@@ -14,4 +14,8 @@ numbers of that generation.
 
 ## Programs
 
-not yet: the perf method audit (ledger item C, p-perf-method) comes first; the tables are rendered from captures by this publisher once it lands
+Each cell is the geometric mean, over the program's workloads (its startup row aside), of the lane's time over the native build's; a lane covering only some workloads names how many. A program's README holds its tables, its machine and its raw captures.
+
+| Program              | Captured             | Machine                                    | Workloads |     interpreter |            JIT |           exe |     AOT |
+| :------------------- | :------------------- | :----------------------------------------- | --------: | --------------: | -------------: | ------------: | ------: |
+| [lua](lua/README.md) | 2026-10-23 12:57 UTC | x86_64, AMD FX(tm)-6300 Six-Core Processor |         5 | 350.49 (4 of 5) | 15.21 (4 of 5) | 4.69 (4 of 5) | not yet |

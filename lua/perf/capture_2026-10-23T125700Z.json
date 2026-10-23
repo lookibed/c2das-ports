@@ -1,0 +1,448 @@
+{
+	"command" : "scripts/publish_ports.sh --program lua --perf --samples 5 --lanes interp,jit,exe,aot --timeout 1800",
+	"program" : "lua",
+	"workloads" : [
+		{
+			"name" : "startup",
+			"args" : "-e \"print(1)\"",
+			"startup" : true
+		},
+		{
+			"name" : "fib",
+			"args" : "bench/fib.lua",
+			"startup" : false
+		},
+		{
+			"name" : "binary_trees",
+			"args" : "bench/binary_trees.lua",
+			"startup" : false
+		},
+		{
+			"name" : "nbody",
+			"args" : "bench/nbody.lua",
+			"startup" : false
+		},
+		{
+			"name" : "spectral_norm",
+			"args" : "bench/spectral_norm.lua",
+			"startup" : false
+		},
+		{
+			"name" : "test suite",
+			"args" : "-e \"_port=true\" all.lua",
+			"startup" : false
+		}
+	],
+	"lanes" : [
+		{
+			"name" : "native",
+			"command" : "/root/libclang/bin/clang -O3 -w -funsigned-char -o lua_all_native lua_all.c -lm",
+			"error" : ""
+		},
+		{
+			"name" : "interp",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime lua_all.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit lua_all.das --",
+			"error" : ""
+		},
+		{
+			"name" : "exe",
+			"command" : "daslang -exe lua_all.das, the binary run",
+			"error" : ""
+		},
+		{
+			"name" : "aot",
+			"command" : "the -ctx context and its host compiled by clang++ -O3 (c2das-re converter/tiers.das), the binary run",
+			"error" : "the aot tier's host passes the program no arguments"
+		}
+	],
+	"machine" : {
+		"arch" : "x86_64",
+		"cpu" : "AMD FX(tm)-6300 Six-Core Processor",
+		"clang" : "clang version 22.1.8 (https://github.com/llvm/llvm-project ca7933e47d3a3451d81e72ac174dcb5aa28b59d1)",
+		"clang_path" : "/root/libclang/bin/clang",
+		"daslang" : "0.6.4"
+	},
+	"cells" : [
+		{
+			"workload" : "startup",
+			"lane" : "native",
+			"time" : 0.006367786,
+			"spread" : 0.10427132758544332,
+			"samples" : [
+				0.007416569,
+				0.006516665,
+				0.006088614,
+				0.006090869,
+				0.006367786
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "interp",
+			"time" : 9.164286826,
+			"spread" : 0.024612373857622893,
+			"samples" : [
+				9.330386314,
+				8.879276607,
+				8.890377465,
+				9.164286826,
+				9.303600957
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "jit",
+			"time" : 9.845360509,
+			"spread" : 0.033720933854734056,
+			"samples" : [
+				9.835686668,
+				10.443686567,
+				9.845360509,
+				10.191373337,
+				9.779697066
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "exe",
+			"time" : 0.054005562,
+			"spread" : 0.011071452233012561,
+			"samples" : [
+				0.054081142,
+				0.052885302,
+				0.054005562,
+				0.05405254,
+				0.053314975
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the aot tier's host passes the program no arguments"
+		},
+		{
+			"workload" : "fib",
+			"lane" : "native",
+			"time" : 0.763321258,
+			"spread" : 0.06595252453980523,
+			"samples" : [
+				0.767994563,
+				0.763321258,
+				0.842849533,
+				0.742163605,
+				0.762716504
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "interp",
+			"time" : 385.988699178,
+			"spread" : 0.017969233783970105,
+			"samples" : [
+				389.345939363,
+				376.048235513,
+				385.988699178,
+				389.92007786,
+				381.375763976
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "jit",
+			"time" : 15.457851418,
+			"spread" : 0.013467183657722998,
+			"samples" : [
+				15.329269017,
+				15.29619376,
+				15.712541208,
+				15.631642222,
+				15.457851418
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "exe",
+			"time" : 5.486195512,
+			"spread" : 0.0014935050130965733,
+			"samples" : [
+				5.489824687,
+				5.484493729,
+				5.486195512,
+				5.48622706,
+				5.473437366
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the aot tier's host passes the program no arguments"
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "native",
+			"time" : 0.879689557,
+			"spread" : 0.008515090852670014,
+			"samples" : [
+				0.879689557,
+				0.870240096,
+				0.880460597,
+				0.884836499,
+				0.869855226
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "interp",
+			"time" : 197.690107245,
+			"spread" : 0.015481479863365304,
+			"samples" : [
+				197.834378775,
+				194.444017601,
+				200.56508843,
+				197.690107245,
+				195.713599805
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "jit",
+			"time" : 12.930289146,
+			"spread" : 0.018317433185418747,
+			"samples" : [
+				12.851111263,
+				13.312803382,
+				13.324810678,
+				12.917519821,
+				12.930289146
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "exe",
+			"time" : 2.854344236,
+			"spread" : 0.0014954697636546655,
+			"samples" : [
+				2.855947848,
+				2.854344236,
+				2.853791568,
+				2.862328739,
+				2.854202771
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the aot tier's host passes the program no arguments"
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "native",
+			"time" : 1.100657645,
+			"spread" : 0.053982714125426365,
+			"samples" : [
+				1.089283016,
+				1.20811599,
+				1.093278536,
+				1.168436222,
+				1.100657645
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "interp",
+			"time" : 356.942138677,
+			"spread" : 0.03435672871646353,
+			"samples" : [
+				358.988537501,
+				334.461809049,
+				356.942138677,
+				337.060286844,
+				357.477789032
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "jit",
+			"time" : 14.415678326,
+			"spread" : 0.019300247252201384,
+			"samples" : [
+				14.602695428,
+				14.263724911,
+				14.584545765,
+				14.415678326,
+				14.046243116
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "exe",
+			"time" : 4.385715077,
+			"spread" : 0.027494038231613047,
+			"samples" : [
+				4.265311084,
+				4.50647312,
+				4.385715077,
+				4.40687551,
+				4.369308791
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the aot tier's host passes the program no arguments"
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "native",
+			"time" : 1.184605944,
+			"spread" : 0.04901915172223719,
+			"samples" : [
+				1.156123516,
+				1.227189965,
+				1.184605944,
+				1.183476154,
+				1.272260273
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "interp",
+			"time" : 485.067742945,
+			"spread" : 0.03317832510525194,
+			"samples" : [
+				495.215565169,
+				472.378655385,
+				484.274851683,
+				485.067742945,
+				504.566125932
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "jit",
+			"time" : 16.251387767,
+			"spread" : 0.018567694760981177,
+			"samples" : [
+				15.870669271,
+				16.266978767,
+				16.474170886,
+				16.251387767,
+				15.892376455
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "exe",
+			"time" : 6.156962742,
+			"spread" : 0.0030420254734100094,
+			"samples" : [
+				6.138579293,
+				6.158949987,
+				6.156962742,
+				6.126926123,
+				6.164385398
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the aot tier's host passes the program no arguments"
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "native",
+			"time" : 8.550924761,
+			"spread" : 0.030566845143124972,
+			"samples" : [
+				8.655476007,
+				8.958429438,
+				8.435679852,
+				8.550924761,
+				8.453397042
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "interp",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [
+				12.488077962
+			],
+			"error" : "exited 3 where the native build exits 0: Starting Tests"
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "jit",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [
+				10.219005167
+			],
+			"error" : "exited 3 where the native build exits 0: Starting Tests"
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "exe",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [
+				0.04419211
+			],
+			"error" : "exited 1 where the native build exits 0: dynamic module `Module_CRT` failed to load: dasCRuntime/dasModuleCRuntime.shared_module (dasCRuntime/dasModuleCRunti..."
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the aot tier's host passes the program no arguments"
+		}
+	],
+	"commit" : "afbc38936bd81e9f9e6b5f3de79165da5f47fb5a",
+	"samples" : 5,
+	"timeout" : 1800,
+	"timestamp" : "2026-10-23 12:57 UTC"
+}
