@@ -1,0 +1,800 @@
+{
+	"command" : "scripts/publish_ports.sh --program lua --perf --samples 5 --lanes interp,jit,exe,aot,interp-scc,jit-scc,interp-single,jit-single --timeout 1800",
+	"program" : "lua",
+	"workloads" : [
+		{
+			"name" : "startup",
+			"args" : "-e \"print(1)\"",
+			"startup" : true
+		},
+		{
+			"name" : "fib",
+			"args" : "bench/fib.lua",
+			"startup" : false
+		},
+		{
+			"name" : "binary_trees",
+			"args" : "bench/binary_trees.lua",
+			"startup" : false
+		},
+		{
+			"name" : "nbody",
+			"args" : "bench/nbody.lua",
+			"startup" : false
+		},
+		{
+			"name" : "spectral_norm",
+			"args" : "bench/spectral_norm.lua",
+			"startup" : false
+		},
+		{
+			"name" : "test suite",
+			"args" : "-e \"_port=true\" all.lua",
+			"startup" : false
+		}
+	],
+	"lanes" : [
+		{
+			"name" : "native",
+			"command" : "/root/libclang/bin/clang -O3 -w -funsigned-char -o lua_native lapi.c lcode.c lctype.c ldebug.c ldo.c ldump.c lfunc.c lgc.c llex.c lmem.c lobject.c lopcodes.c lparser.c lstate.c lstring.c ltable.c ltm.c lundump.c lvm.c lzio.c lauxlib.c lbaselib.c lcorolib.c ldblib.c liolib.c lmathlib.c loadlib.c loslib.c lstrlib.c ltablib.c lutf8lib.c linit.c lua.c -lm",
+			"error" : ""
+		},
+		{
+			"name" : "interp",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "exe",
+			"command" : "daslang -exe lua/lua.das, the binary run",
+			"error" : ""
+		},
+		{
+			"name" : "aot",
+			"command" : "the -ctx context and its host compiled by clang++ -O3 (c2das-re converter/tiers.das), the binary run",
+			"error" : "the aot tier's host passes the program no arguments"
+		},
+		{
+			"name" : "interp-scc",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime scc/lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit-scc",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit scc/lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "interp-single",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime single/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit-single",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit single/lua.das --",
+			"error" : ""
+		}
+	],
+	"machine" : {
+		"arch" : "x86_64",
+		"cpu" : "AMD FX(tm)-6300 Six-Core Processor",
+		"clang" : "clang version 22.1.8 (https://github.com/llvm/llvm-project ca7933e47d3a3451d81e72ac174dcb5aa28b59d1)",
+		"clang_path" : "/root/libclang/bin/clang",
+		"daslang" : "0.6.4"
+	},
+	"cells" : [
+		{
+			"workload" : "startup",
+			"lane" : "native",
+			"time" : 0.007386728,
+			"spread" : 0.018472793366697687,
+			"samples" : [
+				0.007252909,
+				0.007344672,
+				0.007525816,
+				0.007386728,
+				0.007442039
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "interp",
+			"time" : 1.221421323,
+			"spread" : 0.03724497161083208,
+			"samples" : [
+				1.221421323,
+				1.26131362,
+				1.291911621,
+				1.212771265,
+				1.200928016
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "jit",
+			"time" : 1.901226825,
+			"spread" : 0.005844583273224151,
+			"samples" : [
+				1.885659383,
+				1.90788314,
+				1.901226825,
+				1.889767965,
+				1.90316949
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "exe",
+			"time" : 0.053628893,
+			"spread" : 0.013075125380641367,
+			"samples" : [
+				0.053628893,
+				0.054334974,
+				0.052932565,
+				0.054088584,
+				0.053402383
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the aot tier's host passes the program no arguments"
+		},
+		{
+			"workload" : "startup",
+			"lane" : "interp-scc",
+			"time" : 6.229509217,
+			"spread" : 0.016635924739815674,
+			"samples" : [
+				6.250929885,
+				6.366939229,
+				6.159671936,
+				6.229509217,
+				6.170293653
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "jit-scc",
+			"time" : 6.92311374,
+			"spread" : 0.04148264903416136,
+			"samples" : [
+				6.92311374,
+				6.827521226,
+				6.916049025,
+				7.401899421,
+				7.199662389
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "interp-single",
+			"time" : 9.551992859,
+			"spread" : 0.030607108413459105,
+			"samples" : [
+				9.551992859,
+				9.167687093,
+				9.752404855,
+				9.673190144,
+				9.227184027
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "jit-single",
+			"time" : 10.383497121,
+			"spread" : 0.02650098134504986,
+			"samples" : [
+				10.568587018,
+				10.353463943,
+				10.419231738,
+				10.383497121,
+				10.018241291
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "native",
+			"time" : 0.921750196,
+			"spread" : 0.08150802931860722,
+			"samples" : [
+				0.924444767,
+				0.904183322,
+				1.044784588,
+				0.921750196,
+				0.894524504
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "interp",
+			"time" : 366.903367011,
+			"spread" : 0.050588828655921105,
+			"samples" : [
+				366.100046825,
+				366.903367011,
+				369.44127757,
+				398.647774963,
+				361.525351829
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "jit",
+			"time" : 8.373962803,
+			"spread" : 0.006117230480370505,
+			"samples" : [
+				8.327984372,
+				8.414292136,
+				8.430435293,
+				8.363976743,
+				8.373962803
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "exe",
+			"time" : 5.566010095,
+			"spread" : 0.006390918789736776,
+			"samples" : [
+				5.586691004,
+				5.540875972,
+				5.563796861,
+				5.566010095,
+				5.612019809
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the aot tier's host passes the program no arguments"
+		},
+		{
+			"workload" : "fib",
+			"lane" : "interp-scc",
+			"time" : 391.220109737,
+			"spread" : 0.014646523670145713,
+			"samples" : [
+				395.333191857,
+				391.220109737,
+				383.873162662,
+				394.502194873,
+				386.476266335
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "jit-scc",
+			"time" : 13.521963069,
+			"spread" : 0.011392245357714374,
+			"samples" : [
+				13.521963069,
+				13.292472854,
+				13.59916006,
+				13.291069018,
+				13.564093869
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "interp-single",
+			"time" : 390.354064058,
+			"spread" : 0.021918723736481228,
+			"samples" : [
+				394.041660338,
+				378.244280408,
+				391.512072611,
+				376.929534559,
+				390.354064058
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "jit-single",
+			"time" : 15.577068871,
+			"spread" : 0.015198083571469925,
+			"samples" : [
+				15.252818958,
+				15.577068871,
+				15.662630951,
+				15.252624625,
+				15.726107814
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "native",
+			"time" : 0.946794319,
+			"spread" : 0.008053147179899797,
+			"samples" : [
+				0.944088565,
+				0.946794319,
+				0.946485333,
+				0.948364221,
+				0.959337913
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "interp",
+			"time" : 184.194448793,
+			"spread" : 0.032961783100874456,
+			"samples" : [
+				181.808135883,
+				193.950890822,
+				183.976700808,
+				184.787439899,
+				184.194448793
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "jit",
+			"time" : 5.406646014,
+			"spread" : 0.0072390663081424314,
+			"samples" : [
+				5.406646014,
+				5.397102635,
+				5.454837357,
+				5.422899832,
+				5.376559219
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "exe",
+			"time" : 2.946546712,
+			"spread" : 0.007344554190118668,
+			"samples" : [
+				2.965078124,
+				2.946546712,
+				2.984877691,
+				2.941595547,
+				2.944553048
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the aot tier's host passes the program no arguments"
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "interp-scc",
+			"time" : 195.271069236,
+			"spread" : 0.011565977163623948,
+			"samples" : [
+				197.152774839,
+				195.128210506,
+				193.3148181,
+				195.271069236,
+				197.831819555
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "jit-scc",
+			"time" : 10.207035832,
+			"spread" : 0.014477850811173677,
+			"samples" : [
+				10.452910304,
+				10.207035832,
+				10.167258236,
+				10.46281012,
+				10.185720781
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "interp-single",
+			"time" : 196.778955878,
+			"spread" : 0.01468094134919125,
+			"samples" : [
+				196.295661067,
+				192.581595715,
+				196.937049376,
+				196.778955878,
+				198.359396335
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "jit-single",
+			"time" : 12.894733513,
+			"spread" : 0.006736280506489629,
+			"samples" : [
+				12.966093063,
+				12.908592568,
+				12.792367979,
+				12.894733513,
+				12.821977451
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "native",
+			"time" : 1.078294356,
+			"spread" : 0.07184035747656271,
+			"samples" : [
+				1.170130717,
+				1.015200613,
+				1.036802574,
+				1.081229207,
+				1.078294356
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "interp",
+			"time" : 326.593333547,
+			"spread" : 0.0369162662937972,
+			"samples" : [
+				319.556599783,
+				343.669812725,
+				326.593333547,
+				329.554570325,
+				326.427959481
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "jit",
+			"time" : 7.425670666,
+			"spread" : 0.02004989235271321,
+			"samples" : [
+				7.615674608,
+				7.64045029,
+				7.425670666,
+				7.342682495,
+				7.386606857
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "exe",
+			"time" : 4.372086967,
+			"spread" : 0.013663481067713184,
+			"samples" : [
+				4.372086967,
+				4.355276153,
+				4.458186294,
+				4.461939223,
+				4.342463368
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the aot tier's host passes the program no arguments"
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "interp-scc",
+			"time" : 345.973631176,
+			"spread" : 0.02340878422286482,
+			"samples" : [
+				345.973631176,
+				332.973284897,
+				346.940947396,
+				334.79630306,
+				349.170929055
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "jit-scc",
+			"time" : 12.652235258,
+			"spread" : 0.010045006467899823,
+			"samples" : [
+				12.729502883,
+				12.652235258,
+				12.512174143,
+				12.672666977,
+				12.475319313
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "interp-single",
+			"time" : 341.544182177,
+			"spread" : 0.03127945977561273,
+			"samples" : [
+				335.53311646,
+				356.899751476,
+				341.544182177,
+				353.406727791,
+				340.617940727
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "jit-single",
+			"time" : 14.438962989,
+			"spread" : 0.014460863093774064,
+			"samples" : [
+				14.438962989,
+				14.15490274,
+				14.572502474,
+				14.466640963,
+				14.39102051
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "native",
+			"time" : 1.141389891,
+			"spread" : 0.03035741973292107,
+			"samples" : [
+				1.140265939,
+				1.149065853,
+				1.141389891,
+				1.201199125,
+				1.131899821
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "interp",
+			"time" : 466.503136936,
+			"spread" : 0.04178575761790493,
+			"samples" : [
+				466.503136936,
+				456.757982433,
+				481.251377212,
+				495.744356449,
+				459.08658604
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "jit",
+			"time" : 9.429590046,
+			"spread" : 0.0039210665914032865,
+			"samples" : [
+				9.414845228,
+				9.429590046,
+				9.467608444,
+				9.488793329,
+				9.420042425
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "exe",
+			"time" : 6.318328657,
+			"spread" : 0.006335322705262067,
+			"samples" : [
+				6.353192372,
+				6.318328657,
+				6.278123726,
+				6.285512659,
+				6.358181028
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the aot tier's host passes the program no arguments"
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "interp-scc",
+			"time" : 480.339326596,
+			"spread" : 0.03439866229586706,
+			"samples" : [
+				482.453565438,
+				461.141593893,
+				469.235908158,
+				480.339326596,
+				494.187654459
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "jit-scc",
+			"time" : 14.7903548,
+			"spread" : 0.015270823523449191,
+			"samples" : [
+				14.840963142,
+				14.787421915,
+				14.7903548,
+				14.860123793,
+				14.408401997
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "interp-single",
+			"time" : 487.41247656,
+			"spread" : 0.017734484281171112,
+			"samples" : [
+				476.13389793,
+				493.421915738,
+				493.040339167,
+				479.533526192,
+				487.41247656
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "jit-single",
+			"time" : 16.230241837,
+			"spread" : 0.011490960293323242,
+			"samples" : [
+				16.254120892,
+				16.255222452,
+				16.110605584,
+				15.882220323,
+				16.230241837
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "native",
+			"time" : 8.698890931,
+			"spread" : 0.01751772889311094,
+			"samples" : [
+				8.947387157,
+				8.76946855,
+				8.642617531,
+				8.694449226,
+				8.698890931
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "interp",
+			"time" : 499.681084914,
+			"spread" : 0.021959722275436043,
+			"samples" : [
+				505.938299404,
+				494.533504066,
+				499.681084914,
+				485.758396906,
+				507.704112608
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "jit",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [
+				2.43387939
+			],
+			"error" : "exited 0 without the line `final OK !!!`; its last line: .>>> closing state <<<"
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "exe",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [
+				0.039746641
+			],
+			"error" : "exited 1 where the native build exits 0: dynamic module `Module_CRT` failed to load: dasCRuntime/dasModuleCRuntime.shared_module (dasCRuntime/dasModuleCRunti..."
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the aot tier's host passes the program no arguments"
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "interp-scc",
+			"time" : 498.265274712,
+			"spread" : 0.01240787304126995,
+			"samples" : [
+				498.265274712,
+				508.074319578,
+				496.74532,
+				508.710907685,
+				496.346083146
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "jit-scc",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [
+				7.254177955
+			],
+			"error" : "exited 0 without the line `final OK !!!`; its last line: .>>> closing state <<<"
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "interp-single",
+			"time" : 506.909721475,
+			"spread" : 0.015493218498843398,
+			"samples" : [
+				506.909721475,
+				500.929180144,
+				516.636506292,
+				504.428486553,
+				510.93722863
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "jit-single",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [
+				10.655344024
+			],
+			"error" : "exited 0 without the line `final OK !!!`; its last line: .>>> closing state <<<"
+		}
+	],
+	"commit" : "47779a151a4f81fd4c798fe8d8d11682c1e87b90",
+	"samples" : 5,
+	"timeout" : 1800,
+	"timestamp" : "2026-10-31 23:48 UTC"
+}
