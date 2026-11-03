@@ -1263,6 +1263,148 @@ def private c2das_init_globals {
     luaT_typenames_ = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("no value")), unsafe(reinterpret<uint8?>("nil")), unsafe(reinterpret<uint8?>("boolean")), unsafe(addr(udatatypename[0])), unsafe(reinterpret<uint8?>("number")), unsafe(reinterpret<uint8?>("string")), unsafe(reinterpret<uint8?>("table")), unsafe(reinterpret<uint8?>("function")), unsafe(addr(udatatypename[0])), unsafe(reinterpret<uint8?>("thread")), unsafe(reinterpret<uint8?>("upvalue")), unsafe(reinterpret<uint8?>("proto")))
 }
 
+let private LUA_REGISTRYINDEX = -1000000 - 1000
+let private LUA_VERSION_NUM = 504
+let private CLOSEKTOP = -1
+let private LUA_TNONE = -1
+let private LUA_OPUNM = 12
+let private LUA_OPBNOT = 13
+let private CIST_YPCALL = 1 << 4
+let private LUA_OK = 0
+let private GCSTPGC = 2
+let private GCSTPUSR = 1
+let private GCSpause = 8
+let private LUA_GCGEN = 10
+let private LUA_GCINC = 11
+let private KGC_GEN = 1
+let private KGC_INC = 0
+let private NO_JUMP = -1
+let private OFFSET_sJ = (1 << 8 + 8 + 1 + 8) - 1 >> 1
+let private MAXARG_sJ = (1 << 8 + 8 + 1 + 8) - 1
+let private NO_REG = (1 << 8) - 1
+let private LIMLINEDIFF = 128
+let private MAXIWTHABS = 128
+let private ABSLINEINFO = -128
+let private OFFSET_sBx = (1 << 8 + 8 + 1) - 1 >> 1
+let private MAXARG_Bx = (1 << 8 + 8 + 1) - 1
+let private MAXREGS = 255
+let private OFFSET_sC = (1 << 8) - 1 >> 1
+let private MAXINDEXRK = (1 << 8) - 1
+let private MAXARG_B = (1 << 8) - 1
+let private LUA_OPADD = 0
+let private MAXARG_C = (1 << 8) - 1
+let private LUA_MULTRET = -1
+let private CIST_TAIL = 1 << 5
+let private CIST_TRAN = 1 << 8
+let private CIST_HOOKED = 1 << 3
+let private CIST_FIN = 1 << 7
+let private LUA_ERRRUN = 2
+let private CIST_HOOKYIELD = 1 << 6
+let private LUA_MASKLINE = 1 << 2
+let private LUA_MASKCOUNT = 1 << 3
+let private LUA_HOOKCOUNT = 3
+let private LUA_HOOKLINE = 2
+let private LUA_YIELD = 1
+let private LUA_ERRERR = 5
+let private EXTRA_STACK = 5
+let private LUAI_MAXSTACK = 1000000
+let private ERRORSTACKSIZE = 1000000 + 200
+let private LUA_MINSTACK = 20
+let private LUA_MASKCALL = 1 << 0
+let private LUA_HOOKTAILCALL = 4
+let private LUA_HOOKCALL = 0
+let private LUA_MASKRET = 1 << 1
+let private LUA_HOOKRET = 1
+let private CIST_CLSRET = 1 << 9
+let private CIST_C = 1 << 1
+let private CIST_FRESH = 1 << 2
+let private nyci = 65536 | 1
+let private LUAI_MAXCCALLS = 200
+let private LUA_ERRSYNTAX = 3
+let private DIBS = (uint64(typeinfo sizeof(type<uint64>)) * uint64(8) + uint64(6)) / uint64(7)
+let private LUAC_VERSION = 504 / 100 * 16 + 504 % 100
+let private LUAC_FORMAT = 0
+let private LUAC_INT = 22136
+let private LUAC_NUM = 370.5lf
+let private LUA_VCCL = 6 | 2 << 4
+let private LUA_VLCL = 6 | 0 << 4
+let private LUA_VUPVAL = 9 | 0 << 4
+let private LUA_VPROTO = 9 + 1 | 0 << 4
+let private LUA_TSTRING = 4
+let private G_TOUCHED2 = 6
+let private LUA_NUMTAGS = 9
+let private G_TOUCHED1 = 5
+let private GCSatomic = 2
+let private GCSpropagate = 0
+let private G_OLD1 = 3
+let private GCSTPCLS = 4
+let private PAUSEADJ = 100
+let private MAX_LMEM = int64(~uint64(0) >> 1ul)
+let private LUA_VTHREAD = 8 | 0 << 4
+let private G_NEW = 0
+let private maskgcbits = 1 << 5 | (1 << 3 | 1 << 4) | 7
+let private GCSswpallgc = 3
+let private GCSWEEPMAX = 100
+let private GCSenteratomic = 1
+let private GCSswpfinobj = 4
+let private GCSswptobefnz = 5
+let private GCSswpend = 6
+let private GCScallfin = 7
+let private GCFINMAX = 10
+let private GCFINALIZECOST = 50
+let private WORK2MEM = uint64(typeinfo sizeof(type<TValue>))
+let private NUM_RESERVED = int(RESERVED.TK_WHILE) - (127 * 2 + 1 + 1) + 1
+let private FIRST_RESERVED = 127 * 2 + 1 + 1
+let private EOZ = -1
+let private UTF8BUFFSZ = 8
+let private MINSIZEARRAY = 4
+let private L_MAXLENNUM = 200
+let private MAXBY10 = uint64(9223372036854775807l / int64(10))
+let private MAXLASTD = int(9223372036854775807l % int64(10))
+let private BUFVFS = 60 + 44 + 95
+let private MAXNUMBER2STR = 44
+let private LUA_IDSIZE = 60
+let private MAXVARS = 200
+let private VDKREG = 0
+let private RDKCTC = 3
+let private MAXUPVAL = 255
+let private LFIELDS_PER_FLUSH = 50
+let private UNARY_PRIORITY = 12
+let private RDKCONST = 1
+let private RDKTOCLOSE = 2
+let private BASIC_STACK_SIZE = 2 * 20
+let private LUA_RIDX_LAST = 2
+let private LUA_TTHREAD = 8
+let private LUA_EXTRASPACE = uint64(typeinfo sizeof(type<void?>))
+let private LUAI_GCSTEPSIZE = 13
+let private LUAI_GENMINORMUL = 20
+let private STRCACHE_N = 53
+let private STRCACHE_M = 2
+let private MINSTRTABSIZE = 128
+let private LUA_VLNGSTR = 4 | 1 << 4
+let private LUA_VSHRSTR = 4 | 0 << 4
+let private LUAI_MAXSHORTLEN = 40
+let private LUA_VUSERDATA = 7 | 0 << 4
+let private MAXABITS = int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1))
+let private MAXHBITS = int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)) - 1
+let private LUA_VTABLE = 5 | 0 << 4
+let private MAX_SIZET = ~uint64(0)
+let private MAXTAGLOOP = 2000
+let private LUA_TNUMBER = 3
+let private NBITS = int(uint64(typeinfo sizeof(type<int64>)) * uint64(8))
+let private LEVELS1 = 10
+let private LEVELS2 = 11
+let private LUA_TLIGHTUSERDATA = 2
+let private LUA_TNIL = 0
+let private LUAL_BUFFERSIZE = int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>)))
+let private LUA_REFNIL = -1
+let private freelist = 2 + 1
+let private LUA_ERRFILE = 5 + 1
+let private LUA_TTABLE = 5
+let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * uint64(16) + uint64(typeinfo sizeof(type<double>))
+
+// Convert an acceptable index to a pointer to its respective value.
+// Non-valid indices return the special nil value 'G(L)->nilvalue'.
 [c_function]
 def private index2value(var L : lua_State?; var idx : int) : TValue? {
     var ci : CallInfo? = L.ci
@@ -1274,20 +1416,26 @@ def private index2value(var L : lua_State?; var idx : int) : TValue? {
             return addr(o.val)
         }
     } elif (!(idx <= -1000000 - 1000)) {
+        // negative index
         return addr((L.top.p + idx).val)
-    } elif (idx == -1000000 - 1000) {
+    } elif (idx == LUA_REGISTRYINDEX) {
         return addr(L.l_G.l_registry)
     } else {
-        idx = -1000000 - 1000 - idx
+        // upvalues
+        idx = LUA_REGISTRYINDEX - idx
+        // C closure?
         if (int(addr(ci.func.p.val).tt_) == (6 | 2 << 4 | 1 << 6)) {
             var func : CClosure? = addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.c)
             return idx <= int(func.nupvalues) ? addr(deref(addr(func.upvalue[0]) + (idx - 1))) : addr(L.l_G.nilvalue)
         } else {
+            // light C function or Lua function (through a hook)?)
+            // no upvalues
             return addr(L.l_G.nilvalue)
         }
     }
 }
 
+// Convert a valid actual index (not a pseudo-index) to its address.
 [c_function]
 def private index2stack(var L : lua_State?; idx : int) : StackValue? {
     var ci : CallInfo? = L.ci
@@ -1295,6 +1443,7 @@ def private index2stack(var L : lua_State?; idx : int) : StackValue? {
         var o : StackValue? = ci.func.p + idx
         return o
     } else {
+        // non-positive index
         return L.top.p + idx
     }
 }
@@ -1304,12 +1453,16 @@ def lua_checkstack(var L : lua_State?; n : int) : int {
     var res : int
     var ci : CallInfo?
     ci = L.ci
+    // stack large enough?
     if (int64(L.stack_last.p - L.top.p) > int64(n)) {
+        // yes; check is OK
         res = 1
     } else {
+        // need to grow stack
         res = luaD_growstack(L, n, 0)
     }
     if (res != 0 && intptr(ci.top.p) < intptr(L.top.p + n)) {
+        // adjust frame top
         ci.top.p = L.top.p + n
     }
     return res
@@ -1331,6 +1484,7 @@ def lua_xmove(var from : lua_State?; var to : lua_State?; n : int) {
                 io1.value_ = io2.value_
                 io1.tt_ = io2.tt_
             }
+            // stack already checked by previous 'api_check'
             to.top.p = to.top.p + 1
             i++
         }
@@ -1345,9 +1499,10 @@ def lua_atpanic(var L : lua_State?; panicf : function<(var a0 : lua_State?) : in
 }
 
 def lua_version(var L : lua_State?) : double {
-    return double(504)
+    return double(LUA_VERSION_NUM)
 }
 
+// convert an acceptable stack index into an absolute index
 [c_function]
 def lua_absindex(var L : lua_State?; idx : int) : int {
     return idx > 0 || idx <= -1000000 - 1000 ? idx : int(int64(L.top.p - L.ci.func.p)) + idx
@@ -1363,6 +1518,7 @@ def lua_settop(var L : lua_State?; idx : int) {
     var ci : CallInfo?
     var func : StackValue?
     var newtop : StackValue?
+    // difference for new top
     var diff : int64
     ci = L.ci
     func = ci.func.p
@@ -1370,6 +1526,7 @@ def lua_settop(var L : lua_State?; idx : int) {
         diff = int64(func + 1 + idx - L.top.p)
         {
             while (diff > int64(0)) {
+                // clear new slots
                 var _t0 = L.top.p
                 L.top.p = L.top.p + 1
                 addr(_t0.val).tt_ = uint8(0 | 0 << 4)
@@ -1377,12 +1534,14 @@ def lua_settop(var L : lua_State?; idx : int) {
             }
         }
     } else {
+        // will "subtract" index (as it is negative)
         diff = int64(idx + 1)
     }
     newtop = L.top.p + diff
     if (diff < int64(0) && intptr(L.tbclist.p) >= intptr(newtop)) {
-        newtop = luaF_close(L, newtop, -1, 0)
+        newtop = luaF_close(L, newtop, CLOSEKTOP, 0)
     }
+    // correct top only after closing any upvalue
     L.top.p = newtop
 }
 
@@ -1390,10 +1549,14 @@ def lua_settop(var L : lua_State?; idx : int) {
 def lua_closeslot(var L : lua_State?; idx : int) {
     var level : StackValue?
     level = index2stack(L, idx)
-    level = luaF_close(L, level, -1, 0)
+    level = luaF_close(L, level, CLOSEKTOP, 0)
     addr(level.val).tt_ = uint8(0 | 0 << 4)
 }
 
+// Reverse the stack segment from 'from' to 'to'
+// (auxiliary to 'lua_rotate')
+// Note that we move(copy) only the value inside the stack.
+// (We do not move additional fields that may exist.)
 [c_function]
 def private reverse(var L : lua_State?; var from : StackValue?; var to : StackValue?) {
     {
@@ -1423,16 +1586,24 @@ def private reverse(var L : lua_State?; var from : StackValue?; var to : StackVa
     }
 }
 
+// Let x = AB, where A is a prefix of length 'n'. Then,
+// rotate x n == BA. But BA == (A^r . B^r)^r.
 [c_function]
 def lua_rotate(var L : lua_State?; idx : int; n : int) {
     var p : StackValue?
     var t : StackValue?
     var m : StackValue?
+    // end of stack segment being rotated
     t = L.top.p - 1
+    // start of segment
     p = index2stack(L, idx)
+    // end of prefix
     m = n >= 0 ? t - n : p - n + -(1)
+    // reverse the prefix with length 'n'
     reverse(L, p, m)
+    // reverse the suffix
     reverse(L, m + 1, t)
+    // reverse the entire segment
     reverse(L, p, t)
 }
 
@@ -1448,6 +1619,7 @@ def lua_copy(var L : lua_State?; fromidx : int; toidx : int) {
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
+    // function upvalue?
     if (toidx < -1000000 - 1000) {
         if ((int(fr.tt_) & 1 << 6) != 0) {
             if ((int(addr(reinterpret<GCUnion?>(addr(L.ci.func.p.val).value_.gc).cl.c).marked) & 1 << 5) != 0 && (int(fr.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
@@ -1455,6 +1627,8 @@ def lua_copy(var L : lua_State?; fromidx : int; toidx : int) {
             }
         }
     }
+    // LUA_REGISTRYINDEX does not need gc barrier
+    // (collector revisits it before finishing collection)
 }
 
 [c_function]
@@ -1473,7 +1647,7 @@ def lua_pushvalue(var L : lua_State?; idx : int) {
 [c_function]
 def lua_type(var L : lua_State?; idx : int) : int {
     var o : TValue? = index2value(L, idx)
-    return !((int(o.tt_) & 15) == 0) || intptr(o) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue))) ? int(o.tt_) & 15 : -1
+    return !((int(o.tt_) & 15) == 0) || intptr(o) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue))) ? int(o.tt_) & 15 : LUA_TNONE
 }
 
 def lua_typename(var L : lua_State?; t : int) : uint8? {
@@ -1523,8 +1697,10 @@ def lua_rawequal(var L : lua_State?; index1 : int; index2 : int) : int {
 
 [c_function]
 def lua_arith(var L : lua_State?; op : int) {
-    if (op != 12 && op != 13) {
+    if (op != LUA_OPUNM && op != LUA_OPBNOT) {
+        // all other operations expect two operands
     } else {
+        // for unary operations, add fake 2nd operand
         {
             var io1 : TValue? = addr(L.top.p.val)
             var io2 : TValue? = addr((L.top.p - 1).val)
@@ -1535,7 +1711,9 @@ def lua_arith(var L : lua_State?; op : int) {
             L.top.p = L.top.p + 1
         }
     }
+    // first operand at top - 2, second at top - 1; result go to top - 2
     luaO_arith(L, op, addr((L.top.p - 2).val), addr((L.top.p - 1).val), L.top.p - 2)
+    // remove second operand
     L.top.p = L.top.p - 1
 }
 
@@ -1544,6 +1722,7 @@ def lua_compare(var L : lua_State?; index1 : int; index2 : int; op : int) : int 
     var o1 : TValue?
     var o2 : TValue?
     var i : int = 0
+    // may call tag method
     o1 = index2value(L, index1)
     o2 = index2value(L, index2)
     if ((!((int(o1.tt_) & 15) == 0) || intptr(o1) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue)))) && (!((int(o2.tt_) & 15) == 0) || intptr(o2) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue))))) {
@@ -1592,7 +1771,7 @@ def lua_tointegerx(var L : lua_State?; idx : int; var pisnum : int?) : int64 {
     var res : int64 = int64(0)
     var o : TValue? = index2value(L, idx)
     var _t0 : int
-    if (int64((int(o.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (int(o.tt_) == (3 | 0 << 4)) {
         deref(addr(res)) = o.value_.i
         _t0 = 1
     } else {
@@ -1615,6 +1794,7 @@ def lua_tolstring(var L : lua_State?; idx : int; var len : uint64?) : uint8? {
     var o : TValue?
     o = index2value(L, idx)
     if (!((int(o.tt_) & 15) == 4)) {
+        // not convertible?
         if (!((int(o.tt_) & 15) == 3)) {
             if (len != null) {
                 deref(len) = uint64(0)
@@ -1627,6 +1807,7 @@ def lua_tolstring(var L : lua_State?; idx : int; var len : uint64?) : uint8? {
                 luaC_step(L)
             }
         }
+        // previous call may reallocate the stack
         o = index2value(L, idx)
     }
     if (len != null) {
@@ -1661,6 +1842,7 @@ def lua_tocfunction(var L : lua_State?; idx : int) : function<(var a0 : lua_Stat
     } elif (int(o.tt_) == (6 | 2 << 4 | 1 << 6)) {
         return addr(reinterpret<GCUnion?>(o.value_.gc).cl.c).f
     } else {
+        // not a C function
         return default<function<(var a0 : lua_State?) : int>>
     }
 }
@@ -1689,6 +1871,11 @@ def lua_tothread(var L : lua_State?; idx : int) : lua_State? {
     return !(int(o.tt_) == (8 | 0 << 4 | 1 << 6)) ? default<lua_State?> : addr(reinterpret<GCUnion?>(o.value_.gc).th)
 }
 
+// Returns a pointer to the internal representation of an object.
+// Note that ANSI C does not allow the conversion of a pointer to
+// function to a 'void*', so the conversion here goes through
+// a 'size_t'. (As the returned pointer is only informative, this
+// conversion should not be a problem.)
 [c_function]
 def lua_topointer(var L : lua_State?; idx : int) : void? {
     var o : TValue? = index2value(L, idx)
@@ -1741,6 +1928,9 @@ def lua_pushinteger(var L : lua_State?; n : int64) {
     }
 }
 
+// Pushes on the stack a string with given length. Avoid using 's' when
+// 'len' == 0 (as 's' can be NULL in that case), due to later use of
+// 'memcmp' and 'memcpy'.
 [c_function]
 def lua_pushlstring(var L : lua_State?; var s : uint8?; len : uint64) : uint8? {
     var ts : TString?
@@ -1775,6 +1965,7 @@ def lua_pushstring(var L : lua_State?; var s : uint8?) : uint8? {
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
             io.tt_ = uint8(int(x_.tt) | 1 << 6)
         }
+        // internal copy's address
         s = addr(ts.contents[0])
     }
     {
@@ -1841,6 +2032,7 @@ def lua_pushcclosure(var L : lua_State?; fn : function<(var a0 : lua_State?) : i
                 io1.value_ = io2.value_
                 io1.tt_ = io2.tt_
             }
+            // does not need barrier because closure is white
         }
         {
             var io : TValue? = addr(L.top.p.val)
@@ -2008,6 +2200,7 @@ def lua_geti(var L : lua_State?; idx : int; n : int64) : int {
 
 [c_function]
 def private finishrawget(var L : lua_State?; var val : TValue?) : int {
+    // avoid copying empty items to the stack
     if ((int(val.tt_) & 15) == 0) {
         addr(L.top.p.val).tt_ = uint8(0 | 0 << 4)
     } else {
@@ -2034,6 +2227,7 @@ def lua_rawget(var L : lua_State?; idx : int) : int {
     var val : TValue?
     t = gettable(L, idx)
     val = luaH_get(t, addr((L.top.p - 1).val))
+    // remove key
     L.top.p = L.top.p - 1
     return finishrawget(L, val)
 }
@@ -2116,7 +2310,7 @@ def lua_getiuservalue(var L : lua_State?; idx : int; n : int) : int {
     o = index2value(L, idx)
     if (n <= 0 || n > int(addr(reinterpret<GCUnion?>(o.value_.gc).u).nuvalue)) {
         addr(L.top.p.val).tt_ = uint8(0 | 0 << 4)
-        t = -1
+        t = LUA_TNONE
     } else {
         {
             var io1 : TValue? = addr(L.top.p.val)
@@ -2132,6 +2326,7 @@ def lua_getiuservalue(var L : lua_State?; idx : int; n : int) : int {
     return t
 }
 
+// t[k] = value at the top of the stack (where 'k' is a string)
 [c_function]
 def private auxsetstr(var L : lua_State?; var t : TValue?; var k : uint8?) {
     var slot : TValue?
@@ -2158,9 +2353,11 @@ def private auxsetstr(var L : lua_State?; var t : TValue?; var k : uint8?) {
                 }
             }
         }
+        // pop value
         L.top.p = L.top.p - 1
     } else {
         {
+            // push 'str' (to make it a TValue)
             var io : TValue? = addr(L.top.p.val)
             var x_ : TString? = str
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
@@ -2170,13 +2367,16 @@ def private auxsetstr(var L : lua_State?; var t : TValue?; var k : uint8?) {
             L.top.p = L.top.p + 1
         }
         luaV_finishset(L, t, addr((L.top.p - 1).val), addr((L.top.p - 2).val), slot)
+        // pop value and key
         L.top.p = L.top.p - 2
     }
+    // lock done by caller
 }
 
 [c_function]
 def lua_setglobal(var L : lua_State?; var name : uint8?) {
     var G : TValue?
+    // unlock done in 'auxsetstr'
     G = addr(deref(addr(reinterpret<GCUnion?>(addr(L.l_G.l_registry).value_.gc).h)._c_array + (2 - 1)))
     auxsetstr(L, G, name)
 }
@@ -2211,10 +2411,12 @@ def lua_settable(var L : lua_State?; idx : int) {
     } else {
         luaV_finishset(L, t, addr((L.top.p - 2).val), addr((L.top.p - 1).val), slot)
     }
+    // pop index and value
     L.top.p = L.top.p - 2
 }
 
 def lua_setfield(var L : lua_State?; idx : int; var k : uint8?) {
+    // unlock done in 'auxsetstr'
     auxsetstr(L, index2value(L, idx), k)
 }
 
@@ -2254,6 +2456,7 @@ def lua_seti(var L : lua_State?; idx : int; n : int64) {
         }
         luaV_finishset(L, t, addr(aux), addr((L.top.p - 1).val), slot)
     }
+    // pop value
     L.top.p = L.top.p - 1
 }
 
@@ -2346,6 +2549,7 @@ def lua_setiuservalue(var L : lua_State?; idx : int; n : int) : int {
     var res : int
     o = index2value(L, idx)
     if (!(uint(n) - 1u < uint(addr(reinterpret<GCUnion?>(o.value_.gc).u).nuvalue))) {
+        // 'n' not in [1, uvalue(o)->nuvalue]
         res = 0
     } else {
         {
@@ -2369,11 +2573,17 @@ def lua_setiuservalue(var L : lua_State?; idx : int; n : int) : int {
 def lua_callk(var L : lua_State?; nargs : int; nresults : int; ctx : int64; k : function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>) {
     var func : StackValue?
     func = L.top.p - (nargs + 1)
+    // need to prepare continuation?
     if (k != null && (L.nCcalls & 4294901760u) == uint(0)) {
+        // save continuation
         L.ci.u.c.k = k
+        // save context
         L.ci.u.c.ctx = ctx
+        // do the call
         luaD_call(L, func, nresults)
     } else {
+        // no continuation or no yieldable
+        // just do the call
         luaD_callnoyield(L, func, nresults)
     }
     {
@@ -2400,23 +2610,34 @@ def lua_pcallk(var L : lua_State?; nargs : int; nresults : int; errfunc : int; c
         var o : StackValue? = index2stack(L, errfunc)
         func = int64(reinterpret<uint8?>(o) - reinterpret<uint8?>(L.stack.p))
     }
+    // function to be called
     c.func = L.top.p - (nargs + 1)
+    // no continuation or no yieldable?
     if (k == null || !((L.nCcalls & 4294901760u) == uint(0))) {
+        // do a 'conventional' protected call
         c.nresults = nresults
         status = luaD_pcall(L, @@f_call, reinterpret<void?>(addr(c)), int64(reinterpret<uint8?>(c.func) - reinterpret<uint8?>(L.stack.p)), func)
     } else {
+        // prepare continuation (call is already protected by 'resume')
         var ci : CallInfo? = L.ci
+        // save continuation
         ci.u.c.k = k
+        // save context
         ci.u.c.ctx = ctx
+        // save information for error recovery
         ci.u2.funcidx = int(int64(reinterpret<uint8?>(c.func) - reinterpret<uint8?>(L.stack.p)))
         ci.u.c.old_errfunc = L.errfunc
         L.errfunc = func
+        // save value of 'allowhook'
         ci.callstatus = uint16(int(ci.callstatus) & ~(1 << 0) | int(L.allowhook))
-        ci.callstatus = uint16(int(ci.callstatus) | 1 << 4)
+        // function can do error recovery
+        ci.callstatus = uint16(int(ci.callstatus) | CIST_YPCALL)
+        // do the call
         luaD_call(L, c.func, nresults)
-        ci.callstatus = uint16(int(ci.callstatus) & ~(1 << 4))
+        ci.callstatus = uint16(int(ci.callstatus) & ~CIST_YPCALL)
         L.errfunc = ci.u.c.old_errfunc
-        status = 0
+        // if it is here, there were no errors
+        status = LUA_OK
     }
     {
         if (nresults <= -1 && intptr(L.ci.top.p) < intptr(L.top.p)) {
@@ -2435,11 +2656,16 @@ def lua_load(var L : lua_State?; reader : function<(var a0 : lua_State?; var a1 
     }
     luaZ_init(L, addr(z), reader, data)
     status = luaD_protectedparser(L, addr(z), chunkname, mode)
-    if (status == 0) {
+    // no errors?
+    if (status == LUA_OK) {
+        // get new function
         var f : LClosure? = addr(reinterpret<GCUnion?>(addr((L.top.p - 1).val).value_.gc).cl.l)
+        // does it have an upvalue?
         if (int(f.nupvalues) >= 1) {
+            // get global table from registry
             var gt : TValue? = addr(deref(addr(reinterpret<GCUnion?>(addr(L.l_G.l_registry).value_.gc).h)._c_array + (2 - 1)))
             {
+                // set global table as 1st upvalue of 'f' (may be LUA_ENV)
                 var io1 : TValue? = deref(addr(f.upvals[0]) + 0).v.p
                 var io2 : TValue? = gt
                 io1.value_ = io2.value_
@@ -2472,23 +2698,28 @@ def lua_status(var L : lua_State?) : int {
     return int(L.status)
 }
 
+// Garbage-collection function
 [variadic]
 def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
     var argp : CVaCursor
     var res : int = 0
     var g : global_State? = L.l_G
-    if ((int(g.gcstp) & 2) != 0) {
+    // internal stop?
+    if ((int(g.gcstp) & GCSTPGC) != 0) {
+        // all options are invalid when stopped
         return -1
     }
     argp = va_begin(va)
     let _cond = what
     if (_cond == 0) {
         {
-            g.gcstp = uint8(1)
+            // stopped by the user
+            g.gcstp = uint8(GCSTPUSR)
         }
     } elif (_cond == 1) {
         {
             luaE_setdebt(g, int64(0))
+            // (GCSTPGC must be already zero here)
             g.gcstp = uint8(0)
         }
     } elif (_cond == 2) {
@@ -2497,6 +2728,7 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
         }
     } elif (_cond == 3) {
         {
+            // GC values are expressed in Kbytes: #bytes/2^10
             res = int(uint64(g.totalbytes + g.GCdebt) >> 10ul)
         }
     } elif (_cond == 4) {
@@ -2506,13 +2738,17 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
     } elif (_cond == 5) {
         {
             var data : int = int(va_i(argp))
+            // =1 to signal that it did an actual step
             var debt : int64 = int64(1)
             var oldstp : uint8 = g.gcstp
+            // allow GC to run (GCSTPGC must be zero here)
             g.gcstp = uint8(0)
             if (data == 0) {
+                // do a basic step
                 luaE_setdebt(g, int64(0))
                 luaC_step(L)
             } else {
+                // add 'data' to total debt
                 debt = int64(data) * int64(1024) + g.GCdebt
                 luaE_setdebt(g, debt)
                 {
@@ -2521,8 +2757,11 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
                     }
                 }
             }
+            // restore previous state
             g.gcstp = oldstp
-            if (debt > int64(0) && int(g.gcstate) == 8) {
+            // end of cycle?
+            if (debt > int64(0) && int(g.gcstate) == GCSpause) {
+                // signal it
                 res = 1
             }
         }
@@ -2546,21 +2785,21 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
         {
             var minormul : int = int(va_i(argp))
             var majormul : int = int(va_i(argp))
-            res = int(g.gckind) == 1 || g.lastatomic != uint64(0) ? 10 : 11
+            res = int(g.gckind) == 1 || g.lastatomic != uint64(0) ? LUA_GCGEN : LUA_GCINC
             if (minormul != 0) {
                 g.genminormul = uint8(minormul)
             }
             if (majormul != 0) {
                 g.genmajormul = uint8(majormul / 4)
             }
-            luaC_changemode(L, 1)
+            luaC_changemode(L, KGC_GEN)
         }
     } elif (_cond == 11) {
         {
             var pause : int = int(va_i(argp))
             var stepmul : int = int(va_i(argp))
             var stepsize : int = int(va_i(argp))
-            res = int(g.gckind) == 1 || g.lastatomic != uint64(0) ? 10 : 11
+            res = int(g.gckind) == 1 || g.lastatomic != uint64(0) ? LUA_GCGEN : LUA_GCINC
             if (pause != 0) {
                 g.gcpause = uint8(pause / 4)
             }
@@ -2570,9 +2809,10 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
             if (stepsize != 0) {
                 g.gcstepsize = uint8(stepsize)
             }
-            luaC_changemode(L, 0)
+            luaC_changemode(L, KGC_INC)
         }
     } else {
+        // invalid option
         res = -1
     }
     return res
@@ -2582,11 +2822,16 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
 def lua_error(var L : lua_State?) : int {
     var errobj : TValue?
     errobj = addr((L.top.p - 1).val)
+    // error object is the memory error message?
     if (int(errobj.tt_) == (4 | 0 << 4 | 1 << 6) && intptr(addr(reinterpret<GCUnion?>(errobj.value_.gc).ts)) == intptr(L.l_G.memerrmsg)) {
+        // raise a memory error
         luaD_throw(L, 4)
     } else {
+        // raise a regular error
         luaG_errormsg(L)
     }
+    // code unreachable; will unlock when control actually leaves the kernel
+    // to avoid warnings
     return 0
 }
 
@@ -2601,6 +2846,8 @@ def lua_next(var L : lua_State?; idx : int) : int {
             L.top.p = L.top.p + 1
         }
     } else {
+        // no more elements
+        // remove key
         L.top.p = L.top.p - 1
     }
     return more
@@ -2611,8 +2858,11 @@ def lua_toclose(var L : lua_State?; idx : int) {
     var o : StackValue?
     o = index2stack(L, idx)
     nresults = int(L.ci.nresults)
+    // create new to-be-closed upvalue
     luaF_newtbcupval(L, o)
+    // function not marked yet?
     if (!(nresults < -1)) {
+        // mark it
         L.ci.nresults = int16(-nresults - 3)
     }
 }
@@ -2623,6 +2873,8 @@ def lua_concat(var L : lua_State?; n : int) {
         luaV_concat(L, n)
     } else {
         {
+            // nothing to concatenate
+            // push empty string
             var io : TValue? = addr(L.top.p.val)
             var x_ : TString? = luaS_newlstr(L, addr(c2das_empty[0]), uint64(0))
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
@@ -2699,8 +2951,10 @@ def private aux_upvalue(var fi : TValue?; n : int; var val : TValue ??; var owne
     let _cond = int(fi.tt_) & 63
     if (_cond == 38) {
         {
+            // C closure
             var f : CClosure? = addr(reinterpret<GCUnion?>(fi.value_.gc).cl.c)
             if (!(uint(n) - 1u < uint(f.nupvalues))) {
+                // 'n' not in [1, f->nupvalues]
                 return null
             }
             deref(val) = addr(deref(addr(f.upvalue[0]) + (n - 1)))
@@ -2711,10 +2965,12 @@ def private aux_upvalue(var fi : TValue?; n : int; var val : TValue ??; var owne
         }
     } elif (_cond == 6) {
         {
+            // Lua closure
             var f : LClosure? = addr(reinterpret<GCUnion?>(fi.value_.gc).cl.l)
             var name : TString?
             var p : Proto? = f.p
             if (!(uint(n) - 1u < uint(p.sizeupvalues))) {
+                // 'n' not in [1, p->sizeupvalues]
                 return null
             }
             deref(val) = deref(addr(f.upvals[0]) + (n - 1)).v.p
@@ -2725,6 +2981,7 @@ def private aux_upvalue(var fi : TValue?; n : int; var val : TValue ??; var owne
             return name == null ? reinterpret<uint8?>("(no name)") : addr(name.contents[0])
         }
     } else {
+        // not a closure
         return null
     }
     return null
@@ -2733,6 +2990,7 @@ def private aux_upvalue(var fi : TValue?; n : int; var val : TValue ??; var owne
 [c_function]
 def lua_getupvalue(var L : lua_State?; funcindex : int; n : int) : uint8? {
     var name : uint8?
+    // to avoid warnings
     var val : TValue? = null
     name = aux_upvalue(index2value(L, funcindex), n, addr(val), null)
     if (name != null) {
@@ -2752,7 +3010,9 @@ def lua_getupvalue(var L : lua_State?; funcindex : int; n : int) : uint8? {
 [c_function]
 def lua_setupvalue(var L : lua_State?; funcindex : int; n : int) : uint8? {
     var name : uint8?
+    // to avoid warnings
     var val : TValue? = null
+    // to avoid warnings
     var owner : GCObject? = null
     var fi : TValue?
     fi = index2value(L, funcindex)
@@ -2783,6 +3043,7 @@ def private getupvalref(var L : lua_State?; fidx : int; n : int; var pf : LClosu
         deref(pf) = f
     }
     if (1 <= n && n <= f.p.sizeupvalues) {
+        // get its upvalue pointer
         return addr(deref(addr(f.upvals[0]) + (n - 1)))
     } else {
         return addr(getupvalref_nullup)
@@ -2795,15 +3056,16 @@ def lua_upvalueid(var L : lua_State?; fidx : int; n : int) : void? {
     let _cond = int(fi.tt_) & 63
     while (true) {
         var _flag = false
-        _flag ||= _cond == 6
-        if (_flag) {
+        if (_cond == 6) {
             {
+                // lua closure
                 return reinterpret<void?>(deref(getupvalref(L, fidx, n, null)))
             }
         }
         _flag ||= _cond == 38
         if (_flag) {
             {
+                // C closure
                 var f : CClosure? = addr(reinterpret<GCUnion?>(fi.value_.gc).cl.c)
                 if (1 <= n && n <= int(f.nupvalues)) {
                     return reinterpret<void?>(addr(deref(addr(f.upvalue[0]) + (n - 1))))
@@ -2812,10 +3074,12 @@ def lua_upvalueid(var L : lua_State?; fidx : int; n : int) : void? {
         }
         _flag ||= _cond == 22
         if (_flag) {
+            // else
+            // FALLTHROUGH
+            // light C functions have no upvalues
             return null
         }
-        _flag ||= !(_cond == 6 || _cond == 38 || _cond == 22)
-        if (_flag) {
+        if (!(_cond == 6 || _cond == 38 || _cond == 22)) {
             {
                 return null
             }
@@ -2836,13 +3100,18 @@ def lua_upvaluejoin(var L : lua_State?; fidx1 : int; n1 : int; fidx2 : int; n2 :
     }
 }
 
+// semantic error
 def luaK_semerror(var ls : LexState?; var msg : uint8?) {
+    // remove "near <token>" from final message
     ls.t.token = 0
     luaX_syntaxerror(ls, msg)
 }
 
+// If expression is a numeric constant, fills 'v' with its value
+// and returns 1. Otherwise, returns 0.
 def private tonumeral(var e : expdesc?; var v : TValue?) : int {
     if (e.t != e.f) {
+        // not a numeral
         return 0
     }
     let _cond = e.k
@@ -2866,14 +3135,18 @@ def private tonumeral(var e : expdesc?; var v : TValue?) : int {
     return 0
 }
 
+// Get the constant value from a constant expression
 [c_function]
 def private const2val(var fs : FuncState?; var e : expdesc?) : TValue? {
     return addr(deref(fs.ls.dyd.actvar.arr + e.u.info).k)
 }
 
+// If expression is a constant, fills 'v' with its value
+// and returns 1. Otherwise, returns 0.
 [c_function]
 def luaK_exp2const(var fs : FuncState?; var e : expdesc?; var v : TValue?) : int {
     if (e.t != e.f) {
+        // not a constant
         return 0
     }
     let _cond = e.k
@@ -2914,26 +3187,41 @@ def luaK_exp2const(var fs : FuncState?; var e : expdesc?; var v : TValue?) : int
     return 0
 }
 
+// Return the previous instruction of the current code. If there
+// may be a jump target between the current instruction and the
+// previous one, return an invalid instruction (to avoid wrong
+// optimizations).
 [c_function]
 def private previousinstruction(var fs : FuncState?) : uint? {
     if (fs.pc > fs.lasttarget) {
+        // previous instruction
         return addr(deref(fs.f.code + (fs.pc - 1)))
     } else {
         return addr(previousinstruction_invalidinstruction)
     }
 }
 
+// Create a OP_LOADNIL instruction, but try to optimize: if the previous
+// instruction is also OP_LOADNIL and ranges are compatible, adjust
+// range of previous instruction instead of emitting a new one. (For
+// instance, 'local a; local b' will generate a single opcode.)
 [c_function]
 def luaK_nil(var fs : FuncState?; var from : int; n : int) {
+    // last register to set nil
     var l : int = from + n - 1
     var previous : uint? = previousinstruction(fs)
+    // previous is LOADNIL?
     if (enum_from_int(type<OpCode>, int(deref(previous) >> 0u & ~(~uint(0) << 7u) << 0u)) == OpCode.OP_LOADNIL) {
+        // get previous range
         var pfrom : int = int(deref(previous) >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
         var pl : int = pfrom + int(deref(previous) >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
         if (pfrom <= from && from <= pl + 1 || from <= pfrom && pfrom <= l + 1) {
+            // can connect both?
+            // from = min(from, pfrom)
             if (pfrom < from) {
                 from = pfrom
             }
+            // l = max(l, pl)
             if (pl > l) {
                 l = pl
             }
@@ -2942,53 +3230,71 @@ def luaK_nil(var fs : FuncState?; var from : int; n : int) {
             return
         }
     }
+    // else go through
+    // else no optimization
     luaK_codeABCk(fs, OpCode.OP_LOADNIL, from, n - 1, 0, 0)
 }
 
+// Gets the destination address of a jump instruction. Used to traverse
+// a list of jumps.
 [c_function]
 def private getjump(var fs : FuncState?; pc : int) : int {
     var offset : int = int(deref(fs.f.code + pc) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1)
-    if (offset == -1) {
-        return -1
+    // point to itself represents end of list
+    if (offset == NO_JUMP) {
+        // end of list
+        return NO_JUMP
     } else {
+        // turn offset into absolute position
         return pc + 1 + offset
     }
 }
 
+// Fix jump instruction at position 'pc' to jump to 'dest'.
+// (Jump addresses are relative in Lua)
 [c_function]
 def private fixjump(var fs : FuncState?; pc : int; dest : int) {
     var jmp : uint? = addr(deref(fs.f.code + pc))
     var offset : int = dest - (pc + 1)
-    if (!(-((1 << 8 + 8 + 1 + 8) - 1 >> 1) <= offset && offset <= (1 << 8 + 8 + 1 + 8) - 1 - ((1 << 8 + 8 + 1 + 8) - 1 >> 1))) {
+    if (!(-OFFSET_sJ <= offset && offset <= MAXARG_sJ - OFFSET_sJ)) {
         luaX_syntaxerror(fs.ls, reinterpret<uint8?>("control structure too long"))
     }
     deref(jmp) = deref(jmp) & ~(~(~uint(0) << uint(8 + 8 + 1 + 8)) << uint(0 + 7)) | uint(offset + ((1 << 8 + 8 + 1 + 8) - 1 >> 1)) << uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << uint(0 + 7)
 }
 
+// Concatenate jump-list 'l2' into jump-list 'l1'
 [c_function]
 def luaK_concat(var fs : FuncState?; var l1 : int?; l2 : int) {
-    if (l2 == -1) {
+    // nothing to concatenate?
+    if (l2 == NO_JUMP) {
         return
-    } elif (deref(l1) == -1) {
+    } elif (deref(l1) == NO_JUMP) {
+        // no original list?
+        // 'l1' points to 'l2'
         deref(l1) = l2
     } else {
         var list : int = deref(l1)
         var next : int
+        // find last element
         while (true) {
             next = getjump(fs, list)
-            if (!(next != -1)) {
+            if (!(next != NO_JUMP)) {
                 break
             }
             list = next
         }
+        // last element links to 'l2'
         fixjump(fs, list, l2)
     }
 }
 
+// Create a jump instruction and return its position, so its destination
+// can be fixed later (with 'fixjump').
 def luaK_jump(var fs : FuncState?) : int {
-    return codesJ(fs, OpCode.OP_JMP, -1, 0)
+    return codesJ(fs, OpCode.OP_JMP, NO_JUMP, 0)
 }
 
+// Code a 'return' instruction
 def luaK_ret(var fs : FuncState?; first : int; nret : int) {
     var op : OpCode
     let _cond = nret
@@ -3002,16 +3308,23 @@ def luaK_ret(var fs : FuncState?; first : int; nret : int) {
     luaK_codeABCk(fs, op, first, nret + 1, 0, 0)
 }
 
+// Code a "conditional jump", that is, a test or comparison opcode
+// followed by a jump. Return jump position.
 def private condjump(var fs : FuncState?; op : OpCode; A : int; B : int; C : int; k : int) : int {
     luaK_codeABCk(fs, op, A, B, C, k)
     return luaK_jump(fs)
 }
 
+// returns current 'pc' and marks it as a jump target (to avoid wrong
+// optimizations with consecutive instructions not in the same basic block).
 def luaK_getlabel(var fs : FuncState?) : int {
     fs.lasttarget = fs.pc
     return fs.pc
 }
 
+// Returns the position of the instruction "controlling" a given
+// jump (that is, its condition), or the jump itself if it is
+// unconditional.
 [c_function]
 def private getjumpcontrol(var fs : FuncState?; pc : int) : uint? {
     var pi : uint? = addr(deref(fs.f.code + pc))
@@ -3022,59 +3335,82 @@ def private getjumpcontrol(var fs : FuncState?; pc : int) : uint? {
     }
 }
 
+// Patch destination register for a TESTSET instruction.
+// If instruction in position 'node' is not a TESTSET, return 0 ("fails").
+// Otherwise, if 'reg' is not 'NO_REG', set it as the destination
+// register. Otherwise, change instruction to a simple 'TEST' (produces
+// no register value)
 [c_function]
 def private patchtestreg(var fs : FuncState?; node : int; reg : int) : int {
     var i : uint? = getjumpcontrol(fs, node)
     if (enum_from_int(type<OpCode>, int(deref(i) >> 0u & ~(~uint(0) << 7u) << 0u)) != OpCode.OP_TESTSET) {
+        // cannot patch other instructions
         return 0
     }
-    if (reg != (1 << 8) - 1 && reg != int(deref(i) >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)) {
+    if (reg != NO_REG && reg != int(deref(i) >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)) {
         deref(i) = deref(i) & ~(~(~uint(0) << 8u) << uint(0 + 7)) | uint(reg) << uint(0 + 7) & ~(~uint(0) << 8u) << uint(0 + 7)
     } else {
+        // no register to put value or register already has the value;
+        // change instruction to simple test
         deref(i) = uint(int(OpCode.OP_TEST)) << 0u | uint(int(deref(i) >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)) << uint(0 + 7) | uint(0) << uint(0 + 7 + 8 + 1) | uint(0) << uint(0 + 7 + 8 + 1 + 8) | uint(int(deref(i) >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u)) << uint(0 + 7 + 8)
     }
     return 1
 }
 
+// Traverse a list of tests ensuring no one produces a value
 def private removevalues(var fs : FuncState?; var list : int) {
     {
-        while (list != -1) {
-            patchtestreg(fs, list, (1 << 8) - 1)
+        while (list != NO_JUMP) {
+            patchtestreg(fs, list, NO_REG)
             list = getjump(fs, list)
         }
     }
 }
 
+// Traverse a list of tests, patching their destination address and
+// registers: tests producing values jump to 'vtarget' (and put their
+// values in 'reg'), other tests jump to 'dtarget'.
 def private patchlistaux(var fs : FuncState?; var list : int; vtarget : int; reg : int; dtarget : int) {
-    while (list != -1) {
+    while (list != NO_JUMP) {
         var next : int = getjump(fs, list)
         if (patchtestreg(fs, list, reg) != 0) {
             fixjump(fs, list, vtarget)
         } else {
+            // jump to default target
             fixjump(fs, list, dtarget)
         }
         list = next
     }
 }
 
+// Path all jumps in 'list' to jump to 'target'.
+// (The assert means that we cannot fix a jump to a forward address
+// because we only know addresses once code is generated.)
 def luaK_patchlist(var fs : FuncState?; list : int; target : int) {
-    patchlistaux(fs, list, target, (1 << 8) - 1, target)
+    patchlistaux(fs, list, target, NO_REG, target)
 }
 
 def luaK_patchtohere(var fs : FuncState?; list : int) {
+    // mark "here" as a jump target
     var hr : int = luaK_getlabel(fs)
     luaK_patchlist(fs, list, hr)
 }
 
+// Save line info for a new instruction. If difference from last line
+// does not fit in a byte, of after that many instructions, save a new
+// absolute line info; (in that case, the special value 'ABSLINEINFO'
+// in 'lineinfo' signals the existence of this absolute information.)
+// Otherwise, store the difference from last line in 'lineinfo'.
 [c_function]
 def private savelineinfo(var fs : FuncState?; var f : Proto?; line : int) {
     var linedif : int = line - fs.previousline
+    // last instruction coded
     var pc : int = fs.pc - 1
-    var _t1 = crt::abs(linedif) >= 128
+    var _t1 = crt::abs(linedif) >= LIMLINEDIFF
     if (!_t1) {
         let _t0 = fs.iwthabs
         fs.iwthabs = uint8(uint(fs.iwthabs) + 1)
-        _t1 = int(_t0) >= 128
+        _t1 = int(_t0) >= MAXIWTHABS
     }
     if (_t1) {
         f.abslineinfo = reinterpret<AbsLineInfo?>(luaM_growaux_(fs.ls.L, reinterpret<void?>(f.abslineinfo), fs.nabslineinfo, addr(f.sizeabslineinfo), int(uint64(typeinfo sizeof(type<AbsLineInfo>))), int(uint64(2147483647) <= ~uint64(0) / uint64(typeinfo sizeof(type<AbsLineInfo>)) ? uint(2147483647) : uint(~uint64(0) / uint64(typeinfo sizeof(type<AbsLineInfo>)))), reinterpret<uint8?>("lines")))
@@ -3082,67 +3418,96 @@ def private savelineinfo(var fs : FuncState?; var f : Proto?; line : int) {
         let _t2 = fs.nabslineinfo
         fs.nabslineinfo++
         deref(f.abslineinfo + _t2).line = line
-        linedif = -128
+        // signal that there is absolute information
+        linedif = ABSLINEINFO
+        // restart counter
         fs.iwthabs = uint8(1)
     }
     f.lineinfo = reinterpret<int8?>(luaM_growaux_(fs.ls.L, reinterpret<void?>(f.lineinfo), pc, addr(f.sizelineinfo), int(uint64(typeinfo sizeof(type<int8>))), int(uint64(2147483647) <= ~uint64(0) / uint64(typeinfo sizeof(type<int8>)) ? uint(2147483647) : uint(~uint64(0) / uint64(typeinfo sizeof(type<int8>)))), reinterpret<uint8?>("opcodes")))
     deref(f.lineinfo + pc) = int8(linedif)
+    // last line saved
     fs.previousline = line
 }
 
+// Remove line information from the last instruction.
+// If line information for that instruction is absolute, set 'iwthabs'
+// above its max to force the new (replacing) instruction to have
+// absolute line info, too.
 [c_function]
 def private removelastlineinfo(var fs : FuncState?) {
     var f : Proto? = fs.f
+    // last instruction coded
     var pc : int = fs.pc - 1
-    if (int(deref(f.lineinfo + pc)) != -128) {
+    // relative line info?
+    if (int(deref(f.lineinfo + pc)) != ABSLINEINFO) {
+        // correct last line saved
         fs.previousline -= int(deref(f.lineinfo + pc))
+        // undo previous increment
         fs.iwthabs = uint8(uint(fs.iwthabs) - 1)
     } else {
+        // absolute line information
+        // remove it
         fs.nabslineinfo--
-        fs.iwthabs = uint8(128 + 1)
+        // force next line info to be absolute
+        fs.iwthabs = uint8(MAXIWTHABS + 1)
     }
 }
 
+// Remove the last instruction created, correcting line information
+// accordingly.
 def private removelastinstruction(var fs : FuncState?) {
     removelastlineinfo(fs)
     fs.pc--
 }
 
+// Emit instruction 'i', checking for array sizes and saving also its
+// line information. Return 'i' position.
 [c_function]
 def luaK_code(var fs : FuncState?; i : uint) : int {
     var f : Proto? = fs.f
+    // put new instruction in code array
     f.code = reinterpret<uint?>(luaM_growaux_(fs.ls.L, reinterpret<void?>(f.code), fs.pc, addr(f.sizecode), int(uint64(typeinfo sizeof(type<uint>))), int(uint64(2147483647) <= ~uint64(0) / uint64(typeinfo sizeof(type<uint>)) ? uint(2147483647) : uint(~uint64(0) / uint64(typeinfo sizeof(type<uint>)))), reinterpret<uint8?>("opcodes")))
     let _t0 = fs.pc
     fs.pc++
     deref(f.code + _t0) = i
     savelineinfo(fs, f, fs.ls.lastline)
+    // index of new instruction
     return fs.pc - 1
 }
 
+// Format and emit an 'iABC' instruction. (Assertions check consistency
+// of parameters versus opcode.)
 def luaK_codeABCk(var fs : FuncState?; o : OpCode; a : int; b : int; c : int; k : int) : int {
     return luaK_code(fs, uint(int(o)) << 0u | uint(a) << uint(0 + 7) | uint(b) << uint(0 + 7 + 8 + 1) | uint(c) << uint(0 + 7 + 8 + 1 + 8) | uint(k) << uint(0 + 7 + 8))
 }
 
+// Format and emit an 'iABx' instruction.
 def luaK_codeABx(var fs : FuncState?; o : OpCode; a : int; bc : uint) : int {
     return luaK_code(fs, uint(int(o)) << 0u | uint(a) << uint(0 + 7) | bc << uint(0 + 7 + 8))
 }
 
+// Format and emit an 'iAsBx' instruction.
 def private codeAsBx(var fs : FuncState?; o : OpCode; a : int; bc : int) : int {
-    var b : uint = uint(bc + ((1 << 8 + 8 + 1) - 1 >> 1))
+    var b : uint = uint(bc + OFFSET_sBx)
     return luaK_code(fs, uint(int(o)) << 0u | uint(a) << uint(0 + 7) | b << uint(0 + 7 + 8))
 }
 
+// Format and emit an 'isJ' instruction.
 def private codesJ(var fs : FuncState?; o : OpCode; sj : int; k : int) : int {
-    var j : uint = uint(sj + ((1 << 8 + 8 + 1 + 8) - 1 >> 1))
+    var j : uint = uint(sj + OFFSET_sJ)
     return luaK_code(fs, uint(int(o)) << 0u | j << uint(0 + 7) | uint(k) << uint(0 + 7 + 8))
 }
 
+// Emit an "extra argument" instruction (format 'iAx')
 def private codeextraarg(var fs : FuncState?; a : int) : int {
     return luaK_code(fs, uint(int(OpCode.OP_EXTRAARG)) << 0u | uint(a) << uint(0 + 7))
 }
 
+// Emit a "load constant" instruction, using either 'OP_LOADK'
+// (if constant index 'k' fits in 18 bits) or an 'OP_LOADKX'
+// instruction with "extra argument".
 def private luaK_codek(var fs : FuncState?; reg : int; k : int) : int {
-    if (k <= (1 << 8 + 8 + 1) - 1) {
+    if (k <= MAXARG_Bx) {
         return luaK_codeABx(fs, OpCode.OP_LOADK, reg, uint(k))
     } else {
         var p : int = luaK_codeABx(fs, OpCode.OP_LOADKX, reg, uint(0))
@@ -3151,28 +3516,35 @@ def private luaK_codek(var fs : FuncState?; reg : int; k : int) : int {
     }
 }
 
+// Check register-stack level, keeping track of its maximum size
+// in field 'maxstacksize'
 [c_function]
 def luaK_checkstack(var fs : FuncState?; n : int) {
     var newstack : int = int(fs.freereg) + n
     if (newstack > int(fs.f.maxstacksize)) {
-        if (newstack >= 255) {
+        if (newstack >= MAXREGS) {
             luaX_syntaxerror(fs.ls, reinterpret<uint8?>("function or expression needs too many registers"))
         }
         fs.f.maxstacksize = uint8(newstack)
     }
 }
 
+// Reserve 'n' registers in register stack
 def luaK_reserveregs(var fs : FuncState?; n : int) {
     luaK_checkstack(fs, n)
     fs.freereg = uint8(int(fs.freereg) + n)
 }
 
+// Free register 'reg', if it is neither a constant index nor
+// a local variable.
+// )
 def private freereg(var fs : FuncState?; reg : int) {
     if (reg >= luaY_nvarstack(fs)) {
         fs.freereg = uint8(uint(fs.freereg) - 1)
     }
 }
 
+// Free two registers in proper order
 def private freeregs(var fs : FuncState?; r1 : int; r2 : int) {
     if (r1 > r2) {
         freereg(fs, r1)
@@ -3183,35 +3555,52 @@ def private freeregs(var fs : FuncState?; r1 : int; r2 : int) {
     }
 }
 
+// Free register used by expression 'e' (if any)
 def private freeexp(var fs : FuncState?; var e : expdesc?) {
     if (e.k == expkind.VNONRELOC) {
         freereg(fs, e.u.info)
     }
 }
 
+// Free registers used by expressions 'e1' and 'e2' (if any) in proper
+// order.
 def private freeexps(var fs : FuncState?; var e1 : expdesc?; var e2 : expdesc?) {
     var r1 : int = e1.k == expkind.VNONRELOC ? e1.u.info : -1
     var r2 : int = e2.k == expkind.VNONRELOC ? e2.u.info : -1
     freeregs(fs, r1, r2)
 }
 
+// Add constant 'v' to prototype's list of constants (field 'k').
+// Use scanner's table to cache position of constants in constant list
+// and try to reuse constants. Because some values should not be used
+// as keys (nil cannot be a key, integer keys can collapse with float
+// keys), the caller must provide a useful 'key' for indexing the cache.
+// Note that all functions share the same table, so entering or exiting
+// a function can make some indices wrong.
 [c_function]
 def private addk(var fs : FuncState?; var key : TValue?; var v : TValue?) : int {
     var val : TValue
     var L : lua_State? = fs.ls.L
     var f : Proto? = fs.f
+    // query scanner table
     var idx : TValue? = luaH_get(fs.ls.h, key)
     var k : int
     var oldsize : int
+    // is there an index there?
     if (int(idx.tt_) == (3 | 0 << 4)) {
         k = int(idx.value_.i)
+        // correct value? (warning: must distinguish floats from integers!)
         if (k < fs.nk && (int(addr(deref(f.k + k)).tt_) & 63) == (int(v.tt_) & 63) && luaV_equalobj(null, addr(deref(f.k + k)), v) != 0) {
+            // reuse index
             return k
         }
     }
+    // constant not found; create a new entry
     oldsize = f.sizek
     k = fs.nk
     {
+        // numerical value does not need GC barrier;
+        // table has no metatable, so it does not need to invalidate cache
         var io : TValue? = addr(val)
         io.value_.i = int64(k)
         io.tt_ = uint8(3 | 0 << 4)
@@ -3238,6 +3627,7 @@ def private addk(var fs : FuncState?; var key : TValue?; var v : TValue?) : int 
     return k
 }
 
+// Add a string to list of constants and return its index.
 [c_function]
 def private stringK(var fs : FuncState?; var s : TString?) : int {
     var o : TValue
@@ -3248,9 +3638,11 @@ def private stringK(var fs : FuncState?; var s : TString?) : int {
         io.tt_ = uint8(int(x_.tt) | 1 << 6)
         let _t0 = fs.ls.L
     }
+    // use string itself as key
     return addk(fs, addr(o), addr(o))
 }
 
+// Add an integer to list of constants and return its index.
 [c_function]
 def private luaK_intK(var fs : FuncState?; n : int64) : int {
     var o : TValue
@@ -3259,9 +3651,19 @@ def private luaK_intK(var fs : FuncState?; n : int64) : int {
         io.value_.i = n
         io.tt_ = uint8(3 | 0 << 4)
     }
+    // use integer itself as key
     return addk(fs, addr(o), addr(o))
 }
 
+// Add a float to list of constants and return its index. Floats
+// with integral values need a different key, to avoid collision
+// with actual integers. To that, we add to the number its smaller
+// power-of-two fraction that is still significant in its scale.
+// For doubles, that would be 1/2^52.
+// (This method is not bulletproof: there may be another float
+// with that value, and for floats larger than 2^53 the result is
+// still an integer. At worst, this only wastes an entry with
+// a duplicate.)
 [c_function]
 def private luaK_numberK(var fs : FuncState?; r : double) : int {
     var o : TValue
@@ -3271,11 +3673,15 @@ def private luaK_numberK(var fs : FuncState?; r : double) : int {
         io.value_.n = r
         io.tt_ = uint8(3 | 1 << 4)
     }
+    // not an integral value?
     if (!(luaV_flttointeger(r, addr(ik), F2Imod.F2Ieq) != 0)) {
+        // use number itself as key
         return addk(fs, addr(o), addr(o))
     } else {
+        // must build an alternative key
         var nbm : int = 53
         var q : double = crt::ldexp(1.0lf, -nbm + 1)
+        // new key
         var k : double = ik == int64(0) ? q : r + r * q
         var kv : TValue
         {
@@ -3283,30 +3689,37 @@ def private luaK_numberK(var fs : FuncState?; r : double) : int {
             io.value_.n = k
             io.tt_ = uint8(3 | 1 << 4)
         }
+        // result is not an integral value, unless value is too large
         return addk(fs, addr(kv), addr(o))
     }
 }
 
+// Add a false to list of constants and return its index.
 [c_function]
 def private boolF(var fs : FuncState?) : int {
     var o : TValue
     addr(o).tt_ = uint8(1 | 0 << 4)
+    // use boolean itself as key
     return addk(fs, addr(o), addr(o))
 }
 
+// Add a true to list of constants and return its index.
 [c_function]
 def private boolT(var fs : FuncState?) : int {
     var o : TValue
     addr(o).tt_ = uint8(1 | 1 << 4)
+    // use boolean itself as key
     return addk(fs, addr(o), addr(o))
 }
 
+// Add nil to list of constants and return its index.
 [c_function]
 def private nilK(var fs : FuncState?) : int {
     var k : TValue
     var v : TValue
     addr(v).tt_ = uint8(0 | 0 << 4)
     {
+        // cannot use nil as key; instead use table itself to represent nil
         var io : TValue? = addr(k)
         var x_ : Table? = fs.ls.h
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
@@ -3316,12 +3729,16 @@ def private nilK(var fs : FuncState?) : int {
     return addk(fs, addr(k), addr(v))
 }
 
+// Check whether 'i' can be stored in an 'sC' operand. Equivalent to
+// (0 <= int2sC(i) && int2sC(i) <= MAXARG_C) but without risk of
+// overflows in the hidden addition inside 'int2sC'.
 def private fitsC(i : int64) : int {
-    return uint64(i) + uint64((1 << 8) - 1 >> 1) <= uint64(uint((1 << 8) - 1)) ? 1 : 0
+    return uint64(i) + uint64(OFFSET_sC) <= uint64(uint((1 << 8) - 1)) ? 1 : 0
 }
 
+// Check whether 'i' can be stored in an 'sBx' operand.
 def private fitsBx(i : int64) : int {
-    return int64(-((1 << 8 + 8 + 1) - 1 >> 1)) <= i && i <= int64((1 << 8 + 8 + 1) - 1 - ((1 << 8 + 8 + 1) - 1 >> 1)) ? 1 : 0
+    return int64(-OFFSET_sBx) <= i && i <= int64(MAXARG_Bx - OFFSET_sBx) ? 1 : 0
 }
 
 def luaK_int(var fs : FuncState?; reg : int; i : int64) {
@@ -3342,6 +3759,7 @@ def private luaK_float(var fs : FuncState?; reg : int; f : double) {
     }
 }
 
+// Convert a constant in 'v' into an expression description 'e'
 [c_function]
 def private const2exp(var v : TValue?; var e : expdesc?) {
     let _cond = int(v.tt_) & 63
@@ -3364,9 +3782,12 @@ def private const2exp(var v : TValue?; var e : expdesc?) {
     }
 }
 
+// Fix an expression to return the number of results 'nresults'.
+// 'e' must be a multi-ret expression (function call or vararg).
 [c_function]
 def luaK_setreturns(var fs : FuncState?; var e : expdesc?; nresults : int) {
     var pc : uint? = addr(deref(fs.f.code + e.u.info))
+    // expression is an open function call?
     if (e.k == expkind.VCALL) {
         deref(pc) = deref(pc) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)) | uint(nresults + 1) << uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)
     } else {
@@ -3376,22 +3797,37 @@ def luaK_setreturns(var fs : FuncState?; var e : expdesc?; nresults : int) {
     }
 }
 
+// Convert a VKSTR to a VK
 def private str2K(var fs : FuncState?; var e : expdesc?) {
     e.u.info = stringK(fs, e.u.strval)
     e.k = expkind.VK
 }
 
+// Fix an expression to return one result.
+// If expression is not a multi-ret expression (function call or
+// vararg), it already returns one result, so nothing needs to be done.
+// Function calls become VNONRELOC expressions (as its result comes
+// fixed in the base register of the call), while vararg expressions
+// become VRELOC (as OP_VARARG puts its results where it wants).
+// (Calls are created returning one result, so that does not need
+// to be fixed.)
 [c_function]
 def luaK_setoneret(var fs : FuncState?; var e : expdesc?) {
+    // expression is an open function call?
     if (e.k == expkind.VCALL) {
+        // already returns 1 value
+        // result has fixed position
         e.k = expkind.VNONRELOC
         e.u.info = int(deref(fs.f.code + e.u.info) >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
     } elif (e.k == expkind.VVARARG) {
         deref(fs.f.code + e.u.info) = deref(fs.f.code + e.u.info) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)) | uint(2) << uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)
+        // can relocate its simple result
         e.k = expkind.VRELOC
     }
 }
 
+// Ensure that expression 'e' is not a variable (nor a <const>).
+// (Expression still may have jump lists.)
 def luaK_dischargevars(var fs : FuncState?; var e : expdesc?) {
     let _cond = e.k
     if (_cond == expkind.VCONST) {
@@ -3400,12 +3836,16 @@ def luaK_dischargevars(var fs : FuncState?; var e : expdesc?) {
         }
     } elif (_cond == expkind.VLOCAL) {
         {
+            // already in a register
             var temp : int = int(e.u._c_var.ridx)
+            // (can't do a direct assignment; values overlap)
             e.u.info = temp
+            // becomes a non-relocatable value
             e.k = expkind.VNONRELOC
         }
     } elif (_cond == expkind.VUPVAL) {
         {
+            // move value to some (pending) register
             e.u.info = luaK_codeABCk(fs, OpCode.OP_GETUPVAL, 0, e.u.info, 0, 0)
             e.k = expkind.VRELOC
         }
@@ -3440,28 +3880,28 @@ def luaK_dischargevars(var fs : FuncState?; var e : expdesc?) {
     }
 }
 
+// Ensure expression value is in register 'reg', making 'e' a
+// non-relocatable expression.
+// (Expression still may have jump lists.)
 [c_function]
 def private discharge2reg(var fs : FuncState?; var e : expdesc?; reg : int) {
     luaK_dischargevars(fs, e)
     let _cond = e.k
     while (true) {
         var _flag = false
-        _flag ||= _cond == expkind.VNIL
-        if (_flag) {
+        if (_cond == expkind.VNIL) {
             {
                 luaK_nil(fs, reg, 1)
                 break
             }
         }
-        _flag ||= _cond == expkind.VFALSE
-        if (_flag) {
+        if (_cond == expkind.VFALSE) {
             {
                 luaK_codeABCk(fs, OpCode.OP_LOADFALSE, reg, 0, 0, 0)
                 break
             }
         }
-        _flag ||= _cond == expkind.VTRUE
-        if (_flag) {
+        if (_cond == expkind.VTRUE) {
             {
                 luaK_codeABCk(fs, OpCode.OP_LOADTRUE, reg, 0, 0, 0)
                 break
@@ -3476,34 +3916,32 @@ def private discharge2reg(var fs : FuncState?; var e : expdesc?; reg : int) {
         _flag ||= _cond == expkind.VK
         if (_flag) {
             {
+                // FALLTHROUGH
                 luaK_codek(fs, reg, e.u.info)
                 break
             }
         }
-        _flag ||= _cond == expkind.VKFLT
-        if (_flag) {
+        if (_cond == expkind.VKFLT) {
             {
                 luaK_float(fs, reg, e.u.nval)
                 break
             }
         }
-        _flag ||= _cond == expkind.VKINT
-        if (_flag) {
+        if (_cond == expkind.VKINT) {
             {
                 luaK_int(fs, reg, e.u.ival)
                 break
             }
         }
-        _flag ||= _cond == expkind.VRELOC
-        if (_flag) {
+        if (_cond == expkind.VRELOC) {
             {
                 var pc : uint? = addr(deref(fs.f.code + e.u.info))
+                // instruction will put result in 'reg'
                 deref(pc) = deref(pc) & ~(~(~uint(0) << 8u) << uint(0 + 7)) | uint(reg) << uint(0 + 7) & ~(~uint(0) << 8u) << uint(0 + 7)
                 break
             }
         }
-        _flag ||= _cond == expkind.VNONRELOC
-        if (_flag) {
+        if (_cond == expkind.VNONRELOC) {
             {
                 if (reg != e.u.info) {
                     luaK_codeABCk(fs, OpCode.OP_MOVE, reg, e.u.info, 0, 0)
@@ -3511,9 +3949,9 @@ def private discharge2reg(var fs : FuncState?; var e : expdesc?; reg : int) {
                 break
             }
         }
-        _flag ||= !(_cond == expkind.VNIL || _cond == expkind.VFALSE || _cond == expkind.VTRUE || _cond == expkind.VKSTR || _cond == expkind.VK || _cond == expkind.VKFLT || _cond == expkind.VKINT || _cond == expkind.VRELOC || _cond == expkind.VNONRELOC)
-        if (_flag) {
+        if (!(_cond == expkind.VNIL || _cond == expkind.VFALSE || _cond == expkind.VTRUE || _cond == expkind.VKSTR || _cond == expkind.VK || _cond == expkind.VKFLT || _cond == expkind.VKINT || _cond == expkind.VRELOC || _cond == expkind.VNONRELOC)) {
             {
+                // nothing to do...
                 return
             }
         }
@@ -3523,22 +3961,31 @@ def private discharge2reg(var fs : FuncState?; var e : expdesc?; reg : int) {
     e.k = expkind.VNONRELOC
 }
 
+// Ensure expression value is in a register, making 'e' a
+// non-relocatable expression.
+// (Expression still may have jump lists.)
 def private discharge2anyreg(var fs : FuncState?; var e : expdesc?) {
+    // no fixed register yet?
     if (e.k != expkind.VNONRELOC) {
+        // get a register
         luaK_reserveregs(fs, 1)
+        // put value there
         discharge2reg(fs, e, int(fs.freereg) - 1)
     }
 }
 
 def private code_loadbool(var fs : FuncState?; A : int; op : OpCode) : int {
+    // those instructions may be jump targets
     luaK_getlabel(fs)
     return luaK_codeABCk(fs, op, A, 0, 0, 0)
 }
 
+// check whether list has any jump that do not produce a value
+// or produce an inverted value
 [c_function]
 def private need_value(var fs : FuncState?; var list : int) : int {
     {
-        while (list != -1) {
+        while (list != NO_JUMP) {
             var i : uint = deref(getjumpcontrol(fs, list))
             if (enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u)) != OpCode.OP_TESTSET) {
                 return 1
@@ -3546,35 +3993,49 @@ def private need_value(var fs : FuncState?; var list : int) : int {
             list = getjump(fs, list)
         }
     }
+    // not found
     return 0
 }
 
+// Ensures final expression result (which includes results from its
+// jump lists) is in register 'reg'.
+// If expression has jumps, need to patch these jumps either to
+// its final position or to "load" instructions (for those tests
+// that do not produce values).
 [c_function]
 def private exp2reg(var fs : FuncState?; var e : expdesc?; reg : int) {
     discharge2reg(fs, e, reg)
+    // expression itself is a test?
     if (e.k == expkind.VJMP) {
+        // put this jump in 't' list
         luaK_concat(fs, addr(e.t), e.u.info)
     }
     if (e.t != e.f) {
+        // position after whole expression
         var final : int
-        var p_f : int = -1
-        var p_t : int = -1
+        // position of an eventual LOAD false
+        var p_f : int = NO_JUMP
+        // position of an eventual LOAD true
+        var p_t : int = NO_JUMP
         if (need_value(fs, e.t) != 0 || need_value(fs, e.f) != 0) {
-            var fj : int = e.k == expkind.VJMP ? -1 : luaK_jump(fs)
+            var fj : int = e.k == expkind.VJMP ? NO_JUMP : luaK_jump(fs)
+            // skip next inst.
             p_f = code_loadbool(fs, reg, OpCode.OP_LFALSESKIP)
             p_t = code_loadbool(fs, reg, OpCode.OP_LOADTRUE)
+            // jump around these booleans if 'e' is not a test
             luaK_patchtohere(fs, fj)
         }
         final = luaK_getlabel(fs)
         patchlistaux(fs, e.f, final, reg, p_f)
         patchlistaux(fs, e.t, final, reg, p_t)
     }
-    e.t = -1
+    e.t = NO_JUMP
     e.f = e.t
     e.u.info = reg
     e.k = expkind.VNONRELOC
 }
 
+// Ensures final expression result is in next available register.
 def luaK_exp2nextreg(var fs : FuncState?; var e : expdesc?) {
     luaK_dischargevars(fs, e)
     freeexp(fs, e)
@@ -3582,27 +4043,42 @@ def luaK_exp2nextreg(var fs : FuncState?; var e : expdesc?) {
     exp2reg(fs, e, int(fs.freereg) - 1)
 }
 
+// Ensures final expression result is in some (any) register
+// and return that register.
 def luaK_exp2anyreg(var fs : FuncState?; var e : expdesc?) : int {
     luaK_dischargevars(fs, e)
+    // expression already has a register?
     if (e.k == expkind.VNONRELOC) {
+        // no jumps?
         if (!(e.t != e.f)) {
+            // result is already in a register
             return e.u.info
         }
+        // reg. is not a local?
         if (e.u.info >= luaY_nvarstack(fs)) {
+            // put final result in it
             exp2reg(fs, e, e.u.info)
             return e.u.info
         }
     }
+    // else expression has jumps and cannot change its register
+    // to hold the jump values, because it is a local variable.
+    // Go through to the default case.
+    // default: use next available register
     luaK_exp2nextreg(fs, e)
     return e.u.info
 }
 
+// Ensures final expression result is either in a register
+// or in an upvalue.
 def luaK_exp2anyregup(var fs : FuncState?; var e : expdesc?) {
     if (e.k != expkind.VUPVAL || e.t != e.f) {
         luaK_exp2anyreg(fs, e)
     }
 }
 
+// Ensures final expression result is either in a register
+// or it is a constant.
 def luaK_exp2val(var fs : FuncState?; var e : expdesc?) {
     if (e.k == expkind.VJMP || e.t != e.f) {
         luaK_exp2anyreg(fs, e)
@@ -3611,9 +4087,12 @@ def luaK_exp2val(var fs : FuncState?; var e : expdesc?) {
     }
 }
 
+// Try to make 'e' a K expression with an index in the range of R/K
+// indices. Return true iff succeeded.
 def private luaK_exp2K(var fs : FuncState?; var e : expdesc?) : int {
     if (!(e.t != e.f)) {
         var info : int
+        // move constants to 'k'
         let _cond = e.k
         if (_cond == expkind.VTRUE) {
             info = boolT(fs)
@@ -3630,21 +4109,30 @@ def private luaK_exp2K(var fs : FuncState?; var e : expdesc?) : int {
         } elif (_cond == expkind.VK) {
             info = e.u.info
         } else {
+            // not a constant
             return 0
         }
-        if (info <= (1 << 8) - 1) {
+        // does constant fit in 'argC'?
+        if (info <= MAXINDEXRK) {
+            // make expression a 'K' expression
             e.k = expkind.VK
             e.u.info = info
             return 1
         }
     }
+    // else, expression doesn't fit; leave it unchanged
     return 0
 }
 
+// Ensures final expression result is in a valid R/K index
+// (that is, it is either in a register or in 'k' with an index
+// in the range of R/K indices).
+// Returns 1 iff expression is K.
 def private exp2RK(var fs : FuncState?; var e : expdesc?) : int {
     if (luaK_exp2K(fs, e) != 0) {
         return 1
     } else {
+        // not a constant in the right range: put it in a register
         luaK_exp2anyreg(fs, e)
         return 0
     }
@@ -3655,11 +4143,13 @@ def private codeABRK(var fs : FuncState?; o : OpCode; a : int; b : int; var ec :
     luaK_codeABCk(fs, o, a, b, ec.u.info, k)
 }
 
+// Generate code to store result of expression 'ex' into variable 'var'.
 def luaK_storevar(var fs : FuncState?; var _c_var : expdesc?; var ex : expdesc?) {
     let _cond = _c_var.k
     if (_cond == expkind.VLOCAL) {
         {
             freeexp(fs, ex)
+            // compute 'ex' into proper place
             exp2reg(fs, ex, int(_c_var.u._c_var.ridx))
             return
         }
@@ -3685,97 +4175,129 @@ def luaK_storevar(var fs : FuncState?; var _c_var : expdesc?; var ex : expdesc?)
             codeABRK(fs, OpCode.OP_SETTABLE, int(_c_var.u.ind.t), int(_c_var.u.ind.idx), ex)
         }
     } else {
+        // invalid var kind to store
     }
     freeexp(fs, ex)
 }
 
+// Emit SELF instruction (convert expression 'e' into 'e:key(e,').
 def luaK_self(var fs : FuncState?; var e : expdesc?; var key : expdesc?) {
     var ereg : int
     luaK_exp2anyreg(fs, e)
+    // register where 'e' was placed
     ereg = e.u.info
     freeexp(fs, e)
+    // base register for op_self
     e.u.info = int(fs.freereg)
+    // self expression has a fixed register
     e.k = expkind.VNONRELOC
+    // function and 'self' produced by op_self
     luaK_reserveregs(fs, 2)
     codeABRK(fs, OpCode.OP_SELF, e.u.info, ereg, key)
     freeexp(fs, key)
 }
 
+// Negate condition 'e' (where 'e' is a comparison).
 [c_function]
 def private negatecondition(var fs : FuncState?; var e : expdesc?) {
     var pc : uint? = getjumpcontrol(fs, e.u.info)
     deref(pc) = deref(pc) & ~(~(~uint(0) << 1u) << uint(0 + 7 + 8)) | uint(int(deref(pc) >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u) ^ 1) << uint(0 + 7 + 8) & ~(~uint(0) << 1u) << uint(0 + 7 + 8)
 }
 
+// Emit instruction to jump if 'e' is 'cond' (that is, if 'cond'
+// is true, code will jump if 'e' is true.) Return jump position.
+// Optimize when 'e' is 'not' something, inverting the condition
+// and removing the 'not'.
 [c_function]
 def private jumponcond(var fs : FuncState?; var e : expdesc?; cond : int) : int {
     if (e.k == expkind.VRELOC) {
         var ie : uint = deref(fs.f.code + e.u.info)
         if (enum_from_int(type<OpCode>, int(ie >> 0u & ~(~uint(0) << 7u) << 0u)) == OpCode.OP_NOT) {
+            // remove previous OP_NOT
             removelastinstruction(fs)
             return condjump(fs, OpCode.OP_TEST, int(ie >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u), 0, 0, !(cond != 0) ? 1 : 0)
         }
     }
+    // else go through
     discharge2anyreg(fs, e)
     freeexp(fs, e)
-    return condjump(fs, OpCode.OP_TESTSET, (1 << 8) - 1, e.u.info, 0, cond)
+    return condjump(fs, OpCode.OP_TESTSET, NO_REG, e.u.info, 0, cond)
 }
 
+// Emit code to go through if 'e' is true, jump otherwise.
 [c_function]
 def luaK_goiftrue(var fs : FuncState?; var e : expdesc?) {
+    // pc of new jump
     var pc : int
     luaK_dischargevars(fs, e)
     let _cond = e.k
     if (_cond == expkind.VJMP) {
         {
+            // condition?
+            // jump when it is false
             negatecondition(fs, e)
+            // save jump position
             pc = e.u.info
         }
     } elif (_cond == expkind.VK || _cond == expkind.VKFLT || _cond == expkind.VKINT || _cond == expkind.VKSTR || _cond == expkind.VTRUE) {
         {
-            pc = -1
+            // always true; do nothing
+            pc = NO_JUMP
         }
     } else {
         {
+            // jump when false
             pc = jumponcond(fs, e, 0)
         }
     }
+    // insert new jump in false list
     luaK_concat(fs, addr(e.f), pc)
+    // true list jumps to here (to go through)
     luaK_patchtohere(fs, e.t)
-    e.t = -1
+    e.t = NO_JUMP
 }
 
+// Emit code to go through if 'e' is false, jump otherwise.
 [c_function]
 def luaK_goiffalse(var fs : FuncState?; var e : expdesc?) {
+    // pc of new jump
     var pc : int
     luaK_dischargevars(fs, e)
     let _cond = e.k
     if (_cond == expkind.VJMP) {
         {
+            // already jump if true
             pc = e.u.info
         }
     } elif (_cond == expkind.VNIL || _cond == expkind.VFALSE) {
         {
-            pc = -1
+            // always false; do nothing
+            pc = NO_JUMP
         }
     } else {
         {
+            // jump if true
             pc = jumponcond(fs, e, 1)
         }
     }
+    // insert new jump in 't' list
     luaK_concat(fs, addr(e.t), pc)
+    // false list jumps to here (to go through)
     luaK_patchtohere(fs, e.f)
-    e.f = -1
+    e.f = NO_JUMP
 }
 
+// Code 'not e', doing constant folding.
 def private codenot(var fs : FuncState?; var e : expdesc?) {
     let _cond = e.k
     if (_cond == expkind.VNIL || _cond == expkind.VFALSE) {
         {
+            // true == not nil == not false
             e.k = expkind.VTRUE
         }
     } elif (_cond == expkind.VK || _cond == expkind.VKFLT || _cond == expkind.VKINT || _cond == expkind.VKSTR || _cond == expkind.VTRUE) {
         {
+            // false == not "x" == not 0.5 == not 1 == not true
             e.k = expkind.VFALSE
         }
     } elif (_cond == expkind.VJMP) {
@@ -3790,33 +4312,44 @@ def private codenot(var fs : FuncState?; var e : expdesc?) {
             e.k = expkind.VRELOC
         }
     } else {
+        // cannot happen
     }
     {
+        // interchange true and false lists
         var temp : int = e.f
         e.f = e.t
         e.t = temp
     }
+    // values are useless when negated
     removevalues(fs, e.f)
     removevalues(fs, e.t)
 }
 
+// Check whether expression 'e' is a short literal string
 [c_function]
 def private isKstr(var fs : FuncState?; var e : expdesc?) : int {
-    return e.k == expkind.VK && !(e.t != e.f) && e.u.info <= (1 << 8) - 1 && int(addr(deref(fs.f.k + e.u.info)).tt_) == (4 | 0 << 4 | 1 << 6) ? 1 : 0
+    return e.k == expkind.VK && !(e.t != e.f) && e.u.info <= MAXARG_B && int(addr(deref(fs.f.k + e.u.info)).tt_) == (4 | 0 << 4 | 1 << 6) ? 1 : 0
 }
 
+// Check whether expression 'e' is a literal integer.
 def private isKint(var e : expdesc?) : int {
     return e.k == expkind.VKINT && !(e.t != e.f) ? 1 : 0
 }
 
+// Check whether expression 'e' is a literal integer in
+// proper range to fit in register C
 def private isCint(var e : expdesc?) : int {
     return isKint(e) != 0 && uint64(e.u.ival) <= uint64((1 << 8) - 1) ? 1 : 0
 }
 
+// Check whether expression 'e' is a literal integer in
+// proper range to fit in register sC
 def private isSCint(var e : expdesc?) : int {
     return isKint(e) != 0 && fitsC(e.u.ival) != 0 ? 1 : 0
 }
 
+// Check whether expression 'e' is a literal integer or float in
+// proper range to fit in a register (sB or sC).
 [c_function]
 def private isSCnumber(var e : expdesc?; var pi : int?; var isfloat : int?) : int {
     var i : int64
@@ -3825,6 +4358,7 @@ def private isSCnumber(var e : expdesc?; var pi : int?; var isfloat : int?) : in
     } elif (e.k == expkind.VKFLT && luaV_flttointeger(e.u.nval, addr(i), F2Imod.F2Ieq) != 0) {
         deref(isfloat) = 1
     } else {
+        // not a number
         return 0
     }
     if (!(e.t != e.f) && fitsC(i) != 0) {
@@ -3835,62 +4369,86 @@ def private isSCnumber(var e : expdesc?; var pi : int?; var isfloat : int?) : in
     }
 }
 
+// Create expression 't[k]'. 't' must have its final result already in a
+// register or upvalue. Upvalues can only be indexed by literal strings.
+// Keys can be literal strings in the constant table or arbitrary
+// values in registers.
 def luaK_indexed(var fs : FuncState?; var t : expdesc?; var k : expdesc?) {
     if (k.k == expkind.VKSTR) {
         str2K(fs, k)
     }
+    // upvalue indexed by non 'Kstr'?
     if (t.k == expkind.VUPVAL && !(isKstr(fs, k) != 0)) {
+        // put it in a register
         luaK_exp2anyreg(fs, t)
     }
     if (t.k == expkind.VUPVAL) {
+        // upvalue index
         var temp : int = t.u.info
+        // (can't do a direct assignment; values overlap)
         t.u.ind.t = uint8(temp)
+        // literal short string
         t.u.ind.idx = int16(k.u.info)
         t.k = expkind.VINDEXUP
     } else {
+        // register index of the table
         t.u.ind.t = uint8(t.k == expkind.VLOCAL ? int(t.u._c_var.ridx) : t.u.info)
         if (isKstr(fs, k) != 0) {
+            // literal short string
             t.u.ind.idx = int16(k.u.info)
             t.k = expkind.VINDEXSTR
         } elif (isCint(k) != 0) {
+            // int. constant in proper range
             t.u.ind.idx = int16(int(k.u.ival))
             t.k = expkind.VINDEXI
         } else {
+            // register
             t.u.ind.idx = int16(luaK_exp2anyreg(fs, k))
             t.k = expkind.VINDEXED
         }
     }
 }
 
+// Return false if folding can raise an error.
+// Bitwise operations need operands convertible to integers; division
+// operations cannot have 0 as divisor.
 [c_function]
 def private validop(op : int; var v1 : TValue?; var v2 : TValue?) : int {
     let _cond = op
     if (_cond == 7 || _cond == 8 || _cond == 9 || _cond == 10 || _cond == 11 || _cond == 13) {
         {
+            // conversion errors
             var i : int64
             return luaV_tointegerns(v1, addr(i), F2Imod.F2Ieq) != 0 && luaV_tointegerns(v2, addr(i), F2Imod.F2Ieq) != 0 ? 1 : 0
         }
     } elif (_cond == 5 || _cond == 6 || _cond == 3) {
+        // division by 0
         return (int(v2.tt_) == (3 | 0 << 4) ? double(v2.value_.i) : v2.value_.n) != double(0) ? 1 : 0
     } else {
+        // everything else is valid
         return 1
     }
     return 0
 }
 
+// Try to "constant-fold" an operation; return 1 iff successful.
+// (In this case, 'e1' has the final result.)
 [c_function]
 def private constfolding(var fs : FuncState?; op : int; var e1 : expdesc?; var e2 : expdesc?) : int {
     var v1 : TValue
     var v2 : TValue
     var res : TValue
     if (!(tonumeral(e1, addr(v1)) != 0) || !(tonumeral(e2, addr(v2)) != 0) || !(validop(op, addr(v1), addr(v2)) != 0)) {
+        // non-numeric operands or not safe to fold
         return 0
     }
+    // does operation
     luaO_rawarith(fs.ls.L, op, addr(v1), addr(v2), addr(res))
     if (int(addr(res).tt_) == (3 | 0 << 4)) {
         e1.k = expkind.VKINT
         e1.u.ival = addr(res).value_.i
     } else {
+        // folds neither NaN nor 0.0 (to avoid problems with -0.0)
         var n : double = addr(res).value_.n
         if (!(n == n) || n == double(0)) {
             return 0
@@ -3901,67 +4459,97 @@ def private constfolding(var fs : FuncState?; op : int; var e1 : expdesc?; var e
     return 1
 }
 
+// Convert a BinOpr to an OpCode (ORDER OPR - ORDER OP)
 def private binopr2op(opr : BinOpr; baser : BinOpr; base : OpCode) : OpCode {
     return enum_from_int(type<OpCode>, int(opr) - int(baser) + int(base))
 }
 
+// Convert a UnOpr to an OpCode (ORDER OPR - ORDER OP)
 def private unopr2op(opr : UnOpr) : OpCode {
     return enum_from_int(type<OpCode>, int(opr) - int(UnOpr.OPR_MINUS) + int(OpCode.OP_UNM))
 }
 
+// Convert a BinOpr to a tag method (ORDER OPR - ORDER TM)
 def private binopr2TM(opr : BinOpr) : TMS {
     return enum_from_int(type<TMS>, int(opr) - int(BinOpr.OPR_ADD) + int(TMS.TM_ADD))
 }
 
+// Emit code for unary expressions that "produce values"
+// (everything but 'not').
+// Expression to produce final result will be encoded in 'e'.
 def private codeunexpval(var fs : FuncState?; op : OpCode; var e : expdesc?; line : int) {
+    // opcodes operate only on registers
     var r : int = luaK_exp2anyreg(fs, e)
     freeexp(fs, e)
+    // generate opcode
     e.u.info = luaK_codeABCk(fs, op, 0, r, 0, 0)
+    // all those operations are relocatable
     e.k = expkind.VRELOC
     luaK_fixline(fs, line)
 }
 
+// Emit code for binary expressions that "produce values"
+// (everything but logical operators 'and'/'or' and comparison
+// operators).
+// Expression to produce final result will be encoded in 'e1'.
 def private finishbinexpval(var fs : FuncState?; var e1 : expdesc?; var e2 : expdesc?; op : OpCode; v2 : int; flip : int; line : int; mmop : OpCode; event : TMS) {
     var v1 : int = luaK_exp2anyreg(fs, e1)
     var pc : int = luaK_codeABCk(fs, op, 0, v1, v2, 0)
     freeexps(fs, e1, e2)
     e1.u.info = pc
+    // all those operations are relocatable
     e1.k = expkind.VRELOC
     luaK_fixline(fs, line)
+    // to call metamethod
     luaK_codeABCk(fs, mmop, v1, v2, int(event), flip)
     luaK_fixline(fs, line)
 }
 
+// Emit code for binary expressions that "produce values" over
+// two registers.
 def private codebinexpval(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var e2 : expdesc?; line : int) {
     var op : OpCode = binopr2op(opr, BinOpr.OPR_ADD, OpCode.OP_ADD)
+    // make sure 'e2' is in a register
     var v2 : int = luaK_exp2anyreg(fs, e2)
+    // 'e1' must be already in a register or it is a constant
     finishbinexpval(fs, e1, e2, op, v2, 0, line, OpCode.OP_MMBIN, binopr2TM(opr))
 }
 
+// Code binary operators with immediate operands.
 def private codebini(var fs : FuncState?; op : OpCode; var e1 : expdesc?; var e2 : expdesc?; flip : int; line : int; event : TMS) {
+    // immediate operand
     var v2 : int = int(e2.u.ival) + ((1 << 8) - 1 >> 1)
     finishbinexpval(fs, e1, e2, op, v2, flip, line, OpCode.OP_MMBINI, event)
 }
 
+// Code binary operators with K operand.
 def private codebinK(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var e2 : expdesc?; flip : int; line : int) {
     var event : TMS = binopr2TM(opr)
+    // K index
     var v2 : int = e2.u.info
     var op : OpCode = binopr2op(opr, BinOpr.OPR_ADD, OpCode.OP_ADDK)
     finishbinexpval(fs, e1, e2, op, v2, flip, line, OpCode.OP_MMBINK, event)
 }
 
+// Try to code a binary operator negating its second operand.
+// For the metamethod, 2nd operand must keep its original value.
 [c_function]
 def private finishbinexpneg(var fs : FuncState?; var e1 : expdesc?; var e2 : expdesc?; op : OpCode; line : int; event : TMS) : int {
     if (!(isKint(e2) != 0)) {
+        // not an integer constant
         return 0
     } else {
         var i2 : int64 = e2.u.ival
         if (!(fitsC(i2) != 0 && fitsC(-i2) != 0)) {
+            // not in the proper range
             return 0
         } else {
+            // operating a small integer constant
             var v2 : int = int(i2)
             finishbinexpval(fs, e1, e2, op, -v2 + ((1 << 8) - 1 >> 1), 0, line, OpCode.OP_MMBINI, event)
+            // correct metamethod argument
             deref(fs.f.code + (fs.pc - 1)) = deref(fs.f.code + (fs.pc - 1)) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1)) | uint(v2 + ((1 << 8) - 1 >> 1)) << uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1)
+            // successfully coded
             return 1
         }
     }
@@ -3969,32 +4557,46 @@ def private finishbinexpneg(var fs : FuncState?; var e1 : expdesc?; var e2 : exp
 
 [c_function]
 def private swapexps(var e1 : expdesc?; var e2 : expdesc?) {
+    // swap 'e1' and 'e2'
     var temp : expdesc = deref(e1)
     deref(e1) = deref(e2)
     deref(e2) = temp
 }
 
+// Code binary operators with no constant operand.
 def private codebinNoK(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var e2 : expdesc?; flip : int; line : int) {
     if (flip != 0) {
+        // back to original order
         swapexps(e1, e2)
     }
+    // use standard operators
     codebinexpval(fs, opr, e1, e2, line)
 }
 
+// Code arithmetic operators ('+', '-', ...). If second operand is a
+// constant in the proper range, use variant opcodes with K operands.
 def private codearith(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var e2 : expdesc?; flip : int; line : int) {
+    // K operand?
     if (tonumeral(e2, null) != 0 && luaK_exp2K(fs, e2) != 0) {
         codebinK(fs, opr, e1, e2, flip, line)
     } else {
+        // 'e2' is neither an immediate nor a K operand
         codebinNoK(fs, opr, e1, e2, flip, line)
     }
 }
 
+// Code commutative operators ('+', '*'). If first operand is a
+// numeric constant, change order of operands to try to use an
+// immediate or K operator.
 def private codecommutative(var fs : FuncState?; op : BinOpr; var e1 : expdesc?; var e2 : expdesc?; line : int) {
     var flip : int = 0
+    // is first operand a numeric constant?
     if (tonumeral(e1, null) != 0) {
+        // change order
         swapexps(e1, e2)
         flip = 1
     }
+    // immediate operand?
     if (op == BinOpr.OPR_ADD && isSCint(e2) != 0) {
         codebini(fs, OpCode.OP_ADDI, e1, e2, flip, line, TMS.TM_ADD)
     } else {
@@ -4002,19 +4604,26 @@ def private codecommutative(var fs : FuncState?; op : BinOpr; var e1 : expdesc?;
     }
 }
 
+// Code bitwise operations; they are all commutative, so the function
+// tries to put an integer constant as the 2nd operand (a K operand).
 def private codebitwise(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var e2 : expdesc?; line : int) {
     var flip : int = 0
     if (e1.k == expkind.VKINT) {
+        // 'e2' will be the constant operand
         swapexps(e1, e2)
         flip = 1
     }
+    // K operand?
     if (e2.k == expkind.VKINT && luaK_exp2K(fs, e2) != 0) {
         codebinK(fs, opr, e1, e2, flip, line)
     } else {
+        // no constants
         codebinNoK(fs, opr, e1, e2, flip, line)
     }
 }
 
+// Emit code for order comparisons. When using an immediate operand,
+// 'isfloat' tells whether the original value was a float.
 [c_function]
 def private codeorder(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var e2 : expdesc?) {
     var r1 : int
@@ -4023,14 +4632,17 @@ def private codeorder(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var 
     var isfloat : int = 0
     var op : OpCode
     if (isSCnumber(e2, addr(im), addr(isfloat)) != 0) {
+        // use immediate operand
         r1 = luaK_exp2anyreg(fs, e1)
         r2 = im
         op = binopr2op(opr, BinOpr.OPR_LT, OpCode.OP_LTI)
     } elif (isSCnumber(e1, addr(im), addr(isfloat)) != 0) {
+        // transform (A < B) to (B > A) and (A <= B) to (B >= A)
         r1 = luaK_exp2anyreg(fs, e2)
         r2 = im
         op = binopr2op(opr, BinOpr.OPR_LT, OpCode.OP_GTI)
     } else {
+        // regular case, compare two registers
         r1 = luaK_exp2anyreg(fs, e1)
         r2 = luaK_exp2anyreg(fs, e2)
         op = binopr2op(opr, BinOpr.OPR_LT, OpCode.OP_LT)
@@ -4040,24 +4652,32 @@ def private codeorder(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var 
     e1.k = expkind.VJMP
 }
 
+// Emit code for equality comparisons ('==', '~=').
+// 'e1' was already put as RK by 'luaK_infix'.
 [c_function]
 def private codeeq(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var e2 : expdesc?) {
     var r1 : int
     var r2 : int
     var im : int
+    // not needed here, but kept for symmetry
     var isfloat : int = 0
     var op : OpCode
     if (e1.k != expkind.VNONRELOC) {
         swapexps(e1, e2)
     }
+    // 1st expression must be in register
     r1 = luaK_exp2anyreg(fs, e1)
     if (isSCnumber(e2, addr(im), addr(isfloat)) != 0) {
         op = OpCode.OP_EQI
+        // immediate operand
         r2 = im
     } elif (exp2RK(fs, e2) != 0) {
+        // 2nd expression is constant?
         op = OpCode.OP_EQK
+        // constant index
         r2 = e2.u.info
     } else {
+        // will compare two registers
         op = OpCode.OP_EQ
         r2 = luaK_exp2anyreg(fs, e2)
     }
@@ -4066,6 +4686,7 @@ def private codeeq(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var e2 
     e1.k = expkind.VJMP
 }
 
+// Apply prefix operation 'op' to expression 'e'.
 [c_function]
 def luaK_prefix(var fs : FuncState?; opr : UnOpr; var e : expdesc?; line : int) {
     luaK_dischargevars(fs, e)
@@ -4075,41 +4696,46 @@ def luaK_prefix(var fs : FuncState?; opr : UnOpr; var e : expdesc?; line : int) 
         _flag ||= _cond == UnOpr.OPR_MINUS
         _flag ||= _cond == UnOpr.OPR_BNOT
         if (_flag) {
-            if (constfolding(fs, int(uint(int(opr)) + uint(12)), e, addr(luaK_prefix_ef)) != 0) {
+            // use 'ef' as fake 2nd operand
+            if (constfolding(fs, int(uint(int(opr)) + uint(LUA_OPUNM)), e, addr(luaK_prefix_ef)) != 0) {
                 break
             }
         }
         _flag ||= _cond == UnOpr.OPR_LEN
         if (_flag) {
+            // else FALLTHROUGH
             codeunexpval(fs, unopr2op(opr), e, line)
             break
         }
-        _flag ||= _cond == UnOpr.OPR_NOT
-        if (_flag) {
+        if (_cond == UnOpr.OPR_NOT) {
             codenot(fs, e)
             break
         }
-        _flag ||= !(_cond == UnOpr.OPR_MINUS || _cond == UnOpr.OPR_BNOT || _cond == UnOpr.OPR_LEN || _cond == UnOpr.OPR_NOT)
-        if (_flag) {
+        if (!(_cond == UnOpr.OPR_MINUS || _cond == UnOpr.OPR_BNOT || _cond == UnOpr.OPR_LEN || _cond == UnOpr.OPR_NOT)) {
         }
         break
     }
 }
 
+// Process 1st operand 'v' of binary operation 'op' before reading
+// 2nd operand.
 [c_function]
 def luaK_infix(var fs : FuncState?; op : BinOpr; var v : expdesc?) {
     luaK_dischargevars(fs, v)
     let _cond = op
     if (_cond == BinOpr.OPR_AND) {
         {
+            // go ahead only if 'v' is true
             luaK_goiftrue(fs, v)
         }
     } elif (_cond == BinOpr.OPR_OR) {
         {
+            // go ahead only if 'v' is false
             luaK_goiffalse(fs, v)
         }
     } elif (_cond == BinOpr.OPR_CONCAT) {
         {
+            // operand must be on the stack
             luaK_exp2nextreg(fs, v)
         }
     } elif (_cond == BinOpr.OPR_ADD || _cond == BinOpr.OPR_SUB || _cond == BinOpr.OPR_MUL || _cond == BinOpr.OPR_DIV || _cond == BinOpr.OPR_IDIV || _cond == BinOpr.OPR_MOD || _cond == BinOpr.OPR_POW || _cond == BinOpr.OPR_BAND || _cond == BinOpr.OPR_BOR || _cond == BinOpr.OPR_BXOR || _cond == BinOpr.OPR_SHL || _cond == BinOpr.OPR_SHR) {
@@ -4120,12 +4746,15 @@ def luaK_infix(var fs : FuncState?; op : BinOpr; var v : expdesc?) {
         }
     } elif (_cond == BinOpr.OPR_EQ || _cond == BinOpr.OPR_NE) {
         {
+            // else keep numeral, which may be folded or used as an immediate
+            // operand
             if (!(tonumeral(v, null) != 0)) {
                 exp2RK(fs, v)
             }
         }
     } elif (_cond == BinOpr.OPR_LT || _cond == BinOpr.OPR_LE || _cond == BinOpr.OPR_GT || _cond == BinOpr.OPR_GE) {
         {
+            // else keep numeral, which may be an immediate operand
             var dummy : int
             var dummy2 : int
             if (!(isSCnumber(v, addr(dummy), addr(dummy2)) != 0)) {
@@ -4133,60 +4762,70 @@ def luaK_infix(var fs : FuncState?; op : BinOpr; var v : expdesc?) {
             }
         }
     } else {
+        // else keep numeral, which may be an immediate operand
     }
 }
 
+// Create code for '(e1 .. e2)'.
+// For '(e1 .. e2.1 .. e2.2)' (which is '(e1 .. (e2.1 .. e2.2))',
+// because concatenation is right associative), merge both CONCATs.
 [c_function]
 def private codeconcat(var fs : FuncState?; var e1 : expdesc?; var e2 : expdesc?; line : int) {
     var ie2 : uint? = previousinstruction(fs)
+    // is 'e2' a concatenation?
     if (enum_from_int(type<OpCode>, int(deref(ie2) >> 0u & ~(~uint(0) << 7u) << 0u)) == OpCode.OP_CONCAT) {
+        // # of elements concatenated in 'e2'
         var n : int = int(deref(ie2) >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
         freeexp(fs, e2)
+        // correct first element ('e1')
         deref(ie2) = deref(ie2) & ~(~(~uint(0) << 8u) << uint(0 + 7)) | uint(e1.u.info) << uint(0 + 7) & ~(~uint(0) << 8u) << uint(0 + 7)
+        // will concatenate one more element
         deref(ie2) = deref(ie2) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1)) | uint(n + 1) << uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1)
     } else {
+        // 'e2' is not a concatenation
+        // new concat opcode
         luaK_codeABCk(fs, OpCode.OP_CONCAT, e1.u.info, 2, 0, 0)
         freeexp(fs, e2)
         luaK_fixline(fs, line)
     }
 }
 
+// Finalize code for binary operation, after reading 2nd operand.
 [c_function]
 def luaK_posfix(var fs : FuncState?; var opr : BinOpr; var e1 : expdesc?; var e2 : expdesc?; line : int) {
     luaK_dischargevars(fs, e2)
-    if (uint(int(opr)) <= uint(int(BinOpr.OPR_SHR)) && constfolding(fs, int(uint(int(opr)) + uint(0)), e1, e2) != 0) {
+    if (uint(int(opr)) <= uint(int(BinOpr.OPR_SHR)) && constfolding(fs, int(uint(int(opr)) + uint(LUA_OPADD)), e1, e2) != 0) {
+        // done by folding
         return
     }
     let _cond = opr
     while (true) {
         var _flag = false
-        _flag ||= _cond == BinOpr.OPR_AND
-        if (_flag) {
+        if (_cond == BinOpr.OPR_AND) {
             {
+                // list closed by 'luaK_infix'
                 luaK_concat(fs, addr(e2.f), e1.f)
                 deref(e1) = deref(e2)
                 break
             }
         }
-        _flag ||= _cond == BinOpr.OPR_OR
-        if (_flag) {
+        if (_cond == BinOpr.OPR_OR) {
             {
+                // list closed by 'luaK_infix'
                 luaK_concat(fs, addr(e2.t), e1.t)
                 deref(e1) = deref(e2)
                 break
             }
         }
-        _flag ||= _cond == BinOpr.OPR_CONCAT
-        if (_flag) {
+        if (_cond == BinOpr.OPR_CONCAT) {
             {
+                // e1 .. e2
                 luaK_exp2nextreg(fs, e2)
                 codeconcat(fs, e1, e2, line)
                 break
             }
         }
-        _flag ||= _cond == BinOpr.OPR_ADD
-        _flag ||= _cond == BinOpr.OPR_MUL
-        if (_flag) {
+        if (_cond == BinOpr.OPR_ADD || _cond == BinOpr.OPR_MUL) {
             {
                 codecommutative(fs, opr, e1, e2, line)
                 break
@@ -4196,6 +4835,7 @@ def luaK_posfix(var fs : FuncState?; var opr : BinOpr; var e1 : expdesc?; var e2
         if (_flag) {
             {
                 if (finishbinexpneg(fs, e1, e2, OpCode.OP_ADDI, line, TMS.TM_SUB) != 0) {
+                    // coded as (r1 + -I)
                     break
                 }
             }
@@ -4206,46 +4846,46 @@ def luaK_posfix(var fs : FuncState?; var opr : BinOpr; var e1 : expdesc?; var e2
         _flag ||= _cond == BinOpr.OPR_POW
         if (_flag) {
             {
+                // ELSE
+                // FALLTHROUGH
                 codearith(fs, opr, e1, e2, 0, line)
                 break
             }
         }
-        _flag ||= _cond == BinOpr.OPR_BAND
-        _flag ||= _cond == BinOpr.OPR_BOR
-        _flag ||= _cond == BinOpr.OPR_BXOR
-        if (_flag) {
+        if (_cond == BinOpr.OPR_BAND || _cond == BinOpr.OPR_BOR || _cond == BinOpr.OPR_BXOR) {
             {
                 codebitwise(fs, opr, e1, e2, line)
                 break
             }
         }
-        _flag ||= _cond == BinOpr.OPR_SHL
-        if (_flag) {
+        if (_cond == BinOpr.OPR_SHL) {
             {
                 if (isSCint(e1) != 0) {
                     swapexps(e1, e2)
+                    // I << r2
                     codebini(fs, OpCode.OP_SHLI, e1, e2, 1, line, TMS.TM_SHL)
                 } elif (finishbinexpneg(fs, e1, e2, OpCode.OP_SHRI, line, TMS.TM_SHL) != 0) {
+                    // coded as (r1 >> -I)
                 } else {
+                    // regular case (two registers)
                     codebinexpval(fs, opr, e1, e2, line)
                 }
                 break
             }
         }
-        _flag ||= _cond == BinOpr.OPR_SHR
-        if (_flag) {
+        if (_cond == BinOpr.OPR_SHR) {
             {
                 if (isSCint(e2) != 0) {
+                    // r1 >> I
                     codebini(fs, OpCode.OP_SHRI, e1, e2, 0, line, TMS.TM_SHR)
                 } else {
+                    // regular case (two registers)
                     codebinexpval(fs, opr, e1, e2, line)
                 }
                 break
             }
         }
-        _flag ||= _cond == BinOpr.OPR_EQ
-        _flag ||= _cond == BinOpr.OPR_NE
-        if (_flag) {
+        if (_cond == BinOpr.OPR_EQ || _cond == BinOpr.OPR_NE) {
             {
                 codeeq(fs, opr, e1, e2)
                 break
@@ -4255,6 +4895,7 @@ def luaK_posfix(var fs : FuncState?; var opr : BinOpr; var e1 : expdesc?; var e2
         _flag ||= _cond == BinOpr.OPR_GE
         if (_flag) {
             {
+                // '(a > b)' <=> '(b < a)'; '(a >= b)' <=> '(b <= a)'
                 swapexps(e1, e2)
                 opr = enum_from_int(type<BinOpr>, int(uint(int(opr)) - uint(int(BinOpr.OPR_GT)) + uint(int(BinOpr.OPR_LT))))
             }
@@ -4263,17 +4904,19 @@ def luaK_posfix(var fs : FuncState?; var opr : BinOpr; var e1 : expdesc?; var e2
         _flag ||= _cond == BinOpr.OPR_LE
         if (_flag) {
             {
+                // FALLTHROUGH
                 codeorder(fs, opr, e1, e2)
                 break
             }
         }
-        _flag ||= !(_cond == BinOpr.OPR_AND || _cond == BinOpr.OPR_OR || _cond == BinOpr.OPR_CONCAT || _cond == BinOpr.OPR_ADD || _cond == BinOpr.OPR_MUL || _cond == BinOpr.OPR_SUB || _cond == BinOpr.OPR_DIV || _cond == BinOpr.OPR_IDIV || _cond == BinOpr.OPR_MOD || _cond == BinOpr.OPR_POW || _cond == BinOpr.OPR_BAND || _cond == BinOpr.OPR_BOR || _cond == BinOpr.OPR_BXOR || _cond == BinOpr.OPR_SHL || _cond == BinOpr.OPR_SHR || _cond == BinOpr.OPR_EQ || _cond == BinOpr.OPR_NE || _cond == BinOpr.OPR_GT || _cond == BinOpr.OPR_GE || _cond == BinOpr.OPR_LT || _cond == BinOpr.OPR_LE)
-        if (_flag) {
+        if (!(_cond == BinOpr.OPR_AND || _cond == BinOpr.OPR_OR || _cond == BinOpr.OPR_CONCAT || _cond == BinOpr.OPR_ADD || _cond == BinOpr.OPR_MUL || _cond == BinOpr.OPR_SUB || _cond == BinOpr.OPR_DIV || _cond == BinOpr.OPR_IDIV || _cond == BinOpr.OPR_MOD || _cond == BinOpr.OPR_POW || _cond == BinOpr.OPR_BAND || _cond == BinOpr.OPR_BOR || _cond == BinOpr.OPR_BXOR || _cond == BinOpr.OPR_SHL || _cond == BinOpr.OPR_SHR || _cond == BinOpr.OPR_EQ || _cond == BinOpr.OPR_NE || _cond == BinOpr.OPR_GT || _cond == BinOpr.OPR_GE || _cond == BinOpr.OPR_LT || _cond == BinOpr.OPR_LE)) {
         }
         break
     }
 }
 
+// Change line information associated with current position, by removing
+// previous info and adding it again with new line.
 def luaK_fixline(var fs : FuncState?; line : int) {
     removelastlineinfo(fs)
     savelineinfo(fs, fs.f, line)
@@ -4282,32 +4925,44 @@ def luaK_fixline(var fs : FuncState?; line : int) {
 [c_function]
 def luaK_settablesize(var fs : FuncState?; pc : int; ra : int; asize : int; hsize : int) {
     var inst : uint? = addr(deref(fs.f.code + pc))
+    // hash size
     var rb : int = hsize != 0 ? luaO_ceillog2(uint(hsize)) + 1 : 0
-    var extra : int = asize / ((1 << 8) - 1 + 1)
-    var rc : int = asize % ((1 << 8) - 1 + 1)
+    // higher bits of array size
+    var extra : int = asize / (MAXARG_C + 1)
+    // lower bits of array size
+    var rc : int = asize % (MAXARG_C + 1)
+    // true iff needs extra argument
     var k : int = extra > 0 ? 1 : 0
     deref(inst) = uint(int(OpCode.OP_NEWTABLE)) << 0u | uint(ra) << uint(0 + 7) | uint(rb) << uint(0 + 7 + 8 + 1) | uint(rc) << uint(0 + 7 + 8 + 1 + 8) | uint(k) << uint(0 + 7 + 8)
     deref(inst + 1) = uint(int(OpCode.OP_EXTRAARG)) << 0u | uint(extra) << uint(0 + 7)
 }
 
+// Emit a SETLIST instruction.
+// 'base' is register that keeps table;
+// 'nelems' is #table plus those to be stored now;
+// 'tostore' is number of values (in registers 'base + 1',...) to add to
+// table (or LUA_MULTRET to add up to stack top).
 def luaK_setlist(var fs : FuncState?; base : int; var nelems : int; var tostore : int) {
-    if (tostore == -1) {
+    if (tostore == LUA_MULTRET) {
         tostore = 0
     }
-    if (nelems <= (1 << 8) - 1) {
+    if (nelems <= MAXARG_C) {
         luaK_codeABCk(fs, OpCode.OP_SETLIST, base, tostore, nelems, 0)
     } else {
-        var extra : int = nelems / ((1 << 8) - 1 + 1)
-        nelems %= (1 << 8) - 1 + 1
+        var extra : int = nelems / (MAXARG_C + 1)
+        nelems %= MAXARG_C + 1
         luaK_codeABCk(fs, OpCode.OP_SETLIST, base, tostore, nelems, 1)
         codeextraarg(fs, extra)
     }
+    // free registers with list values
     fs.freereg = uint8(base + 1)
 }
 
+// return the final target of a jump (skipping jumps to jumps)
 [c_function]
 def private finaltarget(var code : uint?; var i : int) : int {
     var count : int
+    // avoid infinite loops
     {
         count = 0
         while (count < 100) {
@@ -4323,6 +4978,8 @@ def private finaltarget(var code : uint?; var i : int) : int {
     return i
 }
 
+// Do a final pass over the code of a function, doing small peephole
+// optimizations and adjustments.
 [c_function]
 def luaK_finish(var fs : FuncState?) {
     var i : int
@@ -4338,9 +4995,11 @@ def luaK_finish(var fs : FuncState?) {
                 _flag ||= _cond == OpCode.OP_RETURN1
                 if (_flag) {
                     {
-                        if (!(int(fs.needclose) != 0 || int(p.is_vararg) != 0)) {
+                        if (!(fs.needclose != 0 || p.is_vararg != 0)) {
+                            // no extra work
                             break
                         }
+                        // else use OP_RETURN to do the extra work
                         deref(pc) = deref(pc) & ~(~(~uint(0) << 7u) << 0u) | uint(int(OpCode.OP_RETURN)) << 0u & ~(~uint(0) << 7u) << 0u
                     }
                 }
@@ -4348,25 +5007,26 @@ def luaK_finish(var fs : FuncState?) {
                 _flag ||= _cond == OpCode.OP_TAILCALL
                 if (_flag) {
                     {
+                        // FALLTHROUGH
                         if (fs.needclose != 0) {
+                            // signal that it needs to close
                             deref(pc) = deref(pc) & ~(~(~uint(0) << 1u) << uint(0 + 7 + 8)) | uint(1) << uint(0 + 7 + 8) & ~(~uint(0) << 1u) << uint(0 + 7 + 8)
                         }
                         if (p.is_vararg != 0) {
+                            // signal that it is vararg
                             deref(pc) = deref(pc) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)) | uint(int(p.numparams) + 1) << uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)
                         }
                         break
                     }
                 }
-                _flag ||= _cond == OpCode.OP_JMP
-                if (_flag) {
+                if (_cond == OpCode.OP_JMP) {
                     {
                         var target : int = finaltarget(p.code, i)
                         fixjump(fs, i, target)
                         break
                     }
                 }
-                _flag ||= !(_cond == OpCode.OP_RETURN0 || _cond == OpCode.OP_RETURN1 || _cond == OpCode.OP_RETURN || _cond == OpCode.OP_TAILCALL || _cond == OpCode.OP_JMP)
-                if (_flag) {
+                if (!(_cond == OpCode.OP_RETURN0 || _cond == OpCode.OP_RETURN1 || _cond == OpCode.OP_RETURN || _cond == OpCode.OP_TAILCALL || _cond == OpCode.OP_JMP)) {
                     break
                 }
                 break
@@ -4381,14 +5041,29 @@ def private currentpc(var ci : CallInfo?) : int {
     return int(int64(ci.u.l.savedpc - addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p.code)) - 1
 }
 
+// Get a "base line" to find the line corresponding to an instruction.
+// Base lines are regularly placed at MAXIWTHABS intervals, so usually
+// an integer division gets the right place. When the source file has
+// large sequences of empty/comment lines, it may need extra entries,
+// so the original estimate needs a correction.
+// If the original estimate is -1, the initial 'if' ensures that the
+// 'while' will run at least once.
+// The assertion that the estimate is a lower bound for the correct base
+// is valid as long as the debug info has been generated with the same
+// value for MAXIWTHABS or smaller. (Previous releases use a little
+// smaller value.)
 [c_function]
 def private getbaseline(var f : Proto?; pc : int; var basepc : int?) : int {
     if (f.sizeabslineinfo == 0 || pc < deref(f.abslineinfo + 0).pc) {
+        // start from the beginning
         deref(basepc) = -1
         return f.linedefined
     } else {
-        var i : int = int(uint(pc) / uint(128) - uint(1))
+        // get an estimate
+        var i : int = int(uint(pc) / uint(MAXIWTHABS) - uint(1))
+        // estimate must be a lower bound of the correct base
         while (i + 1 < f.sizeabslineinfo && pc >= deref(f.abslineinfo + (i + 1)).pc) {
+            // low estimate; adjust it
             i++
         }
         deref(basepc) = deref(f.abslineinfo + i).pc
@@ -4396,19 +5071,25 @@ def private getbaseline(var f : Proto?; pc : int; var basepc : int?) : int {
     }
 }
 
+// Get the line corresponding to instruction 'pc' in function 'f';
+// first gets a base line and from there does the increments until
+// the desired instruction.
 [c_function]
 def luaG_getfuncline(var f : Proto?; pc : int) : int {
+    // no debug information?
     if (f.lineinfo == null) {
         return -1
     } else {
         var basepc : int
         var baseline : int = getbaseline(f, pc, addr(basepc))
+        // walk until given instruction
         while (true) {
             let _t0 = basepc
             basepc++
             if (!(_t0 < pc)) {
                 break
             }
+            // correct line
             baseline += int(deref(f.lineinfo + basepc))
         }
         return baseline
@@ -4420,6 +5101,15 @@ def private getcurrentline(var ci : CallInfo?) : int {
     return luaG_getfuncline(addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p, currentpc(ci))
 }
 
+// Set 'trap' for all active Lua frames.
+// This function can be called during a signal, under "reasonable"
+// assumptions. A new 'ci' is completely linked in the list before it
+// becomes part of the "active" list, and we assume that pointers are
+// atomic; see comment in next function.
+// (A compiler doing interprocedural optimizations could, theoretically,
+// reorder memory writes in such a way that the list could be
+// temporarily broken while inserting a new element. We simply assume it
+// has no good reasons to do that.)
 [c_function]
 def private settraps(var ci : CallInfo?) {
     {
@@ -4432,7 +5122,16 @@ def private settraps(var ci : CallInfo?) {
     }
 }
 
+// This function can be called during a signal, under "reasonable"
+// assumptions.
+// Fields 'basehookcount' and 'hookcount' (set by 'resethookcount')
+// are for debug only, and it is no problem if they get arbitrary
+// values (causes at most one wrong hook call). 'hookmask' is an atomic
+// value. We assume that pointers are atomic too (e.g., gcc ensures that
+// for all platforms where it runs). Moreover, 'hook' is always checked
+// before being called (see 'luaD_hook').
 def lua_sethook(var L : lua_State?; var func : function<(var a0 : lua_State?; var a1 : lua_Debug?) : void>; var mask : int; count : int) {
+    // turn off hooks?
     if (func == null || mask == 0) {
         mask = 0
         func = default<function<(var a0 : lua_State?; var a1 : lua_Debug?) : void>>
@@ -4442,6 +5141,7 @@ def lua_sethook(var L : lua_State?; var func : function<(var a0 : lua_State?; va
     L.hookcount = L.basehookcount
     c_volatile_store(L.hookmask, int(uint8(mask)))
     if (mask != 0) {
+        // to trace inside 'luaV_execute'
         settraps(L.ci)
     }
 }
@@ -4462,6 +5162,7 @@ def lua_gethookcount(var L : lua_State?) : int {
 def lua_getstack(var L : lua_State?; var level : int; var ar : lua_Debug?) : int {
     var status : int
     var ci : CallInfo?
+    // invalid (negative) level
     if (level < 0) {
         return 0
     }
@@ -4472,10 +5173,12 @@ def lua_getstack(var L : lua_State?; var level : int; var ar : lua_Debug?) : int
             ci = ci.previous
         }
     }
+    // level found?
     if (level == 0 && intptr(ci) != intptr(addr(L.base_ci))) {
         status = 1
         ar.i_ci = ci
     } else {
+        // no such level
         status = 0
     }
     return status
@@ -4495,11 +5198,14 @@ def private upvalname(var p : Proto?; uv : int) : uint8? {
 def private findvararg(var ci : CallInfo?; n : int; var pos : StackValue ??) : uint8? {
     if (addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p.is_vararg != 0) {
         var nextra : int = ci.u.l.nextraargs
+        // 'n' is negative
         if (n >= -nextra) {
             deref(pos) = ci.func.p - nextra + -(n + 1)
+            // generic name for any vararg
             return reinterpret<uint8?>("(vararg)")
         }
     }
+    // no such vararg
     return null
 }
 
@@ -4508,17 +5214,22 @@ def luaG_findlocal(var L : lua_State?; var ci : CallInfo?; n : int; var pos : St
     var base : StackValue? = ci.func.p + 1
     var name : uint8? = null
     if (!((int(ci.callstatus) & 1 << 1) != 0)) {
+        // access to vararg values?
         if (n < 0) {
             return findvararg(ci, n, pos)
         } else {
             name = luaF_getlocalname(addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p, n, currentpc(ci))
         }
     }
+    // no 'standard' name?
     if (name == null) {
         var limit : StackValue? = intptr(ci) == intptr(L.ci) ? L.top.p : ci.next.func.p
+        // is 'n' inside 'ci' stack?
         if (int64(limit - base) >= int64(n) && n > 0) {
+            // generic name for any valid slot
             name = !((int(ci.callstatus) & 1 << 1) != 0) ? reinterpret<uint8?>("(temporary)") : reinterpret<uint8?>("(C temporary)")
         } else {
+            // no name
             return null
         }
     }
@@ -4531,13 +5242,18 @@ def luaG_findlocal(var L : lua_State?; var ci : CallInfo?; n : int; var pos : St
 [c_function]
 def lua_getlocal(var L : lua_State?; var ar : lua_Debug?; n : int) : uint8? {
     var name : uint8?
+    // information about non-active function?
     if (ar == null) {
+        // not a Lua function?
         if (!(int(addr((L.top.p - 1).val).tt_) == (6 | 0 << 4 | 1 << 6))) {
             name = null
         } else {
+            // consider live variables at function start (parameters)
             name = luaF_getlocalname(addr(reinterpret<GCUnion?>(addr((L.top.p - 1).val).value_.gc).cl.l).p, n, 0)
         }
     } else {
+        // active function; get information through 'ar'
+        // to avoid warnings
         var pos : StackValue? = null
         name = luaG_findlocal(L, ar.i_ci, n, addr(pos))
         if (name != null) {
@@ -4557,6 +5273,7 @@ def lua_getlocal(var L : lua_State?; var ar : lua_Debug?; n : int) : uint8? {
 
 [c_function]
 def lua_setlocal(var L : lua_State?; var ar : lua_Debug?; n : int) : uint8? {
+    // to avoid warnings
     var pos : StackValue? = null
     var name : uint8?
     name = luaG_findlocal(L, ar.i_ci, n, addr(pos))
@@ -4567,6 +5284,7 @@ def lua_setlocal(var L : lua_State?; var ar : lua_Debug?; n : int) : uint8? {
             io1.value_ = io2.value_
             io1.tt_ = io2.tt_
         }
+        // pop value
         L.top.p = L.top.p - 1
     }
     return name
@@ -4598,7 +5316,7 @@ def private funcinfo(var ar : lua_Debug?; var cl : Closure?) {
 
 [c_function]
 def private nextline(var p : Proto?; currentline : int; pc : int) : int {
-    if (int(deref(p.lineinfo + pc)) != -128) {
+    if (int(deref(p.lineinfo + pc)) != ABSLINEINFO) {
         return currentline + int(deref(p.lineinfo + pc))
     } else {
         return luaG_getfuncline(p, pc)
@@ -4615,8 +5333,10 @@ def private collectvalidlines(var L : lua_State?; var f : Closure?) {
     } else {
         var p : Proto? = f.l.p
         var currentline : int = p.linedefined
+        // new table to store active lines
         var t : Table? = luaH_new(L)
         {
+            // push it on stack
             var io : TValue? = addr(L.top.p.val)
             var x_ : Table? = t
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
@@ -4625,19 +5345,28 @@ def private collectvalidlines(var L : lua_State?; var f : Closure?) {
         {
             L.top.p = L.top.p + 1
         }
+        // proto with debug information?
         if (p.lineinfo != null) {
             var i : int
             var v : TValue
+            // boolean 'true' to be the value of all indices
             addr(v).tt_ = uint8(1 | 1 << 4)
+            // regular function?
             if (!(p.is_vararg != 0)) {
+                // consider all instructions
                 i = 0
             } else {
+                // vararg function
                 currentline = nextline(p, currentline, 0)
+                // skip first instruction (OP_VARARGPREP)
                 i = 1
             }
+            // for each instruction
             {
                 while (i < p.sizelineinfo) {
+                    // get its line
                     currentline = nextline(p, currentline, i)
+                    // table[line] = true
                     luaH_setint(L, t, int64(currentline), addr(v))
                     i++
                 }
@@ -4648,9 +5377,11 @@ def private collectvalidlines(var L : lua_State?; var f : Closure?) {
 
 [c_function]
 def private getfuncname(var L : lua_State?; var ci : CallInfo?; var name : uint8 ??) : uint8? {
-    if (ci != null && !((int(ci.callstatus) & 1 << 5) != 0)) {
+    // calling function is a known function?
+    if (ci != null && !((int(ci.callstatus) & CIST_TAIL) != 0)) {
         return funcnamefromcall(L, ci.previous, name)
     } else {
+        // no way to find a name
         return null
     }
 }
@@ -4661,15 +5392,15 @@ def private auxgetinfo(var L : lua_State?; var what : uint8?; var ar : lua_Debug
     {
         while (deref(what) != 0) {
             let _cond = int(deref(what))
-            if (_cond == 83) {
+            if (_cond == 'S') {
                 {
                     funcinfo(ar, f)
                 }
-            } elif (_cond == 108) {
+            } elif (_cond == 'l') {
                 {
                     ar.currentline = ci != null && !((int(ci.callstatus) & 1 << 1) != 0) ? getcurrentline(ci) : -1
                 }
-            } elif (_cond == 117) {
+            } elif (_cond == 'u') {
                 {
                     ar.nups = uint8(f == null ? 0 : int(f.c.nupvalues))
                     if (!(f != null && int(f.c.tt) == (6 | 0 << 4))) {
@@ -4680,21 +5411,22 @@ def private auxgetinfo(var L : lua_State?; var what : uint8?; var ar : lua_Debug
                         ar.nparams = f.l.p.numparams
                     }
                 }
-            } elif (_cond == 116) {
+            } elif (_cond == 't') {
                 {
-                    ar.istailcall = uint8(ci != null ? int(ci.callstatus) & 1 << 5 : 0)
+                    ar.istailcall = uint8(ci != null ? int(ci.callstatus) & CIST_TAIL : 0)
                 }
-            } elif (_cond == 110) {
+            } elif (_cond == 'n') {
                 {
                     ar.namewhat = getfuncname(L, ci, addr(ar.name))
                     if (ar.namewhat == null) {
+                        // not found
                         ar.namewhat = addr(c2das_empty[0])
                         ar.name = null
                     }
                 }
-            } elif (_cond == 114) {
+            } elif (_cond == 'r') {
                 {
-                    if (ci == null || !((int(ci.callstatus) & 1 << 8) != 0)) {
+                    if (ci == null || !((int(ci.callstatus) & CIST_TRAN) != 0)) {
                         ar.ntransfer = uint16(0)
                         ar.ftransfer = ar.ntransfer
                     } else {
@@ -4702,8 +5434,10 @@ def private auxgetinfo(var L : lua_State?; var what : uint8?; var ar : lua_Debug
                         ar.ntransfer = ci.u2.transferinfo.ntransfer
                     }
                 }
-            } elif (_cond == 76 || _cond == 102) {
+            } elif (_cond == 'L' || _cond == 'f') {
             } else {
+                // handled by lua_getinfo
+                // invalid option
                 status = 0
             }
             what = what + 1
@@ -4718,10 +5452,12 @@ def lua_getinfo(var L : lua_State?; var what : uint8?; var ar : lua_Debug?) : in
     var cl : Closure?
     var ci : CallInfo?
     var func : TValue?
-    if (int(deref(what)) == 62) {
+    if (int(deref(what)) == '>') {
         ci = null
         func = addr((L.top.p - 1).val)
+        // skip the '>'
         what = what + 1
+        // pop function
         L.top.p = L.top.p - 1
     } else {
         ci = ar.i_ci
@@ -4729,7 +5465,7 @@ def lua_getinfo(var L : lua_State?; var what : uint8?; var ar : lua_Debug?) : in
     }
     cl = int(func.tt_) == (6 | 0 << 4 | 1 << 6) || int(func.tt_) == (6 | 2 << 4 | 1 << 6) ? addr(reinterpret<GCUnion?>(func.value_.gc).cl) : null
     status = auxgetinfo(L, what, ar, cl, ci)
-    if (crt::strchr(what, 102) != null) {
+    if (crt::strchr(what, 'f') != null) {
         {
             var io1 : TValue? = addr(L.top.p.val)
             var io2 : TValue? = func
@@ -4740,26 +5476,33 @@ def lua_getinfo(var L : lua_State?; var what : uint8?; var ar : lua_Debug?) : in
             L.top.p = L.top.p + 1
         }
     }
-    if (crt::strchr(what, 76) != null) {
+    if (crt::strchr(what, 'L') != null) {
         collectvalidlines(L, cl)
     }
     return status
 }
 
 def private filterpc(pc : int; jmptarget : int) : int {
+    // is code conditional (inside a jump)?
     if (pc < jmptarget) {
+        // cannot know who sets that register
         return -1
     } else {
+        // current position sets that register
         return pc
     }
 }
 
+// Try to find last instruction before 'lastpc' that modified register 'reg'.
 [c_function]
 def private findsetreg(var p : Proto?; var lastpc : int; reg : int) : int {
     var pc : int
+    // keep last instruction that changed 'reg'
     var setreg : int = -1
+    // any code before this address is conditional
     var jmptarget : int = 0
     if ((int(luaP_opmodes[int(enum_from_int(type<OpCode>, int(deref(p.code + lastpc) >> 0u & ~(~uint(0) << 7u) << 0u)))]) & 1 << 7) != 0) {
+        // previous instruction was not actually executed
         lastpc--
     }
     {
@@ -4768,31 +5511,39 @@ def private findsetreg(var p : Proto?; var lastpc : int; reg : int) : int {
             var i : uint = deref(p.code + pc)
             var op : OpCode = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
             var a : int = int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+            // true if current instruction changed 'reg'
             var change : int
             let _cond = op
             if (_cond == OpCode.OP_LOADNIL) {
                 {
+                    // set registers from 'a' to 'a+b'
                     var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
                     change = a <= reg && reg <= a + b ? 1 : 0
                 }
             } elif (_cond == OpCode.OP_TFORCALL) {
                 {
+                    // affect all regs above its base
                     change = reg >= a + 2 ? 1 : 0
                 }
             } elif (_cond == OpCode.OP_CALL || _cond == OpCode.OP_TAILCALL) {
                 {
+                    // affect all registers above base
                     change = reg >= a ? 1 : 0
                 }
             } elif (_cond == OpCode.OP_JMP) {
                 {
+                    // doesn't change registers, but changes 'jmptarget'
                     var b : int = int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1)
                     var dest : int = pc + 1 + b
+                    // jump does not skip 'lastpc' and is larger than current one?
                     if (dest <= lastpc && dest > jmptarget) {
+                        // update 'jmptarget'
                         jmptarget = dest
                     }
                     change = 0
                 }
             } else {
+                // any instruction that sets A
                 change = (int(luaP_opmodes[int(op)]) & 1 << 3) != 0 && reg == a ? 1 : 0
             }
             if (change != 0) {
@@ -4804,6 +5555,7 @@ def private findsetreg(var p : Proto?; var lastpc : int; reg : int) : int {
     return setreg
 }
 
+// Find a "name" for the constant 'c'.
 [c_function]
 def private kname(var p : Proto?; index : int; var name : uint8 ??) : uint8? {
     var kvalue : TValue? = addr(deref(p.k + index))
@@ -4820,19 +5572,24 @@ def private kname(var p : Proto?; index : int; var name : uint8 ??) : uint8? {
 def private basicgetobjname(var p : Proto?; var ppc : int?; reg : int; var name : uint8 ??) : uint8? {
     var pc : int = deref(ppc)
     deref(name) = luaF_getlocalname(p, reg + 1, pc)
+    // is a local?
     if (deref(name) != null) {
         return addr(strlocal[0])
     }
+    // else try symbolic execution
     pc = findsetreg(p, pc, reg)
     deref(ppc) = pc
+    // could find instruction?
     if (pc != -1) {
         var i : uint = deref(p.code + pc)
         var op : OpCode = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
         let _cond = op
         if (_cond == OpCode.OP_MOVE) {
             {
+                // move from 'b' to 'a'
                 var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
                 if (b < int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)) {
+                    // get name for 'b'
                     return basicgetobjname(p, ppc, b, name)
                 }
             }
@@ -4848,58 +5605,80 @@ def private basicgetobjname(var p : Proto?; var ppc : int?; reg : int; var name 
         } else {
         }
     }
+    // could not find reasonable name
     return null
 }
 
+// Find a "name" for the register 'c'.
 [c_function]
 def private rname(var p : Proto?; var pc : int; c : int; var name : uint8 ??) {
+    // search for 'c'
     var what : uint8? = basicgetobjname(p, addr(pc), c, name)
-    if (!(what != null && int(deref(what)) == 99)) {
+    // did not find a constant name?
+    if (!(what != null && int(deref(what)) == 'c')) {
         deref(name) = reinterpret<uint8?>("?")
     }
 }
 
+// Find a "name" for a 'C' value in an RK instruction.
 def private rkname(var p : Proto?; pc : int; i : uint; var name : uint8 ??) {
+    // key index
     var c : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
-    if (int(i >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u) != 0) {
+    // is 'c' a constant?
+    if ((i >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u) != 0) {
         kname(p, c, name)
     } else {
+        // 'c' is a register
         rname(p, pc, c, name)
     }
 }
 
+// Check whether table being indexed by instruction 'i' is the
+// environment '_ENV'. If the table is an upvalue, get its name;
+// otherwise, find some "name" for the table and check whether
+// that name is the name of a local variable (and not, for instance,
+// a string). Then check that, if there is a name, it is '_ENV'.
 [c_function]
 def private isEnv(var p : Proto?; var pc : int; i : uint; isup : int) : uint8? {
+    // table index
     var t : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
+    // name of indexed variable
     var name : uint8?
+    // is 't' an upvalue?
     if (isup != 0) {
         name = upvalname(p, t)
     } else {
+        // 't' is a register
         var what : uint8? = basicgetobjname(p, addr(pc), t, addr(name))
         if (intptr(what) != intptr(addr(strlocal[0])) && intptr(what) != intptr(addr(strupval[0]))) {
+            // cannot be the variable _ENV
             name = null
         }
     }
     return name != null && crt::strcmp(name, reinterpret<uint8?>("_ENV")) == 0 ? reinterpret<uint8?>("global") : reinterpret<uint8?>("field")
 }
 
+// Extend 'basicgetobjname' to handle table accesses
 [c_function]
 def private getobjname(var p : Proto?; var lastpc : int; reg : int; var name : uint8 ??) : uint8? {
     var kind : uint8? = basicgetobjname(p, addr(lastpc), reg, name)
     if (kind != null) {
         return kind
     } elif (lastpc != -1) {
+        // could find instruction?
         var i : uint = deref(p.code + lastpc)
         var op : OpCode = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
         let _cond = op
         if (_cond == OpCode.OP_GETTABUP) {
             {
+                // key index
                 var k : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
                 kname(p, k, name)
                 return isEnv(p, lastpc, i, 1)
             }
         } elif (_cond == OpCode.OP_GETTABLE) {
             {
+                // key index
                 var k : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
                 rname(p, lastpc, k, name)
                 return isEnv(p, lastpc, i, 0)
@@ -4911,6 +5690,7 @@ def private getobjname(var p : Proto?; var lastpc : int; reg : int; var name : u
             }
         } elif (_cond == OpCode.OP_GETFIELD) {
             {
+                // key index
                 var k : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
                 kname(p, k, name)
                 return isEnv(p, lastpc, i, 0)
@@ -4923,22 +5703,33 @@ def private getobjname(var p : Proto?; var lastpc : int; reg : int; var name : u
         } else {
         }
     }
+    // go through to return NULL
+    // could not find reasonable name
     return null
 }
 
+// Try to find a name for a function based on the code that called it.
+// (Only works when function was called by a Lua function.)
+// Returns what the name is (e.g., "for iterator", "method",
+// "metamethod") and sets '*name' to point to the name.
 [c_function]
 def private funcnamefromcode(var L : lua_State?; var p : Proto?; pc : int; var name : uint8 ??) : uint8? {
+    // (initial value avoids warnings)
     var tm : TMS = TMS.TM_INDEX
+    // calling instruction
     var i : uint = deref(p.code + pc)
     let _cond = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
     if (_cond == OpCode.OP_CALL || _cond == OpCode.OP_TAILCALL) {
+        // get function name
         return getobjname(p, pc, int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u), name)
     } elif (_cond == OpCode.OP_TFORCALL) {
         {
+            // for iterator
             deref(name) = reinterpret<uint8?>("for iterator")
             return reinterpret<uint8?>("for iterator")
         }
     } elif (_cond == OpCode.OP_SELF || _cond == OpCode.OP_GETTABUP || _cond == OpCode.OP_GETTABLE || _cond == OpCode.OP_GETI || _cond == OpCode.OP_GETFIELD) {
+        // other instructions can do calls through metamethods
         tm = TMS.TM_INDEX
     } elif (_cond == OpCode.OP_SETTABUP || _cond == OpCode.OP_SETTABLE || _cond == OpCode.OP_SETI || _cond == OpCode.OP_SETFIELD) {
         tm = TMS.TM_NEWINDEX
@@ -4957,25 +5748,31 @@ def private funcnamefromcode(var L : lua_State?; var p : Proto?; pc : int; var n
     } elif (_cond == OpCode.OP_EQ) {
         tm = TMS.TM_EQ
     } elif (_cond == OpCode.OP_LT || _cond == OpCode.OP_LTI || _cond == OpCode.OP_GTI) {
+        // no cases for OP_EQI and OP_EQK, as they don't call metamethods
         tm = TMS.TM_LT
     } elif (_cond == OpCode.OP_LE || _cond == OpCode.OP_LEI || _cond == OpCode.OP_GEI) {
         tm = TMS.TM_LE
     } elif (_cond == OpCode.OP_CLOSE || _cond == OpCode.OP_RETURN) {
         tm = TMS.TM_CLOSE
     } else {
+        // cannot find a reasonable name
         return null
     }
     deref(name) = addr(L.l_G.tmname[int(tm)].contents[0]) + 2
     return reinterpret<uint8?>("metamethod")
 }
 
+// Try to find a name for a function based on how it was called.
 [c_function]
 def private funcnamefromcall(var L : lua_State?; var ci : CallInfo?; var name : uint8 ??) : uint8? {
-    if ((int(ci.callstatus) & 1 << 3) != 0) {
+    // was it called inside a hook?
+    if ((int(ci.callstatus) & CIST_HOOKED) != 0) {
         deref(name) = reinterpret<uint8?>("?")
         return reinterpret<uint8?>("hook")
-    } elif ((int(ci.callstatus) & 1 << 7) != 0) {
+    } elif ((int(ci.callstatus) & CIST_FIN) != 0) {
+        // was it called as a finalizer?
         deref(name) = reinterpret<uint8?>("__gc")
+        // report it as such
         return reinterpret<uint8?>("metamethod")
     } elif (!((int(ci.callstatus) & 1 << 1) != 0)) {
         return funcnamefromcode(L, addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p, currentpc(ci), name)
@@ -4984,6 +5781,10 @@ def private funcnamefromcall(var L : lua_State?; var ci : CallInfo?; var name : 
     }
 }
 
+// Check whether pointer 'o' points to some value in the stack frame of
+// the current function and, if so, returns its index. Because 'o' may
+// not point to a value in this stack, we cannot compare it with the
+// region boundaries (undefined behavior in ISO C).
 [c_function]
 def private instack(var ci : CallInfo?; var o : TValue?) : int {
     var pos : int
@@ -4997,9 +5798,13 @@ def private instack(var ci : CallInfo?; var o : TValue?) : int {
             pos++
         }
     }
+    // not found
     return -1
 }
 
+// Checks whether value 'o' came from an upvalue. (That can only happen
+// with instructions OP_GETTABUP/OP_SETTABUP, which operate directly on
+// upvalues.)
 [c_function]
 def private getupvalname(var ci : CallInfo?; var o : TValue?; var name : uint8 ??) : uint8? {
     var c : LClosure? = addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l)
@@ -5020,21 +5825,29 @@ def private getupvalname(var ci : CallInfo?; var o : TValue?; var name : uint8 ?
 [c_function]
 def private formatvarinfo(var L : lua_State?; var kind : uint8?; var name : uint8?) : uint8? {
     if (kind == null) {
+        // no information
         return addr(c2das_empty[0])
     } else {
         return luaO_pushfstring`va(L, reinterpret<uint8?>(" (%s '%s')"), (kind, name))
     }
 }
 
+// Build a string with a "description" for the value 'o', such as
+// "variable 'x'" or "upvalue 'y'".
 [c_function]
 def private varinfo(var L : lua_State?; var o : TValue?) : uint8? {
     var ci : CallInfo? = L.ci
+    // to avoid warnings
     var name : uint8? = null
     var kind : uint8? = null
     if (!((int(ci.callstatus) & 1 << 1) != 0)) {
+        // check whether 'o' is an upvalue
         kind = getupvalname(ci, o, addr(name))
+        // not an upvalue?
         if (!(kind != null)) {
+            // try a register
             var reg : int = instack(ci, o)
+            // is 'o' a register?
             if (reg >= 0) {
                 kind = getobjname(addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p, currentpc(ci), reg, addr(name))
             }
@@ -5043,19 +5856,26 @@ def private varinfo(var L : lua_State?; var o : TValue?) : uint8? {
     return formatvarinfo(L, kind, name)
 }
 
+// Raise a type error
 [c_function]
 def private typeerror(var L : lua_State?; var o : TValue?; var op : uint8?; var extra : uint8?) {
     var t : uint8? = luaT_objtypename(L, o)
     luaG_runerror`va(L, reinterpret<uint8?>("attempt to %s a %s value%s"), (op, t, extra))
 }
 
+// Raise a type error with "standard" information about the faulty
+// object 'o' (using 'varinfo').
 def luaG_typeerror(var L : lua_State?; var o : TValue?; var op : uint8?) {
     typeerror(L, o, op, varinfo(L, o))
 }
 
+// Raise an error for calling a non-callable object. Try to find a name
+// for the object based on how it was called ('funcnamefromcall'); if it
+// cannot get a name there, try 'varinfo'.
 [c_function]
 def luaG_callerror(var L : lua_State?; var o : TValue?) {
     var ci : CallInfo? = L.ci
+    // to avoid warnings
     var name : uint8? = null
     var kind : uint8? = funcnamefromcall(L, ci, addr(name))
     var extra : uint8? = kind != null ? formatvarinfo(L, kind, name) : varinfo(L, o)
@@ -5076,12 +5896,15 @@ def luaG_concaterror(var L : lua_State?; var p1 : TValue?; var p2 : TValue?) {
 }
 
 def luaG_opinterror(var L : lua_State?; var p1 : TValue?; var p2 : TValue?; var msg : uint8?) {
+    // first operand is wrong?
     if (!((int(p1.tt_) & 15) == 3)) {
+        // now second is wrong
         p2 = p1
     }
     luaG_typeerror(L, p2, msg)
 }
 
+// Error when both values are convertible to numbers, but not to integers
 [c_function]
 def luaG_tointerror(var L : lua_State?; var p1 : TValue?; var p2 : TValue?) {
     var temp : int64
@@ -5102,13 +5925,15 @@ def luaG_ordererror(var L : lua_State?; var p1 : TValue?; var p2 : TValue?) {
     }
 }
 
+// add src:line information to 'msg'
 [c_function]
 def luaG_addinfo(var L : lua_State?; var msg : uint8?; var src : TString?; line : int) : uint8? {
     var buff : uint8[60]
     if (src != null) {
         luaO_chunkid(addr(buff[0]), addr(src.contents[0]), int(src.shrlen) != 255 ? uint64(src.shrlen) : src.u.lnglen)
     } else {
-        buff[0] = uint8(63)
+        // no source available; use "?" instead
+        buff[0] = uint8('?')
         buff[1] = uint8(0)
     }
     return luaO_pushfstring`va(L, reinterpret<uint8?>("%s:%d: %s"), (addr(buff[0]), line, msg))
@@ -5116,24 +5941,29 @@ def luaG_addinfo(var L : lua_State?; var msg : uint8?; var src : TString?; line 
 
 [c_function]
 def luaG_errormsg(var L : lua_State?) {
+    // is there an error handling function?
     if (L.errfunc != int64(0)) {
         var errfunc : StackValue? = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + L.errfunc)
         {
+            // move argument
             var io1 : TValue? = addr(L.top.p.val)
             var io2 : TValue? = addr((L.top.p - 1).val)
             io1.value_ = io2.value_
             io1.tt_ = io2.tt_
         }
         {
+            // push function
             var io1 : TValue? = addr((L.top.p - 1).val)
             var io2 : TValue? = addr(errfunc.val)
             io1.value_ = io2.value_
             io1.tt_ = io2.tt_
         }
+        // assume EXTRA_STACK
         L.top.p = L.top.p + 1
+        // call it
         luaD_callnoyield(L, L.top.p - 2, 1)
     }
-    luaD_throw(L, 2)
+    luaD_throw(L, LUA_ERRRUN)
 }
 
 [c_function, variadic]
@@ -5142,15 +5972,19 @@ def luaG_runerror(var L : lua_State?; var fmt : uint8?; va : va_args) {
     var msg : uint8?
     var argp : CVaCursor
     {
+        // error message uses memory
         if (L.l_G.GCdebt > int64(0)) {
             luaC_step(L)
         }
     }
     argp = va_begin(va)
+    // format message
     msg = luaO_pushvfstring(L, fmt, argp)
+    // if Lua function, add source:line information
     if (!((int(ci.callstatus) & 1 << 1) != 0)) {
         luaG_addinfo(L, msg, addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p.source, getcurrentline(ci))
         {
+            // remove 'msg'
             var io1 : TValue? = addr((L.top.p - 2).val)
             var io2 : TValue? = addr((L.top.p - 1).val)
             io1.value_ = io2.value_
@@ -5161,95 +5995,152 @@ def luaG_runerror(var L : lua_State?; var fmt : uint8?; va : va_args) {
     luaG_errormsg(L)
 }
 
+// Check whether new instruction 'newpc' is in a different line from
+// previous instruction 'oldpc'. More often than not, 'newpc' is only
+// one or a few instructions after 'oldpc' (it must be after, see
+// caller), so try to avoid calling 'luaG_getfuncline'. If they are
+// too far apart, there is a good chance of a ABSLINEINFO in the way,
+// so it goes directly to 'luaG_getfuncline'.
 [c_function]
 def private changedline(var p : Proto?; oldpc : int; newpc : int) : int {
+    // no debug information?
     if (p.lineinfo == null) {
         return 0
     }
-    if (newpc - oldpc < 128 / 2) {
+    // not too far apart?
+    if (newpc - oldpc < MAXIWTHABS / 2) {
+        // line difference
         var delta : int = 0
         var pc : int = oldpc
         {
             while (true) {
                 pc++
                 var lineinfo : int = int(deref(p.lineinfo + pc))
-                if (lineinfo == -128) {
+                if (lineinfo == ABSLINEINFO) {
+                    // cannot compute delta; fall through
                     break
                 }
                 delta += lineinfo
                 if (pc == newpc) {
+                    // delta computed successfully
                     return delta != 0 ? 1 : 0
                 }
             }
         }
     }
+    // either instructions are too far apart or there is an absolute line
+    // info in the way; compute line difference explicitly
     return luaG_getfuncline(p, oldpc) != luaG_getfuncline(p, newpc) ? 1 : 0
 }
 
+// Traces Lua calls. If code is running the first instruction of a function,
+// and function is not vararg, and it is not coming from an yield,
+// calls 'luaD_hookcall'. (Vararg functions will call 'luaD_hookcall'
+// after adjusting its variable arguments; otherwise, they could call
+// a line/count hook before the call hook. Functions coming from
+// an yield already called 'luaD_hookcall' before yielding.)
 [c_function]
 def luaG_tracecall(var L : lua_State?) : int {
     var ci : CallInfo? = L.ci
     var p : Proto? = addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p
+    // ensure hooks will be checked
     c_volatile_store(ci.u.l.trap, 1)
+    // first instruction (not resuming)?
     if (intptr(ci.u.l.savedpc) == intptr(reinterpret<uint?>(p.code))) {
         if (p.is_vararg != 0) {
+            // hooks will start at VARARGPREP instruction
             return 0
-        } elif (!((int(ci.callstatus) & 1 << 6) != 0)) {
+        } elif (!((int(ci.callstatus) & CIST_HOOKYIELD) != 0)) {
+            // not yieded?
+            // check 'call' hook
             luaD_hookcall(L, ci)
         }
     }
+    // keep 'trap' on
     return 1
 }
 
+// Traces the execution of a Lua function. Called before the execution
+// of each opcode, when debug is on. 'L->oldpc' stores the last
+// instruction traced, to detect line changes. When entering a new
+// function, 'npci' will be zero and will test as a new line whatever
+// the value of 'oldpc'. Some exceptional conditions may return to
+// a function without setting 'oldpc'. In that case, 'oldpc' may be
+// invalid; if so, use zero as a valid value. (A wrong but valid 'oldpc'
+// at most causes an extra call to a line hook.)
+// This function is not "Protected" when called, so it should correct
+// 'L->top.p' before calling anything that can run the GC.
 [c_function]
 def luaG_traceexec(var L : lua_State?; var pc : uint?) : int {
     var ci : CallInfo? = L.ci
     var mask : uint8 = uint8(c_volatile_load(L.hookmask))
     var p : Proto? = addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p
     var counthook : int
-    if (!((int(mask) & (1 << 2 | 1 << 3)) != 0)) {
+    // no hooks?
+    if (!((int(mask) & (LUA_MASKLINE | LUA_MASKCOUNT)) != 0)) {
+        // don't need to stop again
         c_volatile_store(ci.u.l.trap, 0)
+        // turn off 'trap'
         return 0
     }
+    // reference is always next instruction
     pc = pc + 1
+    // save 'pc'
     ci.u.l.savedpc = pc
-    var _t0 = (int(mask) & 1 << 3) != 0
+    var _t0 = (int(mask) & LUA_MASKCOUNT) != 0
     if (_t0) {
         L.hookcount--
         _t0 = L.hookcount == 0
     }
     counthook = _t0 ? 1 : 0
     if (counthook != 0) {
+        // reset count
         L.hookcount = L.basehookcount
-    } elif (!((int(mask) & 1 << 2) != 0)) {
+    } elif (!((int(mask) & LUA_MASKLINE) != 0)) {
+        // no line hook and count != 0; nothing to be done now
         return 1
     }
-    if ((int(ci.callstatus) & 1 << 6) != 0) {
-        ci.callstatus = uint16(int(ci.callstatus) & ~(1 << 6))
+    // hook yielded last time?
+    if ((int(ci.callstatus) & CIST_HOOKYIELD) != 0) {
+        // erase mark
+        ci.callstatus = uint16(int(ci.callstatus) & ~CIST_HOOKYIELD)
+        // do not call hook again (VM yielded, so it did not move)
         return 1
     }
+    // top not being used?
     if (!((int(luaP_opmodes[int(enum_from_int(type<OpCode>, int(deref(ci.u.l.savedpc - 1) >> 0u & ~(~uint(0) << 7u) << 0u)))]) & 1 << 5) != 0 && int(deref(ci.u.l.savedpc - 1) >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u) == 0)) {
+        // correct top
         L.top.p = ci.top.p
     }
     if (counthook != 0) {
-        luaD_hook(L, 3, -1, 0, 0)
+        // call count hook
+        luaD_hook(L, LUA_HOOKCOUNT, -1, 0, 0)
     }
-    if ((int(mask) & 1 << 2) != 0) {
+    if ((int(mask) & LUA_MASKLINE) != 0) {
+        // 'L->oldpc' may be invalid; use zero in this case
         var oldpc : int = L.oldpc < p.sizecode ? L.oldpc : 0
         var npci : int = int(int64(pc - p.code)) - 1
+        // call hook when jump back (loop),
         if (npci <= oldpc || changedline(p, oldpc, npci) != 0) {
+            // or when enter new line
             var newline : int = luaG_getfuncline(p, npci)
-            luaD_hook(L, 2, newline, 0, 0)
+            // call line hook
+            luaD_hook(L, LUA_HOOKLINE, newline, 0, 0)
         }
+        // 'pc' of last call to line hook
         L.oldpc = npci
     }
-    if (int(L.status) == 1) {
+    // did hook yield?
+    if (int(L.status) == LUA_YIELD) {
         if (counthook != 0) {
+            // undo decrement to zero
             L.hookcount = 1
         }
-        ci.callstatus = uint16(int(ci.callstatus) | 1 << 6)
-        luaD_throw(L, 1)
+        // mark that it yielded
+        ci.callstatus = uint16(int(ci.callstatus) | CIST_HOOKYIELD)
+        luaD_throw(L, LUA_YIELD)
     }
+    // keep 'trap' on
     return 1
 }
 
@@ -5259,6 +6150,8 @@ def luaD_seterrorobj(var L : lua_State?; errcode : int; var oldtop : StackValue?
     if (_cond == 4) {
         {
             {
+                // memory error?
+                // reuse preregistered msg.
                 var io : TValue? = addr(oldtop.val)
                 var x_ : TString? = L.l_G.memerrmsg
                 io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
@@ -5267,11 +6160,15 @@ def luaD_seterrorobj(var L : lua_State?; errcode : int; var oldtop : StackValue?
         }
     } elif (_cond == 0) {
         {
+            // special case only for closing upvalues
+            // no error message
             addr(oldtop.val).tt_ = uint8(0 | 0 << 4)
         }
     } else {
         {
+            // real error
             {
+                // error message on current top
                 var io1 : TValue? = addr(oldtop.val)
                 var io2 : TValue? = addr((L.top.p - 1).val)
                 io1.value_ = io2.value_
@@ -5284,15 +6181,22 @@ def luaD_seterrorobj(var L : lua_State?; errcode : int; var oldtop : StackValue?
 
 [c_function]
 def luaD_throw(var L : lua_State?; var errcode : int) {
+    // thread has an error handler?
     if (L.errorJmp != null) {
+        // set status
         c_volatile_store(L.errorJmp.status, errcode)
+        // jump to it
         c_longjmp(addr(L.errorJmp.b), 1)
     } else {
+        // thread has no error handler
         var g : global_State? = L.l_G
+        // close all upvalues
         errcode = luaE_resetthread(L, errcode)
         L.status = uint8(errcode)
+        // main thread has a handler?
         if (g.mainthread.errorJmp != null) {
             {
+                // copy error obj.
                 var _t0 = g.mainthread.top.p
                 g.mainthread.top.p = g.mainthread.top.p + 1
                 var io1 : TValue? = addr(_t0.val)
@@ -5300,9 +6204,13 @@ def luaD_throw(var L : lua_State?; var errcode : int) {
                 io1.value_ = io2.value_
                 io1.tt_ = io2.tt_
             }
+            // re-throw in main thread
             luaD_throw(g.mainthread, errcode)
         } else {
+            // no handler at all; abort
+            // panic function?
             if (g._c_panic != null) {
+                // call panic function (last chance to jump out)
                 invoke(g._c_panic, L)
             }
             c_abort()
@@ -5314,32 +6222,25 @@ def luaD_throw(var L : lua_State?; var errcode : int) {
 def luaD_rawrunprotected(var L : lua_State?; f : function<(var a0 : lua_State?; var a1 : void?) : void>; var ud : void?) : int {
     var oldnCcalls : uint = L.nCcalls
     var lj : lua_longjmp
-    c_volatile_store(lj.status, 0)
+    c_volatile_store(lj.status, LUA_OK)
+    // chain new error handler
     lj.previous = L.errorJmp
     L.errorJmp = addr(lj)
-    var _sj_run = true
-    var _sj_val = 0
-    while (_sj_run) {
-        _sj_run = false
-        try {
-            if (_sj_val == 0) {
-                invoke(f, L, ud)
-            }
-            L.errorJmp = lj.previous
-            L.nCcalls = oldnCcalls
-            return c_volatile_load(lj.status)
-        } recover {
-            if (c_jmp_target != addr(addr(lj).b)) {
-                panic("longjmp")
-            }
-            c_jmp_target = null
-            _sj_val = addr(lj).b.val
-            _sj_run = true
+    try {
+        invoke(f, L, ud)
+    } recover {
+        if (c_jmp_target != addr(addr(lj).b)) {
+            panic("longjmp")
         }
+        c_jmp_target = null
     }
-    return 0
+    // restore old error handler
+    L.errorJmp = lj.previous
+    L.nCcalls = oldnCcalls
+    return c_volatile_load(lj.status)
 }
 
+// Change all pointers to the stack into offsets.
 [c_function]
 def private relstack(var L : lua_State?) {
     var ci : CallInfo?
@@ -5363,6 +6264,7 @@ def private relstack(var L : lua_State?) {
     }
 }
 
+// Change back all offsets into pointers.
 [c_function]
 def private correctstack(var L : lua_State?) {
     var ci : CallInfo?
@@ -5382,6 +6284,7 @@ def private correctstack(var L : lua_State?) {
             ci.top.p = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + ci.top.offset)
             ci.func.p = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + ci.func.offset)
             if (!((int(ci.callstatus) & 1 << 1) != 0)) {
+                // signal to update 'trap' in 'luaV_execute'
                 c_volatile_store(ci.u.l.trap, 1)
             }
             ci = ci.previous
@@ -5389,6 +6292,7 @@ def private correctstack(var L : lua_State?) {
     }
 }
 
+// raise an error while running the message handler
 [c_function]
 def luaD_errerr(var L : lua_State?) {
     var msg : TString? = luaS_newlstr(L, reinterpret<uint8?>("error in error handling"), uint64(typeinfo sizeof(type<uint8[24]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
@@ -5398,34 +6302,51 @@ def luaD_errerr(var L : lua_State?) {
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
         io.tt_ = uint8(int(x_.tt) | 1 << 6)
     }
+    // assume EXTRA_STACK
     L.top.p = L.top.p + 1
-    luaD_throw(L, 5)
+    luaD_throw(L, LUA_ERRERR)
 }
 
+// Reallocate the stack to a new size, correcting all pointers into it.
+// In ISO C, any pointer use after the pointer has been deallocated is
+// undefined behavior. So, before the reallocation, all pointers are
+// changed to offsets, and after the reallocation they are changed back
+// to pointers. As during the reallocation the pointers are invalid, the
+// reallocation cannot run emergency collections.
+// In case of allocation error, raise an error or return false according
+// to 'raiseerror'.
 [c_function]
 def luaD_reallocstack(var L : lua_State?; newsize : int; raiseerror : int) : int {
     var oldsize : int = int(int64(L.stack_last.p - L.stack.p))
     var i : int
     var newstack : StackValue?
     var oldgcstop : int = int(L.l_G.gcstopem)
+    // change pointers to offsets
     relstack(L)
+    // stop emergency collection
     L.l_G.gcstopem = uint8(1)
     newstack = reinterpret<StackValue?>(luaM_realloc_(L, reinterpret<void?>(L.stack.p), uint64(oldsize + 5) * uint64(typeinfo sizeof(type<StackValue>)), uint64(newsize + 5) * uint64(typeinfo sizeof(type<StackValue>))))
+    // restore emergency collection
     L.l_G.gcstopem = uint8(oldgcstop)
-    if (int64((newstack == null ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // reallocation failed?
+    if (newstack == null) {
+        // change offsets back to pointers
         correctstack(L)
         if (raiseerror != 0) {
             luaD_throw(L, 4)
         } else {
+            // do not raise an error
             return 0
         }
     }
     L.stack.p = newstack
+    // change offsets back to pointers
     correctstack(L)
     L.stack_last.p = L.stack.p + newsize
     {
-        i = oldsize + 5
-        while (i < newsize + 5) {
+        i = oldsize + EXTRA_STACK
+        while (i < newsize + EXTRA_STACK) {
+            // erase new segment
             addr((newstack + i).val).tt_ = uint8(0 | 0 << 4)
             i++
         }
@@ -5433,34 +6354,49 @@ def luaD_reallocstack(var L : lua_State?; newsize : int; raiseerror : int) : int
     return 1
 }
 
+// Try to grow the stack by at least 'n' elements. When 'raiseerror'
+// is true, raises any error; otherwise, return 0 in case of errors.
 [c_function]
 def luaD_growstack(var L : lua_State?; n : int; raiseerror : int) : int {
     var size : int = int(int64(L.stack_last.p - L.stack.p))
-    if (int64((size > 1000000 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (size > 1000000) {
+        // if stack is larger than maximum, thread is already using the
+        // extra space reserved for errors, that is, thread is handling
+        // a stack error; cannot grow further than that.
         if (raiseerror != 0) {
+            // error inside message handler
             luaD_errerr(L)
         }
+        // if not 'raiseerror', just signal it
         return 0
-    } elif (n < 1000000) {
+    } elif (n < LUAI_MAXSTACK) {
+        // avoids arithmetic overflows
+        // tentative new size
         var newsize : int = 2 * size
         var needed : int = int(int64(L.top.p - L.stack.p)) + n
-        if (newsize > 1000000) {
-            newsize = 1000000
+        // cannot cross the limit
+        if (newsize > LUAI_MAXSTACK) {
+            newsize = LUAI_MAXSTACK
         }
+        // but must respect what was asked for
         if (newsize < needed) {
             newsize = needed
         }
-        if (int64((newsize <= 1000000 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+        if (newsize <= 1000000) {
             return luaD_reallocstack(L, newsize, raiseerror)
         }
     }
-    luaD_reallocstack(L, 1000000 + 200, raiseerror)
+    // else stack overflow
+    // add extra size to be able to handle the error message
+    luaD_reallocstack(L, ERRORSTACKSIZE, raiseerror)
     if (raiseerror != 0) {
         luaG_runerror`va(L, reinterpret<uint8?>("stack overflow"), VaNone())
     }
     return 0
 }
 
+// Compute how much of the stack is being used, by computing the
+// maximum top of all call frames in the stack and the current top.
 [c_function]
 def private stackinuse(var L : lua_State?) : int {
     var ci : CallInfo?
@@ -5475,61 +6411,86 @@ def private stackinuse(var L : lua_State?) : int {
             ci = ci.previous
         }
     }
+    // part of stack in use
     res = int(int64(lim - L.stack.p)) + 1
-    if (res < 20) {
-        res = 20
+    if (res < LUA_MINSTACK) {
+        // ensure a minimum size
+        res = LUA_MINSTACK
     }
     return res
 }
 
+// If stack size is more than 3 times the current use, reduce that size
+// to twice the current use. (So, the final stack size is at most 2/3 the
+// previous size, and half of its entries are empty.)
+// As a particular case, if stack was handling a stack overflow and now
+// it is not, 'max' (limited by LUAI_MAXSTACK) will be smaller than
+// stacksize (equal to ERRORSTACKSIZE in this case), and so the stack
+// will be reduced to a "regular" size.
 [c_function]
 def luaD_shrinkstack(var L : lua_State?) {
     var inuse : int = stackinuse(L)
-    var max : int = inuse > 1000000 / 3 ? 1000000 : inuse * 3
-    if (inuse <= 1000000 && int(int64(L.stack_last.p - L.stack.p)) > max) {
-        var nsize : int = inuse > 1000000 / 2 ? 1000000 : inuse * 2
+    var max : int = inuse > LUAI_MAXSTACK / 3 ? LUAI_MAXSTACK : inuse * 3
+    // if thread is currently not handling a stack overflow and its
+    // size is larger than maximum "reasonable" size, shrink it
+    if (inuse <= LUAI_MAXSTACK && int(int64(L.stack_last.p - L.stack.p)) > max) {
+        var nsize : int = inuse > LUAI_MAXSTACK / 2 ? LUAI_MAXSTACK : inuse * 2
+        // ok if that fails
         luaD_reallocstack(L, nsize, 0)
     } else {
+        // don't change stack
+        // (change only for debugging)
     }
+    // shrink CI list
     luaE_shrinkCI(L)
 }
 
 [c_function]
 def luaD_inctop(var L : lua_State?) {
-    if (int64((int64(L.stack_last.p - L.top.p) <= int64(1) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (int64(L.stack_last.p - L.top.p) <= int64(1)) {
         luaD_growstack(L, 1, 1)
     } else {
     }
     L.top.p = L.top.p + 1
 }
 
+// Call a hook for the given event. Make sure there is a hook to be
+// called. (Both 'L->hook' and 'L->hookmask', which trigger this
+// function, can be changed asynchronously by signals.)
 [c_function]
 def luaD_hook(var L : lua_State?; event : int; line : int; ftransfer : int; ntransfer : int) {
     var hook : function<(var a0 : lua_State?; var a1 : lua_Debug?) : void> = c_volatile_load(L.hook)
-    if (hook != null && int(L.allowhook) != 0) {
-        var mask : int = 1 << 3
+    // make sure there is a hook
+    if (hook != null && L.allowhook != 0) {
+        var mask : int = CIST_HOOKED
         var ci : CallInfo? = L.ci
+        // preserve original 'top'
         var top : int64 = int64(reinterpret<uint8?>(L.top.p) - reinterpret<uint8?>(L.stack.p))
+        // idem for 'ci->top'
         var ci_top : int64 = int64(reinterpret<uint8?>(ci.top.p) - reinterpret<uint8?>(L.stack.p))
         var ar : lua_Debug
         ar.event = event
         ar.currentline = line
         ar.i_ci = ci
         if (ntransfer != 0) {
-            mask |= 1 << 8
+            // 'ci' has transfer information
+            mask |= CIST_TRAN
             ci.u2.transferinfo.ftransfer = uint16(ftransfer)
             ci.u2.transferinfo.ntransfer = uint16(ntransfer)
         }
         if (!((int(ci.callstatus) & 1 << 1) != 0) && intptr(L.top.p) < intptr(ci.top.p)) {
+            // protect entire activation register
             L.top.p = ci.top.p
         }
-        if (int64((int64(L.stack_last.p - L.top.p) <= int64(20) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+        // ensure minimum stack size
+        if (int64(L.stack_last.p - L.top.p) <= int64(20)) {
             luaD_growstack(L, 20, 1)
         } else {
         }
-        if (intptr(ci.top.p) < intptr(L.top.p + 20)) {
-            ci.top.p = L.top.p + 20
+        if (intptr(ci.top.p) < intptr(L.top.p + LUA_MINSTACK)) {
+            ci.top.p = L.top.p + LUA_MINSTACK
         }
+        // cannot call hooks inside a hook
         L.allowhook = uint8(0)
         ci.callstatus = uint16(int(ci.callstatus) | mask)
         invoke(hook, L, addr(ar))
@@ -5540,22 +6501,35 @@ def luaD_hook(var L : lua_State?; event : int; line : int; ftransfer : int; ntra
     }
 }
 
+// Executes a call hook for Lua functions. This function is called
+// whenever 'hookmask' is not zero, so it checks whether call hooks are
+// active.
 [c_function]
 def luaD_hookcall(var L : lua_State?; var ci : CallInfo?) {
+    // set 'oldpc' for new function
     L.oldpc = 0
-    if ((c_volatile_load(L.hookmask) & 1 << 0) != 0) {
-        var event : int = (int(ci.callstatus) & 1 << 5) != 0 ? 4 : 0
+    // is call hook on?
+    if ((c_volatile_load(L.hookmask) & LUA_MASKCALL) != 0) {
+        var event : int = (int(ci.callstatus) & CIST_TAIL) != 0 ? LUA_HOOKTAILCALL : LUA_HOOKCALL
         var p : Proto? = addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p
+        // hooks assume 'pc' is already incremented
         ci.u.l.savedpc = ci.u.l.savedpc + 1
         luaD_hook(L, event, -1, 1, int(p.numparams))
+        // correct 'pc'
         ci.u.l.savedpc = ci.u.l.savedpc - 1
     }
 }
 
+// Executes a return hook for Lua and C functions and sets/corrects
+// 'oldpc'. (Note that this correction is needed by the line hook, so it
+// is done even when return hooks are off.)
 [c_function]
 def private rethook(var L : lua_State?; var ci : CallInfo?; nres : int) {
-    if ((c_volatile_load(L.hookmask) & 1 << 1) != 0) {
+    // is return hook on?
+    if ((c_volatile_load(L.hookmask) & LUA_MASKRET) != 0) {
+        // index of first result
         var firstres : StackValue? = L.top.p - nres
+        // correction for vararg functions
         var delta : int = 0
         var ftransfer : int
         if (!((int(ci.callstatus) & 1 << 1) != 0)) {
@@ -5564,22 +6538,29 @@ def private rethook(var L : lua_State?; var ci : CallInfo?; nres : int) {
                 delta = ci.u.l.nextraargs + int(p.numparams) + 1
             }
         }
+        // if vararg, back to virtual 'func'
         ci.func.p = ci.func.p + delta
         ftransfer = int(uint16(int64(firstres - ci.func.p)))
-        luaD_hook(L, 1, -1, ftransfer, nres)
+        // call it
+        luaD_hook(L, LUA_HOOKRET, -1, ftransfer, nres)
         ci.func.p = ci.func.p - delta
     }
     ci = ci.previous
     if (!((int(ci.callstatus) & 1 << 1) != 0)) {
+        // set 'oldpc'
         L.oldpc = int(int64(ci.u.l.savedpc - addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p.code)) - 1
     }
 }
 
+// Check whether 'func' has a '__call' metafield. If so, put it in the
+// stack, below original 'func', so that 'luaD_precall' can call it. Raise
+// an error if there is no '__call' metafield.
 [c_function]
 def private tryfuncTM(var L : lua_State?; var func : StackValue?) : StackValue? {
     var tm : TValue?
     var p : StackValue?
-    if (int64((int64(L.stack_last.p - L.top.p) <= int64(1) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // space for metamethod
+    if (int64(L.stack_last.p - L.top.p) <= int64(1)) {
         var t__ : int64 = int64(reinterpret<uint8?>(func) - reinterpret<uint8?>(L.stack.p))
         {
             if (L.l_G.GCdebt > int64(0)) {
@@ -5590,10 +6571,13 @@ def private tryfuncTM(var L : lua_State?; var func : StackValue?) : StackValue? 
         func = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + t__)
     } else {
     }
+    // (after previous GC)
     tm = luaT_gettmbyobj(L, addr(func.val), TMS.TM_CALL)
-    if (int64(((int(tm.tt_) & 15) == 0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if ((int(tm.tt_) & 15) == 0) {
+        // nothing to call
         luaG_callerror(L, addr(func.val))
     }
+    // open space for metamethod
     {
         p = L.top.p
         while (intptr(p) > intptr(func)) {
@@ -5604,8 +6588,10 @@ def private tryfuncTM(var L : lua_State?; var func : StackValue?) : StackValue? 
             p = p - 1
         }
     }
+    // stack space pre-allocated by the caller
     L.top.p = L.top.p + 1
     {
+        // metamethod is the new function to be called
         var io1 : TValue? = addr(func.val)
         var io2 : TValue? = tm
         io1.value_ = io2.value_
@@ -5614,18 +6600,29 @@ def private tryfuncTM(var L : lua_State?; var func : StackValue?) : StackValue? 
     return func
 }
 
+// Given 'nres' results at 'firstResult', move 'wanted' of them to 'res'.
+// Handle most typical cases (zero results for commands, one result for
+// expressions, multiple results for tail calls/single parameters)
+// separated.
 [c_function]
 def private moveresults(var L : lua_State?; var res : StackValue?; var nres : int; var wanted : int) {
     var firstresult : StackValue?
     var i : int
+    // handle typical cases separately
     let _cond = wanted
     if (_cond == 0) {
+        // no values needed
         L.top.p = res
         return
     } elif (_cond == 1) {
+        // one value needed
+        // no results?
         if (nres == 0) {
+            // adjust with nil
             addr(res.val).tt_ = uint8(0 | 0 << 4)
         } else {
+            // at least one result
+            // move it to proper place
             var io1 : TValue? = addr(res.val)
             var io2 : TValue? = addr((L.top.p - nres).val)
             io1.value_ = io2.value_
@@ -5634,28 +6631,40 @@ def private moveresults(var L : lua_State?; var res : StackValue?; var nres : in
         L.top.p = res + 1
         return
     } elif (_cond == -1) {
+        // we want all results
         wanted = nres
     } else {
+        // two/more results and/or to-be-closed variables
+        // to-be-closed variables?
         if (wanted < -1) {
-            L.ci.callstatus = uint16(int(L.ci.callstatus) | 1 << 9)
+            // in case of yields
+            L.ci.callstatus = uint16(int(L.ci.callstatus) | CIST_CLSRET)
             L.ci.u2.nres = nres
-            res = luaF_close(L, res, -1, 1)
-            L.ci.callstatus = uint16(int(L.ci.callstatus) & ~(1 << 9))
+            res = luaF_close(L, res, CLOSEKTOP, 1)
+            L.ci.callstatus = uint16(int(L.ci.callstatus) & ~CIST_CLSRET)
+            // if needed, call hook after '__close's
             if (c_volatile_load(L.hookmask) != 0) {
                 var savedres : int64 = int64(reinterpret<uint8?>(res) - reinterpret<uint8?>(L.stack.p))
                 rethook(L, L.ci, nres)
+                // hook can move stack
                 res = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + savedres)
             }
             wanted = -wanted - 3
-            if (wanted == -1) {
+            if (wanted == LUA_MULTRET) {
+                // we want all results
                 wanted = nres
             }
         }
     }
+    // generic case
+    // index of first result
     firstresult = L.top.p - nres
+    // extra results?
     if (nres > wanted) {
+        // don't need them
         nres = wanted
     }
+    // move all results to correct place
     {
         i = 0
         while (i < nres) {
@@ -5666,25 +6675,35 @@ def private moveresults(var L : lua_State?; var res : StackValue?; var nres : in
             i++
         }
     }
+    // complete wanted number of results
     {
         while (i < wanted) {
             addr((res + i).val).tt_ = uint8(0 | 0 << 4)
             i++
         }
     }
+    // top points after the last result
     L.top.p = res + wanted
 }
 
+// Finishes a function call: calls hook if necessary, moves current
+// number of results to proper place, and returns to previous call
+// info. If function has to close variables, hook must be called after
+// that.
 def luaD_poscall(var L : lua_State?; var ci : CallInfo?; nres : int) {
     var wanted : int = int(ci.nresults)
-    if (int64((c_volatile_load(L.hookmask) != 0 && !(wanted < -1) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (c_volatile_load(L.hookmask) != 0 && !(wanted < -1)) {
         rethook(L, ci, nres)
     }
+    // move results to proper place
     moveresults(L, ci.func.p, nres, wanted)
+    // function cannot be in any of these cases when returning
+    // back to caller (after closing variables)
     L.ci = ci.previous
 }
 
 def private prepCallInfo(var L : lua_State?; var func : StackValue?; nret : int; mask : int; var top : StackValue?) : CallInfo? {
+    // new frame
     L.ci = L.ci.next != null ? L.ci.next : luaE_extendCI(L)
     var ci : CallInfo? = L.ci
     ci.func.p = func
@@ -5694,11 +6713,14 @@ def private prepCallInfo(var L : lua_State?; var func : StackValue?; nret : int;
     return ci
 }
 
+// precall for C functions
 [c_function]
 def private precallC(var L : lua_State?; var func : StackValue?; nresults : int; f : function<(var a0 : lua_State?) : int>) : int {
+    // number of returns
     var n : int
     var ci : CallInfo?
-    if (int64((int64(L.stack_last.p - L.top.p) <= int64(20) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // ensure minimum stack size
+    if (int64(L.stack_last.p - L.top.p) <= int64(20)) {
         var t__ : int64 = int64(reinterpret<uint8?>(func) - reinterpret<uint8?>(L.stack.p))
         {
             if (L.l_G.GCdebt > int64(0)) {
@@ -5709,33 +6731,42 @@ def private precallC(var L : lua_State?; var func : StackValue?; nresults : int;
         func = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + t__)
     } else {
     }
-    ci = prepCallInfo(L, func, nresults, 1 << 1, L.top.p + 20)
+    ci = prepCallInfo(L, func, nresults, CIST_C, L.top.p + LUA_MINSTACK)
     L.ci = ci
-    if (int64((c_volatile_load(L.hookmask) & 1 << 0) != 0 ? 1 : 0) != 0) {
+    if ((c_volatile_load(L.hookmask) & 1 << 0) != 0) {
         var narg : int = int(int64(L.top.p - func)) - 1
-        luaD_hook(L, 0, -1, 1, narg)
+        luaD_hook(L, LUA_HOOKCALL, -1, 1, narg)
     }
+    // do the actual call
     n = invoke(f, L)
     luaD_poscall(L, ci, n)
     return n
 }
 
+// Prepare a function for a tail call, building its call info on top
+// of the current call info. 'narg1' is the number of arguments plus 1
+// (so that it includes the function itself). Return the number of
+// results, if it was a C function, or -1 for a Lua function.
 [c_function]
 def luaD_pretailcall(var L : lua_State?; var ci : CallInfo?; var func : StackValue?; var narg1 : int; delta : int) : int {
     label 1:  // retry
     c_label_end()
     let _cond = int(addr(func.val).tt_) & 63
     if (_cond == 38) {
-        return precallC(L, func, -1, addr(reinterpret<GCUnion?>(addr(func.val).value_.gc).cl.c).f)
+        // C closure
+        return precallC(L, func, LUA_MULTRET, addr(reinterpret<GCUnion?>(addr(func.val).value_.gc).cl.c).f)
     } elif (_cond == 22) {
-        return precallC(L, func, -1, addr(func.val).value_.f)
+        // light C function
+        return precallC(L, func, LUA_MULTRET, addr(func.val).value_.f)
     } elif (_cond == 6) {
         {
+            // Lua function
             var p : Proto? = addr(reinterpret<GCUnion?>(addr(func.val).value_.gc).cl.l).p
+            // frame size
             var fsize : int = int(p.maxstacksize)
             var nfixparams : int = int(p.numparams)
             var i : int
-            if (int64((int64(L.stack_last.p - L.top.p) <= int64(fsize - delta) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+            if (int64(L.stack_last.p - L.top.p) <= int64(fsize - delta)) {
                 var t__ : int64 = int64(reinterpret<uint8?>(func) - reinterpret<uint8?>(L.stack.p))
                 {
                     if (L.l_G.GCdebt > int64(0)) {
@@ -5746,7 +6777,9 @@ def luaD_pretailcall(var L : lua_State?; var ci : CallInfo?; var func : StackVal
                 func = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + t__)
             } else {
             }
+            // restore 'func' (if vararg)
             ci.func.p = ci.func.p - delta
+            // move down function and arguments
             {
                 i = 0
                 while (i < narg1) {
@@ -5757,48 +6790,68 @@ def luaD_pretailcall(var L : lua_State?; var ci : CallInfo?; var func : StackVal
                     i++
                 }
             }
+            // moved-down function
             func = ci.func.p
             {
                 while (narg1 <= nfixparams) {
+                    // complete missing arguments
                     addr((func + narg1).val).tt_ = uint8(0 | 0 << 4)
                     narg1++
                 }
             }
+            // top for new function
             ci.top.p = func + 1 + fsize
+            // starting point
             ci.u.l.savedpc = p.code
-            ci.callstatus = uint16(int(ci.callstatus) | 1 << 5)
+            ci.callstatus = uint16(int(ci.callstatus) | CIST_TAIL)
+            // set top
             L.top.p = func + narg1
             return -1
         }
     } else {
         {
+            // not a function
+            // try to get '__call' metamethod
             func = tryfuncTM(L, func)
+            // return luaD_pretailcall(L, ci, func, narg1 + 1, delta);
             narg1++
+            // try again
             goto label 1
         }
     }
     return 0
 }
 
+// Prepares the call to a function (C or Lua). For C functions, also do
+// the call. The function to be called is at '*func'. The arguments
+// are on the stack, right after the function. Returns the CallInfo
+// to be executed, if it was a Lua function. Otherwise (a C function)
+// returns NULL, with all the results on the stack, starting at the
+// original function position.
 [c_function]
 def luaD_precall(var L : lua_State?; var func : StackValue?; nresults : int) : CallInfo? {
     label 1:  // retry
     c_label_end()
     let _cond = int(addr(func.val).tt_) & 63
     if (_cond == 38) {
+        // C closure
         precallC(L, func, nresults, addr(reinterpret<GCUnion?>(addr(func.val).value_.gc).cl.c).f)
         return null
     } elif (_cond == 22) {
+        // light C function
         precallC(L, func, nresults, addr(func.val).value_.f)
         return null
     } elif (_cond == 6) {
         {
+            // Lua function
             var ci : CallInfo?
             var p : Proto? = addr(reinterpret<GCUnion?>(addr(func.val).value_.gc).cl.l).p
+            // number of real arguments
             var narg : int = int(int64(L.top.p - func)) - 1
             var nfixparams : int = int(p.numparams)
+            // frame size
             var fsize : int = int(p.maxstacksize)
-            if (int64((int64(L.stack_last.p - L.top.p) <= int64(fsize) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+            if (int64(L.stack_last.p - L.top.p) <= int64(fsize)) {
                 var t__ : int64 = int64(reinterpret<uint8?>(func) - reinterpret<uint8?>(L.stack.p))
                 {
                     if (L.l_G.GCdebt > int64(0)) {
@@ -5811,9 +6864,11 @@ def luaD_precall(var L : lua_State?; var func : StackValue?; nresults : int) : C
             }
             ci = prepCallInfo(L, func, nresults, 0, func + 1 + fsize)
             L.ci = ci
+            // starting point
             ci.u.l.savedpc = p.code
             {
                 while (narg < nfixparams) {
+                    // complete missing arguments
                     var _t0 = L.top.p
                     L.top.p = L.top.p + 1
                     addr(_t0.val).tt_ = uint8(0 | 0 << 4)
@@ -5824,19 +6879,30 @@ def luaD_precall(var L : lua_State?; var func : StackValue?; nresults : int) : C
         }
     } else {
         {
+            // not a function
+            // try to get '__call' metamethod
             func = tryfuncTM(L, func)
+            // return luaD_precall(L, func, nresults);
+            // try again with metamethod
             goto label 1
         }
     }
     return null
 }
 
+// Call a function (C or Lua) through C. 'inc' can be 1 (increment
+// number of recursive invocations in the C stack) or nyci (the same
+// plus increment number of non-yieldable calls).
+// This function can be called with some use of EXTRA_STACK, so it should
+// check the stack before doing anything else. 'luaD_precall' already
+// does that.
 [c_function]
 def private ccall(var L : lua_State?; var func : StackValue?; nResults : int; inc : uint) {
     var ci : CallInfo?
     L.nCcalls += inc
-    if (int64(((L.nCcalls & uint(65535)) >= uint(200) ? 1 : 0) != 0 ? 1 : 0) != 0) {
-        if (int64((int64(L.stack_last.p - L.top.p) <= int64(0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if ((L.nCcalls & uint(65535)) >= uint(200)) {
+        // free any use of EXTRA_STACK
+        if (int64(L.stack_last.p - L.top.p) <= int64(0)) {
             var t__ : int64 = int64(reinterpret<uint8?>(func) - reinterpret<uint8?>(L.stack.p))
             luaD_growstack(L, 0, 1)
             func = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + t__)
@@ -5844,95 +6910,164 @@ def private ccall(var L : lua_State?; var func : StackValue?; nResults : int; in
         }
         luaE_checkcstack(L)
     }
+    // Lua function?
     ci = luaD_precall(L, func, nResults)
     if (ci != null) {
-        ci.callstatus = uint16(1 << 2)
+        // mark that it is a "fresh" execute
+        ci.callstatus = uint16(CIST_FRESH)
+        // call it
         luaV_execute(L, ci)
     }
     L.nCcalls -= inc
 }
 
+// External interface for 'ccall'
 def luaD_call(var L : lua_State?; var func : StackValue?; nResults : int) {
     ccall(L, func, nResults, uint(1))
 }
 
+// Similar to 'luaD_call', but does not allow yields during the call.
 def luaD_callnoyield(var L : lua_State?; var func : StackValue?; nResults : int) {
-    ccall(L, func, nResults, uint(65536 | 1))
+    ccall(L, func, nResults, uint(nyci))
 }
 
+// Finish the job of 'lua_pcallk' after it was interrupted by an yield.
+// (The caller, 'finishCcall', does the final call to 'adjustresults'.)
+// The main job is to complete the 'luaD_pcall' called by 'lua_pcallk'.
+// If a '__close' method yields here, eventually control will be back
+// to 'finishCcall' (when that '__close' method finally returns) and
+// 'finishpcallk' will run again and close any still pending '__close'
+// methods. Similarly, if a '__close' method errs, 'precover' calls
+// 'unroll' which calls ''finishCcall' and we are back here again, to
+// close any pending '__close' methods.
+// Note that, up to the call to 'luaF_close', the corresponding
+// 'CallInfo' is not modified, so that this repeated run works like the
+// first one (except that it has at least one less '__close' to do). In
+// particular, field CIST_RECST preserves the error status across these
+// multiple runs, changing only if there is a new error.
 [c_function]
 def private finishpcallk(var L : lua_State?; var ci : CallInfo?) : int {
+    // get original status
     var status : int = int(ci.callstatus) >> 10 & 7
-    if (int64((status == 0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
-        status = 1
+    // no error?
+    if (status == 0) {
+        // was interrupted by an yield
+        status = LUA_YIELD
     } else {
+        // error
         var func : StackValue? = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + ci.u2.funcidx)
+        // restore 'allowhook'
         L.allowhook = uint8(int(ci.callstatus) & 1 << 0)
+        // can yield or raise an error
         func = luaF_close(L, func, status, 1)
         luaD_seterrorobj(L, status, func)
+        // restore stack size in case of overflow
         luaD_shrinkstack(L)
+        // clear original status
         ci.callstatus = uint16(int(ci.callstatus) & ~(7 << 10) | 0 << 10)
     }
-    ci.callstatus = uint16(int(ci.callstatus) & ~(1 << 4))
+    ci.callstatus = uint16(int(ci.callstatus) & ~CIST_YPCALL)
     L.errfunc = ci.u.c.old_errfunc
+    // if it is here, there were errors or yields; unlike 'lua_pcallk',
+    // do not change status
     return status
 }
 
+// Completes the execution of a C function interrupted by an yield.
+// The interruption must have happened while the function was either
+// closing its tbc variables in 'moveresults' or executing
+// 'lua_callk'/'lua_pcallk'. In the first case, it just redoes
+// 'luaD_poscall'. In the second case, the call to 'finishpcallk'
+// finishes the interrupted execution of 'lua_pcallk'. After that, it
+// calls the continuation of the interrupted function and finally it
+// completes the job of the 'luaD_call' that called the function. In
+// the call to 'adjustresults', we do not know the number of results
+// of the function called by 'lua_callk'/'lua_pcallk', so we are
+// conservative and use LUA_MULTRET (always adjust).
 def private finishCcall(var L : lua_State?; var ci : CallInfo?) {
+    // actual number of results from C function
     var n : int
-    if ((int(ci.callstatus) & 1 << 9) != 0) {
+    // was returning?
+    if ((int(ci.callstatus) & CIST_CLSRET) != 0) {
+        // just redo 'luaD_poscall'
         n = ci.u2.nres
     } else {
-        var status : int = 1
-        if ((int(ci.callstatus) & 1 << 4) != 0) {
+        // don't need to reset CIST_CLSRET, as it will be set again anyway
+        // default if there were no errors
+        var status : int = LUA_YIELD
+        // must have a continuation and must be able to call it
+        // was inside a 'lua_pcallk'?
+        if ((int(ci.callstatus) & CIST_YPCALL) != 0) {
+            // finish it
             status = finishpcallk(L, ci)
         }
         {
+            // finish 'lua_callk'
             if (-1 <= -1 && intptr(L.ci.top.p) < intptr(L.top.p)) {
                 L.ci.top.p = L.top.p
             }
         }
+        // call continuation
         n = invoke(ci.u.c.k, L, status, ci.u.c.ctx)
     }
+    // finish 'luaD_call'
     luaD_poscall(L, ci, n)
 }
 
+// Executes "full continuation" (everything in the stack) of a
+// previously interrupted coroutine until the stack is empty (or another
+// interruption long-jumps out of the loop).
 [c_function]
 def private unroll(var L : lua_State?; var ud : void?) {
     var ci : CallInfo?
+    // something in the stack
     while (true) {
         ci = L.ci
         if (!(intptr(ci) != intptr(addr(L.base_ci)))) {
             break
         }
+        // C function?
         if (!!((int(ci.callstatus) & 1 << 1) != 0)) {
+            // complete its execution
             finishCcall(L, ci)
         } else {
+            // Lua function
+            // finish interrupted instruction
             luaV_finishOp(L)
+            // execute down to higher C 'boundary'
             luaV_execute(L, ci)
         }
     }
 }
 
+// Try to find a suspended protected call (a "recover point") for the
+// given thread.
 [c_function]
 def private findpcall(var L : lua_State?) : CallInfo? {
     var ci : CallInfo?
+    // search for a pcall
     {
         ci = L.ci
         while (ci != null) {
-            if ((int(ci.callstatus) & 1 << 4) != 0) {
+            if ((int(ci.callstatus) & CIST_YPCALL) != 0) {
                 return ci
             }
             ci = ci.previous
         }
     }
+    // no pending pcall
     return null
 }
 
+// Signal an error in the call to 'lua_resume', not in the execution
+// of the coroutine itself. (Such errors should not be handled by any
+// coroutine error handler and should not kill the coroutine.)
 [c_function]
 def private resume_error(var L : lua_State?; var msg : uint8?; narg : int) : int {
+    // remove args from the stack
     L.top.p = L.top.p - narg
     {
+        // push error message
         var io : TValue? = addr(L.top.p.val)
         var x_ : TString? = luaS_new(L, msg)
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
@@ -5941,32 +7076,59 @@ def private resume_error(var L : lua_State?; var msg : uint8?; narg : int) : int
     {
         L.top.p = L.top.p + 1
     }
-    return 2
+    return LUA_ERRRUN
 }
 
+// Do the work for 'lua_resume' in protected mode. Most of the work
+// depends on the status of the coroutine: initial state, suspended
+// inside a hook, or regularly suspended (optionally with a continuation
+// function), plus erroneous cases: non-suspended coroutine or dead
+// coroutine.
 [c_function]
 def private resume(var L : lua_State?; var ud : void?) {
+    // number of arguments
     var n : int = deref(reinterpret<int?>(ud))
+    // first argument
     var firstArg : StackValue? = L.top.p - n
     var ci : CallInfo? = L.ci
-    if (int(L.status) == 0) {
-        ccall(L, firstArg - 1, -1, uint(0))
+    // starting a coroutine?
+    if (int(L.status) == LUA_OK) {
+        // just call its body
+        ccall(L, firstArg - 1, LUA_MULTRET, uint(0))
     } else {
-        L.status = uint8(0)
+        // resuming from previous yield
+        // mark that it is running (again)
+        L.status = uint8(LUA_OK)
+        // yielded inside a hook?
         if (!((int(ci.callstatus) & 1 << 1) != 0)) {
+            // undo increment made by 'luaG_traceexec': instruction was not
+            // executed yet
             ci.u.l.savedpc = ci.u.l.savedpc - 1
+            // discard arguments
             L.top.p = firstArg
+            // just continue running Lua code
             luaV_execute(L, ci)
         } else {
+            // 'common' yield
+            // does it have a continuation function?
             if (ci.u.c.k != null) {
-                n = invoke(ci.u.c.k, L, 1, ci.u.c.ctx)
+                // call continuation
+                n = invoke(ci.u.c.k, L, LUA_YIELD, ci.u.c.ctx)
             }
+            // finish 'luaD_call'
             luaD_poscall(L, ci, n)
         }
+        // run continuation
         unroll(L, null)
     }
 }
 
+// Unrolls a coroutine in protected mode while there are recoverable
+// errors, that is, errors inside a protected call. (Any error
+// interrupts 'unroll', and this loop protects it again so it can
+// continue.) Stops with a normal end (status == LUA_OK), an yield
+// (status == LUA_YIELD), or an unprotected error ('findpcall' doesn't
+// find a recover point).
 [c_function]
 def private precover(var L : lua_State?; var status : int) : int {
     var ci : CallInfo?
@@ -5979,7 +7141,9 @@ def private precover(var L : lua_State?; var status : int) : int {
         if (!(_t0)) {
             break
         }
+        // go down to recovery functions
         L.ci = ci
+        // status to finish 'pcall'
         ci.callstatus = uint16(int(ci.callstatus) & ~(7 << 10) | status << 10)
         status = luaD_rawrunprotected(L, @@unroll, null)
     }
@@ -5989,29 +7153,38 @@ def private precover(var L : lua_State?; var status : int) : int {
 [c_function]
 def lua_resume(var L : lua_State?; var from : lua_State?; var nargs : int; var nresults : int?) : int {
     var status : int
-    if (int(L.status) == 0) {
+    // may be starting a coroutine
+    if (int(L.status) == LUA_OK) {
+        // not in base level?
         if (intptr(L.ci) != intptr(addr(L.base_ci))) {
             return resume_error(L, reinterpret<uint8?>("cannot resume non-suspended coroutine"), nargs)
         } elif (int64(L.top.p - (L.ci.func.p + 1)) == int64(nargs)) {
+            // no function?
             return resume_error(L, reinterpret<uint8?>("cannot resume dead coroutine"), nargs)
         }
-    } elif (int(L.status) != 1) {
+    } elif (int(L.status) != LUA_YIELD) {
+        // ended with errors?
         return resume_error(L, reinterpret<uint8?>("cannot resume dead coroutine"), nargs)
     }
     L.nCcalls = from != null ? from.nCcalls & uint(65535) : uint(0)
-    if ((L.nCcalls & uint(65535)) >= uint(200)) {
+    if ((L.nCcalls & uint(65535)) >= uint(LUAI_MAXCCALLS)) {
         return resume_error(L, reinterpret<uint8?>("C stack overflow"), nargs)
     }
     L.nCcalls++
     status = luaD_rawrunprotected(L, @@resume, reinterpret<void?>(addr(nargs)))
+    // continue running after recoverable errors
     status = precover(L, status)
-    if (int64((!(status > 1) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!(status > 1)) {
+        // normal end or yield
     } else {
+        // unrecoverable error
+        // mark thread as 'dead'
         L.status = uint8(status)
+        // push error message
         luaD_seterrorobj(L, status, L.top.p)
         L.ci.top.p = L.top.p
     }
-    deref(nresults) = status == 1 ? L.ci.u2.nyield : int(int64(L.top.p - (L.ci.func.p + 1)))
+    deref(nresults) = status == LUA_YIELD ? L.ci.u2.nyield : int(int64(L.top.p - (L.ci.func.p + 1)))
     return status
 }
 
@@ -6023,45 +7196,57 @@ def lua_isyieldable(var L : lua_State?) : int {
 def lua_yieldk(var L : lua_State?; nresults : int; ctx : int64; k : function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>) : int {
     var ci : CallInfo?
     ci = L.ci
-    if (int64((!((L.nCcalls & 4294901760u) == uint(0)) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!((L.nCcalls & 4294901760u) == uint(0))) {
         if (intptr(L) != intptr(L.l_G.mainthread)) {
             luaG_runerror`va(L, reinterpret<uint8?>("attempt to yield across a C-call boundary"), VaNone())
         } else {
             luaG_runerror`va(L, reinterpret<uint8?>("attempt to yield from outside a coroutine"), VaNone())
         }
     }
-    L.status = uint8(1)
+    L.status = uint8(LUA_YIELD)
+    // save number of results
     ci.u2.nyield = nresults
+    // inside a hook?
     if (!((int(ci.callstatus) & 1 << 1) != 0)) {
     } else {
+        // is there a continuation?
         ci.u.c.k = k
         if (ci.u.c.k != null) {
+            // save context
             ci.u.c.ctx = ctx
         }
-        luaD_throw(L, 1)
+        luaD_throw(L, LUA_YIELD)
     }
+    // must be inside a hook
+    // return to 'luaD_hook'
     return 0
 }
 
+// Auxiliary function to call 'luaF_close' in protected mode.
 [c_function]
 def private closepaux(var L : lua_State?; var ud : void?) {
     var pcl : CloseP? = reinterpret<CloseP?>(ud)
     luaF_close(L, pcl.level, pcl.status, 0)
 }
 
+// Calls 'luaF_close' in protected mode. Return the original status
+// or, in case of errors, the new status.
 [c_function]
 def luaD_closeprotected(var L : lua_State?; level : int64; var status : int) : int {
     var old_ci : CallInfo? = L.ci
     var old_allowhooks : uint8 = L.allowhook
+    // keep closing upvalues until no more errors
     {
         while (true) {
             var pcl : CloseP
             pcl.level = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + level)
             pcl.status = status
             status = luaD_rawrunprotected(L, @@closepaux, reinterpret<void?>(addr(pcl)))
-            if (int64((status == 0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+            // no more errors?
+            if (status == 0) {
                 return pcl.status
             } else {
+                // an error occurred; restore saved state and repeat
                 L.ci = old_ci
                 L.allowhook = old_allowhooks
             }
@@ -6070,6 +7255,9 @@ def luaD_closeprotected(var L : lua_State?; level : int64; var status : int) : i
     return 0
 }
 
+// Call the C function 'func' in protected mode, restoring basic
+// thread information ('allowhook', etc.) and in particular
+// its stack level in case of errors.
 [c_function]
 def luaD_pcall(var L : lua_State?; func : function<(var a0 : lua_State?; var a1 : void?) : void>; var u : void?; old_top : int64; ef : int64) : int {
     var status : int
@@ -6078,11 +7266,13 @@ def luaD_pcall(var L : lua_State?; func : function<(var a0 : lua_State?; var a1 
     var old_errfunc : int64 = L.errfunc
     L.errfunc = ef
     status = luaD_rawrunprotected(L, func, u)
-    if (int64((status != 0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // an error occurred?
+    if (status != 0) {
         L.ci = old_ci
         L.allowhook = old_allowhooks
         status = luaD_closeprotected(L, old_top, status)
         luaD_seterrorobj(L, status, reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + old_top))
+        // restore stack size in case of overflow
         luaD_shrinkstack(L)
     }
     L.errfunc = old_errfunc
@@ -6093,7 +7283,7 @@ def luaD_pcall(var L : lua_State?; func : function<(var a0 : lua_State?; var a1 
 def private checkmode(var L : lua_State?; var mode : uint8?; var x : uint8?) {
     if (mode != null && crt::strchr(mode, int(deref(x + 0))) == null) {
         luaO_pushfstring`va(L, reinterpret<uint8?>("attempt to load a %s chunk (mode is '%s')"), (x, mode))
-        luaD_throw(L, 3)
+        luaD_throw(L, LUA_ERRSYNTAX)
     }
 }
 
@@ -6101,6 +7291,7 @@ def private checkmode(var L : lua_State?; var mode : uint8?; var x : uint8?) {
 def private f_parser(var L : lua_State?; var ud : void?) {
     var cl : LClosure?
     var p : SParser? = reinterpret<SParser?>(ud)
+    // read first character
     let _t0 = p.z.n
     p.z.n--
     var _t2 : int
@@ -6126,6 +7317,7 @@ def private f_parser(var L : lua_State?; var ud : void?) {
 def luaD_protectedparser(var L : lua_State?; var z : Zio?; var name : uint8?; var mode : uint8?) : int {
     var p : SParser
     var status : int
+    // cannot yield during parsing
     L.nCcalls += uint(65536)
     p.z = z
     p.name = name
@@ -6167,11 +7359,13 @@ def private dumpSize(var D : DumpState?; var x : uint64) {
     var _first = true
     while (_first || x != uint64(0)) {
         _first = false
+        // fill buffer in reverse order
         n++
-        buff[(uint64(typeinfo sizeof(type<uint64>)) * uint64(8) + uint64(6)) / uint64(7) - uint64(n)] = uint8(x & uint64(127))
+        buff[DIBS - uint64(n)] = uint8(x & uint64(127))
         x >>= 7ul
     }
-    buff[(uint64(typeinfo sizeof(type<uint64>)) * uint64(8) + uint64(6)) / uint64(7) - uint64(1)] = uint8(int(buff[(uint64(typeinfo sizeof(type<uint64>)) * uint64(8) + uint64(6)) / uint64(7) - uint64(1)]) | 128)
+    // mark last byte
+    buff[DIBS - uint64(1)] = uint8(int(buff[DIBS - uint64(1)]) | 128)
     dumpBlock(D, reinterpret<void?>(addr(buff[0]) + (uint64(typeinfo sizeof(type<uint64>)) * uint64(8) + uint64(6)) / uint64(7) + -(n)), uint64(n) * uint64(typeinfo sizeof(type<uint8>)))
 }
 
@@ -6303,6 +7497,7 @@ def private dumpDebug(var D : DumpState?; var f : Proto?) {
 
 def private dumpFunction(var D : DumpState?; var f : Proto?; var psource : TString?) {
     if (D.strip != 0 || intptr(f.source) == intptr(psource)) {
+        // no debug info or same source as its parent
         dumpString(D, null)
     } else {
         dumpString(D, f.source)
@@ -6322,16 +7517,17 @@ def private dumpFunction(var D : DumpState?; var f : Proto?; var psource : TStri
 [c_function]
 def private dumpHeader(var D : DumpState?) {
     dumpBlock(D, reinterpret<void?>(reinterpret<uint8?>("\x1bLua")), uint64(typeinfo sizeof(type<uint8[5]>)) - uint64(typeinfo sizeof(type<uint8>)))
-    dumpByte(D, 504 / 100 * 16 + 504 % 100)
-    dumpByte(D, 0)
+    dumpByte(D, LUAC_VERSION)
+    dumpByte(D, LUAC_FORMAT)
     dumpBlock(D, reinterpret<void?>(reinterpret<uint8?>("\x19\x93\r\n\x1a\n")), uint64(typeinfo sizeof(type<uint8[7]>)) - uint64(typeinfo sizeof(type<uint8>)))
     dumpByte(D, int(uint64(typeinfo sizeof(type<uint>))))
     dumpByte(D, int(uint64(typeinfo sizeof(type<int64>))))
     dumpByte(D, int(uint64(typeinfo sizeof(type<double>))))
-    dumpInteger(D, int64(22136))
-    dumpNumber(D, 370.5lf)
+    dumpInteger(D, int64(LUAC_INT))
+    dumpNumber(D, LUAC_NUM)
 }
 
+// dump Lua function as precompiled chunk
 [c_function]
 def luaU_dump(var L : lua_State?; var f : Proto?; w : function<(var a0 : lua_State?; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var data : void?; strip : int) : int {
     var D : DumpState
@@ -6348,7 +7544,7 @@ def luaU_dump(var L : lua_State?; var f : Proto?; w : function<(var a0 : lua_Sta
 
 [c_function]
 def luaF_newCclosure(var L : lua_State?; nupvals : int) : CClosure? {
-    var o : GCObject? = luaC_newobj(L, 6 | 2 << 4, uint64(int(uint64(typeinfo offsetof < upvalue > (type<CClosure>))) + int(uint64(typeinfo sizeof(type<TValue>))) * nupvals))
+    var o : GCObject? = luaC_newobj(L, LUA_VCCL, uint64(int(uint64(typeinfo offsetof < upvalue > (type<CClosure>))) + int(uint64(typeinfo sizeof(type<TValue>))) * nupvals))
     var c : CClosure? = addr(reinterpret<GCUnion?>(o).cl.c)
     c.nupvalues = uint8(nupvals)
     return c
@@ -6356,7 +7552,7 @@ def luaF_newCclosure(var L : lua_State?; nupvals : int) : CClosure? {
 
 [c_function]
 def luaF_newLclosure(var L : lua_State?; var nupvals : int) : LClosure? {
-    var o : GCObject? = luaC_newobj(L, 6 | 0 << 4, uint64(int(uint64(typeinfo offsetof < upvals > (type<LClosure>))) + int(uint64(typeinfo sizeof(type<TValue?>))) * nupvals))
+    var o : GCObject? = luaC_newobj(L, LUA_VLCL, uint64(int(uint64(typeinfo offsetof < upvals > (type<LClosure>))) + int(uint64(typeinfo sizeof(type<TValue?>))) * nupvals))
     var c : LClosure? = addr(reinterpret<GCUnion?>(o).cl.l)
     c.p = null
     c.nupvalues = uint8(nupvals)
@@ -6371,14 +7567,16 @@ def luaF_newLclosure(var L : lua_State?; var nupvals : int) : LClosure? {
     return c
 }
 
+// fill a closure with new closed upvalues
 [c_function]
 def luaF_initupvals(var L : lua_State?; var cl : LClosure?) {
     var i : int
     {
         i = 0
         while (i < int(cl.nupvalues)) {
-            var o : GCObject? = luaC_newobj(L, 9 | 0 << 4, uint64(typeinfo sizeof(type<UpVal>)))
+            var o : GCObject? = luaC_newobj(L, LUA_VUPVAL, uint64(typeinfo sizeof(type<UpVal>)))
             var uv : UpVal? = addr(reinterpret<GCUnion?>(o).upv)
+            // make it closed
             uv.v.p = addr(uv.u.value)
             uv.v.p.tt_ = uint8(0 | 0 << 4)
             deref(addr(cl.upvals[0]) + i) = uv
@@ -6390,64 +7588,83 @@ def luaF_initupvals(var L : lua_State?; var cl : LClosure?) {
     }
 }
 
+// Create a new upvalue at the given level, and link it to the list of
+// open upvalues of 'L' after entry 'prev'.
 [c_function]
 def private newupval(var L : lua_State?; var level : StackValue?; var prev : UpVal ??) : UpVal? {
-    var o : GCObject? = luaC_newobj(L, 9 | 0 << 4, uint64(typeinfo sizeof(type<UpVal>)))
+    var o : GCObject? = luaC_newobj(L, LUA_VUPVAL, uint64(typeinfo sizeof(type<UpVal>)))
     var uv : UpVal? = addr(reinterpret<GCUnion?>(o).upv)
     var next : UpVal? = deref(prev)
+    // current value lives in the stack
     uv.v.p = addr(level.val)
+    // link it to list of open upvalues
     uv.u.open.next = next
     uv.u.open.previous = prev
     if (next != null) {
         next.u.open.previous = addr(uv.u.open.next)
     }
     deref(prev) = uv
+    // thread not in list of threads with upvalues?
     if (!(intptr(L.twups) != intptr(L))) {
+        // link it to the list
         L.twups = L.l_G.twups
         L.l_G.twups = L
     }
     return uv
 }
 
+// Find and reuse, or create if it does not exist, an upvalue
+// at the given level.
 [c_function]
 def luaF_findupval(var L : lua_State?; var level : StackValue?) : UpVal? {
     var pp : UpVal ?? = addr(L.openupval)
     var p : UpVal?
+    // search for it
     while (true) {
         p = deref(pp)
         if (!(p != null && intptr(reinterpret<StackValue?>(p.v.p)) >= intptr(level))) {
             break
         }
+        // corresponding upvalue?
         if (intptr(reinterpret<StackValue?>(p.v.p)) == intptr(level)) {
+            // return it
             return p
         }
         pp = addr(p.u.open.next)
     }
+    // not found: create a new upvalue after 'pp'
     return newupval(L, level, pp)
 }
 
+// Call closing method for object 'obj' with error message 'err'. The
+// boolean 'yy' controls whether the call is yieldable.
+// (This function assumes EXTRA_STACK.)
 [c_function]
 def private callclosemethod(var L : lua_State?; var obj : TValue?; var err : TValue?; yy : int) {
     var top : StackValue? = L.top.p
     var tm : TValue? = luaT_gettmbyobj(L, obj, TMS.TM_CLOSE)
     {
+        // will call metamethod...
         var io1 : TValue? = addr(top.val)
         var io2 : TValue? = tm
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
     {
+        // with 'self' as the 1st argument
         var io1 : TValue? = addr((top + 1).val)
         var io2 : TValue? = obj
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
     {
+        // and error msg. as 2nd argument
         var io1 : TValue? = addr((top + 2).val)
         var io2 : TValue? = err
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
+    // add function and arguments
     L.top.p = top + 3
     if (yy != 0) {
         luaD_call(L, top, 0)
@@ -6456,10 +7673,14 @@ def private callclosemethod(var L : lua_State?; var obj : TValue?; var err : TVa
     }
 }
 
+// Check whether object at given level has a close metamethod and raise
+// an error if not.
 [c_function]
 def private checkclosemth(var L : lua_State?; var level : StackValue?) {
     var tm : TValue? = luaT_gettmbyobj(L, addr(level.val), TMS.TM_CLOSE)
+    // no metamethod?
     if ((int(tm.tt_) & 15) == 0) {
+        // variable index
         var idx : int = int(int64(level - L.ci.func.p))
         var vname : uint8? = luaG_findlocal(L, L.ci, idx, null)
         if (vname == null) {
@@ -6469,26 +7690,40 @@ def private checkclosemth(var L : lua_State?; var level : StackValue?) {
     }
 }
 
+// Prepare and call a closing method.
+// If status is CLOSEKTOP, the call to the closing method will be pushed
+// at the top of the stack. Otherwise, values can be pushed right after
+// the 'level' of the upvalue being closed, as everything after that
+// won't be used again.
 [c_function]
 def private prepcallclosemth(var L : lua_State?; var level : StackValue?; status : int; yy : int) {
+    // value being closed
     var uv : TValue? = addr(level.val)
     var errobj : TValue?
-    if (status == -1) {
+    if (status == CLOSEKTOP) {
+        // error object is nil
         errobj = addr(L.l_G.nilvalue)
     } else {
+        // 'luaD_seterrorobj' will set top to level + 2
+        // error object goes after 'uv'
         errobj = addr((level + 1).val)
+        // set error object
         luaD_seterrorobj(L, status, level + 1)
     }
     callclosemethod(L, uv, errobj, yy)
 }
 
+// Insert a variable in the list of to-be-closed variables.
 [c_function]
 def luaF_newtbcupval(var L : lua_State?; var level : StackValue?) {
     if (int(addr(level.val).tt_) == (1 | 0 << 4) || (int(addr(level.val).tt_) & 15) == 0) {
+        // false doesn't need to be closed
         return
     }
+    // value must have a close method
     checkclosemth(L, level)
     while (uint64(uint(int64(level - L.tbclist.p))) > (256ul << (uint64(typeinfo sizeof(type<uint16>)) - uint64(1)) * uint64(8)) - uint64(1)) {
+        // create a dummy node at maximum delta
         L.tbclist.p = L.tbclist.p + ((256ul << (uint64(typeinfo sizeof(type<uint16>)) - uint64(1)) * uint64(8)) - uint64(1))
         L.tbclist.p.tbclist.delta = uint16(0)
     }
@@ -6504,9 +7739,11 @@ def luaF_unlinkupval(var uv : UpVal?) {
     }
 }
 
+// Close all upvalues up to the given stack level.
 [c_function]
 def luaF_closeupval(var L : lua_State?; var level : StackValue?) {
     var uv : UpVal?
+    // stack index pointed by 'uv'
     var upl : StackValue?
     while (true) {
         uv = L.openupval
@@ -6518,16 +7755,22 @@ def luaF_closeupval(var L : lua_State?; var level : StackValue?) {
         if (!(_t0)) {
             break
         }
+        // new position for value
         var slot : TValue? = addr(uv.u.value)
+        // remove upvalue from 'openupval' list
         luaF_unlinkupval(uv)
         {
+            // move value to upvalue slot
             var io1 : TValue? = slot
             var io2 : TValue? = uv.v.p
             io1.value_ = io2.value_
             io1.tt_ = io2.tt_
         }
+        // now current value lives here
         uv.v.p = slot
+        // neither white nor dead?
         if (!((int(uv.marked) & (1 << 3 | 1 << 4)) != 0)) {
+            // closed upvalues cannot be gray
             uv.marked = uint8(int(uv.marked) | 1 << 5)
             if ((int(slot.tt_) & 1 << 6) != 0) {
                 if ((int(uv.marked) & 1 << 5) != 0 && (int(slot.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
@@ -6538,23 +7781,33 @@ def luaF_closeupval(var L : lua_State?; var level : StackValue?) {
     }
 }
 
+// Remove first element from the tbclist plus its dummy nodes.
 [c_function]
 def private poptbclist(var L : lua_State?) {
     var tbc : StackValue? = L.tbclist.p
+    // first element cannot be dummy
     tbc = tbc - int(tbc.tbclist.delta)
     while (intptr(tbc) > intptr(L.stack.p) && int(tbc.tbclist.delta) == 0) {
+        // remove dummy nodes
         tbc = tbc - ((256ul << (uint64(typeinfo sizeof(type<uint16>)) - uint64(1)) * uint64(8)) - uint64(1))
     }
     L.tbclist.p = tbc
 }
 
+// Close all upvalues and to-be-closed variables up to the given stack
+// level. Return restored 'level'.
 [c_function]
 def luaF_close(var L : lua_State?; var level : StackValue?; status : int; yy : int) : StackValue? {
     var levelrel : int64 = int64(reinterpret<uint8?>(level) - reinterpret<uint8?>(L.stack.p))
+    // first, close the upvalues
     luaF_closeupval(L, level)
+    // traverse tbc's down to that level
     while (intptr(L.tbclist.p) >= intptr(level)) {
+        // get variable index
         var tbc : StackValue? = L.tbclist.p
+        // remove it from list
         poptbclist(L)
+        // close variable
         prepcallclosemth(L, tbc, status, yy)
         level = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + levelrel)
     }
@@ -6563,7 +7816,7 @@ def luaF_close(var L : lua_State?; var level : StackValue?; status : int; yy : i
 
 [c_function]
 def luaF_newproto(var L : lua_State?) : Proto? {
-    var o : GCObject? = luaC_newobj(L, 9 + 1 | 0 << 4, uint64(typeinfo sizeof(type<Proto>)))
+    var o : GCObject? = luaC_newobj(L, LUA_VPROTO, uint64(typeinfo sizeof(type<Proto>)))
     var f : Proto? = addr(reinterpret<GCUnion?>(o).p)
     f.k = null
     f.sizek = 0
@@ -6600,12 +7853,15 @@ def luaF_freeproto(var L : lua_State?; var f : Proto?) {
     luaM_free_(L, reinterpret<void?>(f), uint64(typeinfo sizeof(type<Proto>)))
 }
 
+// Look for n-th local variable at line 'line' in function 'func'.
+// Returns NULL if not found.
 [c_function]
 def luaF_getlocalname(var f : Proto?; var local_number : int; pc : int) : uint8? {
     var i : int
     {
         i = 0
         while (i < f.sizelocvars && deref(f.locvars + i).startpc <= pc) {
+            // is variable active?
             if (pc < deref(f.locvars + i).endpc) {
                 local_number--
                 if (local_number == 0) {
@@ -6615,6 +7871,7 @@ def luaF_getlocalname(var f : Proto?; var local_number : int; pc : int) : uint8?
             i++
         }
     }
+    // not found
     return null
 }
 
@@ -6644,23 +7901,39 @@ def private getgclist(var o : GCObject?) : GCObject ?? {
 
 [c_function]
 def private linkgclist_(var o : GCObject?; var pnext : GCObject ??; var list : GCObject ??) {
+    // cannot be in a gray list
     deref(pnext) = deref(list)
     deref(list) = o
+    // now it is
     o.marked = uint8(int(o.marked) & int(uint8(~(1 << 5 | (1 << 3 | 1 << 4)))))
 }
 
+// Clear keys for empty entries in tables. If entry is empty, mark its
+// entry as dead. This allows the collection of the key, but keeps its
+// entry in the table: its removal could break a chain and could break
+// a table traversal. Other places never manipulate dead keys, because
+// its associated empty value is enough to signal that the entry is
+// logically empty.
 def private clearkey(var n : Node?) {
     if ((int(n.u.key_tt) & 1 << 6) != 0) {
+        // unused key; remove it
         n.u.key_tt = uint8(9 + 2)
     }
 }
 
+// tells whether a key or value can be cleared from a weak
+// table. Non-collectable objects are never removed from weak
+// tables. Strings behave as 'values', so are never removed too. for
+// other objects: if really collected, cannot keep them; for objects
+// being finalized, keep them in keys, but not in values
 [c_function]
 def private iscleared(var g : global_State?; var o : GCObject?) : int {
+    // non-collectable value
     if (o == null) {
         return 0
-    } elif ((int(o.tt) & 15) == 4) {
+    } elif ((int(o.tt) & 15) == LUA_TSTRING) {
         {
+            // strings are 'values', so are never weak
             if ((int(o.marked) & (1 << 3 | 1 << 4)) != 0) {
                 reallymarkobject(g, addr(reinterpret<GCUnion?>(o).gc))
             }
@@ -6671,42 +7944,74 @@ def private iscleared(var g : global_State?; var o : GCObject?) : int {
     }
 }
 
+// Barrier that moves collector forward, that is, marks the white object
+// 'v' being pointed by the black object 'o'. In the generational
+// mode, 'v' must also become old, if 'o' is old; however, it cannot
+// be changed directly to OLD, because it may still point to non-old
+// objects. So, it is marked as OLD0. In the next cycle it will become
+// OLD1, and in the next it will finally become OLD (regular old). By
+// then, any object it points to will also be old. If called in the
+// incremental sweep phase, it clears the black object to white (sweep
+// it) to avoid other barrier calls for this same object. (That cannot
+// be done is generational mode, as its sweep does not distinguish
+// whites from deads.)
 def luaC_barrier_(var L : lua_State?; var o : GCObject?; var v : GCObject?) {
     var g : global_State? = L.l_G
+    // must keep invariant?
     if (int(g.gcstate) <= 2) {
+        // restore invariant
         reallymarkobject(g, v)
         if ((int(o.marked) & 7) > 1) {
+            // white object could not be old
+            // restore generational invariant
             v.marked = uint8(int(v.marked) & ~7 | 2)
         }
     } else {
-        if (int(g.gckind) == 0) {
+        // sweep phase
+        // incremental mode?
+        if (int(g.gckind) == KGC_INC) {
+            // mark 'o' as white to avoid other barriers
             o.marked = uint8(int(o.marked) & ~(1 << 5 | (1 << 3 | 1 << 4)) | int(uint8(int(g.currentwhite) & (1 << 3 | 1 << 4))))
         }
     }
 }
 
+// barrier that moves collector backward, that is, mark the black object
+// pointing to a white object as gray again.
 [c_function]
 def luaC_barrierback_(var L : lua_State?; var o : GCObject?) {
     var g : global_State? = L.l_G
-    if ((int(o.marked) & 7) == 6) {
+    // already in gray list?
+    if ((int(o.marked) & 7) == G_TOUCHED2) {
+        // make it gray to become touched1
         o.marked = uint8(int(o.marked) & int(uint8(~(1 << 5 | (1 << 3 | 1 << 4)))))
     } else {
+        // link it in 'grayagain' and paint it gray
         linkgclist_(addr(reinterpret<GCUnion?>(o).gc), getgclist(o), addr(g.grayagain))
     }
+    // generational mode?
     if ((int(o.marked) & 7) > 1) {
+        // touched in current cycle
         o.marked = uint8(int(o.marked) & ~7 | 5)
     }
 }
 
 def luaC_fix(var L : lua_State?; var o : GCObject?) {
     var g : global_State? = L.l_G
+    // object must be 1st in 'allgc' list!
+    // they will be gray forever
     o.marked = uint8(int(o.marked) & int(uint8(~(1 << 5 | (1 << 3 | 1 << 4)))))
+    // and old forever
     o.marked = uint8(int(o.marked) & ~7 | 4)
+    // remove object from 'allgc' list
     g.allgc = o.next
+    // link it to 'fixedgc' list
     o.next = g.fixedgc
     g.fixedgc = o
 }
 
+// create a new collectable object (with given type, size, and offset)
+// and link it to 'allgc' list.
 [c_function]
 def luaC_newobjdt(var L : lua_State?; tt : int; sz : uint64; offset : uint64) : GCObject? {
     var g : global_State? = L.l_G
@@ -6723,29 +8028,40 @@ def luaC_newobj(var L : lua_State?; tt : int; sz : uint64) : GCObject? {
     return luaC_newobjdt(L, tt, sz, uint64(0))
 }
 
+// Mark an object. Userdata with no user values, strings, and closed
+// upvalues are visited and turned black here. Open upvalues are
+// already indirectly linked through their respective threads in the
+// 'twups' list, so they don't go to the gray list; nevertheless, they
+// are kept gray to avoid barriers, as their values will be revisited
+// by the thread or by 'remarkupvals'. Other objects are added to the
+// gray list to be visited (and turned black) later. Both userdata and
+// upvalues can call this function recursively, but this recursion goes
+// for at most two levels: An upvalue cannot refer to another upvalue
+// (only closures can), and a userdata's metatable must be a table.
 [c_function]
 def private reallymarkobject(var g : global_State?; var o : GCObject?) {
     let _cond = int(o.tt)
     while (true) {
         var _flag = false
-        _flag ||= _cond == 4
-        _flag ||= _cond == 20
-        if (_flag) {
+        if (_cond == 4 || _cond == 20) {
             {
+                // nothing to visit
                 o.marked = uint8(int(o.marked) & ~(1 << 3 | 1 << 4) | 1 << 5)
                 break
             }
         }
-        _flag ||= _cond == 9
-        if (_flag) {
+        if (_cond == 9) {
             {
                 var uv : UpVal? = addr(reinterpret<GCUnion?>(o).upv)
                 if (intptr(uv.v.p) != intptr(addr(uv.u.value))) {
+                    // open upvalues are kept gray
                     uv.marked = uint8(int(uv.marked) & int(uint8(~(1 << 5 | (1 << 3 | 1 << 4)))))
                 } else {
+                    // closed upvalues are visited here
                     uv.marked = uint8(int(uv.marked) & ~(1 << 3 | 1 << 4) | 1 << 5)
                 }
                 {
+                    // mark its content
                     let _t0 = g.mainthread
                     if ((int(uv.v.p.tt_) & 1 << 6) != 0 && (int(uv.v.p.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
                         reallymarkobject(g, uv.v.p.value_.gc)
@@ -6758,14 +8074,17 @@ def private reallymarkobject(var g : global_State?; var o : GCObject?) {
         if (_flag) {
             {
                 var u : Udata? = addr(reinterpret<GCUnion?>(o).u)
+                // no user values?
                 if (int(u.nuvalue) == 0) {
                     {
+                        // mark its metatable
                         if (u.metatable != null) {
                             if ((int(u.metatable.marked) & (1 << 3 | 1 << 4)) != 0) {
                                 reallymarkobject(g, addr(reinterpret<GCUnion?>(u.metatable).gc))
                             }
                         }
                     }
+                    // nothing else to mark
                     u.marked = uint8(int(u.marked) & ~(1 << 3 | 1 << 4) | 1 << 5)
                     break
                 }
@@ -6778,24 +8097,27 @@ def private reallymarkobject(var g : global_State?; var o : GCObject?) {
         _flag ||= _cond == 10
         if (_flag) {
             {
+                // else...
+                // FALLTHROUGH
+                // to be visited later
                 linkgclist_(addr(reinterpret<GCUnion?>(o).gc), getgclist(o), addr(g.gray))
                 break
             }
         }
-        _flag ||= !(_cond == 4 || _cond == 20 || _cond == 9 || _cond == 7 || _cond == 6 || _cond == 38 || _cond == 5 || _cond == 8 || _cond == 10)
-        if (_flag) {
+        if (!(_cond == 4 || _cond == 20 || _cond == 9 || _cond == 7 || _cond == 6 || _cond == 38 || _cond == 5 || _cond == 8 || _cond == 10)) {
             break
         }
         break
     }
 }
 
+// mark metamethods for basic types
 [c_function]
 def private markmt(var g : global_State?) {
     var i : int
     {
         i = 0
-        while (i < 9) {
+        while (i < LUA_NUMTAGS) {
             if (g.mt[i] != null) {
                 if ((int(g.mt[i].marked) & (1 << 3 | 1 << 4)) != 0) {
                     reallymarkobject(g, addr(reinterpret<GCUnion?>(g.mt[i]).gc))
@@ -6806,6 +8128,7 @@ def private markmt(var g : global_State?) {
     }
 }
 
+// mark all objects in list of being-finalized
 [c_function]
 def private markbeingfnz(var g : global_State?) : uint64 {
     var o : GCObject?
@@ -6825,10 +8148,20 @@ def private markbeingfnz(var g : global_State?) : uint64 {
     return count
 }
 
+// For each non-marked thread, simulates a barrier between each open
+// upvalue and its value. (If the thread is collected, the value will be
+// assigned to the upvalue, but then it can be too late for the barrier
+// to act. The "barrier" does not need to check colors: A non-marked
+// thread must be young; upvalues cannot be older than their threads; so
+// any visited upvalue must be young too.) Also removes the thread from
+// the list, as it was already visited. Removes also threads with no
+// upvalues, as they have nothing to be checked. (If the thread gets an
+// upvalue later, it will be linked in the list again.)
 [c_function]
 def private remarkupvals(var g : global_State?) : int {
     var thread : lua_State?
     var p : lua_State ?? = addr(g.twups)
+    // estimate of how much work was done here
     var work : int = 0
     while (true) {
         thread = deref(p)
@@ -6837,17 +8170,23 @@ def private remarkupvals(var g : global_State?) : int {
         }
         work++
         if (!((int(thread.marked) & (1 << 3 | 1 << 4)) != 0) && thread.openupval != null) {
+            // keep marked thread with upvalues in the list
             p = addr(thread.twups)
         } else {
+            // thread is not marked or without upvalues
             var uv : UpVal?
+            // remove thread from the list
             deref(p) = thread.twups
+            // mark that it is out of list
             thread.twups = thread
             {
                 uv = thread.openupval
                 while (uv != null) {
                     work++
+                    // upvalue already visited?
                     if (!((int(uv.marked) & (1 << 3 | 1 << 4)) != 0)) {
                         {
+                            // mark its value
                             let _t0 = g.mainthread
                             if ((int(uv.v.p.tt_) & 1 << 6) != 0 && (int(uv.v.p.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
                                 reallymarkobject(g, uv.v.p.value_.gc)
@@ -6870,6 +8209,7 @@ def private cleargraylists(var g : global_State?) {
     g.weak = g.allweak
 }
 
+// mark root set and reset all gray lists, to start a new collection
 [c_function]
 def private restartcollection(var g : global_State?) {
     cleargraylists(g)
@@ -6885,27 +8225,48 @@ def private restartcollection(var g : global_State?) {
         }
     }
     markmt(g)
+    // mark any finalizing object left from previous cycle
     markbeingfnz(g)
 }
 
+// Check whether object 'o' should be kept in the 'grayagain' list for
+// post-processing by 'correctgraylist'. (It could put all old objects
+// in the list and leave all the work to 'correctgraylist', but it is
+// more efficient to avoid adding elements that will be removed.) Only
+// TOUCHED1 objects need to be in the list. TOUCHED2 doesn't need to go
+// back to a gray list, but then it must become OLD. (That is what
+// 'correctgraylist' does when it finds a TOUCHED2 object.)
 [c_function]
 def private genlink(var g : global_State?; var o : GCObject?) {
-    if ((int(o.marked) & 7) == 5) {
+    // touched in this cycle?
+    if ((int(o.marked) & 7) == G_TOUCHED1) {
+        // link it back in 'grayagain'
         linkgclist_(addr(reinterpret<GCUnion?>(o).gc), getgclist(o), addr(g.grayagain))
-    } elif ((int(o.marked) & 7) == 6) {
+    } elif ((int(o.marked) & 7) == G_TOUCHED2) {
+        // everything else do not need to be linked back
+        // advance age
         o.marked = uint8(int(o.marked) ^ (6 ^ 4))
     }
 }
 
+// Traverse a table with weak values and link it to proper list. During
+// propagate phase, keep it in 'grayagain' list, to be revisited in the
+// atomic phase. In the atomic phase, if table has any white value,
+// put it in 'weak' list, to be cleared.
 [c_function]
 def private traverseweakvalue(var g : global_State?; var h : Table?) {
     var n : Node?
     var limit : Node? = addr(deref(h.node + uint64(1 << int(h.lsizenode))))
+    // if there is array part, assume it may have white values (it is not
+    // worth traversing it now just to check)
     var hasclears : int = h.alimit > uint(0) ? 1 : 0
+    // traverse hash part
     {
         n = addr(deref(h.node + 0))
         while (intptr(n) < intptr(limit)) {
+            // entry is empty?
             if ((int(addr(n.i_val).tt_) & 15) == 0) {
+                // clear its key
                 clearkey(n)
             } else {
                 {
@@ -6913,28 +8274,46 @@ def private traverseweakvalue(var g : global_State?; var h : Table?) {
                         reallymarkobject(g, n.u.key_val.gc)
                     }
                 }
+                // a white value?
                 if (!(hasclears != 0) && iscleared(g, (int(addr(n.i_val).tt_) & 1 << 6) != 0 ? addr(n.i_val).value_.gc : null) != 0) {
+                    // table will have to be cleared
                     hasclears = 1
                 }
             }
             n = n + 1
         }
     }
-    if (int(g.gcstate) == 2 && hasclears != 0) {
+    if (int(g.gcstate) == GCSatomic && hasclears != 0) {
+        // has to be cleared later
         linkgclist_(addr(reinterpret<GCUnion?>(h).gc), addr(h.gclist), addr(g.weak))
     } else {
+        // must retraverse it in atomic phase
         linkgclist_(addr(reinterpret<GCUnion?>(h).gc), addr(h.gclist), addr(g.grayagain))
     }
 }
 
+// Traverse an ephemeron table and link it to proper list. Returns true
+// iff any object was marked during this traversal (which implies that
+// convergence has to continue). During propagation phase, keep table
+// in 'grayagain' list, to be visited again in the atomic phase. In
+// the atomic phase, if table has any white->white entry, it has to
+// be revisited during ephemeron convergence (as that key may turn
+// black). Otherwise, if it has any white key, table has to be cleared
+// (in the atomic phase). In generational mode, some tables
+// must be kept in some gray list for post-processing; this is done
+// by 'genlink'.
 [c_function]
 def private traverseephemeron(var g : global_State?; var h : Table?; inv : int) : int {
+    // true if an object is marked in this traversal
     var marked : int = 0
+    // true if table has white keys
     var hasclears : int = 0
+    // true if table has entry "white-key -> white-value"
     var hasww : int = 0
     var i : uint
     var asize : uint = luaH_realasize(h)
     var nsize : uint = uint(1 << int(h.lsizenode))
+    // traverse array part
     {
         i = uint(0)
         while (i < asize) {
@@ -6945,31 +8324,48 @@ def private traverseephemeron(var g : global_State?; var h : Table?; inv : int) 
             i++
         }
     }
+    // traverse hash part; if 'inv', traverse descending
+    // (see 'convergeephemerons')
     {
         i = uint(0)
         while (i < nsize) {
             var n : Node? = inv != 0 ? addr(deref(h.node + (nsize - uint(1) - i))) : addr(deref(h.node + i))
+            // entry is empty?
             if ((int(addr(n.i_val).tt_) & 15) == 0) {
+                // clear its key
                 clearkey(n)
             } elif (iscleared(g, (int(n.u.key_tt) & 1 << 6) != 0 ? n.u.key_val.gc : null) != 0) {
+                // key is not marked (yet)?
+                // table must be cleared
                 hasclears = 1
+                // value not marked yet?
                 if ((int(addr(n.i_val).tt_) & 1 << 6) != 0 && (int(addr(n.i_val).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+                    // white-white entry
                     hasww = 1
                 }
             } elif ((int(addr(n.i_val).tt_) & 1 << 6) != 0 && (int(addr(n.i_val).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+                // value not marked yet?
                 marked = 1
+                // mark it now
                 reallymarkobject(g, addr(n.i_val).value_.gc)
             }
             i++
         }
     }
-    if (int(g.gcstate) == 0) {
+    // link table into proper list
+    if (int(g.gcstate) == GCSpropagate) {
+        // must retraverse it in atomic phase
         linkgclist_(addr(reinterpret<GCUnion?>(h).gc), addr(h.gclist), addr(g.grayagain))
     } elif (hasww != 0) {
+        // table has white->white entries?
+        // have to propagate again
         linkgclist_(addr(reinterpret<GCUnion?>(h).gc), addr(h.gclist), addr(g.ephemeron))
     } elif (hasclears != 0) {
+        // table has white keys?
+        // may have to clean white keys
         linkgclist_(addr(reinterpret<GCUnion?>(h).gc), addr(h.gclist), addr(g.allweak))
     } else {
+        // check whether collector still needs to see it
         genlink(g, addr(reinterpret<GCUnion?>(h).gc))
     }
     return marked
@@ -6981,6 +8377,7 @@ def private traversestrongtable(var g : global_State?; var h : Table?) {
     var limit : Node? = addr(deref(h.node + uint64(1 << int(h.lsizenode))))
     var i : uint
     var asize : uint = luaH_realasize(h)
+    // traverse array part
     {
         i = uint(0)
         while (i < asize) {
@@ -6991,10 +8388,13 @@ def private traversestrongtable(var g : global_State?; var h : Table?) {
             i++
         }
     }
+    // traverse hash part
     {
         n = addr(deref(h.node + 0))
         while (intptr(n) < intptr(limit)) {
+            // entry is empty?
             if ((int(addr(n.i_val).tt_) & 15) == 0) {
+                // clear its key
                 clearkey(n)
             } else {
                 {
@@ -7028,22 +8428,29 @@ def private traversetable(var g : global_State?; var h : Table?) : uint64 {
             }
         }
     }
+    // is there a weak mode?
     var _t0 = mode != null && int(mode.tt_) == (4 | 0 << 4 | 1 << 6)
     if (_t0) {
         smode = addr(reinterpret<GCUnion?>(mode.value_.gc).ts)
-        weakkey = crt::strchr(addr(smode.contents[0]), 107)
-        weakvalue = crt::strchr(addr(smode.contents[0]), 118)
+        weakkey = crt::strchr(addr(smode.contents[0]), 'k')
+        weakvalue = crt::strchr(addr(smode.contents[0]), 'v')
         _t0 = weakkey != null || weakvalue != null
     }
     if (_t0) {
+        // is really weak?
+        // strong keys?
         if (!(weakkey != null)) {
             traverseweakvalue(g, h)
         } elif (!(weakvalue != null)) {
+            // strong values?
             traverseephemeron(g, h, 0)
         } else {
+            // all weak
+            // nothing to traverse now
             linkgclist_(addr(reinterpret<GCUnion?>(h).gc), addr(h.gclist), addr(g.allweak))
         }
     } else {
+        // not weak
         traversestrongtable(g, h)
     }
     return uint64(uint(1) + h.alimit + uint(2 * (h.lastfree == null ? 0 : 1 << int(h.lsizenode))))
@@ -7053,6 +8460,7 @@ def private traversetable(var g : global_State?; var h : Table?) : uint64 {
 def private traverseudata(var g : global_State?; var u : Udata?) : int {
     var i : int
     {
+        // mark its metatable
         if (u.metatable != null) {
             if ((int(u.metatable.marked) & (1 << 3 | 1 << 4)) != 0) {
                 reallymarkobject(g, addr(reinterpret<GCUnion?>(u.metatable).gc))
@@ -7073,6 +8481,9 @@ def private traverseudata(var g : global_State?; var u : Udata?) : int {
     return 1 + int(u.nuvalue)
 }
 
+// Traverse a prototype. (While a prototype is being build, its
+// arrays can be larger than needed; the extra slots are filled with
+// NULL, so the use of 'markobjectN')
 [c_function]
 def private traverseproto(var g : global_State?; var f : Proto?) : int {
     var i : int
@@ -7083,6 +8494,7 @@ def private traverseproto(var g : global_State?; var f : Proto?) : int {
             }
         }
     }
+    // mark literals
     {
         i = 0
         while (i < f.sizek) {
@@ -7093,6 +8505,7 @@ def private traverseproto(var g : global_State?; var f : Proto?) : int {
             i++
         }
     }
+    // mark upvalue names
     {
         i = 0
         while (i < f.sizeupvalues) {
@@ -7104,6 +8517,7 @@ def private traverseproto(var g : global_State?; var f : Proto?) : int {
             i++
         }
     }
+    // mark nested protos
     {
         i = 0
         while (i < f.sizep) {
@@ -7115,6 +8529,7 @@ def private traverseproto(var g : global_State?; var f : Proto?) : int {
             i++
         }
     }
+    // mark local-variable names
     {
         i = 0
         while (i < f.sizelocvars) {
@@ -7132,6 +8547,7 @@ def private traverseproto(var g : global_State?; var f : Proto?) : int {
 [c_function]
 def private traverseCclosure(var g : global_State?; var cl : CClosure?) : int {
     var i : int
+    // mark its upvalues
     {
         i = 0
         while (i < int(cl.nupvalues)) {
@@ -7145,21 +8561,26 @@ def private traverseCclosure(var g : global_State?; var cl : CClosure?) : int {
     return 1 + int(cl.nupvalues)
 }
 
+// Traverse a Lua closure, marking its prototype and its upvalues.
+// (Both can be NULL while closure is being created.)
 [c_function]
 def private traverseLclosure(var g : global_State?; var cl : LClosure?) : int {
     var i : int
     {
+        // mark its prototype
         if (cl.p != null) {
             if ((int(cl.p.marked) & (1 << 3 | 1 << 4)) != 0) {
                 reallymarkobject(g, addr(reinterpret<GCUnion?>(cl.p).gc))
             }
         }
     }
+    // visit its upvalues
     {
         i = 0
         while (i < int(cl.nupvalues)) {
             var uv : UpVal? = deref(addr(cl.upvals[0]) + i)
             {
+                // mark upvalue
                 if (uv != null) {
                     if ((int(uv.marked) & (1 << 3 | 1 << 4)) != 0) {
                         reallymarkobject(g, addr(reinterpret<GCUnion?>(uv).gc))
@@ -7172,16 +8593,29 @@ def private traverseLclosure(var g : global_State?; var cl : LClosure?) : int {
     return 1 + int(cl.nupvalues)
 }
 
+// Traverse a thread, marking the elements in the stack up to its top
+// and cleaning the rest of the stack in the final traversal. That
+// ensures that the entire stack have valid (non-dead) objects.
+// Threads have no barriers. In gen. mode, old threads must be visited
+// at every cycle, because they might point to young objects. In inc.
+// mode, the thread can still be modified before the end of the cycle,
+// and therefore it must be visited again in the atomic phase. To ensure
+// these visits, threads must return to a gray list if they are not new
+// (which can only happen in generational mode) or if the traverse is in
+// the propagate phase (which can only happen in incremental mode).
 [c_function]
 def private traversethread(var g : global_State?; var th : lua_State?) : int {
     var uv : UpVal?
     var o : StackValue? = th.stack.p
-    if ((int(th.marked) & 7) > 1 || int(g.gcstate) == 0) {
+    if ((int(th.marked) & 7) > 1 || int(g.gcstate) == GCSpropagate) {
+        // insert into 'grayagain' list
         linkgclist_(addr(reinterpret<GCUnion?>(th).gc), addr(th.gclist), addr(g.grayagain))
     }
     if (o == null) {
+        // stack not completely built yet
         return 1
     }
+    // mark live elements in the stack
     {
         while (intptr(o) < intptr(th.top.p)) {
             let _t0 = g.mainthread
@@ -7194,24 +8628,30 @@ def private traversethread(var g : global_State?; var th : lua_State?) : int {
     {
         uv = th.openupval
         while (uv != null) {
+            // open upvalues cannot be collected
             if ((int(uv.marked) & (1 << 3 | 1 << 4)) != 0) {
                 reallymarkobject(g, addr(reinterpret<GCUnion?>(uv).gc))
             }
             uv = uv.u.open.next
         }
     }
-    if (int(g.gcstate) == 2) {
+    // final traversal?
+    if (int(g.gcstate) == GCSatomic) {
         if (!(g.gcemergency != 0)) {
+            // do not change stack in emergency cycle
             luaD_shrinkstack(th)
         }
         {
             o = th.top.p
-            while (intptr(o) < intptr(th.stack_last.p + 5)) {
+            while (intptr(o) < intptr(th.stack_last.p + EXTRA_STACK)) {
+                // clear dead stack slice
                 addr(o.val).tt_ = uint8(0 | 0 << 4)
                 o = o + 1
             }
         }
+        // 'remarkupvals' may have removed thread from 'twups' list
         if (!(intptr(th.twups) != intptr(th)) && th.openupval != null) {
+            // link it back to the list
             th.twups = g.twups
             g.twups = th
         }
@@ -7219,10 +8659,12 @@ def private traversethread(var g : global_State?; var th : lua_State?) : int {
     return 1 + int(int64(th.stack_last.p - th.stack.p))
 }
 
+// traverse one gray object, turning it to black.
 [c_function]
 def private propagatemark(var g : global_State?) : uint64 {
     var o : GCObject? = g.gray
     o.marked = uint8(int(o.marked) | 1 << 5)
+    // remove from 'gray' list
     g.gray = deref(getgclist(o))
     let _cond = int(o.tt)
     if (_cond == 5) {
@@ -7251,6 +8693,10 @@ def private propagateall(var g : global_State?) : uint64 {
     return tot
 }
 
+// Traverse all ephemeron tables propagating marks from keys to values.
+// Repeat until it converges, that is, nothing new is marked. 'dir'
+// inverts the direction of the traversals, trying to speed up
+// convergence on chains in the same table.
 [c_function]
 def private convergeephemerons(var g : global_State?) {
     var changed : int
@@ -7259,26 +8705,36 @@ def private convergeephemerons(var g : global_State?) {
     while (_first || changed != 0) {
         _first = false
         var w : GCObject?
+        // get ephemeron list
         var next : GCObject? = g.ephemeron
+        // tables may return to this list when traversed
         g.ephemeron = null
         changed = 0
+        // for each ephemeron table
         while (true) {
             w = next
             if (!(w != null)) {
                 break
             }
             var h : Table? = addr(reinterpret<GCUnion?>(w).h)
+            // list is rebuilt during loop
             next = h.gclist
+            // out of the list (for now)
             h.marked = uint8(int(h.marked) | 1 << 5)
+            // marked some value?
             if (traverseephemeron(g, h, dir) != 0) {
+                // propagate changes
                 propagateall(g)
+                // will have to revisit all ephemeron tables
                 changed = 1
             }
         }
+        // invert direction next time
         dir = !(dir != 0) ? 1 : 0
     }
 }
 
+// clear entries with unmarked keys from all weaktables in list 'l'
 [c_function]
 def private clearbykeys(var g : global_State?; var l : GCObject?) {
     {
@@ -7289,10 +8745,14 @@ def private clearbykeys(var g : global_State?; var l : GCObject?) {
             {
                 n = addr(deref(h.node + 0))
                 while (intptr(n) < intptr(limit)) {
+                    // unmarked key?
                     if (iscleared(g, (int(n.u.key_tt) & 1 << 6) != 0 ? n.u.key_val.gc : null) != 0) {
+                        // remove entry
                         addr(n.i_val).tt_ = uint8(0 | 1 << 4)
                     }
+                    // is entry empty?
                     if ((int(addr(n.i_val).tt_) & 15) == 0) {
+                        // clear its key
                         clearkey(n)
                     }
                     n = n + 1
@@ -7303,6 +8763,8 @@ def private clearbykeys(var g : global_State?; var l : GCObject?) {
     }
 }
 
+// clear entries with unmarked values from all weaktables in list 'l' up
+// to element 'f'
 [c_function]
 def private clearbyvalues(var g : global_State?; var l : GCObject?; var f : GCObject?) {
     {
@@ -7316,7 +8778,9 @@ def private clearbyvalues(var g : global_State?; var l : GCObject?; var f : GCOb
                 i = uint(0)
                 while (i < asize) {
                     var o : TValue? = addr(deref(h._c_array + i))
+                    // value was collected?
                     if (iscleared(g, (int(o.tt_) & 1 << 6) != 0 ? o.value_.gc : null) != 0) {
+                        // remove entry
                         o.tt_ = uint8(0 | 1 << 4)
                     }
                     i++
@@ -7325,10 +8789,14 @@ def private clearbyvalues(var g : global_State?; var l : GCObject?; var f : GCOb
             {
                 n = addr(deref(h.node + 0))
                 while (intptr(n) < intptr(limit)) {
+                    // unmarked value?
                     if (iscleared(g, (int(addr(n.i_val).tt_) & 1 << 6) != 0 ? addr(n.i_val).value_.gc : null) != 0) {
+                        // remove entry
                         addr(n.i_val).tt_ = uint8(0 | 1 << 4)
                     }
+                    // is entry empty?
                     if ((int(addr(n.i_val).tt_) & 15) == 0) {
+                        // clear its key
                         clearkey(n)
                     }
                     n = n + 1
@@ -7376,6 +8844,7 @@ def private freeobj(var L : lua_State?; var o : GCObject?) {
     } elif (_cond == 4) {
         {
             var ts : TString? = addr(reinterpret<GCUnion?>(o).ts)
+            // remove it from hash table
             luaS_remove(L, ts)
             luaM_free_(L, reinterpret<void?>(ts), uint64(typeinfo offsetof < contents > (type<TString>)) + uint64(int(ts.shrlen) + 1) * uint64(typeinfo sizeof(type<uint8>)))
         }
@@ -7388,33 +8857,46 @@ def private freeobj(var L : lua_State?; var o : GCObject?) {
     }
 }
 
+// sweep at most 'countin' elements from a list of GCObjects erasing dead
+// objects, where a dead object is one marked with the old (non current)
+// white; change all non-dead objects back to white, preparing for next
+// collection cycle. Return where to continue the traversal or NULL if
+// list is finished. ('*countout' gets the number of elements traversed.)
 [c_function]
 def private sweeplist(var L : lua_State?; var p : GCObject ??; countin : int; var countout : int?) : GCObject ?? {
     var g : global_State? = L.l_G
     var ow : int = int(g.currentwhite) ^ (1 << 3 | 1 << 4)
     var i : int
+    // current white
     var white : int = int(uint8(int(g.currentwhite) & (1 << 3 | 1 << 4)))
     {
         i = 0
         while (deref(p) != null && i < countin) {
             var curr : GCObject? = deref(p)
             var marked : int = int(curr.marked)
+            // is 'curr' dead?
             if ((marked & ow) != 0) {
+                // remove 'curr' from list
                 deref(p) = curr.next
+                // erase 'curr'
                 freeobj(L, curr)
             } else {
+                // change mark to 'white'
                 curr.marked = uint8(marked & ~(1 << 5 | (1 << 3 | 1 << 4) | 7) | white)
+                // go to next element
                 p = addr(curr.next)
             }
             i++
         }
     }
     if (countout != null) {
+        // number of elements traversed
         deref(countout) = i
     }
     return deref(p) == null ? default<GCObject ??> : p
 }
 
+// sweep a list until a live object (or end of list)
 def private sweeptolive(var L : lua_State?; var p : GCObject ??) : GCObject ?? {
     var old : GCObject ?? = p
     var _first = true
@@ -7425,25 +8907,36 @@ def private sweeptolive(var L : lua_State?; var p : GCObject ??) : GCObject ?? {
     return p
 }
 
+// If possible, shrink string table.
 def private checkSizes(var L : lua_State?; var g : global_State?) {
     if (!(g.gcemergency != 0)) {
+        // string table too big?
         if (g.strt.nuse < g.strt.size / 4) {
             var olddebt : int64 = g.GCdebt
             luaS_resize(L, g.strt.size / 2)
+            // correct estimate
             g.GCestimate += uint64(g.GCdebt - olddebt)
         }
     }
 }
 
+// Get the next udata to be finalized from the 'tobefnz' list, and
+// link it back into the 'allgc' list.
 def private udata2finalize(var g : global_State?) : GCObject? {
+    // get first element
     var o : GCObject? = g.tobefnz
+    // remove it from 'tobefnz' list
     g.tobefnz = o.next
+    // return it to 'allgc' list
     o.next = g.allgc
     g.allgc = o
+    // object is "normal" again
     o.marked = uint8(int(o.marked) & int(uint8(~(1 << 6))))
     if (3 <= int(g.gcstate) && int(g.gcstate) <= 6) {
+        // "sweep" object
         o.marked = uint8(int(o.marked) & ~(1 << 5 | (1 << 3 | 1 << 4)) | int(uint8(int(g.currentwhite) & (1 << 3 | 1 << 4))))
-    } elif ((int(o.marked) & 7) == 3) {
+    } elif ((int(o.marked) & 7) == G_OLD1) {
+        // it is the first OLD1 object in the list
         g.firstold1 = o
     }
     return o
@@ -7466,13 +8959,17 @@ def private GCTM(var L : lua_State?) {
         io.tt_ = uint8(int(i_g.tt) | 1 << 6)
     }
     tm = luaT_gettmbyobj(L, addr(v), TMS.TM_GC)
+    // is there a finalizer?
     if (!((int(tm.tt_) & 15) == 0)) {
         var status : int
         var oldah : uint8 = L.allowhook
         var oldgcstp : int = int(g.gcstp)
-        g.gcstp = uint8(int(g.gcstp) | 2)
+        // avoid GC steps
+        g.gcstp = uint8(int(g.gcstp) | GCSTPGC)
+        // stop debug hooks during GC metamethod
         L.allowhook = uint8(0)
         {
+            // push finalizer...
             var _t0 = L.top.p
             L.top.p = L.top.p + 1
             var io1 : TValue? = addr(_t0.val)
@@ -7481,6 +8978,7 @@ def private GCTM(var L : lua_State?) {
             io1.tt_ = io2.tt_
         }
         {
+            // ... and its argument
             var _t1 = L.top.p
             L.top.p = L.top.p + 1
             var io1 : TValue? = addr(_t1.val)
@@ -7488,24 +8986,32 @@ def private GCTM(var L : lua_State?) {
             io1.value_ = io2.value_
             io1.tt_ = io2.tt_
         }
-        L.ci.callstatus = uint16(int(L.ci.callstatus) | 1 << 7)
+        // will run a finalizer
+        L.ci.callstatus = uint16(int(L.ci.callstatus) | CIST_FIN)
         status = luaD_pcall(L, @@dothecall, null, int64(reinterpret<uint8?>(L.top.p - 2) - reinterpret<uint8?>(L.stack.p)), int64(0))
-        L.ci.callstatus = uint16(int(L.ci.callstatus) & ~(1 << 7))
+        // not running a finalizer anymore
+        L.ci.callstatus = uint16(int(L.ci.callstatus) & ~CIST_FIN)
+        // restore hooks
         L.allowhook = oldah
+        // restore state
         g.gcstp = uint8(oldgcstp)
-        if (int64((status != 0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+        // error while running __gc?
+        if (status != 0) {
             luaE_warnerror(L, reinterpret<uint8?>("__gc"))
+            // pops error object
             L.top.p = L.top.p - 1
         }
     }
 }
 
+// Call a few finalizers
 def private runafewfinalizers(var L : lua_State?; n : int) : int {
     var g : global_State? = L.l_G
     var i : int
     {
         i = 0
         while (i < n && g.tobefnz != null) {
+            // call one finalizer
             GCTM(L)
             i++
         }
@@ -7513,6 +9019,7 @@ def private runafewfinalizers(var L : lua_State?; n : int) : int {
     return i
 }
 
+// call all pending finalizers
 def private callallpendingfinalizers(var L : lua_State?) {
     var g : global_State? = L.l_G
     while (g.tobefnz != null) {
@@ -7520,6 +9027,7 @@ def private callallpendingfinalizers(var L : lua_State?) {
     }
 }
 
+// find last 'next' field in list 'p' list (to add elements in its end)
 [c_function]
 def private findlast(var p : GCObject ??) : GCObject ?? {
     while (deref(p) != null) {
@@ -7528,23 +9036,35 @@ def private findlast(var p : GCObject ??) : GCObject ?? {
     return p
 }
 
+// Move all unreachable objects (or 'all' objects) that need
+// finalization from list 'finobj' to list 'tobefnz' (to be finalized).
+// (Note that objects after 'finobjold1' cannot be white, so they
+// don't need to be traversed. In incremental mode, 'finobjold1' is NULL,
+// so the whole list is traversed.)
 [c_function]
 def private separatetobefnz(var g : global_State?; all : int) {
     var curr : GCObject?
     var p : GCObject ?? = addr(g.finobj)
     var lastnext : GCObject ?? = findlast(addr(g.tobefnz))
+    // traverse all finalizable objects
     while (true) {
         curr = deref(p)
         if (!(intptr(curr) != intptr(g.finobjold1))) {
             break
         }
+        // not being collected?
         if (!((int(curr.marked) & (1 << 3 | 1 << 4)) != 0 || all != 0)) {
+            // don't bother with it
             p = addr(curr.next)
         } else {
+            // removing 'finobjsur'?
             if (intptr(curr) == intptr(g.finobjsur)) {
+                // correct it
                 g.finobjsur = curr.next
             }
+            // remove 'curr' from 'finobj' list
             deref(p) = curr.next
+            // link at the end of 'tobefnz' list
             curr.next = deref(lastnext)
             deref(lastnext) = curr
             lastnext = addr(curr.next)
@@ -7552,6 +9072,7 @@ def private separatetobefnz(var g : global_State?; all : int) {
     }
 }
 
+// If pointer 'p' points to 'o', move it to the next element.
 [c_function]
 def private checkpointer(var p : GCObject ??; var o : GCObject?) {
     if (intptr(o) == intptr(deref(p))) {
@@ -7559,6 +9080,8 @@ def private checkpointer(var p : GCObject ??; var o : GCObject?) {
     }
 }
 
+// Correct pointers to objects inside 'allgc' list when
+// object 'o' is being removed from the list.
 [c_function]
 def private correctpointers(var g : global_State?; var o : GCObject?) {
     checkpointer(addr(g.survival), o)
@@ -7567,40 +9090,63 @@ def private correctpointers(var g : global_State?; var o : GCObject?) {
     checkpointer(addr(g.firstold1), o)
 }
 
+// if object 'o' has a finalizer, remove it from 'allgc' list (must
+// search the list to find it) and link it in 'finobj' list.
 [c_function]
 def luaC_checkfinalizer(var L : lua_State?; var o : GCObject?; var mt : Table?) {
     var g : global_State? = L.l_G
-    if ((int(o.marked) & 1 << 6) != 0 || (mt == null ? default<TValue?> : ((uint(mt.flags) & 1u << uint(int(TMS.TM_GC))) != 0 ? default<TValue?> : luaT_gettm(mt, TMS.TM_GC, g.tmname[int(TMS.TM_GC)]))) == null || (int(g.gcstp) & 4) != 0) {
+    // obj. is already marked...
+    if ((int(o.marked) & 1 << 6) != 0 || (mt == null ? default<TValue?> : ((uint(mt.flags) & 1u << uint(int(TMS.TM_GC))) != 0 ? default<TValue?> : luaT_gettm(mt, TMS.TM_GC, g.tmname[int(TMS.TM_GC)]))) == null || (int(g.gcstp) & GCSTPCLS) != 0) {
+        // or has no finalizer...
+        // or closing state?
+        // nothing to be done
         return
     } else {
+        // move 'o' to 'finobj' list
         var p : GCObject ??
         if (3 <= int(g.gcstate) && int(g.gcstate) <= 6) {
+            // "sweep" object 'o'
             o.marked = uint8(int(o.marked) & ~(1 << 5 | (1 << 3 | 1 << 4)) | int(uint8(int(g.currentwhite) & (1 << 3 | 1 << 4))))
+            // should not remove 'sweepgc' object
             if (intptr(g.sweepgc) == intptr(addr(o.next))) {
+                // change 'sweepgc'
                 g.sweepgc = sweeptolive(L, g.sweepgc)
             }
         } else {
             correctpointers(g, o)
         }
+        // search for pointer pointing to 'o'
+        // empty
         {
             p = addr(g.allgc)
             while (intptr(deref(p)) != intptr(o)) {
                 p = addr(deref(p).next)
             }
         }
+        // remove 'o' from 'allgc' list
         deref(p) = o.next
+        // link it in 'finobj' list
         o.next = g.finobj
         g.finobj = o
+        // mark it as such
         o.marked = uint8(int(o.marked) | 1 << 6)
     }
 }
 
+// Set the "time" to wait before starting a new GC cycle; cycle will
+// start when memory use hits the threshold of ('estimate' * pause
+// PAUSEADJ). (Division by 'estimate' should be OK: it cannot be zero,
+// because Lua cannot even start with less than PAUSEADJ bytes).
 def private setpause(var g : global_State?) {
     var threshold : int64
     var debt : int64
     var pause : int = int(g.gcpause) * 4
-    var estimate : int64 = int64(g.GCestimate / uint64(100))
-    threshold = int64(pause) < int64(~uint64(0) >> 1ul) / estimate ? estimate * int64(pause) : int64(~uint64(0) >> 1ul)
+    // adjust 'estimate'
+    var estimate : int64 = int64(g.GCestimate / uint64(PAUSEADJ))
+    // overflow?
+    threshold = int64(pause) < MAX_LMEM / estimate ? estimate * int64(pause) : MAX_LMEM
+    // no overflow
+    // overflow; truncate to maximum
     debt = g.totalbytes + g.GCdebt - threshold
     if (debt > int64(0)) {
         debt = int64(0)
@@ -7608,6 +9154,10 @@ def private setpause(var g : global_State?) {
     luaE_setdebt(g, debt)
 }
 
+// Sweep a list of objects to enter generational mode. Deletes dead
+// objects and turns the non dead to old. All non-dead threads---which
+// are now old---must be in a gray list. Everything else is not in a
+// gray list. Open upvalues are also kept gray.
 [c_function]
 def private sweep2old(var L : lua_State?; var p : GCObject ??) {
     var curr : GCObject?
@@ -7617,26 +9167,51 @@ def private sweep2old(var L : lua_State?; var p : GCObject ??) {
         if (!(curr != null)) {
             break
         }
+        // is 'curr' dead?
         if ((int(curr.marked) & (1 << 3 | 1 << 4)) != 0) {
+            // remove 'curr' from list
             deref(p) = curr.next
+            // erase 'curr'
             freeobj(L, curr)
         } else {
+            // all surviving objects become old
             curr.marked = uint8(int(curr.marked) & ~7 | 4)
-            if (int(curr.tt) == (8 | 0 << 4)) {
+            // threads must be watched
+            if (int(curr.tt) == LUA_VTHREAD) {
                 var th : lua_State? = addr(reinterpret<GCUnion?>(curr).th)
+                // insert into 'grayagain' list
                 linkgclist_(addr(reinterpret<GCUnion?>(th).gc), addr(th.gclist), addr(g.grayagain))
-            } elif (int(curr.tt) == (9 | 0 << 4) && intptr(addr(reinterpret<GCUnion?>(curr).upv).v.p) != intptr(addr(addr(reinterpret<GCUnion?>(curr).upv).u.value))) {
+            } elif (int(curr.tt) == LUA_VUPVAL && intptr(addr(reinterpret<GCUnion?>(curr).upv).v.p) != intptr(addr(addr(reinterpret<GCUnion?>(curr).upv).u.value))) {
+                // open upvalues are always gray
                 curr.marked = uint8(int(curr.marked) & int(uint8(~(1 << 5 | (1 << 3 | 1 << 4)))))
             } else {
+                // everything else is black
                 curr.marked = uint8(int(curr.marked) | 1 << 5)
             }
+            // go to next element
             p = addr(curr.next)
         }
     }
 }
 
+// Sweep for generational mode. Delete dead objects. (Because the
+// collection is not incremental, there are no "new white" objects
+// during the sweep. So, any white object must be dead.) For
+// non-dead objects, advance their ages and clear the color of
+// new objects. (Old objects keep their colors.)
+// The ages of G_TOUCHED1 and G_TOUCHED2 objects cannot be advanced
+// here, because these old-generation objects are usually not swept
+// here. They will all be advanced in 'correctgraylist'. That function
+// will also remove objects turned white here from any gray list.
 [c_function]
 def private sweepgen(var L : lua_State?; var g : global_State?; var p : GCObject ??; var limit : GCObject?; var pfirstold1 : GCObject ??) : GCObject ?? {
+    // from G_NEW
+    // from G_SURVIVAL
+    // from G_OLD0
+    // from G_OLD1
+    // from G_OLD (do not change)
+    // from G_TOUCHED1 (do not change)
+    // from G_TOUCHED2 (do not change)
     var white : int = int(uint8(int(g.currentwhite) & (1 << 3 | 1 << 4)))
     var curr : GCObject?
     while (true) {
@@ -7644,25 +9219,37 @@ def private sweepgen(var L : lua_State?; var g : global_State?; var p : GCObject
         if (!(intptr(curr) != intptr(limit))) {
             break
         }
+        // is 'curr' dead?
         if ((int(curr.marked) & (1 << 3 | 1 << 4)) != 0) {
+            // remove 'curr' from list
             deref(p) = curr.next
+            // erase 'curr'
             freeobj(L, curr)
         } else {
-            if ((int(curr.marked) & 7) == 0) {
-                var marked : int = int(curr.marked) & ~(1 << 5 | (1 << 3 | 1 << 4) | 7)
+            // correct mark and age
+            // new objects go back to white
+            if ((int(curr.marked) & 7) == G_NEW) {
+                // erase GC bits
+                var marked : int = int(curr.marked) & ~maskgcbits
                 curr.marked = uint8(marked | 1 | white)
             } else {
+                // all other objects will be old, and so keep their color
                 curr.marked = uint8(int(curr.marked) & ~7 | int(sweepgen_nextage[int(curr.marked) & 7]))
-                if ((int(curr.marked) & 7) == 3 && deref(pfirstold1) == null) {
+                if ((int(curr.marked) & 7) == G_OLD1 && deref(pfirstold1) == null) {
+                    // first OLD1 object in the list
                     deref(pfirstold1) = curr
                 }
             }
+            // go to next element
             p = addr(curr.next)
         }
     }
     return p
 }
 
+// Traverse a list making all its elements white and clearing their
+// age. In incremental mode, all objects are 'new' all the time,
+// except for fixed strings (which are always old).
 [c_function]
 def private whitelist(var g : global_State?; var p : GCObject?) {
     var white : int = int(uint8(int(g.currentwhite) & (1 << 3 | 1 << 4)))
@@ -7674,6 +9261,13 @@ def private whitelist(var g : global_State?; var p : GCObject?) {
     }
 }
 
+// Correct a list of gray objects. Return pointer to where rest of the
+// list should be linked.
+// Because this correction is done after sweeping, young objects might
+// be turned white and still be in the list. They are only removed.
+// 'TOUCHED1' objects are advanced to 'TOUCHED2' and remain on the list;
+// Non-white threads also remain on the list; 'TOUCHED2' objects become
+// regular old; they and anything else are removed from the list.
 [c_function]
 def private correctgraylist(var p : GCObject ??) : GCObject ?? {
     var curr : GCObject?
@@ -7684,17 +9278,27 @@ def private correctgraylist(var p : GCObject ??) : GCObject ?? {
         }
         var next : GCObject ?? = getgclist(curr)
         if ((int(curr.marked) & (1 << 3 | 1 << 4)) != 0) {
+            // remove all white objects
             goto label 1
-        } elif ((int(curr.marked) & 7) == 5) {
+        } elif ((int(curr.marked) & 7) == G_TOUCHED1) {
+            // touched in this cycle?
+            // make it black, for next barrier
             curr.marked = uint8(int(curr.marked) | 1 << 5)
             curr.marked = uint8(int(curr.marked) ^ (5 ^ 6))
+            // keep it in the list and go to next element
             goto label 2
-        } elif (int(curr.tt) == (8 | 0 << 4)) {
+        } elif (int(curr.tt) == LUA_VTHREAD) {
+            // keep non-white threads on the list
             goto label 2
         } else {
-            if ((int(curr.marked) & 7) == 6) {
+            // everything else is removed
+            // young objects should be white here
+            // advance from TOUCHED2...
+            if ((int(curr.marked) & 7) == G_TOUCHED2) {
+                // ... to OLD
                 curr.marked = uint8(int(curr.marked) ^ (6 ^ 4))
             }
+            // make object black (to be removed)
             curr.marked = uint8(int(curr.marked) | 1 << 5)
             goto label 1
         }
@@ -7708,6 +9312,7 @@ def private correctgraylist(var p : GCObject ??) : GCObject ?? {
     return p
 }
 
+// Correct all gray lists, coalescing them into 'grayagain'.
 [c_function]
 def private correctgraylists(var g : global_State?) {
     var list : GCObject ?? = correctgraylist(addr(g.grayagain))
@@ -7722,12 +9327,16 @@ def private correctgraylists(var g : global_State?) {
     correctgraylist(list)
 }
 
+// Mark black 'OLD1' objects when starting a new young collection.
+// Gray objects are already in some gray list, and so will be visited
+// in the atomic step.
 def private markold(var g : global_State?; var from : GCObject?; var to : GCObject?) {
     var p : GCObject?
     {
         p = from
         while (intptr(p) != intptr(to)) {
-            if ((int(p.marked) & 7) == 3) {
+            if ((int(p.marked) & 7) == G_OLD1) {
+                // now they are old
                 p.marked = uint8(int(p.marked) ^ (3 ^ 4))
                 if ((int(p.marked) & 1 << 5) != 0) {
                     reallymarkobject(g, p)
@@ -7738,76 +9347,117 @@ def private markold(var g : global_State?; var from : GCObject?; var to : GCObje
     }
 }
 
+// Finish a young-generation collection.
 def private finishgencycle(var L : lua_State?; var g : global_State?) {
     correctgraylists(g)
     checkSizes(L, g)
-    g.gcstate = uint8(0)
+    // skip restart
+    g.gcstate = uint8(GCSpropagate)
     if (!(g.gcemergency != 0)) {
         callallpendingfinalizers(L)
     }
 }
 
+// Does a young collection. First, mark 'OLD1' objects. Then does the
+// atomic step. Then, sweep all lists and advance pointers. Finally,
+// finish the collection.
 [c_function]
 def private youngcollection(var L : lua_State?; var g : global_State?) {
+    // to point to first non-dead survival object
     var psurvival : GCObject ??
+    // dummy out parameter to 'sweepgen'
     var dummy : GCObject?
+    // are there regular OLD1 objects?
     if (g.firstold1 != null) {
+        // mark them
         markold(g, g.firstold1, g.reallyold)
+        // no more OLD1 objects (for now)
         g.firstold1 = null
     }
     markold(g, g.finobj, g.finobjrold)
     markold(g, g.tobefnz, null)
     atomic(L)
-    g.gcstate = uint8(3)
+    // sweep nursery and get a pointer to its last live element
+    g.gcstate = uint8(GCSswpallgc)
     psurvival = sweepgen(L, g, addr(g.allgc), g.survival, addr(g.firstold1))
+    // sweep 'survival'
     sweepgen(L, g, psurvival, g.old1, addr(g.firstold1))
     g.reallyold = g.old1
+    // 'survival' survivals are old now
     g.old1 = deref(psurvival)
+    // all news are survivals
     g.survival = g.allgc
+    // repeat for 'finobj' lists
+    // no 'firstold1' optimization for 'finobj' lists
     dummy = null
     psurvival = sweepgen(L, g, addr(g.finobj), g.finobjsur, addr(dummy))
+    // sweep 'survival'
     sweepgen(L, g, psurvival, g.finobjold1, addr(dummy))
     g.finobjrold = g.finobjold1
+    // 'survival' survivals are old now
     g.finobjold1 = deref(psurvival)
+    // all news are survivals
     g.finobjsur = g.finobj
     sweepgen(L, g, addr(g.tobefnz), null, addr(dummy))
     finishgencycle(L, g)
 }
 
+// Clears all gray lists, sweeps objects, and prepare sublists to enter
+// generational mode. The sweeps remove dead objects and turn all
+// surviving objects to old. Threads go back to 'grayagain'; everything
+// else is turned black (not in any gray list).
 [c_function]
 def private atomic2gen(var L : lua_State?; var g : global_State?) {
     cleargraylists(g)
-    g.gcstate = uint8(3)
+    // sweep all elements making them old
+    g.gcstate = uint8(GCSswpallgc)
     sweep2old(L, addr(g.allgc))
+    // everything alive now is old
     g.survival = g.allgc
     g.old1 = g.survival
     g.reallyold = g.old1
+    // there are no OLD1 objects anywhere
     g.firstold1 = null
+    // repeat for 'finobj' lists
     sweep2old(L, addr(g.finobj))
     g.finobjsur = g.finobj
     g.finobjold1 = g.finobjsur
     g.finobjrold = g.finobjold1
     sweep2old(L, addr(g.tobefnz))
-    g.gckind = uint8(1)
+    g.gckind = uint8(KGC_GEN)
     g.lastatomic = uint64(0)
+    // base for memory control
     g.GCestimate = uint64(g.totalbytes + g.GCdebt)
     finishgencycle(L, g)
 }
 
+// Set debt for the next minor collection, which will happen when
+// memory grows 'genminormul'%.
 def private setminordebt(var g : global_State?) {
     luaE_setdebt(g, -(int64(uint64(g.totalbytes + g.GCdebt) / uint64(100)) * int64(g.genminormul)))
 }
 
+// Enter generational mode. Must go until the end of an atomic cycle
+// to ensure that all objects are correctly marked and weak tables
+// are cleared. Then, turn all objects into old and finishes the
+// collection.
 def private entergen(var L : lua_State?; var g : global_State?) : uint64 {
     var numobjs : uint64
+    // prepare to start a new cycle
     luaC_runtilstate(L, 1 << 8)
+    // start new cycle
     luaC_runtilstate(L, 1 << 0)
+    // propagates all and then do the atomic stuff
     numobjs = atomic(L)
     atomic2gen(L, g)
+    // set debt assuming next cycle will be minor
     setminordebt(g)
     return numobjs
 }
 
+// Enter incremental mode. Turn all objects white, make all
+// intermediate lists point to NULL (to avoid invalid pointers),
+// and go to the pause state.
 def private enterinc(var g : global_State?) {
     whitelist(g, g.allgc)
     g.survival = null
@@ -7818,76 +9468,142 @@ def private enterinc(var g : global_State?) {
     g.finobjsur = null
     g.finobjold1 = g.finobjsur
     g.finobjrold = g.finobjold1
-    g.gcstate = uint8(8)
-    g.gckind = uint8(0)
+    g.gcstate = uint8(GCSpause)
+    g.gckind = uint8(KGC_INC)
     g.lastatomic = uint64(0)
 }
 
+// Change collector mode to 'newmode'.
 def luaC_changemode(var L : lua_State?; newmode : int) {
     var g : global_State? = L.l_G
     if (newmode != int(g.gckind)) {
-        if (newmode == 1) {
+        // entering generational mode?
+        if (newmode == KGC_GEN) {
             entergen(L, g)
         } else {
+            // entering incremental mode
             enterinc(g)
         }
     }
     g.lastatomic = uint64(0)
 }
 
+// Does a full collection in generational mode.
 def private fullgen(var L : lua_State?; var g : global_State?) : uint64 {
     enterinc(g)
     return entergen(L, g)
 }
 
+// Does a major collection after last collection was a "bad collection".
+// When the program is building a big structure, it allocates lots of
+// memory but generates very little garbage. In those scenarios,
+// the generational mode just wastes time doing small collections, and
+// major collections are frequently what we call a "bad collection", a
+// collection that frees too few objects. To avoid the cost of switching
+// between generational mode and the incremental mode needed for full
+// (major) collections, the collector tries to stay in incremental mode
+// after a bad collection, and to switch back to generational mode only
+// after a "good" collection (one that traverses less than 9/8 objects
+// of the previous one).
+// The collector must choose whether to stay in incremental mode or to
+// switch back to generational mode before sweeping. At this point, it
+// does not know the real memory in use, so it cannot use memory to
+// decide whether to return to generational mode. Instead, it uses the
+// number of objects traversed (returned by 'atomic') as a proxy. The
+// field 'g->lastatomic' keeps this count from the last collection.
+// ('g->lastatomic != 0' also means that the last collection was bad.)
 def private stepgenfull(var L : lua_State?; var g : global_State?) {
+    // count of traversed objects
     var newatomic : uint64
+    // count from last collection
     var lastatomic : uint64 = g.lastatomic
-    if (int(g.gckind) == 1) {
+    // still in generational mode?
+    if (int(g.gckind) == KGC_GEN) {
+        // enter incremental mode
         enterinc(g)
     }
+    // start new cycle
     luaC_runtilstate(L, 1 << 0)
+    // mark everybody
     newatomic = atomic(L)
+    // good collection?
     if (newatomic < lastatomic + (lastatomic >> 3ul)) {
+        // return to generational mode
         atomic2gen(L, g)
         setminordebt(g)
     } else {
+        // another bad collection; stay in incremental mode
+        // first estimate
         g.GCestimate = uint64(g.totalbytes + g.GCdebt)
         entersweep(L)
+        // finish collection
         luaC_runtilstate(L, 1 << 8)
         setpause(g)
         g.lastatomic = newatomic
     }
 }
 
+// Does a generational "step".
+// Usually, this means doing a minor collection and setting the debt to
+// make another collection when memory grows 'genminormul'% larger.
+// However, there are exceptions. If memory grows 'genmajormul'%
+// larger than it was at the end of the last major collection (kept
+// in 'g->GCestimate'), the function does a major collection. At the
+// end, it checks whether the major collection was able to free a
+// decent amount of memory (at least half the growth in memory since
+// previous major collection). If so, the collector keeps its state,
+// and the next collection will probably be minor again. Otherwise,
+// we have what we call a "bad collection". In that case, set the field
+// 'g->lastatomic' to signal that fact, so that the next collection will
+// go to 'stepgenfull'.
+// 'GCdebt <= 0' means an explicit call to GC step with "size" zero;
+// in that case, do a minor collection.
 def private genstep(var L : lua_State?; var g : global_State?) {
+    // last collection was a bad one?
     if (g.lastatomic != uint64(0)) {
+        // do a full step
         stepgenfull(L, g)
     } else {
+        // memory after last major collection
         var majorbase : uint64 = g.GCestimate
         var majorinc : uint64 = majorbase / uint64(100) * uint64(int(g.genmajormul) * 4)
         if (g.GCdebt > int64(0) && uint64(g.totalbytes + g.GCdebt) > majorbase + majorinc) {
+            // do a major collection
             var numobjs : uint64 = fullgen(L, g)
             if (uint64(g.totalbytes + g.GCdebt) < majorbase + majorinc / uint64(2)) {
+                // collected at least half of memory growth since last major
+                // collection; keep doing minor collections.
             } else {
+                // bad collection
+                // signal that last collection was bad
                 g.lastatomic = numobjs
+                // do a long wait for next (major) collection
                 setpause(g)
             }
         } else {
+            // regular case; do a minor collection
             youngcollection(L, g)
             setminordebt(g)
+            // preserve base value
             g.GCestimate = majorbase
         }
     }
 }
 
+// Enter first sweep phase.
+// The call to 'sweeptolive' makes the pointer point to an object
+// inside the list (instead of to the header), so that the real sweep do
+// not need to skip objects created between "now" and the start of the
+// real sweep.
 [c_function]
 def private entersweep(var L : lua_State?) {
     var g : global_State? = L.l_G
-    g.gcstate = uint8(3)
+    g.gcstate = uint8(GCSswpallgc)
     g.sweepgc = sweeptolive(L, addr(g.allgc))
 }
 
+// Delete all objects in list 'p' until (but not including) object
+// 'limit'.
 def private deletelist(var L : lua_State?; var p : GCObject?; var limit : GCObject?) {
     while (intptr(p) != intptr(limit)) {
         var next : GCObject? = p.next
@@ -7896,14 +9612,20 @@ def private deletelist(var L : lua_State?; var p : GCObject?; var limit : GCObje
     }
 }
 
+// Call all finalizers of the objects in the given Lua state, and
+// then free all objects, except for the main thread.
 [c_function]
 def luaC_freeallobjects(var L : lua_State?) {
     var g : global_State? = L.l_G
-    g.gcstp = uint8(4)
-    luaC_changemode(L, 0)
+    // no extra finalizers after here
+    g.gcstp = uint8(GCSTPCLS)
+    luaC_changemode(L, KGC_INC)
+    // separate all objects with finalizers
     separatetobefnz(g, 1)
     callallpendingfinalizers(L)
     deletelist(L, g.allgc, addr(reinterpret<GCUnion?>(g.mainthread).gc))
+    // no new finalizers
+    // collect fixed objects
     deletelist(L, g.fixedgc, null)
 }
 
@@ -7913,41 +9635,61 @@ def private atomic(var L : lua_State?) : uint64 {
     var work : uint64 = uint64(0)
     var origweak : GCObject?
     var origall : GCObject?
+    // save original list
     var grayagain : GCObject? = g.grayagain
     g.grayagain = null
-    g.gcstate = uint8(2)
+    g.gcstate = uint8(GCSatomic)
     {
+        // mark running thread
         if ((int(L.marked) & (1 << 3 | 1 << 4)) != 0) {
             reallymarkobject(g, addr(reinterpret<GCUnion?>(L).gc))
         }
     }
     {
+        // registry and global metatables may be changed by API
         let _t0 = g.mainthread
         if ((int(addr(g.l_registry).tt_) & 1 << 6) != 0 && (int(addr(g.l_registry).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
             reallymarkobject(g, addr(g.l_registry).value_.gc)
         }
     }
+    // mark global metatables
     markmt(g)
+    // empties 'gray' list
     work += propagateall(g)
+    // remark occasional upvalues of (maybe) dead threads
     work += uint64(remarkupvals(g))
+    // propagate changes
     work += propagateall(g)
     g.gray = grayagain
+    // traverse 'grayagain' list
     work += propagateall(g)
     convergeephemerons(g)
+    // at this point, all strongly accessible objects are marked.
+    // Clear values from weak tables, before checking finalizers
     clearbyvalues(g, g.weak, null)
     clearbyvalues(g, g.allweak, null)
     origweak = g.weak
     origall = g.allweak
+    // separate objects to be finalized
     separatetobefnz(g, 0)
+    // mark objects that will be finalized
     work += markbeingfnz(g)
+    // remark, to propagate 'resurrection'
     work += propagateall(g)
     convergeephemerons(g)
+    // at this point, all resurrected objects are marked.
+    // remove dead objects from weak tables
+    // clear keys from all ephemeron tables
     clearbykeys(g, g.ephemeron)
+    // clear keys from all 'allweak' tables
     clearbykeys(g, g.allweak)
+    // clear values from resurrected weak tables
     clearbyvalues(g, g.weak, origweak)
     clearbyvalues(g, g.allweak, origall)
     luaS_clearcache(g)
+    // flip current white
     g.currentwhite = uint8(int(g.currentwhite) ^ (1 << 3 | 1 << 4))
+    // estimate of slots marked by 'atomic'
     return work
 }
 
@@ -7956,12 +9698,15 @@ def private sweepstep(var L : lua_State?; var g : global_State?; nextstate : int
     if (g.sweepgc != null) {
         var olddebt : int64 = g.GCdebt
         var count : int
-        g.sweepgc = sweeplist(L, g.sweepgc, 100, addr(count))
+        g.sweepgc = sweeplist(L, g.sweepgc, GCSWEEPMAX, addr(count))
+        // update estimate
         g.GCestimate += uint64(g.GCdebt - olddebt)
         return count
     } else {
+        // enter next state
         g.gcstate = uint8(nextstate)
         g.sweepgc = nextlist
+        // no work done
         return 0
     }
 }
@@ -7970,54 +9715,69 @@ def private sweepstep(var L : lua_State?; var g : global_State?; nextstate : int
 def private singlestep(var L : lua_State?) : uint64 {
     var g : global_State? = L.l_G
     var work : uint64
+    // collector is not reentrant
+    // no emergency collections while collecting
     g.gcstopem = uint8(1)
     let _cond = int(g.gcstate)
     if (_cond == 8) {
         {
             restartcollection(g)
-            g.gcstate = uint8(0)
+            g.gcstate = uint8(GCSpropagate)
             work = uint64(1)
         }
     } elif (_cond == 0) {
         {
+            // no more gray objects?
             if (g.gray == null) {
-                g.gcstate = uint8(1)
+                // finish propagate phase
+                g.gcstate = uint8(GCSenteratomic)
                 work = uint64(0)
             } else {
+                // traverse one gray object
                 work = propagatemark(g)
             }
         }
     } elif (_cond == 1) {
         {
+            // work is what was traversed by 'atomic'
             work = atomic(L)
             entersweep(L)
+            // first estimate
             g.GCestimate = uint64(g.totalbytes + g.GCdebt)
         }
     } elif (_cond == 3) {
         {
-            work = uint64(sweepstep(L, g, 4, addr(g.finobj)))
+            // sweep "regular" objects
+            work = uint64(sweepstep(L, g, GCSswpfinobj, addr(g.finobj)))
         }
     } elif (_cond == 4) {
         {
-            work = uint64(sweepstep(L, g, 5, addr(g.tobefnz)))
+            // sweep objects with finalizers
+            work = uint64(sweepstep(L, g, GCSswptobefnz, addr(g.tobefnz)))
         }
     } elif (_cond == 5) {
         {
-            work = uint64(sweepstep(L, g, 6, null))
+            // sweep objects to be finalized
+            work = uint64(sweepstep(L, g, GCSswpend, null))
         }
     } elif (_cond == 6) {
         {
+            // finish sweeps
             checkSizes(L, g)
-            g.gcstate = uint8(7)
+            g.gcstate = uint8(GCScallfin)
             work = uint64(0)
         }
     } elif (_cond == 7) {
         {
+            // call remaining finalizers
             if (g.tobefnz != null && !(g.gcemergency != 0)) {
+                // ok collections during finalizers
                 g.gcstopem = uint8(0)
-                work = uint64(runafewfinalizers(L, 10) * 50)
+                work = uint64(runafewfinalizers(L, GCFINMAX) * GCFINALIZECOST)
             } else {
-                g.gcstate = uint8(8)
+                // emergency mode or no more finalizers
+                // finish collection
+                g.gcstate = uint8(GCSpause)
                 work = uint64(0)
             }
         }
@@ -8028,6 +9788,8 @@ def private singlestep(var L : lua_State?) : uint64 {
     return work
 }
 
+// advances the garbage collector until it reaches a state allowed
+// by 'statemask'
 def luaC_runtilstate(var L : lua_State?; statesmask : int) {
     var g : global_State? = L.l_G
     while (!((statesmask & 1 << int(g.gcstate)) != 0)) {
@@ -8035,26 +9797,41 @@ def luaC_runtilstate(var L : lua_State?; statesmask : int) {
     }
 }
 
+// Performs a basic incremental step. The debt and step size are
+// converted from bytes to "units of work"; then the function loops
+// running single steps until adding that many units of work or
+// finishing a cycle (pause state). Finally, it sets the debt that
+// controls when next step will be performed.
 def private incstep(var L : lua_State?; var g : global_State?) {
+    // avoid division by 0
     var stepmul : int = int(g.gcstepmul) * 4 | 1
-    var debt : int64 = int64(uint64(g.GCdebt) / uint64(typeinfo sizeof(type<TValue>)) * uint64(stepmul))
-    var stepsize : int64 = int64(uint64(g.gcstepsize) <= uint64(typeinfo sizeof(type<int64>)) * uint64(8) - uint64(2) ? uint64(int64(1) << int64(int(g.gcstepsize))) / uint64(typeinfo sizeof(type<TValue>)) * uint64(stepmul) : uint64(int64(~uint64(0) >> 1ul)))
+    var debt : int64 = int64(uint64(g.GCdebt) / WORK2MEM * uint64(stepmul))
+    var stepsize : int64 = int64(uint64(g.gcstepsize) <= uint64(typeinfo sizeof(type<int64>)) * uint64(8) - uint64(2) ? uint64(int64(1) << int64(int(g.gcstepsize))) / WORK2MEM * uint64(stepmul) : uint64(MAX_LMEM))
+    // overflow; keep maximum value
+    // repeat until pause or enough "credit" (negative debt)
     var _first = true
-    while (_first || debt > -stepsize && int(g.gcstate) != 8) {
+    while (_first || debt > -stepsize && int(g.gcstate) != GCSpause) {
         _first = false
+        // perform one single step
         var work : uint64 = singlestep(L)
         debt = int64(uint64(debt) - work)
     }
-    if (int(g.gcstate) == 8) {
+    if (int(g.gcstate) == GCSpause) {
+        // pause until next cycle
         setpause(g)
     } else {
-        debt = int64(uint64(debt / int64(stepmul)) * uint64(typeinfo sizeof(type<TValue>)))
+        // convert 'work units' to bytes
+        debt = int64(uint64(debt / int64(stepmul)) * WORK2MEM)
         luaE_setdebt(g, debt)
     }
 }
 
+// Performs a basic GC step if collector is running. (If collector is
+// not running, set a reasonable debt to avoid it being called at
+// every single check.)
 def luaC_step(var L : lua_State?) {
     var g : global_State? = L.l_G
+    // not running?
     if (!(int(g.gcstp) == 0)) {
         luaE_setdebt(g, int64(-2000))
     } else {
@@ -8066,22 +9843,39 @@ def luaC_step(var L : lua_State?) {
     }
 }
 
+// Perform a full collection in incremental mode.
+// Before running the collection, check 'keepinvariant'; if it is true,
+// there may be some objects marked as black, so the collector has
+// to sweep all objects to turn them back to white (as white has not
+// changed, nothing will be collected).
 def private fullinc(var L : lua_State?; var g : global_State?) {
+    // black objects?
     if (int(g.gcstate) <= 2) {
+        // sweep everything to turn them back to white
         entersweep(L)
     }
+    // finish any pending sweep phase to start a new cycle
     luaC_runtilstate(L, 1 << 8)
+    // start new cycle
     luaC_runtilstate(L, 1 << 0)
-    g.gcstate = uint8(1)
+    // go straight to atomic phase
+    g.gcstate = uint8(GCSenteratomic)
+    // run up to finalizers
     luaC_runtilstate(L, 1 << 7)
+    // estimate must be correct after a full GC cycle
+    // finish collection
     luaC_runtilstate(L, 1 << 8)
     setpause(g)
 }
 
+// Performs a full GC cycle; if 'isemergency', set a flag to avoid
+// some operations which could change the interpreter state in some
+// unexpected ways (running finalizers and shrinking some structures).
 def luaC_fullgc(var L : lua_State?; isemergency : int) {
     var g : global_State? = L.l_G
+    // set flag
     g.gcemergency = uint8(isemergency)
-    if (int(g.gckind) == 0) {
+    if (int(g.gckind) == KGC_INC) {
         fullinc(L, g)
     } else {
         fullgen(L, g)
@@ -8109,13 +9903,17 @@ def private save(var ls : LexState?; c : int) {
 [c_function]
 def luaX_init(var L : lua_State?) {
     var i : int
+    // create env name
     var e : TString? = luaS_newlstr(L, reinterpret<uint8?>("_ENV"), uint64(typeinfo sizeof(type<uint8[5]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
+    // never collect this name
     luaC_fix(L, addr(reinterpret<GCUnion?>(e).gc))
     {
         i = 0
-        while (i < int(RESERVED.TK_WHILE) - (127 * 2 + 1 + 1) + 1) {
+        while (i < NUM_RESERVED) {
             var ts : TString? = luaS_new(L, luaX_tokens[i])
+            // reserved words are never collected
             luaC_fix(L, addr(reinterpret<GCUnion?>(ts).gc))
+            // reserved word
             ts.extra = uint8(i + 1)
             i++
         }
@@ -8124,17 +9922,21 @@ def luaX_init(var L : lua_State?) {
 
 [c_function]
 def luaX_token2str(var ls : LexState?; token : int) : uint8? {
-    if (token < 127 * 2 + 1 + 1) {
+    // single-byte symbols?
+    if (token < FIRST_RESERVED) {
         if ((int(luai_ctype_[token + 1]) & 1 << 2) != 0) {
             return luaO_pushfstring`va(ls.L, reinterpret<uint8?>("'%c'"), (token,))
         } else {
+            // control character
             return luaO_pushfstring`va(ls.L, reinterpret<uint8?>("'<\\%d>'"), (token,))
         }
     } else {
-        var s : uint8? = luaX_tokens[token - (127 * 2 + 1 + 1)]
+        var s : uint8? = luaX_tokens[token - FIRST_RESERVED]
+        // fixed format (symbols and reserved words)?
         if (token < int(RESERVED.TK_EOS)) {
             return luaO_pushfstring`va(ls.L, reinterpret<uint8?>("'%s'"), (s,))
         } else {
+            // names, strings, and numerals
             return s
         }
     }
@@ -8158,44 +9960,64 @@ def private lexerror(var ls : LexState?; var msg : uint8?; token : int) {
     if (token != 0) {
         luaO_pushfstring`va(ls.L, reinterpret<uint8?>("%s near %s"), (msg, txtToken(ls, token)))
     }
-    luaD_throw(ls.L, 3)
+    luaD_throw(ls.L, LUA_ERRSYNTAX)
 }
 
 def luaX_syntaxerror(var ls : LexState?; var msg : uint8?) {
     lexerror(ls, msg, ls.t.token)
 }
 
+// Creates a new string and anchors it in scanner's table so that it
+// will not be collected until the end of the compilation; by that time
+// it should be anchored somewhere. It also internalizes long strings,
+// ensuring there is only one copy of each unique string. The table
+// here is used as a set: the string enters as the key, while its value
+// is irrelevant. We use the string itself as the value only because it
+// is a TValue readily available. Later, the code generation can change
+// this value.
 [c_function]
 def luaX_newstring(var ls : LexState?; var str : uint8?; l : uint64) : TString? {
     var L : lua_State? = ls.L
+    // create new string
     var ts : TString? = luaS_newlstr(L, str, l)
     var o : TValue? = luaH_getstr(ls.h, ts)
+    // string already present?
     if (!((int(o.tt_) & 15) == 0)) {
+        // get saved copy
         ts = addr(reinterpret<GCUnion?>(reinterpret<Node?>(o).u.key_val.gc).ts)
     } else {
+        // not in use yet
+        // reserve stack space for string
         var _t0 = L.top.p
         L.top.p = L.top.p + 1
         var stv : TValue? = addr(_t0.val)
         {
+            // temporarily anchor the string
             var io : TValue? = stv
             var x_ : TString? = ts
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
             io.tt_ = uint8(int(x_.tt) | 1 << 6)
         }
+        // t[string] = string
         luaH_finishset(L, ls.h, stv, o, stv)
         {
+            // table is not a metatable, so it does not need to invalidate cache
             if (L.l_G.GCdebt > int64(0)) {
                 luaC_step(L)
             }
         }
+        // remove string from stack
         L.top.p = L.top.p - 1
     }
     return ts
 }
 
+// increment line number and skips newline sequence (any of
+// \n, \r, \n\r, or \r\n)
 [c_function]
 def private inclinenumber(var ls : LexState?) {
     var old : int = ls.current
+    // skip '\n' or '\r'
     let _t0 = ls.z.n
     ls.z.n--
     var _t2 : int
@@ -8207,7 +10029,8 @@ def private inclinenumber(var ls : LexState?) {
         _t2 = luaZ_fill(ls.z)
     }
     ls.current = _t2
-    if ((ls.current == 10 || ls.current == 13) && ls.current != old) {
+    if ((ls.current == '\n' || ls.current == '\r') && ls.current != old) {
+        // skip '\n\r' or '\r\n'
         let _t3 = ls.z.n
         ls.z.n--
         var _t5 : int
@@ -8231,13 +10054,16 @@ def luaX_setinput(var L : lua_State?; var ls : LexState?; var z : Zio?; var sour
     ls.t.token = 0
     ls.L = L
     ls.current = firstchar
+    // no look-ahead token
     ls.lookahead.token = int(RESERVED.TK_EOS)
     ls.z = z
     ls.fs = null
     ls.linenumber = 1
     ls.lastline = 1
     ls.source = source
+    // get env name
     ls.envn = luaS_newlstr(L, reinterpret<uint8?>("_ENV"), uint64(typeinfo sizeof(type<uint8[5]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
+    // initialize buffer
     ls.buff.buffer = reinterpret<uint8?>(luaM_saferealloc_(ls.L, reinterpret<void?>(ls.buff.buffer), ls.buff.buffsize * uint64(typeinfo sizeof(type<uint8>)), uint64(32) * uint64(typeinfo sizeof(type<uint8>))))
     ls.buff.buffsize = uint64(32)
 }
@@ -8262,6 +10088,8 @@ def private check_next1(var ls : LexState?; c : int) : int {
     }
 }
 
+// Check whether current char is in set 'set' (with two chars) and
+// saves it
 [c_function]
 def private check_next2(var ls : LexState?; var set : uint8?) : int {
     if (ls.current == int(deref(set + 0)) || ls.current == int(deref(set + 1))) {
@@ -8283,6 +10111,14 @@ def private check_next2(var ls : LexState?; var set : uint8?) : int {
     }
 }
 
+// LUA_NUMBER
+// This function is quite liberal in what it accepts, as 'luaO_str2num'
+// will reject ill-formed numerals. Roughly, it accepts the following
+// pattern:
+// %d(%x|%.|([Ee][+-]?))* | 0[Xx](%x|%.|([Pp][+-]?))
+// The only tricky part is to accept [+-] only after a valid exponent
+// mark, to avoid reading '3-4' or '0xe+1' as a single number.
+// The caller might have already read an initial dot.
 [c_function]
 def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
     var obj : TValue
@@ -8300,14 +10136,18 @@ def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
         _t2 = luaZ_fill(ls.z)
     }
     ls.current = _t2
-    if (first == 48 && check_next2(ls, reinterpret<uint8?>("xX")) != 0) {
+    // hexadecimal?
+    if (first == '0' && check_next2(ls, reinterpret<uint8?>("xX")) != 0) {
         expo = reinterpret<uint8?>("Pp")
     }
     {
         while (true) {
+            // exponent mark?
             if (check_next2(ls, expo) != 0) {
+                // optional exponent sign
                 check_next2(ls, reinterpret<uint8?>("-+"))
-            } elif ((int(luai_ctype_[ls.current + 1]) & 1 << 4) != 0 || ls.current == 46) {
+            } elif ((int(luai_ctype_[ls.current + 1]) & 1 << 4) != 0 || ls.current == '.') {
+                // '%x|%.'
                 save(ls, ls.current)
                 let _t3 = ls.z.n
                 ls.z.n--
@@ -8325,7 +10165,9 @@ def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
             }
         }
     }
+    // is numeral touching a letter?
     if ((int(luai_ctype_[ls.current + 1]) & 1 << 0) != 0) {
+        // force an error
         save(ls, ls.current)
         let _t6 = ls.z.n
         ls.z.n--
@@ -8340,6 +10182,7 @@ def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
         ls.current = _t8
     }
     save(ls, 0)
+    // format error?
     if (luaO_str2num(ls.buff.buffer, addr(obj)) == uint64(0)) {
         lexerror(ls, reinterpret<uint8?>("malformed number"), int(RESERVED.TK_FLT))
     }
@@ -8352,6 +10195,10 @@ def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
     }
 }
 
+// read a sequence '[=*[' or ']=*]', leaving the last bracket. If
+// sequence is well formed, return its number of '='s + 2; otherwise,
+// return 1 if it is a single bracket (no '='s and no 2nd bracket);
+// otherwise (an unfinished '[==...') return 0.
 [c_function]
 def private skip_sep(var ls : LexState?) : uint64 {
     var count : uint64 = uint64(0)
@@ -8368,7 +10215,7 @@ def private skip_sep(var ls : LexState?) : uint64 {
         _t2 = luaZ_fill(ls.z)
     }
     ls.current = _t2
-    while (ls.current == 61) {
+    while (ls.current == '=') {
         save(ls, ls.current)
         let _t3 = ls.z.n
         ls.z.n--
@@ -8388,7 +10235,9 @@ def private skip_sep(var ls : LexState?) : uint64 {
 
 [c_function]
 def private read_long_string(var ls : LexState?; var seminfo : SemInfo?; sep : uint64) {
+    // initial line (for error message)
     var line : int = ls.linenumber
+    // skip 2nd '['
     save(ls, ls.current)
     let _t0 = ls.z.n
     ls.z.n--
@@ -8401,7 +10250,9 @@ def private read_long_string(var ls : LexState?; var seminfo : SemInfo?; sep : u
         _t2 = luaZ_fill(ls.z)
     }
     ls.current = _t2
-    if (ls.current == 10 || ls.current == 13) {
+    // string starts with a newline?
+    if (ls.current == '\n' || ls.current == '\r') {
+        // skip it
         inclinenumber(ls)
     }
     {
@@ -8409,13 +10260,16 @@ def private read_long_string(var ls : LexState?; var seminfo : SemInfo?; sep : u
             let _cond = ls.current
             if (_cond == -1) {
                 {
+                    // error
                     var what : uint8? = seminfo != null ? reinterpret<uint8?>("string") : reinterpret<uint8?>("comment")
                     var msg : uint8? = luaO_pushfstring`va(ls.L, reinterpret<uint8?>("unfinished long %s (starting at line %d)"), (what, line))
                     lexerror(ls, msg, int(RESERVED.TK_EOS))
                 }
-            } elif (_cond == 93) {
+            } elif (_cond == ']') {
                 {
+                    // to avoid warnings
                     if (skip_sep(ls) == sep) {
+                        // skip 2nd ']'
                         save(ls, ls.current)
                         let _t3 = ls.z.n
                         ls.z.n--
@@ -8431,10 +10285,11 @@ def private read_long_string(var ls : LexState?; var seminfo : SemInfo?; sep : u
                         goto label 1
                     }
                 }
-            } elif (_cond == 10 || _cond == 13) {
+            } elif (_cond == '\n' || _cond == '\r') {
                 {
-                    save(ls, 10)
+                    save(ls, '\n')
                     inclinenumber(ls)
+                    // avoid wasting space
                     if (!(seminfo != null)) {
                         ls.buff.n = uint64(0)
                     }
@@ -8481,7 +10336,8 @@ def private read_long_string(var ls : LexState?; var seminfo : SemInfo?; sep : u
 [c_function]
 def private esccheck(var ls : LexState?; c : int; var msg : uint8?) {
     if (!(c != 0)) {
-        if (ls.current != -1) {
+        if (ls.current != EOZ) {
+            // add current to buffer for error message
             save(ls, ls.current)
             let _t0 = ls.z.n
             ls.z.n--
@@ -8520,6 +10376,7 @@ def private gethexa(var ls : LexState?) : int {
 def private readhexaesc(var ls : LexState?) : int {
     var r : int = gethexa(ls)
     r = (r << 4) + gethexa(ls)
+    // remove saved chars from buffer
     ls.buff.n -= uint64(2)
     return r
 }
@@ -8527,7 +10384,9 @@ def private readhexaesc(var ls : LexState?) : int {
 [c_function]
 def private readutf8esc(var ls : LexState?) : uint64 {
     var r : uint64
+    // chars to be removed: '\', 'u', '{', and first digit
     var i : int = 4
+    // skip 'u'
     save(ls, ls.current)
     let _t0 = ls.z.n
     ls.z.n--
@@ -8540,7 +10399,8 @@ def private readutf8esc(var ls : LexState?) : uint64 {
         _t2 = luaZ_fill(ls.z)
     }
     ls.current = _t2
-    esccheck(ls, ls.current == 123 ? 1 : 0, reinterpret<uint8?>("missing '\{'"))
+    esccheck(ls, ls.current == '{' ? 1 : 0, reinterpret<uint8?>("missing '\{'"))
+    // must have at least one digit
     r = uint64(gethexa(ls))
     while (true) {
         save(ls, ls.current)
@@ -8562,7 +10422,8 @@ def private readutf8esc(var ls : LexState?) : uint64 {
         esccheck(ls, r <= uint64(2147483647u >> 4u) ? 1 : 0, reinterpret<uint8?>("UTF-8 value too large"))
         r = (r << 4ul) + uint64(luaO_hexavalue(ls.current))
     }
-    esccheck(ls, ls.current == 125 ? 1 : 0, reinterpret<uint8?>("missing '\}'"))
+    esccheck(ls, ls.current == '}' ? 1 : 0, reinterpret<uint8?>("missing '\}'"))
+    // skip '}'
     let _t6 = ls.z.n
     ls.z.n--
     var _t8 : int
@@ -8574,6 +10435,7 @@ def private readutf8esc(var ls : LexState?) : uint64 {
         _t8 = luaZ_fill(ls.z)
     }
     ls.current = _t8
+    // remove saved chars from buffer
     ls.buff.n -= uint64(i)
     return r
 }
@@ -8582,9 +10444,10 @@ def private readutf8esc(var ls : LexState?) : uint64 {
 def private utf8esc(var ls : LexState?) {
     var buff : uint8[8]
     var n : int = luaO_utf8esc(addr(buff[0]), readutf8esc(ls))
+    // add 'buff' to string
     {
         while (n > 0) {
-            save(ls, int(buff[8 - n]))
+            save(ls, int(buff[UTF8BUFFSZ - n]))
             n--
         }
     }
@@ -8593,11 +10456,13 @@ def private utf8esc(var ls : LexState?) {
 [c_function]
 def private readdecesc(var ls : LexState?) : int {
     var i : int
+    // result accumulator
     var r : int = 0
+    // read up to 3 digits
     {
         i = 0
         while (i < 3 && (int(luai_ctype_[ls.current + 1]) & 1 << 1) != 0) {
-            r = 10 * r + ls.current - 48
+            r = 10 * r + ls.current - '0'
             save(ls, ls.current)
             let _t0 = ls.z.n
             ls.z.n--
@@ -8614,12 +10479,14 @@ def private readdecesc(var ls : LexState?) : int {
         }
     }
     esccheck(ls, r <= 127 * 2 + 1 ? 1 : 0, reinterpret<uint8?>("decimal escape too large"))
+    // remove read digits from buffer
     ls.buff.n -= uint64(i)
     return r
 }
 
 [c_function]
 def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
+    // keep delimiter (for error messages)
     save(ls, ls.current)
     let _t0 = ls.z.n
     ls.z.n--
@@ -8636,11 +10503,16 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
         let _cond = ls.current
         if (_cond == -1) {
             lexerror(ls, reinterpret<uint8?>("unfinished string"), int(RESERVED.TK_EOS))
-        } elif (_cond == 10 || _cond == 13) {
+        } elif (_cond == '\n' || _cond == '\r') {
+            // to avoid warnings
             lexerror(ls, reinterpret<uint8?>("unfinished string"), int(RESERVED.TK_STRING))
-        } elif (_cond == 92) {
+        } elif (_cond == '\\') {
             {
+                // to avoid warnings
+                // escape sequences
+                // final character to be saved
                 var c : int
+                // keep '\\' for error messages
                 save(ls, ls.current)
                 let _t3 = ls.z.n
                 ls.z.n--
@@ -8654,45 +10526,49 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 }
                 ls.current = _t5
                 let _cond2 = ls.current
-                if (_cond2 == 97) {
+                if (_cond2 == 'a') {
                     c = 7
                     goto label 1
-                } elif (_cond2 == 98) {
-                    c = 8
+                } elif (_cond2 == 'b') {
+                    c = '\b'
                     goto label 1
-                } elif (_cond2 == 102) {
-                    c = 12
+                } elif (_cond2 == 'f') {
+                    c = '\f'
                     goto label 1
-                } elif (_cond2 == 110) {
-                    c = 10
+                } elif (_cond2 == 'n') {
+                    c = '\n'
                     goto label 1
-                } elif (_cond2 == 114) {
-                    c = 13
+                } elif (_cond2 == 'r') {
+                    c = '\r'
                     goto label 1
-                } elif (_cond2 == 116) {
-                    c = 9
+                } elif (_cond2 == 't') {
+                    c = '\t'
                     goto label 1
-                } elif (_cond2 == 118) {
+                } elif (_cond2 == 'v') {
                     c = 11
                     goto label 1
-                } elif (_cond2 == 120) {
+                } elif (_cond2 == 'x') {
                     c = readhexaesc(ls)
                     goto label 1
-                } elif (_cond2 == 117) {
+                } elif (_cond2 == 'u') {
                     utf8esc(ls)
                     goto label 3
-                } elif (_cond2 == 10 || _cond2 == 13) {
+                } elif (_cond2 == '\n' || _cond2 == '\r') {
                     inclinenumber(ls)
-                    c = 10
+                    c = '\n'
                     goto label 2
-                } elif (_cond2 == 92 || _cond2 == 34 || _cond2 == 39) {
+                } elif (_cond2 == '\\' || _cond2 == '"' || _cond2 == '\'') {
                     c = ls.current
                     goto label 1
                 } elif (_cond2 == -1) {
+                    // will raise an error next loop
                     goto label 3
-                } elif (_cond2 == 122) {
+                } elif (_cond2 == 'z') {
                     {
+                        // zap following span of spaces
+                        // remove '\\'
                         ls.buff.n -= uint64(1)
+                        // skip the 'z'
                         let _t6 = ls.z.n
                         ls.z.n--
                         var _t8 : int
@@ -8705,7 +10581,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                         }
                         ls.current = _t8
                         while ((int(luai_ctype_[ls.current + 1]) & 1 << 3) != 0) {
-                            if (ls.current == 10 || ls.current == 13) {
+                            if (ls.current == '\n' || ls.current == '\r') {
                                 inclinenumber(ls)
                             } else {
                                 let _t9 = ls.z.n
@@ -8726,6 +10602,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 } else {
                     {
                         esccheck(ls, int(luai_ctype_[ls.current + 1]) & 1 << 1, reinterpret<uint8?>("invalid escape sequence"))
+                        // digital escape '\ddd'
                         c = readdecesc(ls)
                         goto label 2
                     }
@@ -8745,12 +10622,15 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 ls.current = _t14
                 label 2:  // only_save
                 c_label_end()
+                // go through
+                // remove '\\'
                 ls.buff.n -= uint64(1)
                 save(ls, c)
                 label 3:  // no_save
                 c_label_end()
             }
         } else {
+            // go through
             save(ls, ls.current)
             let _t15 = ls.z.n
             ls.z.n--
@@ -8765,6 +10645,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
             ls.current = _t17
         }
     }
+    // skip delimiter
     save(ls, ls.current)
     let _t18 = ls.z.n
     ls.z.n--
@@ -8788,20 +10669,16 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
             let _cond = ls.current
             while (true) {
                 var _flag = false
-                _flag ||= _cond == 10
-                _flag ||= _cond == 13
-                if (_flag) {
+                if (_cond == '\n' || _cond == '\r') {
                     {
+                        // line breaks
                         inclinenumber(ls)
                         break
                     }
                 }
-                _flag ||= _cond == 32
-                _flag ||= _cond == 12
-                _flag ||= _cond == 9
-                _flag ||= _cond == 11
-                if (_flag) {
+                if (_cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == 11) {
                     {
+                        // spaces
                         let _t0 = ls.z.n
                         ls.z.n--
                         var _t2 : int
@@ -8816,9 +10693,9 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                         break
                     }
                 }
-                _flag ||= _cond == 45
-                if (_flag) {
+                if (_cond == '-') {
                     {
+                        // '-' or '--' (comment)
                         let _t3 = ls.z.n
                         ls.z.n--
                         var _t5 : int
@@ -8830,9 +10707,10 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                             _t5 = luaZ_fill(ls.z)
                         }
                         ls.current = _t5
-                        if (ls.current != 45) {
-                            return 45
+                        if (ls.current != '-') {
+                            return '-'
                         }
+                        // else is a comment
                         let _t6 = ls.z.n
                         ls.z.n--
                         var _t8 : int
@@ -8844,16 +10722,22 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                             _t8 = luaZ_fill(ls.z)
                         }
                         ls.current = _t8
-                        if (ls.current == 91) {
+                        // long comment?
+                        if (ls.current == '[') {
                             var sep : uint64 = skip_sep(ls)
+                            // 'skip_sep' may dirty the buffer
                             ls.buff.n = uint64(0)
                             if (sep >= uint64(2)) {
+                                // skip long comment
                                 read_long_string(ls, null, sep)
+                                // previous call may dirty the buff.
                                 ls.buff.n = uint64(0)
                                 break
                             }
                         }
-                        while (!(ls.current == 10 || ls.current == 13) && ls.current != -1) {
+                        // else short comment
+                        while (!(ls.current == '\n' || ls.current == '\r') && ls.current != EOZ) {
+                            // skip until end of line (or end of file)
                             let _t9 = ls.z.n
                             ls.z.n--
                             var _t11 : int
@@ -8869,20 +10753,21 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                         break
                     }
                 }
-                _flag ||= _cond == 91
-                if (_flag) {
+                if (_cond == '[') {
                     {
+                        // long string or simply '['
                         var sep : uint64 = skip_sep(ls)
                         if (sep >= uint64(2)) {
                             read_long_string(ls, seminfo, sep)
                             return int(RESERVED.TK_STRING)
                         } elif (sep == uint64(0)) {
+                            // '[=...' missing second bracket?
                             lexerror(ls, reinterpret<uint8?>("invalid long string delimiter"), int(RESERVED.TK_STRING))
                         }
-                        return 91
+                        return '['
                     }
                 }
-                _flag ||= _cond == 61
+                _flag ||= _cond == '='
                 if (_flag) {
                     {
                         let _t12 = ls.z.n
@@ -8896,14 +10781,15 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                             _t14 = luaZ_fill(ls.z)
                         }
                         ls.current = _t14
-                        if (check_next1(ls, 61) != 0) {
+                        // '=='
+                        if (check_next1(ls, '=') != 0) {
                             return int(RESERVED.TK_EQ)
                         } else {
-                            return 61
+                            return '='
                         }
                     }
                 }
-                _flag ||= _cond == 60
+                _flag ||= _cond == '<'
                 if (_flag) {
                     {
                         let _t15 = ls.z.n
@@ -8917,16 +10803,18 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                             _t17 = luaZ_fill(ls.z)
                         }
                         ls.current = _t17
-                        if (check_next1(ls, 61) != 0) {
+                        // '<='
+                        if (check_next1(ls, '=') != 0) {
                             return int(RESERVED.TK_LE)
-                        } elif (check_next1(ls, 60) != 0) {
+                        } elif (check_next1(ls, '<') != 0) {
+                            // '<<'
                             return int(RESERVED.TK_SHL)
                         } else {
-                            return 60
+                            return '<'
                         }
                     }
                 }
-                _flag ||= _cond == 62
+                _flag ||= _cond == '>'
                 if (_flag) {
                     {
                         let _t18 = ls.z.n
@@ -8940,16 +10828,18 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                             _t20 = luaZ_fill(ls.z)
                         }
                         ls.current = _t20
-                        if (check_next1(ls, 61) != 0) {
+                        // '>='
+                        if (check_next1(ls, '=') != 0) {
                             return int(RESERVED.TK_GE)
-                        } elif (check_next1(ls, 62) != 0) {
+                        } elif (check_next1(ls, '>') != 0) {
+                            // '>>'
                             return int(RESERVED.TK_SHR)
                         } else {
-                            return 62
+                            return '>'
                         }
                     }
                 }
-                _flag ||= _cond == 47
+                _flag ||= _cond == '/'
                 if (_flag) {
                     {
                         let _t21 = ls.z.n
@@ -8963,14 +10853,15 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                             _t23 = luaZ_fill(ls.z)
                         }
                         ls.current = _t23
-                        if (check_next1(ls, 47) != 0) {
+                        // '//'
+                        if (check_next1(ls, '/') != 0) {
                             return int(RESERVED.TK_IDIV)
                         } else {
-                            return 47
+                            return '/'
                         }
                     }
                 }
-                _flag ||= _cond == 126
+                _flag ||= _cond == '~'
                 if (_flag) {
                     {
                         let _t24 = ls.z.n
@@ -8984,14 +10875,15 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                             _t26 = luaZ_fill(ls.z)
                         }
                         ls.current = _t26
-                        if (check_next1(ls, 61) != 0) {
+                        // '~='
+                        if (check_next1(ls, '=') != 0) {
                             return int(RESERVED.TK_NE)
                         } else {
-                            return 126
+                            return '~'
                         }
                     }
                 }
-                _flag ||= _cond == 58
+                _flag ||= _cond == ':'
                 if (_flag) {
                     {
                         let _t27 = ls.z.n
@@ -9005,24 +10897,27 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                             _t29 = luaZ_fill(ls.z)
                         }
                         ls.current = _t29
-                        if (check_next1(ls, 58) != 0) {
+                        // '::'
+                        if (check_next1(ls, ':') != 0) {
                             return int(RESERVED.TK_DBCOLON)
                         } else {
-                            return 58
+                            return ':'
                         }
                     }
                 }
-                _flag ||= _cond == 34
-                _flag ||= _cond == 39
+                _flag ||= _cond == '"'
+                _flag ||= _cond == '\''
                 if (_flag) {
                     {
+                        // short literal strings
                         read_string(ls, ls.current, seminfo)
                         return int(RESERVED.TK_STRING)
                     }
                 }
-                _flag ||= _cond == 46
+                _flag ||= _cond == '.'
                 if (_flag) {
                     {
+                        // '.', '..', '...', or number
                         save(ls, ls.current)
                         let _t30 = ls.z.n
                         ls.z.n--
@@ -9035,43 +10930,44 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                             _t32 = luaZ_fill(ls.z)
                         }
                         ls.current = _t32
-                        if (check_next1(ls, 46) != 0) {
-                            if (check_next1(ls, 46) != 0) {
+                        if (check_next1(ls, '.') != 0) {
+                            if (check_next1(ls, '.') != 0) {
+                                // '...'
                                 return int(RESERVED.TK_DOTS)
                             } else {
+                                // '..'
                                 return int(RESERVED.TK_CONCAT)
                             }
                         } elif (!((int(luai_ctype_[ls.current + 1]) & 1 << 1) != 0)) {
-                            return 46
+                            return '.'
                         } else {
                             return read_numeral(ls, seminfo)
                         }
                     }
                 }
-                _flag ||= _cond == 48
-                _flag ||= _cond == 49
-                _flag ||= _cond == 50
-                _flag ||= _cond == 51
-                _flag ||= _cond == 52
-                _flag ||= _cond == 53
-                _flag ||= _cond == 54
-                _flag ||= _cond == 55
-                _flag ||= _cond == 56
-                _flag ||= _cond == 57
+                _flag ||= _cond == '0'
+                _flag ||= _cond == '1'
+                _flag ||= _cond == '2'
+                _flag ||= _cond == '3'
+                _flag ||= _cond == '4'
+                _flag ||= _cond == '5'
+                _flag ||= _cond == '6'
+                _flag ||= _cond == '7'
+                _flag ||= _cond == '8'
+                _flag ||= _cond == '9'
                 if (_flag) {
                     {
                         return read_numeral(ls, seminfo)
                     }
                 }
-                _flag ||= _cond == -1
-                if (_flag) {
+                if (_cond == -1) {
                     {
                         return int(RESERVED.TK_EOS)
                     }
                 }
-                _flag ||= !(_cond == 10 || _cond == 13 || _cond == 32 || _cond == 12 || _cond == 9 || _cond == 11 || _cond == 45 || _cond == 91 || _cond == 61 || _cond == 60 || _cond == 62 || _cond == 47 || _cond == 126 || _cond == 58 || _cond == 34 || _cond == 39 || _cond == 46 || _cond == 48 || _cond == 49 || _cond == 50 || _cond == 51 || _cond == 52 || _cond == 53 || _cond == 54 || _cond == 55 || _cond == 56 || _cond == 57 || _cond == -1)
-                if (_flag) {
+                if (!(_cond == '\n' || _cond == '\r' || _cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == 11 || _cond == '-' || _cond == '[' || _cond == '=' || _cond == '<' || _cond == '>' || _cond == '/' || _cond == '~' || _cond == ':' || _cond == '"' || _cond == '\'' || _cond == '.' || _cond == '0' || _cond == '1' || _cond == '2' || _cond == '3' || _cond == '4' || _cond == '5' || _cond == '6' || _cond == '7' || _cond == '8' || _cond == '9' || _cond == -1)) {
                     {
+                        // identifier or reserved word?
                         if ((int(luai_ctype_[ls.current + 1]) & 1 << 0) != 0) {
                             var ts : TString?
                             var _first = true
@@ -9092,12 +10988,14 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                             }
                             ts = luaX_newstring(ls, ls.buff.buffer, ls.buff.n)
                             seminfo.ts = ts
+                            // reserved word?
                             if (int(ts.tt) == (4 | 0 << 4) && int(ts.extra) > 0) {
-                                return int(ts.extra) - 1 + (127 * 2 + 1 + 1)
+                                return int(ts.extra) - 1 + FIRST_RESERVED
                             } else {
                                 return int(RESERVED.TK_NAME)
                             }
                         } else {
+                            // single-char tokens ('+', '*', '%', '{', '}', ...)
                             var c : int = ls.current
                             let _t36 = ls.z.n
                             ls.z.n--
@@ -9124,10 +11022,14 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
 [c_function]
 def luaX_next(var ls : LexState?) {
     ls.lastline = ls.linenumber
+    // is there a look-ahead token?
     if (ls.lookahead.token != int(RESERVED.TK_EOS)) {
+        // use this one
         ls.t = ls.lookahead
+        // and discharge it
         ls.lookahead.token = int(RESERVED.TK_EOS)
     } else {
+        // read next token
         ls.t.token = llex(ls, addr(ls.t.seminfo))
     }
 }
@@ -9142,25 +11044,37 @@ def luaX_lookahead(var ls : LexState?) : int {
 def luaM_growaux_(var L : lua_State?; var _c_block : void?; nelems : int; var psize : int?; size_elems : int; limit : int; var what : uint8?) : void? {
     var newblock : void?
     var size : int = deref(psize)
+    // does one extra element still fit?
     if (nelems + 1 <= size) {
+        // nothing to be done
         return _c_block
     }
+    // cannot double it?
     if (size >= limit / 2) {
-        if (int64((size >= limit ? 1 : 0) != 0 ? 1 : 0) != 0) {
+        // cannot grow even a little?
+        if (size >= limit) {
             luaG_runerror`va(L, reinterpret<uint8?>("too many %s (limit is %d)"), (what, limit))
         }
+        // still have at least one free place
         size = limit
     } else {
         size *= 2
-        if (size < 4) {
-            size = 4
+        if (size < MINSIZEARRAY) {
+            // minimum size
+            size = MINSIZEARRAY
         }
     }
+    // 'limit' ensures that multiplication will not overflow
     newblock = luaM_saferealloc_(L, _c_block, uint64(deref(psize)) * uint64(size_elems), uint64(size) * uint64(size_elems))
+    // update only when everything else is OK
     deref(psize) = size
     return newblock
 }
 
+// In prototypes, the size of the array is also its number of
+// elements (to save memory). So, if it cannot shrink an array
+// to its number of elements, the only option is to raise an
+// error.
 [c_function]
 def luaM_shrinkvector_(var L : lua_State?; var _c_block : void?; var size : int?; final_n : int; size_elem : int) : void? {
     var newblock : void?
@@ -9176,30 +11090,39 @@ def luaM_toobig(var L : lua_State?) {
     luaG_runerror`va(L, reinterpret<uint8?>("memory allocation error: block too big"), VaNone())
 }
 
+// Free memory
 def luaM_free_(var L : lua_State?; var _c_block : void?; osize : uint64) {
     var g : global_State? = L.l_G
     invoke(g.frealloc, g.ud, _c_block, osize, uint64(0))
     g.GCdebt = int64(uint64(g.GCdebt) - osize)
 }
 
+// In case of allocation fail, this function will do an emergency
+// collection to free some memory and then try the allocation again.
 [c_function]
 def private tryagain(var L : lua_State?; var _c_block : void?; osize : uint64; nsize : uint64) : void? {
     var g : global_State? = L.l_G
     if ((int(addr(g.nilvalue).tt_) & 15) == 0 && !(g.gcstopem != 0)) {
+        // try to free some memory...
         luaC_fullgc(L, 1)
+        // try again
         return invoke(g.frealloc, g.ud, _c_block, osize, nsize)
     } else {
+        // cannot run an emergency collection
         return null
     }
 }
 
+// Generic allocation routine.
 def luaM_realloc_(var L : lua_State?; var _c_block : void?; osize : uint64; nsize : uint64) : void? {
     var newblock : void?
     var g : global_State? = L.l_G
     newblock = invoke(g.frealloc, g.ud, _c_block, osize, nsize)
-    if (int64((newblock == null && nsize > uint64(0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (newblock == null && nsize > uint64(0)) {
         newblock = tryagain(L, _c_block, osize, nsize)
+        // still no memory?
         if (newblock == null) {
+            // do not update 'GCdebt'
             return null
         }
     }
@@ -9209,7 +11132,8 @@ def luaM_realloc_(var L : lua_State?; var _c_block : void?; osize : uint64; nsiz
 
 def luaM_saferealloc_(var L : lua_State?; var _c_block : void?; osize : uint64; nsize : uint64) : void? {
     var newblock : void? = luaM_realloc_(L, _c_block, osize, nsize)
-    if (int64((newblock == null && nsize > uint64(0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // allocation failed?
+    if (newblock == null && nsize > uint64(0)) {
         luaD_throw(L, 4)
     }
     return newblock
@@ -9217,11 +11141,12 @@ def luaM_saferealloc_(var L : lua_State?; var _c_block : void?; osize : uint64; 
 
 def luaM_malloc_(var L : lua_State?; size : uint64; tag : int) : void? {
     if (size == uint64(0)) {
+        // that's all
         return null
     } else {
         var g : global_State? = L.l_G
         var newblock : void? = invoke(g.frealloc, g.ud, null, uint64(tag), size)
-        if (int64((newblock == null ? 1 : 0) != 0 ? 1 : 0) != 0) {
+        if (newblock == null) {
             newblock = tryagain(L, null, uint64(tag), size)
             if (newblock == null) {
                 luaD_throw(L, 4)
@@ -9232,7 +11157,9 @@ def luaM_malloc_(var L : lua_State?; size : uint64; tag : int) : void? {
     }
 }
 
+// Computes ceil(log2(x))
 def luaO_ceillog2(var x : uint) : int {
+    // log_2[i] = ceil(log2(i - 1))
     var l : int = 0
     x--
     while (x >= uint(256)) {
@@ -9249,23 +11176,23 @@ def private intarith(var L : lua_State?; op : int; v1 : int64; v2 : int64) : int
     } elif (_cond == 1) {
         return v1 - v2
     } elif (_cond == 2) {
-        return int64(uint64(v1) * uint64(v2))
+        return v1 * v2
     } elif (_cond == 3) {
         return luaV_mod(L, v1, v2)
     } elif (_cond == 6) {
         return luaV_idiv(L, v1, v2)
     } elif (_cond == 7) {
-        return int64(uint64(v1) & uint64(v2))
+        return v1 & v2
     } elif (_cond == 8) {
-        return int64(uint64(v1) | uint64(v2))
+        return v1 | v2
     } elif (_cond == 9) {
-        return int64(uint64(v1) ^ uint64(v2))
+        return v1 ^ v2
     } elif (_cond == 10) {
         return luaV_shiftl(v1, v2)
     } elif (_cond == 11) {
-        return luaV_shiftl(v1, int64(uint64(0) - uint64(v2)))
+        return luaV_shiftl(v1, int64(0) - v2)
     } elif (_cond == 12) {
-        return int64(uint64(0) - uint64(v1))
+        return int64(0) - v1
     } elif (_cond == 13) {
         return int64(~uint64(0) ^ uint64(v1))
     } else {
@@ -9311,10 +11238,11 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
         _flag ||= _cond == 13
         if (_flag) {
             {
+                // operate only on integers
                 var i1 : int64
                 var i2 : int64
                 var _t0 : int
-                if (int64((int(p1.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                if (int(p1.tt_) == (3 | 0 << 4)) {
                     deref(addr(i1)) = p1.value_.i
                     _t0 = 1
                 } else {
@@ -9323,7 +11251,7 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                 var _t2 = _t0 != 0
                 if (_t2) {
                     var _t1 : int
-                    if (int64((int(p2.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                    if (int(p2.tt_) == (3 | 0 << 4)) {
                         deref(addr(i2)) = p2.value_.i
                         _t1 = 1
                     } else {
@@ -9339,6 +11267,7 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                     }
                     return 1
                 } else {
+                    // fail
                     return 0
                 }
             }
@@ -9347,6 +11276,7 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
         _flag ||= _cond == 4
         if (_flag) {
             {
+                // operate only on floats
                 var n1 : double
                 var n2 : double
                 var _t4 : int
@@ -9389,6 +11319,7 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                     }
                     return 1
                 } else {
+                    // fail
                     return 0
                 }
             }
@@ -9396,6 +11327,7 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
         _flag ||= !(_cond == 7 || _cond == 8 || _cond == 9 || _cond == 10 || _cond == 11 || _cond == 13 || _cond == 5 || _cond == 4)
         if (_flag) {
             {
+                // other operations
                 var n1 : double
                 var n2 : double
                 if (int(p1.tt_) == (3 | 0 << 4) && int(p2.tt_) == (3 | 0 << 4)) {
@@ -9446,6 +11378,7 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                         }
                         return 1
                     } else {
+                        // fail
                         return 0
                     }
                 }
@@ -9459,61 +11392,89 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
 [c_function]
 def luaO_arith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValue?; var res : StackValue?) {
     if (!(luaO_rawarith(L, op, p1, p2, addr(res.val)) != 0)) {
+        // could not perform raw operation; try metamethod
         luaT_trybinTM(L, p1, p2, res, enum_from_int(type<TMS>, op - 0 + int(TMS.TM_ADD)))
     }
 }
 
 def luaO_hexavalue(c : int) : int {
     if ((int(luai_ctype_[c + 1]) & 1 << 1) != 0) {
-        return c - 48
+        return c - '0'
     } else {
-        return (c | 65 ^ 97) - 97 + 10
+        return (c | 'A' ^ 'a') - 'a' + 10
     }
 }
 
 [c_function]
 def private isneg(var s : uint8 ??) : int {
-    if (int(deref(deref(s))) == 45) {
+    if (int(deref(deref(s))) == '-') {
         deref(s) = deref(s) + 1
         return 1
-    } elif (int(deref(deref(s))) == 43) {
+    } elif (int(deref(deref(s))) == '+') {
         deref(s) = deref(s) + 1
     }
     return 0
 }
 
+// Convert string 's' to a Lua number (put in 'result'). Return NULL on
+// fail or the address of the ending '\0' on success. ('mode' == 'x')
+// means a hexadecimal numeral.
 [c_function]
 def private l_str2dloc(var s : uint8?; var result : double?; mode : int) : uint8? {
     var endptr : uint8?
-    deref(result) = mode == 120 ? crt::strtod(s, addr(endptr)) : crt::strtod(s, addr(endptr))
+    // try to convert
+    deref(result) = mode == 'x' ? crt::strtod(s, addr(endptr)) : crt::strtod(s, addr(endptr))
+    // nothing recognized?
     if (intptr(endptr) == intptr(reinterpret<uint8?>(s))) {
         return null
     }
+    // skip trailing spaces
     while ((int(luai_ctype_[int(uint8(deref(endptr))) + 1]) & 1 << 3) != 0) {
         endptr = endptr + 1
     }
+    // OK iff no trailing chars
     return int(deref(endptr)) == 0 ? endptr : null
 }
 
+// Convert string 's' to a Lua number (put in 'result') handling the
+// current locale.
+// This function accepts both the current locale or a dot as the radix
+// mark. If the conversion fails, it may mean number has a dot but
+// locale accepts something else. In that case, the code copies 's'
+// to a buffer (because 's' is read-only), changes the dot to the
+// current locale radix mark, and tries to convert again.
+// The variable 'mode' checks for special characters in the string:
+// - 'n' means 'inf' or 'nan' (which should be rejected)
+// - 'x' means a hexadecimal numeral
+// - '.' just optimizes the search for the common case (no special chars)
 [c_function]
 def private l_str2d(var s : uint8?; var result : double?) : uint8? {
     var endptr : uint8?
+    // look for special chars
     var pmode : uint8? = crt::strpbrk(s, reinterpret<uint8?>(".xXnN"))
-    var mode : int = pmode != null ? int(uint8(deref(pmode))) | 65 ^ 97 : 0
-    if (mode == 110) {
+    var mode : int = pmode != null ? int(uint8(deref(pmode))) | 'A' ^ 'a' : 0
+    // reject 'inf' and 'nan'
+    if (mode == 'n') {
         return null
     }
+    // try to convert
     endptr = l_str2dloc(s, result, mode)
+    // failed? may be a different locale
     if (endptr == null) {
         var buff : uint8[201]
-        var pdot : uint8? = crt::strchr(s, 46)
-        if (pdot == null || crt::strlen(s) > uint64(200)) {
+        var pdot : uint8? = crt::strchr(s, '.')
+        if (pdot == null || crt::strlen(s) > uint64(L_MAXLENNUM)) {
+            // string too long or no dot; fail
             return null
         }
+        // copy string to buffer
         crt::strcpy(addr(buff[0]), s)
+        // correct decimal point
         buff[int64(pdot - s)] = deref(reinterpret<lconv?>(crt::localeconv()).decimal_point + 0)
+        // try again
         endptr = l_str2dloc(addr(buff[0]), result, mode)
         if (endptr != null) {
+            // make relative to 's'
             endptr = s + int64(endptr - addr(buff[0]))
         }
     }
@@ -9525,11 +11486,14 @@ def private l_str2int(var s : uint8?; var result : int64?) : uint8? {
     var a : uint64 = uint64(0)
     var empty : int = 1
     var neg : int
+    // skip initial spaces
     while ((int(luai_ctype_[int(uint8(deref(s))) + 1]) & 1 << 3) != 0) {
         s = s + 1
     }
     neg = isneg(addr(s))
-    if (int(deref(s + 0)) == 48 && (int(deref(s + 1)) == 120 || int(deref(s + 1)) == 88)) {
+    if (int(deref(s + 0)) == '0' && (int(deref(s + 1)) == 'x' || int(deref(s + 1)) == 'X')) {
+        // hex?
+        // skip '0x'
         s = s + 2
         {
             while ((int(luai_ctype_[int(uint8(deref(s))) + 1]) & 1 << 4) != 0) {
@@ -9539,10 +11503,13 @@ def private l_str2int(var s : uint8?; var result : int64?) : uint8? {
             }
         }
     } else {
+        // decimal
         {
             while ((int(luai_ctype_[int(uint8(deref(s))) + 1]) & 1 << 1) != 0) {
-                var d : int = int(deref(s)) - 48
-                if (a >= uint64(9223372036854775807l / int64(10)) && (a > uint64(9223372036854775807l / int64(10)) || d > int(9223372036854775807l % int64(10)) + neg)) {
+                var d : int = int(deref(s)) - '0'
+                // overflow?
+                if (a >= MAXBY10 && (a > MAXBY10 || d > MAXLASTD + neg)) {
+                    // do not accept it (as integer)
                     return null
                 }
                 a = a * uint64(10) + uint64(d)
@@ -9551,9 +11518,11 @@ def private l_str2int(var s : uint8?; var result : int64?) : uint8? {
             }
         }
     }
+    // skip trailing spaces
     while ((int(luai_ctype_[int(uint8(deref(s))) + 1]) & 1 << 3) != 0) {
         s = s + 1
     }
+    // something wrong in the numeral
     if (empty != 0 || int(deref(s)) != 0) {
         return null
     } else {
@@ -9567,6 +11536,7 @@ def luaO_str2num(var s : uint8?; var o : TValue?) : uint64 {
     var i : int64
     var n : double
     var e : uint8?
+    // try as an integer
     e = l_str2int(s, addr(i))
     if (e != null) {
         {
@@ -9575,6 +11545,7 @@ def luaO_str2num(var s : uint8?; var o : TValue?) : uint64 {
             io.tt_ = uint8(3 | 0 << 4)
         }
     } else {
+        // else try as a float
         e = l_str2d(s, addr(n))
         if (e != null) {
             {
@@ -9583,33 +11554,45 @@ def luaO_str2num(var s : uint8?; var o : TValue?) : uint64 {
                 io.tt_ = uint8(3 | 1 << 4)
             }
         } else {
+            // conversion failed
             return uint64(0)
         }
     }
+    // success; return string size
     return uint64(int64(e - s) + int64(1))
 }
 
 [c_function]
 def luaO_utf8esc(var buff : uint8?; var x : uint64) : int {
+    // number of bytes put in buffer (backwards)
     var n : int = 1
+    // ascii?
     if (x < uint64(128)) {
-        deref(buff + (8 - 1)) = uint8(x)
+        deref(buff + (UTF8BUFFSZ - 1)) = uint8(x)
     } else {
+        // need continuation bytes
+        // maximum that fits in first byte
         var mfb : uint = uint(63)
+        // add continuation bytes
         var _first = true
         while (_first || x > uint64(mfb)) {
             _first = false
             let _t0 = n
             n++
-            deref(buff + (8 - _t0)) = uint8(uint64(128) | x & uint64(63))
+            deref(buff + (UTF8BUFFSZ - _t0)) = uint8(uint64(128) | x & uint64(63))
+            // remove added bits
             x >>= 6ul
+            // now there is one less bit available in first byte
             mfb >>= 1u
         }
-        deref(buff + (8 - n)) = uint8(uint64(~mfb << 1u) | x)
+        // still needs continuation byte?
+        // add first byte
+        deref(buff + (UTF8BUFFSZ - n)) = uint8(uint64(~mfb << 1u) | x)
     }
     return n
 }
 
+// Convert a number object to a string, adding it to a buffer
 [c_function]
 def private tostringbuff(var obj : TValue?; var buff : uint8?) : int {
     var len : int
@@ -9617,18 +11600,21 @@ def private tostringbuff(var obj : TValue?; var buff : uint8?) : int {
         len = snprintf(buff, uint64(44), reinterpret<uint8?>("%lld"), obj.value_.i)
     } else {
         len = snprintf(buff, uint64(44), reinterpret<uint8?>("%.14g"), obj.value_.n)
+        // looks like an int?
         if (int(deref(buff + crt::strspn(buff, reinterpret<uint8?>("-0123456789")))) == 0) {
             let _t0 = len
             len++
             deref(buff + _t0) = deref(reinterpret<lconv?>(crt::localeconv()).decimal_point + 0)
+            // adds '.0' to result
             let _t1 = len
             len++
-            deref(buff + _t1) = uint8(48)
+            deref(buff + _t1) = uint8('0')
         }
     }
     return len
 }
 
+// Convert a number object to a Lua string, replacing the value at 'obj'
 [c_function]
 def luaO_tostring(var L : lua_State?; var obj : TValue?) {
     var buff : uint8[44]
@@ -9641,6 +11627,13 @@ def luaO_tostring(var L : lua_State?; var obj : TValue?) {
     }
 }
 
+// Push given string to the stack, as part of the result, and
+// join it to previous partial result if there is one.
+// It may call 'luaV_concat' while using one slot from EXTRA_STACK.
+// This call cannot invoke metamethods, as both operands must be
+// strings. It can, however, raise an error if the result is too
+// long. In that case, 'luaV_concat' frees the extra slot before
+// raising the error.
 [c_function]
 def private pushstr(var buff : BuffFS?; var str : uint8?; lstr : uint64) {
     var L : lua_State? = buff.L
@@ -9650,75 +11643,103 @@ def private pushstr(var buff : BuffFS?; var str : uint8?; lstr : uint64) {
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
         io.tt_ = uint8(int(x_.tt) | 1 << 6)
     }
+    // may use one slot from EXTRA_STACK
     L.top.p = L.top.p + 1
+    // no previous string on the stack?
     if (!(buff.pushed != 0)) {
+        // now there is one
         buff.pushed = 1
     } else {
+        // join previous string with new one
         luaV_concat(L, 2)
     }
 }
 
+// empty the buffer space into the stack
 [c_function]
 def private clearbuff(var buff : BuffFS?) {
+    // push buffer contents
     pushstr(buff, addr(buff.space[0]), uint64(buff.blen))
+    // space now is empty
     buff.blen = 0
 }
 
+// Get a space of size 'sz' in the buffer. If buffer has not enough
+// space, empty it. 'sz' must fit in an empty buffer.
 [c_function]
 def private getbuff(var buff : BuffFS?; sz : int) : uint8? {
-    if (sz > 60 + 44 + 95 - buff.blen) {
+    // not enough space?
+    if (sz > BUFVFS - buff.blen) {
         clearbuff(buff)
     }
     return addr(buff.space[0]) + buff.blen
 }
 
+// Add 'str' to the buffer. If string is larger than the buffer space,
+// push the string directly to the stack.
 [c_function]
 def private addstr2buff(var buff : BuffFS?; var str : uint8?; slen : uint64) {
-    if (slen <= uint64(60 + 44 + 95)) {
+    // does string fit into buffer?
+    if (slen <= uint64(BUFVFS)) {
         var bf : uint8? = getbuff(buff, int(slen))
+        // add string to buffer
         crt::memcpy(reinterpret<void?>(bf), reinterpret<void?>(str), slen)
         buff.blen += int(slen)
     } else {
+        // string larger than buffer
+        // string comes after buffer's content
         clearbuff(buff)
+        // push string
         pushstr(buff, str, slen)
     }
 }
 
+// Add a numeral to the buffer.
 def private addnum2buff(var buff : BuffFS?; var num : TValue?) {
-    var numbuff : uint8? = getbuff(buff, 44)
+    var numbuff : uint8? = getbuff(buff, MAXNUMBER2STR)
+    // format number into 'numbuff'
     var len : int = tostringbuff(num, numbuff)
     buff.blen += len
 }
 
+// this function handles only '%d', '%c', '%f', '%p', '%s', and '%%'
+// conventional formats, plus Lua-specific '%I' and '%U'
 [c_function]
 def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor) : uint8? {
+    // holds last part of the result
     var buff : BuffFS
+    // points to next '%'
     var e : uint8?
     buff.blen = 0
     buff.pushed = buff.blen
     buff.L = L
     while (true) {
-        e = crt::strchr(fmt, 37)
+        e = crt::strchr(fmt, '%')
         if (!(e != null)) {
             break
         }
+        // add 'fmt' up to '%'
         addstr2buff(addr(buff), fmt, uint64(int64(e - fmt)))
+        // conversion specifier
         let _cond = int(deref(e + 1))
-        if (_cond == 115) {
+        if (_cond == 's') {
             {
+                // zero-terminated string
                 var s : uint8? = reinterpret<uint8?>(va_p(argp))
                 if (s == null) {
                     s = reinterpret<uint8?>("(null)")
                 }
                 addstr2buff(addr(buff), s, crt::strlen(s))
             }
-        } elif (_cond == 99) {
+        } elif (_cond == 'c') {
             {
+                // an 'int' as a character
                 var c : uint8 = uint8(uint8(int(va_i(argp))))
                 addstr2buff(addr(buff), addr(c), uint64(typeinfo sizeof(type<uint8>)))
             }
-        } elif (_cond == 100) {
+        } elif (_cond == 'd') {
             {
+                // an 'int'
                 var num : TValue
                 {
                     var io : TValue? = addr(num)
@@ -9727,8 +11748,9 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
                 }
                 addnum2buff(addr(buff), addr(num))
             }
-        } elif (_cond == 73) {
+        } elif (_cond == 'I') {
             {
+                // a 'lua_Integer'
                 var num : TValue
                 {
                     var io : TValue? = addr(num)
@@ -9737,8 +11759,9 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
                 }
                 addnum2buff(addr(buff), addr(num))
             }
-        } elif (_cond == 102) {
+        } elif (_cond == 'f') {
             {
+                // a 'lua_Number'
                 var num : TValue
                 {
                     var io : TValue? = addr(num)
@@ -9747,21 +11770,24 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
                 }
                 addnum2buff(addr(buff), addr(num))
             }
-        } elif (_cond == 112) {
+        } elif (_cond == 'p') {
             {
+                // a pointer
+                // enough space for '%p'
                 var sz : int = int(uint64(3) * uint64(typeinfo sizeof(type<void?>)) + uint64(8))
                 var bf : uint8? = getbuff(addr(buff), sz)
                 var p : void? = reinterpret<void?>(va_p(argp))
                 var len : int = snprintf(bf, uint64(sz), reinterpret<uint8?>("%p"), reinterpret<uint8?>(p))
                 addr(buff).blen += len
             }
-        } elif (_cond == 85) {
+        } elif (_cond == 'U') {
             {
+                // a 'long' as a UTF-8 sequence
                 var bf : uint8[8]
                 var len : int = luaO_utf8esc(addr(bf[0]), uint64(va_i(argp)))
-                addstr2buff(addr(buff), addr(bf[0]) + 8 + -(len), uint64(len))
+                addstr2buff(addr(buff), addr(bf[0]) + UTF8BUFFSZ + -(len), uint64(len))
             }
-        } elif (_cond == 37) {
+        } elif (_cond == '%') {
             {
                 addstr2buff(addr(buff), reinterpret<uint8?>("%"), uint64(1))
             }
@@ -9770,9 +11796,12 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
                 luaG_runerror`va(L, reinterpret<uint8?>("invalid option '%%%c' to 'lua_pushfstring'"), (int(deref(e + 1)),))
             }
         }
+        // skip '%' and the specifier
         fmt = e + 2
     }
+    // rest of 'fmt'
     addstr2buff(addr(buff), fmt, crt::strlen(fmt))
+    // empty buffer into the stack
     clearbuff(addr(buff))
     return addr(addr(reinterpret<GCUnion?>(addr((L.top.p - 1).val).value_.gc).ts).contents[0])
 }
@@ -9788,33 +11817,47 @@ def luaO_pushfstring(var L : lua_State?; var fmt : uint8?; va : va_args) : uint8
 
 [c_function]
 def luaO_chunkid(var out : uint8?; var source : uint8?; var srclen : uint64) {
-    var bufflen : uint64 = uint64(60)
-    if (int(deref(source)) == 61) {
+    // free space in buffer
+    var bufflen : uint64 = uint64(LUA_IDSIZE)
+    // 'literal' source
+    if (int(deref(source)) == '=') {
+        // small enough?
         if (srclen <= bufflen) {
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1), srclen * uint64(typeinfo sizeof(type<uint8>)))
         } else {
+            // truncate it
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1), (bufflen - uint64(1)) * uint64(typeinfo sizeof(type<uint8>)))
             out = out + (bufflen - uint64(1))
             deref(out) = uint8(0)
         }
-    } elif (int(deref(source)) == 64) {
+    } elif (int(deref(source)) == '@') {
+        // file name
+        // small enough?
         if (srclen <= bufflen) {
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1), srclen * uint64(typeinfo sizeof(type<uint8>)))
         } else {
+            // add '...' before rest of name
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(reinterpret<uint8?>("...")), (uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)) * uint64(typeinfo sizeof(type<uint8>)))
             out = out + (uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
             bufflen -= uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1 + srclen + -int64(bufflen)), bufflen * uint64(typeinfo sizeof(type<uint8>)))
         }
     } else {
-        var nl : uint8? = crt::strchr(source, 10)
+        // string; format as [string "source"]
+        // find first new line (if any)
+        var nl : uint8? = crt::strchr(source, '\n')
+        // add prefix
         crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(reinterpret<uint8?>("[string \"")), (uint64(typeinfo sizeof(type<uint8[10]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)) * uint64(typeinfo sizeof(type<uint8>)))
         out = out + (uint64(typeinfo sizeof(type<uint8[10]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
+        // save space for prefix+suffix+'\0'
         bufflen -= uint64(typeinfo sizeof(type<uint8[15]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1) + uint64(1)
+        // small one-line source?
         if (srclen < bufflen && nl == null) {
+            // keep it
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source), srclen * uint64(typeinfo sizeof(type<uint8>)))
             out = out + srclen
         } else {
+            // stop at first newline
             if (nl != null) {
                 srclen = uint64(int64(nl - source))
             }
@@ -9851,6 +11894,7 @@ def private checklimit(var fs : FuncState?; v : int; l : int; var what : uint8?)
     }
 }
 
+// Test whether next token is 'c'; if so, skip it.
 def private testnext(var ls : LexState?; c : int) : int {
     if (ls.t.token == c) {
         luaX_next(ls)
@@ -9860,21 +11904,28 @@ def private testnext(var ls : LexState?; c : int) : int {
     }
 }
 
+// Check that next token is 'c'.
 def private check(var ls : LexState?; c : int) {
     if (ls.t.token != c) {
         error_expected(ls, c)
     }
 }
 
+// Check that next token is 'c' and skip it.
 def private checknext(var ls : LexState?; c : int) {
     check(ls, c)
     luaX_next(ls)
 }
 
+// Check that next token is 'what' and skip it. In case of error,
+// raise an error that the expected 'what' should match a 'who'
+// in line 'where' (if that is not the current line).
 [c_function]
 def private check_match(var ls : LexState?; what : int; who : int; _c_where : int) {
-    if (int64((!(testnext(ls, what) != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!(testnext(ls, what) != 0)) {
+        // all in the same line?
         if (_c_where == ls.linenumber) {
+            // do not need a complex message
             error_expected(ls, what)
         } else {
             luaX_syntaxerror(ls, luaO_pushfstring`va(ls.L, reinterpret<uint8?>("%s expected (to close %s at line %d)"), (luaX_token2str(ls, what), luaX_token2str(ls, who), _c_where)))
@@ -9891,14 +11942,14 @@ def private str_checkname(var ls : LexState?) : TString? {
 }
 
 def private init_exp(var e : expdesc?; k : expkind; i : int) {
-    e.t = -1
+    e.t = NO_JUMP
     e.f = e.t
     e.k = k
     e.u.info = i
 }
 
 def private codestring(var e : expdesc?; var s : TString?) {
-    e.t = -1
+    e.t = NO_JUMP
     e.f = e.t
     e.k = expkind.VKSTR
     e.u.strval = s
@@ -9908,6 +11959,8 @@ def private codename(var ls : LexState?; var e : expdesc?) {
     codestring(e, str_checkname(ls))
 }
 
+// Register a new local variable in the active 'Proto' (for debug
+// information).
 [c_function]
 def private registerlocalvar(var ls : LexState?; var fs : FuncState?; var varname : TString?) : int {
     var f : Proto? = fs.f
@@ -9928,27 +11981,36 @@ def private registerlocalvar(var ls : LexState?; var fs : FuncState?; var varnam
     return int(_t1)
 }
 
+// Create a new local variable with the given 'name'. Return its index
+// in the function.
 [c_function]
 def private new_localvar(var ls : LexState?; var name : TString?) : int {
     var L : lua_State? = ls.L
     var fs : FuncState? = ls.fs
     var dyd : Dyndata? = ls.dyd
     var _c_var : Vardesc?
-    checklimit(fs, dyd.actvar.n + 1 - fs.firstlocal, 200, reinterpret<uint8?>("local variables"))
+    checklimit(fs, dyd.actvar.n + 1 - fs.firstlocal, MAXVARS, reinterpret<uint8?>("local variables"))
     dyd.actvar.arr = reinterpret<Vardesc?>(luaM_growaux_(L, reinterpret<void?>(dyd.actvar.arr), dyd.actvar.n + 1, addr(dyd.actvar.size), int(uint64(typeinfo sizeof(type<Vardesc>))), int(uint64(32767) <= ~uint64(0) / uint64(typeinfo sizeof(type<Vardesc>)) ? uint(32767) : uint(~uint64(0) / uint64(typeinfo sizeof(type<Vardesc>)))), reinterpret<uint8?>("local variables")))
     let _t0 = dyd.actvar.n
     dyd.actvar.n++
     _c_var = addr(deref(dyd.actvar.arr + _t0))
-    _c_var.vd.kind = uint8(0)
+    // default
+    _c_var.vd.kind = uint8(VDKREG)
     _c_var.vd.name = name
     return dyd.actvar.n - 1 - fs.firstlocal
 }
 
+// Return the "variable description" (Vardesc) of a given variable.
+// (Unless noted otherwise, all variables are referred to by their
+// compiler indices.)
 [c_function]
 def private getlocalvardesc(var fs : FuncState?; vidx : int) : Vardesc? {
     return addr(deref(fs.ls.dyd.actvar.arr + (fs.firstlocal + vidx)))
 }
 
+// Convert 'nvar', a compiler index level, to its corresponding
+// register. For that, search for the highest variable below that level
+// that is in a register and uses its register index ('ridx') plus one.
 def private reglevel(var fs : FuncState?; var nvar : int) : int {
     while (true) {
         let _t0 = nvar
@@ -9956,22 +12018,29 @@ def private reglevel(var fs : FuncState?; var nvar : int) : int {
         if (!(_t0 > 0)) {
             break
         }
+        // get previous variable
         var vd : Vardesc? = getlocalvardesc(fs, nvar)
-        if (int(vd.vd.kind) != 3) {
+        // is in a register?
+        if (int(vd.vd.kind) != RDKCTC) {
             return int(vd.vd.ridx) + 1
         }
     }
+    // no variables in registers
     return 0
 }
 
+// Return the number of variables in the register stack for the given
+// function.
 def luaY_nvarstack(var fs : FuncState?) : int {
     return reglevel(fs, int(fs.nactvar))
 }
 
+// Get the debug-information entry for current variable 'vidx'.
 [c_function]
 def private localdebuginfo(var fs : FuncState?; vidx : int) : LocVar? {
     var vd : Vardesc? = getlocalvardesc(fs, vidx)
-    if (int(vd.vd.kind) == 3) {
+    if (int(vd.vd.kind) == RDKCTC) {
+        // no debug info. for constants
         return null
     } else {
         var idx : int = int(vd.vd.pidx)
@@ -9979,17 +12048,20 @@ def private localdebuginfo(var fs : FuncState?; vidx : int) : LocVar? {
     }
 }
 
+// Create an expression representing variable 'vidx'
 def private init_var(var fs : FuncState?; var e : expdesc?; vidx : int) {
-    e.t = -1
+    e.t = NO_JUMP
     e.f = e.t
     e.k = expkind.VLOCAL
     e.u._c_var.vidx = uint16(vidx)
     e.u._c_var.ridx = getlocalvardesc(fs, vidx).vd.ridx
 }
 
+// Raises an error if variable described by 'e' is read only
 [c_function]
 def private check_readonly(var ls : LexState?; var e : expdesc?) {
     var fs : FuncState? = ls.fs
+    // to be set if variable is const
     var varname : TString? = null
     let _cond = e.k
     if (_cond == expkind.VCONST) {
@@ -9999,26 +12071,30 @@ def private check_readonly(var ls : LexState?; var e : expdesc?) {
     } elif (_cond == expkind.VLOCAL) {
         {
             var vardesc : Vardesc? = getlocalvardesc(fs, int(e.u._c_var.vidx))
-            if (int(vardesc.vd.kind) != 0) {
+            // not a regular variable?
+            if (int(vardesc.vd.kind) != VDKREG) {
                 varname = vardesc.vd.name
             }
         }
     } elif (_cond == expkind.VUPVAL) {
         {
             var up : Upvaldesc? = addr(deref(fs.f.upvalues + e.u.info))
-            if (int(up.kind) != 0) {
+            if (int(up.kind) != VDKREG) {
                 varname = up.name
             }
         }
     } else {
+        // other cases cannot be read-only
         return
     }
     if (varname != null) {
         var msg : uint8? = luaO_pushfstring`va(ls.L, reinterpret<uint8?>("attempt to assign to const variable '%s'"), (addr(varname.contents[0]),))
+        // error
         luaK_semerror(ls, msg)
     }
 }
 
+// Start the scope for the last 'nvars' created variables.
 def private adjustlocalvars(var ls : LexState?; nvars : int) {
     var fs : FuncState? = ls.fs
     var reglevel : int = luaY_nvarstack(fs)
@@ -10039,17 +12115,22 @@ def private adjustlocalvars(var ls : LexState?; nvars : int) {
     }
 }
 
+// Close the scope for all variables up to level 'tolevel'.
+// (debug info.)
 def private removevars(var fs : FuncState?; tolevel : int) {
     fs.ls.dyd.actvar.n -= int(fs.nactvar) - tolevel
     while (int(fs.nactvar) > tolevel) {
         fs.nactvar = uint8(uint(fs.nactvar) - 1)
         var _c_var : LocVar? = localdebuginfo(fs, int(fs.nactvar))
+        // does it have debug information?
         if (_c_var != null) {
             _c_var.endpc = fs.pc
         }
     }
 }
 
+// Search the upvalues of the function 'fs' for one
+// with the given 'name'.
 [c_function]
 def private searchupvalue(var fs : FuncState?; var name : TString?) : int {
     var i : int
@@ -10063,6 +12144,7 @@ def private searchupvalue(var fs : FuncState?; var name : TString?) : int {
             i++
         }
     }
+    // not found
     return -1
 }
 
@@ -10070,7 +12152,7 @@ def private searchupvalue(var fs : FuncState?; var name : TString?) : int {
 def private allocupvalue(var fs : FuncState?) : Upvaldesc? {
     var f : Proto? = fs.f
     var oldsize : int = f.sizeupvalues
-    checklimit(fs, int(fs.nups) + 1, 255, reinterpret<uint8?>("upvalues"))
+    checklimit(fs, int(fs.nups) + 1, MAXUPVAL, reinterpret<uint8?>("upvalues"))
     f.upvalues = reinterpret<Upvaldesc?>(luaM_growaux_(fs.ls.L, reinterpret<void?>(f.upvalues), int(fs.nups), addr(f.sizeupvalues), int(uint64(typeinfo sizeof(type<Upvaldesc>))), int(uint64(255) <= ~uint64(0) / uint64(typeinfo sizeof(type<Upvaldesc>)) ? uint(255) : uint(~uint64(0) / uint64(typeinfo sizeof(type<Upvaldesc>)))), reinterpret<uint8?>("upvalues")))
     while (oldsize < f.sizeupvalues) {
         let _t0 = oldsize
@@ -10102,16 +12184,22 @@ def private newupvalue(var fs : FuncState?; var name : TString?; var v : expdesc
     return int(fs.nups) - 1
 }
 
+// Look for an active local variable with the name 'n' in the
+// function 'fs'. If found, initialize 'var' with it and return
+// its expression kind; otherwise return -1.
 def private searchvar(var fs : FuncState?; var n : TString?; var _c_var : expdesc?) : int {
     var i : int
     {
         i = int(fs.nactvar) - 1
         while (i >= 0) {
             var vd : Vardesc? = getlocalvardesc(fs, i)
+            // found?
             if (intptr(n) == intptr(vd.vd.name)) {
-                if (int(vd.vd.kind) == 3) {
+                // compile-time constant?
+                if (int(vd.vd.kind) == RDKCTC) {
                     init_exp(_c_var, expkind.VCONST, fs.firstlocal + i)
                 } else {
+                    // real variable
                     init_var(fs, _c_var, i)
                 }
                 return int(_c_var.k)
@@ -10119,9 +12207,12 @@ def private searchvar(var fs : FuncState?; var n : TString?; var _c_var : expdes
             i--
         }
     }
+    // not found
     return -1
 }
 
+// Mark block where variable at given level was defined
+// (to emit close instructions later).
 def private markupval(var fs : FuncState?; level : int) {
     var bl : BlockCnt? = fs.bl
     while (int(bl.nactvar) > level) {
@@ -10131,6 +12222,7 @@ def private markupval(var fs : FuncState?; level : int) {
     fs.needclose = uint8(1)
 }
 
+// Mark that current block has a to-be-closed variable.
 def private marktobeclosed(var fs : FuncState?) {
     var bl : BlockCnt? = fs.bl
     bl.upval = uint8(1)
@@ -10138,86 +12230,134 @@ def private marktobeclosed(var fs : FuncState?) {
     fs.needclose = uint8(1)
 }
 
+// Find a variable with the given name 'n'. If it is an upvalue, add
+// this upvalue into all intermediate functions. If it is a global, set
+// 'var' as 'void' as a flag.
 [c_function]
 def private singlevaraux(var fs : FuncState?; var n : TString?; var _c_var : expdesc?; base : int) {
+    // no more levels?
     if (fs == null) {
+        // default is global
         init_exp(_c_var, expkind.VVOID, 0)
     } else {
+        // look up locals at current level
         var v : int = searchvar(fs, n, _c_var)
+        // found?
         if (v >= 0) {
             if (v == int(expkind.VLOCAL) && !(base != 0)) {
+                // local will be used as an upval
                 markupval(fs, int(_c_var.u._c_var.vidx))
             }
         } else {
+            // not found as local at current level; try upvalues
+            // try existing upvalues
             var idx : int = searchupvalue(fs, n)
+            // not found?
             if (idx < 0) {
+                // try upper levels
                 singlevaraux(fs.prev, n, _c_var, 0)
+                // local or upvalue?
                 if (_c_var.k == expkind.VLOCAL || _c_var.k == expkind.VUPVAL) {
+                    // will be a new upvalue
                     idx = newupvalue(fs, n, _c_var)
                 } else {
+                    // it is a global or a constant
+                    // don't need to do anything at this level
                     return
                 }
             }
+            // new or old upvalue
             init_exp(_c_var, expkind.VUPVAL, idx)
         }
     }
 }
 
+// Find a variable with the given name 'n', handling global variables
+// too.
 [c_function]
 def private singlevar(var ls : LexState?; var _c_var : expdesc?) {
     var varname : TString? = str_checkname(ls)
     var fs : FuncState? = ls.fs
     singlevaraux(fs, varname, _c_var, 1)
+    // global name?
     if (_c_var.k == expkind.VVOID) {
         var key : expdesc
+        // get environment variable
         singlevaraux(fs, ls.envn, _c_var, 1)
+        // this one must exist
+        // but could be a constant
         luaK_exp2anyregup(fs, _c_var)
+        // key is variable name
         codestring(addr(key), varname)
+        // env[varname]
         luaK_indexed(fs, _c_var, addr(key))
     }
 }
 
+// Adjust the number of results from an expression list 'e' with 'nexps'
+// expressions to 'nvars' values.
 def private adjust_assign(var ls : LexState?; nvars : int; nexps : int; var e : expdesc?) {
     var fs : FuncState? = ls.fs
+    // extra values needed
     var needed : int = nvars - nexps
+    // last expression has multiple returns?
     if (e.k == expkind.VCALL || e.k == expkind.VVARARG) {
+        // discount last expression itself
         var extra : int = needed + 1
         if (extra < 0) {
             extra = 0
         }
+        // last exp. provides the difference
         luaK_setreturns(fs, e, extra)
     } else {
+        // at least one expression?
         if (e.k != expkind.VVOID) {
+            // close last expression
             luaK_exp2nextreg(fs, e)
         }
+        // missing values?
         if (needed > 0) {
+            // complete with nils
             luaK_nil(fs, int(fs.freereg), needed)
         }
     }
     if (needed > 0) {
+        // registers for extra values
         luaK_reserveregs(fs, needed)
     } else {
+        // adding 'needed' is actually a subtraction
+        // remove extra values
         fs.freereg = uint8(int(fs.freereg) + needed)
     }
 }
 
+// Generates an error that a goto jumps into the scope of some
+// local variable.
 [c_function]
 def private jumpscopeerror(var ls : LexState?; var gt : Labeldesc?) {
     var varname : uint8? = addr(getlocalvardesc(ls.fs, int(gt.nactvar)).vd.name.contents[0])
     var msg : uint8? = reinterpret<uint8?>("<goto %s> at line %d jumps into the scope of local '%s'")
     msg = luaO_pushfstring`va(ls.L, msg, (addr(gt.name.contents[0]), gt.line, varname))
+    // raise the error
     luaK_semerror(ls, msg)
 }
 
+// Solves the goto at index 'g' to given 'label' and removes it
+// from the list of pending gotos.
+// If it jumps into the scope of some variable, raises an error.
 [c_function]
 def private solvegoto(var ls : LexState?; g : int; var _c_label : Labeldesc?) {
     var i : int
+    // list of gotos
     var gl : Labellist? = addr(ls.dyd.gt)
+    // goto to be resolved
     var gt : Labeldesc? = addr(deref(gl.arr + g))
-    if (int64((int(gt.nactvar) < int(_c_label.nactvar) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // enter some scope?
+    if (int(gt.nactvar) < int(_c_label.nactvar)) {
         jumpscopeerror(ls, gt)
     }
     luaK_patchlist(ls.fs, gt.pc, _c_label.pc)
+    // remove goto from pending list
     {
         i = g
         while (i < gl.n - 1) {
@@ -10228,23 +12368,28 @@ def private solvegoto(var ls : LexState?; g : int; var _c_label : Labeldesc?) {
     gl.n--
 }
 
+// Search for an active label with the given name.
 [c_function]
 def private findlabel(var ls : LexState?; var name : TString?) : Labeldesc? {
     var i : int
     var dyd : Dyndata? = ls.dyd
+    // check labels in current function for a match
     {
         i = ls.fs.firstlabel
         while (i < dyd._c_label.n) {
             var lb : Labeldesc? = addr(deref(dyd._c_label.arr + i))
+            // correct label?
             if (intptr(lb.name) == intptr(name)) {
                 return lb
             }
             i++
         }
     }
+    // label not found
     return null
 }
 
+// Adds a new label/goto in the corresponding list.
 [c_function]
 def private newlabelentry(var ls : LexState?; var l : Labellist?; var name : TString?; line : int; pc : int) : int {
     var n : int = l.n
@@ -10263,6 +12408,9 @@ def private newgotoentry(var ls : LexState?; var name : TString?; line : int; pc
     return newlabelentry(ls, addr(ls.dyd.gt), name, line, pc)
 }
 
+// Solves forward jumps. Check whether new label 'lb' matches any
+// pending gotos in current block and solves them. Return true
+// if any of the gotos need to close upvalues.
 [c_function]
 def private solvegotos(var ls : LexState?; var lb : Labeldesc?) : int {
     var gl : Labellist? = addr(ls.dyd.gt)
@@ -10271,6 +12419,7 @@ def private solvegotos(var ls : LexState?; var lb : Labeldesc?) : int {
     while (i < gl.n) {
         if (intptr(deref(gl.arr + i).name) == intptr(lb.name)) {
             needsclose |= int(deref(gl.arr + i).close)
+            // will remove 'i' from the list
             solvegoto(ls, i, lb)
         } else {
             i++
@@ -10279,14 +12428,22 @@ def private solvegotos(var ls : LexState?; var lb : Labeldesc?) : int {
     return needsclose
 }
 
+// Create a new label with the given 'name' at the given 'line'.
+// 'last' tells whether label is the last non-op statement in its
+// block. Solves all pending gotos to this new label and adds
+// a close instruction if necessary.
+// Returns true iff it added a close instruction.
 [c_function]
 def private createlabel(var ls : LexState?; var name : TString?; line : int; last : int) : int {
     var fs : FuncState? = ls.fs
     var ll : Labellist? = addr(ls.dyd._c_label)
     var l : int = newlabelentry(ls, ll, name, line, luaK_getlabel(fs))
+    // label is last no-op statement in the block?
     if (last != 0) {
+        // assume that locals are already out of scope
         deref(ll.arr + l).nactvar = fs.bl.nactvar
     }
+    // need close?
     if (solvegotos(ls, addr(deref(ll.arr + l))) != 0) {
         luaK_codeABCk(fs, OpCode.OP_CLOSE, luaY_nvarstack(fs), 0, 0, 0)
         return 1
@@ -10294,17 +12451,23 @@ def private createlabel(var ls : LexState?; var name : TString?; line : int; las
     return 0
 }
 
+// Adjust pending gotos to outer level of a block.
 [c_function]
 def private movegotosout(var fs : FuncState?; var bl : BlockCnt?) {
     var i : int
     var gl : Labellist? = addr(fs.ls.dyd.gt)
+    // correct pending gotos to current block
+    // for each pending goto
     {
         i = bl.firstgoto
         while (i < gl.n) {
             var gt : Labeldesc? = addr(deref(gl.arr + i))
+            // leaving a variable scope?
             if (reglevel(fs, int(gt.nactvar)) > reglevel(fs, int(bl.nactvar))) {
+                // jump may need a close
                 gt.close = uint8(int(gt.close) | int(bl.upval))
             }
+            // update goto level
             gt.nactvar = bl.nactvar
             i++
         }
@@ -10318,11 +12481,12 @@ def private enterblock(var fs : FuncState?; var bl : BlockCnt?; isloop : uint8) 
     bl.firstlabel = fs.ls.dyd._c_label.n
     bl.firstgoto = fs.ls.dyd.gt.n
     bl.upval = uint8(0)
-    bl.insidetbc = uint8(fs.bl != null && int(fs.bl.insidetbc) != 0 ? 1 : 0)
+    bl.insidetbc = uint8(fs.bl != null && fs.bl.insidetbc != 0 ? 1 : 0)
     bl.previous = fs.bl
     fs.bl = bl
 }
 
+// generates an error for an undefined 'goto'.
 [c_function]
 def private undefgoto(var ls : LexState?; var gt : Labeldesc?) {
     var msg : uint8?
@@ -10341,31 +12505,45 @@ def private leaveblock(var fs : FuncState?) {
     var bl : BlockCnt? = fs.bl
     var ls : LexState? = fs.ls
     var hasclose : int = 0
+    // level outside the block
     var stklevel : int = reglevel(fs, int(bl.nactvar))
+    // remove block locals
     removevars(fs, int(bl.nactvar))
+    // back to level on entry
+    // has to fix pending breaks?
     if (bl.isloop != 0) {
         hasclose = createlabel(ls, luaS_newlstr(ls.L, reinterpret<uint8?>("break"), uint64(typeinfo sizeof(type<uint8[6]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)), 0, 0)
     }
-    if (!(hasclose != 0) && bl.previous != null && int(bl.upval) != 0) {
+    // still need a 'close'?
+    if (!(hasclose != 0) && bl.previous != null && bl.upval != 0) {
         luaK_codeABCk(fs, OpCode.OP_CLOSE, stklevel, 0, 0, 0)
     }
+    // free registers
     fs.freereg = uint8(stklevel)
+    // remove local labels
     ls.dyd._c_label.n = bl.firstlabel
+    // current block now is previous one
     fs.bl = bl.previous
+    // was it a nested block?
     if (bl.previous != null) {
+        // update pending gotos to enclosing block
         movegotosout(fs, bl)
     } else {
+        // still pending gotos?
         if (bl.firstgoto < ls.dyd.gt.n) {
+            // error
             undefgoto(ls, addr(deref(ls.dyd.gt.arr + bl.firstgoto)))
         }
     }
 }
 
+// adds a new prototype into list of prototypes
 [c_function]
 def private addprototype(var ls : LexState?) : Proto? {
     var clp : Proto?
     var L : lua_State? = ls.L
     var fs : FuncState? = ls.fs
+    // prototype of current function
     var f : Proto? = fs.f
     if (fs.np >= f.sizep) {
         var oldsize : int = f.sizep
@@ -10386,15 +12564,21 @@ def private addprototype(var ls : LexState?) : Proto? {
     return clp
 }
 
+// codes instruction to create new closure in parent function.
+// The OP_CLOSURE instruction uses the last available register,
+// so that, if it invokes the GC, the GC knows which registers
+// are in use at that time.
 def private codeclosure(var ls : LexState?; var v : expdesc?) {
     var fs : FuncState? = ls.fs.prev
     init_exp(v, expkind.VRELOC, luaK_codeABx(fs, OpCode.OP_CLOSURE, 0, uint(fs.np - 1)))
+    // fix it at the last register
     luaK_exp2nextreg(fs, v)
 }
 
 [c_function]
 def private open_func(var ls : LexState?; var fs : FuncState?; var bl : BlockCnt?) {
     var f : Proto? = fs.f
+    // linked list of funcstates
     fs.prev = ls.fs
     fs.ls = ls
     ls.fs = fs
@@ -10417,6 +12601,7 @@ def private open_func(var ls : LexState?; var fs : FuncState?; var bl : BlockCnt
     if ((int(f.marked) & 1 << 5) != 0 && (int(f.source.marked) & (1 << 3 | 1 << 4)) != 0) {
         luaC_barrier_(ls.L, addr(reinterpret<GCUnion?>(f).gc), addr(reinterpret<GCUnion?>(f.source).gc))
     }
+    // registers 0/1 are always valid
     f.maxstacksize = uint8(2)
     enterblock(fs, bl, uint8(0))
 }
@@ -10426,6 +12611,7 @@ def private close_func(var ls : LexState?) {
     var L : lua_State? = ls.L
     var fs : FuncState? = ls.fs
     var f : Proto? = fs.f
+    // final return
     luaK_ret(fs, luaY_nvarstack(fs), 0)
     leaveblock(fs)
     luaK_finish(fs)
@@ -10444,6 +12630,9 @@ def private close_func(var ls : LexState?) {
     }
 }
 
+// check whether current token is in the follow set of a block.
+// 'until' closes syntactical blocks, but do not close scope,
+// so it is handled in separate.
 def private block_follow(var ls : LexState?; withuntil : int) : int {
     let _cond = ls.t.token
     if (_cond == 259 || _cond == 260 || _cond == 261 || _cond == 288) {
@@ -10457,9 +12646,11 @@ def private block_follow(var ls : LexState?; withuntil : int) : int {
 }
 
 def private statlist(var ls : LexState?) {
+    // statlist -> { stat [';'] }
     while (!(block_follow(ls, 1) != 0)) {
         if (ls.t.token == int(RESERVED.TK_RETURN)) {
             statement(ls)
+            // 'return' must be last statement
             return
         }
         statement(ls)
@@ -10468,23 +12659,28 @@ def private statlist(var ls : LexState?) {
 
 [c_function]
 def private fieldsel(var ls : LexState?; var v : expdesc?) {
+    // fieldsel -> ['.' | ':'] NAME
     var fs : FuncState? = ls.fs
     var key : expdesc
     luaK_exp2anyregup(fs, v)
+    // skip the dot or colon
     luaX_next(ls)
     codename(ls, addr(key))
     luaK_indexed(fs, v, addr(key))
 }
 
 def private yindex(var ls : LexState?; var v : expdesc?) {
+    // index -> '[' expr ']'
+    // skip the '['
     luaX_next(ls)
     expr(ls, v)
     luaK_exp2val(ls.fs, v)
-    checknext(ls, 93)
+    checknext(ls, ']')
 }
 
 [c_function]
 def private recfield(var ls : LexState?; var cc : ConsControl?) {
+    // recfield -> (NAME | '['exp']') = exp
     var fs : FuncState? = ls.fs
     var reg : int = int(ls.fs.freereg)
     var tab : expdesc
@@ -10493,28 +12689,33 @@ def private recfield(var ls : LexState?; var cc : ConsControl?) {
     if (ls.t.token == int(RESERVED.TK_NAME)) {
         codename(ls, addr(key))
     } else {
+        // ls->t.token == '['
         yindex(ls, addr(key))
     }
     checklimit(fs, cc.nh, 2147483647, reinterpret<uint8?>("items in a constructor"))
     cc.nh++
-    checknext(ls, 61)
+    checknext(ls, '=')
     tab = deref(cc.t)
     luaK_indexed(fs, addr(tab), addr(key))
     expr(ls, addr(val))
     luaK_storevar(fs, addr(tab), addr(val))
+    // free registers
     fs.freereg = uint8(reg)
 }
 
 [c_function]
 def private closelistfield(var fs : FuncState?; var cc : ConsControl?) {
+    // there is no list item
     if (cc.v.k == expkind.VVOID) {
         return
     }
     luaK_exp2nextreg(fs, addr(cc.v))
     cc.v.k = expkind.VVOID
-    if (cc.tostore == 50) {
+    if (cc.tostore == LFIELDS_PER_FLUSH) {
+        // flush
         luaK_setlist(fs, cc.t.u.info, cc.na, cc.tostore)
         cc.na += cc.tostore
+        // no more items pending
         cc.tostore = 0
     }
 }
@@ -10526,7 +12727,8 @@ def private lastlistfield(var fs : FuncState?; var cc : ConsControl?) {
     }
     if (cc.v.k == expkind.VCALL || cc.v.k == expkind.VVARARG) {
         luaK_setreturns(fs, addr(cc.v), -1)
-        luaK_setlist(fs, cc.t.u.info, cc.na, -1)
+        luaK_setlist(fs, cc.t.u.info, cc.na, LUA_MULTRET)
+        // do not count last expression (unknown number of elements)
         cc.na--
     } else {
         if (cc.v.k != expkind.VVOID) {
@@ -10539,21 +12741,25 @@ def private lastlistfield(var fs : FuncState?; var cc : ConsControl?) {
 
 [c_function]
 def private listfield(var ls : LexState?; var cc : ConsControl?) {
+    // listfield -> exp
     expr(ls, addr(cc.v))
     cc.tostore++
 }
 
 def private field(var ls : LexState?; var cc : ConsControl?) {
+    // field -> listfield | recfield
     let _cond = ls.t.token
     if (_cond == 291) {
         {
-            if (luaX_lookahead(ls) != 61) {
+            // may be 'listfield' or 'recfield'
+            // expression?
+            if (luaX_lookahead(ls) != '=') {
                 listfield(ls, cc)
             } else {
                 recfield(ls, cc)
             }
         }
-    } elif (_cond == 91) {
+    } elif (_cond == '[') {
         {
             recfield(ls, cc)
         }
@@ -10566,29 +12772,34 @@ def private field(var ls : LexState?; var cc : ConsControl?) {
 
 [c_function]
 def private constructor(var ls : LexState?; var t : expdesc?) {
+    // constructor -> '{' [ field { sep field } [sep] ] '}'
+    // sep -> ',' | ';'
     var fs : FuncState? = ls.fs
     var line : int = ls.linenumber
     var pc : int = luaK_codeABCk(fs, OpCode.OP_NEWTABLE, 0, 0, 0, 0)
     var cc : ConsControl
+    // space for extra arg.
     luaK_code(fs, uint(0))
     cc.tostore = 0
     cc.nh = cc.tostore
     cc.na = cc.nh
     cc.t = t
+    // table will be at stack top
     init_exp(t, expkind.VNONRELOC, int(fs.freereg))
     luaK_reserveregs(fs, 1)
+    // no value (yet)
     init_exp(addr(cc.v), expkind.VVOID, 0)
-    checknext(ls, 123)
+    checknext(ls, '{')
     var _first = true
-    while (_first || (testnext(ls, 44) != 0 || testnext(ls, 59) != 0)) {
+    while (_first || (testnext(ls, ',') != 0 || testnext(ls, ';') != 0)) {
         _first = false
-        if (ls.t.token == 125) {
+        if (ls.t.token == '}') {
             break
         }
         closelistfield(fs, addr(cc))
         field(ls, addr(cc))
     }
-    check_match(ls, 125, 123, line)
+    check_match(ls, '}', '{', line)
     lastlistfield(fs, addr(cc))
     luaK_settablesize(fs, pc, t.u.info, cc.na, cc.nh)
 }
@@ -10600,13 +12811,15 @@ def private setvararg(var fs : FuncState?; nparams : int) {
 
 [c_function]
 def private parlist(var ls : LexState?) {
+    // parlist -> [ {NAME ','} (NAME | '...') ]
     var fs : FuncState? = ls.fs
     var f : Proto? = fs.f
     var nparams : int = 0
     var isvararg : int = 0
-    if (ls.t.token != 41) {
+    // is 'parlist' not empty?
+    if (ls.t.token != ')') {
         var _first = true
-        while (_first || !(isvararg != 0) && testnext(ls, 44) != 0) {
+        while (_first || !(isvararg != 0) && testnext(ls, ',') != 0) {
             _first = false
             let _cond = ls.t.token
             if (_cond == 291) {
@@ -10627,25 +12840,29 @@ def private parlist(var ls : LexState?) {
     adjustlocalvars(ls, nparams)
     f.numparams = fs.nactvar
     if (isvararg != 0) {
+        // declared vararg
         setvararg(fs, int(f.numparams))
     }
+    // reserve registers for parameters
     luaK_reserveregs(fs, int(fs.nactvar))
 }
 
 [c_function]
 def private body(var ls : LexState?; var e : expdesc?; ismethod : int; line : int) {
+    // body -> '(' parlist ')' block END
     var new_fs : FuncState
     var bl : BlockCnt
     new_fs.f = addprototype(ls)
     new_fs.f.linedefined = line
     open_func(ls, addr(new_fs), addr(bl))
-    checknext(ls, 40)
+    checknext(ls, '(')
     if (ismethod != 0) {
+        // create 'self' parameter
         new_localvar(ls, luaX_newstring(ls, reinterpret<uint8?>("self"), uint64(typeinfo sizeof(type<uint8[5]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)))
         adjustlocalvars(ls, 1)
     }
     parlist(ls)
-    checknext(ls, 41)
+    checknext(ls, ')')
     statlist(ls)
     new_fs.f.lastlinedefined = ls.linenumber
     check_match(ls, int(RESERVED.TK_END), int(RESERVED.TK_FUNCTION), line)
@@ -10654,9 +12871,11 @@ def private body(var ls : LexState?; var e : expdesc?; ismethod : int; line : in
 }
 
 def private explist(var ls : LexState?; var v : expdesc?) : int {
+    // explist -> expr { ',' expr }
+    // at least one expression
     var n : int = 1
     expr(ls, v)
-    while (testnext(ls, 44) != 0) {
+    while (testnext(ls, ',') != 0) {
         luaK_exp2nextreg(ls.fs, v)
         expr(ls, v)
         n++
@@ -10672,10 +12891,12 @@ def private funcargs(var ls : LexState?; var f : expdesc?) {
     var nparams : int
     var line : int = ls.linenumber
     let _cond = ls.t.token
-    if (_cond == 40) {
+    if (_cond == '(') {
         {
+            // funcargs -> '(' [ explist ] ')'
             luaX_next(ls)
-            if (ls.t.token == 41) {
+            // arg list is empty?
+            if (ls.t.token == ')') {
                 args.k = expkind.VVOID
             } else {
                 explist(ls, addr(args))
@@ -10683,15 +12904,18 @@ def private funcargs(var ls : LexState?; var f : expdesc?) {
                     luaK_setreturns(fs, addr(args), -1)
                 }
             }
-            check_match(ls, 41, 40, line)
+            check_match(ls, ')', '(', line)
         }
-    } elif (_cond == 123) {
+    } elif (_cond == '{') {
         {
+            // funcargs -> constructor
             constructor(ls, addr(args))
         }
     } elif (_cond == 292) {
         {
+            // funcargs -> STRING
             codestring(addr(args), ls.t.seminfo.ts)
+            // must use 'seminfo' before 'next'
             luaX_next(ls)
         }
     } else {
@@ -10699,29 +12923,34 @@ def private funcargs(var ls : LexState?; var f : expdesc?) {
             luaX_syntaxerror(ls, reinterpret<uint8?>("function arguments expected"))
         }
     }
+    // base register for call
     base = f.u.info
     if (args.k == expkind.VCALL || args.k == expkind.VVARARG) {
-        nparams = -1
+        // open call
+        nparams = LUA_MULTRET
     } else {
         if (args.k != expkind.VVOID) {
+            // close last argument
             luaK_exp2nextreg(fs, addr(args))
         }
         nparams = int(fs.freereg) - (base + 1)
     }
     init_exp(f, expkind.VCALL, luaK_codeABCk(fs, OpCode.OP_CALL, base, nparams + 1, 2, 0))
     luaK_fixline(fs, line)
+    // call removes function and arguments and leaves
     fs.freereg = uint8(base + 1)
 }
 
 [c_function]
 def private primaryexp(var ls : LexState?; var v : expdesc?) {
+    // primaryexp -> NAME | '(' expr ')'
     let _cond = ls.t.token
-    if (_cond == 40) {
+    if (_cond == '(') {
         {
             var line : int = ls.linenumber
             luaX_next(ls)
             expr(ls, v)
-            check_match(ls, 41, 40, line)
+            check_match(ls, ')', '(', line)
             luaK_dischargevars(ls.fs, v)
             return
         }
@@ -10739,32 +12968,38 @@ def private primaryexp(var ls : LexState?; var v : expdesc?) {
 
 [c_function]
 def private suffixedexp(var ls : LexState?; var v : expdesc?) {
+    // suffixedexp ->
+    // primaryexp { '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs }
     var fs : FuncState? = ls.fs
     primaryexp(ls, v)
     {
         while (true) {
             let _cond = ls.t.token
-            if (_cond == 46) {
+            if (_cond == '.') {
                 {
+                    // fieldsel
                     fieldsel(ls, v)
                 }
-            } elif (_cond == 91) {
+            } elif (_cond == '[') {
                 {
+                    // '[' exp ']'
                     var key : expdesc
                     luaK_exp2anyregup(fs, v)
                     yindex(ls, addr(key))
                     luaK_indexed(fs, v, addr(key))
                 }
-            } elif (_cond == 58) {
+            } elif (_cond == ':') {
                 {
+                    // ':' NAME funcargs
                     var key : expdesc
                     luaX_next(ls)
                     codename(ls, addr(key))
                     luaK_self(fs, v, addr(key))
                     funcargs(ls, v)
                 }
-            } elif (_cond == 40 || _cond == 292 || _cond == 123) {
+            } elif (_cond == '(' || _cond == 292 || _cond == '{') {
                 {
+                    // funcargs
                     luaK_exp2nextreg(fs, v)
                     funcargs(ls, v)
                 }
@@ -10777,6 +13012,8 @@ def private suffixedexp(var ls : LexState?; var v : expdesc?) {
 
 [c_function]
 def private simpleexp(var ls : LexState?; var v : expdesc?) {
+    // simpleexp -> FLT | INT | STRING | NIL | TRUE | FALSE | ... |
+    // constructor | FUNCTION body | suffixedexp
     let _cond = ls.t.token
     if (_cond == 289) {
         {
@@ -10806,6 +13043,7 @@ def private simpleexp(var ls : LexState?; var v : expdesc?) {
         }
     } elif (_cond == 280) {
         {
+            // vararg
             var fs : FuncState? = ls.fs
             {
                 if (!(fs.f.is_vararg != 0)) {
@@ -10814,8 +13052,9 @@ def private simpleexp(var ls : LexState?; var v : expdesc?) {
             }
             init_exp(v, expkind.VVARARG, luaK_codeABCk(fs, OpCode.OP_VARARG, 0, 0, 1, 0))
         }
-    } elif (_cond == 123) {
+    } elif (_cond == '{') {
         {
+            // constructor
             constructor(ls, v)
             return
         }
@@ -10838,11 +13077,11 @@ def private getunopr(op : int) : UnOpr {
     let _cond = op
     if (_cond == 270) {
         return UnOpr.OPR_NOT
-    } elif (_cond == 45) {
+    } elif (_cond == '-') {
         return UnOpr.OPR_MINUS
-    } elif (_cond == 126) {
+    } elif (_cond == '~') {
         return UnOpr.OPR_BNOT
-    } elif (_cond == 35) {
+    } elif (_cond == '#') {
         return UnOpr.OPR_LEN
     } else {
         return UnOpr.OPR_NOUNOPR
@@ -10852,25 +13091,25 @@ def private getunopr(op : int) : UnOpr {
 
 def private getbinopr(op : int) : BinOpr {
     let _cond = op
-    if (_cond == 43) {
+    if (_cond == '+') {
         return BinOpr.OPR_ADD
-    } elif (_cond == 45) {
+    } elif (_cond == '-') {
         return BinOpr.OPR_SUB
-    } elif (_cond == 42) {
+    } elif (_cond == '*') {
         return BinOpr.OPR_MUL
-    } elif (_cond == 37) {
+    } elif (_cond == '%') {
         return BinOpr.OPR_MOD
-    } elif (_cond == 94) {
+    } elif (_cond == '^') {
         return BinOpr.OPR_POW
-    } elif (_cond == 47) {
+    } elif (_cond == '/') {
         return BinOpr.OPR_DIV
     } elif (_cond == 278) {
         return BinOpr.OPR_IDIV
-    } elif (_cond == 38) {
+    } elif (_cond == '&') {
         return BinOpr.OPR_BAND
-    } elif (_cond == 124) {
+    } elif (_cond == '|') {
         return BinOpr.OPR_BOR
-    } elif (_cond == 126) {
+    } elif (_cond == '~') {
         return BinOpr.OPR_BXOR
     } elif (_cond == 285) {
         return BinOpr.OPR_SHL
@@ -10882,11 +13121,11 @@ def private getbinopr(op : int) : BinOpr {
         return BinOpr.OPR_NE
     } elif (_cond == 281) {
         return BinOpr.OPR_EQ
-    } elif (_cond == 60) {
+    } elif (_cond == '<') {
         return BinOpr.OPR_LT
     } elif (_cond == 283) {
         return BinOpr.OPR_LE
-    } elif (_cond == 62) {
+    } elif (_cond == '>') {
         return BinOpr.OPR_GT
     } elif (_cond == 282) {
         return BinOpr.OPR_GE
@@ -10900,32 +13139,40 @@ def private getbinopr(op : int) : BinOpr {
     return BinOpr.OPR_ADD
 }
 
+// subexpr -> (simpleexp | unop subexpr) { binop subexpr }
+// where 'binop' is any binary operator with a priority higher than 'limit'
 [c_function]
 def private subexpr(var ls : LexState?; var v : expdesc?; limit : int) : BinOpr {
     var op : BinOpr
     var uop : UnOpr
     luaE_incCstack(ls.L)
     uop = getunopr(ls.t.token)
+    // prefix (unary) operator?
     if (uop != UnOpr.OPR_NOUNOPR) {
         var line : int = ls.linenumber
+        // skip operator
         luaX_next(ls)
-        subexpr(ls, v, 12)
+        subexpr(ls, v, UNARY_PRIORITY)
         luaK_prefix(ls.fs, uop, v, line)
     } else {
         simpleexp(ls, v)
     }
+    // expand while operators have priorities higher than 'limit'
     op = getbinopr(ls.t.token)
     while (op != BinOpr.OPR_NOBINOPR && int(priority[int(op)].left) > limit) {
         var v2 : expdesc
         var nextop : BinOpr
         var line : int = ls.linenumber
+        // skip operator
         luaX_next(ls)
         luaK_infix(ls.fs, op, v)
+        // read sub-expression with higher priority
         nextop = subexpr(ls, addr(v2), int(priority[int(op)].right))
         luaK_posfix(ls.fs, op, v, addr(v2), line)
         op = nextop
     }
     ls.L.nCcalls--
+    // return first untreated operator
     return op
 }
 
@@ -10935,6 +13182,7 @@ def private expr(var ls : LexState?; var v : expdesc?) {
 
 [c_function]
 def private _c_block(var ls : LexState?) {
+    // block -> statlist
     var fs : FuncState? = ls.fs
     var bl : BlockCnt
     enterblock(fs, addr(bl), uint8(0))
@@ -10942,26 +13190,41 @@ def private _c_block(var ls : LexState?) {
     leaveblock(fs)
 }
 
+// check whether, in an assignment to an upvalue/local variable, the
+// upvalue/local variable is begin used in a previous assignment to a
+// table. If so, save original upvalue/local value in a safe place and
+// use this safe copy in the previous assignment.
 def private check_conflict(var ls : LexState?; var lh : LHS_assign?; var v : expdesc?) {
     var fs : FuncState? = ls.fs
+    // eventual position to save local variable
     var extra : int = int(fs.freereg)
     var conflict : int = 0
+    // check all previous assignments
     {
         while (lh != null) {
+            // assignment to table field?
             if (uint(int(expkind.VINDEXED)) <= uint(int(lh.v.k)) && uint(int(lh.v.k)) <= uint(int(expkind.VINDEXSTR))) {
+                // is table an upvalue?
                 if (lh.v.k == expkind.VINDEXUP) {
                     if (v.k == expkind.VUPVAL && int(lh.v.u.ind.t) == v.u.info) {
+                        // table is the upvalue being assigned now
                         conflict = 1
                         lh.v.k = expkind.VINDEXSTR
+                        // assignment will use safe copy
                         lh.v.u.ind.t = uint8(extra)
                     }
                 } else {
+                    // table is a register
                     if (v.k == expkind.VLOCAL && int(lh.v.u.ind.t) == int(v.u._c_var.ridx)) {
+                        // table is the local being assigned now
                         conflict = 1
+                        // assignment will use safe copy
                         lh.v.u.ind.t = uint8(extra)
                     }
+                    // is index the local being assigned?
                     if (lh.v.k == expkind.VINDEXED && v.k == expkind.VLOCAL && int(lh.v.u.ind.idx) == int(v.u._c_var.ridx)) {
                         conflict = 1
+                        // previous assignment will use safe copy
                         lh.v.u.ind.idx = int16(extra)
                     }
                 }
@@ -10970,6 +13233,7 @@ def private check_conflict(var ls : LexState?; var lh : LHS_assign?; var v : exp
         }
     }
     if (conflict != 0) {
+        // copy upvalue/local value to a temporary (in position 'extra')
         if (v.k == expkind.VLOCAL) {
             luaK_codeABCk(fs, OpCode.OP_MOVE, extra, int(v.u._c_var.ridx), 0, 0)
         } else {
@@ -10979,6 +13243,10 @@ def private check_conflict(var ls : LexState?; var lh : LHS_assign?; var v : exp
     }
 }
 
+// Parse and compile a multiple assignment. The first "variable"
+// (a 'suffixedexp') was already read by the caller.
+// assignment -> suffixedexp restassign
+// restassign -> ',' suffixedexp restassign | '=' explist
 [c_function]
 def private restassign(var ls : LexState?; var lh : LHS_assign?; nvars : int) {
     var e : expdesc
@@ -10988,36 +13256,45 @@ def private restassign(var ls : LexState?; var lh : LHS_assign?; nvars : int) {
         }
     }
     check_readonly(ls, addr(lh.v))
-    if (testnext(ls, 44) != 0) {
+    // restassign -> ',' suffixedexp restassign
+    if (testnext(ls, ',') != 0) {
         var nv : LHS_assign
         nv.prev = lh
         suffixedexp(ls, addr(nv.v))
         if (!(uint(int(expkind.VINDEXED)) <= uint(int(nv.v.k)) && uint(int(nv.v.k)) <= uint(int(expkind.VINDEXSTR)))) {
             check_conflict(ls, lh, addr(nv.v))
         }
+        // control recursion depth
         luaE_incCstack(ls.L)
         restassign(ls, addr(nv), nvars + 1)
         ls.L.nCcalls--
     } else {
+        // restassign -> '=' explist
         var nexps : int
-        checknext(ls, 61)
+        checknext(ls, '=')
         nexps = explist(ls, addr(e))
         if (nexps != nvars) {
             adjust_assign(ls, nvars, nexps, addr(e))
         } else {
+            // close last expression
             luaK_setoneret(ls.fs, addr(e))
             luaK_storevar(ls.fs, addr(lh.v), addr(e))
+            // avoid default
             return
         }
     }
+    // default assignment
     init_exp(addr(e), expkind.VNONRELOC, int(ls.fs.freereg) - 1)
     luaK_storevar(ls.fs, addr(lh.v), addr(e))
 }
 
 [c_function]
 def private cond(var ls : LexState?) : int {
+    // cond -> exp
     var v : expdesc
+    // read condition
     expr(ls, addr(v))
+    // 'falses' are all equal here
     if (v.k == expkind.VNIL) {
         v.k = expkind.VFALSE
     }
@@ -11029,51 +13306,70 @@ def private cond(var ls : LexState?) : int {
 def private gotostat(var ls : LexState?) {
     var fs : FuncState? = ls.fs
     var line : int = ls.linenumber
+    // label's name
     var name : TString? = str_checkname(ls)
     var lb : Labeldesc? = findlabel(ls, name)
+    // no label?
     if (lb == null) {
+        // forward jump; will be resolved when the label is declared
         newgotoentry(ls, name, line, luaK_jump(fs))
     } else {
+        // found a label
+        // backward jump; will be resolved here
+        // label level
         var lblevel : int = reglevel(fs, int(lb.nactvar))
+        // leaving the scope of a variable?
         if (luaY_nvarstack(fs) > lblevel) {
             luaK_codeABCk(fs, OpCode.OP_CLOSE, lblevel, 0, 0, 0)
         }
+        // create jump and link it to the label
         luaK_patchlist(fs, luaK_jump(fs), lb.pc)
     }
 }
 
+// Break statement. Semantically equivalent to "goto break".
 [c_function]
 def private breakstat(var ls : LexState?) {
     var line : int = ls.linenumber
+    // skip break
     luaX_next(ls)
     newgotoentry(ls, luaS_newlstr(ls.L, reinterpret<uint8?>("break"), uint64(typeinfo sizeof(type<uint8[6]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)), line, luaK_jump(ls.fs))
 }
 
+// Check whether there is already a label with the given 'name'.
 [c_function]
 def private checkrepeated(var ls : LexState?; var name : TString?) {
     var lb : Labeldesc? = findlabel(ls, name)
-    if (int64((lb != null ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // already defined?
+    if (lb != null) {
         var msg : uint8? = reinterpret<uint8?>("label '%s' already defined on line %d")
         msg = luaO_pushfstring`va(ls.L, msg, (addr(name.contents[0]), lb.line))
+        // error
         luaK_semerror(ls, msg)
     }
 }
 
 def private labelstat(var ls : LexState?; var name : TString?; line : int) {
+    // label -> '::' NAME '::'
+    // skip double colon
     checknext(ls, int(RESERVED.TK_DBCOLON))
-    while (ls.t.token == 59 || ls.t.token == int(RESERVED.TK_DBCOLON)) {
+    while (ls.t.token == ';' || ls.t.token == int(RESERVED.TK_DBCOLON)) {
+        // skip other no-op statements
         statement(ls)
     }
+    // check for repeated labels
     checkrepeated(ls, name)
     createlabel(ls, name, line, block_follow(ls, 0))
 }
 
 [c_function]
 def private whilestat(var ls : LexState?; line : int) {
+    // whilestat -> WHILE cond DO block END
     var fs : FuncState? = ls.fs
     var whileinit : int
     var condexit : int
     var bl : BlockCnt
+    // skip WHILE
     luaX_next(ls)
     whileinit = luaK_getlabel(fs)
     condexit = cond(ls)
@@ -11083,34 +13379,50 @@ def private whilestat(var ls : LexState?; line : int) {
     luaK_patchlist(fs, luaK_jump(fs), whileinit)
     check_match(ls, int(RESERVED.TK_END), int(RESERVED.TK_WHILE), line)
     leaveblock(fs)
+    // false conditions finish the loop
     luaK_patchtohere(fs, condexit)
 }
 
 [c_function]
 def private repeatstat(var ls : LexState?; line : int) {
+    // repeatstat -> REPEAT block UNTIL cond
     var condexit : int
     var fs : FuncState? = ls.fs
     var repeat_init : int = luaK_getlabel(fs)
     var bl1 : BlockCnt
     var bl2 : BlockCnt
+    // loop block
     enterblock(fs, addr(bl1), uint8(1))
+    // scope block
     enterblock(fs, addr(bl2), uint8(0))
+    // skip REPEAT
     luaX_next(ls)
     statlist(ls)
     check_match(ls, int(RESERVED.TK_UNTIL), int(RESERVED.TK_REPEAT), line)
+    // read condition (inside scope block)
     condexit = cond(ls)
+    // finish scope
     leaveblock(fs)
+    // upvalues?
     if (bl2.upval != 0) {
+        // normal exit must jump over fix
         var exit : int = luaK_jump(fs)
+        // repetition must close upvalues
         luaK_patchtohere(fs, condexit)
         luaK_codeABCk(fs, OpCode.OP_CLOSE, reglevel(fs, int(bl2.nactvar)), 0, 0, 0)
+        // repeat after closing upvalues
         condexit = luaK_jump(fs)
+        // normal exit comes to here
         luaK_patchtohere(fs, exit)
     }
+    // close the loop
     luaK_patchlist(fs, condexit, repeat_init)
+    // finish loop
     leaveblock(fs)
 }
 
+// Read an expression and generate code to put its results in next
+// stack slot.
 [c_function]
 def private exp1(var ls : LexState?) {
     var e : expdesc
@@ -11118,6 +13430,9 @@ def private exp1(var ls : LexState?) {
     luaK_exp2nextreg(ls.fs, addr(e))
 }
 
+// Fix for instruction at position 'pc' to jump to 'dest'.
+// (Jump addresses are relative in Lua). 'back' true means
+// a back jump.
 [c_function]
 def private fixforjump(var fs : FuncState?; pc : int; dest : int; back : int) {
     var jmp : uint? = addr(deref(fs.f.code + pc))
@@ -11125,26 +13440,31 @@ def private fixforjump(var fs : FuncState?; pc : int; dest : int; back : int) {
     if (back != 0) {
         offset = -offset
     }
-    if (int64((offset > (1 << 8 + 8 + 1) - 1 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (offset > (1 << 8 + 8 + 1) - 1) {
         luaX_syntaxerror(fs.ls, reinterpret<uint8?>("control structure too long"))
     }
     deref(jmp) = deref(jmp) & ~(~(~uint(0) << uint(8 + 8 + 1)) << uint(0 + 7 + 8)) | uint(offset) << uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << uint(0 + 7 + 8)
 }
 
+// Generate code for a 'for' loop.
 [c_function]
 def private forbody(var ls : LexState?; base : int; line : int; nvars : int; isgen : int) {
+    // forbody -> DO block
     var bl : BlockCnt
     var fs : FuncState? = ls.fs
     var prep : int
     var endfor : int
     checknext(ls, int(RESERVED.TK_DO))
     prep = luaK_codeABx(fs, forbody_forprep[isgen], base, uint(0))
+    // scope for declared variables
     enterblock(fs, addr(bl), uint8(0))
     adjustlocalvars(ls, nvars)
     luaK_reserveregs(fs, nvars)
     _c_block(ls)
+    // end of scope for declared variables
     leaveblock(fs)
     fixforjump(fs, prep, luaK_getlabel(fs), 0)
+    // generic for?
     if (isgen != 0) {
         luaK_codeABCk(fs, OpCode.OP_TFORCALL, base, 0, nvars, 0)
         luaK_fixline(fs, line)
@@ -11156,102 +13476,137 @@ def private forbody(var ls : LexState?; base : int; line : int; nvars : int; isg
 
 [c_function]
 def private fornum(var ls : LexState?; var varname : TString?; line : int) {
+    // fornum -> NAME = exp,exp[,exp] forbody
     var fs : FuncState? = ls.fs
     var base : int = int(fs.freereg)
     new_localvar(ls, luaX_newstring(ls, reinterpret<uint8?>("(for state)"), uint64(typeinfo sizeof(type<uint8[12]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)))
     new_localvar(ls, luaX_newstring(ls, reinterpret<uint8?>("(for state)"), uint64(typeinfo sizeof(type<uint8[12]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)))
     new_localvar(ls, luaX_newstring(ls, reinterpret<uint8?>("(for state)"), uint64(typeinfo sizeof(type<uint8[12]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)))
     new_localvar(ls, varname)
-    checknext(ls, 61)
+    checknext(ls, '=')
+    // initial value
     exp1(ls)
-    checknext(ls, 44)
+    checknext(ls, ',')
+    // limit
     exp1(ls)
-    if (testnext(ls, 44) != 0) {
+    if (testnext(ls, ',') != 0) {
+        // optional step
         exp1(ls)
     } else {
+        // default step = 1
         luaK_int(fs, int(fs.freereg), int64(1))
         luaK_reserveregs(fs, 1)
     }
+    // control variables
     adjustlocalvars(ls, 3)
     forbody(ls, base, line, 1, 0)
 }
 
 [c_function]
 def private forlist(var ls : LexState?; var indexname : TString?) {
+    // forlist -> NAME {,NAME} IN explist forbody
     var fs : FuncState? = ls.fs
     var e : expdesc
+    // gen, state, control, toclose, 'indexname'
     var nvars : int = 5
     var line : int
     var base : int = int(fs.freereg)
+    // create control variables
     new_localvar(ls, luaX_newstring(ls, reinterpret<uint8?>("(for state)"), uint64(typeinfo sizeof(type<uint8[12]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)))
     new_localvar(ls, luaX_newstring(ls, reinterpret<uint8?>("(for state)"), uint64(typeinfo sizeof(type<uint8[12]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)))
     new_localvar(ls, luaX_newstring(ls, reinterpret<uint8?>("(for state)"), uint64(typeinfo sizeof(type<uint8[12]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)))
     new_localvar(ls, luaX_newstring(ls, reinterpret<uint8?>("(for state)"), uint64(typeinfo sizeof(type<uint8[12]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)))
+    // create declared variables
     new_localvar(ls, indexname)
-    while (testnext(ls, 44) != 0) {
+    while (testnext(ls, ',') != 0) {
         new_localvar(ls, str_checkname(ls))
         nvars++
     }
     checknext(ls, int(RESERVED.TK_IN))
     line = ls.linenumber
     adjust_assign(ls, 4, explist(ls, addr(e)), addr(e))
+    // control variables
     adjustlocalvars(ls, 4)
+    // last control var. must be closed
     marktobeclosed(fs)
+    // extra space to call generator
     luaK_checkstack(fs, 3)
     forbody(ls, base, line, nvars - 4, 1)
 }
 
 [c_function]
 def private forstat(var ls : LexState?; line : int) {
+    // forstat -> FOR (fornum | forlist) END
     var fs : FuncState? = ls.fs
     var varname : TString?
     var bl : BlockCnt
+    // scope for loop and control variables
     enterblock(fs, addr(bl), uint8(1))
+    // skip 'for'
     luaX_next(ls)
+    // first variable name
     varname = str_checkname(ls)
     let _cond = ls.t.token
-    if (_cond == 61) {
+    if (_cond == '=') {
         fornum(ls, varname, line)
-    } elif (_cond == 44 || _cond == 267) {
+    } elif (_cond == ',' || _cond == 267) {
         forlist(ls, varname)
     } else {
         luaX_syntaxerror(ls, reinterpret<uint8?>("'=' or 'in' expected"))
     }
     check_match(ls, int(RESERVED.TK_END), int(RESERVED.TK_FOR), line)
+    // loop scope ('break' jumps to this point)
     leaveblock(fs)
 }
 
 [c_function]
 def private test_then_block(var ls : LexState?; var escapelist : int?) {
+    // test_then_block -> [IF | ELSEIF] cond THEN block
     var bl : BlockCnt
     var fs : FuncState? = ls.fs
     var v : expdesc
+    // instruction to skip 'then' code (if condition is false)
     var jf : int
+    // skip IF or ELSEIF
     luaX_next(ls)
+    // read condition
     expr(ls, addr(v))
     checknext(ls, int(RESERVED.TK_THEN))
+    // 'if x then break' ?
     if (ls.t.token == int(RESERVED.TK_BREAK)) {
         var line : int = ls.linenumber
+        // will jump if condition is true
         luaK_goiffalse(ls.fs, addr(v))
+        // skip 'break'
         luaX_next(ls)
+        // must enter block before 'goto'
         enterblock(fs, addr(bl), uint8(0))
         newgotoentry(ls, luaS_newlstr(ls.L, reinterpret<uint8?>("break"), uint64(typeinfo sizeof(type<uint8[6]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)), line, v.t)
-        while (testnext(ls, 59) != 0) {
+        // skip semicolons
+        while (testnext(ls, ';') != 0) {
         }
+        // jump is the entire block?
         if (block_follow(ls, 0) != 0) {
             leaveblock(fs)
+            // and that is it
             return
         } else {
+            // must skip over 'then' part if condition is false
             jf = luaK_jump(fs)
         }
     } else {
+        // regular case (not a break)
+        // skip over block if condition is false
         luaK_goiftrue(ls.fs, addr(v))
         enterblock(fs, addr(bl), uint8(0))
         jf = v.f
     }
+    // 'then' part
     statlist(ls)
     leaveblock(fs)
     if (ls.t.token == int(RESERVED.TK_ELSE) || ls.t.token == int(RESERVED.TK_ELSEIF)) {
+        // followed by 'else'/'elseif'?
+        // must jump over it
         luaK_concat(fs, escapelist, luaK_jump(fs))
     }
     luaK_patchtohere(fs, jf)
@@ -11259,16 +13614,22 @@ def private test_then_block(var ls : LexState?; var escapelist : int?) {
 
 [c_function]
 def private ifstat(var ls : LexState?; line : int) {
+    // ifstat -> IF cond THEN block {ELSEIF cond THEN block} [ELSE block] END
     var fs : FuncState? = ls.fs
-    var escapelist : int = -1
+    // exit list for finished parts
+    var escapelist : int = NO_JUMP
+    // IF cond THEN block
     test_then_block(ls, addr(escapelist))
     while (ls.t.token == int(RESERVED.TK_ELSEIF)) {
+        // ELSEIF cond THEN block
         test_then_block(ls, addr(escapelist))
     }
     if (testnext(ls, int(RESERVED.TK_ELSE)) != 0) {
+        // 'else' part
         _c_block(ls)
     }
     check_match(ls, int(RESERVED.TK_END), int(RESERVED.TK_IF), line)
+    // patch escape list to 'if' end
     luaK_patchtohere(fs, escapelist)
 }
 
@@ -11276,30 +13637,40 @@ def private ifstat(var ls : LexState?; line : int) {
 def private localfunc(var ls : LexState?) {
     var b : expdesc
     var fs : FuncState? = ls.fs
+    // function's variable index
     var fvar : int = int(fs.nactvar)
+    // new local variable
     new_localvar(ls, str_checkname(ls))
+    // enter its scope
     adjustlocalvars(ls, 1)
+    // function created in next register
     body(ls, addr(b), 0, ls.linenumber)
+    // debug information will only see the variable after this point!
     localdebuginfo(fs, fvar).startpc = fs.pc
 }
 
 [c_function]
 def private getlocalattribute(var ls : LexState?) : int {
-    if (testnext(ls, 60) != 0) {
+    // ATTRIB -> ['<' Name '>']
+    if (testnext(ls, '<') != 0) {
         var attr : uint8? = addr(str_checkname(ls).contents[0])
-        checknext(ls, 62)
+        checknext(ls, '>')
         if (crt::strcmp(attr, reinterpret<uint8?>("const")) == 0) {
-            return 1
+            // read-only variable
+            return RDKCONST
         } elif (crt::strcmp(attr, reinterpret<uint8?>("close")) == 0) {
-            return 2
+            // to-be-closed variable
+            return RDKTOCLOSE
         } else {
             luaK_semerror(ls, luaO_pushfstring`va(ls.L, reinterpret<uint8?>("unknown attribute '%s'"), (attr,)))
         }
     }
-    return 0
+    // regular variable
+    return VDKREG
 }
 
 def private checktoclose(var fs : FuncState?; level : int) {
+    // is there a to-be-closed variable?
     if (level != -1) {
         marktobeclosed(fs)
         luaK_codeABCk(fs, OpCode.OP_TBC, reglevel(fs, level), 0, 0, 0)
@@ -11308,21 +13679,27 @@ def private checktoclose(var fs : FuncState?; level : int) {
 
 [c_function]
 def private localstat(var ls : LexState?) {
+    // stat -> LOCAL NAME ATTRIB { ',' NAME ATTRIB } ['=' explist]
     var fs : FuncState? = ls.fs
+    // index of to-be-closed variable (if any)
     var toclose : int = -1
+    // last variable
     var _c_var : Vardesc?
+    // index and kind of last variable
     var vidx : int
     var kind : int
     var nvars : int = 0
     var nexps : int
     var e : expdesc
     var _first = true
-    while (_first || testnext(ls, 44) != 0) {
+    while (_first || testnext(ls, ',') != 0) {
         _first = false
         vidx = new_localvar(ls, str_checkname(ls))
         kind = getlocalattribute(ls)
         getlocalvardesc(fs, vidx).vd.kind = uint8(kind)
-        if (kind == 2) {
+        // to-be-closed?
+        if (kind == RDKTOCLOSE) {
+            // one already present?
             if (toclose != -1) {
                 luaK_semerror(ls, reinterpret<uint8?>("multiple to-be-closed variables in local list"))
             }
@@ -11330,16 +13707,23 @@ def private localstat(var ls : LexState?) {
         }
         nvars++
     }
-    if (testnext(ls, 61) != 0) {
+    if (testnext(ls, '=') != 0) {
         nexps = explist(ls, addr(e))
     } else {
         e.k = expkind.VVOID
         nexps = 0
     }
+    // get last variable
     _c_var = getlocalvardesc(fs, vidx)
-    if (nvars == nexps && int(_c_var.vd.kind) == 1 && luaK_exp2const(fs, addr(e), addr(_c_var.k)) != 0) {
-        _c_var.vd.kind = uint8(3)
+    // no adjustments?
+    if (nvars == nexps && int(_c_var.vd.kind) == RDKCONST && luaK_exp2const(fs, addr(e), addr(_c_var.k)) != 0) {
+        // last variable is const?
+        // compile-time constant?
+        // variable is a compile-time constant
+        _c_var.vd.kind = uint8(RDKCTC)
+        // exclude last variable
         adjustlocalvars(ls, nvars - 1)
+        // but count it
         fs.nactvar = uint8(uint(fs.nactvar) + 1)
     } else {
         adjust_assign(ls, nvars, nexps, addr(e))
@@ -11349,12 +13733,13 @@ def private localstat(var ls : LexState?) {
 }
 
 def private funcname(var ls : LexState?; var v : expdesc?) : int {
+    // funcname -> NAME {fieldsel} [':' NAME]
     var ismethod : int = 0
     singlevar(ls, v)
-    while (ls.t.token == 46) {
+    while (ls.t.token == '.') {
         fieldsel(ls, v)
     }
-    if (ls.t.token == 58) {
+    if (ls.t.token == ':') {
         ismethod = 1
         fieldsel(ls, v)
     }
@@ -11363,26 +13748,32 @@ def private funcname(var ls : LexState?; var v : expdesc?) : int {
 
 [c_function]
 def private funcstat(var ls : LexState?; line : int) {
+    // funcstat -> FUNCTION funcname body
     var ismethod : int
     var v : expdesc
     var b : expdesc
+    // skip FUNCTION
     luaX_next(ls)
     ismethod = funcname(ls, addr(v))
     body(ls, addr(b), ismethod, line)
     check_readonly(ls, addr(v))
     luaK_storevar(ls.fs, addr(v), addr(b))
+    // definition "happens" in the first line
     luaK_fixline(ls.fs, line)
 }
 
 [c_function]
 def private exprstat(var ls : LexState?) {
+    // stat -> func | assignment
     var fs : FuncState? = ls.fs
     var v : LHS_assign
     suffixedexp(ls, addr(v.v))
-    if (ls.t.token == 61 || ls.t.token == 44) {
+    // stat -> assignment ?
+    if (ls.t.token == '=' || ls.t.token == ',') {
         v.prev = null
         restassign(ls, addr(v), 1)
     } else {
+        // stat -> func
         var inst : uint?
         {
             if (!(v.v.k == expkind.VCALL)) {
@@ -11390,75 +13781,100 @@ def private exprstat(var ls : LexState?) {
             }
         }
         inst = addr(deref(fs.f.code + addr(v.v).u.info))
+        // call statement uses no results
         deref(inst) = deref(inst) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)) | uint(1) << uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)
     }
 }
 
 [c_function]
 def private retstat(var ls : LexState?) {
+    // stat -> RETURN [explist] [';']
     var fs : FuncState? = ls.fs
     var e : expdesc
+    // number of values being returned
     var nret : int
+    // first slot to be returned
     var first : int = luaY_nvarstack(fs)
-    if (block_follow(ls, 1) != 0 || ls.t.token == 59) {
+    if (block_follow(ls, 1) != 0 || ls.t.token == ';') {
+        // return no values
         nret = 0
     } else {
+        // optional return values
         nret = explist(ls, addr(e))
         if (e.k == expkind.VCALL || e.k == expkind.VVARARG) {
             luaK_setreturns(fs, addr(e), -1)
+            // tail call?
             if (e.k == expkind.VCALL && nret == 1 && !(fs.bl.insidetbc != 0)) {
                 deref(fs.f.code + addr(e).u.info) = deref(fs.f.code + addr(e).u.info) & ~(~(~uint(0) << 7u) << 0u) | uint(int(OpCode.OP_TAILCALL)) << 0u & ~(~uint(0) << 7u) << 0u
             }
-            nret = -1
+            // return all values
+            nret = LUA_MULTRET
         } else {
+            // only one single value?
             if (nret == 1) {
+                // can use original slot
                 first = luaK_exp2anyreg(fs, addr(e))
             } else {
+                // values must go to the top of the stack
                 luaK_exp2nextreg(fs, addr(e))
             }
         }
     }
     luaK_ret(fs, first, nret)
-    testnext(ls, 59)
+    // skip optional semicolon
+    testnext(ls, ';')
 }
 
 def private statement(var ls : LexState?) {
+    // may be needed for error messages
     var line : int = ls.linenumber
     luaE_incCstack(ls.L)
     let _cond = ls.t.token
-    if (_cond == 59) {
+    if (_cond == ';') {
         {
+            // stat -> ';' (empty statement)
+            // skip ';'
             luaX_next(ls)
         }
     } elif (_cond == 266) {
         {
+            // stat -> ifstat
             ifstat(ls, line)
         }
     } elif (_cond == 277) {
         {
+            // stat -> whilestat
             whilestat(ls, line)
         }
     } elif (_cond == 258) {
         {
+            // stat -> DO block END
+            // skip DO
             luaX_next(ls)
             _c_block(ls)
             check_match(ls, int(RESERVED.TK_END), int(RESERVED.TK_DO), line)
         }
     } elif (_cond == 263) {
         {
+            // stat -> forstat
             forstat(ls, line)
         }
     } elif (_cond == 272) {
         {
+            // stat -> repeatstat
             repeatstat(ls, line)
         }
     } elif (_cond == 264) {
         {
+            // stat -> funcstat
             funcstat(ls, line)
         }
     } elif (_cond == 268) {
         {
+            // stat -> localstat
+            // skip LOCAL
             luaX_next(ls)
+            // local function?
             if (testnext(ls, int(RESERVED.TK_FUNCTION)) != 0) {
                 localfunc(ls)
             } else {
@@ -11467,47 +13883,62 @@ def private statement(var ls : LexState?) {
         }
     } elif (_cond == 287) {
         {
+            // stat -> label
+            // skip double colon
             luaX_next(ls)
             labelstat(ls, str_checkname(ls), line)
         }
     } elif (_cond == 273) {
         {
+            // stat -> retstat
+            // skip RETURN
             luaX_next(ls)
             retstat(ls)
         }
     } elif (_cond == 257) {
         {
+            // stat -> breakstat
             breakstat(ls)
         }
     } elif (_cond == 265) {
         {
+            // stat -> 'goto' NAME
+            // skip 'goto'
             luaX_next(ls)
             gotostat(ls)
         }
     } else {
         {
+            // stat -> func | assignment
             exprstat(ls)
         }
     }
+    // free registers
     ls.fs.freereg = uint8(luaY_nvarstack(ls.fs))
     ls.L.nCcalls--
 }
 
+// compiles the main function, which is a regular vararg function with an
+// upvalue named LUA_ENV
 [c_function]
 def private mainfunc(var ls : LexState?; var fs : FuncState?) {
     var bl : BlockCnt
     var env : Upvaldesc?
     open_func(ls, fs, addr(bl))
+    // main function is always declared vararg
     setvararg(fs, 0)
+    // ...set environment upvalue
     env = allocupvalue(fs)
     env.instack = uint8(1)
     env.idx = uint8(0)
-    env.kind = uint8(0)
+    env.kind = uint8(VDKREG)
     env.name = ls.envn
     if ((int(fs.f.marked) & 1 << 5) != 0 && (int(env.name.marked) & (1 << 3 | 1 << 4)) != 0) {
         luaC_barrier_(ls.L, addr(reinterpret<GCUnion?>(fs.f).gc), addr(reinterpret<GCUnion?>(env.name).gc))
     }
+    // read first token
     luaX_next(ls)
+    // parse main body
     statlist(ls)
     check(ls, int(RESERVED.TK_EOS))
     close_func(ls)
@@ -11517,16 +13948,20 @@ def private mainfunc(var ls : LexState?; var fs : FuncState?) {
 def luaY_parser(var L : lua_State?; var z : Zio?; var buff : Mbuffer?; var dyd : Dyndata?; var name : uint8?; firstchar : int) : LClosure? {
     var lexstate : LexState
     var funcstate : FuncState
+    // create main closure
     var cl : LClosure? = luaF_newLclosure(L, 1)
     {
+        // anchor it (to avoid being collected)
         var io : TValue? = addr(L.top.p.val)
         var x_ : LClosure? = cl
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
         io.tt_ = uint8(6 | 0 << 4 | 1 << 6)
     }
     luaD_inctop(L)
+    // create table for scanner
     lexstate.h = luaH_new(L)
     {
+        // anchor it
         var io : TValue? = addr(L.top.p.val)
         var x_ : Table? = lexstate.h
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
@@ -11538,6 +13973,7 @@ def luaY_parser(var L : lua_State?; var z : Zio?; var buff : Mbuffer?; var dyd :
     if ((int(cl.marked) & 1 << 5) != 0 && (int(cl.p.marked) & (1 << 3 | 1 << 4)) != 0) {
         luaC_barrier_(L, addr(reinterpret<GCUnion?>(cl).gc), addr(reinterpret<GCUnion?>(cl.p).gc))
     }
+    // create and anchor TString
     funcstate.f.source = luaS_new(L, name)
     if ((int(funcstate.f.marked) & 1 << 5) != 0 && (int(funcstate.f.source.marked) & (1 << 3 | 1 << 4)) != 0) {
         luaC_barrier_(L, addr(reinterpret<GCUnion?>(funcstate.f).gc), addr(reinterpret<GCUnion?>(funcstate.f.source).gc))
@@ -11549,7 +13985,10 @@ def luaY_parser(var L : lua_State?; var z : Zio?; var buff : Mbuffer?; var dyd :
     dyd.actvar.n = dyd.gt.n
     luaX_setinput(L, addr(lexstate), z, funcstate.f.source, firstchar)
     mainfunc(addr(lexstate), addr(funcstate))
+    // all scopes should be correctly finished
+    // remove scanner's table
     L.top.p = L.top.p - 1
+    // closure is on the stack, too
     return cl
 }
 
@@ -11559,16 +13998,19 @@ def private luai_makeseed(var L : lua_State?) : uint {
     var h : uint = uint(crt::time(null))
     var p : int = 0
     {
+        // heap variable
         var t : uint64 = uint64(intptr(L))
         crt::memcpy(reinterpret<void?>(addr(buff[0]) + p), reinterpret<void?>(addr(t)), uint64(typeinfo sizeof(type<uint64>)))
         p = int(uint64(p) + uint64(typeinfo sizeof(type<uint64>)))
     }
     {
+        // local variable
         var t : uint64 = uint64(intptr(addr(h)))
         crt::memcpy(reinterpret<void?>(addr(buff[0]) + p), reinterpret<void?>(addr(t)), uint64(typeinfo sizeof(type<uint64>)))
         p = int(uint64(p) + uint64(typeinfo sizeof(type<uint64>)))
     }
     {
+        // public function
         var t : uint64 = uint64(intptr(@@lua_newstate))
         crt::memcpy(reinterpret<void?>(addr(buff[0]) + p), reinterpret<void?>(addr(t)), uint64(typeinfo sizeof(type<uint64>)))
         p = int(uint64(p) + uint64(typeinfo sizeof(type<uint64>)))
@@ -11576,17 +14018,21 @@ def private luai_makeseed(var L : lua_State?) : uint {
     return luaS_hash(addr(buff[0]), uint64(p), h)
 }
 
+// set GCdebt to a new value keeping the value (totalbytes + GCdebt)
+// invariant (and avoiding underflows in 'totalbytes')
 def luaE_setdebt(var g : global_State?; var debt : int64) {
     var tb : int64 = int64(uint64(g.totalbytes + g.GCdebt))
-    if (debt < tb - int64(~uint64(0) >> 1ul)) {
-        debt = tb - int64(~uint64(0) >> 1ul)
+    if (debt < tb - MAX_LMEM) {
+        // will make 'totalbytes == MAX_LMEM'
+        debt = tb - MAX_LMEM
     }
     g.totalbytes = tb - debt
     g.GCdebt = debt
 }
 
 def lua_setcstacklimit(var L : lua_State?; limit : uint) : int {
-    return 200
+    // warning??
+    return LUAI_MAXCCALLS
 }
 
 [c_function]
@@ -11601,6 +14047,7 @@ def luaE_extendCI(var L : lua_State?) : CallInfo? {
     return ci
 }
 
+// free all CallInfo structures not in use by a thread
 [c_function]
 def private freeCI(var L : lua_State?) {
     var ci : CallInfo? = L.ci
@@ -11617,43 +14064,59 @@ def private freeCI(var L : lua_State?) {
     }
 }
 
+// free half of the CallInfo structures not in use by a thread,
+// keeping the first one.
 [c_function]
 def luaE_shrinkCI(var L : lua_State?) {
+    // first free CallInfo
     var ci : CallInfo? = L.ci.next
     var next : CallInfo?
     if (ci == null) {
+        // no extra elements
         return
     }
+    // two extra elements?
     while (true) {
         next = ci.next
         if (!(next != null)) {
             break
         }
+        // next's next
         var next2 : CallInfo? = next.next
+        // remove next from the list
         ci.next = next2
         L.nci = uint16(uint(L.nci) - 1)
+        // free next
         luaM_free_(L, reinterpret<void?>(next), uint64(typeinfo sizeof(type<CallInfo>)))
         if (next2 == null) {
+            // no more elements
             break
         } else {
             next2.previous = ci
+            // continue
             ci = next2
         }
     }
 }
 
+// Called when 'getCcalls(L)' larger or equal to LUAI_MAXCCALLS.
+// If equal, raises an overflow error. If value is larger than
+// LUAI_MAXCCALLS (which means it is handling an overflow) but
+// not much larger, does not report an error (to allow overflow
+// handling to work).
 [c_function]
 def luaE_checkcstack(var L : lua_State?) {
-    if ((L.nCcalls & uint(65535)) == uint(200)) {
+    if ((L.nCcalls & uint(65535)) == uint(LUAI_MAXCCALLS)) {
         luaG_runerror`va(L, reinterpret<uint8?>("C stack overflow"), VaNone())
-    } elif ((L.nCcalls & uint(65535)) >= uint(200 / 10 * 11)) {
+    } elif ((L.nCcalls & uint(65535)) >= uint(LUAI_MAXCCALLS / 10 * 11)) {
+        // error while handling stack error
         luaD_errerr(L)
     }
 }
 
 def luaE_incCstack(var L : lua_State?) {
     L.nCcalls++
-    if (int64(((L.nCcalls & uint(65535)) >= uint(200) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if ((L.nCcalls & uint(65535)) >= uint(200)) {
         luaE_checkcstack(L)
     }
 }
@@ -11662,42 +14125,51 @@ def luaE_incCstack(var L : lua_State?) {
 def private stack_init(var L1 : lua_State?; var L : lua_State?) {
     var i : int
     var ci : CallInfo?
+    // initialize stack array
     L1.stack.p = reinterpret<StackValue?>(luaM_malloc_(L, uint64(2 * 20 + 5) * uint64(typeinfo sizeof(type<StackValue>)), 0))
     L1.tbclist.p = L1.stack.p
     {
         i = 0
-        while (i < 2 * 20 + 5) {
+        while (i < BASIC_STACK_SIZE + EXTRA_STACK) {
+            // erase new stack
             addr((L1.stack.p + i).val).tt_ = uint8(0 | 0 << 4)
             i++
         }
     }
     L1.top.p = L1.stack.p
-    L1.stack_last.p = L1.stack.p + 2 * 20
+    L1.stack_last.p = L1.stack.p + BASIC_STACK_SIZE
+    // initialize first ci
     ci = addr(L1.base_ci)
     ci.previous = null
     ci.next = ci.previous
-    ci.callstatus = uint16(1 << 1)
+    ci.callstatus = uint16(CIST_C)
     ci.func.p = L1.top.p
     ci.u.c.k = default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>
     ci.nresults = int16(0)
+    // 'function' entry for this 'ci'
     addr(L1.top.p.val).tt_ = uint8(0 | 0 << 4)
     L1.top.p = L1.top.p + 1
-    ci.top.p = L1.top.p + 20
+    ci.top.p = L1.top.p + LUA_MINSTACK
     L1.ci = ci
 }
 
 [c_function]
 def private freestack(var L : lua_State?) {
     if (L.stack.p == null) {
+        // stack not completely built yet
         return
     }
+    // free the entire 'ci' list
     L.ci = addr(L.base_ci)
     freeCI(L)
+    // free stack
     luaM_free_(L, reinterpret<void?>(L.stack.p), uint64(int(int64(L.stack_last.p - L.stack.p)) + 5) * uint64(typeinfo sizeof(type<StackValue>)))
 }
 
+// Create registry table and its predefined values
 [c_function]
 def private init_registry(var L : lua_State?; var g : global_State?) {
+    // create registry
     var registry : Table? = luaH_new(L)
     {
         var io : TValue? = addr(g.l_registry)
@@ -11705,14 +14177,16 @@ def private init_registry(var L : lua_State?; var g : global_State?) {
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
         io.tt_ = uint8(5 | 0 << 4 | 1 << 6)
     }
-    luaH_resize(L, registry, uint(2), uint(0))
+    luaH_resize(L, registry, uint(LUA_RIDX_LAST), uint(0))
     {
+        // registry[LUA_RIDX_MAINTHREAD] = L
         var io : TValue? = addr(deref(registry._c_array + (1 - 1)))
         var x_ : lua_State? = L
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
         io.tt_ = uint8(8 | 0 << 4 | 1 << 6)
     }
     {
+        // registry[LUA_RIDX_GLOBALS] = new table (table of globals)
         var io : TValue? = addr(deref(registry._c_array + (2 - 1)))
         var x_ : Table? = luaH_new(L)
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
@@ -11720,23 +14194,30 @@ def private init_registry(var L : lua_State?; var g : global_State?) {
     }
 }
 
+// open parts of the state that may cause memory-allocation errors.
 [c_function]
 def private f_luaopen(var L : lua_State?; var ud : void?) {
     var g : global_State? = L.l_G
+    // init stack
     stack_init(L, L)
     init_registry(L, g)
     luaS_init(L)
     luaT_init(L)
     luaX_init(L)
+    // allow gc
     g.gcstp = uint8(0)
+    // now state is complete
     addr(g.nilvalue).tt_ = uint8(0 | 0 << 4)
 }
 
+// preinitialize a thread with consistent values without allocating
+// any memory (to avoid errors)
 def private preinit_thread(var L : lua_State?; var g : global_State?) {
     L.l_G = g
     L.stack.p = null
     L.ci = null
     L.nci = uint16(0)
+    // thread has no upvalues
     L.twups = L
     L.nCcalls = uint(0)
     L.errorJmp = null
@@ -11746,7 +14227,7 @@ def private preinit_thread(var L : lua_State?; var g : global_State?) {
     L.allowhook = uint8(1)
     L.hookcount = L.basehookcount
     L.openupval = null
-    L.status = uint8(0)
+    L.status = uint8(LUA_OK)
     L.errfunc = int64(0)
     L.oldpc = 0
 }
@@ -11754,17 +14235,26 @@ def private preinit_thread(var L : lua_State?; var g : global_State?) {
 [c_function]
 def private close_state(var L : lua_State?) {
     var g : global_State? = L.l_G
+    // closing a partially built state?
     if (!((int(addr(g.nilvalue).tt_) & 15) == 0)) {
+        // just collect its objects
         luaC_freeallobjects(L)
     } else {
+        // closing a fully built state
+        // unwind CallInfo list
         L.ci = addr(L.base_ci)
+        // stack unwind can "throw away" the error function
         L.errfunc = int64(0)
-        luaD_closeprotected(L, int64(1), 0)
+        // close all upvalues
+        luaD_closeprotected(L, int64(1), LUA_OK)
+        // empty the stack to run finalizers
         L.top.p = L.stack.p + 1
+        // collect all objects
         luaC_freeallobjects(L)
     }
     luaM_free_(L, reinterpret<void?>(L.l_G.strt.hash), uint64(L.l_G.strt.size) * uint64(typeinfo sizeof(type<TString?>)))
     freestack(L)
+    // free main block
     invoke(g.frealloc, g.ud, reinterpret<void?>(reinterpret<LX?>(reinterpret<uint8?>(L) + -int64(uint64(typeinfo offsetof < l > (type<LX>))))), uint64(typeinfo sizeof(type<LG>)), uint64(0))
 }
 
@@ -11778,9 +14268,11 @@ def lua_newthread(var L : lua_State?) : lua_State? {
             luaC_step(L)
         }
     }
-    o = luaC_newobjdt(L, 8, uint64(typeinfo sizeof(type<LX>)), uint64(typeinfo offsetof < l > (type<LX>)))
+    // create new thread
+    o = luaC_newobjdt(L, LUA_TTHREAD, uint64(typeinfo sizeof(type<LX>)), uint64(typeinfo offsetof < l > (type<LX>)))
     L1 = addr(reinterpret<GCUnion?>(o).th)
     {
+        // anchor it on L stack
         var io : TValue? = addr(L.top.p.val)
         var x_ : lua_State? = L1
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
@@ -11794,7 +14286,9 @@ def lua_newthread(var L : lua_State?) : lua_State? {
     L1.basehookcount = L.basehookcount
     c_volatile_store(L1.hook, c_volatile_load(L.hook))
     L1.hookcount = L1.basehookcount
-    crt::memcpy(reinterpret<void?>(reinterpret<uint8?>(L1) + -int64(uint64(typeinfo sizeof(type<void?>)))), reinterpret<void?>(reinterpret<uint8?>(g.mainthread) + -int64(uint64(typeinfo sizeof(type<void?>)))), uint64(typeinfo sizeof(type<void?>)))
+    // initialize L1 extra space
+    crt::memcpy(reinterpret<void?>(reinterpret<uint8?>(L1) + -int64(uint64(typeinfo sizeof(type<void?>)))), reinterpret<void?>(reinterpret<uint8?>(g.mainthread) + -int64(uint64(typeinfo sizeof(type<void?>)))), LUA_EXTRASPACE)
+    // init stack
     stack_init(L1, L)
     return L1
 }
@@ -11802,6 +14296,7 @@ def lua_newthread(var L : lua_State?) : lua_State? {
 [c_function]
 def luaE_freethread(var L : lua_State?; var L1 : lua_State?) {
     var l : LX? = reinterpret<LX?>(reinterpret<uint8?>(L1) + -int64(uint64(typeinfo offsetof < l > (type<LX>))))
+    // close all upvalues
     luaF_closeupval(L1, L1.stack.p)
     freestack(L1)
     luaM_free_(L, reinterpret<void?>(l), uint64(typeinfo sizeof(type<LX>)))
@@ -11809,23 +14304,28 @@ def luaE_freethread(var L : lua_State?; var L1 : lua_State?) {
 
 [c_function]
 def luaE_resetthread(var L : lua_State?; var status : int) : int {
+    // unwind CallInfo list
     L.ci = addr(L.base_ci)
     var ci : CallInfo? = L.ci
+    // 'function' entry for basic 'ci'
     addr(L.stack.p.val).tt_ = uint8(0 | 0 << 4)
     ci.func.p = L.stack.p
-    ci.callstatus = uint16(1 << 1)
-    if (status == 1) {
-        status = 0
+    ci.callstatus = uint16(CIST_C)
+    if (status == LUA_YIELD) {
+        status = LUA_OK
     }
-    L.status = uint8(0)
+    // so it can run __close metamethods
+    L.status = uint8(LUA_OK)
+    // stack unwind can "throw away" the error function
     L.errfunc = int64(0)
     status = luaD_closeprotected(L, int64(1), status)
-    if (status != 0) {
+    // errors?
+    if (status != LUA_OK) {
         luaD_seterrorobj(L, status, L.stack.p + 1)
     } else {
         L.top.p = L.stack.p + 1
     }
-    ci.top.p = L.top.p + 20
+    ci.top.p = L.top.p + LUA_MINSTACK
     luaD_reallocstack(L, int(int64(ci.top.p - L.stack.p)), 0)
     return status
 }
@@ -11837,6 +14337,7 @@ def lua_closethread(var L : lua_State?; var from : lua_State?) : int {
     return status
 }
 
+// Deprecated! Use 'lua_closethread' instead.
 def lua_resetthread(var L : lua_State?) : int {
     return lua_closethread(L, null)
 }
@@ -11852,12 +14353,14 @@ def lua_newstate(f : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 :
     }
     L = addr(l.l.l)
     g = addr(l.g)
-    L.tt = uint8(8 | 0 << 4)
+    L.tt = uint8(LUA_VTHREAD)
     g.currentwhite = uint8(1 << 3)
     L.marked = uint8(int(g.currentwhite) & (1 << 3 | 1 << 4))
     preinit_thread(L, g)
+    // by now, only object is the main thread
     g.allgc = addr(reinterpret<GCUnion?>(L).gc)
     L.next = null
+    // main thread is always non yieldable
     L.nCcalls += uint(65536)
     g.frealloc = f
     g.ud = ud
@@ -11865,14 +14368,15 @@ def lua_newstate(f : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 :
     g.ud_warn = null
     g.mainthread = L
     g.seed = luai_makeseed(L)
-    g.gcstp = uint8(2)
+    // no GC while building state
+    g.gcstp = uint8(GCSTPGC)
     g.strt.nuse = 0
     g.strt.size = g.strt.nuse
     g.strt.hash = null
     addr(g.l_registry).tt_ = uint8(0 | 0 << 4)
     g._c_panic = default<function<(var a0 : lua_State?) : int>>
-    g.gcstate = uint8(8)
-    g.gckind = uint8(0)
+    g.gcstate = uint8(GCSpause)
+    g.gckind = uint8(KGC_INC)
     g.gcstopem = uint8(0)
     g.gcemergency = uint8(0)
     g.fixedgc = null
@@ -11896,23 +14400,25 @@ def lua_newstate(f : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 :
     g.GCdebt = int64(0)
     g.lastatomic = uint64(0)
     {
+        // to signal that state is not yet built
         var io : TValue? = addr(g.nilvalue)
         io.value_.i = int64(0)
         io.tt_ = uint8(3 | 0 << 4)
     }
     g.gcpause = uint8(200 / 4)
     g.gcstepmul = uint8(100 / 4)
-    g.gcstepsize = uint8(13)
+    g.gcstepsize = uint8(LUAI_GCSTEPSIZE)
     g.genmajormul = uint8(100 / 4)
-    g.genminormul = uint8(20)
+    g.genminormul = uint8(LUAI_GENMINORMUL)
     {
         i = 0
-        while (i < 9) {
+        while (i < LUA_NUMTAGS) {
             g.mt[i] = null
             i++
         }
     }
-    if (luaD_rawrunprotected(L, @@f_luaopen, null) != 0) {
+    if (luaD_rawrunprotected(L, @@f_luaopen, null) != LUA_OK) {
+        // memory allocation error: free partial state
         close_state(L)
         L = null
     }
@@ -11920,6 +14426,7 @@ def lua_newstate(f : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 :
 }
 
 def lua_close(var L : lua_State?) {
+    // only the main thread can be closed
     L = L.l_G.mainthread
     close_state(L)
 }
@@ -11931,10 +14438,13 @@ def luaE_warning(var L : lua_State?; var msg : uint8?; tocont : int) {
     }
 }
 
+// Generate a warning from an error message
 [c_function]
 def luaE_warnerror(var L : lua_State?; var _c_where : uint8?) {
+    // error object
     var errobj : TValue? = addr((L.top.p - 1).val)
     var msg : uint8? = (int(errobj.tt_) & 15) == 4 ? addr(addr(reinterpret<GCUnion?>(errobj.value_.gc).ts).contents[0]) : reinterpret<uint8?>("error object is not a string")
+    // produce warning "error in %s (%s)" (where, msg)
     luaE_warning(L, reinterpret<uint8?>("error in "), 1)
     luaE_warning(L, _c_where, 1)
     luaE_warning(L, reinterpret<uint8?>(" ("), 1)
@@ -11942,9 +14452,11 @@ def luaE_warnerror(var L : lua_State?; var _c_where : uint8?) {
     luaE_warning(L, reinterpret<uint8?>(")"), 0)
 }
 
+// equality for long strings
 [c_function]
 def luaS_eqlngstr(var a : TString?; var b : TString?) : int {
     var len : uint64 = a.u.lnglen
+    // same instance or...
     return intptr(a) == intptr(b) || len == b.u.lnglen && crt::memcmp(reinterpret<void?>(addr(a.contents[0])), reinterpret<void?>(addr(b.contents[0])), len) == 0 ? 1 : 0
 }
 
@@ -11962,9 +14474,11 @@ def luaS_hash(var str : uint8?; var l : uint64; seed : uint) : uint {
 
 [c_function]
 def luaS_hashlongstr(var ts : TString?) : uint {
+    // no hash?
     if (int(ts.extra) == 0) {
         var len : uint64 = ts.u.lnglen
         ts.hash = luaS_hash(addr(ts.contents[0]), len, ts.hash)
+        // now it has its hash
         ts.extra = uint8(1)
     }
     return ts.hash
@@ -11973,6 +14487,7 @@ def luaS_hashlongstr(var ts : TString?) : uint {
 [c_function]
 def private tablerehash(var vect : TString ??; osize : int; nsize : int) {
     var i : int
+    // clear new elements
     {
         i = osize
         while (i < nsize) {
@@ -11980,14 +14495,19 @@ def private tablerehash(var vect : TString ??; osize : int; nsize : int) {
             i++
         }
     }
+    // rehash old part of the array
     {
         i = 0
         while (i < osize) {
             var p : TString? = deref(vect + i)
             deref(vect + i) = null
+            // for each string in the list
             while (p != null) {
+                // save next
                 var hnext : TString? = p.u.hnext
+                // new position
                 var h : uint = uint(int(p.hash & uint(nsize - 1)))
+                // chain it into array
                 p.u.hnext = deref(vect + h)
                 deref(vect + h) = p
                 p = hnext
@@ -11997,38 +14517,53 @@ def private tablerehash(var vect : TString ??; osize : int; nsize : int) {
     }
 }
 
+// Resize the string table. If allocation fails, keep the current size.
+// (This can degrade performance, but any non-zero size should work
+// correctly.)
 [c_function]
 def luaS_resize(var L : lua_State?; nsize : int) {
     var tb : stringtable? = addr(L.l_G.strt)
     var osize : int = tb.size
     var newvect : TString ??
+    // shrinking table?
     if (nsize < osize) {
+        // depopulate shrinking part
         tablerehash(tb.hash, osize, nsize)
     }
     newvect = reinterpret<TString ??>(luaM_realloc_(L, reinterpret<void?>(tb.hash), uint64(osize) * uint64(typeinfo sizeof(type<TString?>)), uint64(nsize) * uint64(typeinfo sizeof(type<TString?>))))
-    if (int64((newvect == null ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // reallocation failed?
+    if (newvect == null) {
+        // was it shrinking table?
         if (nsize < osize) {
+            // restore to original size
             tablerehash(tb.hash, nsize, osize)
         }
     } else {
+        // leave table as it was
+        // allocation succeeded
         tb.hash = newvect
         tb.size = nsize
         if (nsize > osize) {
+            // rehash for new size
             tablerehash(newvect, osize, nsize)
         }
     }
 }
 
+// Clear API string cache. (Entries cannot be empty, so fill them with
+// a non-collectable string.)
 def luaS_clearcache(var g : global_State?) {
     var i : int
     var j : int
     {
         i = 0
-        while (i < 53) {
+        while (i < STRCACHE_N) {
             {
                 j = 0
-                while (j < 2) {
+                while (j < STRCACHE_M) {
+                    // will entry be collected?
                     if ((int(g.strcache[i][j].marked) & (1 << 3 | 1 << 4)) != 0) {
+                        // replace it with something fixed
                         g.strcache[i][j] = g.memerrmsg
                     }
                     j++
@@ -12039,6 +14574,7 @@ def luaS_clearcache(var g : global_State?) {
     }
 }
 
+// Initialize the string table and the string cache
 [c_function]
 def luaS_init(var L : lua_State?) {
     var g : global_State? = L.l_G
@@ -12046,16 +14582,20 @@ def luaS_init(var L : lua_State?) {
     var j : int
     var tb : stringtable? = addr(L.l_G.strt)
     tb.hash = reinterpret<TString ??>(luaM_malloc_(L, uint64(128) * uint64(typeinfo sizeof(type<TString?>)), 0))
-    tablerehash(tb.hash, 0, 128)
-    tb.size = 128
+    // clear array
+    tablerehash(tb.hash, 0, MINSTRTABSIZE)
+    tb.size = MINSTRTABSIZE
+    // pre-create memory-error message
     g.memerrmsg = luaS_newlstr(L, reinterpret<uint8?>("not enough memory"), uint64(typeinfo sizeof(type<uint8[18]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
+    // it should never be collected
     luaC_fix(L, addr(reinterpret<GCUnion?>(g.memerrmsg).gc))
+    // fill cache with valid strings
     {
         i = 0
-        while (i < 53) {
+        while (i < STRCACHE_N) {
             {
                 j = 0
-                while (j < 2) {
+                while (j < STRCACHE_M) {
                     g.strcache[i][j] = g.memerrmsg
                     j++
                 }
@@ -12065,23 +14605,27 @@ def luaS_init(var L : lua_State?) {
     }
 }
 
+// creates a new string object
 [c_function]
 def private createstrobj(var L : lua_State?; l : uint64; tag : int; h : uint) : TString? {
     var ts : TString?
     var o : GCObject?
+    // total size of TString object
     var totalsize : uint64
     totalsize = uint64(typeinfo offsetof < contents > (type<TString>)) + (l + uint64(1)) * uint64(typeinfo sizeof(type<uint8>))
     o = luaC_newobj(L, tag, totalsize)
     ts = addr(reinterpret<GCUnion?>(o).ts)
     ts.hash = h
     ts.extra = uint8(0)
+    // ending 0
     deref(addr(ts.contents[0]) + l) = uint8(0)
     return ts
 }
 
 def luaS_createlngstrobj(var L : lua_State?; l : uint64) : TString? {
-    var ts : TString? = createstrobj(L, l, 4 | 1 << 4, L.l_G.seed)
+    var ts : TString? = createstrobj(L, l, LUA_VLNGSTR, L.l_G.seed)
     ts.u.lnglen = l
+    // signals that it is a long string
     ts.shrlen = uint8(255)
     return ts
 }
@@ -12090,25 +14634,33 @@ def luaS_createlngstrobj(var L : lua_State?; l : uint64) : TString? {
 def luaS_remove(var L : lua_State?; var ts : TString?) {
     var tb : stringtable? = addr(L.l_G.strt)
     var p : TString ?? = addr(deref(tb.hash + int(ts.hash & uint(tb.size - 1))))
+    // find previous element
     while (intptr(deref(p)) != intptr(ts)) {
         p = addr(deref(p).u.hnext)
     }
+    // remove element from its list
     deref(p) = deref(p).u.hnext
     tb.nuse--
 }
 
 def private growstrtab(var L : lua_State?; var tb : stringtable?) {
-    if (int64((tb.nuse == 2147483647 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // too many strings?
+    if (tb.nuse == 2147483647) {
+        // try to free some...
         luaC_fullgc(L, 1)
+        // still too many?
         if (tb.nuse == 2147483647) {
+            // cannot even create a message...
             luaD_throw(L, 4)
         }
     }
+    // can grow string table?
     if (tb.size <= int(uint64(2147483647) <= ~uint64(0) / uint64(typeinfo sizeof(type<TString?>)) ? uint(2147483647) : uint(~uint64(0) / uint64(typeinfo sizeof(type<TString?>)))) / 2) {
         luaS_resize(L, tb.size * 2)
     }
 }
 
+// Checks whether short string exists and reuses it or creates a new one.
 [c_function]
 def private internshrstr(var L : lua_State?; var str : uint8?; l : uint64) : TString? {
     var ts : TString?
@@ -12116,11 +14668,15 @@ def private internshrstr(var L : lua_State?; var str : uint8?; l : uint64) : TSt
     var tb : stringtable? = addr(g.strt)
     var h : uint = luaS_hash(str, l, g.seed)
     var list : TString ?? = addr(deref(tb.hash + int(h & uint(tb.size - 1))))
+    // otherwise 'memcmp'/'memcpy' are undefined
     {
         ts = deref(list)
         while (ts != null) {
             if (l == uint64(ts.shrlen) && crt::memcmp(reinterpret<void?>(str), reinterpret<void?>(addr(ts.contents[0])), l * uint64(typeinfo sizeof(type<uint8>))) == 0) {
+                // found!
+                // dead (but not collected yet)?
                 if ((int(ts.marked) & (int(g.currentwhite) ^ (1 << 3 | 1 << 4))) != 0) {
+                    // resurrect it
                     ts.marked = uint8(int(ts.marked) ^ (1 << 3 | 1 << 4))
                 }
                 return ts
@@ -12128,11 +14684,14 @@ def private internshrstr(var L : lua_State?; var str : uint8?; l : uint64) : TSt
             ts = ts.u.hnext
         }
     }
+    // else must create a new string
+    // need to grow string table?
     if (tb.nuse >= tb.size) {
         growstrtab(L, tb)
+        // rehash with new size
         list = addr(deref(tb.hash + int(h & uint(tb.size - 1))))
     }
-    ts = createstrobj(L, l, 4 | 0 << 4, h)
+    ts = createstrobj(L, l, LUA_VSHRSTR, h)
     ts.shrlen = uint8(l)
     crt::memcpy(reinterpret<void?>(addr(ts.contents[0])), reinterpret<void?>(str), l * uint64(typeinfo sizeof(type<uint8>)))
     ts.u.hnext = deref(list)
@@ -12141,13 +14700,15 @@ def private internshrstr(var L : lua_State?; var str : uint8?; l : uint64) : TSt
     return ts
 }
 
+// new string (with explicit length)
 [c_function]
 def luaS_newlstr(var L : lua_State?; var str : uint8?; l : uint64) : TString? {
-    if (l <= uint64(40)) {
+    // short string?
+    if (l <= uint64(LUAI_MAXSHORTLEN)) {
         return internshrstr(L, str, l)
     } else {
         var ts : TString?
-        if (int64((l * uint64(typeinfo sizeof(type<uint8>)) >= (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? ~uint64(0) : uint64(9223372036854775807l)) - uint64(typeinfo sizeof(type<TString>)) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+        if (l * uint64(typeinfo sizeof(type<uint8>)) >= (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? ~uint64(0) : uint64(9223372036854775807l)) - uint64(typeinfo sizeof(type<TString>))) {
             luaM_toobig(L)
         }
         ts = luaS_createlngstrobj(L, l)
@@ -12156,27 +14717,37 @@ def luaS_newlstr(var L : lua_State?; var str : uint8?; l : uint64) : TString? {
     }
 }
 
+// Create or reuse a zero-terminated string, first checking in the
+// cache (using the string address as a key). The cache can contain
+// only zero-terminated strings, so it is safe to use 'strcmp' to
+// check hits.
 [c_function]
 def luaS_new(var L : lua_State?; var str : uint8?) : TString? {
-    var i : uint = uint(uint64(intptr(str)) & uint64(uint(2147483647) * 2u + 1u)) % uint(53)
+    // hash
+    var i : uint = uint(uint64(intptr(str)) & uint64(uint(2147483647) * 2u + 1u)) % uint(STRCACHE_N)
     var j : int
     var p : TString ?? = addr(L.l_G.strcache[i][0])
     {
         j = 0
-        while (j < 2) {
+        while (j < STRCACHE_M) {
+            // hit?
             if (crt::strcmp(str, addr(deref(p + j).contents[0])) == 0) {
+                // that is it
                 return deref(p + j)
             }
             j++
         }
     }
+    // normal route
     {
-        j = 2 - 1
+        j = STRCACHE_M - 1
         while (j > 0) {
+            // move out last element
             deref(p + j) = deref(p + (j - 1))
             j--
         }
     }
+    // new element is first in the list
     deref(p + 0) = luaS_newlstr(L, str, crt::strlen(str))
     return deref(p + 0)
 }
@@ -12186,10 +14757,10 @@ def luaS_newudata(var L : lua_State?; s : uint64; nuvalue : int) : Udata? {
     var u : Udata?
     var i : int
     var o : GCObject?
-    if (int64((s > (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? ~uint64(0) : uint64(9223372036854775807l)) - (nuvalue == 0 ? uint64(typeinfo offsetof < bindata > (type<Udata0>)) : uint64(typeinfo offsetof < uv > (type<Udata>)) + uint64(typeinfo sizeof(type<UValue>)) * uint64(nuvalue)) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (s > (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? ~uint64(0) : uint64(9223372036854775807l)) - (nuvalue == 0 ? uint64(typeinfo offsetof < bindata > (type<Udata0>)) : uint64(typeinfo offsetof < uv > (type<Udata>)) + uint64(typeinfo sizeof(type<UValue>)) * uint64(nuvalue))) {
         luaM_toobig(L)
     }
-    o = luaC_newobj(L, 7 | 0 << 4, (nuvalue == 0 ? uint64(typeinfo offsetof < bindata > (type<Udata0>)) : uint64(typeinfo offsetof < uv > (type<Udata>)) + uint64(typeinfo sizeof(type<UValue>)) * uint64(nuvalue)) + s)
+    o = luaC_newobj(L, LUA_VUSERDATA, (nuvalue == 0 ? uint64(typeinfo offsetof < bindata > (type<Udata0>)) : uint64(typeinfo offsetof < uv > (type<Udata>)) + uint64(typeinfo sizeof(type<UValue>)) * uint64(nuvalue)) + s)
     u = addr(reinterpret<GCUnion?>(o).u)
     u.len = s
     u.nuvalue = uint16(nuvalue)
@@ -12204,6 +14775,10 @@ def luaS_newudata(var L : lua_State?; s : uint64; nuvalue : int) : Udata? {
     return u
 }
 
+// Hash for integers. To allow a good hash, use the remainder operator
+// ('%'). If integer fits as a non-negative int, compute an int
+// remainder, which is faster. Otherwise, use an unsigned-integer
+// remainder, which uses all bits and ensures a non-negative result.
 [c_function]
 def private hashint(var t : Table?; i : int64) : Node? {
     var ui : uint64 = uint64(i)
@@ -12219,6 +14794,7 @@ def private l_hashfloat(var n : double) : int {
     var i : int
     var ni : int64
     n = crt::frexp(n, addr(i)) * -double(-2147483647 - 1)
+    // is 'n' inf/-inf/NaN?
     var _t0 = n >= double(-9223372036854775807l - 1l) && n < -double(-9223372036854775807l - 1l)
     if (_t0) {
         deref(addr(ni)) = int64(n)
@@ -12227,11 +14803,14 @@ def private l_hashfloat(var n : double) : int {
     if (!_t0) {
         return 0
     } else {
+        // normal case
         var u : uint = uint(i) + uint(ni)
         return int(u <= uint(2147483647) ? u : ~u)
     }
 }
 
+// returns the 'main' position of an element in a table (that is,
+// the index of its hash value).
 [c_function]
 def private mainpositionTV(var t : Table?; var key : TValue?) : Node? {
     let _cond = int(key.tt_) & 63
@@ -12291,9 +14870,29 @@ def private mainpositionfromnode(var t : Table?; var nd : Node?) : Node? {
     return mainpositionTV(t, addr(key))
 }
 
+// Check whether key 'k1' is equal to the key in node 'n2'. This
+// equality is raw, so there are no metamethods. Floats with integer
+// values have been normalized, so integers cannot be equal to
+// floats. It is assumed that 'eqshrstr' is simply pointer equality, so
+// that short strings are handled in the default case.
+// A true 'deadok' means to accept dead keys as equal to their original
+// values. All dead keys are compared in the default case, by pointer
+// identity. (Only collectable objects can produce dead keys.) Note that
+// dead long strings are also compared by identity.
+// Once a key is dead, its corresponding value may be collected, and
+// then another value can be created with the same address. If this
+// other value is given to 'next', 'equalkey' will signal a false
+// positive. In a regular traversal, this situation should never happen,
+// as all keys given to 'next' came from the table itself, and therefore
+// could not have been collected. Outside a regular traversal, we
+// have garbage in, garbage out. What is relevant is that this false
+// positive does not break anything. (In particular, 'next' will return
+// some other valid item on the table or nil.)
 [c_function]
 def private equalkey(var k1 : TValue?; var n2 : Node?; deadok : int) : int {
+    // not the same variants?
     if (int(k1.tt_) != int(n2.u.key_tt) && !(deadok != 0 && int(n2.u.key_tt) == 9 + 2 && (int(k1.tt_) & 1 << 6) != 0)) {
+        // cannot be same key
         return 0
     }
     let _cond = int(n2.u.key_tt)
@@ -12315,21 +14914,29 @@ def private equalkey(var k1 : TValue?; var n2 : Node?; deadok : int) : int {
     return 0
 }
 
+// Returns the real size of the 'array' array
 def luaH_realasize(var t : Table?) : uint {
     if (!((int(t.flags) & 1 << 7) != 0) || (t.alimit & t.alimit - uint(1)) == uint(0)) {
+        // this is the size
         return t.alimit
     } else {
         var size : uint = t.alimit
+        // compute the smallest power of 2 not smaller than 'size'
         size |= size >> 1u
         size |= size >> 2u
         size |= size >> 4u
         size |= size >> 8u
+        // unsigned int has more than 16 bits
         size |= size >> 16u
+        // unsigned int has more than 32 bits
         size++
         return size
     }
 }
 
+// Check whether real size of the array is a power of 2.
+// (If it is not, 'alimit' cannot be changed to any other value
+// without changing the real size.)
 def private ispow2realasize(var t : Table?) : int {
     return !!((int(t.flags) & 1 << 7) != 0) || (t.alimit & t.alimit - uint(1)) == uint(0) ? 1 : 0
 }
@@ -12340,16 +14947,22 @@ def private setlimittosize(var t : Table?) : uint {
     return t.alimit
 }
 
+// "Generic" get version. (Not that generic: not valid for integers,
+// which may be in array part, nor for floats with integral values.)
+// See explanation about 'deadok' in function 'equalkey'.
 [c_function]
 def private getgeneric(var t : Table?; var key : TValue?; deadok : int) : TValue? {
     var n : Node? = mainpositionTV(t, key)
+    // check whether 'key' is somewhere in the chain
     {
         while (true) {
             if (equalkey(key, n, deadok) != 0) {
+                // that's it
                 return addr(n.i_val)
             } else {
                 var nx : int = n.u.next
                 if (nx == 0) {
+                    // not found
                     return addr(absentkey)
                 }
                 n = n + nx
@@ -12359,29 +14972,42 @@ def private getgeneric(var t : Table?; var key : TValue?; deadok : int) : TValue
     return null
 }
 
+// returns the index for 'k' if 'k' is an appropriate key to live in
+// the array part of a table, 0 otherwise.
 def private arrayindex(k : int64) : uint {
+    // 'k' in [1, MAXASIZE]?
     if (uint64(k) - uint64(1u) < uint64(uint64(1u << uint(int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)))) <= ~uint64(0) / uint64(typeinfo sizeof(type<TValue>)) ? 1u << uint(int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1))) : uint(~uint64(0) / uint64(typeinfo sizeof(type<TValue>))))) {
+        // 'key' is an appropriate array index
         return uint(k)
     } else {
         return uint(0)
     }
 }
 
+// returns the index of a 'key' for table traversals. First goes all
+// elements in the array part, then elements in the hash part. The
+// beginning of a traversal is signaled by 0.
 [c_function]
 def private findindex(var L : lua_State?; var t : Table?; var key : TValue?; asize : uint) : uint {
     var i : uint
+    // first iteration
     if ((int(key.tt_) & 15) == 0) {
         return uint(0)
     }
     i = int(key.tt_) == (3 | 0 << 4) ? arrayindex(key.value_.i) : uint(0)
+    // is 'key' inside array part?
     if (i - 1u < asize) {
+        // yes; that's the index
         return i
     } else {
         var n : TValue? = getgeneric(t, key, 1)
-        if (int64((int(n.tt_) == (0 | 2 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+        if (int(n.tt_) == (0 | 2 << 4)) {
+            // key not found
             luaG_runerror`va(L, reinterpret<uint8?>("invalid key to 'next'"), VaNone())
         }
+        // key index in hash table
         i = uint(int(int64(reinterpret<Node?>(n) - addr(deref(t.node + 0)))))
+        // hash elements are numbered after array ones
         return i + uint(1) + asize
     }
 }
@@ -12389,9 +15015,12 @@ def private findindex(var L : lua_State?; var t : Table?; var key : TValue?; asi
 [c_function]
 def luaH_next(var L : lua_State?; var t : Table?; var key : StackValue?) : int {
     var asize : uint = luaH_realasize(t)
+    // find original key
     var i : uint = findindex(L, t, addr(key.val), asize)
+    // try first array part
     {
         while (i < asize) {
+            // a non-empty entry?
             if (!((int(addr(deref(t._c_array + i)).tt_) & 15) == 0)) {
                 {
                     var io : TValue? = addr(key.val)
@@ -12409,9 +15038,11 @@ def luaH_next(var L : lua_State?; var t : Table?; var key : StackValue?) : int {
             i++
         }
     }
+    // hash part
     {
         i -= asize
         while (int(i) < 1 << int(t.lsizenode)) {
+            // a non-empty entry?
             if (!((int(addr(addr(deref(t.node + i)).i_val).tt_) & 15) == 0)) {
                 var n : Node? = addr(deref(t.node + i))
                 {
@@ -12431,6 +15062,7 @@ def luaH_next(var L : lua_State?; var t : Table?; var key : StackValue?) : int {
             i++
         }
     }
+    // no more elements
     return 0
 }
 
@@ -12441,20 +15073,34 @@ def private freehash(var L : lua_State?; var t : Table?) {
     }
 }
 
+// Compute the optimal size for the array part of table 't'. 'nums' is a
+// "count array" where 'nums[i]' is the number of integers in the table
+// between 2^(i - 1) + 1 and 2^i. 'pna' enters with the total number of
+// integer keys in the table and leaves with the number of keys that
+// will go to the array part; return the optimal size. (The condition
+// 'twotoi > 0' in the for loop stops the loop if 'twotoi' overflows.)
 [c_function]
 def private computesizes(var nums : uint?; var pna : uint?) : uint {
     var i : int
+    // 2^i (candidate for optimal size)
     var twotoi : uint
+    // number of elements smaller than 2^i
     var a : uint = uint(0)
+    // number of elements to go to array part
     var na : uint = uint(0)
+    // optimal size for array part
     var optimal : uint = uint(0)
+    // loop while keys can fill more than half of total size
     {
         i = 0
         twotoi = uint(1)
         while (twotoi > uint(0) && deref(pna) > twotoi / uint(2)) {
             a += deref(nums + i)
+            // more than half elements present?
             if (a > twotoi / uint(2)) {
+                // optimal size (till now)
                 optimal = twotoi
+                // all elements up to 'optimal' will go to array part
                 na = a
             }
             i++
@@ -12468,7 +15114,9 @@ def private computesizes(var nums : uint?; var pna : uint?) : uint {
 [c_function]
 def private countint(key : int64; var nums : uint?) : int {
     var k : uint = arrayindex(key)
+    // is 'key' an appropriate array index?
     if (k != uint(0)) {
+        // count as such
         let _t0 = luaO_ceillog2(k)
         deref(nums + _t0)++
         return 1
@@ -12477,25 +15125,37 @@ def private countint(key : int64; var nums : uint?) : int {
     }
 }
 
+// Count keys in array part of table 't': Fill 'nums[i]' with
+// number of keys that will go into corresponding slice and return
+// total number of non-nil keys.
 [c_function]
 def private numusearray(var t : Table?; var nums : uint?) : uint {
     var lg : int
+    // 2^lg
     var ttlg : uint
+    // summation of 'nums'
     var ause : uint = uint(0)
+    // count to traverse all array keys
     var i : uint = uint(1)
+    // real array size
     var asize : uint = t.alimit
+    // traverse each slice
     {
         lg = 0
         ttlg = uint(1)
-        while (lg <= int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1))) {
+        while (lg <= MAXABITS) {
+            // counter
             var lc : uint = uint(0)
             var lim : uint = ttlg
             if (lim > asize) {
+                // adjust upper limit
                 lim = asize
                 if (i > lim) {
+                    // no more elements to count
                     break
                 }
             }
+            // count elements in range (2^(lg - 1), 2^lg]
             {
                 while (i <= lim) {
                     if (!((int(addr(deref(t._c_array + (i - uint(1)))).tt_) & 15) == 0)) {
@@ -12515,7 +15175,9 @@ def private numusearray(var t : Table?; var nums : uint?) : uint {
 
 [c_function]
 def private numusehash(var t : Table?; var nums : uint?; var pna : uint?) : int {
+    // total number of elements
     var totaluse : int = 0
+    // elements added to 'nums' (can go to array part)
     var ause : int = 0
     var i : int = 1 << int(t.lsizenode)
     while (true) {
@@ -12536,16 +15198,24 @@ def private numusehash(var t : Table?; var nums : uint?; var pna : uint?) : int 
     return totaluse
 }
 
+// Creates an array for the hash part of a table with the given
+// size, or reuses the dummy node if size is zero.
+// The computation for size overflow is in two steps: the first
+// comparison ensures that the shift in the second one does not
+// overflow.
 [c_function]
 def private setnodevector(var L : lua_State?; var t : Table?; var size : uint) {
+    // no elements to hash part?
     if (size == uint(0)) {
+        // use common 'dummynode'
         t.node = addr(dummynode_)
         t.lsizenode = uint8(0)
+        // signal that it is using dummy node
         t.lastfree = null
     } else {
         var i : int
         var lsize : int = luaO_ceillog2(size)
-        if (lsize > int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)) - 1 || 1u << uint(lsize) > (uint64(1u << uint(int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)) - 1)) <= ~uint64(0) / uint64(typeinfo sizeof(type<Node>)) ? 1u << uint(int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)) - 1) : uint(~uint64(0) / uint64(typeinfo sizeof(type<Node>))))) {
+        if (lsize > MAXHBITS || 1u << uint(lsize) > (uint64(1u << uint(int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)) - 1)) <= ~uint64(0) / uint64(typeinfo sizeof(type<Node>)) ? 1u << uint(int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)) - 1) : uint(~uint64(0) / uint64(typeinfo sizeof(type<Node>))))) {
             luaG_runerror`va(L, reinterpret<uint8?>("table overflow"), VaNone())
         }
         size = uint(1 << lsize)
@@ -12561,10 +15231,12 @@ def private setnodevector(var L : lua_State?; var t : Table?; var size : uint) {
             }
         }
         t.lsizenode = uint8(lsize)
+        // all positions are free
         t.lastfree = addr(deref(t.node + size))
     }
 }
 
+// (Re)insert all elements from the hash part of 'ot' into table 't'.
 [c_function]
 def private reinsert(var L : lua_State?; var ot : Table?; var t : Table?) {
     var j : int
@@ -12574,6 +15246,8 @@ def private reinsert(var L : lua_State?; var ot : Table?; var t : Table?) {
         while (j < size) {
             var old : Node? = addr(deref(ot.node + j))
             if (!((int(addr(old.i_val).tt_) & 15) == 0)) {
+                // doesn't need barrier/invalidate cache, as entry was
+                // already present in the table
                 var k : TValue
                 {
                     var io_ : TValue? = addr(k)
@@ -12588,6 +15262,7 @@ def private reinsert(var L : lua_State?; var ot : Table?; var t : Table?) {
     }
 }
 
+// Exchange the hash part of 't1' and 't2'.
 def private exchangehashpart(var t1 : Table?; var t2 : Table?) {
     var lsizenode : uint8 = t1.lsizenode
     var node : Node? = t1.node
@@ -12600,16 +15275,33 @@ def private exchangehashpart(var t1 : Table?; var t2 : Table?) {
     t2.lastfree = lastfree
 }
 
+// Resize table 't' for the new given sizes. Both allocations (for
+// the hash part and for the array part) can fail, which creates some
+// subtleties. If the first allocation, for the hash part, fails, an
+// error is raised and that is it. Otherwise, it copies the elements from
+// the shrinking part of the array (if it is shrinking) into the new
+// hash. Then it reallocates the array part. If that fails, the table
+// is in its original state; the function frees the new hash part and then
+// raises the allocation error. Otherwise, it sets the new hash part
+// into the table, initializes the new part of the array (if any) with
+// nils and reinserts the elements of the old hash back into the new
+// parts of the table.
 [c_function]
 def luaH_resize(var L : lua_State?; var t : Table?; newasize : uint; nhsize : uint) {
     var i : uint
+    // to keep the new hash part
     var newt : Table
     var oldasize : uint = setlimittosize(t)
     var newarray : TValue?
+    // create new hash part with appropriate size into 'newt'
     setnodevector(L, addr(newt), nhsize)
+    // will array shrink?
     if (newasize < oldasize) {
+        // pretend array has new size...
         t.alimit = newasize
+        // and new hash
         exchangehashpart(t, addr(newt))
+        // re-insert into the new hash the elements from vanishing slice
         {
             i = newasize
             while (i < oldasize) {
@@ -12619,17 +15311,27 @@ def luaH_resize(var L : lua_State?; var t : Table?; newasize : uint; nhsize : ui
                 i++
             }
         }
+        // restore current size...
         t.alimit = oldasize
+        // and hash (in case of errors)
         exchangehashpart(t, addr(newt))
     }
+    // allocate new array
     newarray = reinterpret<TValue?>(luaM_realloc_(L, reinterpret<void?>(t._c_array), uint64(oldasize) * uint64(typeinfo sizeof(type<TValue>)), uint64(newasize) * uint64(typeinfo sizeof(type<TValue>))))
-    if (int64((newarray == null && newasize > uint(0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // allocation failed?
+    if (newarray == null && newasize > uint(0)) {
+        // release new hash part
         freehash(L, addr(newt))
+        // raise error (with array unchanged)
         luaD_throw(L, 4)
     }
+    // allocation ok; initialize new part of the array
+    // 't' has the new hash ('newt' has the old)
     exchangehashpart(t, addr(newt))
+    // set new array part
     t._c_array = newarray
     t.alimit = newasize
+    // clear new slice of the array
     {
         i = oldasize
         while (i < newasize) {
@@ -12637,7 +15339,10 @@ def luaH_resize(var L : lua_State?; var t : Table?; newasize : uint; nhsize : ui
             i++
         }
     }
+    // re-insert elements from old hash part into new parts
+    // 'newt' now has the old hash
     reinsert(L, addr(newt), t)
+    // free old hash part
     freehash(L, addr(newt))
 }
 
@@ -12647,37 +15352,48 @@ def luaH_resizearray(var L : lua_State?; var t : Table?; nasize : uint) {
     luaH_resize(L, t, nasize, uint(nsize))
 }
 
+// nums[i] = number of keys 'k' where 2^(i - 1) < k <= 2^i
 [c_function]
 def private rehash(var L : lua_State?; var t : Table?; var ek : TValue?) {
+    // optimal size for array part
     var asize : uint
+    // number of keys in the array part
     var na : uint
     var nums : uint[32]
     var i : int
     var totaluse : int
+    // reset counts
     {
         i = 0
-        while (i <= int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1))) {
+        while (i <= MAXABITS) {
             nums[i] = uint(0)
             i++
         }
     }
     setlimittosize(t)
+    // count keys in array part
     na = numusearray(t, addr(nums[0]))
+    // all those keys are integer keys
     totaluse = int(na)
+    // count keys in hash part
     totaluse += numusehash(t, addr(nums[0]), addr(na))
+    // count extra key
     if (int(ek.tt_) == (3 | 0 << 4)) {
         na += uint(countint(ek.value_.i, addr(nums[0])))
     }
     totaluse++
+    // compute new size for array part
     asize = computesizes(addr(nums[0]), addr(na))
+    // resize the table to new computed sizes
     luaH_resize(L, t, asize, uint(totaluse) - na)
 }
 
 [c_function]
 def luaH_new(var L : lua_State?) : Table? {
-    var o : GCObject? = luaC_newobj(L, 5 | 0 << 4, uint64(typeinfo sizeof(type<Table>)))
+    var o : GCObject? = luaC_newobj(L, LUA_VTABLE, uint64(typeinfo sizeof(type<Table>)))
     var t : Table? = addr(reinterpret<GCUnion?>(o).h)
     t.metatable = null
+    // table has no metamethod fields
     t.flags = uint8(~(~0u << uint(int(TMS.TM_EQ) + 1)))
     t._c_array = null
     t.alimit = uint(0)
@@ -12702,55 +15418,80 @@ def private getfreepos(var t : Table?) : Node? {
             }
         }
     }
+    // could not find a free place
     return null
 }
 
+// inserts a new key into a hash table; first, check whether key's main
+// position is free. If not, check whether colliding node is in its main
+// position or not: if it is not, move colliding node to an empty place and
+// put new key in its main position; otherwise (colliding node is in its main
+// position), new key goes to an empty position.
 [c_function]
 def private luaH_newkey(var L : lua_State?; var t : Table?; var key : TValue?; var value : TValue?) {
     var mp : Node?
     var aux : TValue
-    if (int64(((int(key.tt_) & 15) == 0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if ((int(key.tt_) & 15) == 0) {
         luaG_runerror`va(L, reinterpret<uint8?>("table index is nil"), VaNone())
     } elif (int(key.tt_) == (3 | 1 << 4)) {
         var f : double = key.value_.n
         var k : int64
+        // does key fit in an integer?
         if (luaV_flttointeger(f, addr(k), F2Imod.F2Ieq) != 0) {
             {
                 var io : TValue? = addr(aux)
                 io.value_.i = k
                 io.tt_ = uint8(3 | 0 << 4)
             }
+            // insert it as an integer
             key = addr(aux)
-        } elif (int64((!(f == f) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+        } elif (!(f == f)) {
             luaG_runerror`va(L, reinterpret<uint8?>("table index is NaN"), VaNone())
         }
     }
     if ((int(value.tt_) & 15) == 0) {
+        // do not insert nil values
         return
     }
     mp = mainpositionTV(t, key)
+    // main position is taken?
     if (!((int(addr(mp.i_val).tt_) & 15) == 0) || t.lastfree == null) {
         var othern : Node?
+        // get a free place
         var f : Node? = getfreepos(t)
+        // cannot find a free place?
         if (f == null) {
+            // grow table
             rehash(L, t, key)
+            // whatever called 'newkey' takes care of TM cache
+            // insert key into grown table
             luaH_set(L, t, key, value)
             return
         }
         othern = mainpositionfromnode(t, mp)
+        // is colliding node out of its main position?
         if (intptr(othern) != intptr(mp)) {
+            // yes; move colliding node into free position
+            // find previous
             while (intptr(othern + othern.u.next) != intptr(mp)) {
                 othern = othern + othern.u.next
             }
+            // rechain to point to 'f'
             othern.u.next = int(int64(f - othern))
+            // copy colliding node into free pos. (mp->next also goes)
             deref(f) = deref(mp)
             if (mp.u.next != 0) {
+                // correct 'next'
                 f.u.next += int(int64(mp - f))
+                // now 'mp' is free
                 mp.u.next = 0
             }
             addr(mp.i_val).tt_ = uint8(0 | 1 << 4)
         } else {
+            // colliding node is in its own main position
+            // new node will go into free position
             if (mp.u.next != 0) {
+                // chain new position
                 f.u.next = int(int64(mp + mp.u.next - f))
             } else {
             }
@@ -12777,19 +15518,45 @@ def private luaH_newkey(var L : lua_State?; var t : Table?; var key : TValue?; v
     }
 }
 
+// Search function for integers. If integer is inside 'alimit', get it
+// directly from the array part. Otherwise, if 'alimit' is not
+// the real size of the array, the key still can be in the array part.
+// In this case, do the "Xmilia trick" to check whether 'key-1' is
+// smaller than the real size.
+// The trick works as follow: let 'p' be an integer such that
+// '2^(p+1) >= alimit > 2^p', or '2^(p+1) > alimit-1 >= 2^p'.
+// That is, 2^(p+1) is the real size of the array, and 'p' is the highest
+// bit on in 'alimit-1'. What we have to check becomes 'key-1 < 2^(p+1)'.
+// We compute '(key-1) & ~(alimit-1)', which we call 'res'; it will
+// have the 'p' bit cleared. If the key is outside the array, that is,
+// 'key-1 >= 2^(p+1)', then 'res' will have some bit on higher than 'p',
+// therefore it will be larger or equal to 'alimit', and the check
+// will fail. If 'key-1 < 2^(p+1)', then 'res' has no bit on higher than
+// 'p', and as the bit 'p' itself was cleared, 'res' will be smaller
+// than 2^p, therefore smaller than 'alimit', and the check succeeds.
+// As special cases, when 'alimit' is 0 the condition is trivially false,
+// and when 'alimit' is 1 the condition simplifies to 'key-1 < alimit'.
+// If key is 0 or negative, 'res' will have its higher bit on, so that
+// if cannot be smaller than alimit.
 [c_function]
 def luaH_getint(var t : Table?; key : int64) : TValue? {
     var alimit : uint64 = uint64(t.alimit)
+    // 'key' in [1, t->alimit]?
     if (uint64(key) - uint64(1u) < alimit) {
         return addr(deref(t._c_array + (key - int64(1))))
     } elif (!!((int(t.flags) & 1 << 7) != 0) && (uint64(key) - uint64(1u) & ~(alimit - uint64(1u))) < alimit) {
+        // key still may be in the array part?
+        // probably '#t' is here now
         t.alimit = uint(key)
         return addr(deref(t._c_array + (key - int64(1))))
     } else {
+        // key is not in the array part; check the hash
         var n : Node? = hashint(t, key)
+        // check whether 'key' is somewhere in the chain
         {
             while (true) {
                 if (int(n.u.key_tt) == (3 | 0 << 4) && n.u.key_val.i == key) {
+                    // that's it
                     return addr(n.i_val)
                 } else {
                     var nx : int = n.u.next
@@ -12804,16 +15571,20 @@ def luaH_getint(var t : Table?; key : int64) : TValue? {
     }
 }
 
+// search function for short strings
 [c_function]
 def luaH_getshortstr(var t : Table?; var key : TString?) : TValue? {
     var n : Node? = addr(deref(t.node + int(key.hash & uint((1 << int(t.lsizenode)) - 1))))
+    // check whether 'key' is somewhere in the chain
     {
         while (true) {
             if (int(n.u.key_tt) == (4 | 0 << 4 | 1 << 6) && intptr(addr(reinterpret<GCUnion?>(n.u.key_val.gc).ts)) == intptr(key)) {
+                // that's it
                 return addr(n.i_val)
             } else {
                 var nx : int = n.u.next
                 if (nx == 0) {
+                    // not found
                     return addr(absentkey)
                 }
                 n = n + nx
@@ -12825,9 +15596,10 @@ def luaH_getshortstr(var t : Table?; var key : TString?) : TValue? {
 
 [c_function]
 def luaH_getstr(var t : Table?; var key : TString?) : TValue? {
-    if (int(key.tt) == (4 | 0 << 4)) {
+    if (int(key.tt) == LUA_VSHRSTR) {
         return luaH_getshortstr(t, key)
     } else {
+        // for long strings, use generic case
         var ko : TValue
         {
             var io : TValue? = addr(ko)
@@ -12840,34 +15612,36 @@ def luaH_getstr(var t : Table?; var key : TString?) : TValue? {
     }
 }
 
+// main search function
 [c_function]
 def luaH_get(var t : Table?; var key : TValue?) : TValue? {
     let _cond = int(key.tt_) & 63
     while (true) {
         var _flag = false
-        _flag ||= _cond == 4
-        if (_flag) {
+        if (_cond == 4) {
             return luaH_getshortstr(t, addr(reinterpret<GCUnion?>(key.value_.gc).ts))
         }
-        _flag ||= _cond == 3
-        if (_flag) {
+        if (_cond == 3) {
             return luaH_getint(t, key.value_.i)
         }
-        _flag ||= _cond == 0
-        if (_flag) {
+        if (_cond == 0) {
             return addr(absentkey)
         }
         _flag ||= _cond == 19
         if (_flag) {
             {
                 var k : int64
+                // integral index?
                 if (luaV_flttointeger(key.value_.n, addr(k), F2Imod.F2Ieq) != 0) {
+                    // use specialized version
                     return luaH_getint(t, k)
                 }
             }
         }
         _flag ||= !(_cond == 4 || _cond == 3 || _cond == 0 || _cond == 19)
         if (_flag) {
+            // else...
+            // FALLTHROUGH
             return getgeneric(t, key, 0)
         }
         break
@@ -12875,6 +15649,10 @@ def luaH_get(var t : Table?; var key : TValue?) : TValue? {
     return null
 }
 
+// Finish a raw "set table" operation, where 'slot' is where the value
+// should have been (the result of a previous "get table").
+// Beware: when using this function you probably need to check a GC
+// barrier and invalidate the TM cache.
 def luaH_finishset(var L : lua_State?; var t : Table?; var key : TValue?; var slot : TValue?; var value : TValue?) {
     if (int(slot.tt_) == (0 | 2 << 4)) {
         luaH_newkey(L, t, key, value)
@@ -12886,6 +15664,8 @@ def luaH_finishset(var L : lua_State?; var t : Table?; var key : TValue?; var sl
     }
 }
 
+// beware: when using this function you probably need to check a GC
+// barrier and invalidate the TM cache.
 def luaH_set(var L : lua_State?; var t : Table?; var key : TValue?; var value : TValue?) {
     var slot : TValue? = luaH_get(t, key)
     luaH_finishset(L, t, key, slot, value)
@@ -12910,26 +15690,46 @@ def luaH_setint(var L : lua_State?; var t : Table?; key : int64; var value : TVa
     }
 }
 
+// Try to find a boundary in the hash part of table 't'. From the
+// caller, we know that 'j' is zero or present and that 'j + 1' is
+// present. We want to find a larger key that is absent from the
+// table, so that we can do a binary search between the two keys to
+// find a boundary. We keep doubling 'j' until we get an absent index.
+// If the doubling would overflow, we try LUA_MAXINTEGER. If it is
+// absent, we are ready for the binary search. ('j', being max integer,
+// is larger or equal to 'i', but it cannot be equal because it is
+// absent while 'i' is present; so 'j > i'.) Otherwise, 'j' is a
+// boundary. ('j + 1' cannot be a present integer key because it is
+// not a valid integer in Lua.)
 def private hash_search(var t : Table?; var j : uint64) : uint64 {
     var i : uint64
+    // the caller ensures 'j + 1' is present
     if (j == uint64(0)) {
         j++
     }
     var _first = true
     while (_first || !((int(luaH_getint(t, int64(j)).tt_) & 15) == 0)) {
         _first = false
+        // 'i' is a present index
         i = j
         if (j <= uint64(9223372036854775807l) / uint64(2)) {
             j *= uint64(2)
         } else {
             j = uint64(9223372036854775807l)
+            // t[j] not present?
             if ((int(luaH_getint(t, int64(j)).tt_) & 15) == 0) {
+                // 'j' now is an absent index
                 break
             } else {
+                // weird case
+                // well, max integer is a boundary...
                 return j
             }
         }
     }
+    // repeat until an absent t[j]
+    // i < j && t[i] present && t[j] absent
+    // do a binary search between them
     while (j - i > uint64(1u)) {
         var m : uint64 = (i + j) / uint64(2)
         if ((int(luaH_getint(t, int64(m)).tt_) & 15) == 0) {
@@ -12943,6 +15743,7 @@ def private hash_search(var t : Table?; var j : uint64) : uint64 {
 
 [c_function]
 def private binsearch(var _c_array : TValue?; var i : uint; var j : uint) : uint {
+    // binary search
     while (j - i > 1u) {
         var m : uint = (i + j) / uint(2)
         if ((int(addr(deref(_c_array + (m - uint(1)))).tt_) & 15) == 0) {
@@ -12954,59 +15755,112 @@ def private binsearch(var _c_array : TValue?; var i : uint; var j : uint) : uint
     return i
 }
 
+// Try to find a boundary in table 't'. (A 'boundary' is an integer index
+// such that t[i] is present and t[i+1] is absent, or 0 if t[1] is absent
+// and 'maxinteger' if t[maxinteger] is present.)
+// (In the next explanation, we use Lua indices, that is, with base 1.
+// The code itself uses base 0 when indexing the array part of the table.)
+// The code starts with 'limit = t->alimit', a position in the array
+// part that may be a boundary.
+// (1) If 't[limit]' is empty, there must be a boundary before it.
+// As a common case (e.g., after 't[#t]=nil'), check whether 'limit-1'
+// is present. If so, it is a boundary. Otherwise, do a binary search
+// between 0 and limit to find a boundary. In both cases, try to
+// use this boundary as the new 'alimit', as a hint for the next call.
+// (2) If 't[limit]' is not empty and the array has more elements
+// after 'limit', try to find a boundary there. Again, try first
+// the special case (which should be quite frequent) where 'limit+1'
+// is empty, so that 'limit' is a boundary. Otherwise, check the
+// last element of the array part. If it is empty, there must be a
+// boundary between the old limit (present) and the last element
+// (absent), which is found with a binary search. (This boundary always
+// can be a new limit.)
+// (3) The last case is when there are no elements in the array part
+// (limit == 0) or its last element (the new limit) is present.
+// In this case, must check the hash part. If there is no hash part
+// or 'limit+1' is absent, 'limit' is a boundary. Otherwise, call
+// 'hash_search' to find a boundary in the hash part of the table.
+// (In those cases, the boundary is not inside the array part, and
+// therefore cannot be used as a new limit.)
 [c_function]
 def luaH_getn(var t : Table?) : uint64 {
     var limit : uint = t.alimit
+    // (1)?
     if (limit > uint(0) && (int(addr(deref(t._c_array + (limit - uint(1)))).tt_) & 15) == 0) {
+        // there must be a boundary before 'limit'
         if (limit >= uint(2) && !((int(addr(deref(t._c_array + (limit - uint(2)))).tt_) & 15) == 0)) {
+            // 'limit - 1' is a boundary; can it be a new limit?
             if (ispow2realasize(t) != 0 && !((limit - uint(1) & limit - uint(1) - uint(1)) == uint(0))) {
                 t.alimit = limit - uint(1)
+                // now 'alimit' is not the real size
                 t.flags = uint8(int(t.flags) | 1 << 7)
             }
             return uint64(limit - uint(1))
         } else {
+            // must search for a boundary in [0, limit]
             var boundary : uint = binsearch(t._c_array, uint(0), limit)
+            // can this boundary represent the real size of the array?
             if (ispow2realasize(t) != 0 && boundary > luaH_realasize(t) / uint(2)) {
+                // use it as the new limit
                 t.alimit = boundary
                 t.flags = uint8(int(t.flags) | 1 << 7)
             }
             return uint64(boundary)
         }
     }
+    // 'limit' is zero or present in table
+    // (2)?
     if (!(!((int(t.flags) & 1 << 7) != 0) || (t.alimit & t.alimit - uint(1)) == uint(0))) {
+        // 'limit' > 0 and array has more elements after 'limit'
+        // 'limit + 1' is empty?
         if ((int(addr(deref(t._c_array + limit)).tt_) & 15) == 0) {
+            // this is the boundary
             return uint64(limit)
         }
+        // else, try last element in the array
         limit = luaH_realasize(t)
+        // empty?
         if ((int(addr(deref(t._c_array + (limit - uint(1)))).tt_) & 15) == 0) {
+            // there must be a boundary in the array after old limit,
+            // and it must be a valid new limit
             var boundary : uint = binsearch(t._c_array, t.alimit, limit)
             t.alimit = boundary
             return uint64(boundary)
         }
     }
+    // else, new limit is present in the table; check the hash part
+    // (3) 'limit' is the last element and either is zero or present in table
     if (t.lastfree == null || (int(luaH_getint(t, int64(limit + uint(1))).tt_) & 15) == 0) {
+        // 'limit + 1' is absent
         return uint64(limit)
     } else {
+        // 'limit + 1' is also present
         return hash_search(t, uint64(limit))
     }
 }
 
 [c_function]
 def luaT_init(var L : lua_State?) {
+    // ORDER TM
     var i : int
     {
         i = 0
         while (i < int(TMS.TM_N)) {
             L.l_G.tmname[i] = luaS_new(L, luaT_init_luaT_eventname[i])
+            // never collect these names
             luaC_fix(L, addr(reinterpret<GCUnion?>(L.l_G.tmname[i]).gc))
             i++
         }
     }
 }
 
+// function to be used with macro "fasttm": optimized for absence of
+// tag methods
 def luaT_gettm(var events : Table?; event : TMS; var ename : TString?) : TValue? {
     var tm : TValue? = luaH_getshortstr(events, ename)
+    // no tag method?
     if ((int(tm.tt_) & 15) == 0) {
+        // cache this fact
         events.flags = uint8(int(events.flags) | int(uint8(1u << uint(int(event)))))
         return null
     } else {
@@ -13028,6 +15882,8 @@ def luaT_gettmbyobj(var L : lua_State?; var o : TValue?; event : TMS) : TValue? 
     return mt != null ? luaH_getshortstr(mt, L.l_G.tmname[int(event)]) : reinterpret<TValue?>(addr(L.l_G.nilvalue))
 }
 
+// Return the name of the type of an object. For tables and userdata
+// with metatable, use their '__name' metafield, if present.
 [c_function]
 def luaT_objtypename(var L : lua_State?; var o : TValue?) : uint8? {
     var mt : Table?
@@ -13047,10 +15903,13 @@ def luaT_objtypename(var L : lua_State?; var o : TValue?) : uint8? {
     }
     if (_t2) {
         var name : TValue? = luaH_getshortstr(mt, luaS_new(L, reinterpret<uint8?>("__name")))
+        // is '__name' a string?
         if ((int(name.tt_) & 15) == 4) {
+            // use it as type name
             return addr(addr(reinterpret<GCUnion?>(name.value_.gc).ts).contents[0])
         }
     }
+    // else use standard type name
     return luaT_typenames_[(int(o.tt_) & 15) + 1]
 }
 
@@ -13058,30 +15917,35 @@ def luaT_objtypename(var L : lua_State?; var o : TValue?) : uint8? {
 def luaT_callTM(var L : lua_State?; var f : TValue?; var p1 : TValue?; var p2 : TValue?; var p3 : TValue?) {
     var func : StackValue? = L.top.p
     {
+        // push function (assume EXTRA_STACK)
         var io1 : TValue? = addr(func.val)
         var io2 : TValue? = f
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
     {
+        // 1st argument
         var io1 : TValue? = addr((func + 1).val)
         var io2 : TValue? = p1
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
     {
+        // 2nd argument
         var io1 : TValue? = addr((func + 2).val)
         var io2 : TValue? = p2
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
     {
+        // 3rd argument
         var io1 : TValue? = addr((func + 3).val)
         var io2 : TValue? = p3
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
     L.top.p = func + 4
+    // metamethod may yield only when called from Lua code
     if (!((int(L.ci.callstatus) & (1 << 1 | 1 << 3)) != 0)) {
         luaD_call(L, func, 0)
     } else {
@@ -13094,24 +15958,28 @@ def luaT_callTMres(var L : lua_State?; var f : TValue?; var p1 : TValue?; var p2
     var result : int64 = int64(reinterpret<uint8?>(res) - reinterpret<uint8?>(L.stack.p))
     var func : StackValue? = L.top.p
     {
+        // push function (assume EXTRA_STACK)
         var io1 : TValue? = addr(func.val)
         var io2 : TValue? = f
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
     {
+        // 1st argument
         var io1 : TValue? = addr((func + 1).val)
         var io2 : TValue? = p1
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
     {
+        // 2nd argument
         var io1 : TValue? = addr((func + 2).val)
         var io2 : TValue? = p2
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
     L.top.p = L.top.p + 3
+    // metamethod may yield only when called from Lua code
     if (!((int(L.ci.callstatus) & (1 << 1 | 1 << 3)) != 0)) {
         luaD_call(L, func, 1)
     } else {
@@ -13119,6 +15987,7 @@ def luaT_callTMres(var L : lua_State?; var f : TValue?; var p1 : TValue?; var p2
     }
     res = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + result)
     {
+        // move result to its place
         var io1 : TValue? = addr(res.val)
         L.top.p = L.top.p - 1
         var io2 : TValue? = addr(L.top.p.val)
@@ -13128,8 +15997,10 @@ def luaT_callTMres(var L : lua_State?; var f : TValue?; var p1 : TValue?; var p2
 }
 
 def private callbinTM(var L : lua_State?; var p1 : TValue?; var p2 : TValue?; var res : StackValue?; event : TMS) : int {
+    // try first operand
     var tm : TValue? = luaT_gettmbyobj(L, p1, event)
     if ((int(tm.tt_) & 15) == 0) {
+        // try second operand
         tm = luaT_gettmbyobj(L, p2, event)
     }
     if ((int(tm.tt_) & 15) == 0) {
@@ -13141,7 +16012,7 @@ def private callbinTM(var L : lua_State?; var p1 : TValue?; var p2 : TValue?; va
 
 [c_function]
 def luaT_trybinTM(var L : lua_State?; var p1 : TValue?; var p2 : TValue?; var res : StackValue?; event : TMS) {
-    if (int64((!(callbinTM(L, p1, p2, res, event) != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!(callbinTM(L, p1, p2, res, event) != 0)) {
         let _cond = event
         while (true) {
             var _flag = false
@@ -13162,6 +16033,7 @@ def luaT_trybinTM(var L : lua_State?; var p1 : TValue?; var p2 : TValue?; var re
             }
             _flag ||= !(_cond == TMS.TM_BAND || _cond == TMS.TM_BOR || _cond == TMS.TM_BXOR || _cond == TMS.TM_SHL || _cond == TMS.TM_SHR || _cond == TMS.TM_BNOT)
             if (_flag) {
+                // calls never return, but to avoid warnings: FALLTHROUGH
                 luaG_opinterror(L, p1, p2, reinterpret<uint8?>("perform arithmetic on"))
             }
             break
@@ -13172,7 +16044,7 @@ def luaT_trybinTM(var L : lua_State?; var p1 : TValue?; var p2 : TValue?; var re
 [c_function]
 def luaT_tryconcatTM(var L : lua_State?) {
     var top : StackValue? = L.top.p
-    if (int64((!(callbinTM(L, addr((top - 2).val), addr((top - 1).val), top - 2, TMS.TM_CONCAT) != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!(callbinTM(L, addr((top - 2).val), addr((top - 1).val), top - 2, TMS.TM_CONCAT) != 0)) {
         luaG_concaterror(L, addr((top - 2).val), addr((top - 1).val))
     }
 }
@@ -13196,12 +16068,26 @@ def luaT_trybiniTM(var L : lua_State?; var p1 : TValue?; i2 : int64; flip : int;
     luaT_trybinassocTM(L, p1, addr(aux), flip, res, event)
 }
 
+// Calls an order tag method.
+// For lessequal, LUA_COMPAT_LT_LE keeps compatibility with old
+// behavior: if there is no '__le', try '__lt', based on l <= r iff
+// !(r < l) (assuming a total order). If the metamethod yields during
+// this substitution, the continuation has to know about it (to negate
+// the result of r<l); bit CIST_LEQ in the call status keeps that
+// information.
 [c_function]
 def luaT_callorderTM(var L : lua_State?; var p1 : TValue?; var p2 : TValue?; event : TMS) : int {
+    // try original event
     if (callbinTM(L, p1, p2, L.top.p, event) != 0) {
         return !(int(addr(L.top.p.val).tt_) == (1 | 0 << 4) || (int(addr(L.top.p.val).tt_) & 15) == 0) ? 1 : 0
     }
+    // try '!(p2 < p1)' for '(p1 <= p2)'
+    // mark it is doing 'lt' for 'le'
+    // clear mark
+    // else error will remove this 'ci'; no need to clear mark
+    // no metamethod found
     luaG_ordererror(L, p1, p2)
+    // to avoid warnings
     return 0
 }
 
@@ -13220,7 +16106,9 @@ def luaT_callorderiTM(var L : lua_State?; var p1 : TValue?; v2 : int; flip : int
         io.value_.i = int64(v2)
         io.tt_ = uint8(3 | 0 << 4)
     }
+    // arguments were exchanged?
     if (flip != 0) {
+        // correct them
         p2 = p1
         p1 = addr(aux)
     } else {
@@ -13232,14 +16120,17 @@ def luaT_callorderiTM(var L : lua_State?; var p1 : TValue?; v2 : int; flip : int
 [c_function]
 def luaT_adjustvarargs(var L : lua_State?; nfixparams : int; var ci : CallInfo?; var p : Proto?) {
     var i : int
+    // number of arguments
     var actual : int = int(int64(L.top.p - ci.func.p)) - 1
+    // number of extra arguments
     var nextra : int = actual - nfixparams
     ci.u.l.nextraargs = nextra
-    if (int64((int64(L.stack_last.p - L.top.p) <= int64(int(p.maxstacksize) + 1) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (int64(L.stack_last.p - L.top.p) <= int64(int(p.maxstacksize) + 1)) {
         luaD_growstack(L, int(p.maxstacksize) + 1, 1)
     } else {
     }
     {
+        // copy function to the top of the stack
         var _t0 = L.top.p
         L.top.p = L.top.p + 1
         var io1 : TValue? = addr(_t0.val)
@@ -13247,6 +16138,7 @@ def luaT_adjustvarargs(var L : lua_State?; nfixparams : int; var ci : CallInfo?;
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
+    // move fixed parameters to the top of the stack
     {
         i = 1
         while (i <= nfixparams) {
@@ -13258,6 +16150,7 @@ def luaT_adjustvarargs(var L : lua_State?; nfixparams : int; var ci : CallInfo?;
                 io1.value_ = io2.value_
                 io1.tt_ = io2.tt_
             }
+            // erase original parameter (for GC)
             addr((ci.func.p + i).val).tt_ = uint8(0 | 0 << 4)
             i++
         }
@@ -13271,8 +16164,10 @@ def luaT_getvarargs(var L : lua_State?; var ci : CallInfo?; var _c_where : Stack
     var i : int
     var nextra : int = ci.u.l.nextraargs
     if (wanted < 0) {
+        // get all extra arguments available
         wanted = nextra
-        if (int64((int64(L.stack_last.p - L.top.p) <= int64(nextra) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+        // ensure stack space
+        if (int64(L.stack_last.p - L.top.p) <= int64(nextra)) {
             var t__ : int64 = int64(reinterpret<uint8?>(_c_where) - reinterpret<uint8?>(L.stack.p))
             {
                 if (L.l_G.GCdebt > int64(0)) {
@@ -13283,6 +16178,7 @@ def luaT_getvarargs(var L : lua_State?; var ci : CallInfo?; var _c_where : Stack
             _c_where = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + t__)
         } else {
         }
+        // next instruction will need top
         L.top.p = _c_where + nextra
     }
     {
@@ -13295,6 +16191,7 @@ def luaT_getvarargs(var L : lua_State?; var ci : CallInfo?; var _c_where : Stack
             i++
         }
     }
+    // complete required results with nil
     {
         while (i < wanted) {
             addr((_c_where + i).val).tt_ = uint8(0 | 0 << 4)
@@ -13306,7 +16203,7 @@ def luaT_getvarargs(var L : lua_State?; var ci : CallInfo?; var _c_where : Stack
 [c_function]
 def private error(var S : LoadState?; var why : uint8?) {
     luaO_pushfstring`va(S.L, reinterpret<uint8?>("%s: bad binary format (%s)"), (S.name, why))
-    luaD_throw(S.L, 3)
+    luaD_throw(S.L, LUA_ERRSYNTAX)
 }
 
 [c_function]
@@ -13329,7 +16226,7 @@ def private loadByte(var S : LoadState?) : uint8 {
         _t2 = luaZ_fill(S.Z)
     }
     var b : int = _t2
-    if (b == -1) {
+    if (b == EOZ) {
         error(S, reinterpret<uint8?>("truncated chunk"))
     }
     return uint8(b)
@@ -13353,7 +16250,7 @@ def private loadUnsigned(var S : LoadState?; var limit : uint64) : uint64 {
 }
 
 def private loadSize(var S : LoadState?) : uint64 {
-    return loadUnsigned(S, ~uint64(0))
+    return loadUnsigned(S, MAX_SIZET)
 }
 
 def private loadInt(var S : LoadState?) : int {
@@ -13374,29 +16271,39 @@ def private loadInteger(var S : LoadState?) : int64 {
     return x
 }
 
+// Load a nullable string into prototype 'p'.
 [c_function]
 def private loadStringN(var S : LoadState?; var p : Proto?) : TString? {
     var L : lua_State? = S.L
     var ts : TString?
     var size : uint64 = loadSize(S)
+    // no string?
     if (size == uint64(0)) {
         return null
     } else {
+        // short string?
         size--
-        if (size <= uint64(40)) {
+        if (size <= uint64(LUAI_MAXSHORTLEN)) {
             var buff : uint8[40]
+            // load string into buffer
             loadBlock(S, reinterpret<void?>(addr(buff[0])), size * uint64(typeinfo sizeof(type<uint8>)))
+            // create string
             ts = luaS_newlstr(L, addr(buff[0]), size)
         } else {
+            // long string
+            // create string
             ts = luaS_createlngstrobj(L, size)
             {
+                // anchor it ('loadVector' can GC)
                 var io : TValue? = addr(L.top.p.val)
                 var x_ : TString? = ts
                 io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
                 io.tt_ = uint8(int(x_.tt) | 1 << 6)
             }
             luaD_inctop(L)
+            // load directly in final place
             loadBlock(S, reinterpret<void?>(addr(ts.contents[0])), size * uint64(typeinfo sizeof(type<uint8>)))
+            // pop string
             L.top.p = L.top.p - 1
         }
     }
@@ -13406,6 +16313,7 @@ def private loadStringN(var S : LoadState?; var p : Proto?) : TString? {
     return ts
 }
 
+// Load a non-nullable string into prototype 'p'.
 [c_function]
 def private loadString(var S : LoadState?; var p : Proto?) : TString? {
     var st : TString? = loadStringN(S, p)
@@ -13510,6 +16418,10 @@ def private loadProtos(var S : LoadState?; var f : Proto?) {
     }
 }
 
+// Load the upvalues for a function. The names must be filled first,
+// because the filling of the other fields can raise read errors and
+// the creation of the error message can call an emergency collection;
+// in that case all prototypes must be consistent for the GC.
 [c_function]
 def private loadUpvalues(var S : LoadState?; var f : Proto?) {
     var i : int
@@ -13520,6 +16432,7 @@ def private loadUpvalues(var S : LoadState?; var f : Proto?) {
     }
     f.upvalues = reinterpret<Upvaldesc?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<Upvaldesc>)), 0))
     f.sizeupvalues = n
+    // make array valid for GC
     {
         i = 0
         while (i < n) {
@@ -13527,6 +16440,7 @@ def private loadUpvalues(var S : LoadState?; var f : Proto?) {
             i++
         }
     }
+    // following calls can raise errors
     {
         i = 0
         while (i < n) {
@@ -13586,7 +16500,9 @@ def private loadDebug(var S : LoadState?; var f : Proto?) {
         }
     }
     n = loadInt(S)
+    // does it have debug information?
     if (n != 0) {
+        // must be this many
         n = f.sizeupvalues
     }
     {
@@ -13601,7 +16517,9 @@ def private loadDebug(var S : LoadState?; var f : Proto?) {
 [c_function]
 def private loadFunction(var S : LoadState?; var f : Proto?; var psource : TString?) {
     f.source = loadStringN(S, f)
+    // no source in dump?
     if (f.source == null) {
+        // reuse parent's source
         f.source = psource
     }
     f.linedefined = loadInt(S)
@@ -13618,6 +16536,7 @@ def private loadFunction(var S : LoadState?; var f : Proto?; var psource : TStri
 
 [c_function]
 def private checkliteral(var S : LoadState?; var s : uint8?; var msg : uint8?) {
+    // larger than both
     var buff : uint8[12]
     var len : uint64 = crt::strlen(s)
     loadBlock(S, reinterpret<void?>(addr(buff[0])), len * uint64(typeinfo sizeof(type<uint8>)))
@@ -13635,18 +16554,19 @@ def private fchecksize(var S : LoadState?; size : uint64; var tname : uint8?) {
 
 [c_function]
 def private checkHeader(var S : LoadState?) {
+    // skip 1st char (already read and checked)
     checkliteral(S, addr(deref(reinterpret<uint8?>("\x1bLua") + 1)), reinterpret<uint8?>("not a binary chunk"))
-    if (int(loadByte(S)) != 504 / 100 * 16 + 504 % 100) {
+    if (int(loadByte(S)) != LUAC_VERSION) {
         error(S, reinterpret<uint8?>("version mismatch"))
     }
-    if (int(loadByte(S)) != 0) {
+    if (int(loadByte(S)) != LUAC_FORMAT) {
         error(S, reinterpret<uint8?>("format mismatch"))
     }
     checkliteral(S, reinterpret<uint8?>("\x19\x93\r\n\x1a\n"), reinterpret<uint8?>("corrupted chunk"))
     fchecksize(S, uint64(typeinfo sizeof(type<uint>)), reinterpret<uint8?>("Instruction"))
     fchecksize(S, uint64(typeinfo sizeof(type<int64>)), reinterpret<uint8?>("lua_Integer"))
     fchecksize(S, uint64(typeinfo sizeof(type<double>)), reinterpret<uint8?>("lua_Number"))
-    if (loadInteger(S) != int64(22136)) {
+    if (loadInteger(S) != int64(LUAC_INT)) {
         error(S, reinterpret<uint8?>("integer format mismatch"))
     }
     if (loadNumber(S) != 370.5lf) {
@@ -13654,11 +16574,12 @@ def private checkHeader(var S : LoadState?) {
     }
 }
 
+// Load precompiled chunk.
 [c_function]
 def luaU_undump(var L : lua_State?; var Z : Zio?; var name : uint8?) : LClosure? {
     var S : LoadState
     var cl : LClosure?
-    if (int(deref(name)) == 64 || int(deref(name)) == 61) {
+    if (int(deref(name)) == '@' || int(deref(name)) == '=') {
         S.name = name + 1
     } elif (int(deref(name)) == int(deref(reinterpret<uint8?>("\x1bLua") + 0))) {
         S.name = reinterpret<uint8?>("binary string")
@@ -13684,8 +16605,14 @@ def luaU_undump(var L : lua_State?; var Z : Zio?; var name : uint8?) : LClosure?
     return cl
 }
 
+// Try to convert a value from string to a number value.
+// If the value is not a string or is a string not representing
+// a valid numeral (or if coercions from strings to numbers
+// are disabled via macro 'cvt2num'), do not modify 'result'
+// and return 0.
 [c_function]
 def private l_strton(var obj : TValue?; var result : TValue?) : int {
+    // is object not a string?
     if (!((int(obj.tt_) & 15) == 4)) {
         return 0
     } else {
@@ -13694,6 +16621,8 @@ def private l_strton(var obj : TValue?; var result : TValue?) : int {
     }
 }
 
+// Try to convert a value to a float. The float case is already handled
+// by the macro 'tonumber'.
 [c_function]
 def luaV_tonumber_(var obj : TValue?; var n : double?) : int {
     var v : TValue
@@ -13701,20 +16630,28 @@ def luaV_tonumber_(var obj : TValue?; var n : double?) : int {
         deref(n) = double(obj.value_.i)
         return 1
     } elif (l_strton(obj, addr(v)) != 0) {
+        // string coercible to number?
+        // convert result of 'luaO_str2num' to a float
         deref(n) = int(addr(v).tt_) == (3 | 0 << 4) ? double(addr(v).value_.i) : addr(v).value_.n
         return 1
     } else {
+        // conversion failed
         return 0
     }
 }
 
+// try to convert a float to an integer, rounding according to 'mode'.
 [c_function]
 def luaV_flttointeger(n : double; var p : int64?; mode : F2Imod) : int {
     var f : double = math::floor(n)
+    // not an integral value?
     if (n != f) {
+        // fails if mode demands integral value
         if (mode == F2Imod.F2Ieq) {
             return 0
         } elif (mode == F2Imod.F2Iceil) {
+            // needs ceil?
+            // convert floor to ceil (remember: n != f)
             f += double(1)
         }
     }
@@ -13726,6 +16663,9 @@ def luaV_flttointeger(n : double; var p : int64?; mode : F2Imod) : int {
     return _t0 ? 1 : 0
 }
 
+// try to convert a value to an integer, rounding according to 'mode',
+// without string coercion.
+// ("Fast track" handled by macro 'tointegerns'.)
 [c_function]
 def luaV_tointegerns(var obj : TValue?; var p : int64?; mode : F2Imod) : int {
     if (int(obj.tt_) == (3 | 1 << 4)) {
@@ -13738,19 +16678,39 @@ def luaV_tointegerns(var obj : TValue?; var p : int64?; mode : F2Imod) : int {
     }
 }
 
+// try to convert a value to an integer.
 [c_function]
 def luaV_tointeger(var obj : TValue?; var p : int64?; mode : F2Imod) : int {
     var v : TValue
+    // does 'obj' point to a numerical string?
     if (l_strton(obj, addr(v)) != 0) {
+        // change it to point to its corresponding number
         obj = addr(v)
     }
     return luaV_tointegerns(obj, p, mode)
 }
 
+// Try to convert a 'for' limit to an integer, preserving the semantics
+// of the loop. Return true if the loop must not run; otherwise, '*p'
+// gets the integer limit.
+// (The following explanation assumes a positive step; it is valid for
+// negative steps mutatis mutandis.)
+// If the limit is an integer or can be converted to an integer,
+// rounding down, that is the limit.
+// Otherwise, check whether the limit can be converted to a float. If
+// the float is too large, clip it to LUA_MAXINTEGER. If the float
+// is too negative, the loop should not run, because any initial
+// integer value is greater than such limit; so, the function returns
+// true to signal that. (For this latter case, no integer limit would be
+// correct; even a limit of LUA_MININTEGER would run the loop once for
+// an initial value equal to LUA_MININTEGER.)
 [c_function]
 def private forlimit(var L : lua_State?; init : int64; var lim : TValue?; var p : int64?; step : int64) : int {
     if (!(luaV_tointeger(lim, p, step < int64(0) ? F2Imod.F2Iceil : F2Imod.F2Ifloor) != 0)) {
+        // not coercible to in integer
+        // try to convert to float
         var flim : double
+        // cannot convert to float?
         var _t0 : int
         if (int(lim.tt_) == (3 | 1 << 4)) {
             deref(addr(flim)) = lim.value_.n
@@ -13761,26 +16721,42 @@ def private forlimit(var L : lua_State?; init : int64; var lim : TValue?; var p 
         if (!(_t0 != 0)) {
             luaG_forerror(L, lim, reinterpret<uint8?>("limit"))
         }
+        // else 'flim' is a float out of integer bounds
+        // if it is positive, it is too large
         if (double(0) < flim) {
+            // initial value must be less than it
             if (step < int64(0)) {
                 return 1
             }
+            // truncate
             deref(p) = 9223372036854775807l
         } else {
+            // it is less than min integer
+            // initial value must be greater than it
             if (step > int64(0)) {
                 return 1
             }
+            // truncate
             deref(p) = -9223372036854775807l - 1l
         }
     }
+    // not to run?
     return (step > int64(0) ? init > deref(p) : init < deref(p)) ? 1 : 0
 }
 
+// Prepare a numerical for loop (opcode OP_FORPREP).
+// Return true to skip the loop. Otherwise,
+// after preparation, stack will be as follows:
+// ra : internal index (safe copy of the control variable)
+// ra + 1 : loop counter (integer loops) or limit (float loops)
+// ra + 2 : step
+// ra + 3 : control variable
 [c_function]
 def private forprep(var L : lua_State?; var ra : StackValue?) : int {
     var pinit : TValue? = addr(ra.val)
     var plimit : TValue? = addr((ra + 1).val)
     var pstep : TValue? = addr((ra + 2).val)
+    // integer loop?
     if (int(pinit.tt_) == (3 | 0 << 4) && int(pstep.tt_) == (3 | 0 << 4)) {
         var init : int64 = pinit.value_.i
         var step : int64 = pstep.value_.i
@@ -13789,30 +16765,40 @@ def private forprep(var L : lua_State?; var ra : StackValue?) : int {
             luaG_runerror`va(L, reinterpret<uint8?>("'for' step is zero"), VaNone())
         }
         {
+            // control variable
             var io : TValue? = addr((ra + 3).val)
             io.value_.i = init
             io.tt_ = uint8(3 | 0 << 4)
         }
         if (forlimit(L, init, plimit, addr(limit), step) != 0) {
+            // skip the loop
             return 1
         } else {
+            // prepare loop counter
             var count : uint64
+            // ascending loop?
             if (step > int64(0)) {
                 count = uint64(limit) - uint64(init)
+                // avoid division in the too common case
                 if (step != int64(1)) {
                     count /= uint64(step)
                 }
             } else {
+                // step < 0; descending loop
                 count = uint64(init) - uint64(limit)
+                // 'step+1' avoids negating 'mininteger'
                 count /= uint64(-(step + int64(1))) + uint64(1u)
             }
             {
+                // store the counter in place of the limit (which won't be
+                // needed anymore)
                 var io : TValue? = plimit
                 io.value_.i = int64(count)
                 io.tt_ = uint8(3 | 0 << 4)
             }
         }
     } else {
+        // try making all values floats
         var init : double
         var limit : double
         var step : double
@@ -13823,7 +16809,7 @@ def private forprep(var L : lua_State?; var ra : StackValue?) : int {
         } else {
             _t0 = luaV_tonumber_(plimit, addr(limit))
         }
-        if (int64((!(_t0 != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+        if (!(_t0 != 0)) {
             luaG_forerror(L, plimit, reinterpret<uint8?>("limit"))
         }
         var _t1 : int
@@ -13833,7 +16819,7 @@ def private forprep(var L : lua_State?; var ra : StackValue?) : int {
         } else {
             _t1 = luaV_tonumber_(pstep, addr(step))
         }
-        if (int64((!(_t1 != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+        if (!(_t1 != 0)) {
             luaG_forerror(L, pstep, reinterpret<uint8?>("step"))
         }
         var _t2 : int
@@ -13843,16 +16829,18 @@ def private forprep(var L : lua_State?; var ra : StackValue?) : int {
         } else {
             _t2 = luaV_tonumber_(pinit, addr(init))
         }
-        if (int64((!(_t2 != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+        if (!(_t2 != 0)) {
             luaG_forerror(L, pinit, reinterpret<uint8?>("initial value"))
         }
         if (step == double(0)) {
             luaG_runerror`va(L, reinterpret<uint8?>("'for' step is zero"), VaNone())
         }
         if (double(0) < step ? limit < init : init < limit) {
+            // skip the loop
             return 1
         } else {
             {
+                // make sure internal values are all floats
                 var io : TValue? = plimit
                 io.value_.n = limit
                 io.tt_ = uint8(3 | 1 << 4)
@@ -13863,11 +16851,13 @@ def private forprep(var L : lua_State?; var ra : StackValue?) : int {
                 io.tt_ = uint8(3 | 1 << 4)
             }
             {
+                // internal index
                 var io : TValue? = addr(ra.val)
                 io.value_.n = init
                 io.tt_ = uint8(3 | 1 << 4)
             }
             {
+                // control variable
                 var io : TValue? = addr((ra + 3).val)
                 io.value_.n = init
                 io.tt_ = uint8(3 | 1 << 4)
@@ -13877,52 +16867,78 @@ def private forprep(var L : lua_State?; var ra : StackValue?) : int {
     return 0
 }
 
+// Execute a step of a float numerical for loop, returning
+// true iff the loop must continue. (The integer case is
+// written online with opcode OP_FORLOOP, for performance.)
 [c_function]
 def private floatforloop(var ra : StackValue?) : int {
     var step : double = addr((ra + 2).val).value_.n
     var limit : double = addr((ra + 1).val).value_.n
+    // internal index
     var idx : double = addr(ra.val).value_.n
+    // increment index
     idx += step
     if (double(0) < step ? idx <= limit : limit <= idx) {
         {
+            // update internal index
             var io : TValue? = addr(ra.val)
             io.value_.n = idx
         }
         {
+            // and control variable
             var io : TValue? = addr((ra + 3).val)
             io.value_.n = idx
             io.tt_ = uint8(3 | 1 << 4)
         }
+        // jump back
         return 1
     } else {
+        // finish the loop
         return 0
     }
 }
 
+// Finish the table access 'val = t[key]'.
+// if 'slot' is NULL, 't' is not a table; otherwise, 'slot' points to
+// t[k] entry (which must be empty).
 [c_function]
 def luaV_finishget(var L : lua_State?; var t : TValue?; var key : TValue?; var val : StackValue?; var slot : TValue?) {
+    // counter to avoid infinite loops
     var loop : int
+    // metamethod
     var tm : TValue?
     {
         loop = 0
-        while (loop < 2000) {
+        while (loop < MAXTAGLOOP) {
+            // 't' is not a table?
             if (slot == null) {
                 tm = luaT_gettmbyobj(L, t, TMS.TM_INDEX)
-                if (int64(((int(tm.tt_) & 15) == 0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                if ((int(tm.tt_) & 15) == 0) {
+                    // no metamethod
                     luaG_typeerror(L, t, reinterpret<uint8?>("index"))
                 }
             } else {
+                // else will try the metamethod
+                // 't' is a table
+                // table's metamethod
                 tm = addr(reinterpret<GCUnion?>(t.value_.gc).h).metatable == null ? default<TValue?> : ((uint(addr(reinterpret<GCUnion?>(t.value_.gc).h).metatable.flags) & 1u << uint(int(TMS.TM_INDEX))) != 0 ? default<TValue?> : luaT_gettm(addr(reinterpret<GCUnion?>(t.value_.gc).h).metatable, TMS.TM_INDEX, L.l_G.tmname[int(TMS.TM_INDEX)]))
+                // no metamethod?
                 if (tm == null) {
+                    // result is nil
                     addr(val.val).tt_ = uint8(0 | 0 << 4)
                     return
                 }
             }
+            // else will try the metamethod
+            // is metamethod a function?
             if ((int(tm.tt_) & 15) == 6) {
+                // call it
                 luaT_callTMres(L, tm, t, key, val)
                 return
             }
+            // else try to access 'tm[key]'
             t = tm
+            // fast track?
             var _t0 : int
             if (!(int(t.tt_) == (5 | 0 << 4 | 1 << 6))) {
                 slot = null
@@ -13933,6 +16949,7 @@ def luaV_finishget(var L : lua_State?; var t : TValue?; var key : TValue?; var v
             }
             if (_t0 != 0) {
                 {
+                    // done
                     var io1 : TValue? = addr(val.val)
                     var io2 : TValue? = slot
                     io1.value_ = io2.value_
@@ -13943,27 +16960,43 @@ def luaV_finishget(var L : lua_State?; var t : TValue?; var key : TValue?; var v
             loop++
         }
     }
+    // else repeat (tail call 'luaV_finishget')
     luaG_runerror`va(L, reinterpret<uint8?>("'__index' chain too long; possible loop"), VaNone())
 }
 
+// Finish a table assignment 't[key] = val'.
+// If 'slot' is NULL, 't' is not a table. Otherwise, 'slot' points
+// to the entry 't[key]', or to a value with an absent key if there
+// is no such entry. (The value at 'slot' must be empty, otherwise
+// 'luaV_fastget' would have done the job.)
 [c_function]
 def luaV_finishset(var L : lua_State?; var t : TValue?; var key : TValue?; var val : TValue?; var slot : TValue?) {
+    // counter to avoid infinite loops
     var loop : int
     {
         loop = 0
-        while (loop < 2000) {
+        while (loop < MAXTAGLOOP) {
+            // '__newindex' metamethod
             var tm : TValue?
+            // is 't' a table?
             if (slot != null) {
+                // save 't' table
                 var h : Table? = addr(reinterpret<GCUnion?>(t.value_.gc).h)
+                // slot must be empty
+                // get metamethod
                 tm = h.metatable == null ? default<TValue?> : ((uint(h.metatable.flags) & 1u << uint(int(TMS.TM_NEWINDEX))) != 0 ? default<TValue?> : luaT_gettm(h.metatable, TMS.TM_NEWINDEX, L.l_G.tmname[int(TMS.TM_NEWINDEX)]))
+                // no metamethod?
                 if (tm == null) {
                     {
+                        // anchor 't'
                         var io : TValue? = addr(L.top.p.val)
                         var x_ : Table? = h
                         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
                         io.tt_ = uint8(5 | 0 << 4 | 1 << 6)
                     }
+                    // assume EXTRA_STACK
                     L.top.p = L.top.p + 1
+                    // set new value
                     luaH_finishset(L, h, key, slot, val)
                     L.top.p = L.top.p - 1
                     h.flags = uint8(uint(h.flags) & ~~(~0u << uint(int(TMS.TM_EQ) + 1)))
@@ -13975,15 +17008,19 @@ def luaV_finishset(var L : lua_State?; var t : TValue?; var key : TValue?; var v
                     return
                 }
             } else {
+                // else will try the metamethod
+                // not a table; check metamethod
                 tm = luaT_gettmbyobj(L, t, TMS.TM_NEWINDEX)
-                if (int64(((int(tm.tt_) & 15) == 0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                if ((int(tm.tt_) & 15) == 0) {
                     luaG_typeerror(L, t, reinterpret<uint8?>("index"))
                 }
             }
+            // try the metamethod
             if ((int(tm.tt_) & 15) == 6) {
                 luaT_callTM(L, tm, t, key, val)
                 return
             }
+            // else repeat assignment over 'tm'
             t = tm
             var _t0 : int
             if (!(int(t.tt_) == (5 | 0 << 4 | 1 << 6))) {
@@ -14007,33 +17044,53 @@ def luaV_finishset(var L : lua_State?; var t : TValue?; var key : TValue?; var v
                         }
                     }
                 }
+                // done
                 return
             }
             loop++
         }
     }
+    // else 'return luaV_finishset(L, t, key, val, slot)' (loop)
     luaG_runerror`va(L, reinterpret<uint8?>("'__newindex' chain too long; possible loop"), VaNone())
 }
 
+// Compare two strings 'ts1' x 'ts2', returning an integer less-equal-
+// -greater than zero if 'ts1' is less-equal-greater than 'ts2'.
+// The code is a little tricky because it allows '\0' in the strings
+// and it uses 'strcoll' (to respect locales) for each segment
+// of the strings. Note that segments can compare equal but still
+// have different lengths.
 [c_function]
 def private l_strcmp(var ts1 : TString?; var ts2 : TString?) : int {
     var s1 : uint8? = addr(ts1.contents[0])
+    // real length
     var rl1 : uint64 = int(ts1.shrlen) != 255 ? uint64(ts1.shrlen) : ts1.u.lnglen
     var s2 : uint8? = addr(ts2.contents[0])
     var rl2 : uint64 = int(ts2.shrlen) != 255 ? uint64(ts2.shrlen) : ts2.u.lnglen
+    // for each segment
     {
         while (true) {
             var temp : int = crt::strcoll(s1, s2)
+            // not equal?
             if (temp != 0) {
+                // done
                 return temp
             } else {
+                // strings are equal up to a '\0'
+                // index of first '\0' in 's1'
                 var zl1 : uint64 = crt::strlen(s1)
+                // index of first '\0' in 's2'
                 var zl2 : uint64 = crt::strlen(s2)
+                // 's2' is finished?
                 if (zl2 == rl2) {
+                    // check 's1'
                     return zl1 == rl1 ? 0 : 1
                 } elif (zl1 == rl1) {
+                    // 's1' is finished?
+                    // 's1' is less than 's2' ('s2' is not finished)
                     return -1
                 }
+                // both strings longer than 'zl'; go on comparing after the '\0'
                 zl1++
                 zl2++
                 s1 = s1 + zl1
@@ -14046,100 +17103,155 @@ def private l_strcmp(var ts1 : TString?; var ts2 : TString?) : int {
     return 0
 }
 
+// Check whether integer 'i' is less than float 'f'. If 'i' has an
+// exact representation as a float ('l_intfitsf'), compare numbers as
+// floats. Otherwise, use the equivalence 'i < f <=> i < ceil(f)'.
+// If 'ceil(f)' is out of integer range, either 'f' is greater than
+// all integers or less than all integers.
+// (The test with 'l_intfitsf' is only for performance; the else
+// case is correct for all values, but it is slow due to the conversion
+// from float to int.)
+// When 'f' is NaN, comparisons must result in false.
 [c_function]
 def private LTintfloat(i : int64; f : double) : int {
     if ((uint64(1) << 53ul) + uint64(i) <= uint64(2) * (uint64(1) << 53ul)) {
+        // compare them as floats
         return double(i) < f ? 1 : 0
     } else {
+        // i < f <=> i < ceil(f)
         var fi : int64
+        // fi = ceil(f)
         if (luaV_flttointeger(f, addr(fi), F2Imod.F2Iceil) != 0) {
+            // compare them as integers
             return i < fi ? 1 : 0
         } else {
+            // 'f' is either greater or less than all integers
+            // greater?
             return f > double(0) ? 1 : 0
         }
     }
 }
 
+// Check whether integer 'i' is less than or equal to float 'f'.
+// See comments on previous function.
 [c_function]
 def private LEintfloat(i : int64; f : double) : int {
     if ((uint64(1) << 53ul) + uint64(i) <= uint64(2) * (uint64(1) << 53ul)) {
+        // compare them as floats
         return double(i) <= f ? 1 : 0
     } else {
+        // i <= f <=> i <= floor(f)
         var fi : int64
+        // fi = floor(f)
         if (luaV_flttointeger(f, addr(fi), F2Imod.F2Ifloor) != 0) {
+            // compare them as integers
             return i <= fi ? 1 : 0
         } else {
+            // 'f' is either greater or less than all integers
+            // greater?
             return f > double(0) ? 1 : 0
         }
     }
 }
 
+// Check whether float 'f' is less than integer 'i'.
+// See comments on previous function.
 [c_function]
 def private LTfloatint(f : double; i : int64) : int {
     if ((uint64(1) << 53ul) + uint64(i) <= uint64(2) * (uint64(1) << 53ul)) {
+        // compare them as floats
         return f < double(i) ? 1 : 0
     } else {
+        // f < i <=> floor(f) < i
         var fi : int64
+        // fi = floor(f)
         if (luaV_flttointeger(f, addr(fi), F2Imod.F2Ifloor) != 0) {
+            // compare them as integers
             return fi < i ? 1 : 0
         } else {
+            // 'f' is either greater or less than all integers
+            // less?
             return f < double(0) ? 1 : 0
         }
     }
 }
 
+// Check whether float 'f' is less than or equal to integer 'i'.
+// See comments on previous function.
 [c_function]
 def private LEfloatint(f : double; i : int64) : int {
     if ((uint64(1) << 53ul) + uint64(i) <= uint64(2) * (uint64(1) << 53ul)) {
+        // compare them as floats
         return f <= double(i) ? 1 : 0
     } else {
+        // f <= i <=> ceil(f) <= i
         var fi : int64
+        // fi = ceil(f)
         if (luaV_flttointeger(f, addr(fi), F2Imod.F2Iceil) != 0) {
+            // compare them as integers
             return fi <= i ? 1 : 0
         } else {
+            // 'f' is either greater or less than all integers
+            // less?
             return f < double(0) ? 1 : 0
         }
     }
 }
 
+// Return 'l < r', for numbers.
 def private LTnum(var l : TValue?; var r : TValue?) : int {
     if (int(l.tt_) == (3 | 0 << 4)) {
         var li : int64 = l.value_.i
         if (int(r.tt_) == (3 | 0 << 4)) {
+            // both are integers
             return li < r.value_.i ? 1 : 0
         } else {
+            // 'l' is int and 'r' is float
+            // l < r ?
             return LTintfloat(li, r.value_.n)
         }
     } else {
+        // 'l' must be float
         var lf : double = l.value_.n
         if (int(r.tt_) == (3 | 1 << 4)) {
+            // both are float
             return lf < r.value_.n ? 1 : 0
         } else {
+            // 'l' is float and 'r' is int
             return LTfloatint(lf, r.value_.i)
         }
     }
 }
 
+// Return 'l <= r', for numbers.
 def private LEnum(var l : TValue?; var r : TValue?) : int {
     if (int(l.tt_) == (3 | 0 << 4)) {
         var li : int64 = l.value_.i
         if (int(r.tt_) == (3 | 0 << 4)) {
+            // both are integers
             return li <= r.value_.i ? 1 : 0
         } else {
+            // 'l' is int and 'r' is float
+            // l <= r ?
             return LEintfloat(li, r.value_.n)
         }
     } else {
+        // 'l' must be float
         var lf : double = l.value_.n
         if (int(r.tt_) == (3 | 1 << 4)) {
+            // both are float
             return lf <= r.value_.n ? 1 : 0
         } else {
+            // 'l' is float and 'r' is int
             return LEfloatint(lf, r.value_.i)
         }
     }
 }
 
+// return 'l < r' for non-numbers.
 [c_function]
 def private lessthanothers(var L : lua_State?; var l : TValue?; var r : TValue?) : int {
+    // both are strings?
     if ((int(l.tt_) & 15) == 4 && (int(r.tt_) & 15) == 4) {
         return l_strcmp(addr(reinterpret<GCUnion?>(l.value_.gc).ts), addr(reinterpret<GCUnion?>(r.value_.gc).ts)) < 0 ? 1 : 0
     } else {
@@ -14147,7 +17259,9 @@ def private lessthanothers(var L : lua_State?; var l : TValue?; var r : TValue?)
     }
 }
 
+// Main operation less than; return 'l < r'.
 def luaV_lessthan(var L : lua_State?; var l : TValue?; var r : TValue?) : int {
+    // both operands are numbers?
     if ((int(l.tt_) & 15) == 3 && (int(r.tt_) & 15) == 3) {
         return LTnum(l, r)
     } else {
@@ -14155,8 +17269,10 @@ def luaV_lessthan(var L : lua_State?; var l : TValue?; var r : TValue?) : int {
     }
 }
 
+// return 'l <= r' for non-numbers.
 [c_function]
 def private lessequalothers(var L : lua_State?; var l : TValue?; var r : TValue?) : int {
+    // both are strings?
     if ((int(l.tt_) & 15) == 4 && (int(r.tt_) & 15) == 4) {
         return l_strcmp(addr(reinterpret<GCUnion?>(l.value_.gc).ts), addr(reinterpret<GCUnion?>(r.value_.gc).ts)) <= 0 ? 1 : 0
     } else {
@@ -14164,7 +17280,9 @@ def private lessequalothers(var L : lua_State?; var l : TValue?; var r : TValue?
     }
 }
 
+// Main operation less than or equal to; return 'l <= r'.
 def luaV_lessequal(var L : lua_State?; var l : TValue?; var r : TValue?) : int {
+    // both operands are numbers?
     if ((int(l.tt_) & 15) == 3 && (int(r.tt_) & 15) == 3) {
         return LEnum(l, r)
     } else {
@@ -14172,18 +17290,27 @@ def luaV_lessequal(var L : lua_State?; var l : TValue?; var r : TValue?) : int {
     }
 }
 
+// Main operation for equality of Lua values; return 't1 == t2'.
+// L == NULL means raw equality (no metamethods)
 [c_function]
 def luaV_equalobj(var L : lua_State?; var t1 : TValue?; var t2 : TValue?) : int {
     var tm : TValue?
+    // not the same variant?
     if ((int(t1.tt_) & 63) != (int(t2.tt_) & 63)) {
-        if ((int(t1.tt_) & 15) != (int(t2.tt_) & 15) || (int(t1.tt_) & 15) != 3) {
+        if ((int(t1.tt_) & 15) != (int(t2.tt_) & 15) || (int(t1.tt_) & 15) != LUA_TNUMBER) {
+            // only numbers can be equal with different variants
             return 0
         } else {
+            // two numbers with different variants
+            // One of them is an integer. If the other does not have an
+            // integer value, they cannot be equal; otherwise, compare their
+            // integer values.
             var i1 : int64
             var i2 : int64
             return luaV_tointegerns(t1, addr(i1), F2Imod.F2Ieq) != 0 && luaV_tointegerns(t2, addr(i2), F2Imod.F2Ieq) != 0 && i1 == i2 ? 1 : 0
         }
     }
+    // values have same type and same variant
     let _cond = int(t1.tt_) & 63
     if (_cond == 0 || _cond == 1 || _cond == 17) {
         return 1
@@ -14213,6 +17340,7 @@ def luaV_equalobj(var L : lua_State?; var t1 : TValue?; var t2 : TValue?) : int 
         }
     } elif (_cond == 5) {
         {
+            // will try TM
             if (intptr(addr(reinterpret<GCUnion?>(t1.value_.gc).h)) == intptr(addr(reinterpret<GCUnion?>(t2.value_.gc).h))) {
                 return 1
             } elif (L == null) {
@@ -14224,18 +17352,24 @@ def luaV_equalobj(var L : lua_State?; var t1 : TValue?; var t2 : TValue?) : int 
             }
         }
     } else {
+        // will try TM
         return intptr(t1.value_.gc) == intptr(t2.value_.gc) ? 1 : 0
     }
+    // no TM?
     if (tm == null) {
+        // objects are different
         return 0
     } else {
+        // call TM
         luaT_callTMres(L, tm, t1, t2, L.top.p)
         return !(int(addr(L.top.p.val).tt_) == (1 | 0 << 4) || (int(addr(L.top.p.val).tt_) & 15) == 0) ? 1 : 0
     }
 }
 
+// copy strings in stack from top - n up to top - 1 to buffer
 [c_function]
 def private copy2buff(var top : StackValue?; var n : int; var buff : uint8?) {
+    // size already copied
     var tl : uint64 = uint64(0)
     var _first = true
     while (true) {
@@ -14247,21 +17381,26 @@ def private copy2buff(var top : StackValue?; var n : int; var buff : uint8?) {
         }
         _first = false
         var st : TString? = addr(reinterpret<GCUnion?>(addr((top - n).val).value_.gc).ts)
+        // length of string being copied
         var l : uint64 = int(st.shrlen) != 255 ? uint64(st.shrlen) : st.u.lnglen
         crt::memcpy(reinterpret<void?>(buff + tl), reinterpret<void?>(addr(st.contents[0])), l * uint64(typeinfo sizeof(type<uint8>)))
         tl += l
     }
 }
 
+// Main operation for concatenation: concat 'total' values in the stack,
+// from 'L->top.p - total' up to 'L->top.p - 1'.
 [c_function]
 def luaV_concat(var L : lua_State?; var total : int) {
     if (total == 1) {
+        // "all" values already concatenated
         return
     }
     var _first = true
     while (_first || total > 1) {
         _first = false
         var top : StackValue? = L.top.p
+        // number of elements handled in this pass (at least 2)
         var n : int = 2
         var _t2 = !((int(addr((top - 2).val).tt_) & 15) == 4 || (int(addr((top - 2).val).tt_) & 15) == 3)
         if (!_t2) {
@@ -14277,8 +17416,11 @@ def luaV_concat(var L : lua_State?; var total : int) {
             _t2 = !_t1
         }
         if (_t2) {
+            // may invalidate 'top'
             luaT_tryconcatTM(L)
         } elif (int(addr((top - 1).val).tt_) == (4 | 0 << 4 | 1 << 6) && int(addr(reinterpret<GCUnion?>(addr((top - 1).val).value_.gc).ts).shrlen) == 0) {
+            // second operand is empty?
+            // result is first operand
             var _t4 = (int(addr((top - 2).val).tt_) & 15) == 4
             if (!_t4) {
                 var _t3 = (int(addr((top - 2).val).tt_) & 15) == 3
@@ -14291,14 +17433,18 @@ def luaV_concat(var L : lua_State?; var total : int) {
             let _t5 = _t4
         } elif (int(addr((top - 2).val).tt_) == (4 | 0 << 4 | 1 << 6) && int(addr(reinterpret<GCUnion?>(addr((top - 2).val).value_.gc).ts).shrlen) == 0) {
             {
+                // first operand is empty string?
+                // result is second op.
                 var io1 : TValue? = addr((top - 2).val)
                 var io2 : TValue? = addr((top - 1).val)
                 io1.value_ = io2.value_
                 io1.tt_ = io2.tt_
             }
         } else {
+            // at least two non-empty string values; get as many as possible
             var tl : uint64 = int(addr(reinterpret<GCUnion?>(addr((top - 1).val).value_.gc).ts).shrlen) != 255 ? uint64(addr(reinterpret<GCUnion?>(addr((top - 1).val).value_.gc).ts).shrlen) : addr(reinterpret<GCUnion?>(addr((top - 1).val).value_.gc).ts).u.lnglen
             var ts : TString?
+            // collect total length and number of strings
             {
                 n = 1
                 while (true) {
@@ -14319,7 +17465,8 @@ def luaV_concat(var L : lua_State?; var total : int) {
                         break
                     }
                     var l : uint64 = int(addr(reinterpret<GCUnion?>(addr((top - n + -(1)).val).value_.gc).ts).shrlen) != 255 ? uint64(addr(reinterpret<GCUnion?>(addr((top - n + -(1)).val).value_.gc).ts).shrlen) : addr(reinterpret<GCUnion?>(addr((top - n + -(1)).val).value_.gc).ts).u.lnglen
-                    if (int64((l >= (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? ~uint64(0) : uint64(9223372036854775807l)) - uint64(typeinfo sizeof(type<TString>)) - tl ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                    if (l >= (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? ~uint64(0) : uint64(9223372036854775807l)) - uint64(typeinfo sizeof(type<TString>)) - tl) {
+                        // pop strings to avoid wasting stack
                         L.top.p = top - total
                         luaG_runerror`va(L, reinterpret<uint8?>("string length overflow"), VaNone())
                     }
@@ -14327,41 +17474,48 @@ def luaV_concat(var L : lua_State?; var total : int) {
                     n++
                 }
             }
-            if (tl <= uint64(40)) {
+            // is result a short string?
+            if (tl <= uint64(LUAI_MAXSHORTLEN)) {
                 var buff : uint8[40]
+                // copy strings to buffer
                 copy2buff(top, n, addr(buff[0]))
                 ts = luaS_newlstr(L, addr(buff[0]), tl)
             } else {
+                // long string; copy strings directly to final result
                 ts = luaS_createlngstrobj(L, tl)
                 copy2buff(top, n, addr(ts.contents[0]))
             }
             {
+                // create result
                 var io : TValue? = addr((top - n).val)
                 var x_ : TString? = ts
                 io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
                 io.tt_ = uint8(int(x_.tt) | 1 << 6)
             }
         }
+        // got 'n' strings to create one new
         total -= n - 1
+        // popped 'n' strings and pushed one
         L.top.p = L.top.p - (n - 1)
     }
 }
 
+// Main operation 'ra = #rb'.
 [c_function]
 def luaV_objlen(var L : lua_State?; var ra : StackValue?; var rb : TValue?) {
     var tm : TValue?
     let _cond = int(rb.tt_) & 63
     while (true) {
-        var _flag = false
-        _flag ||= _cond == 5
-        if (_flag) {
+        if (_cond == 5) {
             {
                 var h : Table? = addr(reinterpret<GCUnion?>(rb.value_.gc).h)
                 tm = h.metatable == null ? default<TValue?> : ((uint(h.metatable.flags) & 1u << uint(int(TMS.TM_LEN))) != 0 ? default<TValue?> : luaT_gettm(h.metatable, TMS.TM_LEN, L.l_G.tmname[int(TMS.TM_LEN)]))
+                // metamethod? break switch to call it
                 if (tm != null) {
                     break
                 }
                 {
+                    // else primitive len
                     var io : TValue? = addr(ra.val)
                     io.value_.i = int64(luaH_getn(h))
                     io.tt_ = uint8(3 | 0 << 4)
@@ -14369,8 +17523,7 @@ def luaV_objlen(var L : lua_State?; var ra : StackValue?; var rb : TValue?) {
                 return
             }
         }
-        _flag ||= _cond == 4
-        if (_flag) {
+        if (_cond == 4) {
             {
                 {
                     var io : TValue? = addr(ra.val)
@@ -14380,8 +17533,7 @@ def luaV_objlen(var L : lua_State?; var ra : StackValue?; var rb : TValue?) {
                 return
             }
         }
-        _flag ||= _cond == 20
-        if (_flag) {
+        if (_cond == 20) {
             {
                 {
                     var io : TValue? = addr(ra.val)
@@ -14391,11 +17543,12 @@ def luaV_objlen(var L : lua_State?; var ra : StackValue?; var rb : TValue?) {
                 return
             }
         }
-        _flag ||= !(_cond == 5 || _cond == 4 || _cond == 20)
-        if (_flag) {
+        if (!(_cond == 5 || _cond == 4 || _cond == 20)) {
             {
+                // try metamethod
                 tm = luaT_gettmbyobj(L, rb, TMS.TM_LEN)
-                if (int64(((int(tm.tt_) & 15) == 0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                // no metamethod?
+                if ((int(tm.tt_) & 15) == 0) {
                     luaG_typeerror(L, rb, reinterpret<uint8?>("get length of"))
                 }
                 break
@@ -14406,38 +17559,55 @@ def luaV_objlen(var L : lua_State?; var ra : StackValue?; var rb : TValue?) {
     luaT_callTMres(L, tm, rb, rb, ra)
 }
 
+// Integer division; return 'm // n', that is, floor(m/n).
+// C division truncates its result (rounds towards zero).
+// 'floor(q) == trunc(q)' when 'q >= 0' or when 'q' is integer,
+// otherwise 'floor(q) == trunc(q) - 1'.
 [c_function]
 def luaV_idiv(var L : lua_State?; m : int64; n : int64) : int64 {
-    if (int64((uint64(n) + uint64(1u) <= uint64(1u) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // special cases: -1 or 0
+    if (uint64(n) + uint64(1u) <= uint64(1u)) {
         if (n == int64(0)) {
             luaG_runerror`va(L, reinterpret<uint8?>("attempt to divide by zero"), VaNone())
         }
-        return int64(uint64(0) - uint64(m))
+        // n==-1; avoid overflow with 0x80000...//-1
+        return int64(0) - m
     } else {
+        // perform C division
         var q : int64 = m / n
+        // 'm/n' would be negative non-integer?
         if ((m ^ n) < int64(0) && m % n != int64(0)) {
+            // correct result for different rounding
             q -= int64(1)
         }
         return q
     }
 }
 
+// Integer modulus; return 'm % n'. (Assume that C '%' with
+// negative operands follows C99 behavior. See previous comment
+// about luaV_idiv.)
 [c_function]
 def luaV_mod(var L : lua_State?; m : int64; n : int64) : int64 {
-    if (int64((uint64(n) + uint64(1u) <= uint64(1u) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // special cases: -1 or 0
+    if (uint64(n) + uint64(1u) <= uint64(1u)) {
         if (n == int64(0)) {
             luaG_runerror`va(L, reinterpret<uint8?>("attempt to perform 'n%%0'"), VaNone())
         }
+        // m % -1 == 0; avoid overflow with 0x80000...%-1
         return int64(0)
     } else {
         var r : int64 = m % n
+        // 'm/n' would be non-integer negative?
         if (r != int64(0) && (r ^ n) < int64(0)) {
+            // correct result for different rounding
             r += n
         }
         return r
     }
 }
 
+// Float modulus
 [c_function]
 def luaV_modf(var L : lua_State?; m : double; n : double) : double {
     var r : double
@@ -14450,15 +17620,18 @@ def luaV_modf(var L : lua_State?; m : double; n : double) : double {
     return r
 }
 
+// Shift left operation. (Shift right just negates 'y'.)
 def luaV_shiftl(x : int64; y : int64) : int64 {
+    // shift right?
     if (y < int64(0)) {
-        if (y <= int64(-int(uint64(typeinfo sizeof(type<int64>)) * uint64(8)))) {
+        if (y <= int64(-NBITS)) {
             return int64(0)
         } else {
             return int64(uint64(x) >> uint64(-y))
         }
     } else {
-        if (y >= int64(int(uint64(typeinfo sizeof(type<int64>)) * uint64(8)))) {
+        // shift left
+        if (y >= int64(NBITS)) {
             return int64(0)
         } else {
             return int64(uint64(x) << uint64(y))
@@ -14466,6 +17639,8 @@ def luaV_shiftl(x : int64; y : int64) : int64 {
     }
 }
 
+// create a new Lua closure, push it in the stack, and initialize
+// its upvalues.
 [c_function]
 def private pushclosure(var L : lua_State?; var p : Proto?; var encup : UpVal ??; var base : StackValue?; var ra : StackValue?) {
     var nup : int = p.sizeupvalues
@@ -14474,17 +17649,21 @@ def private pushclosure(var L : lua_State?; var p : Proto?; var encup : UpVal ??
     var ncl : LClosure? = luaF_newLclosure(L, nup)
     ncl.p = p
     {
+        // anchor new closure in stack
         var io : TValue? = addr(ra.val)
         var x_ : LClosure? = ncl
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
         io.tt_ = uint8(6 | 0 << 4 | 1 << 6)
     }
+    // fill in its upvalues
     {
         i = 0
         while (i < nup) {
+            // upvalue refers to local variable?
             if (deref(uv + i).instack != 0) {
                 deref(addr(ncl.upvals[0]) + i) = luaF_findupval(L, base + int(deref(uv + i).idx))
             } else {
+                // get upvalue from enclosing function
                 deref(addr(ncl.upvals[0]) + i) = deref(encup + int(deref(uv + i).idx))
             }
             if ((int(ncl.marked) & 1 << 5) != 0 && (int(deref(addr(ncl.upvals[0]) + i).marked) & (1 << 3 | 1 << 4)) != 0) {
@@ -14495,12 +17674,15 @@ def private pushclosure(var L : lua_State?; var p : Proto?; var encup : UpVal ??
     }
 }
 
+// finish execution of an opcode interrupted by a yield
 [c_function]
 def luaV_finishOp(var L : lua_State?) {
     var ci : CallInfo? = L.ci
     var base : StackValue? = ci.func.p + 1
+    // interrupted instruction
     var inst : uint = deref(ci.u.l.savedpc - 1)
     var op : OpCode = enum_from_int(type<OpCode>, int(inst >> 0u & ~(~uint(0) << 7u) << 0u))
+    // finish its execution
     let _cond = op
     if (_cond == OpCode.OP_MMBIN || _cond == OpCode.OP_MMBINI || _cond == OpCode.OP_MMBINK) {
         {
@@ -14524,38 +17706,57 @@ def luaV_finishOp(var L : lua_State?) {
         }
     } elif (_cond == OpCode.OP_LT || _cond == OpCode.OP_LE || _cond == OpCode.OP_LTI || _cond == OpCode.OP_LEI || _cond == OpCode.OP_GTI || _cond == OpCode.OP_GEI || _cond == OpCode.OP_EQ) {
         {
+            // note that 'OP_EQI'/'OP_EQK' cannot yield
             var res : int = !(int(addr((L.top.p - 1).val).tt_) == (1 | 0 << 4) || (int(addr((L.top.p - 1).val).tt_) & 15) == 0) ? 1 : 0
             L.top.p = L.top.p - 1
+            // "<=" using "<" instead?
+            // clear mark
+            // negate result
+            // condition failed?
             if (res != int(inst >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u)) {
+                // skip jump instruction
                 ci.u.l.savedpc = ci.u.l.savedpc + 1
             }
         }
     } elif (_cond == OpCode.OP_CONCAT) {
         {
+            // top when 'luaT_tryconcatTM' was called
             var top : StackValue? = L.top.p - 1
+            // first element to concatenate
             var a : int = int(inst >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+            // yet to concatenate
             var total : int = int(int64(top - 1 - (base + a)))
             {
+                // put TM result in proper position
                 var io1 : TValue? = addr((top - 2).val)
                 var io2 : TValue? = addr(top.val)
                 io1.value_ = io2.value_
                 io1.tt_ = io2.tt_
             }
+            // top is one after last element (at top-2)
             L.top.p = top - 1
+            // concat them (may yield again)
             luaV_concat(L, total)
         }
     } elif (_cond == OpCode.OP_CLOSE) {
         {
+            // yielded closing variables
+            // repeat instruction to close other vars.
             ci.u.l.savedpc = ci.u.l.savedpc - 1
         }
     } elif (_cond == OpCode.OP_RETURN) {
         {
+            // yielded closing variables
             var ra : StackValue? = base + int(inst >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+            // adjust top to signal correct number of returns, in case the
+            // return is "up to top" ('isIT')
             L.top.p = ra + ci.u2.nres
+            // repeat instruction to close other vars. and complete the return
             ci.u.l.savedpc = ci.u.l.savedpc - 1
         }
     } else {
         {
+            // only these other opcodes can yield
         }
     }
 }
@@ -14572,18 +17773,21 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
     trap = c_volatile_load(L.hookmask)
     label 3:  // returning
     c_label_end()
+    // trap already set
     cl = addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l)
     k = cl.p.k
     pc = ci.u.l.savedpc
-    if (int64(trap != 0 ? 1 : 0) != 0) {
+    if (trap != 0) {
         trap = luaG_tracecall(L)
     }
     base = ci.func.p + 1
+    // main loop of interpreter
     {
         while (true) {
+            // instruction being executed
             var i : uint
             {
-                if (int64(trap != 0 ? 1 : 0) != 0) {
+                if (trap != 0) {
                     trap = luaG_traceexec(L, pc)
                     base = ci.func.p + 1
                 }
@@ -14591,13 +17795,14 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                 pc = pc + 1
                 i = deref(_t0)
             }
+            // low-level line tracing for debugging Lua
+            // invalidate top for instructions not expecting it
             let _cond = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
             var _goto = 0
             while (true) {
                 label 1:  // re-dispatch
                 var _flag = false
-                _flag ||= _goto == 0 && _cond == OpCode.OP_MOVE
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_MOVE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         {
@@ -14609,8 +17814,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LOADI
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LOADI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var b : int64 = int64(int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u) - ((1 << 8 + 8 + 1) - 1 >> 1))
@@ -14622,8 +17826,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LOADF
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LOADF) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var b : int = int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u) - ((1 << 8 + 8 + 1) - 1 >> 1)
@@ -14635,8 +17838,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LOADK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LOADK) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = k + int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u)
@@ -14649,8 +17851,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LOADKX
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LOADKX) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue?
@@ -14665,33 +17866,30 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LOADFALSE
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LOADFALSE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         addr(ra.val).tt_ = uint8(1 | 0 << 4)
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LFALSESKIP
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LFALSESKIP) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         addr(ra.val).tt_ = uint8(1 | 0 << 4)
+                        // skip next instruction
                         pc = pc + 1
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LOADTRUE
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LOADTRUE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         addr(ra.val).tt_ = uint8(1 | 1 << 4)
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LOADNIL
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LOADNIL) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
@@ -14712,8 +17910,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_GETUPVAL
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_GETUPVAL) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
@@ -14726,8 +17923,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SETUPVAL
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SETUPVAL) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var uv : UpVal? = deref(addr(cl.upvals[0]) + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u))
@@ -14745,13 +17941,13 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_GETTABUP
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_GETTABUP) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
                         var upval : TValue? = deref(addr(cl.upvals[0]) + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).v.p
                         var rc : TValue? = k + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
+                        // key must be a short string
                         var key : TString? = addr(reinterpret<GCUnion?>(rc.value_.gc).ts)
                         var _t3 : int
                         if (!(int(upval.tt_) == (5 | 0 << 4 | 1 << 6))) {
@@ -14777,14 +17973,14 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_GETTABLE
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_GETTABLE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
                         var rc : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)).val)
                         var n : uint64
+                        // fast track for integers?
                         var _t6 : int
                         if (int(rc.tt_) == (3 | 0 << 4)) {
                             n = uint64(rc.value_.i)
@@ -14824,8 +18020,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_GETI
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_GETI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
@@ -14861,13 +18056,13 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_GETFIELD
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_GETFIELD) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
                         var rc : TValue? = k + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
+                        // key must be a short string
                         var key : TString? = addr(reinterpret<GCUnion?>(rc.value_.gc).ts)
                         var _t8 : int
                         if (!(int(rb.tt_) == (5 | 0 << 4 | 1 << 6))) {
@@ -14893,13 +18088,13 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SETTABUP
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SETTABUP) {
                     {
                         var slot : TValue?
                         var upval : TValue? = deref(addr(cl.upvals[0]) + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)).v.p
                         var rb : TValue? = k + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
-                        var rc : TValue? = int(i & 1u << uint(0 + 7 + 8)) != 0 ? k + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) : addr((base + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)).val)
+                        var rc : TValue? = (i & 1u << uint(0 + 7 + 8)) != 0 ? k + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) : addr((base + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)).val)
+                        // key must be a short string
                         var key : TString? = addr(reinterpret<GCUnion?>(rb.value_.gc).ts)
                         var _t9 : int
                         if (!(int(upval.tt_) == (5 | 0 << 4 | 1 << 6))) {
@@ -14932,14 +18127,16 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SETTABLE
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SETTABLE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
+                        // key (table is in 'ra')
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
-                        var rc : TValue? = int(i & 1u << uint(0 + 7 + 8)) != 0 ? k + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) : addr((base + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)).val)
+                        // value
+                        var rc : TValue? = (i & 1u << uint(0 + 7 + 8)) != 0 ? k + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) : addr((base + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)).val)
                         var n : uint64
+                        // fast track for integers?
                         var _t12 : int
                         if (int(rb.tt_) == (3 | 0 << 4)) {
                             n = uint64(rb.value_.i)
@@ -14986,13 +18183,12 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SETI
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SETI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
                         var c : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
-                        var rc : TValue? = int(i & 1u << uint(0 + 7 + 8)) != 0 ? k + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) : addr((base + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)).val)
+                        var rc : TValue? = (i & 1u << uint(0 + 7 + 8)) != 0 ? k + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) : addr((base + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)).val)
                         var _t13 : int
                         if (!(int(addr(ra.val).tt_) == (5 | 0 << 4 | 1 << 6))) {
                             slot = null
@@ -15030,13 +18226,13 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SETFIELD
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SETFIELD) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
                         var rb : TValue? = k + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
-                        var rc : TValue? = int(i & 1u << uint(0 + 7 + 8)) != 0 ? k + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) : addr((base + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)).val)
+                        var rc : TValue? = (i & 1u << uint(0 + 7 + 8)) != 0 ? k + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) : addr((base + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)).val)
+                        // key must be a short string
                         var key : TString? = addr(reinterpret<GCUnion?>(rb.value_.gc).ts)
                         var _t14 : int
                         if (!(int(addr(ra.val).tt_) == (5 | 0 << 4 | 1 << 6))) {
@@ -15069,21 +18265,28 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_NEWTABLE
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_NEWTABLE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // log2(hash size) + 1
                         var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
+                        // array size
                         var c : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
                         var t : Table?
                         if (b > 0) {
+                            // size is 2^(b - 1)
                             b = 1 << b - 1
                         }
-                        if (int(i & 1u << uint(0 + 7 + 8)) != 0) {
-                            c += int(deref(pc) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) * ((1 << 8) - 1 + 1)
+                        // non-zero extra argument?
+                        if ((i & 1u << uint(0 + 7 + 8)) != 0) {
+                            // add it to size
+                            c += int(deref(pc) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) * (MAXARG_C + 1)
                         }
+                        // skip extra argument
                         pc = pc + 1
+                        // correct top in case of emergency GC
                         L.top.p = ra + 1
+                        // memory allocation
                         t = luaH_new(L)
                         {
                             var io : TValue? = addr(ra.val)
@@ -15092,6 +18295,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             io.tt_ = uint8(5 | 0 << 4 | 1 << 6)
                         }
                         if (b != 0 || c != 0) {
+                            // idem
                             luaH_resize(L, t, uint(c), uint(b))
                         }
                         {
@@ -15109,13 +18313,13 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SELF
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SELF) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
-                        var rc : TValue? = int(i & 1u << uint(0 + 7 + 8)) != 0 ? k + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) : addr((base + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)).val)
+                        var rc : TValue? = (i & 1u << uint(0 + 7 + 8)) != 0 ? k + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) : addr((base + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)).val)
+                        // key must be a string
                         var key : TString? = addr(reinterpret<GCUnion?>(rc.value_.gc).ts)
                         {
                             var io1 : TValue? = addr((ra + 1).val)
@@ -15147,8 +18351,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_ADDI
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_ADDI) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -15159,7 +18362,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                                 pc = pc + 1
                                 {
                                     var io : TValue? = addr(ra.val)
-                                    io.value_.i = int64(uint64(iv1) + uint64(imm))
+                                    io.value_.i = iv1 + int64(imm)
                                     io.tt_ = uint8(3 | 0 << 4)
                                 }
                             } elif (int(v1.tt_) == (3 | 1 << 4)) {
@@ -15176,8 +18379,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_ADDK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_ADDK) {
                     {
                         {
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -15242,8 +18444,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SUBK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SUBK) {
                     {
                         {
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -15308,8 +18509,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_MULK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_MULK) {
                     {
                         {
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -15322,7 +18522,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                                     pc = pc + 1
                                     {
                                         var io : TValue? = addr(ra.val)
-                                        io.value_.i = int64(uint64(i1) * uint64(i2))
+                                        io.value_.i = i1 * i2
                                         io.tt_ = uint8(3 | 0 << 4)
                                     }
                                 } else {
@@ -15374,9 +18574,9 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_MODK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_MODK) {
                     {
+                        // in case of division by 0
                         ci.u.l.savedpc = pc
                         L.top.p = ci.top.p
                         {
@@ -15442,8 +18642,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_POWK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_POWK) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -15497,8 +18696,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_DIVK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_DIVK) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -15552,9 +18750,9 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_IDIVK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_IDIVK) {
                     {
+                        // in case of division by 0
                         ci.u.l.savedpc = pc
                         L.top.p = ci.top.p
                         {
@@ -15620,8 +18818,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_BANDK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_BANDK) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -15630,7 +18827,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var i1 : int64
                             var i2 : int64 = v2.value_.i
                             var _t51 : int
-                            if (int64((int(v1.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                            if (int(v1.tt_) == (3 | 0 << 4)) {
                                 deref(addr(i1)) = v1.value_.i
                                 _t51 = 1
                             } else {
@@ -15640,7 +18837,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                                 pc = pc + 1
                                 {
                                     var io : TValue? = addr(ra.val)
-                                    io.value_.i = int64(uint64(i1) & uint64(i2))
+                                    io.value_.i = i1 & i2
                                     io.tt_ = uint8(3 | 0 << 4)
                                 }
                             }
@@ -15648,8 +18845,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_BORK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_BORK) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -15658,7 +18854,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var i1 : int64
                             var i2 : int64 = v2.value_.i
                             var _t52 : int
-                            if (int64((int(v1.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                            if (int(v1.tt_) == (3 | 0 << 4)) {
                                 deref(addr(i1)) = v1.value_.i
                                 _t52 = 1
                             } else {
@@ -15668,7 +18864,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                                 pc = pc + 1
                                 {
                                     var io : TValue? = addr(ra.val)
-                                    io.value_.i = int64(uint64(i1) | uint64(i2))
+                                    io.value_.i = i1 | i2
                                     io.tt_ = uint8(3 | 0 << 4)
                                 }
                             }
@@ -15676,8 +18872,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_BXORK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_BXORK) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -15686,7 +18881,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var i1 : int64
                             var i2 : int64 = v2.value_.i
                             var _t53 : int
-                            if (int64((int(v1.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                            if (int(v1.tt_) == (3 | 0 << 4)) {
                                 deref(addr(i1)) = v1.value_.i
                                 _t53 = 1
                             } else {
@@ -15696,7 +18891,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                                 pc = pc + 1
                                 {
                                     var io : TValue? = addr(ra.val)
-                                    io.value_.i = int64(uint64(i1) ^ uint64(i2))
+                                    io.value_.i = i1 ^ i2
                                     io.tt_ = uint8(3 | 0 << 4)
                                 }
                             }
@@ -15704,15 +18899,14 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SHRI
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SHRI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
                         var ic : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) - ((1 << 8) - 1 >> 1)
                         var ib : int64
                         var _t54 : int
-                        if (int64((int(rb.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                        if (int(rb.tt_) == (3 | 0 << 4)) {
                             deref(addr(ib)) = rb.value_.i
                             _t54 = 1
                         } else {
@@ -15729,15 +18923,14 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SHLI
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SHLI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
                         var ic : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) - ((1 << 8) - 1 >> 1)
                         var ib : int64
                         var _t55 : int
-                        if (int64((int(rb.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                        if (int(rb.tt_) == (3 | 0 << 4)) {
                             deref(addr(ib)) = rb.value_.i
                             _t55 = 1
                         } else {
@@ -15754,8 +18947,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_ADD
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_ADD) {
                     {
                         {
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -15820,8 +19012,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SUB
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SUB) {
                     {
                         {
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -15886,8 +19077,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_MUL
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_MUL) {
                     {
                         {
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -15900,7 +19090,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                                     pc = pc + 1
                                     {
                                         var io : TValue? = addr(ra.val)
-                                        io.value_.i = int64(uint64(i1) * uint64(i2))
+                                        io.value_.i = i1 * i2
                                         io.tt_ = uint8(3 | 0 << 4)
                                     }
                                 } else {
@@ -15952,9 +19142,9 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_MOD
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_MOD) {
                     {
+                        // in case of division by 0
                         ci.u.l.savedpc = pc
                         L.top.p = ci.top.p
                         {
@@ -16020,8 +19210,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_POW
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_POW) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -16075,10 +19264,10 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_DIV
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_DIV) {
                     {
                         {
+                            // float division (always with floats)
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
                             var v2 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)).val)
@@ -16130,9 +19319,10 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_IDIV
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_IDIV) {
                     {
+                        // floor division
+                        // in case of division by 0
                         ci.u.l.savedpc = pc
                         L.top.p = ci.top.p
                         {
@@ -16198,8 +19388,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_BAND
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_BAND) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -16208,7 +19397,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var i1 : int64
                             var i2 : int64
                             var _t91 : int
-                            if (int64((int(v1.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                            if (int(v1.tt_) == (3 | 0 << 4)) {
                                 deref(addr(i1)) = v1.value_.i
                                 _t91 = 1
                             } else {
@@ -16217,7 +19406,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var _t93 = _t91 != 0
                             if (_t93) {
                                 var _t92 : int
-                                if (int64((int(v2.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                                if (int(v2.tt_) == (3 | 0 << 4)) {
                                     deref(addr(i2)) = v2.value_.i
                                     _t92 = 1
                                 } else {
@@ -16229,7 +19418,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                                 pc = pc + 1
                                 {
                                     var io : TValue? = addr(ra.val)
-                                    io.value_.i = int64(uint64(i1) & uint64(i2))
+                                    io.value_.i = i1 & i2
                                     io.tt_ = uint8(3 | 0 << 4)
                                 }
                             }
@@ -16237,8 +19426,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_BOR
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_BOR) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -16247,7 +19435,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var i1 : int64
                             var i2 : int64
                             var _t94 : int
-                            if (int64((int(v1.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                            if (int(v1.tt_) == (3 | 0 << 4)) {
                                 deref(addr(i1)) = v1.value_.i
                                 _t94 = 1
                             } else {
@@ -16256,7 +19444,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var _t96 = _t94 != 0
                             if (_t96) {
                                 var _t95 : int
-                                if (int64((int(v2.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                                if (int(v2.tt_) == (3 | 0 << 4)) {
                                     deref(addr(i2)) = v2.value_.i
                                     _t95 = 1
                                 } else {
@@ -16268,7 +19456,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                                 pc = pc + 1
                                 {
                                     var io : TValue? = addr(ra.val)
-                                    io.value_.i = int64(uint64(i1) | uint64(i2))
+                                    io.value_.i = i1 | i2
                                     io.tt_ = uint8(3 | 0 << 4)
                                 }
                             }
@@ -16276,8 +19464,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_BXOR
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_BXOR) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -16286,7 +19473,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var i1 : int64
                             var i2 : int64
                             var _t97 : int
-                            if (int64((int(v1.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                            if (int(v1.tt_) == (3 | 0 << 4)) {
                                 deref(addr(i1)) = v1.value_.i
                                 _t97 = 1
                             } else {
@@ -16295,7 +19482,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var _t99 = _t97 != 0
                             if (_t99) {
                                 var _t98 : int
-                                if (int64((int(v2.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                                if (int(v2.tt_) == (3 | 0 << 4)) {
                                     deref(addr(i2)) = v2.value_.i
                                     _t98 = 1
                                 } else {
@@ -16307,7 +19494,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                                 pc = pc + 1
                                 {
                                     var io : TValue? = addr(ra.val)
-                                    io.value_.i = int64(uint64(i1) ^ uint64(i2))
+                                    io.value_.i = i1 ^ i2
                                     io.tt_ = uint8(3 | 0 << 4)
                                 }
                             }
@@ -16315,8 +19502,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SHR
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SHR) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -16325,7 +19511,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var i1 : int64
                             var i2 : int64
                             var _t100 : int
-                            if (int64((int(v1.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                            if (int(v1.tt_) == (3 | 0 << 4)) {
                                 deref(addr(i1)) = v1.value_.i
                                 _t100 = 1
                             } else {
@@ -16334,7 +19520,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var _t102 = _t100 != 0
                             if (_t102) {
                                 var _t101 : int
-                                if (int64((int(v2.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                                if (int(v2.tt_) == (3 | 0 << 4)) {
                                     deref(addr(i2)) = v2.value_.i
                                     _t101 = 1
                                 } else {
@@ -16346,7 +19532,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                                 pc = pc + 1
                                 {
                                     var io : TValue? = addr(ra.val)
-                                    io.value_.i = luaV_shiftl(i1, int64(uint64(0) - uint64(i2)))
+                                    io.value_.i = luaV_shiftl(i1, int64(0) - i2)
                                     io.tt_ = uint8(3 | 0 << 4)
                                 }
                             }
@@ -16354,8 +19540,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SHL
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SHL) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -16364,7 +19549,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var i1 : int64
                             var i2 : int64
                             var _t103 : int
-                            if (int64((int(v1.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                            if (int(v1.tt_) == (3 | 0 << 4)) {
                                 deref(addr(i1)) = v1.value_.i
                                 _t103 = 1
                             } else {
@@ -16373,7 +19558,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var _t105 = _t103 != 0
                             if (_t105) {
                                 var _t104 : int
-                                if (int64((int(v2.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                                if (int(v2.tt_) == (3 | 0 << 4)) {
                                     deref(addr(i2)) = v2.value_.i
                                     _t104 = 1
                                 } else {
@@ -16393,10 +19578,10 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_MMBIN
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_MMBIN) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // original arith. expression
                         var pi : uint = deref(pc - 2)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
                         var tm : TMS = enum_from_int(type<TMS>, int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u))
@@ -16408,10 +19593,10 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_MMBINI
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_MMBINI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // original arith. expression
                         var pi : uint = deref(pc - 2)
                         var imm : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u) - ((1 << 8) - 1 >> 1)
                         var tm : TMS = enum_from_int(type<TMS>, int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u))
@@ -16424,10 +19609,10 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_MMBINK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_MMBINK) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // original arith. expression
                         var pi : uint = deref(pc - 2)
                         var imm : TValue? = k + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
                         var tm : TMS = enum_from_int(type<TMS>, int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u))
@@ -16440,8 +19625,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_UNM
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_UNM) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -16450,7 +19634,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             var ib : int64 = rb.value_.i
                             {
                                 var io : TValue? = addr(ra.val)
-                                io.value_.i = int64(uint64(0) - uint64(ib))
+                                io.value_.i = int64(0) - ib
                                 io.tt_ = uint8(3 | 0 << 4)
                             }
                         } else {
@@ -16484,14 +19668,13 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_BNOT
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_BNOT) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
                         var ib : int64
                         var _t110 : int
-                        if (int64((int(rb.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                        if (int(rb.tt_) == (3 | 0 << 4)) {
                             deref(addr(ib)) = rb.value_.i
                             _t110 = 1
                         } else {
@@ -16512,8 +19695,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_NOT
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_NOT) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -16525,8 +19707,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LEN
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LEN) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         ci.u.l.savedpc = pc
@@ -16536,17 +19717,19 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_CONCAT
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_CONCAT) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // number of elements to concatenate
                         var n : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
+                        // mark the end of concat operands
                         L.top.p = ra + n
                         ci.u.l.savedpc = pc
                         luaV_concat(L, n)
                         trap = c_volatile_load(ci.u.l.trap)
                         {
                             {
+                                // 'luaV_concat' ensures correct top
                                 if (L.l_G.GCdebt > int64(0)) {
                                     ci.u.l.savedpc = pc
                                     L.top.p = L.top.p
@@ -16560,8 +19743,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_CLOSE
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_CLOSE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         ci.u.l.savedpc = pc
@@ -16571,18 +19753,17 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_TBC
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_TBC) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // create new to-be-closed upvalue
                         ci.u.l.savedpc = pc
                         L.top.p = ci.top.p
                         luaF_newtbcupval(L, ra)
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_JMP
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_JMP) {
                     {
                         {
                             pc = pc + (int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1) + 0)
@@ -16591,8 +19772,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_EQ
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_EQ) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var cond : int
@@ -16613,8 +19793,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LT
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LT) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -16645,8 +19824,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LE
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LE) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -16677,11 +19855,11 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_EQK
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_EQK) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = k + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
+                        // basic types do not use '__eq'; we can use raw equality
                         var cond : int = luaV_equalobj(null, addr(ra.val), rb)
                         if (cond != int(i >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u)) {
                             pc = pc + 1
@@ -16695,8 +19873,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_EQI
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_EQI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var cond : int
@@ -16706,6 +19883,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         } elif (int(addr(ra.val).tt_) == (3 | 1 << 4)) {
                             cond = addr(ra.val).value_.n == double(im) ? 1 : 0
                         } else {
+                            // other types cannot be equal to a number
                             cond = 0
                         }
                         if (cond != int(i >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u)) {
@@ -16720,8 +19898,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LTI
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LTI) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -16753,8 +19930,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_LEI
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_LEI) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -16786,8 +19962,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_GTI
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_GTI) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -16819,8 +19994,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_GEI
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_GEI) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -16852,8 +20026,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_TEST
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_TEST) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var cond : int = !(int(addr(ra.val).tt_) == (1 | 0 << 4) || (int(addr(ra.val).tt_) & 15) == 0) ? 1 : 0
@@ -16869,8 +20042,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_TESTSET
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_TESTSET) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -16894,21 +20066,26 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_CALL
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_CALL) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var newci : CallInfo?
                         var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
                         var nresults : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) - 1
+                        // fixed number of arguments?
                         if (b != 0) {
+                            // top signals number of arguments
                             L.top.p = ra + b
                         }
+                        // else previous instruction set top
+                        // in case of errors
                         ci.u.l.savedpc = pc
                         newci = luaD_precall(L, ra, nresults)
                         if (newci == null) {
+                            // C call; nothing else to be done
                             trap = c_volatile_load(ci.u.l.trap)
                         } else {
+                            // Lua call: run function in this same C frame
                             ci = newci
                             goto label 2
                         }
@@ -16919,26 +20096,40 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                 if (_flag) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // number of arguments + 1 (function)
                         var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
+                        // number of results when calling a C function
                         var n : int
                         var nparams1 : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
+                        // delta is virtual 'func' - real 'func' (vararg functions)
                         var delta : int = nparams1 != 0 ? ci.u.l.nextraargs + nparams1 : 0
                         if (b != 0) {
                             L.top.p = ra + b
                         } else {
+                            // previous instruction set top
                             b = int(int64(L.top.p - ra))
                         }
+                        // several calls here can raise errors
                         ci.u.l.savedpc = pc
-                        if (int(i & 1u << uint(0 + 7 + 8)) != 0) {
+                        if ((i & 1u << uint(0 + 7 + 8)) != 0) {
+                            // close upvalues from current call
                             luaF_closeupval(L, base)
+                            // no pending tbc variables
                         }
+                        // Lua function?
                         n = luaD_pretailcall(L, ci, ra, b, delta)
                         if (n < 0) {
+                            // execute the callee
                             goto label 2
                         } else {
+                            // C function?
+                            // restore 'func' (if vararg)
                             ci.func.p = ci.func.p - delta
+                            // finish caller
                             luaD_poscall(L, ci, n)
+                            // 'luaD_poscall' can change hooks
                             trap = c_volatile_load(ci.u.l.trap)
+                            // caller returns after the tail call
                             _goto = 1
                             goto label 1
                         }
@@ -16948,52 +20139,63 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                 if (_flag) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // number of results
                         var n : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u) - 1
                         var nparams1 : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
+                        // not fixed?
                         if (n < 0) {
+                            // get what is available
                             n = int(int64(L.top.p - ra))
                         }
                         ci.u.l.savedpc = pc
-                        if (int(i & 1u << uint(0 + 7 + 8)) != 0) {
+                        // may there be open upvalues?
+                        if ((i & 1u << uint(0 + 7 + 8)) != 0) {
+                            // save number of returns
                             ci.u2.nres = n
                             if (intptr(L.top.p) < intptr(ci.top.p)) {
                                 L.top.p = ci.top.p
                             }
-                            luaF_close(L, base, -1, 1)
+                            luaF_close(L, base, CLOSEKTOP, 1)
                             trap = c_volatile_load(ci.u.l.trap)
                             {
-                                if (int64(trap != 0 ? 1 : 0) != 0) {
+                                if (trap != 0) {
                                     base = ci.func.p + 1
                                     ra = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                                 }
                             }
                         }
+                        // vararg function?
                         if (nparams1 != 0) {
                             ci.func.p = ci.func.p - (ci.u.l.nextraargs + nparams1)
                         }
+                        // set call for 'luaD_poscall'
                         L.top.p = ra + n
                         luaD_poscall(L, ci, n)
+                        // 'luaD_poscall' can change hooks
                         trap = c_volatile_load(ci.u.l.trap)
                         _goto = 1
                         goto label 1
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_RETURN0
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_RETURN0) {
                     {
-                        if (int64(c_volatile_load(L.hookmask) != 0 ? 1 : 0) != 0) {
+                        if (c_volatile_load(L.hookmask) != 0) {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                             L.top.p = ra
                             ci.u.l.savedpc = pc
+                            // no hurry...
                             luaD_poscall(L, ci, 0)
                             trap = 1
                         } else {
+                            // do the 'poscall' here
                             var nres : int
+                            // back to caller
                             L.ci = ci.previous
                             L.top.p = base - 1
                             {
                                 nres = int(ci.nresults)
-                                while (int64((nres > 0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                                while (nres > 0) {
+                                    // all results are nil
                                     var _t111 = L.top.p
                                     L.top.p = L.top.p + 1
                                     addr(_t111.val).tt_ = uint8(0 | 0 << 4)
@@ -17007,20 +20209,25 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                 }
                 _flag ||= _goto == 0 && _cond == OpCode.OP_RETURN1
                 if (_flag) {
-                    if (int64(c_volatile_load(L.hookmask) != 0 ? 1 : 0) != 0) {
+                    if (c_volatile_load(L.hookmask) != 0) {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         L.top.p = ra + 1
                         ci.u.l.savedpc = pc
+                        // no hurry...
                         luaD_poscall(L, ci, 1)
                         trap = 1
                     } else {
+                        // do the 'poscall' here
                         var nres : int = int(ci.nresults)
+                        // back to caller
                         L.ci = ci.previous
                         if (nres == 0) {
+                            // asked for no results
                             L.top.p = base - 1
                         } else {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                             {
+                                // at least this result
                                 var io1 : TValue? = addr((base - 1).val)
                                 var io2 : TValue? = addr(ra.val)
                                 io1.value_ = io2.value_
@@ -17028,7 +20235,8 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             }
                             L.top.p = base
                             {
-                                while (int64((nres > 1 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                                while (nres > 1) {
+                                    // complete missing results
                                     var _t112 = L.top.p
                                     L.top.p = L.top.p + 1
                                     addr(_t112.val).tt_ = uint8(0 | 0 << 4)
@@ -17041,10 +20249,13 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                 _flag ||= _goto == 1  // ret
                 if (_flag) {
                     _goto = 0
-                    if ((int(ci.callstatus) & 1 << 2) != 0) {
+                    // return from a Lua function
+                    if ((int(ci.callstatus) & CIST_FRESH) != 0) {
+                        // end this frame
                         return
                     } else {
                         ci = ci.previous
+                        // continue running caller in this frame
                         goto label 3
                     }
                 }
@@ -17052,54 +20263,67 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                 if (_flag) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // integer loop?
                         if (int(addr((ra + 2).val).tt_) == (3 | 0 << 4)) {
                             var count : uint64 = uint64(addr((ra + 1).val).value_.i)
+                            // still more iterations?
                             if (count > uint64(0)) {
                                 var step : int64 = addr((ra + 2).val).value_.i
+                                // internal index
                                 var idx : int64 = addr(ra.val).value_.i
                                 {
+                                    // update counter
                                     var io : TValue? = addr((ra + 1).val)
                                     io.value_.i = int64(count - uint64(1))
                                 }
+                                // add step to index
                                 idx += step
                                 {
+                                    // update internal index
                                     var io : TValue? = addr(ra.val)
                                     io.value_.i = idx
                                 }
                                 {
+                                    // and control variable
                                     var io : TValue? = addr((ra + 3).val)
                                     io.value_.i = idx
                                     io.tt_ = uint8(3 | 0 << 4)
                                 }
+                                // jump back
                                 pc = pc - int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u)
                             }
                         } elif (floatforloop(ra) != 0) {
+                            // float loop
+                            // jump back
                             pc = pc - int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u)
                         }
+                        // allows a signal to break the loop
                         trap = c_volatile_load(ci.u.l.trap)
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_FORPREP
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_FORPREP) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // in case of errors
                         ci.u.l.savedpc = pc
                         L.top.p = ci.top.p
                         if (forprep(L, ra) != 0) {
+                            // skip the loop
                             pc = pc + (int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u) + 1)
                         }
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_TFORPREP
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_TFORPREP) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // create to-be-closed upvalue (if needed)
                         ci.u.l.savedpc = pc
                         L.top.p = ci.top.p
                         luaF_newtbcupval(L, ra + 3)
                         pc = pc + int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u)
+                        // go to next instruction
                         var _t113 = pc
                         pc = pc + 1
                         i = deref(_t113)
@@ -17113,17 +20337,25 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                     _goto = 0
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // 'ra' has the iterator function, 'ra + 1' has the state,
+                        // 'ra + 2' has the control variable, and 'ra + 3' has the
+                        // to-be-closed variable. The call will use the stack after
+                        // these values (starting at 'ra + 4')
+                        // push function, state, and control variable
                         crt::memcpy(reinterpret<void?>(ra + 4), reinterpret<void?>(ra), uint64(3) * uint64(typeinfo sizeof(type<StackValue>)))
                         L.top.p = ra + 4 + 3
+                        // do the call
                         ci.u.l.savedpc = pc
                         luaD_call(L, ra + 4, int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u))
                         trap = c_volatile_load(ci.u.l.trap)
                         {
-                            if (int64(trap != 0 ? 1 : 0) != 0) {
+                            // stack may have changed
+                            if (trap != 0) {
                                 base = ci.func.p + 1
                                 ra = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                             }
                         }
+                        // go to next instruction
                         var _t114 = pc
                         pc = pc + 1
                         i = deref(_t114)
@@ -17137,36 +20369,42 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                     _goto = 0
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // continue loop?
                         if (!((int(addr((ra + 4).val).tt_) & 15) == 0)) {
                             {
+                                // save control variable
                                 var io1 : TValue? = addr((ra + 2).val)
                                 var io2 : TValue? = addr((ra + 4).val)
                                 io1.value_ = io2.value_
                                 io1.tt_ = io2.tt_
                             }
+                            // jump back
                             pc = pc - int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u)
                         }
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_SETLIST
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_SETLIST) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var n : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
                         var last : uint = uint(int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u))
                         var h : Table? = addr(reinterpret<GCUnion?>(addr(ra.val).value_.gc).h)
                         if (n == 0) {
+                            // get up to the top
                             n = int(int64(L.top.p - ra)) - 1
                         } else {
+                            // correct top in case of emergency GC
                             L.top.p = ci.top.p
                         }
                         last += uint(n)
-                        if (int(i & 1u << uint(0 + 7 + 8)) != 0) {
-                            last += uint(int(deref(pc) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) * ((1 << 8) - 1 + 1))
+                        if ((i & 1u << uint(0 + 7 + 8)) != 0) {
+                            last += uint(int(deref(pc) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) * (MAXARG_C + 1))
                             pc = pc + 1
                         }
+                        // needs more space?
                         if (last > luaH_realasize(h)) {
+                            // preallocate it at once
                             luaH_resizearray(L, h, last)
                         }
                         {
@@ -17190,8 +20428,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_CLOSURE
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_CLOSURE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var p : Proto? = deref(cl.p.p + int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u))
@@ -17213,10 +20450,10 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_VARARG
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_VARARG) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+                        // required results
                         var n : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) - 1
                         ci.u.l.savedpc = pc
                         L.top.p = ci.top.p
@@ -17225,22 +20462,23 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_VARARGPREP
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_VARARGPREP) {
                     {
                         ci.u.l.savedpc = pc
                         luaT_adjustvarargs(L, int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u), ci, cl.p)
                         trap = c_volatile_load(ci.u.l.trap)
-                        if (int64(trap != 0 ? 1 : 0) != 0) {
+                        // previous "Protect" updated trap
+                        if (trap != 0) {
                             luaD_hookcall(L, ci)
+                            // next opcode will be seen as a "new" line
                             L.oldpc = 1
                         }
+                        // function has new base after adjustment
                         base = ci.func.p + 1
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_EXTRAARG
-                if (_flag) {
+                if (_goto == 0 && _cond == OpCode.OP_EXTRAARG) {
                     {
                         break
                     }
@@ -17258,8 +20496,9 @@ def luaZ_fill(var z : Zio?) : int {
     var buff : uint8?
     buff = invoke(z.reader, L, z.data, addr(size))
     if (buff == null || size == uint64(0)) {
-        return -1
+        return EOZ
     }
+    // discount char being returned
     z.n = size - uint64(1)
     z.p = buff
     var _t0 = z.p
@@ -17275,18 +20514,24 @@ def luaZ_init(var L : lua_State?; var z : Zio?; reader : function<(var a0 : lua_
     z.p = null
 }
 
+// --------------------------------------------------------------- read ---
 [c_function]
 def luaZ_read(var z : Zio?; var b : void?; var n : uint64) : uint64 {
     while (n != 0) {
         var m : uint64
+        // no bytes in buffer?
         if (z.n == uint64(0)) {
-            if (luaZ_fill(z) == -1) {
+            // try to read more
+            if (luaZ_fill(z) == EOZ) {
+                // no more input; return number of missing bytes
                 return n
             } else {
+                // luaZ_fill consumed first byte; put it back
                 z.n++
                 z.p = z.p - 1
             }
         }
+        // min. between n and z->n
         m = n <= z.n ? n : z.n
         crt::memcpy(b, reinterpret<void?>(z.p), m)
         z.n -= m
@@ -17297,47 +20542,71 @@ def luaZ_read(var z : Zio?; var b : void?; var n : uint64) : uint64 {
     return uint64(0)
 }
 
+// Search for 'objidx' in table at index -1. ('objidx' must be an
+// absolute index.) Return 1 + string at top if it found a good name.
 [c_function]
 def private findfield(var L : lua_State?; objidx : int; level : int) : int {
     if (level == 0 || !(lua_type(L, -1) == 5)) {
+        // not found
         return 0
     }
+    // start 'next' loop
     lua_pushnil(L)
+    // for each pair in table
     while (lua_next(L, -2) != 0) {
-        if (lua_type(L, -2) == 4) {
+        // ignore non-string keys
+        if (lua_type(L, -2) == LUA_TSTRING) {
+            // found object?
             if (lua_rawequal(L, objidx, -1) != 0) {
+                // remove value (but keep name)
                 lua_settop(L, -1 - 1)
                 return 1
             } elif (findfield(L, objidx, level - 1) != 0) {
+                // try recursively
+                // stack: lib_name, lib_table, field_name (top)
+                // place '.' between the two names
                 lua_pushstring(L, reinterpret<uint8?>("."))
+                // (in the slot occupied by table)
                 lua_copy(L, -1, -3)
                 lua_settop(L, -1 - 1)
+                // lib_name.field_name
                 lua_concat(L, 3)
                 return 1
             }
         }
+        // remove value
         lua_settop(L, -1 - 1)
     }
+    // not found
     return 0
 }
 
+// Search for a name for a function in all loaded modules
 [c_function]
 def private pushglobalfuncname(var L : lua_State?; var ar : lua_Debug?) : int {
     var top : int = lua_gettop(L)
+    // push function
     lua_getinfo(L, reinterpret<uint8?>("f"), ar)
-    lua_getfield(L, -1000000 - 1000, reinterpret<uint8?>("_LOADED"))
+    lua_getfield(L, LUA_REGISTRYINDEX, reinterpret<uint8?>("_LOADED"))
+    // slots for 'findfield'
     luaL_checkstack(L, 6, reinterpret<uint8?>("not enough stack"))
     if (findfield(L, top + 1, 2) != 0) {
         var name : uint8? = lua_tolstring(L, -1, null)
+        // name start with '_G.'?
         if (crt::strncmp(name, reinterpret<uint8?>("_G."), uint64(3)) == 0) {
+            // push name without prefix
             lua_pushstring(L, name + 3)
+            // remove original name
             lua_rotate(L, -2, -1)
             lua_settop(L, -1 - 1)
         }
+        // copy name to proper place
         lua_copy(L, -1, top + 1)
+        // remove table "loaded" and name copy
         lua_settop(L, top + 1)
         return 1
     } else {
+        // remove function and global table
         lua_settop(L, top)
         return 0
     }
@@ -17345,17 +20614,24 @@ def private pushglobalfuncname(var L : lua_State?; var ar : lua_Debug?) : int {
 
 [c_function]
 def private pushfuncname(var L : lua_State?; var ar : lua_Debug?) {
+    // try first a global name
     if (pushglobalfuncname(L, ar) != 0) {
         lua_pushfstring`va(L, reinterpret<uint8?>("function '%s'"), (lua_tolstring(L, -1, null),))
+        // remove name
         lua_rotate(L, -2, -1)
         lua_settop(L, -1 - 1)
     } elif (int(deref(ar.namewhat)) != 0) {
+        // is there a name from code?
+        // use it
         lua_pushfstring`va(L, reinterpret<uint8?>("%s '%s'"), (ar.namewhat, ar.name))
-    } elif (int(deref(ar.what)) == 109) {
+    } elif (int(deref(ar.what)) == 'm') {
+        // main?
         lua_pushstring(L, reinterpret<uint8?>("main chunk"))
-    } elif (int(deref(ar.what)) != 67) {
+    } elif (int(deref(ar.what)) != 'C') {
+        // for Lua functions, use <file:line>
         lua_pushfstring`va(L, reinterpret<uint8?>("function <%s:%d>"), (addr(ar.short_src[0]), ar.linedefined))
     } else {
+        // nothing left...
         lua_pushstring(L, reinterpret<uint8?>("?"))
     }
 }
@@ -17365,10 +20641,12 @@ def private lastlevel(var L : lua_State?) : int {
     var ar : lua_Debug
     var li : int = 1
     var le : int = 1
+    // find an upper bound
     while (lua_getstack(L, le, addr(ar)) != 0) {
         li = le
         le *= 2
     }
+    // do a binary search
     while (li < le) {
         var m : int = (li + le) / 2
         if (lua_getstack(L, m, addr(ar)) != 0) {
@@ -17385,14 +20663,14 @@ def luaL_traceback(var L : lua_State?; var L1 : lua_State?; var msg : uint8?; va
     var b : luaL_Buffer
     var ar : lua_Debug
     var last : int = lastlevel(L1)
-    var limit2show : int = last - level > 10 + 11 ? 10 : -1
+    var limit2show : int = last - level > LEVELS1 + LEVELS2 ? LEVELS1 : -1
     luaL_buffinit(L, addr(b))
     if (msg != null) {
         luaL_addstring(addr(b), msg)
         let _t0 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), uint64(1)) != null
         let _t1 = addr(b).n
         addr(b).n++
-        deref(addr(b).b + _t1) = uint8(10)
+        deref(addr(b).b + _t1) = uint8('\n')
     }
     luaL_addstring(addr(b), reinterpret<uint8?>("stack traceback:"))
     while (true) {
@@ -17401,12 +20679,16 @@ def luaL_traceback(var L : lua_State?; var L1 : lua_State?; var msg : uint8?; va
         if (!(lua_getstack(L1, _t2, addr(ar)) != 0)) {
             break
         }
+        // too many levels?
         let _t3 = limit2show
         limit2show--
         if (_t3 == 0) {
-            var n : int = last - level - 11 + 1
+            // number of levels to skip
+            var n : int = last - level - LEVELS2 + 1
             lua_pushfstring`va(L, reinterpret<uint8?>("\n\t...\t(skipping %d levels)"), (n,))
+            // add warning about skip
             luaL_addvalue(addr(b))
+            // and skip to last levels
             level += n
         } else {
             lua_getinfo(L1, reinterpret<uint8?>("Slnt"), addr(ar))
@@ -17429,12 +20711,15 @@ def luaL_traceback(var L : lua_State?; var L1 : lua_State?; var msg : uint8?; va
 [c_function]
 def luaL_argerror(var L : lua_State?; var arg : int; var extramsg : uint8?) : int {
     var ar : lua_Debug
+    // no stack frame?
     if (!(lua_getstack(L, 0, addr(ar)) != 0)) {
         return luaL_error`va(L, reinterpret<uint8?>("bad argument #%d (%s)"), (arg, extramsg))
     }
     lua_getinfo(L, reinterpret<uint8?>("n"), addr(ar))
     if (crt::strcmp(ar.namewhat, reinterpret<uint8?>("method")) == 0) {
+        // do not count 'self'
         arg--
+        // error is in the self argument itself?
         if (arg == 0) {
             return luaL_error`va(L, reinterpret<uint8?>("calling '%s' on bad self (%s)"), (ar.name, extramsg))
         }
@@ -17448,12 +20733,16 @@ def luaL_argerror(var L : lua_State?; var arg : int; var extramsg : uint8?) : in
 [c_function]
 def luaL_typeerror(var L : lua_State?; arg : int; var tname : uint8?) : int {
     var msg : uint8?
+    // name for the type of the actual argument
     var typearg : uint8?
-    if (luaL_getmetafield(L, arg, reinterpret<uint8?>("__name")) == 4) {
+    if (luaL_getmetafield(L, arg, reinterpret<uint8?>("__name")) == LUA_TSTRING) {
+        // use the given type name
         typearg = lua_tolstring(L, -1, null)
-    } elif (lua_type(L, arg) == 2) {
+    } elif (lua_type(L, arg) == LUA_TLIGHTUSERDATA) {
+        // special name for messages
         typearg = reinterpret<uint8?>("light userdata")
     } else {
+        // standard name
         typearg = lua_typename(L, lua_type(L, arg))
     }
     msg = lua_pushfstring`va(L, reinterpret<uint8?>("%s expected, got %s"), (tname, typearg))
@@ -17464,19 +20753,28 @@ def private tag_error(var L : lua_State?; arg : int; tag : int) {
     luaL_typeerror(L, arg, lua_typename(L, tag))
 }
 
+// The use of 'lua_pushfstring' ensures this function does not
+// need reserved stack space when called.
 [c_function]
 def luaL_where(var L : lua_State?; level : int) {
     var ar : lua_Debug
+    // check function at level
     if (lua_getstack(L, level, addr(ar)) != 0) {
+        // get info about it
         lua_getinfo(L, reinterpret<uint8?>("Sl"), addr(ar))
+        // is there info?
         if (ar.currentline > 0) {
             lua_pushfstring`va(L, reinterpret<uint8?>("%s:%d: "), (addr(ar.short_src[0]), ar.currentline))
             return
         }
     }
+    // else, no information available...
     lua_pushfstring`va(L, addr(c2das_empty[0]), VaNone())
 }
 
+// Again, the use of 'lua_pushvfstring' ensures this function does
+// not need reserved stack space when called. (At worst, it generates
+// an error with "stack overflow" instead of the given message.)
 [variadic]
 def luaL_error(var L : lua_State?; var fmt : uint8?; va : va_args) : int {
     var argp : CVaCursor
@@ -17489,6 +20787,7 @@ def luaL_error(var L : lua_State?; var fmt : uint8?; va : va_args) : int {
 
 [c_function]
 def luaL_fileresult(var L : lua_State?; stat : int; var fname : uint8?) : int {
+    // calls to Lua API may change this value
     var en : int = deref(crt::c_errno_location())
     if (stat != 0) {
         lua_pushboolean(L, 1)
@@ -17509,32 +20808,42 @@ def luaL_fileresult(var L : lua_State?; stat : int; var fname : uint8?) : int {
 
 [c_function]
 def luaL_execresult(var L : lua_State?; stat : int) : int {
+    // error with an 'errno'?
     if (stat != 0 && deref(crt::c_errno_location()) != 0) {
         return luaL_fileresult(L, 0, null)
     } else {
+        // type of termination
         var what : uint8? = reinterpret<uint8?>("exit")
-        if (int(deref(what)) == 101 && stat == 0) {
+        // interpret result
+        // successful termination?
+        if (int(deref(what)) == 'e' && stat == 0) {
             lua_pushboolean(L, 1)
         } else {
             lua_pushnil(L)
         }
         lua_pushstring(L, what)
         lua_pushinteger(L, int64(stat))
+        // return true/fail,what,code
         return 3
     }
 }
 
 [c_function]
 def luaL_newmetatable(var L : lua_State?; var tname : uint8?) : int {
-    if (lua_getfield(L, -1000000 - 1000, tname) != 0) {
+    // name already in use?
+    if (lua_getfield(L, -1000000 - 1000, tname) != LUA_TNIL) {
+        // leave previous value on top, but return 0
         return 0
     }
     lua_settop(L, -1 - 1)
+    // create metatable
     lua_createtable(L, 0, 2)
     lua_pushstring(L, tname)
+    // metatable.__name = tname
     lua_setfield(L, -2, reinterpret<uint8?>("__name"))
     lua_pushvalue(L, -1)
-    lua_setfield(L, -1000000 - 1000, tname)
+    // registry.name = metatable
+    lua_setfield(L, LUA_REGISTRYINDEX, tname)
     return 1
 }
 
@@ -17545,22 +20854,29 @@ def luaL_setmetatable(var L : lua_State?; var tname : uint8?) {
 
 def luaL_testudata(var L : lua_State?; ud : int; var tname : uint8?) : void? {
     var p : void? = lua_touserdata(L, ud)
+    // value is a userdata?
     if (p != null) {
+        // does it have a metatable?
         if (lua_getmetatable(L, ud) != 0) {
+            // get correct metatable
             lua_getfield(L, -1000000 - 1000, tname)
+            // not the same?
             if (!(lua_rawequal(L, -1, -2) != 0)) {
+                // value is a userdata with wrong metatable
                 p = null
             }
+            // remove both metatables
             lua_settop(L, -2 - 1)
             return p
         }
     }
+    // value is not a userdata with a metatable
     return null
 }
 
 def luaL_checkudata(var L : lua_State?; ud : int; var tname : uint8?) : void? {
     var p : void? = luaL_testudata(L, ud, tname)
-    let _t0 = int64((p != null ? 1 : 0) != 0 ? 1 : 0) != 0 || luaL_typeerror(L, ud, tname) != 0
+    let _t0 = p != null || luaL_typeerror(L, ud, tname) != 0
     return p
 }
 
@@ -17580,9 +20896,14 @@ def luaL_checkoption(var L : lua_State?; arg : int; var _c_def : uint8?; var lst
     return luaL_argerror(L, arg, lua_pushfstring`va(L, reinterpret<uint8?>("invalid option '%s'"), (name,)))
 }
 
+// Ensures the stack has at least 'space' extra slots, raising an error
+// if it cannot fulfill the request. (The error handling needs a few
+// extra slots to format the error message. In case of an error without
+// this extra space, Lua will generate the same 'stack overflow' error,
+// but without 'msg'.)
 [c_function]
 def luaL_checkstack(var L : lua_State?; space : int; var msg : uint8?) {
-    if (int64((!(lua_checkstack(L, space) != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!(lua_checkstack(L, space) != 0)) {
         if (msg != null) {
             luaL_error`va(L, reinterpret<uint8?>("stack overflow (%s)"), (msg,))
         } else {
@@ -17592,22 +20913,22 @@ def luaL_checkstack(var L : lua_State?; space : int; var msg : uint8?) {
 }
 
 def luaL_checktype(var L : lua_State?; arg : int; t : int) {
-    if (int64((lua_type(L, arg) != t ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (lua_type(L, arg) != t) {
         tag_error(L, arg, t)
     }
 }
 
 [c_function]
 def luaL_checkany(var L : lua_State?; arg : int) {
-    if (int64((lua_type(L, arg) == -1 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (lua_type(L, arg) == -1) {
         luaL_argerror(L, arg, reinterpret<uint8?>("value expected"))
     }
 }
 
 def luaL_checklstring(var L : lua_State?; arg : int; var len : uint64?) : uint8? {
     var s : uint8? = lua_tolstring(L, arg, len)
-    if (int64((!(s != null) ? 1 : 0) != 0 ? 1 : 0) != 0) {
-        tag_error(L, arg, 4)
+    if (!(s != null)) {
+        tag_error(L, arg, LUA_TSTRING)
     }
     return s
 }
@@ -17628,8 +20949,8 @@ def luaL_optlstring(var L : lua_State?; arg : int; var _c_def : uint8?; var len 
 def luaL_checknumber(var L : lua_State?; arg : int) : double {
     var isnum : int
     var d : double = lua_tonumberx(L, arg, addr(isnum))
-    if (int64((!(isnum != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
-        tag_error(L, arg, 3)
+    if (!(isnum != 0)) {
+        tag_error(L, arg, LUA_TNUMBER)
     }
     return d
 }
@@ -17643,7 +20964,7 @@ def private interror(var L : lua_State?; arg : int) {
     if (lua_isnumber(L, arg) != 0) {
         luaL_argerror(L, arg, reinterpret<uint8?>("number has no integer representation"))
     } else {
-        tag_error(L, arg, 3)
+        tag_error(L, arg, LUA_TNUMBER)
     }
 }
 
@@ -17651,7 +20972,7 @@ def private interror(var L : lua_State?; arg : int) {
 def luaL_checkinteger(var L : lua_State?; arg : int) : int64 {
     var isnum : int
     var d : int64 = lua_tointegerx(L, arg, addr(isnum))
-    if (int64((!(isnum != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!(isnum != 0)) {
         interror(L, arg)
     }
     return d
@@ -17667,8 +20988,10 @@ def private resizebox(var L : lua_State?; idx : int; newsize : uint64) : void? {
     var allocf : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 : uint64) : void?> = lua_getallocf(L, addr(ud))
     var box : UBox? = reinterpret<UBox?>(lua_touserdata(L, idx))
     var temp : void? = invoke(allocf, ud, box.box, box.bsize, newsize)
-    if (int64((temp == null && newsize > uint64(0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // allocation error?
+    if (temp == null && newsize > uint64(0)) {
         lua_pushstring(L, reinterpret<uint8?>("not enough memory"))
+        // raise a memory error
         lua_error(L)
     }
     box.box = temp
@@ -17686,41 +21009,61 @@ def private newbox(var L : lua_State?) {
     var box : UBox? = reinterpret<UBox?>(lua_newuserdatauv(L, uint64(typeinfo sizeof(type<UBox>)), 0))
     box.box = null
     box.bsize = uint64(0)
+    // creating metatable?
     if (luaL_newmetatable(L, reinterpret<uint8?>("_UBOX*")) != 0) {
+        // set its metamethods
         luaL_setfuncs(L, addr(boxmt[0]), 0)
     }
     lua_setmetatable(L, -2)
 }
 
+// Compute new size for buffer 'B', enough to accommodate extra 'sz'
+// bytes. (The test for "not big enough" also gets the case when the
+// computation of 'newsize' overflows.)
 [c_function]
 def private newbuffsize(var B : luaL_Buffer?; sz : uint64) : uint64 {
+    // buffer size * 1.5
     var newsize : uint64 = B.size / uint64(2) * uint64(3)
-    if (int64((~uint64(0) - sz < B.n ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // overflow in (B->n + sz)?
+    if (~uint64(0) - sz < B.n) {
         return uint64(luaL_error`va(B.L, reinterpret<uint8?>("buffer too large"), VaNone()))
     }
+    // not big enough?
     if (newsize < B.n + sz) {
         newsize = B.n + sz
     }
     return newsize
 }
 
+// Returns a pointer to a free area with at least 'sz' bytes in buffer
+// 'B'. 'boxidx' is the relative position in the stack where is the
+// buffer's box or its placeholder.
 [c_function]
 def private prepbuffsize(var B : luaL_Buffer?; sz : uint64; boxidx : int) : uint8? {
+    // enough space?
     if (B.size - B.n >= sz) {
         return B.b + B.n
     } else {
         var L : lua_State? = B.L
         var newbuff : uint8?
         var newsize : uint64 = newbuffsize(B, sz)
+        // create larger buffer
+        // buffer already has a box?
         if (intptr(B.b) != intptr(addr(B.init.b[0]))) {
+            // resize it
             newbuff = reinterpret<uint8?>(resizebox(L, boxidx, newsize))
         } else {
+            // no box yet
+            // remove placeholder
             lua_rotate(L, boxidx, -1)
             lua_settop(L, -1 - 1)
+            // create a new box
             newbox(L)
+            // move box to its intended position
             lua_rotate(L, boxidx, 1)
             lua_toclose(L, boxidx)
             newbuff = reinterpret<uint8?>(resizebox(L, boxidx, newsize))
+            // copy original content
             crt::memcpy(reinterpret<void?>(newbuff), reinterpret<void?>(B.b), B.n * uint64(typeinfo sizeof(type<uint8>)))
         }
         B.b = newbuff
@@ -17729,12 +21072,14 @@ def private prepbuffsize(var B : luaL_Buffer?; sz : uint64; boxidx : int) : uint
     }
 }
 
+// returns a pointer to a free area with at least 'sz' bytes
 def luaL_prepbuffsize(var B : luaL_Buffer?; sz : uint64) : uint8? {
     return prepbuffsize(B, sz, -1)
 }
 
 [c_function]
 def luaL_addlstring(var B : luaL_Buffer?; var s : uint8?; l : uint64) {
+    // avoid 'memcpy' when 's' can be NULL
     if (l > uint64(0)) {
         var b : uint8? = prepbuffsize(B, l, -1)
         crt::memcpy(reinterpret<void?>(b), reinterpret<void?>(s), l * uint64(typeinfo sizeof(type<uint8>)))
@@ -17752,8 +21097,10 @@ def luaL_pushresult(var B : luaL_Buffer?) {
     var L : lua_State? = B.L
     lua_pushlstring(L, B.b, B.n)
     if (intptr(B.b) != intptr(addr(B.init.b[0]))) {
+        // close the box
         lua_closeslot(L, -2)
     }
+    // remove box or placeholder from the stack
     lua_rotate(L, -2, -1)
     lua_settop(L, -1 - 1)
 }
@@ -17763,6 +21110,13 @@ def luaL_pushresultsize(var B : luaL_Buffer?; sz : uint64) {
     luaL_pushresult(B)
 }
 
+// 'luaL_addvalue' is the only function in the Buffer system where the
+// box (if existent) is not on the top of the stack. So, instead of
+// calling 'luaL_addlstring', it replicates the code using -2 as the
+// last argument to 'prepbuffsize', signaling that the box is (or will
+// be) below the string being added to the buffer. (Box creation can
+// trigger an emergency GC, so we should not remove the string from the
+// stack before we have the space guaranteed.)
 [c_function]
 def luaL_addvalue(var B : luaL_Buffer?) {
     var L : lua_State? = B.L
@@ -17771,6 +21125,7 @@ def luaL_addvalue(var B : luaL_Buffer?) {
     var b : uint8? = prepbuffsize(B, len, -2)
     crt::memcpy(reinterpret<void?>(b), reinterpret<void?>(s), len * uint64(typeinfo sizeof(type<uint8>)))
     B.n += len
+    // pop string
     lua_settop(L, -1 - 1)
 }
 
@@ -17779,7 +21134,8 @@ def luaL_buffinit(var L : lua_State?; var B : luaL_Buffer?) {
     B.L = L
     B.b = addr(B.init.b[0])
     B.n = uint64(0)
-    B.size = uint64(int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>))))
+    B.size = uint64(LUAL_BUFFERSIZE)
+    // push placeholder
     lua_pushlightuserdata(L, reinterpret<void?>(B))
 }
 
@@ -17788,25 +21144,42 @@ def luaL_buffinitsize(var L : lua_State?; var B : luaL_Buffer?; sz : uint64) : u
     return prepbuffsize(B, sz, -1)
 }
 
+// The previously freed references form a linked list:
+// t[freelist] is the index of a first free index, or zero if list is
+// empty; t[t[freelist]] is the index of the second element; etc.
 def luaL_ref(var L : lua_State?; var t : int) : int {
     var ref : int
     if (lua_type(L, -1) == 0) {
+        // remove from stack
         lua_settop(L, -1 - 1)
-        return -1
+        // 'nil' has a unique fixed reference
+        return LUA_REFNIL
     }
     t = lua_absindex(L, t)
-    if (lua_rawgeti(L, t, int64(2 + 1)) == 0) {
+    // first access?
+    if (lua_rawgeti(L, t, int64(freelist)) == LUA_TNIL) {
+        // list is empty
         ref = 0
+        // initialize as an empty list
         lua_pushinteger(L, int64(0))
-        lua_rawseti(L, t, int64(2 + 1))
+        // ref = t[freelist] = 0
+        lua_rawseti(L, t, int64(freelist))
     } else {
+        // already initialized
+        // ref = t[freelist]
         ref = int(lua_tointegerx(L, -1, null))
     }
+    // remove element from stack
     lua_settop(L, -1 - 1)
+    // any free element?
     if (ref != 0) {
+        // remove it from list
         lua_rawgeti(L, t, int64(ref))
-        lua_rawseti(L, t, int64(2 + 1))
+        // (t[freelist] = t[ref])
+        lua_rawseti(L, t, int64(freelist))
     } else {
+        // no free elements
+        // get a new reference
         ref = int(lua_rawlen(L, t)) + 1
     }
     lua_rawseti(L, t, int64(ref))
@@ -17816,23 +21189,34 @@ def luaL_ref(var L : lua_State?; var t : int) : int {
 def luaL_unref(var L : lua_State?; var t : int; ref : int) {
     if (ref >= 0) {
         t = lua_absindex(L, t)
-        lua_rawgeti(L, t, int64(2 + 1))
+        lua_rawgeti(L, t, int64(freelist))
+        // t[ref] = t[freelist]
         lua_rawseti(L, t, int64(ref))
         lua_pushinteger(L, int64(ref))
-        lua_rawseti(L, t, int64(2 + 1))
+        // t[freelist] = ref
+        lua_rawseti(L, t, int64(freelist))
     }
 }
 
 [c_function]
 def private getF(var L : lua_State?; var ud : void?; var size : uint64?) : uint8? {
     var lf : LoadF? = reinterpret<LoadF?>(ud)
+    // not used
+    // are there pre-read characters to be read?
     if (lf.n > 0) {
+        // return them (chars already in buffer)
         deref(size) = uint64(lf.n)
+        // no more pre-read characters
         lf.n = 0
     } else {
+        // read a block from file
+        // 'fread' can return > 0 *and* set the EOF flag. If next call to
+        // 'getF' called 'fread', it might still wait for user input.
+        // The next check avoids this problem.
         if (crt::feof(reinterpret<void?>(lf.f)) != 0) {
             return null
         }
+        // read block
         deref(size) = crt::fread(reinterpret<void?>(addr(lf.buff[0])), uint64(1), uint64(typeinfo sizeof(type<uint8[8192]>)), reinterpret<void?>(lf.f))
     }
     return addr(lf.buff[0])
@@ -17849,32 +21233,51 @@ def private errfile(var L : lua_State?; var what : uint8?; fnameindex : int) : i
     }
     lua_rotate(L, fnameindex, -1)
     lua_settop(L, -1 - 1)
-    return 5 + 1
+    return LUA_ERRFILE
 }
 
+// Skip an optional BOM at the start of a stream. If there is an
+// incomplete BOM (the first character is correct but the rest is
+// not), returns the first character anyway to force an error
+// (as no chunk can start with 0xEF).
 [c_function]
 def private skipBOM(var f : _IO_FILE?) : int {
+    // read first character
     var c : int = crt::getc(reinterpret<void?>(f))
+    // correct BOM?
     if (c == 239 && crt::getc(reinterpret<void?>(f)) == 187 && crt::getc(reinterpret<void?>(f)) == 191) {
+        // ignore BOM and return next char
         return crt::getc(reinterpret<void?>(f))
     } else {
+        // no (valid) BOM
+        // return first character
         return c
     }
 }
 
+// reads the first character of file 'f' and skips an optional BOM mark
+// in its beginning plus its first line if it starts with '#'. Returns
+// true if it skipped the first line. In any case, '*cp' has the
+// first "valid" character of the file (after the optional BOM and
+// a first-line comment).
 [c_function]
 def private skipcomment(var f : _IO_FILE?; var cp : int?) : int {
     deref(cp) = skipBOM(f)
     var c : int = deref(cp)
-    if (c == 35) {
+    // first line is a comment (Unix exec. file)?
+    if (c == '#') {
+        // skip first line
         var _first = true
-        while (_first || c != -1 && c != 10) {
+        while (_first || c != -1 && c != '\n') {
             _first = false
             c = crt::getc(reinterpret<void?>(f))
         }
+        // next character after comment, if present
         deref(cp) = crt::getc(reinterpret<void?>(f))
+        // there was a comment
         return 1
     } else {
+        // no comment
         return 0
     }
 }
@@ -17885,6 +21288,7 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
     var status : int
     var readstatus : int
     var c : int
+    // index of filename on the stack
     var fnameindex : int = lua_gettop(L) + 1
     if (filename == null) {
         lua_pushstring(L, reinterpret<uint8?>("=stdin"))
@@ -17898,23 +21302,31 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
         }
     }
     lf.n = 0
+    // read initial portion
     if (skipcomment(lf.f, addr(c)) != 0) {
+        // add newline to correct line numbers
         let _t0 = lf.n
         lf.n++
-        lf.buff[_t0] = uint8(10)
+        lf.buff[_t0] = uint8('\n')
     }
+    // binary file?
     if (c == int(deref(reinterpret<uint8?>("\x1bLua") + 0))) {
+        // remove possible newline
         lf.n = 0
+        // "real" file?
         if (filename != null) {
             deref(crt::c_errno_location()) = 0
+            // reopen in binary mode
             lf.f = reinterpret<_IO_FILE?>(crt::freopen(filename, reinterpret<uint8?>("rb"), reinterpret<void?>(lf.f)))
             if (lf.f == null) {
                 return errfile(L, reinterpret<uint8?>("reopen"), fnameindex)
             }
+            // re-read initial portion
             skipcomment(lf.f, addr(c))
         }
     }
     if (c != -1) {
+        // 'c' is the first character of the stream
         let _t1 = lf.n
         lf.n++
         lf.buff[_t1] = uint8(c)
@@ -17922,10 +21334,12 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
     deref(crt::c_errno_location()) = 0
     status = lua_load(L, @@getF, reinterpret<void?>(addr(lf)), lua_tolstring(L, -1, null), mode)
     readstatus = crt::ferror(reinterpret<void?>(lf.f))
+    // close file (even in case of errors)
     if (filename != null) {
         crt::fclose(reinterpret<void?>(lf.f))
     }
     if (readstatus != 0) {
+        // ignore results from 'lua_load'
         lua_settop(L, fnameindex)
         return errfile(L, reinterpret<uint8?>("read"), fnameindex)
     }
@@ -17937,6 +21351,7 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
 [c_function]
 def private getS(var L : lua_State?; var ud : void?; var size : uint64?) : uint8? {
     var ls : LoadS? = reinterpret<LoadS?>(ud)
+    // not used
     if (ls.size == uint64(0)) {
         return null
     }
@@ -17959,25 +21374,31 @@ def luaL_loadstring(var L : lua_State?; var s : uint8?) : int {
 }
 
 def luaL_getmetafield(var L : lua_State?; obj : int; var event : uint8?) : int {
+    // no metatable?
     if (!(lua_getmetatable(L, obj) != 0)) {
-        return 0
+        return LUA_TNIL
     } else {
         var tt : int
         lua_pushstring(L, event)
         tt = lua_rawget(L, -2)
-        if (tt == 0) {
+        // is metafield nil?
+        if (tt == LUA_TNIL) {
+            // remove metatable and metafield
             lua_settop(L, -2 - 1)
         } else {
+            // remove only metatable
             lua_rotate(L, -2, -1)
             lua_settop(L, -1 - 1)
         }
+        // return metafield type
         return tt
     }
 }
 
 def luaL_callmeta(var L : lua_State?; var obj : int; var event : uint8?) : int {
     obj = lua_absindex(L, obj)
-    if (luaL_getmetafield(L, obj, event) == 0) {
+    // no metafield?
+    if (luaL_getmetafield(L, obj, event) == LUA_TNIL) {
         return 0
     }
     lua_pushvalue(L, obj)
@@ -17991,9 +21412,10 @@ def luaL_len(var L : lua_State?; idx : int) : int64 {
     var isnum : int
     lua_len(L, idx)
     l = lua_tointegerx(L, -1, addr(isnum))
-    if (int64((!(isnum != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!(isnum != 0)) {
         luaL_error`va(L, reinterpret<uint8?>("object length is not an integer"), VaNone())
     }
+    // remove object
     lua_settop(L, -1 - 1)
     return l
 }
@@ -18001,6 +21423,7 @@ def luaL_len(var L : lua_State?; idx : int) : int64 {
 [c_function]
 def luaL_tolstring(var L : lua_State?; var idx : int; var len : uint64?) : uint8? {
     idx = lua_absindex(L, idx)
+    // metafield?
     if (luaL_callmeta(L, idx, reinterpret<uint8?>("__tostring")) != 0) {
         if (!(lua_isstring(L, -1) != 0)) {
             luaL_error`va(L, reinterpret<uint8?>("'__tostring' must return a string"), VaNone())
@@ -18023,10 +21446,12 @@ def luaL_tolstring(var L : lua_State?; var idx : int; var len : uint64?) : uint8
             lua_pushstring(L, reinterpret<uint8?>("nil"))
         } else {
             {
+                // try name
                 var tt : int = luaL_getmetafield(L, idx, reinterpret<uint8?>("__name"))
-                var kind : uint8? = tt == 4 ? lua_tolstring(L, -1, null) : lua_typename(L, lua_type(L, idx))
+                var kind : uint8? = tt == LUA_TSTRING ? lua_tolstring(L, -1, null) : lua_typename(L, lua_type(L, idx))
                 lua_pushfstring`va(L, reinterpret<uint8?>("%s: %p"), (kind, reinterpret<uint8?>(lua_topointer(L, idx))))
-                if (tt != 0) {
+                if (tt != LUA_TNIL) {
+                    // remove '__name'
                     lua_rotate(L, -2, -1)
                     lua_settop(L, -1 - 1)
                 }
@@ -18036,15 +21461,21 @@ def luaL_tolstring(var L : lua_State?; var idx : int; var len : uint64?) : uint8
     return lua_tolstring(L, -1, len)
 }
 
+// set functions from list 'l' into table at top - 'nup'; each
+// function gets the 'nup' elements at the top as upvalues.
+// Returns with only the table at the stack.
 [c_function]
 def luaL_setfuncs(var L : lua_State?; var l : luaL_Reg?; nup : int) {
     luaL_checkstack(L, nup, reinterpret<uint8?>("too many upvalues"))
+    // fill the table with given functions
     {
         while (l.name != null) {
+            // placeholder?
             if (l.func == null) {
                 lua_pushboolean(L, 0)
             } else {
                 var i : int
+                // copy upvalues to the top
                 {
                     i = 0
                     while (i < nup) {
@@ -18052,44 +21483,67 @@ def luaL_setfuncs(var L : lua_State?; var l : luaL_Reg?; nup : int) {
                         i++
                     }
                 }
+                // closure with those upvalues
                 lua_pushcclosure(L, l.func, nup)
             }
             lua_setfield(L, -(nup + 2), l.name)
             l = l + 1
         }
     }
+    // remove upvalues
     lua_settop(L, -nup - 1)
 }
 
+// ensure that stack[idx][fname] has a table and push that table
+// into the stack
 def luaL_getsubtable(var L : lua_State?; var idx : int; var fname : uint8?) : int {
-    if (lua_getfield(L, idx, fname) == 5) {
+    if (lua_getfield(L, idx, fname) == LUA_TTABLE) {
+        // table already there
         return 1
     } else {
+        // remove previous result
         lua_settop(L, -1 - 1)
         idx = lua_absindex(L, idx)
         lua_createtable(L, 0, 0)
+        // copy to be left at top
         lua_pushvalue(L, -1)
+        // assign new table to field
         lua_setfield(L, idx, fname)
+        // false, because did not find table there
         return 0
     }
 }
 
+// Stripped-down 'require': After checking "loaded" table, calls 'openf'
+// to open a module, registers the result in 'package.loaded' table and,
+// if 'glb' is true, also registers the result in the global table.
+// Leaves resulting module on the top.
 [c_function]
 def luaL_requiref(var L : lua_State?; var modname : uint8?; openf : function<(var a0 : lua_State?) : int>; glb : int) {
-    luaL_getsubtable(L, -1000000 - 1000, reinterpret<uint8?>("_LOADED"))
+    luaL_getsubtable(L, LUA_REGISTRYINDEX, reinterpret<uint8?>("_LOADED"))
+    // LOADED[modname]
     lua_getfield(L, -1, modname)
+    // package not already loaded?
     if (!(lua_toboolean(L, -1) != 0)) {
+        // remove field
         lua_settop(L, -1 - 1)
         lua_pushcclosure(L, openf, 0)
+        // argument to open function
         lua_pushstring(L, modname)
+        // call 'openf' to open module
         lua_callk(L, 1, 1, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+        // make copy of module (call result)
         lua_pushvalue(L, -1)
+        // LOADED[modname] = module
         lua_setfield(L, -3, modname)
     }
+    // remove LOADED table
     lua_rotate(L, -2, -1)
     lua_settop(L, -1 - 1)
     if (glb != 0) {
+        // copy of module
         lua_pushvalue(L, -1)
+        // _G[modname] = module
         lua_setglobal(L, modname)
     }
 }
@@ -18103,10 +21557,14 @@ def luaL_addgsub(var b : luaL_Buffer?; var s : uint8?; var p : uint8?; var r : u
         if (!(wild != null)) {
             break
         }
+        // push prefix
         luaL_addlstring(b, s, uint64(int64(wild - s)))
+        // push replacement in place of pattern
         luaL_addstring(b, r)
+        // continue after 'p'
         s = wild + l
     }
+    // push last suffix
     luaL_addstring(b, s)
 }
 
@@ -18121,6 +21579,7 @@ def luaL_gsub(var L : lua_State?; var s : uint8?; var p : uint8?; var r : uint8?
 
 [c_function]
 def private l_alloc(var ud : void?; var ptr : void?; osize : uint64; nsize : uint64) : void? {
+    // not used
     if (nsize == uint64(0)) {
         crt::free(ptr)
         return null
@@ -18129,30 +21588,39 @@ def private l_alloc(var ud : void?; var ptr : void?; osize : uint64; nsize : uin
     }
 }
 
+// Standard panic funcion just prints an error message. The test
+// with 'lua_type' avoids possible memory errors in 'lua_tostring'.
 [c_function]
 def private _c_panic(var L : lua_State?) : int {
-    var msg : uint8? = lua_type(L, -1) == 4 ? lua_tolstring(L, -1, null) : reinterpret<uint8?>(reinterpret<uint8?>("error object is not a string"))
+    var msg : uint8? = lua_type(L, -1) == LUA_TSTRING ? lua_tolstring(L, -1, null) : reinterpret<uint8?>(reinterpret<uint8?>("error object is not a string"))
     fprintf(crt::c_stderr(), reinterpret<uint8?>("PANIC: unprotected error in call to Lua API (%s)\n"), msg)
     crt::fflush(crt::c_stderr())
+    // return to Lua to abort
     return 0
 }
 
+// Check whether message is a control message. If so, execute the
+// control or ignore it if unknown.
 [c_function]
 def private checkcontrol(var L : lua_State?; var message : uint8?; tocont : int) : int {
+    // not a control message?
     var _t1 = tocont != 0
     if (!_t1) {
         var _t0 = message
         message = message + 1
-        _t1 = int(deref(_t0)) != 64
+        _t1 = int(deref(_t0)) != '@'
     }
     if (_t1) {
         return 0
     } else {
         if (crt::strcmp(message, reinterpret<uint8?>("off")) == 0) {
+            // turn warnings off
             lua_setwarnf(L, @@warnfoff, reinterpret<void?>(L))
         } elif (crt::strcmp(message, reinterpret<uint8?>("on")) == 0) {
+            // turn warnings on
             lua_setwarnf(L, @@warnfon, reinterpret<void?>(L))
         }
+        // it was a control message
         return 1
     }
 }
@@ -18162,35 +21630,48 @@ def private warnfoff(var ud : void?; var message : uint8?; tocont : int) {
     checkcontrol(reinterpret<lua_State?>(ud), message, tocont)
 }
 
+// Writes the message and handle 'tocont', finishing the message
+// if needed and setting the next warn function.
 [c_function]
 def private warnfcont(var ud : void?; var message : uint8?; tocont : int) {
     var L : lua_State? = reinterpret<lua_State?>(ud)
+    // write message
     fprintf(crt::c_stderr(), reinterpret<uint8?>("%s"), message)
     crt::fflush(crt::c_stderr())
+    // not the last part?
     if (tocont != 0) {
+        // to be continued
         lua_setwarnf(L, @@warnfcont, reinterpret<void?>(L))
     } else {
+        // last part
+        // finish message with end-of-line
         fprintf(crt::c_stderr(), reinterpret<uint8?>("%s"), reinterpret<uint8?>("\n"))
         crt::fflush(crt::c_stderr())
+        // next call is a new message
         lua_setwarnf(L, @@warnfon, reinterpret<void?>(L))
     }
 }
 
 [c_function]
 def private warnfon(var ud : void?; var message : uint8?; tocont : int) {
+    // control message?
     if (checkcontrol(reinterpret<lua_State?>(ud), message, tocont) != 0) {
+        // nothing else to be done
         return
     }
+    // start a new warning
     fprintf(crt::c_stderr(), reinterpret<uint8?>("%s"), reinterpret<uint8?>("Lua warning: "))
     crt::fflush(crt::c_stderr())
+    // finish processing
     warnfcont(ud, message, tocont)
 }
 
 [c_function]
 def luaL_newstate : lua_State ? {
     var L : lua_State? = lua_newstate(@@l_alloc, null)
-    if (int64(L != null ? 1 : 0) != 0) {
+    if (L != null) {
         lua_atpanic(L, @@_c_panic)
+        // default is warnings off
         lua_setwarnf(L, @@warnfoff, reinterpret<void?>(L))
     }
     return L
@@ -18199,7 +21680,8 @@ def luaL_newstate : lua_State ? {
 [c_function]
 def luaL_checkversion_(var L : lua_State?; ver : double; sz : uint64) {
     var v : double = lua_version(L)
-    if (sz != uint64(typeinfo sizeof(type<int64>)) * uint64(16) + uint64(typeinfo sizeof(type<double>))) {
+    // check numeric types
+    if (sz != LUAL_NUMSIZES) {
         luaL_error`va(L, reinterpret<uint8?>("core and library have incompatible numeric types"), VaNone())
     } elif (v != ver) {
         luaL_error`va(L, reinterpret<uint8?>("version mismatch: app. needs %f, Lua core provides %f"), (ver, v))
@@ -18220,7 +21702,7 @@ def private cannot(var what : uint8?) {
 
 [c_function]
 def private usage(var message : uint8?) {
-    if (int(deref(message)) == 45) {
+    if (int(deref(message)) == '-') {
         fprintf(crt::c_stderr(), reinterpret<uint8?>("%s: unrecognized option '%s'\n"), progname, message)
     } else {
         fprintf(crt::c_stderr(), reinterpret<uint8?>("%s: %s\n"), progname, message)
@@ -18239,34 +21721,43 @@ def private doargs(argc : int; var argv : uint8 ??) : int {
     {
         i = 1
         while (i < argc) {
-            if (int(deref(deref(argv + i))) != 45) {
+            // end of options; keep it
+            if (int(deref(deref(argv + i))) != '-') {
                 break
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("--")) == 0) {
+                // end of options; skip it
                 i++
                 if (version != 0) {
                     version++
                 }
                 break
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-")) == 0) {
+                // end of options; use stdin
                 break
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-l")) == 0) {
+                // list
                 listing++
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-o")) == 0) {
+                // output file
                 i++
                 output = deref(argv + i)
-                if (output == null || int(deref(output)) == 0 || int(deref(output)) == 45 && int(deref(output + 1)) != 0) {
+                if (output == null || int(deref(output)) == 0 || int(deref(output)) == '-' && int(deref(output + 1)) != 0) {
                     usage(reinterpret<uint8?>("'-o' needs argument"))
                 }
                 if (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-")) == 0) {
                     output = null
                 }
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-p")) == 0) {
+                // parse only
                 dumping = 0
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-s")) == 0) {
+                // strip debug information
                 stripping = 1
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-v")) == 0) {
+                // show version
                 version++
             } else {
+                // unknown option
                 usage(deref(argv + i))
             }
             i++
@@ -18306,7 +21797,7 @@ def private combine(var L : lua_State?; n : int) : Proto? {
     } else {
         var f : Proto?
         var i : int = n
-        if (lua_load(L, @@reader, reinterpret<void?>(addr(i)), reinterpret<uint8?>("=(luac)"), null) != 0) {
+        if (lua_load(L, @@reader, reinterpret<void?>(addr(i)), reinterpret<uint8?>("=(luac)"), null) != LUA_OK) {
             fatal(lua_tolstring(L, -1, null))
         }
         f = addr(reinterpret<GCUnion?>(addr((L.top.p + -1).val).value_.gc).cl.l).p
@@ -18343,7 +21834,7 @@ def private pmain(var L : lua_State?) : int {
         i = 0
         while (i < argc) {
             var filename : uint8? = crt::strcmp(deref(argv + i), reinterpret<uint8?>("-")) == 0 ? default<uint8?> : deref(argv + i)
-            if (luaL_loadfilex(L, filename, null) != 0) {
+            if (luaL_loadfilex(L, filename, null) != LUA_OK) {
                 fatal(lua_tolstring(L, -1, null))
             }
             i++
@@ -18385,7 +21876,7 @@ def c_main(var argc : int; var argv : uint8 ??) : int {
     lua_pushcclosure(L, @@pmain, 0)
     lua_pushinteger(L, int64(argc))
     lua_pushlightuserdata(L, reinterpret<void?>(argv))
-    if (lua_pcallk(L, 2, 0, 0, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>) != 0) {
+    if (lua_pcallk(L, 2, 0, 0, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>) != LUA_OK) {
         fatal(lua_tolstring(L, -1, null))
     }
     lua_close(L)
@@ -18403,21 +21894,21 @@ def private PrintString(var ts : TString?) {
         while (i < n) {
             var c : int = int(uint8(deref(s + i)))
             let _cond = c
-            if (_cond == 34) {
+            if (_cond == '"') {
                 printf(reinterpret<uint8?>("\\\""))
-            } elif (_cond == 92) {
+            } elif (_cond == '\\') {
                 printf(reinterpret<uint8?>("\\\\"))
             } elif (_cond == 7) {
                 printf(reinterpret<uint8?>("\\a"))
-            } elif (_cond == 8) {
+            } elif (_cond == '\b') {
                 printf(reinterpret<uint8?>("\\b"))
-            } elif (_cond == 12) {
+            } elif (_cond == '\f') {
                 printf(reinterpret<uint8?>("\\f"))
-            } elif (_cond == 10) {
+            } elif (_cond == '\n') {
                 printf(reinterpret<uint8?>("\\n"))
-            } elif (_cond == 13) {
+            } elif (_cond == '\r') {
                 printf(reinterpret<uint8?>("\\r"))
-            } elif (_cond == 9) {
+            } elif (_cond == '\t') {
                 printf(reinterpret<uint8?>("\\t"))
             } elif (_cond == 11) {
                 printf(reinterpret<uint8?>("\\v"))
@@ -18449,6 +21940,7 @@ def private PrintType(var f : Proto?; i : int) {
     } elif (_cond == 4 || _cond == 20) {
         printf(reinterpret<uint8?>("S"))
     } else {
+        // cannot happen
         printf(reinterpret<uint8?>("?%d"), int(o.tt_) & 63)
     }
     printf(reinterpret<uint8?>("\t"))
@@ -18478,6 +21970,7 @@ def private PrintConstant(var f : Proto?; i : int) {
     } elif (_cond == 4 || _cond == 20) {
         PrintString(addr(reinterpret<GCUnion?>(o.value_.gc).ts))
     } else {
+        // cannot happen
         printf(reinterpret<uint8?>("?%d"), int(o.tt_) & 63)
     }
 }
@@ -18788,7 +22281,7 @@ def private PrintCode(var f : Proto?) {
 [c_function]
 def private PrintHeader(var f : Proto?) {
     var s : uint8? = f.source != null ? addr(f.source.contents[0]) : reinterpret<uint8?>("=?")
-    if (int(deref(s)) == 64 || int(deref(s)) == 61) {
+    if (int(deref(s)) == '@' || int(deref(s)) == '=') {
         s = s + 1
     } elif (int(deref(s)) == int(deref(reinterpret<uint8?>("\x1bLua") + 0))) {
         s = reinterpret<uint8?>("(bstring)")
@@ -18796,7 +22289,7 @@ def private PrintHeader(var f : Proto?) {
         s = reinterpret<uint8?>("(string)")
     }
     printf(reinterpret<uint8?>("\n%s <%s:%d,%d> (%d instruction%s at %p)\n"), f.linedefined == 0 ? reinterpret<uint8?>("main") : reinterpret<uint8?>("function"), s, f.linedefined, f.lastlinedefined, f.sizecode, f.sizecode == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), reinterpret<uint8?>(reinterpret<void?>(f)))
-    printf(reinterpret<uint8?>("%d%s param%s, %d slot%s, %d upvalue%s, "), int(f.numparams), int(f.is_vararg) != 0 ? reinterpret<uint8?>("+") : addr(c2das_empty[0]), int(f.numparams) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), int(f.maxstacksize), int(f.maxstacksize) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizeupvalues, f.sizeupvalues == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"))
+    printf(reinterpret<uint8?>("%d%s param%s, %d slot%s, %d upvalue%s, "), int(f.numparams), f.is_vararg != 0 ? reinterpret<uint8?>("+") : addr(c2das_empty[0]), int(f.numparams) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), int(f.maxstacksize), int(f.maxstacksize) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizeupvalues, f.sizeupvalues == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"))
     printf(reinterpret<uint8?>("%d local%s, %d constant%s, %d function%s\n"), f.sizelocvars, f.sizelocvars == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizek, f.sizek == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizep, f.sizep == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"))
 }
 

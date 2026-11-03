@@ -2,101 +2,121 @@ c_types
 lapi
 lauxlib
 lauxlib_h
-lcode
+lcode_cluster: cluster of 15: lcode ldebug ldo lfunc lgc llex lmem lobject lparser lstate lstring ltable ltm lundump lvm
 lcode_h
 lctype
-ldebug
-ldo
 ldump
-lfunc
-lgc
-llex
 llex_h_cluster: cluster of 2: llex_h lparser_h
-lmem
-lobject
 lobject_h_cluster: cluster of 3: lobject_h lstate_h lua_h
 lopcodes
 lopcodes_h
-lparser
-lstate
-lstring
-ltable
-ltm
 ltm_h
 luac
-luac_link
-lundump
-lvm
 lvm_h
 lzio
 lzio_h
+lcode_cluster: lcode -> lgc: luaC_barrier_
+lcode_cluster: lcode -> llex: luaX_syntaxerror
+lcode_cluster: lcode -> lmem: luaM_growaux_
+lcode_cluster: lcode -> lobject: luaO_ceillog2, luaO_rawarith
+lcode_cluster: lcode -> lparser: luaY_nvarstack
+lcode_cluster: lcode -> ltable: luaH_get, luaH_finishset
+lcode_cluster: lcode -> lvm: luaV_flttointeger, luaV_tointegerns, luaV_equalobj
+lcode_cluster: ldebug -> ldo: luaD_callnoyield, luaD_throw, luaD_hook, luaD_hookcall
+lcode_cluster: ldebug -> lfunc: luaF_getlocalname
+lcode_cluster: ldebug -> lgc: luaC_step
+lcode_cluster: ldebug -> lobject: luaO_pushfstring, luaO_pushvfstring, luaO_chunkid
+lcode_cluster: ldebug -> ltable: luaH_new, luaH_setint
+lcode_cluster: ldebug -> ltm: luaT_objtypename
+lcode_cluster: ldebug -> lvm: luaV_tointegerns
+lcode_cluster: ldo -> ldebug: luaG_runerror, luaG_callerror
+lcode_cluster: ldo -> lfunc: luaF_close, luaF_initupvals
+lcode_cluster: ldo -> lgc: luaC_step
+lcode_cluster: ldo -> lmem: luaM_saferealloc_, luaM_realloc_, luaM_free_
+lcode_cluster: ldo -> lobject: luaO_pushfstring
+lcode_cluster: ldo -> lparser: luaY_parser
+lcode_cluster: ldo -> lstate: luaE_checkcstack, luaE_shrinkCI, luaE_resetthread, luaE_extendCI
+lcode_cluster: ldo -> lstring: luaS_new, luaS_newlstr
+lcode_cluster: ldo -> ltm: luaT_gettmbyobj
+lcode_cluster: ldo -> lundump: luaU_undump
+lcode_cluster: ldo -> lvm: luaV_finishOp, luaV_execute
+lcode_cluster: lfunc -> ldebug: luaG_findlocal, luaG_runerror
+lcode_cluster: lfunc -> ldo: luaD_seterrorobj, luaD_callnoyield, luaD_call
+lcode_cluster: lfunc -> lgc: luaC_newobj, luaC_barrier_
+lcode_cluster: lfunc -> lmem: luaM_free_
+lcode_cluster: lfunc -> ltm: luaT_gettmbyobj
+lcode_cluster: lgc -> ldo: luaD_pcall, luaD_shrinkstack, luaD_callnoyield
+lcode_cluster: lgc -> lfunc: luaF_freeproto, luaF_unlinkupval
+lcode_cluster: lgc -> lmem: luaM_free_, luaM_malloc_
+lcode_cluster: lgc -> lstate: luaE_warnerror, luaE_freethread, luaE_setdebt
+lcode_cluster: lgc -> lstring: luaS_clearcache, luaS_remove, luaS_resize
+lcode_cluster: lgc -> ltable: luaH_realasize, luaH_free
+lcode_cluster: lgc -> ltm: luaT_gettm, luaT_gettmbyobj
+lcode_cluster: llex -> ldebug: luaG_addinfo
+lcode_cluster: llex -> ldo: luaD_throw
+lcode_cluster: llex -> lgc: luaC_fix, luaC_step
+lcode_cluster: llex -> lmem: luaM_saferealloc_
+lcode_cluster: llex -> lobject: luaO_pushfstring, luaO_str2num, luaO_utf8esc, luaO_hexavalue
+lcode_cluster: llex -> lstring: luaS_new, luaS_newlstr
+lcode_cluster: llex -> ltable: luaH_getstr, luaH_finishset
+lcode_cluster: lmem -> ldebug: luaG_runerror
+lcode_cluster: lmem -> ldo: luaD_throw
+lcode_cluster: lmem -> lgc: luaC_fullgc
+lcode_cluster: lobject -> ldebug: luaG_runerror
+lcode_cluster: lobject -> lstring: luaS_newlstr
+lcode_cluster: lobject -> ltm: luaT_trybinTM
+lcode_cluster: lobject -> lvm: luaV_modf, luaV_tointegerns, luaV_idiv, luaV_shiftl, luaV_mod, luaV_concat
+lcode_cluster: lparser -> lcode: luaK_settablesize, luaK_dischargevars, luaK_ret, luaK_code, luaK_semerror, luaK_setoneret, luaK_indexed, luaK_getlabel, luaK_exp2const, luaK_reserveregs, luaK_exp2anyregup, luaK_int, luaK_codeABCk, luaK_setlist, luaK_exp2nextreg, luaK_prefix, luaK_patchtohere, luaK_setreturns, luaK_patchlist, luaK_jump, luaK_exp2anyreg, luaK_finish, luaK_goiftrue, luaK_codeABx, luaK_concat, luaK_goiffalse, luaK_infix, luaK_nil, luaK_checkstack, luaK_fixline, luaK_exp2val, luaK_posfix, luaK_self, luaK_storevar
+lcode_cluster: lparser -> ldo: luaD_inctop
+lcode_cluster: lparser -> lfunc: luaF_newproto, luaF_newLclosure
+lcode_cluster: lparser -> lgc: luaC_step, luaC_barrier_
+lcode_cluster: lparser -> llex: luaX_newstring, luaX_syntaxerror, luaX_token2str, luaX_lookahead, luaX_next, luaX_setinput
+lcode_cluster: lparser -> lmem: luaM_shrinkvector_, luaM_growaux_
+lcode_cluster: lparser -> lobject: luaO_pushfstring
+lcode_cluster: lparser -> lstate: luaE_incCstack
+lcode_cluster: lparser -> lstring: luaS_newlstr, luaS_new
+lcode_cluster: lparser -> ltable: luaH_new
+lcode_cluster: lstate -> ldebug: luaG_runerror
+lcode_cluster: lstate -> ldo: luaD_seterrorobj, luaD_closeprotected, luaD_reallocstack, luaD_rawrunprotected, luaD_errerr
+lcode_cluster: lstate -> lfunc: luaF_closeupval
+lcode_cluster: lstate -> lgc: luaC_step, luaC_newobjdt, luaC_freeallobjects
+lcode_cluster: lstate -> llex: luaX_init
+lcode_cluster: lstate -> lmem: luaM_free_, luaM_malloc_
+lcode_cluster: lstate -> lstring: luaS_hash, luaS_init
+lcode_cluster: lstate -> ltable: luaH_resize, luaH_new
+lcode_cluster: lstate -> ltm: luaT_init
+lcode_cluster: lstring -> ldo: luaD_throw
+lcode_cluster: lstring -> lgc: luaC_fix, luaC_fullgc, luaC_newobj
+lcode_cluster: lstring -> lmem: luaM_realloc_, luaM_toobig, luaM_malloc_
+lcode_cluster: ltable -> ldebug: luaG_runerror
+lcode_cluster: ltable -> ldo: luaD_throw
+lcode_cluster: ltable -> lgc: luaC_barrierback_, luaC_newobj
+lcode_cluster: ltable -> lmem: luaM_realloc_, luaM_free_, luaM_malloc_
+lcode_cluster: ltable -> lobject: luaO_ceillog2
+lcode_cluster: ltable -> lstring: luaS_eqlngstr, luaS_hashlongstr
+lcode_cluster: ltable -> lvm: luaV_flttointeger
+lcode_cluster: ltm -> ldebug: luaG_ordererror, luaG_concaterror, luaG_tointerror, luaG_opinterror
+lcode_cluster: ltm -> ldo: luaD_growstack, luaD_callnoyield, luaD_call
+lcode_cluster: ltm -> lgc: luaC_fix, luaC_step
+lcode_cluster: ltm -> lstring: luaS_new
+lcode_cluster: ltm -> ltable: luaH_getshortstr
+lcode_cluster: lundump -> ldo: luaD_inctop, luaD_throw
+lcode_cluster: lundump -> lfunc: luaF_newproto, luaF_newLclosure
+lcode_cluster: lundump -> lgc: luaC_barrier_
+lcode_cluster: lundump -> lmem: luaM_toobig, luaM_malloc_
+lcode_cluster: lundump -> lobject: luaO_pushfstring
+lcode_cluster: lundump -> lstring: luaS_createlngstrobj, luaS_newlstr
+lcode_cluster: lvm -> ldebug: luaG_traceexec, luaG_forerror, luaG_tracecall, luaG_runerror, luaG_typeerror
+lcode_cluster: lvm -> ldo: luaD_pretailcall, luaD_poscall, luaD_hookcall, luaD_precall, luaD_call
+lcode_cluster: lvm -> lfunc: luaF_close, luaF_newtbcupval, luaF_closeupval, luaF_newLclosure, luaF_findupval
+lcode_cluster: lvm -> lgc: luaC_step, luaC_barrierback_, luaC_barrier_
+lcode_cluster: lvm -> lobject: luaO_tostring, luaO_str2num
+lcode_cluster: lvm -> lstring: luaS_createlngstrobj, luaS_eqlngstr, luaS_newlstr
+lcode_cluster: lvm -> ltable: luaH_realasize, luaH_resize, luaH_get, luaH_getn, luaH_new, luaH_getstr, luaH_getint, luaH_finishset, luaH_getshortstr, luaH_resizearray
+lcode_cluster: lvm -> ltm: luaT_callTMres, luaT_gettm, luaT_trybiniTM, luaT_getvarargs, luaT_gettmbyobj, luaT_callorderTM, luaT_tryconcatTM, luaT_trybinassocTM, luaT_adjustvarargs, luaT_callTM, luaT_callorderiTM, luaT_trybinTM
 llex_h_cluster: llex_h -> lparser_h: struct FuncState, struct Dyndata
 llex_h_cluster: lparser_h -> llex_h: struct LexState
 lobject_h_cluster: lobject_h -> lstate_h: struct lua_State
 lobject_h_cluster: lstate_h -> lobject_h: struct TString, struct Table, struct TValue, struct GCObject, struct UpVal, union StkIdRel, union Closure, struct Proto, struct Udata
 lobject_h_cluster: lstate_h -> lua_h: struct lua_Debug
 lobject_h_cluster: lua_h -> lstate_h: struct CallInfo
-cut luaC_barrierback_: ltable -> lgc, 23 calls profiled of the edge's 3908560
-cut luaC_fix: ltm -> lgc, 125 calls profiled of the edge's 125
-cut luaC_freeallobjects: lstate -> lgc, 5 calls profiled of the edge's 3281
-cut luaC_fullgc: lmem -> lgc, 0 calls profiled of the edge's 0
-cut luaC_newobj: ltable -> lgc, 3908537 calls profiled of the edge's 3908560
-cut luaC_newobjdt: lstate -> lgc, 3273 calls profiled of the edge's 3281
-cut luaC_step: lstate -> lgc, 3 calls profiled of the edge's 3281
-cut luaC_step: ltm -> lgc, 0 calls profiled of the edge's 125
-cut luaD_call: lfunc -> ldo, 76 calls profiled of the edge's 694
-cut luaD_call: ltm -> ldo, 369 calls profiled of the edge's 581
-cut luaD_callnoyield: lfunc -> ldo, 353 calls profiled of the edge's 694
-cut luaD_callnoyield: lgc -> ldo, 3828 calls profiled of the edge's 20732
-cut luaD_callnoyield: ltm -> ldo, 208 calls profiled of the edge's 581
-cut luaD_closeprotected: lstate -> ldo, 1006 calls profiled of the edge's 3030
-cut luaD_errerr: lstate -> ldo, 22 calls profiled of the edge's 3030
-cut luaD_growstack: ltm -> ldo, 4 calls profiled of the edge's 581
-cut luaD_pcall: lgc -> ldo, 3828 calls profiled of the edge's 20732
-cut luaD_rawrunprotected: lstate -> ldo, 5 calls profiled of the edge's 3030
-cut luaD_reallocstack: lstate -> ldo, 1001 calls profiled of the edge's 3030
-cut luaD_seterrorobj: lfunc -> ldo, 265 calls profiled of the edge's 694
-cut luaD_seterrorobj: lstate -> ldo, 996 calls profiled of the edge's 3030
-cut luaD_shrinkstack: lgc -> ldo, 13076 calls profiled of the edge's 20732
-cut luaD_throw: lmem -> ldo, 0 calls profiled of the edge's 0
-cut luaD_throw: lstring -> ldo, 0 calls profiled of the edge's 0
-cut luaD_throw: ltable -> ldo, 0 calls profiled of the edge's 0
-cut luaF_closeupval: lstate -> lfunc, 3273 calls profiled of the edge's 3273
-cut luaF_freeproto: lgc -> lfunc, 239963 calls profiled of the edge's 241966
-cut luaF_unlinkupval: lgc -> lfunc, 2003 calls profiled of the edge's 241966
-cut luaG_callerror: ldo -> ldebug, 11899 calls profiled of the edge's 11910
-cut luaG_concaterror: ltm -> ldebug, 4 calls profiled of the edge's 1213
-cut luaG_findlocal: lfunc -> ldebug, 1 calls profiled of the edge's 2
-cut luaG_opinterror: ltm -> ldebug, 1179 calls profiled of the edge's 1213
-cut luaG_ordererror: ltm -> ldebug, 9 calls profiled of the edge's 1213
-cut luaG_runerror: ldo -> ldebug, 11 calls profiled of the edge's 11910
-cut luaG_runerror: lfunc -> ldebug, 1 calls profiled of the edge's 2
-cut luaG_runerror: lmem -> ldebug, 0 calls profiled of the edge's 0
-cut luaG_runerror: lobject -> ldebug, 0 calls profiled of the edge's 0
-cut luaG_runerror: lstate -> ldebug, 219 calls profiled of the edge's 219
-cut luaG_runerror: ltable -> ldebug, 5 calls profiled of the edge's 5
-cut luaG_tointerror: ltm -> ldebug, 21 calls profiled of the edge's 1213
-cut luaS_clearcache: lgc -> lstring, 2865 calls profiled of the edge's 482158
-cut luaS_eqlngstr: ltable -> lstring, 320 calls profiled of the edge's 2169
-cut luaS_hash: lstate -> lstring, 5 calls profiled of the edge's 10
-cut luaS_hashlongstr: ltable -> lstring, 1849 calls profiled of the edge's 2169
-cut luaS_init: lstate -> lstring, 5 calls profiled of the edge's 10
-cut luaS_new: ltm -> lstring, 133 calls profiled of the edge's 133
-cut luaS_newlstr: lobject -> lstring, 385819 calls profiled of the edge's 385819
-cut luaS_remove: lgc -> lstring, 479246 calls profiled of the edge's 482158
-cut luaS_resize: lgc -> lstring, 47 calls profiled of the edge's 482158
-cut luaT_trybinTM: lobject -> ltm, 0 calls profiled of the edge's 0
-cut luaU_undump: ldo -> lundump, 322 calls profiled of the edge's 322
-cut luaV_concat: lobject -> lvm, 0 calls profiled of the edge's 393
-cut luaV_execute: ldo -> lvm, 1618204 calls profiled of the edge's 1620065
-cut luaV_finishOp: ldo -> lvm, 1861 calls profiled of the edge's 1620065
-cut luaV_flttointeger: ltable -> lvm, 332876 calls profiled of the edge's 332876
-cut luaV_idiv: lobject -> lvm, 28 calls profiled of the edge's 393
-cut luaV_mod: lobject -> lvm, 38 calls profiled of the edge's 393
-cut luaV_modf: lobject -> lvm, 37 calls profiled of the edge's 393
-cut luaV_shiftl: lobject -> lvm, 168 calls profiled of the edge's 393
-cut luaV_tointegerns: ldebug -> lvm, 21 calls profiled of the edge's 21
-cut luaV_tointegerns: lobject -> lvm, 122 calls profiled of the edge's 393
-cut luaX_init: lstate -> llex, 5 calls profiled of the edge's 5
-cut luaY_nvarstack: lcode -> lparser, 1359860 calls profiled of the edge's 1359860
-cut luaY_parser: ldo -> lparser, 228646 calls profiled of the edge's 228646

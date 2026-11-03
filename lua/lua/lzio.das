@@ -7,6 +7,8 @@ require crt
 require lobject_h_cluster
 require lzio_h
 
+let private EOZ = -1
+
 [c_function]
 def luaZ_fill(var z : Zio?) : int {
     var size : uint64
@@ -14,8 +16,9 @@ def luaZ_fill(var z : Zio?) : int {
     var buff : uint8?
     buff = invoke(z.reader, L, z.data, addr(size))
     if (buff == null || size == uint64(0)) {
-        return -1
+        return EOZ
     }
+    // discount char being returned
     z.n = size - uint64(1)
     z.p = buff
     var _t0 = z.p
@@ -31,18 +34,24 @@ def luaZ_init(var L : lua_State?; var z : Zio?; reader : function<(var a0 : lua_
     z.p = null
 }
 
+// --------------------------------------------------------------- read ---
 [c_function]
 def luaZ_read(var z : Zio?; var b : void?; var n : uint64) : uint64 {
     while (n != 0) {
         var m : uint64
+        // no bytes in buffer?
         if (z.n == uint64(0)) {
-            if (luaZ_fill(z) == -1) {
+            // try to read more
+            if (luaZ_fill(z) == EOZ) {
+                // no more input; return number of missing bytes
                 return n
             } else {
+                // luaZ_fill consumed first byte; put it back
                 z.n++
                 z.p = z.p - 1
             }
         }
+        // min. between n and z->n
         m = n <= z.n ? n : z.n
         crt::memcpy(b, reinterpret<void?>(z.p), m)
         z.n -= m

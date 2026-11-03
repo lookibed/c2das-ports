@@ -44,6 +44,13 @@ var private iolib : luaL_Reg[12] = fixed_array(luaL_Reg(name = unsafe(reinterpre
 var private meth : luaL_Reg[8] = fixed_array(luaL_Reg(name = unsafe(reinterpret<uint8?>("read")), func = @@f_read), luaL_Reg(name = unsafe(reinterpret<uint8?>("write")), func = @@f_write), luaL_Reg(name = unsafe(reinterpret<uint8?>("lines")), func = @@f_lines), luaL_Reg(name = unsafe(reinterpret<uint8?>("flush")), func = @@f_flush), luaL_Reg(name = unsafe(reinterpret<uint8?>("seek")), func = @@f_seek), luaL_Reg(name = unsafe(reinterpret<uint8?>("close")), func = @@f_close), luaL_Reg(name = unsafe(reinterpret<uint8?>("setvbuf")), func = @@f_setvbuf), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 var private metameth : luaL_Reg[5] = fixed_array(luaL_Reg(name = unsafe(reinterpret<uint8?>("__index")), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = unsafe(reinterpret<uint8?>("__gc")), func = @@f_gc), luaL_Reg(name = unsafe(reinterpret<uint8?>("__close")), func = @@f_gc), luaL_Reg(name = unsafe(reinterpret<uint8?>("__tostring")), func = @@f_tostring), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
+let private LUA_REGISTRYINDEX = -1000000 - 1000
+let private IOPREF_LEN = uint64(typeinfo sizeof(type<uint8[5]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)
+let private LUAL_BUFFERSIZE = int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>)))
+let private LUA_MINSTACK = 20
+let private LUA_TNUMBER = 3
+
+// Check whether 'mode' matches '[rwa]%+?[L_MODEEXT]*'
 [c_function]
 def private l_checkmode(var mode : uint8?) : int {
     var _t1 = int(deref(mode)) != 0
@@ -54,7 +61,7 @@ def private l_checkmode(var mode : uint8?) : int {
     }
     var _t3 = _t1
     if (_t3) {
-        var _t2 = int(deref(mode)) != 43
+        var _t2 = int(deref(mode)) != '+'
         if (!_t2) {
             mode = mode + 1
             _t2 = 1 != 0
@@ -70,6 +77,7 @@ def private io_type(var L : lua_State?) : int {
     luaL_checkany(L, 1)
     p = reinterpret<luaL_Stream?>(luaL_testudata(L, 1, reinterpret<uint8?>("FILE*")))
     if (p == null) {
+        // not a file
         lua_pushnil(L)
     } elif (p.closef == null) {
         lua_pushstring(L, reinterpret<uint8?>("closed file"))
@@ -93,37 +101,49 @@ def private f_tostring(var L : lua_State?) : int {
 [c_function]
 def private tofile(var L : lua_State?) : _IO_FILE? {
     var p : luaL_Stream? = reinterpret<luaL_Stream?>(luaL_checkudata(L, 1, reinterpret<uint8?>("FILE*")))
-    if (int64((p.closef == null ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (p.closef == null) {
         luaL_error`va(L, reinterpret<uint8?>("attempt to use a closed file"), VaNone())
     }
     return p.f
 }
 
+// When creating file handles, always creates a 'closed' file handle
+// before opening the actual file; so, if there is a memory error, the
+// handle is in a consistent state.
 [c_function]
 def private newprefile(var L : lua_State?) : luaL_Stream? {
     var p : luaL_Stream? = reinterpret<luaL_Stream?>(lua_newuserdatauv(L, uint64(typeinfo sizeof(type<luaL_Stream>)), 0))
+    // mark file handle as 'closed'
     p.closef = default<function<(var a0 : lua_State?) : int>>
     luaL_setmetatable(L, reinterpret<uint8?>("FILE*"))
     return p
 }
 
+// Calls the 'close' function from a file handle. The 'volatile' avoids
+// a bug in some versions of the Clang compiler (e.g., clang 3.0 for
+// 32 bits).
 [c_function]
 def private aux_close(var L : lua_State?) : int {
     var p : luaL_Stream? = reinterpret<luaL_Stream?>(luaL_checkudata(L, 1, reinterpret<uint8?>("FILE*")))
     var cf : function<(var a0 : lua_State?) : int> = p.closef
+    // mark stream as closed
     p.closef = default<function<(var a0 : lua_State?) : int>>
+    // close it
     return invoke(c_volatile_load(cf), L)
 }
 
 def private f_close(var L : lua_State?) : int {
+    // make sure argument is an open stream
     tofile(L)
     return aux_close(L)
 }
 
 [c_function]
 def private io_close(var L : lua_State?) : int {
+    // no argument?
     if (lua_type(L, 1) == -1) {
-        lua_getfield(L, -1000000 - 1000, reinterpret<uint8?>("_IO_output"))
+        // use default output
+        lua_getfield(L, LUA_REGISTRYINDEX, reinterpret<uint8?>("_IO_output"))
     }
     return f_close(L)
 }
@@ -132,11 +152,13 @@ def private io_close(var L : lua_State?) : int {
 def private f_gc(var L : lua_State?) : int {
     var p : luaL_Stream? = reinterpret<luaL_Stream?>(luaL_checkudata(L, 1, reinterpret<uint8?>("FILE*")))
     if (!(p.closef == null) && p.f != null) {
+        // ignore closed and incompletely open files
         aux_close(L)
     }
     return 0
 }
 
+// function to close regular files
 [c_function]
 def private io_fclose(var L : lua_State?) : int {
     var p : luaL_Stream? = reinterpret<luaL_Stream?>(luaL_checkudata(L, 1, reinterpret<uint8?>("FILE*")))
@@ -155,7 +177,7 @@ def private newfile(var L : lua_State?) : luaL_Stream? {
 def private opencheck(var L : lua_State?; var fname : uint8?; var mode : uint8?) {
     var p : luaL_Stream? = newfile(L)
     p.f = reinterpret<_IO_FILE?>(crt::fopen(fname, mode))
-    if (int64((p.f == null ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (p.f == null) {
         luaL_error`va(L, reinterpret<uint8?>("cannot open file '%s' (%s)"), (fname, crt::strerror(deref(crt::c_errno_location()))))
     }
 }
@@ -165,13 +187,15 @@ def private io_open(var L : lua_State?) : int {
     var filename : uint8? = luaL_checklstring(L, 1, null)
     var mode : uint8? = luaL_optlstring(L, 2, reinterpret<uint8?>("r"), null)
     var p : luaL_Stream? = newfile(L)
+    // to traverse/check mode
     var md : uint8? = mode
-    let _t0 = int64(l_checkmode(md) != 0 ? 1 : 0) != 0 || luaL_argerror(L, 2, reinterpret<uint8?>("invalid mode")) != 0
+    let _t0 = l_checkmode(md) != 0 || luaL_argerror(L, 2, reinterpret<uint8?>("invalid mode")) != 0
     deref(crt::c_errno_location()) = 0
     p.f = reinterpret<_IO_FILE?>(crt::fopen(filename, mode))
     return p.f == null ? luaL_fileresult(L, 0, filename) : 1
 }
 
+// function to close 'popen' files
 [c_function]
 def private io_pclose(var L : lua_State?) : int {
     var p : luaL_Stream? = reinterpret<luaL_Stream?>(luaL_checkudata(L, 1, reinterpret<uint8?>("FILE*")))
@@ -185,7 +209,7 @@ def private io_popen(var L : lua_State?) : int {
     var filename : uint8? = luaL_checklstring(L, 1, null)
     var mode : uint8? = luaL_optlstring(L, 2, reinterpret<uint8?>("r"), null)
     var p : luaL_Stream? = newprefile(L)
-    let _t0 = int64(((int(deref(mode + 0)) == 114 || int(deref(mode + 0)) == 119) && int(deref(mode + 1)) == 0 ? 1 : 0) != 0 ? 1 : 0) != 0 || luaL_argerror(L, 2, reinterpret<uint8?>("invalid mode")) != 0
+    let _t0 = (int(deref(mode + 0)) == 'r' || int(deref(mode + 0)) == 'w') && int(deref(mode + 1)) == 0 || luaL_argerror(L, 2, reinterpret<uint8?>("invalid mode")) != 0
     deref(crt::c_errno_location()) = 0
     luaL_error`va(L, reinterpret<uint8?>("'popen' not supported"), VaNone())
     p.f = null
@@ -204,10 +228,10 @@ def private io_tmpfile(var L : lua_State?) : int {
 [c_function]
 def private getiofile(var L : lua_State?; var findex : uint8?) : _IO_FILE? {
     var p : luaL_Stream?
-    lua_getfield(L, -1000000 - 1000, findex)
+    lua_getfield(L, LUA_REGISTRYINDEX, findex)
     p = reinterpret<luaL_Stream?>(lua_touserdata(L, -1))
-    if (int64((p.closef == null ? 1 : 0) != 0 ? 1 : 0) != 0) {
-        luaL_error`va(L, reinterpret<uint8?>("default %s file is closed"), (findex + (uint64(typeinfo sizeof(type<uint8[5]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)),))
+    if (p.closef == null) {
+        luaL_error`va(L, reinterpret<uint8?>("default %s file is closed"), (findex + IOPREF_LEN,))
     }
     return p.f
 }
@@ -218,12 +242,14 @@ def private g_iofile(var L : lua_State?; var f : uint8?; var mode : uint8?) : in
         if (filename != null) {
             opencheck(L, filename, mode)
         } else {
+            // check that it's a valid file handle
             tofile(L)
             lua_pushvalue(L, 1)
         }
-        lua_setfield(L, -1000000 - 1000, f)
+        lua_setfield(L, LUA_REGISTRYINDEX, f)
     }
-    lua_getfield(L, -1000000 - 1000, f)
+    // return current value
+    lua_getfield(L, LUA_REGISTRYINDEX, f)
     return 1
 }
 
@@ -237,46 +263,75 @@ def private io_output(var L : lua_State?) : int {
     return g_iofile(L, reinterpret<uint8?>("_IO_output"), reinterpret<uint8?>("w"))
 }
 
+// Auxiliary function to create the iteration function for 'lines'.
+// The iteration function is a closure over 'io_readline', with
+// the following upvalues:
+// 1) The file being read (first value in the stack)
+// 2) the number of arguments to read
+// 3) a boolean, true iff file has to be closed when finished ('toclose')
+// ) a variable number of format arguments (rest of the stack)
 [c_function]
 def private aux_lines(var L : lua_State?; toclose : int) {
+    // number of arguments to read
     var n : int = lua_gettop(L) - 1
-    let _t0 = int64((n <= 250 ? 1 : 0) != 0 ? 1 : 0) != 0 || luaL_argerror(L, 250 + 2, reinterpret<uint8?>("too many arguments")) != 0
+    let _t0 = n <= 250 || luaL_argerror(L, 250 + 2, reinterpret<uint8?>("too many arguments")) != 0
+    // file
     lua_pushvalue(L, 1)
+    // number of arguments to read
     lua_pushinteger(L, int64(n))
+    // close/not close file when finished
     lua_pushboolean(L, toclose)
+    // move the three values to their positions
     lua_rotate(L, 2, 3)
     lua_pushcclosure(L, @@io_readline, 3 + n)
 }
 
 def private f_lines(var L : lua_State?) : int {
+    // check that it's a valid file handle
     tofile(L)
     aux_lines(L, 0)
     return 1
 }
 
+// Return an iteration function for 'io.lines'. If file has to be
+// closed, also returns the file itself as a second result (to be
+// closed as the state at the exit of a generic for).
 [c_function]
 def private io_lines(var L : lua_State?) : int {
     var toclose : int
+    // at least one argument
     if (lua_type(L, 1) == -1) {
         lua_pushnil(L)
     }
+    // no file name?
     if (lua_type(L, 1) == 0) {
-        lua_getfield(L, -1000000 - 1000, reinterpret<uint8?>("_IO_input"))
+        // get default input
+        lua_getfield(L, LUA_REGISTRYINDEX, reinterpret<uint8?>("_IO_input"))
+        // put it at index 1
         lua_copy(L, -1, 1)
         lua_settop(L, -1 - 1)
+        // check that it's a valid file handle
         tofile(L)
+        // do not close it after iteration
         toclose = 0
     } else {
+        // open a new file
         var filename : uint8? = luaL_checklstring(L, 1, null)
         opencheck(L, filename, reinterpret<uint8?>("r"))
+        // put file at index 1
         lua_copy(L, -1, 1)
         lua_settop(L, -1 - 1)
+        // close it after iteration
         toclose = 1
     }
+    // push iteration function
     aux_lines(L, toclose)
     if (toclose != 0) {
+        // state
         lua_pushnil(L)
+        // control
         lua_pushnil(L)
+        // file is the to-be-closed variable (4th result)
         lua_pushvalue(L, 1)
         return 4
     } else {
@@ -284,20 +339,27 @@ def private io_lines(var L : lua_State?) : int {
     }
 }
 
+// Add current char to buffer (if not out of space) and read next one
 [c_function]
 def private nextc(var rn : RN?) : int {
-    if (int64((rn.n >= 200 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // buffer overflow?
+    if (rn.n >= 200) {
+        // invalidate result
         rn.buff[0] = uint8(0)
+        // fail
         return 0
     } else {
+        // save current char
         let _t0 = rn.n
         rn.n++
         rn.buff[_t0] = uint8(rn.c)
+        // read next one
         rn.c = crt::getc(reinterpret<void?>(rn.f))
         return 1
     }
 }
 
+// Accept current char if it is in 'set' (of size 2)
 [c_function]
 def private test2(var rn : RN?; var set : uint8?) : int {
     if (rn.c == int(deref(set + 0)) || rn.c == int(deref(set + 1))) {
@@ -307,6 +369,7 @@ def private test2(var rn : RN?; var set : uint8?) : int {
     }
 }
 
+// Read a sequence of (hex)digits
 [c_function]
 def private readdigits(var rn : RN?; hex : int) : int {
     var count : int = 0
@@ -316,6 +379,9 @@ def private readdigits(var rn : RN?; hex : int) : int {
     return count
 }
 
+// Read a number: first reads a valid prefix of a numeral into a buffer.
+// Then it calls 'lua_stringtonumber' to check whether the format is
+// correct and to convert it to a Lua number.
 [c_function]
 def private read_number(var L : lua_State?; var f : _IO_FILE?) : int {
     var rn : RN
@@ -324,35 +390,53 @@ def private read_number(var L : lua_State?; var f : _IO_FILE?) : int {
     var decp : uint8[2]
     rn.f = f
     rn.n = 0
+    // get decimal point from locale
     decp[0] = deref(reinterpret<lconv?>(crt::localeconv()).decimal_point + 0)
-    decp[1] = uint8(46)
+    // always accept a dot
+    decp[1] = uint8('.')
+    // skip spaces
     var _first = true
     while (_first || crt::isspace(rn.c) != 0) {
         _first = false
         rn.c = crt::getc(reinterpret<void?>(rn.f))
     }
+    // optional sign
     test2(addr(rn), reinterpret<uint8?>("-+"))
     if (test2(addr(rn), reinterpret<uint8?>("00")) != 0) {
+        // numeral is hexadecimal
         if (test2(addr(rn), reinterpret<uint8?>("xX")) != 0) {
             hex = 1
         } else {
+            // count initial '0' as a valid digit
             count = 1
         }
     }
+    // integral part
     count += readdigits(addr(rn), hex)
+    // decimal point?
     if (test2(addr(rn), addr(decp[0])) != 0) {
+        // fractional part
         count += readdigits(addr(rn), hex)
     }
+    // exponent mark?
     if (count > 0 && test2(addr(rn), hex != 0 ? reinterpret<uint8?>("pP") : reinterpret<uint8?>("eE")) != 0) {
+        // exponent sign
         test2(addr(rn), reinterpret<uint8?>("-+"))
+        // exponent digits
         readdigits(addr(rn), 0)
     }
+    // unread look-ahead char
     crt::ungetc(rn.c, reinterpret<void?>(rn.f))
+    // finish string
     rn.buff[rn.n] = uint8(0)
-    if (int64(lua_stringtonumber(L, addr(rn.buff[0])) != uint64(0) ? 1 : 0) != 0) {
+    if (lua_stringtonumber(L, addr(rn.buff[0])) != uint64(0)) {
+        // ok, it is a valid number
         return 1
     } else {
+        // invalid format
+        // "result" to be removed
         lua_pushnil(L)
+        // read fails
         return 0
     }
 }
@@ -360,6 +444,7 @@ def private read_number(var L : lua_State?; var f : _IO_FILE?) : int {
 [c_function]
 def private test_eof(var L : lua_State?; var f : _IO_FILE?) : int {
     var c : int = crt::getc(reinterpret<void?>(f))
+    // no-op when c == EOF
     crt::ungetc(c, reinterpret<void?>(f))
     lua_pushstring(L, addr(c2das_empty[0]))
     return c != -1 ? 1 : 0
@@ -370,34 +455,43 @@ def private read_line(var L : lua_State?; var f : _IO_FILE?; chop : int) : int {
     var b : luaL_Buffer
     var c : int
     luaL_buffinit(L, addr(b))
+    // may need to read several chunks to get whole line
     var _first = true
-    while (_first || c != -1 && c != 10) {
+    while (_first || c != -1 && c != '\n') {
         _first = false
+        // preallocate buffer space
         var buff : uint8? = luaL_prepbuffsize(addr(b), uint64(int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>)))))
         var i : int = 0
+        // no memory errors can happen inside the lock
         while (true) {
-            var _t0 = i < int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>)))
+            var _t0 = i < LUAL_BUFFERSIZE
             if (_t0) {
                 c = crt::getc(reinterpret<void?>(f))
                 _t0 = c != -1
             }
-            if (!(_t0 && c != 10)) {
+            if (!(_t0 && c != '\n')) {
                 break
             }
+            // read up to end of line or buffer limit
             let _t1 = i
             i++
             deref(buff + _t1) = uint8(c)
         }
         addr(b).n += uint64(i)
     }
-    if (!(chop != 0) && c == 10) {
+    // repeat until end of line
+    // want a newline and have one?
+    if (!(chop != 0) && c == '\n') {
+        // add ending newline to result
         let _t2 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), uint64(1)) != null
         let _t3 = addr(b).n
         addr(b).n++
         deref(addr(b).b + _t3) = uint8(c)
     }
+    // close buffer
     luaL_pushresult(addr(b))
-    return c == 10 || lua_rawlen(L, -1) > uint64(0) ? 1 : 0
+    // return ok if read something (either a newline or something else)
+    return c == '\n' || lua_rawlen(L, -1) > uint64(0) ? 1 : 0
 }
 
 [c_function]
@@ -405,26 +499,33 @@ def private read_all(var L : lua_State?; var f : _IO_FILE?) {
     var nr : uint64
     var b : luaL_Buffer
     luaL_buffinit(L, addr(b))
+    // read file in chunks of LUAL_BUFFERSIZE bytes
     var _first = true
-    while (_first || nr == uint64(int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>))))) {
+    while (_first || nr == uint64(LUAL_BUFFERSIZE)) {
         _first = false
         var p : uint8? = luaL_prepbuffsize(addr(b), uint64(int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>)))))
-        nr = crt::fread(reinterpret<void?>(p), uint64(typeinfo sizeof(type<uint8>)), uint64(int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>)))), reinterpret<void?>(f))
+        nr = crt::fread(reinterpret<void?>(p), uint64(typeinfo sizeof(type<uint8>)), uint64(LUAL_BUFFERSIZE), reinterpret<void?>(f))
         addr(b).n += nr
     }
+    // close buffer
     luaL_pushresult(addr(b))
 }
 
 [c_function]
 def private read_chars(var L : lua_State?; var f : _IO_FILE?; n : uint64) : int {
+    // number of chars actually read
     var nr : uint64
     var p : uint8?
     var b : luaL_Buffer
     luaL_buffinit(L, addr(b))
+    // prepare buffer to read whole block
     p = luaL_prepbuffsize(addr(b), n)
+    // try to read 'n' chars
     nr = crt::fread(reinterpret<void?>(p), uint64(typeinfo sizeof(type<uint8>)), n, reinterpret<void?>(f))
     addr(b).n += nr
+    // close buffer
     luaL_pushresult(addr(b))
+    // true iff read something
     return nr > uint64(0) ? 1 : 0
 }
 
@@ -435,11 +536,14 @@ def private g_read(var L : lua_State?; var f : _IO_FILE?; first : int) : int {
     var success : int
     crt::clearerr(reinterpret<void?>(f))
     deref(crt::c_errno_location()) = 0
+    // no arguments?
     if (nargs == 0) {
         success = read_line(L, f, 1)
+        // to return 1 result
         n = first + 1
     } else {
-        luaL_checkstack(L, nargs + 20, reinterpret<uint8?>("too many arguments"))
+        // ensure stack space for all results and for auxlib's buffer
+        luaL_checkstack(L, nargs + LUA_MINSTACK, reinterpret<uint8?>("too many arguments"))
         success = 1
         {
             n = first
@@ -449,23 +553,30 @@ def private g_read(var L : lua_State?; var f : _IO_FILE?; first : int) : int {
                 if (!(_t0 != 0 && success != 0)) {
                     break
                 }
-                if (lua_type(L, n) == 3) {
+                if (lua_type(L, n) == LUA_TNUMBER) {
                     var l : uint64 = uint64(luaL_checkinteger(L, n))
                     success = l == uint64(0) ? test_eof(L, f) : read_chars(L, f, l)
                 } else {
                     var p : uint8? = luaL_checklstring(L, n, null)
-                    if (int(deref(p)) == 42) {
+                    // skip optional '*' (for compatibility)
+                    if (int(deref(p)) == '*') {
                         p = p + 1
                     }
                     let _cond = int(deref(p))
-                    if (_cond == 110) {
+                    if (_cond == 'n') {
+                        // number
                         success = read_number(L, f)
-                    } elif (_cond == 108) {
+                    } elif (_cond == 'l') {
+                        // line
                         success = read_line(L, f, 1)
-                    } elif (_cond == 76) {
+                    } elif (_cond == 'L') {
+                        // line with end-of-line
                         success = read_line(L, f, 0)
-                    } elif (_cond == 97) {
+                    } elif (_cond == 'a') {
+                        // file
+                        // read entire file
                         read_all(L, f)
+                        // always success
                         success = 1
                     } else {
                         return luaL_argerror(L, n, reinterpret<uint8?>("invalid format"))
@@ -479,7 +590,9 @@ def private g_read(var L : lua_State?; var f : _IO_FILE?; first : int) : int {
         return luaL_fileresult(L, 0, null)
     }
     if (!(success != 0)) {
+        // remove last result
         lua_settop(L, -1 - 1)
+        // push nil instead
         lua_pushnil(L)
     }
     return n - first
@@ -494,16 +607,19 @@ def private f_read(var L : lua_State?) : int {
     return g_read(L, tofile(L), 2)
 }
 
+// Iteration function for 'lines'.
 [c_function]
 def private io_readline(var L : lua_State?) : int {
     var p : luaL_Stream? = reinterpret<luaL_Stream?>(lua_touserdata(L, -1000000 - 1000 - 1))
     var i : int
     var n : int = int(lua_tointegerx(L, -1000000 - 1000 - 2, null))
+    // file is already closed?
     if (p.closef == null) {
         return luaL_error`va(L, reinterpret<uint8?>("file is already closed"), VaNone())
     }
     lua_settop(L, 1)
     luaL_checkstack(L, n, reinterpret<uint8?>("too many arguments"))
+    // push arguments to 'g_read'
     {
         i = 1
         while (i <= n) {
@@ -511,16 +627,27 @@ def private io_readline(var L : lua_State?) : int {
             i++
         }
     }
+    // 'n' is number of results
     n = g_read(L, p.f, 2)
+    // should return at least a nil
+    // read at least one value?
     if (lua_toboolean(L, -n) != 0) {
+        // return them
         return n
     } else {
+        // first result is false: EOF or error
+        // is there error information?
         if (n > 1) {
+            // 2nd result is error message
             return luaL_error`va(L, reinterpret<uint8?>("%s"), (lua_tolstring(L, -n + 1, null),))
         }
+        // generator created file?
         if (lua_toboolean(L, -1000000 - 1000 - 3) != 0) {
+            // clear stack
             lua_settop(L, 0)
+            // push file at index 1
             lua_pushvalue(L, -1000000 - 1000 - 1)
+            // close it
             aux_close(L)
         }
         return 0
@@ -539,7 +666,8 @@ def private g_write(var L : lua_State?; var f : _IO_FILE?; var arg : int) : int 
             if (!(_t0 != 0)) {
                 break
             }
-            if (lua_type(L, arg) == 3) {
+            if (lua_type(L, arg) == LUA_TNUMBER) {
+                // optimization: could be done exactly as for strings
                 var len : int = lua_isinteger(L, arg) != 0 ? fprintf(reinterpret<void?>(f), reinterpret<uint8?>("%lld"), lua_tointegerx(L, arg, null)) : fprintf(reinterpret<void?>(f), reinterpret<uint8?>("%.14g"), lua_tonumberx(L, arg, null))
                 status = status != 0 && len > 0 ? 1 : 0
             } else {
@@ -550,7 +678,8 @@ def private g_write(var L : lua_State?; var f : _IO_FILE?; var arg : int) : int 
             arg++
         }
     }
-    if (int64(status != 0 ? 1 : 0) != 0) {
+    if (status != 0) {
+        // file handle already on stack top
         return 1
     } else {
         return luaL_fileresult(L, status, null)
@@ -564,6 +693,7 @@ def private io_write(var L : lua_State?) : int {
 
 def private f_write(var L : lua_State?) : int {
     var f : _IO_FILE? = tofile(L)
+    // push file at the stack top (to be returned)
     lua_pushvalue(L, 1)
     return g_write(L, f, 2)
 }
@@ -574,10 +704,11 @@ def private f_seek(var L : lua_State?) : int {
     var op : int = luaL_checkoption(L, 2, reinterpret<uint8?>("cur"), addr(f_seek_modenames[0]))
     var p3 : int64 = luaL_optinteger(L, 3, int64(0))
     var offset : int64 = int64(p3)
-    let _t0 = int64((int64(offset) == p3 ? 1 : 0) != 0 ? 1 : 0) != 0 || luaL_argerror(L, 3, reinterpret<uint8?>("not an integer in proper range")) != 0
+    let _t0 = int64(offset) == p3 || luaL_argerror(L, 3, reinterpret<uint8?>("not an integer in proper range")) != 0
     deref(crt::c_errno_location()) = 0
     op = crt::fseek(reinterpret<void?>(f), offset, f_seek_mode[op])
-    if (int64(op != 0 ? 1 : 0) != 0) {
+    if (op != 0) {
+        // error
         return luaL_fileresult(L, 0, null)
     } else {
         lua_pushinteger(L, int64(crt::ftell(reinterpret<void?>(f))))
@@ -589,7 +720,7 @@ def private f_seek(var L : lua_State?) : int {
 def private f_setvbuf(var L : lua_State?) : int {
     var f : _IO_FILE? = tofile(L)
     var op : int = luaL_checkoption(L, 2, null, addr(f_setvbuf_modenames[0]))
-    var sz : int64 = luaL_optinteger(L, 3, int64(int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>)))))
+    var sz : int64 = luaL_optinteger(L, 3, int64(LUAL_BUFFERSIZE))
     var res : int
     deref(crt::c_errno_location()) = 0
     res = crt::setvbuf(reinterpret<void?>(f), null, f_setvbuf_mode[op], uint64(sz))
@@ -612,17 +743,25 @@ def private f_flush(var L : lua_State?) : int {
 
 [c_function]
 def private createmeta(var L : lua_State?) {
+    // metatable for file handles
     luaL_newmetatable(L, reinterpret<uint8?>("FILE*"))
+    // add metamethods to new metatable
     luaL_setfuncs(L, addr(metameth[0]), 0)
+    // create method table
     lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[8]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - uint64(1)))
+    // add file methods to method table
     luaL_setfuncs(L, addr(meth[0]), 0)
+    // metatable.__index = method table
     lua_setfield(L, -2, reinterpret<uint8?>("__index"))
+    // pop metatable
     lua_settop(L, -1 - 1)
 }
 
+// function to (not) close the standard files stdin, stdout, and stderr
 [c_function]
 def private io_noclose(var L : lua_State?) : int {
     var p : luaL_Stream? = reinterpret<luaL_Stream?>(luaL_checkudata(L, 1, reinterpret<uint8?>("FILE*")))
+    // keep file opened
     p.closef = @@io_noclose
     lua_pushnil(L)
     lua_pushstring(L, reinterpret<uint8?>("cannot close standard file"))
@@ -636,17 +775,21 @@ def private createstdfile(var L : lua_State?; var f : _IO_FILE?; var k : uint8?;
     p.closef = @@io_noclose
     if (k != null) {
         lua_pushvalue(L, -1)
-        lua_setfield(L, -1000000 - 1000, k)
+        // add file to registry
+        lua_setfield(L, LUA_REGISTRYINDEX, k)
     }
+    // add file to module
     lua_setfield(L, -2, fname)
 }
 
 [c_function]
 def luaopen_io(var L : lua_State?) : int {
+    // new module
     luaL_checkversion_(L, double(504), uint64(typeinfo sizeof(type<int64>)) * uint64(16) + uint64(typeinfo sizeof(type<double>)))
     lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[12]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - uint64(1)))
     luaL_setfuncs(L, addr(iolib[0]), 0)
     createmeta(L)
+    // create (and set) default files
     createstdfile(L, reinterpret<_IO_FILE?>(crt::c_stdin()), reinterpret<uint8?>("_IO_input"), reinterpret<uint8?>("stdin"))
     createstdfile(L, reinterpret<_IO_FILE?>(crt::c_stdout()), reinterpret<uint8?>("_IO_output"), reinterpret<uint8?>("stdout"))
     createstdfile(L, reinterpret<_IO_FILE?>(crt::c_stderr()), null, reinterpret<uint8?>("stderr"))

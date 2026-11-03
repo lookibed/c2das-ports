@@ -22,6 +22,12 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < status > (type<DumpState>) == 28, "DumpState.status: clang puts it at 28")
 }
 
+let private DIBS = (uint64(typeinfo sizeof(type<uint64>)) * uint64(8) + uint64(6)) / uint64(7)
+let private LUAC_VERSION = 504 / 100 * 16 + 504 % 100
+let private LUAC_FORMAT = 0
+let private LUAC_INT = 22136
+let private LUAC_NUM = 370.5lf
+
 def private dumpBlock(var D : DumpState?; var b : void?; size : uint64) {
     if (D.status == 0 && size > uint64(0)) {
         D.status = invoke(D.writer, D.L, b, size, D.data)
@@ -41,11 +47,13 @@ def private dumpSize(var D : DumpState?; var x : uint64) {
     var _first = true
     while (_first || x != uint64(0)) {
         _first = false
+        // fill buffer in reverse order
         n++
-        buff[(uint64(typeinfo sizeof(type<uint64>)) * uint64(8) + uint64(6)) / uint64(7) - uint64(n)] = uint8(x & uint64(127))
+        buff[DIBS - uint64(n)] = uint8(x & uint64(127))
         x >>= 7ul
     }
-    buff[(uint64(typeinfo sizeof(type<uint64>)) * uint64(8) + uint64(6)) / uint64(7) - uint64(1)] = uint8(int(buff[(uint64(typeinfo sizeof(type<uint64>)) * uint64(8) + uint64(6)) / uint64(7) - uint64(1)]) | 128)
+    // mark last byte
+    buff[DIBS - uint64(1)] = uint8(int(buff[DIBS - uint64(1)]) | 128)
     dumpBlock(D, reinterpret<void?>(addr(buff[0]) + (uint64(typeinfo sizeof(type<uint64>)) * uint64(8) + uint64(6)) / uint64(7) + -(n)), uint64(n) * uint64(typeinfo sizeof(type<uint8>)))
 }
 
@@ -177,6 +185,7 @@ def private dumpDebug(var D : DumpState?; var f : Proto?) {
 
 def private dumpFunction(var D : DumpState?; var f : Proto?; var psource : TString?) {
     if (D.strip != 0 || intptr(f.source) == intptr(psource)) {
+        // no debug info or same source as its parent
         dumpString(D, null)
     } else {
         dumpString(D, f.source)
@@ -196,16 +205,17 @@ def private dumpFunction(var D : DumpState?; var f : Proto?; var psource : TStri
 [c_function]
 def private dumpHeader(var D : DumpState?) {
     dumpBlock(D, reinterpret<void?>(reinterpret<uint8?>("\x1bLua")), uint64(typeinfo sizeof(type<uint8[5]>)) - uint64(typeinfo sizeof(type<uint8>)))
-    dumpByte(D, 504 / 100 * 16 + 504 % 100)
-    dumpByte(D, 0)
+    dumpByte(D, LUAC_VERSION)
+    dumpByte(D, LUAC_FORMAT)
     dumpBlock(D, reinterpret<void?>(reinterpret<uint8?>("\x19\x93\r\n\x1a\n")), uint64(typeinfo sizeof(type<uint8[7]>)) - uint64(typeinfo sizeof(type<uint8>)))
     dumpByte(D, int(uint64(typeinfo sizeof(type<uint>))))
     dumpByte(D, int(uint64(typeinfo sizeof(type<int64>))))
     dumpByte(D, int(uint64(typeinfo sizeof(type<double>))))
-    dumpInteger(D, int64(22136))
-    dumpNumber(D, 370.5lf)
+    dumpInteger(D, int64(LUAC_INT))
+    dumpNumber(D, LUAC_NUM)
 }
 
+// dump Lua function as precompiled chunk
 [c_function]
 def luaU_dump(var L : lua_State?; var f : Proto?; w : function<(var a0 : lua_State?; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var data : void?; strip : int) : int {
     var D : DumpState

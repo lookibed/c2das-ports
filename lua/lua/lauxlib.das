@@ -9,9 +9,8 @@ require c_types
 require crt
 require lapi
 require lauxlib_h
-require ldebug
+require lcode_cluster
 require lobject_h_cluster
-require lstate
 
 var private c2das_empty : uint8[1] = fixed_array(uint8(0))
 
@@ -52,47 +51,85 @@ def private c2das_layout_check {
 
 var private boxmt : luaL_Reg[3] = fixed_array(luaL_Reg(name = unsafe(reinterpret<uint8?>("__gc")), func = @@boxgc), luaL_Reg(name = unsafe(reinterpret<uint8?>("__close")), func = @@boxgc), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
+let private LUA_TSTRING = 4
+let private LUA_REGISTRYINDEX = -1000000 - 1000
+let private LEVELS1 = 10
+let private LEVELS2 = 11
+let private LUA_TLIGHTUSERDATA = 2
+let private LUA_TNIL = 0
+let private LUA_TNUMBER = 3
+let private LUAL_BUFFERSIZE = int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>)))
+let private LUA_REFNIL = -1
+let private freelist = 2 + 1
+let private LUA_ERRFILE = 5 + 1
+let private LUA_TTABLE = 5
+let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * uint64(16) + uint64(typeinfo sizeof(type<double>))
+
+// Search for 'objidx' in table at index -1. ('objidx' must be an
+// absolute index.) Return 1 + string at top if it found a good name.
 [c_function]
 def private findfield(var L : lua_State?; objidx : int; level : int) : int {
     if (level == 0 || !(lua_type(L, -1) == 5)) {
+        // not found
         return 0
     }
+    // start 'next' loop
     lua_pushnil(L)
+    // for each pair in table
     while (lua_next(L, -2) != 0) {
-        if (lua_type(L, -2) == 4) {
+        // ignore non-string keys
+        if (lua_type(L, -2) == LUA_TSTRING) {
+            // found object?
             if (lua_rawequal(L, objidx, -1) != 0) {
+                // remove value (but keep name)
                 lua_settop(L, -1 - 1)
                 return 1
             } elif (findfield(L, objidx, level - 1) != 0) {
+                // try recursively
+                // stack: lib_name, lib_table, field_name (top)
+                // place '.' between the two names
                 lua_pushstring(L, reinterpret<uint8?>("."))
+                // (in the slot occupied by table)
                 lua_copy(L, -1, -3)
                 lua_settop(L, -1 - 1)
+                // lib_name.field_name
                 lua_concat(L, 3)
                 return 1
             }
         }
+        // remove value
         lua_settop(L, -1 - 1)
     }
+    // not found
     return 0
 }
 
+// Search for a name for a function in all loaded modules
 [c_function]
 def private pushglobalfuncname(var L : lua_State?; var ar : lua_Debug?) : int {
     var top : int = lua_gettop(L)
+    // push function
     lua_getinfo(L, reinterpret<uint8?>("f"), ar)
-    lua_getfield(L, -1000000 - 1000, reinterpret<uint8?>("_LOADED"))
+    lua_getfield(L, LUA_REGISTRYINDEX, reinterpret<uint8?>("_LOADED"))
+    // slots for 'findfield'
     luaL_checkstack(L, 6, reinterpret<uint8?>("not enough stack"))
     if (findfield(L, top + 1, 2) != 0) {
         var name : uint8? = lua_tolstring(L, -1, null)
+        // name start with '_G.'?
         if (crt::strncmp(name, reinterpret<uint8?>("_G."), uint64(3)) == 0) {
+            // push name without prefix
             lua_pushstring(L, name + 3)
+            // remove original name
             lua_rotate(L, -2, -1)
             lua_settop(L, -1 - 1)
         }
+        // copy name to proper place
         lua_copy(L, -1, top + 1)
+        // remove table "loaded" and name copy
         lua_settop(L, top + 1)
         return 1
     } else {
+        // remove function and global table
         lua_settop(L, top)
         return 0
     }
@@ -100,17 +137,24 @@ def private pushglobalfuncname(var L : lua_State?; var ar : lua_Debug?) : int {
 
 [c_function]
 def private pushfuncname(var L : lua_State?; var ar : lua_Debug?) {
+    // try first a global name
     if (pushglobalfuncname(L, ar) != 0) {
         lua_pushfstring`va(L, reinterpret<uint8?>("function '%s'"), (lua_tolstring(L, -1, null),))
+        // remove name
         lua_rotate(L, -2, -1)
         lua_settop(L, -1 - 1)
     } elif (int(deref(ar.namewhat)) != 0) {
+        // is there a name from code?
+        // use it
         lua_pushfstring`va(L, reinterpret<uint8?>("%s '%s'"), (ar.namewhat, ar.name))
-    } elif (int(deref(ar.what)) == 109) {
+    } elif (int(deref(ar.what)) == 'm') {
+        // main?
         lua_pushstring(L, reinterpret<uint8?>("main chunk"))
-    } elif (int(deref(ar.what)) != 67) {
+    } elif (int(deref(ar.what)) != 'C') {
+        // for Lua functions, use <file:line>
         lua_pushfstring`va(L, reinterpret<uint8?>("function <%s:%d>"), (addr(ar.short_src[0]), ar.linedefined))
     } else {
+        // nothing left...
         lua_pushstring(L, reinterpret<uint8?>("?"))
     }
 }
@@ -120,10 +164,12 @@ def private lastlevel(var L : lua_State?) : int {
     var ar : lua_Debug
     var li : int = 1
     var le : int = 1
+    // find an upper bound
     while (lua_getstack(L, le, addr(ar)) != 0) {
         li = le
         le *= 2
     }
+    // do a binary search
     while (li < le) {
         var m : int = (li + le) / 2
         if (lua_getstack(L, m, addr(ar)) != 0) {
@@ -140,14 +186,14 @@ def luaL_traceback(var L : lua_State?; var L1 : lua_State?; var msg : uint8?; va
     var b : luaL_Buffer
     var ar : lua_Debug
     var last : int = lastlevel(L1)
-    var limit2show : int = last - level > 10 + 11 ? 10 : -1
+    var limit2show : int = last - level > LEVELS1 + LEVELS2 ? LEVELS1 : -1
     luaL_buffinit(L, addr(b))
     if (msg != null) {
         luaL_addstring(addr(b), msg)
         let _t0 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), uint64(1)) != null
         let _t1 = addr(b).n
         addr(b).n++
-        deref(addr(b).b + _t1) = uint8(10)
+        deref(addr(b).b + _t1) = uint8('\n')
     }
     luaL_addstring(addr(b), reinterpret<uint8?>("stack traceback:"))
     while (true) {
@@ -156,12 +202,16 @@ def luaL_traceback(var L : lua_State?; var L1 : lua_State?; var msg : uint8?; va
         if (!(lua_getstack(L1, _t2, addr(ar)) != 0)) {
             break
         }
+        // too many levels?
         let _t3 = limit2show
         limit2show--
         if (_t3 == 0) {
-            var n : int = last - level - 11 + 1
+            // number of levels to skip
+            var n : int = last - level - LEVELS2 + 1
             lua_pushfstring`va(L, reinterpret<uint8?>("\n\t...\t(skipping %d levels)"), (n,))
+            // add warning about skip
             luaL_addvalue(addr(b))
+            // and skip to last levels
             level += n
         } else {
             lua_getinfo(L1, reinterpret<uint8?>("Slnt"), addr(ar))
@@ -184,12 +234,15 @@ def luaL_traceback(var L : lua_State?; var L1 : lua_State?; var msg : uint8?; va
 [c_function]
 def luaL_argerror(var L : lua_State?; var arg : int; var extramsg : uint8?) : int {
     var ar : lua_Debug
+    // no stack frame?
     if (!(lua_getstack(L, 0, addr(ar)) != 0)) {
         return luaL_error`va(L, reinterpret<uint8?>("bad argument #%d (%s)"), (arg, extramsg))
     }
     lua_getinfo(L, reinterpret<uint8?>("n"), addr(ar))
     if (crt::strcmp(ar.namewhat, reinterpret<uint8?>("method")) == 0) {
+        // do not count 'self'
         arg--
+        // error is in the self argument itself?
         if (arg == 0) {
             return luaL_error`va(L, reinterpret<uint8?>("calling '%s' on bad self (%s)"), (ar.name, extramsg))
         }
@@ -203,12 +256,16 @@ def luaL_argerror(var L : lua_State?; var arg : int; var extramsg : uint8?) : in
 [c_function]
 def luaL_typeerror(var L : lua_State?; arg : int; var tname : uint8?) : int {
     var msg : uint8?
+    // name for the type of the actual argument
     var typearg : uint8?
-    if (luaL_getmetafield(L, arg, reinterpret<uint8?>("__name")) == 4) {
+    if (luaL_getmetafield(L, arg, reinterpret<uint8?>("__name")) == LUA_TSTRING) {
+        // use the given type name
         typearg = lua_tolstring(L, -1, null)
-    } elif (lua_type(L, arg) == 2) {
+    } elif (lua_type(L, arg) == LUA_TLIGHTUSERDATA) {
+        // special name for messages
         typearg = reinterpret<uint8?>("light userdata")
     } else {
+        // standard name
         typearg = lua_typename(L, lua_type(L, arg))
     }
     msg = lua_pushfstring`va(L, reinterpret<uint8?>("%s expected, got %s"), (tname, typearg))
@@ -219,19 +276,28 @@ def private tag_error(var L : lua_State?; arg : int; tag : int) {
     luaL_typeerror(L, arg, lua_typename(L, tag))
 }
 
+// The use of 'lua_pushfstring' ensures this function does not
+// need reserved stack space when called.
 [c_function]
 def luaL_where(var L : lua_State?; level : int) {
     var ar : lua_Debug
+    // check function at level
     if (lua_getstack(L, level, addr(ar)) != 0) {
+        // get info about it
         lua_getinfo(L, reinterpret<uint8?>("Sl"), addr(ar))
+        // is there info?
         if (ar.currentline > 0) {
             lua_pushfstring`va(L, reinterpret<uint8?>("%s:%d: "), (addr(ar.short_src[0]), ar.currentline))
             return
         }
     }
+    // else, no information available...
     lua_pushfstring`va(L, addr(c2das_empty[0]), VaNone())
 }
 
+// Again, the use of 'lua_pushvfstring' ensures this function does
+// not need reserved stack space when called. (At worst, it generates
+// an error with "stack overflow" instead of the given message.)
 [variadic]
 def luaL_error(var L : lua_State?; var fmt : uint8?; va : va_args) : int {
     var argp : CVaCursor
@@ -244,6 +310,7 @@ def luaL_error(var L : lua_State?; var fmt : uint8?; va : va_args) : int {
 
 [c_function]
 def luaL_fileresult(var L : lua_State?; stat : int; var fname : uint8?) : int {
+    // calls to Lua API may change this value
     var en : int = deref(crt::c_errno_location())
     if (stat != 0) {
         lua_pushboolean(L, 1)
@@ -264,32 +331,42 @@ def luaL_fileresult(var L : lua_State?; stat : int; var fname : uint8?) : int {
 
 [c_function]
 def luaL_execresult(var L : lua_State?; stat : int) : int {
+    // error with an 'errno'?
     if (stat != 0 && deref(crt::c_errno_location()) != 0) {
         return luaL_fileresult(L, 0, null)
     } else {
+        // type of termination
         var what : uint8? = reinterpret<uint8?>("exit")
-        if (int(deref(what)) == 101 && stat == 0) {
+        // interpret result
+        // successful termination?
+        if (int(deref(what)) == 'e' && stat == 0) {
             lua_pushboolean(L, 1)
         } else {
             lua_pushnil(L)
         }
         lua_pushstring(L, what)
         lua_pushinteger(L, int64(stat))
+        // return true/fail,what,code
         return 3
     }
 }
 
 [c_function]
 def luaL_newmetatable(var L : lua_State?; var tname : uint8?) : int {
-    if (lua_getfield(L, -1000000 - 1000, tname) != 0) {
+    // name already in use?
+    if (lua_getfield(L, -1000000 - 1000, tname) != LUA_TNIL) {
+        // leave previous value on top, but return 0
         return 0
     }
     lua_settop(L, -1 - 1)
+    // create metatable
     lua_createtable(L, 0, 2)
     lua_pushstring(L, tname)
+    // metatable.__name = tname
     lua_setfield(L, -2, reinterpret<uint8?>("__name"))
     lua_pushvalue(L, -1)
-    lua_setfield(L, -1000000 - 1000, tname)
+    // registry.name = metatable
+    lua_setfield(L, LUA_REGISTRYINDEX, tname)
     return 1
 }
 
@@ -300,22 +377,29 @@ def luaL_setmetatable(var L : lua_State?; var tname : uint8?) {
 
 def luaL_testudata(var L : lua_State?; ud : int; var tname : uint8?) : void? {
     var p : void? = lua_touserdata(L, ud)
+    // value is a userdata?
     if (p != null) {
+        // does it have a metatable?
         if (lua_getmetatable(L, ud) != 0) {
+            // get correct metatable
             lua_getfield(L, -1000000 - 1000, tname)
+            // not the same?
             if (!(lua_rawequal(L, -1, -2) != 0)) {
+                // value is a userdata with wrong metatable
                 p = null
             }
+            // remove both metatables
             lua_settop(L, -2 - 1)
             return p
         }
     }
+    // value is not a userdata with a metatable
     return null
 }
 
 def luaL_checkudata(var L : lua_State?; ud : int; var tname : uint8?) : void? {
     var p : void? = luaL_testudata(L, ud, tname)
-    let _t0 = int64((p != null ? 1 : 0) != 0 ? 1 : 0) != 0 || luaL_typeerror(L, ud, tname) != 0
+    let _t0 = p != null || luaL_typeerror(L, ud, tname) != 0
     return p
 }
 
@@ -335,9 +419,14 @@ def luaL_checkoption(var L : lua_State?; arg : int; var _c_def : uint8?; var lst
     return luaL_argerror(L, arg, lua_pushfstring`va(L, reinterpret<uint8?>("invalid option '%s'"), (name,)))
 }
 
+// Ensures the stack has at least 'space' extra slots, raising an error
+// if it cannot fulfill the request. (The error handling needs a few
+// extra slots to format the error message. In case of an error without
+// this extra space, Lua will generate the same 'stack overflow' error,
+// but without 'msg'.)
 [c_function]
 def luaL_checkstack(var L : lua_State?; space : int; var msg : uint8?) {
-    if (int64((!(lua_checkstack(L, space) != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!(lua_checkstack(L, space) != 0)) {
         if (msg != null) {
             luaL_error`va(L, reinterpret<uint8?>("stack overflow (%s)"), (msg,))
         } else {
@@ -347,22 +436,22 @@ def luaL_checkstack(var L : lua_State?; space : int; var msg : uint8?) {
 }
 
 def luaL_checktype(var L : lua_State?; arg : int; t : int) {
-    if (int64((lua_type(L, arg) != t ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (lua_type(L, arg) != t) {
         tag_error(L, arg, t)
     }
 }
 
 [c_function]
 def luaL_checkany(var L : lua_State?; arg : int) {
-    if (int64((lua_type(L, arg) == -1 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (lua_type(L, arg) == -1) {
         luaL_argerror(L, arg, reinterpret<uint8?>("value expected"))
     }
 }
 
 def luaL_checklstring(var L : lua_State?; arg : int; var len : uint64?) : uint8? {
     var s : uint8? = lua_tolstring(L, arg, len)
-    if (int64((!(s != null) ? 1 : 0) != 0 ? 1 : 0) != 0) {
-        tag_error(L, arg, 4)
+    if (!(s != null)) {
+        tag_error(L, arg, LUA_TSTRING)
     }
     return s
 }
@@ -383,8 +472,8 @@ def luaL_optlstring(var L : lua_State?; arg : int; var _c_def : uint8?; var len 
 def luaL_checknumber(var L : lua_State?; arg : int) : double {
     var isnum : int
     var d : double = lua_tonumberx(L, arg, addr(isnum))
-    if (int64((!(isnum != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
-        tag_error(L, arg, 3)
+    if (!(isnum != 0)) {
+        tag_error(L, arg, LUA_TNUMBER)
     }
     return d
 }
@@ -398,7 +487,7 @@ def private interror(var L : lua_State?; arg : int) {
     if (lua_isnumber(L, arg) != 0) {
         luaL_argerror(L, arg, reinterpret<uint8?>("number has no integer representation"))
     } else {
-        tag_error(L, arg, 3)
+        tag_error(L, arg, LUA_TNUMBER)
     }
 }
 
@@ -406,7 +495,7 @@ def private interror(var L : lua_State?; arg : int) {
 def luaL_checkinteger(var L : lua_State?; arg : int) : int64 {
     var isnum : int
     var d : int64 = lua_tointegerx(L, arg, addr(isnum))
-    if (int64((!(isnum != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!(isnum != 0)) {
         interror(L, arg)
     }
     return d
@@ -422,8 +511,10 @@ def private resizebox(var L : lua_State?; idx : int; newsize : uint64) : void? {
     var allocf : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 : uint64) : void?> = lua_getallocf(L, addr(ud))
     var box : UBox? = reinterpret<UBox?>(lua_touserdata(L, idx))
     var temp : void? = invoke(allocf, ud, box.box, box.bsize, newsize)
-    if (int64((temp == null && newsize > uint64(0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // allocation error?
+    if (temp == null && newsize > uint64(0)) {
         lua_pushstring(L, reinterpret<uint8?>("not enough memory"))
+        // raise a memory error
         lua_error(L)
     }
     box.box = temp
@@ -441,41 +532,61 @@ def private newbox(var L : lua_State?) {
     var box : UBox? = reinterpret<UBox?>(lua_newuserdatauv(L, uint64(typeinfo sizeof(type<UBox>)), 0))
     box.box = null
     box.bsize = uint64(0)
+    // creating metatable?
     if (luaL_newmetatable(L, reinterpret<uint8?>("_UBOX*")) != 0) {
+        // set its metamethods
         luaL_setfuncs(L, addr(boxmt[0]), 0)
     }
     lua_setmetatable(L, -2)
 }
 
+// Compute new size for buffer 'B', enough to accommodate extra 'sz'
+// bytes. (The test for "not big enough" also gets the case when the
+// computation of 'newsize' overflows.)
 [c_function]
 def private newbuffsize(var B : luaL_Buffer?; sz : uint64) : uint64 {
+    // buffer size * 1.5
     var newsize : uint64 = B.size / uint64(2) * uint64(3)
-    if (int64((~uint64(0) - sz < B.n ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // overflow in (B->n + sz)?
+    if (~uint64(0) - sz < B.n) {
         return uint64(luaL_error`va(B.L, reinterpret<uint8?>("buffer too large"), VaNone()))
     }
+    // not big enough?
     if (newsize < B.n + sz) {
         newsize = B.n + sz
     }
     return newsize
 }
 
+// Returns a pointer to a free area with at least 'sz' bytes in buffer
+// 'B'. 'boxidx' is the relative position in the stack where is the
+// buffer's box or its placeholder.
 [c_function]
 def private prepbuffsize(var B : luaL_Buffer?; sz : uint64; boxidx : int) : uint8? {
+    // enough space?
     if (B.size - B.n >= sz) {
         return B.b + B.n
     } else {
         var L : lua_State? = B.L
         var newbuff : uint8?
         var newsize : uint64 = newbuffsize(B, sz)
+        // create larger buffer
+        // buffer already has a box?
         if (intptr(B.b) != intptr(addr(B.init.b[0]))) {
+            // resize it
             newbuff = reinterpret<uint8?>(resizebox(L, boxidx, newsize))
         } else {
+            // no box yet
+            // remove placeholder
             lua_rotate(L, boxidx, -1)
             lua_settop(L, -1 - 1)
+            // create a new box
             newbox(L)
+            // move box to its intended position
             lua_rotate(L, boxidx, 1)
             lua_toclose(L, boxidx)
             newbuff = reinterpret<uint8?>(resizebox(L, boxidx, newsize))
+            // copy original content
             crt::memcpy(reinterpret<void?>(newbuff), reinterpret<void?>(B.b), B.n * uint64(typeinfo sizeof(type<uint8>)))
         }
         B.b = newbuff
@@ -484,12 +595,14 @@ def private prepbuffsize(var B : luaL_Buffer?; sz : uint64; boxidx : int) : uint
     }
 }
 
+// returns a pointer to a free area with at least 'sz' bytes
 def luaL_prepbuffsize(var B : luaL_Buffer?; sz : uint64) : uint8? {
     return prepbuffsize(B, sz, -1)
 }
 
 [c_function]
 def luaL_addlstring(var B : luaL_Buffer?; var s : uint8?; l : uint64) {
+    // avoid 'memcpy' when 's' can be NULL
     if (l > uint64(0)) {
         var b : uint8? = prepbuffsize(B, l, -1)
         crt::memcpy(reinterpret<void?>(b), reinterpret<void?>(s), l * uint64(typeinfo sizeof(type<uint8>)))
@@ -507,8 +620,10 @@ def luaL_pushresult(var B : luaL_Buffer?) {
     var L : lua_State? = B.L
     lua_pushlstring(L, B.b, B.n)
     if (intptr(B.b) != intptr(addr(B.init.b[0]))) {
+        // close the box
         lua_closeslot(L, -2)
     }
+    // remove box or placeholder from the stack
     lua_rotate(L, -2, -1)
     lua_settop(L, -1 - 1)
 }
@@ -518,6 +633,13 @@ def luaL_pushresultsize(var B : luaL_Buffer?; sz : uint64) {
     luaL_pushresult(B)
 }
 
+// 'luaL_addvalue' is the only function in the Buffer system where the
+// box (if existent) is not on the top of the stack. So, instead of
+// calling 'luaL_addlstring', it replicates the code using -2 as the
+// last argument to 'prepbuffsize', signaling that the box is (or will
+// be) below the string being added to the buffer. (Box creation can
+// trigger an emergency GC, so we should not remove the string from the
+// stack before we have the space guaranteed.)
 [c_function]
 def luaL_addvalue(var B : luaL_Buffer?) {
     var L : lua_State? = B.L
@@ -526,6 +648,7 @@ def luaL_addvalue(var B : luaL_Buffer?) {
     var b : uint8? = prepbuffsize(B, len, -2)
     crt::memcpy(reinterpret<void?>(b), reinterpret<void?>(s), len * uint64(typeinfo sizeof(type<uint8>)))
     B.n += len
+    // pop string
     lua_settop(L, -1 - 1)
 }
 
@@ -534,7 +657,8 @@ def luaL_buffinit(var L : lua_State?; var B : luaL_Buffer?) {
     B.L = L
     B.b = addr(B.init.b[0])
     B.n = uint64(0)
-    B.size = uint64(int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>))))
+    B.size = uint64(LUAL_BUFFERSIZE)
+    // push placeholder
     lua_pushlightuserdata(L, reinterpret<void?>(B))
 }
 
@@ -543,25 +667,42 @@ def luaL_buffinitsize(var L : lua_State?; var B : luaL_Buffer?; sz : uint64) : u
     return prepbuffsize(B, sz, -1)
 }
 
+// The previously freed references form a linked list:
+// t[freelist] is the index of a first free index, or zero if list is
+// empty; t[t[freelist]] is the index of the second element; etc.
 def luaL_ref(var L : lua_State?; var t : int) : int {
     var ref : int
     if (lua_type(L, -1) == 0) {
+        // remove from stack
         lua_settop(L, -1 - 1)
-        return -1
+        // 'nil' has a unique fixed reference
+        return LUA_REFNIL
     }
     t = lua_absindex(L, t)
-    if (lua_rawgeti(L, t, int64(2 + 1)) == 0) {
+    // first access?
+    if (lua_rawgeti(L, t, int64(freelist)) == LUA_TNIL) {
+        // list is empty
         ref = 0
+        // initialize as an empty list
         lua_pushinteger(L, int64(0))
-        lua_rawseti(L, t, int64(2 + 1))
+        // ref = t[freelist] = 0
+        lua_rawseti(L, t, int64(freelist))
     } else {
+        // already initialized
+        // ref = t[freelist]
         ref = int(lua_tointegerx(L, -1, null))
     }
+    // remove element from stack
     lua_settop(L, -1 - 1)
+    // any free element?
     if (ref != 0) {
+        // remove it from list
         lua_rawgeti(L, t, int64(ref))
-        lua_rawseti(L, t, int64(2 + 1))
+        // (t[freelist] = t[ref])
+        lua_rawseti(L, t, int64(freelist))
     } else {
+        // no free elements
+        // get a new reference
         ref = int(lua_rawlen(L, t)) + 1
     }
     lua_rawseti(L, t, int64(ref))
@@ -571,23 +712,34 @@ def luaL_ref(var L : lua_State?; var t : int) : int {
 def luaL_unref(var L : lua_State?; var t : int; ref : int) {
     if (ref >= 0) {
         t = lua_absindex(L, t)
-        lua_rawgeti(L, t, int64(2 + 1))
+        lua_rawgeti(L, t, int64(freelist))
+        // t[ref] = t[freelist]
         lua_rawseti(L, t, int64(ref))
         lua_pushinteger(L, int64(ref))
-        lua_rawseti(L, t, int64(2 + 1))
+        // t[freelist] = ref
+        lua_rawseti(L, t, int64(freelist))
     }
 }
 
 [c_function]
 def private getF(var L : lua_State?; var ud : void?; var size : uint64?) : uint8? {
     var lf : LoadF? = reinterpret<LoadF?>(ud)
+    // not used
+    // are there pre-read characters to be read?
     if (lf.n > 0) {
+        // return them (chars already in buffer)
         deref(size) = uint64(lf.n)
+        // no more pre-read characters
         lf.n = 0
     } else {
+        // read a block from file
+        // 'fread' can return > 0 *and* set the EOF flag. If next call to
+        // 'getF' called 'fread', it might still wait for user input.
+        // The next check avoids this problem.
         if (crt::feof(reinterpret<void?>(lf.f)) != 0) {
             return null
         }
+        // read block
         deref(size) = crt::fread(reinterpret<void?>(addr(lf.buff[0])), uint64(1), uint64(typeinfo sizeof(type<uint8[8192]>)), reinterpret<void?>(lf.f))
     }
     return addr(lf.buff[0])
@@ -604,32 +756,51 @@ def private errfile(var L : lua_State?; var what : uint8?; fnameindex : int) : i
     }
     lua_rotate(L, fnameindex, -1)
     lua_settop(L, -1 - 1)
-    return 5 + 1
+    return LUA_ERRFILE
 }
 
+// Skip an optional BOM at the start of a stream. If there is an
+// incomplete BOM (the first character is correct but the rest is
+// not), returns the first character anyway to force an error
+// (as no chunk can start with 0xEF).
 [c_function]
 def private skipBOM(var f : _IO_FILE?) : int {
+    // read first character
     var c : int = crt::getc(reinterpret<void?>(f))
+    // correct BOM?
     if (c == 239 && crt::getc(reinterpret<void?>(f)) == 187 && crt::getc(reinterpret<void?>(f)) == 191) {
+        // ignore BOM and return next char
         return crt::getc(reinterpret<void?>(f))
     } else {
+        // no (valid) BOM
+        // return first character
         return c
     }
 }
 
+// reads the first character of file 'f' and skips an optional BOM mark
+// in its beginning plus its first line if it starts with '#'. Returns
+// true if it skipped the first line. In any case, '*cp' has the
+// first "valid" character of the file (after the optional BOM and
+// a first-line comment).
 [c_function]
 def private skipcomment(var f : _IO_FILE?; var cp : int?) : int {
     deref(cp) = skipBOM(f)
     var c : int = deref(cp)
-    if (c == 35) {
+    // first line is a comment (Unix exec. file)?
+    if (c == '#') {
+        // skip first line
         var _first = true
-        while (_first || c != -1 && c != 10) {
+        while (_first || c != -1 && c != '\n') {
             _first = false
             c = crt::getc(reinterpret<void?>(f))
         }
+        // next character after comment, if present
         deref(cp) = crt::getc(reinterpret<void?>(f))
+        // there was a comment
         return 1
     } else {
+        // no comment
         return 0
     }
 }
@@ -640,6 +811,7 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
     var status : int
     var readstatus : int
     var c : int
+    // index of filename on the stack
     var fnameindex : int = lua_gettop(L) + 1
     if (filename == null) {
         lua_pushstring(L, reinterpret<uint8?>("=stdin"))
@@ -653,23 +825,31 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
         }
     }
     lf.n = 0
+    // read initial portion
     if (skipcomment(lf.f, addr(c)) != 0) {
+        // add newline to correct line numbers
         let _t0 = lf.n
         lf.n++
-        lf.buff[_t0] = uint8(10)
+        lf.buff[_t0] = uint8('\n')
     }
+    // binary file?
     if (c == int(deref(reinterpret<uint8?>("\x1bLua") + 0))) {
+        // remove possible newline
         lf.n = 0
+        // "real" file?
         if (filename != null) {
             deref(crt::c_errno_location()) = 0
+            // reopen in binary mode
             lf.f = reinterpret<_IO_FILE?>(crt::freopen(filename, reinterpret<uint8?>("rb"), reinterpret<void?>(lf.f)))
             if (lf.f == null) {
                 return errfile(L, reinterpret<uint8?>("reopen"), fnameindex)
             }
+            // re-read initial portion
             skipcomment(lf.f, addr(c))
         }
     }
     if (c != -1) {
+        // 'c' is the first character of the stream
         let _t1 = lf.n
         lf.n++
         lf.buff[_t1] = uint8(c)
@@ -677,10 +857,12 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
     deref(crt::c_errno_location()) = 0
     status = lua_load(L, @@getF, reinterpret<void?>(addr(lf)), lua_tolstring(L, -1, null), mode)
     readstatus = crt::ferror(reinterpret<void?>(lf.f))
+    // close file (even in case of errors)
     if (filename != null) {
         crt::fclose(reinterpret<void?>(lf.f))
     }
     if (readstatus != 0) {
+        // ignore results from 'lua_load'
         lua_settop(L, fnameindex)
         return errfile(L, reinterpret<uint8?>("read"), fnameindex)
     }
@@ -692,6 +874,7 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
 [c_function]
 def private getS(var L : lua_State?; var ud : void?; var size : uint64?) : uint8? {
     var ls : LoadS? = reinterpret<LoadS?>(ud)
+    // not used
     if (ls.size == uint64(0)) {
         return null
     }
@@ -714,25 +897,31 @@ def luaL_loadstring(var L : lua_State?; var s : uint8?) : int {
 }
 
 def luaL_getmetafield(var L : lua_State?; obj : int; var event : uint8?) : int {
+    // no metatable?
     if (!(lua_getmetatable(L, obj) != 0)) {
-        return 0
+        return LUA_TNIL
     } else {
         var tt : int
         lua_pushstring(L, event)
         tt = lua_rawget(L, -2)
-        if (tt == 0) {
+        // is metafield nil?
+        if (tt == LUA_TNIL) {
+            // remove metatable and metafield
             lua_settop(L, -2 - 1)
         } else {
+            // remove only metatable
             lua_rotate(L, -2, -1)
             lua_settop(L, -1 - 1)
         }
+        // return metafield type
         return tt
     }
 }
 
 def luaL_callmeta(var L : lua_State?; var obj : int; var event : uint8?) : int {
     obj = lua_absindex(L, obj)
-    if (luaL_getmetafield(L, obj, event) == 0) {
+    // no metafield?
+    if (luaL_getmetafield(L, obj, event) == LUA_TNIL) {
         return 0
     }
     lua_pushvalue(L, obj)
@@ -746,9 +935,10 @@ def luaL_len(var L : lua_State?; idx : int) : int64 {
     var isnum : int
     lua_len(L, idx)
     l = lua_tointegerx(L, -1, addr(isnum))
-    if (int64((!(isnum != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!(isnum != 0)) {
         luaL_error`va(L, reinterpret<uint8?>("object length is not an integer"), VaNone())
     }
+    // remove object
     lua_settop(L, -1 - 1)
     return l
 }
@@ -756,6 +946,7 @@ def luaL_len(var L : lua_State?; idx : int) : int64 {
 [c_function]
 def luaL_tolstring(var L : lua_State?; var idx : int; var len : uint64?) : uint8? {
     idx = lua_absindex(L, idx)
+    // metafield?
     if (luaL_callmeta(L, idx, reinterpret<uint8?>("__tostring")) != 0) {
         if (!(lua_isstring(L, -1) != 0)) {
             luaL_error`va(L, reinterpret<uint8?>("'__tostring' must return a string"), VaNone())
@@ -778,10 +969,12 @@ def luaL_tolstring(var L : lua_State?; var idx : int; var len : uint64?) : uint8
             lua_pushstring(L, reinterpret<uint8?>("nil"))
         } else {
             {
+                // try name
                 var tt : int = luaL_getmetafield(L, idx, reinterpret<uint8?>("__name"))
-                var kind : uint8? = tt == 4 ? lua_tolstring(L, -1, null) : lua_typename(L, lua_type(L, idx))
+                var kind : uint8? = tt == LUA_TSTRING ? lua_tolstring(L, -1, null) : lua_typename(L, lua_type(L, idx))
                 lua_pushfstring`va(L, reinterpret<uint8?>("%s: %p"), (kind, reinterpret<uint8?>(lua_topointer(L, idx))))
-                if (tt != 0) {
+                if (tt != LUA_TNIL) {
+                    // remove '__name'
                     lua_rotate(L, -2, -1)
                     lua_settop(L, -1 - 1)
                 }
@@ -791,15 +984,21 @@ def luaL_tolstring(var L : lua_State?; var idx : int; var len : uint64?) : uint8
     return lua_tolstring(L, -1, len)
 }
 
+// set functions from list 'l' into table at top - 'nup'; each
+// function gets the 'nup' elements at the top as upvalues.
+// Returns with only the table at the stack.
 [c_function]
 def luaL_setfuncs(var L : lua_State?; var l : luaL_Reg?; nup : int) {
     luaL_checkstack(L, nup, reinterpret<uint8?>("too many upvalues"))
+    // fill the table with given functions
     {
         while (l.name != null) {
+            // placeholder?
             if (l.func == null) {
                 lua_pushboolean(L, 0)
             } else {
                 var i : int
+                // copy upvalues to the top
                 {
                     i = 0
                     while (i < nup) {
@@ -807,44 +1006,67 @@ def luaL_setfuncs(var L : lua_State?; var l : luaL_Reg?; nup : int) {
                         i++
                     }
                 }
+                // closure with those upvalues
                 lua_pushcclosure(L, l.func, nup)
             }
             lua_setfield(L, -(nup + 2), l.name)
             l = l + 1
         }
     }
+    // remove upvalues
     lua_settop(L, -nup - 1)
 }
 
+// ensure that stack[idx][fname] has a table and push that table
+// into the stack
 def luaL_getsubtable(var L : lua_State?; var idx : int; var fname : uint8?) : int {
-    if (lua_getfield(L, idx, fname) == 5) {
+    if (lua_getfield(L, idx, fname) == LUA_TTABLE) {
+        // table already there
         return 1
     } else {
+        // remove previous result
         lua_settop(L, -1 - 1)
         idx = lua_absindex(L, idx)
         lua_createtable(L, 0, 0)
+        // copy to be left at top
         lua_pushvalue(L, -1)
+        // assign new table to field
         lua_setfield(L, idx, fname)
+        // false, because did not find table there
         return 0
     }
 }
 
+// Stripped-down 'require': After checking "loaded" table, calls 'openf'
+// to open a module, registers the result in 'package.loaded' table and,
+// if 'glb' is true, also registers the result in the global table.
+// Leaves resulting module on the top.
 [c_function]
 def luaL_requiref(var L : lua_State?; var modname : uint8?; openf : function<(var a0 : lua_State?) : int>; glb : int) {
-    luaL_getsubtable(L, -1000000 - 1000, reinterpret<uint8?>("_LOADED"))
+    luaL_getsubtable(L, LUA_REGISTRYINDEX, reinterpret<uint8?>("_LOADED"))
+    // LOADED[modname]
     lua_getfield(L, -1, modname)
+    // package not already loaded?
     if (!(lua_toboolean(L, -1) != 0)) {
+        // remove field
         lua_settop(L, -1 - 1)
         lua_pushcclosure(L, openf, 0)
+        // argument to open function
         lua_pushstring(L, modname)
+        // call 'openf' to open module
         lua_callk(L, 1, 1, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+        // make copy of module (call result)
         lua_pushvalue(L, -1)
+        // LOADED[modname] = module
         lua_setfield(L, -3, modname)
     }
+    // remove LOADED table
     lua_rotate(L, -2, -1)
     lua_settop(L, -1 - 1)
     if (glb != 0) {
+        // copy of module
         lua_pushvalue(L, -1)
+        // _G[modname] = module
         lua_setglobal(L, modname)
     }
 }
@@ -858,10 +1080,14 @@ def luaL_addgsub(var b : luaL_Buffer?; var s : uint8?; var p : uint8?; var r : u
         if (!(wild != null)) {
             break
         }
+        // push prefix
         luaL_addlstring(b, s, uint64(int64(wild - s)))
+        // push replacement in place of pattern
         luaL_addstring(b, r)
+        // continue after 'p'
         s = wild + l
     }
+    // push last suffix
     luaL_addstring(b, s)
 }
 
@@ -876,6 +1102,7 @@ def luaL_gsub(var L : lua_State?; var s : uint8?; var p : uint8?; var r : uint8?
 
 [c_function]
 def private l_alloc(var ud : void?; var ptr : void?; osize : uint64; nsize : uint64) : void? {
+    // not used
     if (nsize == uint64(0)) {
         crt::free(ptr)
         return null
@@ -884,30 +1111,39 @@ def private l_alloc(var ud : void?; var ptr : void?; osize : uint64; nsize : uin
     }
 }
 
+// Standard panic funcion just prints an error message. The test
+// with 'lua_type' avoids possible memory errors in 'lua_tostring'.
 [c_function]
 def private _c_panic(var L : lua_State?) : int {
-    var msg : uint8? = lua_type(L, -1) == 4 ? lua_tolstring(L, -1, null) : reinterpret<uint8?>(reinterpret<uint8?>("error object is not a string"))
+    var msg : uint8? = lua_type(L, -1) == LUA_TSTRING ? lua_tolstring(L, -1, null) : reinterpret<uint8?>(reinterpret<uint8?>("error object is not a string"))
     fprintf(crt::c_stderr(), reinterpret<uint8?>("PANIC: unprotected error in call to Lua API (%s)\n"), msg)
     crt::fflush(crt::c_stderr())
+    // return to Lua to abort
     return 0
 }
 
+// Check whether message is a control message. If so, execute the
+// control or ignore it if unknown.
 [c_function]
 def private checkcontrol(var L : lua_State?; var message : uint8?; tocont : int) : int {
+    // not a control message?
     var _t1 = tocont != 0
     if (!_t1) {
         var _t0 = message
         message = message + 1
-        _t1 = int(deref(_t0)) != 64
+        _t1 = int(deref(_t0)) != '@'
     }
     if (_t1) {
         return 0
     } else {
         if (crt::strcmp(message, reinterpret<uint8?>("off")) == 0) {
+            // turn warnings off
             lua_setwarnf(L, @@warnfoff, reinterpret<void?>(L))
         } elif (crt::strcmp(message, reinterpret<uint8?>("on")) == 0) {
+            // turn warnings on
             lua_setwarnf(L, @@warnfon, reinterpret<void?>(L))
         }
+        // it was a control message
         return 1
     }
 }
@@ -917,35 +1153,48 @@ def private warnfoff(var ud : void?; var message : uint8?; tocont : int) {
     checkcontrol(reinterpret<lua_State?>(ud), message, tocont)
 }
 
+// Writes the message and handle 'tocont', finishing the message
+// if needed and setting the next warn function.
 [c_function]
 def private warnfcont(var ud : void?; var message : uint8?; tocont : int) {
     var L : lua_State? = reinterpret<lua_State?>(ud)
+    // write message
     fprintf(crt::c_stderr(), reinterpret<uint8?>("%s"), message)
     crt::fflush(crt::c_stderr())
+    // not the last part?
     if (tocont != 0) {
+        // to be continued
         lua_setwarnf(L, @@warnfcont, reinterpret<void?>(L))
     } else {
+        // last part
+        // finish message with end-of-line
         fprintf(crt::c_stderr(), reinterpret<uint8?>("%s"), reinterpret<uint8?>("\n"))
         crt::fflush(crt::c_stderr())
+        // next call is a new message
         lua_setwarnf(L, @@warnfon, reinterpret<void?>(L))
     }
 }
 
 [c_function]
 def private warnfon(var ud : void?; var message : uint8?; tocont : int) {
+    // control message?
     if (checkcontrol(reinterpret<lua_State?>(ud), message, tocont) != 0) {
+        // nothing else to be done
         return
     }
+    // start a new warning
     fprintf(crt::c_stderr(), reinterpret<uint8?>("%s"), reinterpret<uint8?>("Lua warning: "))
     crt::fflush(crt::c_stderr())
+    // finish processing
     warnfcont(ud, message, tocont)
 }
 
 [c_function]
 def luaL_newstate : lua_State ? {
     var L : lua_State? = lua_newstate(@@l_alloc, null)
-    if (int64(L != null ? 1 : 0) != 0) {
+    if (L != null) {
         lua_atpanic(L, @@_c_panic)
+        // default is warnings off
         lua_setwarnf(L, @@warnfoff, reinterpret<void?>(L))
     }
     return L
@@ -954,7 +1203,8 @@ def luaL_newstate : lua_State ? {
 [c_function]
 def luaL_checkversion_(var L : lua_State?; ver : double; sz : uint64) {
     var v : double = lua_version(L)
-    if (sz != uint64(typeinfo sizeof(type<int64>)) * uint64(16) + uint64(typeinfo sizeof(type<double>))) {
+    // check numeric types
+    if (sz != LUAL_NUMSIZES) {
         luaL_error`va(L, reinterpret<uint8?>("core and library have incompatible numeric types"), VaNone())
     } elif (v != ver) {
         luaL_error`va(L, reinterpret<uint8?>("version mismatch: app. needs %f, Lua core provides %f"), (ver, v))

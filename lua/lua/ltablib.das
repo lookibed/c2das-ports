@@ -14,18 +14,33 @@ var private c2das_empty : uint8[1] = fixed_array(uint8(0))
 
 var private tab_funcs : luaL_Reg[8] = fixed_array(luaL_Reg(name = unsafe(reinterpret<uint8?>("concat")), func = @@tconcat), luaL_Reg(name = unsafe(reinterpret<uint8?>("insert")), func = @@tinsert), luaL_Reg(name = unsafe(reinterpret<uint8?>("pack")), func = @@tpack), luaL_Reg(name = unsafe(reinterpret<uint8?>("unpack")), func = @@tunpack), luaL_Reg(name = unsafe(reinterpret<uint8?>("remove")), func = @@tremove), luaL_Reg(name = unsafe(reinterpret<uint8?>("move")), func = @@tmove), luaL_Reg(name = unsafe(reinterpret<uint8?>("sort")), func = @@sort), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
+let private LUA_TNIL = 0
+let private LUA_TTABLE = 5
+let private TAB_R = 1
+let private TAB_W = 2
+let private TAB_L = 4
+let private LUA_OPEQ = 0
+let private LUA_OPLT = 1
+let private RANLIMIT = 100u
+let private LUA_TFUNCTION = 6
+
 def private checkfield(var L : lua_State?; var key : uint8?; n : int) : int {
     lua_pushstring(L, key)
-    return lua_rawget(L, -n) != 0 ? 1 : 0
+    return lua_rawget(L, -n) != LUA_TNIL ? 1 : 0
 }
 
+// Check that 'arg' either is a table or can behave like one (that is,
+// has a metatable with the required metamethods)
 [c_function]
 def private checktab(var L : lua_State?; arg : int; what : int) {
-    if (lua_type(L, arg) != 5) {
+    // is it not a table?
+    if (lua_type(L, arg) != LUA_TTABLE) {
+        // number of elements to pop
         var n : int = 1
+        // must have metatable
         var _t1 = lua_getmetatable(L, arg) != 0
         if (_t1) {
-            var _t0 = !((what & 1) != 0)
+            var _t0 = !((what & TAB_R) != 0)
             if (!_t0) {
                 n++
                 _t0 = checkfield(L, reinterpret<uint8?>("__index"), n) != 0
@@ -34,7 +49,7 @@ def private checktab(var L : lua_State?; arg : int; what : int) {
         }
         var _t3 = _t1
         if (_t3) {
-            var _t2 = !((what & 2) != 0)
+            var _t2 = !((what & TAB_W) != 0)
             if (!_t2) {
                 n++
                 _t2 = checkfield(L, reinterpret<uint8?>("__newindex"), n) != 0
@@ -43,7 +58,7 @@ def private checktab(var L : lua_State?; arg : int; what : int) {
         }
         var _t5 = _t3
         if (_t5) {
-            var _t4 = !((what & 4) != 0)
+            var _t4 = !((what & TAB_L) != 0)
             if (!_t4) {
                 n++
                 _t4 = checkfield(L, reinterpret<uint8?>("__len"), n) != 0
@@ -51,33 +66,43 @@ def private checktab(var L : lua_State?; arg : int; what : int) {
             _t5 = _t4
         }
         if (_t5) {
+            // pop metatable and tested metamethods
             lua_settop(L, -n - 1)
         } else {
-            luaL_checktype(L, arg, 5)
+            // force an error
+            luaL_checktype(L, arg, LUA_TTABLE)
         }
     }
 }
 
 [c_function]
 def private tinsert(var L : lua_State?) : int {
+    // where to insert new element
     var pos : int64
     checktab(L, 1, 1 | 2 | 4)
     var e : int64 = luaL_len(L, 1)
-    e = int64(uint64(e) + uint64(1))
+    // first empty element
+    e += int64(1)
     let _cond = lua_gettop(L)
     if (_cond == 2) {
         {
+            // called with only 2 arguments
+            // insert new element at the end
             pos = e
         }
     } elif (_cond == 3) {
         {
             var i : int64
+            // 2nd argument is the position
             pos = luaL_checkinteger(L, 2)
-            let _t0 = int64((uint64(pos) - uint64(1u) < uint64(e) ? 1 : 0) != 0 ? 1 : 0) != 0 || luaL_argerror(L, 2, reinterpret<uint8?>("position out of bounds")) != 0
+            // check whether 'pos' is in [1, e]
+            let _t0 = uint64(pos) - uint64(1u) < uint64(e) || luaL_argerror(L, 2, reinterpret<uint8?>("position out of bounds")) != 0
+            // move up elements
             {
                 i = e
                 while (i > pos) {
                     lua_geti(L, 1, i - int64(1))
+                    // t[i] = t[i - 1]
                     lua_seti(L, 1, i)
                     i--
                 }
@@ -88,6 +113,7 @@ def private tinsert(var L : lua_State?) : int {
             return luaL_error`va(L, reinterpret<uint8?>("wrong number of arguments to 'insert'"), VaNone())
         }
     }
+    // t[pos] = v
     lua_seti(L, 1, pos)
     return 0
 }
@@ -97,37 +123,49 @@ def private tremove(var L : lua_State?) : int {
     checktab(L, 1, 1 | 2 | 4)
     var size : int64 = luaL_len(L, 1)
     var pos : int64 = luaL_optinteger(L, 2, size)
+    // validate 'pos' if given
     if (pos != size) {
-        let _t0 = int64((uint64(pos) - uint64(1u) <= uint64(size) ? 1 : 0) != 0 ? 1 : 0) != 0 || luaL_argerror(L, 2, reinterpret<uint8?>("position out of bounds")) != 0
+        // check whether 'pos' is in [1, size + 1]
+        let _t0 = uint64(pos) - uint64(1u) <= uint64(size) || luaL_argerror(L, 2, reinterpret<uint8?>("position out of bounds")) != 0
     }
+    // result = t[pos]
     lua_geti(L, 1, pos)
     {
         while (pos < size) {
             lua_geti(L, 1, pos + int64(1))
+            // t[pos] = t[pos + 1]
             lua_seti(L, 1, pos)
             pos++
         }
     }
     lua_pushnil(L)
+    // remove entry t[pos]
     lua_seti(L, 1, pos)
     return 1
 }
 
+// Copy elements (1[f], ..., 1[e]) into (tt[t], tt[t+1], ...). Whenever
+// possible, copy in increasing order, which is better for rehashing.
+// "possible" means destination after original range, or smaller
+// than origin, or copying to another table.
 [c_function]
 def private tmove(var L : lua_State?) : int {
     var f : int64 = luaL_checkinteger(L, 2)
     var e : int64 = luaL_checkinteger(L, 3)
     var t : int64 = luaL_checkinteger(L, 4)
+    // destination table
     var tt : int = !(lua_type(L, 5) <= 0) ? 5 : 1
-    checktab(L, 1, 1)
-    checktab(L, tt, 2)
+    checktab(L, 1, TAB_R)
+    checktab(L, tt, TAB_W)
+    // otherwise, nothing to move
     if (e >= f) {
         var n : int64
         var i : int64
-        let _t0 = int64((f > int64(0) || e < 9223372036854775807l + f ? 1 : 0) != 0 ? 1 : 0) != 0 || luaL_argerror(L, 3, reinterpret<uint8?>("too many elements to move")) != 0
+        let _t0 = f > int64(0) || e < 9223372036854775807l + f || luaL_argerror(L, 3, reinterpret<uint8?>("too many elements to move")) != 0
+        // number of elements to move
         n = e - f + int64(1)
-        let _t1 = int64((t <= 9223372036854775807l - n + int64(1) ? 1 : 0) != 0 ? 1 : 0) != 0 || luaL_argerror(L, 4, reinterpret<uint8?>("destination wrap around")) != 0
-        if (t > e || t <= f || tt != 1 && !(lua_compare(L, 1, tt, 0) != 0)) {
+        let _t1 = t <= 9223372036854775807l - n + int64(1) || luaL_argerror(L, 4, reinterpret<uint8?>("destination wrap around")) != 0
+        if (t > e || t <= f || tt != 1 && !(lua_compare(L, 1, tt, LUA_OPEQ) != 0)) {
             {
                 i = int64(0)
                 while (i < n) {
@@ -147,6 +185,7 @@ def private tmove(var L : lua_State?) : int {
             }
         }
     }
+    // return destination table
     lua_pushvalue(L, tt)
     return 1
 }
@@ -154,7 +193,7 @@ def private tmove(var L : lua_State?) : int {
 [c_function]
 def private addfield(var L : lua_State?; var b : luaL_Buffer?; i : int64) {
     lua_geti(L, 1, i)
-    if (int64((!(lua_isstring(L, -1) != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!(lua_isstring(L, -1) != 0)) {
         luaL_error`va(L, reinterpret<uint8?>("invalid value (%s) at index %I in table for 'concat'"), (lua_typename(L, lua_type(L, -1)), i))
     }
     luaL_addvalue(b)
@@ -177,6 +216,7 @@ def private tconcat(var L : lua_State?) : int {
             i++
         }
     }
+    // add last value (if interval was not empty)
     if (i == last) {
         addfield(L, addr(b), i)
     }
@@ -187,9 +227,13 @@ def private tconcat(var L : lua_State?) : int {
 [c_function]
 def private tpack(var L : lua_State?) : int {
     var i : int
+    // number of elements to pack
     var n : int = lua_gettop(L)
+    // create result table
     lua_createtable(L, n, 1)
+    // put it at index 1
     lua_rotate(L, 1, 1)
+    // assign elements
     {
         i = n
         while (i >= 1) {
@@ -198,7 +242,9 @@ def private tpack(var L : lua_State?) : int {
         }
     }
     lua_pushinteger(L, int64(n))
+    // t.n = number of elements
     lua_setfield(L, 1, reinterpret<uint8?>("n"))
+    // return table
     return 1
 }
 
@@ -207,28 +253,36 @@ def private tunpack(var L : lua_State?) : int {
     var n : uint64
     var i : int64 = luaL_optinteger(L, 2, int64(1))
     var e : int64 = lua_type(L, 3) <= 0 ? luaL_len(L, 1) : luaL_checkinteger(L, 3)
+    // empty range
     if (i > e) {
         return 0
     }
+    // number of elements minus 1 (avoid overflows)
     n = uint64(e) - uint64(i)
     var _t0 = n >= uint64(uint(2147483647))
     if (!_t0) {
         n++
         _t0 = !(lua_checkstack(L, int(n)) != 0)
     }
-    if (int64((_t0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (_t0) {
         return luaL_error`va(L, reinterpret<uint8?>("too many results to unpack"), VaNone())
     }
+    // push arg[i..e - 1] (to avoid overflows)
     {
         while (i < e) {
             lua_geti(L, 1, i)
             i++
         }
     }
+    // push last element
     lua_geti(L, 1, e)
     return int(n)
 }
 
+// Use 'time' and 'clock' as sources of "randomness". Because we don't
+// know the types 'clock_t' and 'time_t', we cannot cast them to
+// anything without risking overflows. A safe way to use their values
+// is to copy them to an array of a known type and use the array values.
 [c_function]
 def private l_randomizePivot : uint {
     var c : int64 = crt::clock()
@@ -253,116 +307,185 @@ def private set2(var L : lua_State?; i : uint; j : uint) {
     lua_seti(L, 1, int64(j))
 }
 
+// Return true iff value at stack index 'a' is less than the value at
+// index 'b' (according to the order of the sort).
 def private sort_comp(var L : lua_State?; a : int; b : int) : int {
+    // no function?
     if (lua_type(L, 2) == 0) {
-        return lua_compare(L, a, b, 1)
+        // a < b
+        return lua_compare(L, a, b, LUA_OPLT)
     } else {
+        // function
         var res : int
+        // push function
         lua_pushvalue(L, 2)
+        // -1 to compensate function
         lua_pushvalue(L, a - 1)
+        // -2 to compensate function and 'a'
         lua_pushvalue(L, b - 2)
+        // call function
         lua_callk(L, 2, 1, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+        // get result
         res = lua_toboolean(L, -1)
+        // pop result
         lua_settop(L, -1 - 1)
         return res
     }
 }
 
+// Does the partition: Pivot P is at the top of the stack.
+// precondition: a[lo] <= P == a[up-1] <= a[up],
+// so it only needs to do the partition from lo + 1 to up - 2.
+// Pos-condition: a[lo .. i - 1] <= a[i] == P <= a[i + 1 .. up]
+// returns 'i'.
 [c_function]
 def private partition(var L : lua_State?; lo : uint; up : uint) : uint {
+    // will be incremented before first use
     var i : uint = lo
+    // will be decremented before first use
     var j : uint = up - uint(1)
+    // loop invariant: a[lo .. i] <= P <= a[j .. up]
     {
         while (true) {
+            // next loop: repeat ++i while a[i] < P
             while (true) {
                 i++
                 lua_geti(L, 1, int64(i))
                 if (!(sort_comp(L, -1, -2) != 0)) {
                     break
                 }
-                if (int64((i == up - uint(1) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                // a[i] < P but a[up - 1] == P ??
+                if (i == up - uint(1)) {
                     luaL_error`va(L, reinterpret<uint8?>("invalid order function for sorting"), VaNone())
                 }
+                // remove a[i]
                 lua_settop(L, -1 - 1)
             }
+            // after the loop, a[i] >= P and a[lo .. i - 1] < P
+            // next loop: repeat --j while P < a[j]
             while (true) {
                 j--
                 lua_geti(L, 1, int64(j))
                 if (!(sort_comp(L, -3, -1) != 0)) {
                     break
                 }
-                if (int64((j < i ? 1 : 0) != 0 ? 1 : 0) != 0) {
+                // j < i but a[j] > P ??
+                if (j < i) {
                     luaL_error`va(L, reinterpret<uint8?>("invalid order function for sorting"), VaNone())
                 }
+                // remove a[j]
                 lua_settop(L, -1 - 1)
             }
+            // after the loop, a[j] <= P and a[j + 1 .. up] >= P
+            // no elements out of place?
             if (j < i) {
+                // a[lo .. i - 1] <= P <= a[j + 1 .. i .. up]
+                // pop a[j]
                 lua_settop(L, -1 - 1)
+                // swap pivot (a[up - 1]) with a[i] to satisfy pos-condition
                 set2(L, up - uint(1), i)
                 return i
             }
+            // otherwise, swap a[i] - a[j] to restore invariant and repeat
             set2(L, i, j)
         }
     }
     return uint(0)
 }
 
+// Choose an element in the middle (2nd-3th quarters) of [lo,up]
+// "randomized" by 'rnd'
 def private choosePivot(lo : uint; up : uint; rnd : uint) : uint {
+    // range/4
     var r4 : uint = (up - lo) / uint(4)
     var p : uint = rnd % (r4 * uint(2)) + (lo + r4)
     return p
 }
 
+// Quicksort algorithm (recursive function)
 def private auxsort(var L : lua_State?; var lo : uint; var up : uint; var rnd : uint) {
+    // loop for tail recursion
     while (lo < up) {
+        // Pivot index
         var p : uint
+        // to be used later
         var n : uint
+        // sort elements 'lo', 'p', and 'up'
         lua_geti(L, 1, int64(lo))
         lua_geti(L, 1, int64(up))
+        // a[up] < a[lo]?
         if (sort_comp(L, -1, -2) != 0) {
+            // swap a[lo] - a[up]
             set2(L, lo, up)
         } else {
+            // remove both values
             lua_settop(L, -2 - 1)
         }
+        // only 2 elements?
         if (up - lo == uint(1)) {
+            // already sorted
             return
         }
-        if (up - lo < 100u || rnd == uint(0)) {
+        // small interval or no randomize?
+        if (up - lo < RANLIMIT || rnd == uint(0)) {
+            // middle element is a good pivot
             p = (lo + up) / uint(2)
         } else {
+            // for larger intervals, it is worth a random pivot
             p = choosePivot(lo, up, rnd)
         }
         lua_geti(L, 1, int64(p))
         lua_geti(L, 1, int64(lo))
+        // a[p] < a[lo]?
         if (sort_comp(L, -2, -1) != 0) {
+            // swap a[p] - a[lo]
             set2(L, p, lo)
         } else {
+            // remove a[lo]
             lua_settop(L, -1 - 1)
             lua_geti(L, 1, int64(up))
+            // a[up] < a[p]?
             if (sort_comp(L, -1, -2) != 0) {
+                // swap a[up] - a[p]
                 set2(L, p, up)
             } else {
                 lua_settop(L, -2 - 1)
             }
         }
+        // only 3 elements?
         if (up - lo == uint(2)) {
+            // already sorted
             return
         }
+        // get middle element (Pivot)
         lua_geti(L, 1, int64(p))
+        // push Pivot
         lua_pushvalue(L, -1)
+        // push a[up - 1]
         lua_geti(L, 1, int64(up - uint(1)))
+        // swap Pivot (a[p]) with a[up - 1]
         set2(L, p, up - uint(1))
         p = partition(L, lo, up)
+        // a[lo .. p - 1] <= a[p] == P <= a[p + 1 .. up]
+        // lower interval is smaller?
         if (p - lo < up - p) {
+            // call recursively for lower interval
             auxsort(L, lo, p - uint(1), rnd)
+            // size of smaller interval
             n = p - lo
+            // tail call for [p + 1 .. up] (upper interval)
             lo = p + uint(1)
         } else {
+            // call recursively for upper interval
             auxsort(L, p + uint(1), up, rnd)
+            // size of smaller interval
             n = up - p
+            // tail call for [lo .. p - 1] (lower interval)
             up = p - uint(1)
         }
+        // partition too imbalanced?
         if ((up - lo) / uint(128) > n) {
+            // try a new randomization
             rnd = l_randomizePivot()
         }
     }
@@ -372,11 +495,15 @@ def private auxsort(var L : lua_State?; var lo : uint; var up : uint; var rnd : 
 def private sort(var L : lua_State?) : int {
     checktab(L, 1, 1 | 2 | 4)
     var n : int64 = luaL_len(L, 1)
+    // non-trivial interval?
     if (n > int64(1)) {
-        let _t0 = int64((n < int64(2147483647) ? 1 : 0) != 0 ? 1 : 0) != 0 || luaL_argerror(L, 1, reinterpret<uint8?>("array too big")) != 0
+        let _t0 = n < int64(2147483647) || luaL_argerror(L, 1, reinterpret<uint8?>("array too big")) != 0
+        // is there a 2nd argument?
         if (!(lua_type(L, 2) <= 0)) {
-            luaL_checktype(L, 2, 6)
+            // must be a function
+            luaL_checktype(L, 2, LUA_TFUNCTION)
         }
+        // make sure there are two arguments
         lua_settop(L, 2)
         auxsort(L, uint(1), uint(n), uint(0))
     }

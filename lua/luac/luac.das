@@ -12,16 +12,10 @@ require c_types
 require crt
 require lapi
 require lauxlib
-require lcode
-require lcode_h
-require ldebug
+require lcode_cluster
 require ldump
-require llex
 require lobject_h_cluster
 require lopcodes_h
-require lparser
-require lstate
-require lundump
 
 var private c2das_empty : uint8[1] = fixed_array(uint8(0))
 
@@ -39,6 +33,8 @@ var private output : uint8? = unsafe(addr(Output[0]))
 var private progname : uint8? = unsafe(reinterpret<uint8?>("luac"))
 var private tmname : TString ??
 
+let private LUA_OK = 0
+
 [c_function]
 def private fatal(var message : uint8?) {
     fprintf(crt::c_stderr(), reinterpret<uint8?>("%s: %s\n"), progname, message)
@@ -53,7 +49,7 @@ def private cannot(var what : uint8?) {
 
 [c_function]
 def private usage(var message : uint8?) {
-    if (int(deref(message)) == 45) {
+    if (int(deref(message)) == '-') {
         fprintf(crt::c_stderr(), reinterpret<uint8?>("%s: unrecognized option '%s'\n"), progname, message)
     } else {
         fprintf(crt::c_stderr(), reinterpret<uint8?>("%s: %s\n"), progname, message)
@@ -72,34 +68,43 @@ def private doargs(argc : int; var argv : uint8 ??) : int {
     {
         i = 1
         while (i < argc) {
-            if (int(deref(deref(argv + i))) != 45) {
+            // end of options; keep it
+            if (int(deref(deref(argv + i))) != '-') {
                 break
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("--")) == 0) {
+                // end of options; skip it
                 i++
                 if (version != 0) {
                     version++
                 }
                 break
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-")) == 0) {
+                // end of options; use stdin
                 break
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-l")) == 0) {
+                // list
                 listing++
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-o")) == 0) {
+                // output file
                 i++
                 output = deref(argv + i)
-                if (output == null || int(deref(output)) == 0 || int(deref(output)) == 45 && int(deref(output + 1)) != 0) {
+                if (output == null || int(deref(output)) == 0 || int(deref(output)) == '-' && int(deref(output + 1)) != 0) {
                     usage(reinterpret<uint8?>("'-o' needs argument"))
                 }
                 if (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-")) == 0) {
                     output = null
                 }
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-p")) == 0) {
+                // parse only
                 dumping = 0
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-s")) == 0) {
+                // strip debug information
                 stripping = 1
             } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-v")) == 0) {
+                // show version
                 version++
             } else {
+                // unknown option
                 usage(deref(argv + i))
             }
             i++
@@ -139,7 +144,7 @@ def private combine(var L : lua_State?; n : int) : Proto? {
     } else {
         var f : Proto?
         var i : int = n
-        if (lua_load(L, @@reader, reinterpret<void?>(addr(i)), reinterpret<uint8?>("=(luac)"), null) != 0) {
+        if (lua_load(L, @@reader, reinterpret<void?>(addr(i)), reinterpret<uint8?>("=(luac)"), null) != LUA_OK) {
             fatal(lua_tolstring(L, -1, null))
         }
         f = addr(reinterpret<GCUnion?>(addr((L.top.p + -1).val).value_.gc).cl.l).p
@@ -176,7 +181,7 @@ def private pmain(var L : lua_State?) : int {
         i = 0
         while (i < argc) {
             var filename : uint8? = crt::strcmp(deref(argv + i), reinterpret<uint8?>("-")) == 0 ? default<uint8?> : deref(argv + i)
-            if (luaL_loadfilex(L, filename, null) != 0) {
+            if (luaL_loadfilex(L, filename, null) != LUA_OK) {
                 fatal(lua_tolstring(L, -1, null))
             }
             i++
@@ -218,7 +223,7 @@ def c_main(var argc : int; var argv : uint8 ??) : int {
     lua_pushcclosure(L, @@pmain, 0)
     lua_pushinteger(L, int64(argc))
     lua_pushlightuserdata(L, reinterpret<void?>(argv))
-    if (lua_pcallk(L, 2, 0, 0, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>) != 0) {
+    if (lua_pcallk(L, 2, 0, 0, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>) != LUA_OK) {
         fatal(lua_tolstring(L, -1, null))
     }
     lua_close(L)
@@ -236,21 +241,21 @@ def private PrintString(var ts : TString?) {
         while (i < n) {
             var c : int = int(uint8(deref(s + i)))
             let _cond = c
-            if (_cond == 34) {
+            if (_cond == '"') {
                 printf(reinterpret<uint8?>("\\\""))
-            } elif (_cond == 92) {
+            } elif (_cond == '\\') {
                 printf(reinterpret<uint8?>("\\\\"))
             } elif (_cond == 7) {
                 printf(reinterpret<uint8?>("\\a"))
-            } elif (_cond == 8) {
+            } elif (_cond == '\b') {
                 printf(reinterpret<uint8?>("\\b"))
-            } elif (_cond == 12) {
+            } elif (_cond == '\f') {
                 printf(reinterpret<uint8?>("\\f"))
-            } elif (_cond == 10) {
+            } elif (_cond == '\n') {
                 printf(reinterpret<uint8?>("\\n"))
-            } elif (_cond == 13) {
+            } elif (_cond == '\r') {
                 printf(reinterpret<uint8?>("\\r"))
-            } elif (_cond == 9) {
+            } elif (_cond == '\t') {
                 printf(reinterpret<uint8?>("\\t"))
             } elif (_cond == 11) {
                 printf(reinterpret<uint8?>("\\v"))
@@ -282,6 +287,7 @@ def private PrintType(var f : Proto?; i : int) {
     } elif (_cond == 4 || _cond == 20) {
         printf(reinterpret<uint8?>("S"))
     } else {
+        // cannot happen
         printf(reinterpret<uint8?>("?%d"), int(o.tt_) & 63)
     }
     printf(reinterpret<uint8?>("\t"))
@@ -311,6 +317,7 @@ def private PrintConstant(var f : Proto?; i : int) {
     } elif (_cond == 4 || _cond == 20) {
         PrintString(addr(reinterpret<GCUnion?>(o.value_.gc).ts))
     } else {
+        // cannot happen
         printf(reinterpret<uint8?>("?%d"), int(o.tt_) & 63)
     }
 }
@@ -621,7 +628,7 @@ def private PrintCode(var f : Proto?) {
 [c_function]
 def private PrintHeader(var f : Proto?) {
     var s : uint8? = f.source != null ? addr(f.source.contents[0]) : reinterpret<uint8?>("=?")
-    if (int(deref(s)) == 64 || int(deref(s)) == 61) {
+    if (int(deref(s)) == '@' || int(deref(s)) == '=') {
         s = s + 1
     } elif (int(deref(s)) == int(deref(reinterpret<uint8?>("\x1bLua") + 0))) {
         s = reinterpret<uint8?>("(bstring)")
@@ -629,7 +636,7 @@ def private PrintHeader(var f : Proto?) {
         s = reinterpret<uint8?>("(string)")
     }
     printf(reinterpret<uint8?>("\n%s <%s:%d,%d> (%d instruction%s at %p)\n"), f.linedefined == 0 ? reinterpret<uint8?>("main") : reinterpret<uint8?>("function"), s, f.linedefined, f.lastlinedefined, f.sizecode, f.sizecode == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), reinterpret<uint8?>(reinterpret<void?>(f)))
-    printf(reinterpret<uint8?>("%d%s param%s, %d slot%s, %d upvalue%s, "), int(f.numparams), int(f.is_vararg) != 0 ? reinterpret<uint8?>("+") : addr(c2das_empty[0]), int(f.numparams) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), int(f.maxstacksize), int(f.maxstacksize) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizeupvalues, f.sizeupvalues == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"))
+    printf(reinterpret<uint8?>("%d%s param%s, %d slot%s, %d upvalue%s, "), int(f.numparams), f.is_vararg != 0 ? reinterpret<uint8?>("+") : addr(c2das_empty[0]), int(f.numparams) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), int(f.maxstacksize), int(f.maxstacksize) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizeupvalues, f.sizeupvalues == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"))
     printf(reinterpret<uint8?>("%d local%s, %d constant%s, %d function%s\n"), f.sizelocvars, f.sizelocvars == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizek, f.sizek == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizep, f.sizep == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"))
 }
 

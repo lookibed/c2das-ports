@@ -5,19 +5,10 @@ options stack = 8388608
 require c_runtime/c_function
 require c_runtime/cstr_array
 require c_runtime/variadic
-require ldebug
-require ldo
+require lcode_cluster
 require ldump
-require lfunc
-require lgc
-require lobject
 require lobject_h_cluster
-require lstate
-require lstring
-require ltable
-require ltm
 require ltm_h
-require lvm
 require lvm_h
 require lzio
 require lzio_h
@@ -39,6 +30,24 @@ def private c2das_layout_check {
 var lua_ident : uint8[129] = cstr_array("$LuaVersion: Lua 5.4.8  Copyright (C) 1994-2025 Lua.org, PUC-Rio $$LuaAuthors: R. Ierusalimschy, L. H. de Figueiredo, W. Celes $", 129)
 var private getupvalref_nullup : UpVal? = null
 
+let private LUA_REGISTRYINDEX = -1000000 - 1000
+let private LUA_VERSION_NUM = 504
+let private CLOSEKTOP = -1
+let private LUA_TNONE = -1
+let private LUA_OPUNM = 12
+let private LUA_OPBNOT = 13
+let private CIST_YPCALL = 1 << 4
+let private LUA_OK = 0
+let private GCSTPGC = 2
+let private GCSTPUSR = 1
+let private GCSpause = 8
+let private LUA_GCGEN = 10
+let private LUA_GCINC = 11
+let private KGC_GEN = 1
+let private KGC_INC = 0
+
+// Convert an acceptable index to a pointer to its respective value.
+// Non-valid indices return the special nil value 'G(L)->nilvalue'.
 [c_function]
 def private index2value(var L : lua_State?; var idx : int) : TValue? {
     var ci : CallInfo? = L.ci
@@ -50,20 +59,26 @@ def private index2value(var L : lua_State?; var idx : int) : TValue? {
             return addr(o.val)
         }
     } elif (!(idx <= -1000000 - 1000)) {
+        // negative index
         return addr((L.top.p + idx).val)
-    } elif (idx == -1000000 - 1000) {
+    } elif (idx == LUA_REGISTRYINDEX) {
         return addr(L.l_G.l_registry)
     } else {
-        idx = -1000000 - 1000 - idx
+        // upvalues
+        idx = LUA_REGISTRYINDEX - idx
+        // C closure?
         if (int(addr(ci.func.p.val).tt_) == (6 | 2 << 4 | 1 << 6)) {
             var func : CClosure? = addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.c)
             return idx <= int(func.nupvalues) ? addr(deref(addr(func.upvalue[0]) + (idx - 1))) : addr(L.l_G.nilvalue)
         } else {
+            // light C function or Lua function (through a hook)?)
+            // no upvalues
             return addr(L.l_G.nilvalue)
         }
     }
 }
 
+// Convert a valid actual index (not a pseudo-index) to its address.
 [c_function]
 def private index2stack(var L : lua_State?; idx : int) : StackValue? {
     var ci : CallInfo? = L.ci
@@ -71,6 +86,7 @@ def private index2stack(var L : lua_State?; idx : int) : StackValue? {
         var o : StackValue? = ci.func.p + idx
         return o
     } else {
+        // non-positive index
         return L.top.p + idx
     }
 }
@@ -80,12 +96,16 @@ def lua_checkstack(var L : lua_State?; n : int) : int {
     var res : int
     var ci : CallInfo?
     ci = L.ci
+    // stack large enough?
     if (int64(L.stack_last.p - L.top.p) > int64(n)) {
+        // yes; check is OK
         res = 1
     } else {
+        // need to grow stack
         res = luaD_growstack(L, n, 0)
     }
     if (res != 0 && intptr(ci.top.p) < intptr(L.top.p + n)) {
+        // adjust frame top
         ci.top.p = L.top.p + n
     }
     return res
@@ -107,6 +127,7 @@ def lua_xmove(var from : lua_State?; var to : lua_State?; n : int) {
                 io1.value_ = io2.value_
                 io1.tt_ = io2.tt_
             }
+            // stack already checked by previous 'api_check'
             to.top.p = to.top.p + 1
             i++
         }
@@ -121,9 +142,10 @@ def lua_atpanic(var L : lua_State?; panicf : function<(var a0 : lua_State?) : in
 }
 
 def lua_version(var L : lua_State?) : double {
-    return double(504)
+    return double(LUA_VERSION_NUM)
 }
 
+// convert an acceptable stack index into an absolute index
 [c_function]
 def lua_absindex(var L : lua_State?; idx : int) : int {
     return idx > 0 || idx <= -1000000 - 1000 ? idx : int(int64(L.top.p - L.ci.func.p)) + idx
@@ -139,6 +161,7 @@ def lua_settop(var L : lua_State?; idx : int) {
     var ci : CallInfo?
     var func : StackValue?
     var newtop : StackValue?
+    // difference for new top
     var diff : int64
     ci = L.ci
     func = ci.func.p
@@ -146,6 +169,7 @@ def lua_settop(var L : lua_State?; idx : int) {
         diff = int64(func + 1 + idx - L.top.p)
         {
             while (diff > int64(0)) {
+                // clear new slots
                 var _t0 = L.top.p
                 L.top.p = L.top.p + 1
                 addr(_t0.val).tt_ = uint8(0 | 0 << 4)
@@ -153,12 +177,14 @@ def lua_settop(var L : lua_State?; idx : int) {
             }
         }
     } else {
+        // will "subtract" index (as it is negative)
         diff = int64(idx + 1)
     }
     newtop = L.top.p + diff
     if (diff < int64(0) && intptr(L.tbclist.p) >= intptr(newtop)) {
-        newtop = luaF_close(L, newtop, -1, 0)
+        newtop = luaF_close(L, newtop, CLOSEKTOP, 0)
     }
+    // correct top only after closing any upvalue
     L.top.p = newtop
 }
 
@@ -166,10 +192,14 @@ def lua_settop(var L : lua_State?; idx : int) {
 def lua_closeslot(var L : lua_State?; idx : int) {
     var level : StackValue?
     level = index2stack(L, idx)
-    level = luaF_close(L, level, -1, 0)
+    level = luaF_close(L, level, CLOSEKTOP, 0)
     addr(level.val).tt_ = uint8(0 | 0 << 4)
 }
 
+// Reverse the stack segment from 'from' to 'to'
+// (auxiliary to 'lua_rotate')
+// Note that we move(copy) only the value inside the stack.
+// (We do not move additional fields that may exist.)
 [c_function]
 def private reverse(var L : lua_State?; var from : StackValue?; var to : StackValue?) {
     {
@@ -199,16 +229,24 @@ def private reverse(var L : lua_State?; var from : StackValue?; var to : StackVa
     }
 }
 
+// Let x = AB, where A is a prefix of length 'n'. Then,
+// rotate x n == BA. But BA == (A^r . B^r)^r.
 [c_function]
 def lua_rotate(var L : lua_State?; idx : int; n : int) {
     var p : StackValue?
     var t : StackValue?
     var m : StackValue?
+    // end of stack segment being rotated
     t = L.top.p - 1
+    // start of segment
     p = index2stack(L, idx)
+    // end of prefix
     m = n >= 0 ? t - n : p - n + -(1)
+    // reverse the prefix with length 'n'
     reverse(L, p, m)
+    // reverse the suffix
     reverse(L, m + 1, t)
+    // reverse the entire segment
     reverse(L, p, t)
 }
 
@@ -224,6 +262,7 @@ def lua_copy(var L : lua_State?; fromidx : int; toidx : int) {
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
+    // function upvalue?
     if (toidx < -1000000 - 1000) {
         if ((int(fr.tt_) & 1 << 6) != 0) {
             if ((int(addr(reinterpret<GCUnion?>(addr(L.ci.func.p.val).value_.gc).cl.c).marked) & 1 << 5) != 0 && (int(fr.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
@@ -231,6 +270,8 @@ def lua_copy(var L : lua_State?; fromidx : int; toidx : int) {
             }
         }
     }
+    // LUA_REGISTRYINDEX does not need gc barrier
+    // (collector revisits it before finishing collection)
 }
 
 [c_function]
@@ -249,7 +290,7 @@ def lua_pushvalue(var L : lua_State?; idx : int) {
 [c_function]
 def lua_type(var L : lua_State?; idx : int) : int {
     var o : TValue? = index2value(L, idx)
-    return !((int(o.tt_) & 15) == 0) || intptr(o) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue))) ? int(o.tt_) & 15 : -1
+    return !((int(o.tt_) & 15) == 0) || intptr(o) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue))) ? int(o.tt_) & 15 : LUA_TNONE
 }
 
 def lua_typename(var L : lua_State?; t : int) : uint8? {
@@ -299,8 +340,10 @@ def lua_rawequal(var L : lua_State?; index1 : int; index2 : int) : int {
 
 [c_function]
 def lua_arith(var L : lua_State?; op : int) {
-    if (op != 12 && op != 13) {
+    if (op != LUA_OPUNM && op != LUA_OPBNOT) {
+        // all other operations expect two operands
     } else {
+        // for unary operations, add fake 2nd operand
         {
             var io1 : TValue? = addr(L.top.p.val)
             var io2 : TValue? = addr((L.top.p - 1).val)
@@ -311,7 +354,9 @@ def lua_arith(var L : lua_State?; op : int) {
             L.top.p = L.top.p + 1
         }
     }
+    // first operand at top - 2, second at top - 1; result go to top - 2
     luaO_arith(L, op, addr((L.top.p - 2).val), addr((L.top.p - 1).val), L.top.p - 2)
+    // remove second operand
     L.top.p = L.top.p - 1
 }
 
@@ -320,6 +365,7 @@ def lua_compare(var L : lua_State?; index1 : int; index2 : int; op : int) : int 
     var o1 : TValue?
     var o2 : TValue?
     var i : int = 0
+    // may call tag method
     o1 = index2value(L, index1)
     o2 = index2value(L, index2)
     if ((!((int(o1.tt_) & 15) == 0) || intptr(o1) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue)))) && (!((int(o2.tt_) & 15) == 0) || intptr(o2) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue))))) {
@@ -368,7 +414,7 @@ def lua_tointegerx(var L : lua_State?; idx : int; var pisnum : int?) : int64 {
     var res : int64 = int64(0)
     var o : TValue? = index2value(L, idx)
     var _t0 : int
-    if (int64((int(o.tt_) == (3 | 0 << 4) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (int(o.tt_) == (3 | 0 << 4)) {
         deref(addr(res)) = o.value_.i
         _t0 = 1
     } else {
@@ -391,6 +437,7 @@ def lua_tolstring(var L : lua_State?; idx : int; var len : uint64?) : uint8? {
     var o : TValue?
     o = index2value(L, idx)
     if (!((int(o.tt_) & 15) == 4)) {
+        // not convertible?
         if (!((int(o.tt_) & 15) == 3)) {
             if (len != null) {
                 deref(len) = uint64(0)
@@ -403,6 +450,7 @@ def lua_tolstring(var L : lua_State?; idx : int; var len : uint64?) : uint8? {
                 luaC_step(L)
             }
         }
+        // previous call may reallocate the stack
         o = index2value(L, idx)
     }
     if (len != null) {
@@ -437,6 +485,7 @@ def lua_tocfunction(var L : lua_State?; idx : int) : function<(var a0 : lua_Stat
     } elif (int(o.tt_) == (6 | 2 << 4 | 1 << 6)) {
         return addr(reinterpret<GCUnion?>(o.value_.gc).cl.c).f
     } else {
+        // not a C function
         return default<function<(var a0 : lua_State?) : int>>
     }
 }
@@ -465,6 +514,11 @@ def lua_tothread(var L : lua_State?; idx : int) : lua_State? {
     return !(int(o.tt_) == (8 | 0 << 4 | 1 << 6)) ? default<lua_State?> : addr(reinterpret<GCUnion?>(o.value_.gc).th)
 }
 
+// Returns a pointer to the internal representation of an object.
+// Note that ANSI C does not allow the conversion of a pointer to
+// function to a 'void*', so the conversion here goes through
+// a 'size_t'. (As the returned pointer is only informative, this
+// conversion should not be a problem.)
 [c_function]
 def lua_topointer(var L : lua_State?; idx : int) : void? {
     var o : TValue? = index2value(L, idx)
@@ -517,6 +571,9 @@ def lua_pushinteger(var L : lua_State?; n : int64) {
     }
 }
 
+// Pushes on the stack a string with given length. Avoid using 's' when
+// 'len' == 0 (as 's' can be NULL in that case), due to later use of
+// 'memcmp' and 'memcpy'.
 [c_function]
 def lua_pushlstring(var L : lua_State?; var s : uint8?; len : uint64) : uint8? {
     var ts : TString?
@@ -551,6 +608,7 @@ def lua_pushstring(var L : lua_State?; var s : uint8?) : uint8? {
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
             io.tt_ = uint8(int(x_.tt) | 1 << 6)
         }
+        // internal copy's address
         s = addr(ts.contents[0])
     }
     {
@@ -617,6 +675,7 @@ def lua_pushcclosure(var L : lua_State?; fn : function<(var a0 : lua_State?) : i
                 io1.value_ = io2.value_
                 io1.tt_ = io2.tt_
             }
+            // does not need barrier because closure is white
         }
         {
             var io : TValue? = addr(L.top.p.val)
@@ -784,6 +843,7 @@ def lua_geti(var L : lua_State?; idx : int; n : int64) : int {
 
 [c_function]
 def private finishrawget(var L : lua_State?; var val : TValue?) : int {
+    // avoid copying empty items to the stack
     if ((int(val.tt_) & 15) == 0) {
         addr(L.top.p.val).tt_ = uint8(0 | 0 << 4)
     } else {
@@ -810,6 +870,7 @@ def lua_rawget(var L : lua_State?; idx : int) : int {
     var val : TValue?
     t = gettable(L, idx)
     val = luaH_get(t, addr((L.top.p - 1).val))
+    // remove key
     L.top.p = L.top.p - 1
     return finishrawget(L, val)
 }
@@ -892,7 +953,7 @@ def lua_getiuservalue(var L : lua_State?; idx : int; n : int) : int {
     o = index2value(L, idx)
     if (n <= 0 || n > int(addr(reinterpret<GCUnion?>(o.value_.gc).u).nuvalue)) {
         addr(L.top.p.val).tt_ = uint8(0 | 0 << 4)
-        t = -1
+        t = LUA_TNONE
     } else {
         {
             var io1 : TValue? = addr(L.top.p.val)
@@ -908,6 +969,7 @@ def lua_getiuservalue(var L : lua_State?; idx : int; n : int) : int {
     return t
 }
 
+// t[k] = value at the top of the stack (where 'k' is a string)
 [c_function]
 def private auxsetstr(var L : lua_State?; var t : TValue?; var k : uint8?) {
     var slot : TValue?
@@ -934,9 +996,11 @@ def private auxsetstr(var L : lua_State?; var t : TValue?; var k : uint8?) {
                 }
             }
         }
+        // pop value
         L.top.p = L.top.p - 1
     } else {
         {
+            // push 'str' (to make it a TValue)
             var io : TValue? = addr(L.top.p.val)
             var x_ : TString? = str
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
@@ -946,13 +1010,16 @@ def private auxsetstr(var L : lua_State?; var t : TValue?; var k : uint8?) {
             L.top.p = L.top.p + 1
         }
         luaV_finishset(L, t, addr((L.top.p - 1).val), addr((L.top.p - 2).val), slot)
+        // pop value and key
         L.top.p = L.top.p - 2
     }
+    // lock done by caller
 }
 
 [c_function]
 def lua_setglobal(var L : lua_State?; var name : uint8?) {
     var G : TValue?
+    // unlock done in 'auxsetstr'
     G = addr(deref(addr(reinterpret<GCUnion?>(addr(L.l_G.l_registry).value_.gc).h)._c_array + (2 - 1)))
     auxsetstr(L, G, name)
 }
@@ -987,10 +1054,12 @@ def lua_settable(var L : lua_State?; idx : int) {
     } else {
         luaV_finishset(L, t, addr((L.top.p - 2).val), addr((L.top.p - 1).val), slot)
     }
+    // pop index and value
     L.top.p = L.top.p - 2
 }
 
 def lua_setfield(var L : lua_State?; idx : int; var k : uint8?) {
+    // unlock done in 'auxsetstr'
     auxsetstr(L, index2value(L, idx), k)
 }
 
@@ -1030,6 +1099,7 @@ def lua_seti(var L : lua_State?; idx : int; n : int64) {
         }
         luaV_finishset(L, t, addr(aux), addr((L.top.p - 1).val), slot)
     }
+    // pop value
     L.top.p = L.top.p - 1
 }
 
@@ -1122,6 +1192,7 @@ def lua_setiuservalue(var L : lua_State?; idx : int; n : int) : int {
     var res : int
     o = index2value(L, idx)
     if (!(uint(n) - 1u < uint(addr(reinterpret<GCUnion?>(o.value_.gc).u).nuvalue))) {
+        // 'n' not in [1, uvalue(o)->nuvalue]
         res = 0
     } else {
         {
@@ -1145,11 +1216,17 @@ def lua_setiuservalue(var L : lua_State?; idx : int; n : int) : int {
 def lua_callk(var L : lua_State?; nargs : int; nresults : int; ctx : int64; k : function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>) {
     var func : StackValue?
     func = L.top.p - (nargs + 1)
+    // need to prepare continuation?
     if (k != null && (L.nCcalls & 4294901760u) == uint(0)) {
+        // save continuation
         L.ci.u.c.k = k
+        // save context
         L.ci.u.c.ctx = ctx
+        // do the call
         luaD_call(L, func, nresults)
     } else {
+        // no continuation or no yieldable
+        // just do the call
         luaD_callnoyield(L, func, nresults)
     }
     {
@@ -1176,23 +1253,34 @@ def lua_pcallk(var L : lua_State?; nargs : int; nresults : int; errfunc : int; c
         var o : StackValue? = index2stack(L, errfunc)
         func = int64(reinterpret<uint8?>(o) - reinterpret<uint8?>(L.stack.p))
     }
+    // function to be called
     c.func = L.top.p - (nargs + 1)
+    // no continuation or no yieldable?
     if (k == null || !((L.nCcalls & 4294901760u) == uint(0))) {
+        // do a 'conventional' protected call
         c.nresults = nresults
         status = luaD_pcall(L, @@f_call, reinterpret<void?>(addr(c)), int64(reinterpret<uint8?>(c.func) - reinterpret<uint8?>(L.stack.p)), func)
     } else {
+        // prepare continuation (call is already protected by 'resume')
         var ci : CallInfo? = L.ci
+        // save continuation
         ci.u.c.k = k
+        // save context
         ci.u.c.ctx = ctx
+        // save information for error recovery
         ci.u2.funcidx = int(int64(reinterpret<uint8?>(c.func) - reinterpret<uint8?>(L.stack.p)))
         ci.u.c.old_errfunc = L.errfunc
         L.errfunc = func
+        // save value of 'allowhook'
         ci.callstatus = uint16(int(ci.callstatus) & ~(1 << 0) | int(L.allowhook))
-        ci.callstatus = uint16(int(ci.callstatus) | 1 << 4)
+        // function can do error recovery
+        ci.callstatus = uint16(int(ci.callstatus) | CIST_YPCALL)
+        // do the call
         luaD_call(L, c.func, nresults)
-        ci.callstatus = uint16(int(ci.callstatus) & ~(1 << 4))
+        ci.callstatus = uint16(int(ci.callstatus) & ~CIST_YPCALL)
         L.errfunc = ci.u.c.old_errfunc
-        status = 0
+        // if it is here, there were no errors
+        status = LUA_OK
     }
     {
         if (nresults <= -1 && intptr(L.ci.top.p) < intptr(L.top.p)) {
@@ -1211,11 +1299,16 @@ def lua_load(var L : lua_State?; reader : function<(var a0 : lua_State?; var a1 
     }
     luaZ_init(L, addr(z), reader, data)
     status = luaD_protectedparser(L, addr(z), chunkname, mode)
-    if (status == 0) {
+    // no errors?
+    if (status == LUA_OK) {
+        // get new function
         var f : LClosure? = addr(reinterpret<GCUnion?>(addr((L.top.p - 1).val).value_.gc).cl.l)
+        // does it have an upvalue?
         if (int(f.nupvalues) >= 1) {
+            // get global table from registry
             var gt : TValue? = addr(deref(addr(reinterpret<GCUnion?>(addr(L.l_G.l_registry).value_.gc).h)._c_array + (2 - 1)))
             {
+                // set global table as 1st upvalue of 'f' (may be LUA_ENV)
                 var io1 : TValue? = deref(addr(f.upvals[0]) + 0).v.p
                 var io2 : TValue? = gt
                 io1.value_ = io2.value_
@@ -1248,23 +1341,28 @@ def lua_status(var L : lua_State?) : int {
     return int(L.status)
 }
 
+// Garbage-collection function
 [variadic]
 def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
     var argp : CVaCursor
     var res : int = 0
     var g : global_State? = L.l_G
-    if ((int(g.gcstp) & 2) != 0) {
+    // internal stop?
+    if ((int(g.gcstp) & GCSTPGC) != 0) {
+        // all options are invalid when stopped
         return -1
     }
     argp = va_begin(va)
     let _cond = what
     if (_cond == 0) {
         {
-            g.gcstp = uint8(1)
+            // stopped by the user
+            g.gcstp = uint8(GCSTPUSR)
         }
     } elif (_cond == 1) {
         {
             luaE_setdebt(g, int64(0))
+            // (GCSTPGC must be already zero here)
             g.gcstp = uint8(0)
         }
     } elif (_cond == 2) {
@@ -1273,6 +1371,7 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
         }
     } elif (_cond == 3) {
         {
+            // GC values are expressed in Kbytes: #bytes/2^10
             res = int(uint64(g.totalbytes + g.GCdebt) >> 10ul)
         }
     } elif (_cond == 4) {
@@ -1282,13 +1381,17 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
     } elif (_cond == 5) {
         {
             var data : int = int(va_i(argp))
+            // =1 to signal that it did an actual step
             var debt : int64 = int64(1)
             var oldstp : uint8 = g.gcstp
+            // allow GC to run (GCSTPGC must be zero here)
             g.gcstp = uint8(0)
             if (data == 0) {
+                // do a basic step
                 luaE_setdebt(g, int64(0))
                 luaC_step(L)
             } else {
+                // add 'data' to total debt
                 debt = int64(data) * int64(1024) + g.GCdebt
                 luaE_setdebt(g, debt)
                 {
@@ -1297,8 +1400,11 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
                     }
                 }
             }
+            // restore previous state
             g.gcstp = oldstp
-            if (debt > int64(0) && int(g.gcstate) == 8) {
+            // end of cycle?
+            if (debt > int64(0) && int(g.gcstate) == GCSpause) {
+                // signal it
                 res = 1
             }
         }
@@ -1322,21 +1428,21 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
         {
             var minormul : int = int(va_i(argp))
             var majormul : int = int(va_i(argp))
-            res = int(g.gckind) == 1 || g.lastatomic != uint64(0) ? 10 : 11
+            res = int(g.gckind) == 1 || g.lastatomic != uint64(0) ? LUA_GCGEN : LUA_GCINC
             if (minormul != 0) {
                 g.genminormul = uint8(minormul)
             }
             if (majormul != 0) {
                 g.genmajormul = uint8(majormul / 4)
             }
-            luaC_changemode(L, 1)
+            luaC_changemode(L, KGC_GEN)
         }
     } elif (_cond == 11) {
         {
             var pause : int = int(va_i(argp))
             var stepmul : int = int(va_i(argp))
             var stepsize : int = int(va_i(argp))
-            res = int(g.gckind) == 1 || g.lastatomic != uint64(0) ? 10 : 11
+            res = int(g.gckind) == 1 || g.lastatomic != uint64(0) ? LUA_GCGEN : LUA_GCINC
             if (pause != 0) {
                 g.gcpause = uint8(pause / 4)
             }
@@ -1346,9 +1452,10 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
             if (stepsize != 0) {
                 g.gcstepsize = uint8(stepsize)
             }
-            luaC_changemode(L, 0)
+            luaC_changemode(L, KGC_INC)
         }
     } else {
+        // invalid option
         res = -1
     }
     return res
@@ -1358,11 +1465,16 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
 def lua_error(var L : lua_State?) : int {
     var errobj : TValue?
     errobj = addr((L.top.p - 1).val)
+    // error object is the memory error message?
     if (int(errobj.tt_) == (4 | 0 << 4 | 1 << 6) && intptr(addr(reinterpret<GCUnion?>(errobj.value_.gc).ts)) == intptr(L.l_G.memerrmsg)) {
+        // raise a memory error
         luaD_throw(L, 4)
     } else {
+        // raise a regular error
         luaG_errormsg(L)
     }
+    // code unreachable; will unlock when control actually leaves the kernel
+    // to avoid warnings
     return 0
 }
 
@@ -1377,6 +1489,8 @@ def lua_next(var L : lua_State?; idx : int) : int {
             L.top.p = L.top.p + 1
         }
     } else {
+        // no more elements
+        // remove key
         L.top.p = L.top.p - 1
     }
     return more
@@ -1387,8 +1501,11 @@ def lua_toclose(var L : lua_State?; idx : int) {
     var o : StackValue?
     o = index2stack(L, idx)
     nresults = int(L.ci.nresults)
+    // create new to-be-closed upvalue
     luaF_newtbcupval(L, o)
+    // function not marked yet?
     if (!(nresults < -1)) {
+        // mark it
         L.ci.nresults = int16(-nresults - 3)
     }
 }
@@ -1399,6 +1516,8 @@ def lua_concat(var L : lua_State?; n : int) {
         luaV_concat(L, n)
     } else {
         {
+            // nothing to concatenate
+            // push empty string
             var io : TValue? = addr(L.top.p.val)
             var x_ : TString? = luaS_newlstr(L, addr(c2das_empty[0]), uint64(0))
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
@@ -1475,8 +1594,10 @@ def private aux_upvalue(var fi : TValue?; n : int; var val : TValue ??; var owne
     let _cond = int(fi.tt_) & 63
     if (_cond == 38) {
         {
+            // C closure
             var f : CClosure? = addr(reinterpret<GCUnion?>(fi.value_.gc).cl.c)
             if (!(uint(n) - 1u < uint(f.nupvalues))) {
+                // 'n' not in [1, f->nupvalues]
                 return null
             }
             deref(val) = addr(deref(addr(f.upvalue[0]) + (n - 1)))
@@ -1487,10 +1608,12 @@ def private aux_upvalue(var fi : TValue?; n : int; var val : TValue ??; var owne
         }
     } elif (_cond == 6) {
         {
+            // Lua closure
             var f : LClosure? = addr(reinterpret<GCUnion?>(fi.value_.gc).cl.l)
             var name : TString?
             var p : Proto? = f.p
             if (!(uint(n) - 1u < uint(p.sizeupvalues))) {
+                // 'n' not in [1, p->sizeupvalues]
                 return null
             }
             deref(val) = deref(addr(f.upvals[0]) + (n - 1)).v.p
@@ -1501,6 +1624,7 @@ def private aux_upvalue(var fi : TValue?; n : int; var val : TValue ??; var owne
             return name == null ? reinterpret<uint8?>("(no name)") : addr(name.contents[0])
         }
     } else {
+        // not a closure
         return null
     }
     return null
@@ -1509,6 +1633,7 @@ def private aux_upvalue(var fi : TValue?; n : int; var val : TValue ??; var owne
 [c_function]
 def lua_getupvalue(var L : lua_State?; funcindex : int; n : int) : uint8? {
     var name : uint8?
+    // to avoid warnings
     var val : TValue? = null
     name = aux_upvalue(index2value(L, funcindex), n, addr(val), null)
     if (name != null) {
@@ -1528,7 +1653,9 @@ def lua_getupvalue(var L : lua_State?; funcindex : int; n : int) : uint8? {
 [c_function]
 def lua_setupvalue(var L : lua_State?; funcindex : int; n : int) : uint8? {
     var name : uint8?
+    // to avoid warnings
     var val : TValue? = null
+    // to avoid warnings
     var owner : GCObject? = null
     var fi : TValue?
     fi = index2value(L, funcindex)
@@ -1559,6 +1686,7 @@ def private getupvalref(var L : lua_State?; fidx : int; n : int; var pf : LClosu
         deref(pf) = f
     }
     if (1 <= n && n <= f.p.sizeupvalues) {
+        // get its upvalue pointer
         return addr(deref(addr(f.upvals[0]) + (n - 1)))
     } else {
         return addr(getupvalref_nullup)
@@ -1571,15 +1699,16 @@ def lua_upvalueid(var L : lua_State?; fidx : int; n : int) : void? {
     let _cond = int(fi.tt_) & 63
     while (true) {
         var _flag = false
-        _flag ||= _cond == 6
-        if (_flag) {
+        if (_cond == 6) {
             {
+                // lua closure
                 return reinterpret<void?>(deref(getupvalref(L, fidx, n, null)))
             }
         }
         _flag ||= _cond == 38
         if (_flag) {
             {
+                // C closure
                 var f : CClosure? = addr(reinterpret<GCUnion?>(fi.value_.gc).cl.c)
                 if (1 <= n && n <= int(f.nupvalues)) {
                     return reinterpret<void?>(addr(deref(addr(f.upvalue[0]) + (n - 1))))
@@ -1588,10 +1717,12 @@ def lua_upvalueid(var L : lua_State?; fidx : int; n : int) : void? {
         }
         _flag ||= _cond == 22
         if (_flag) {
+            // else
+            // FALLTHROUGH
+            // light C functions have no upvalues
             return null
         }
-        _flag ||= !(_cond == 6 || _cond == 38 || _cond == 22)
-        if (_flag) {
+        if (!(_cond == 6 || _cond == 38 || _cond == 22)) {
             {
                 return null
             }

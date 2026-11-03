@@ -7,41 +7,57 @@ require c_runtime/variadic
 require lapi
 require lauxlib
 require lauxlib_h
-require ldebug
-require ldo
+require lcode_cluster
 require lobject_h_cluster
-require lstate
 
 var private statname : uint8? [4] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("running")), unsafe(reinterpret<uint8?>("dead")), unsafe(reinterpret<uint8?>("suspended")), unsafe(reinterpret<uint8?>("normal")))
 var private co_funcs : luaL_Reg[9] = fixed_array(luaL_Reg(name = unsafe(reinterpret<uint8?>("create")), func = @@luaB_cocreate), luaL_Reg(name = unsafe(reinterpret<uint8?>("resume")), func = @@luaB_coresume), luaL_Reg(name = unsafe(reinterpret<uint8?>("running")), func = @@luaB_corunning), luaL_Reg(name = unsafe(reinterpret<uint8?>("status")), func = @@luaB_costatus), luaL_Reg(name = unsafe(reinterpret<uint8?>("wrap")), func = @@luaB_cowrap), luaL_Reg(name = unsafe(reinterpret<uint8?>("yield")), func = @@luaB_yield), luaL_Reg(name = unsafe(reinterpret<uint8?>("isyieldable")), func = @@luaB_yieldable), luaL_Reg(name = unsafe(reinterpret<uint8?>("close")), func = @@luaB_close), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
+let private LUA_OK = 0
+let private LUA_YIELD = 1
+let private LUA_ERRMEM = 4
+let private LUA_TSTRING = 4
+let private LUA_TFUNCTION = 6
+let private COS_RUN = 0
+let private COS_YIELD = 2
+let private COS_NORM = 3
+let private COS_DEAD = 1
+
 [c_function]
 def private getco(var L : lua_State?) : lua_State? {
     var co : lua_State? = lua_tothread(L, 1)
-    let _t0 = int64(co != null ? 1 : 0) != 0 || luaL_typeerror(L, 1, reinterpret<uint8?>("thread")) != 0
+    let _t0 = co != null || luaL_typeerror(L, 1, reinterpret<uint8?>("thread")) != 0
     return co
 }
 
+// Resumes a coroutine. Returns the number of results for non-error
+// cases or -1 for errors.
 [c_function]
 def private auxresume(var L : lua_State?; var co : lua_State?; narg : int) : int {
     var status : int
     var nres : int
-    if (int64((!(lua_checkstack(co, narg) != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (!(lua_checkstack(co, narg) != 0)) {
         lua_pushstring(L, reinterpret<uint8?>("too many arguments to resume"))
+        // error flag
         return -1
     }
     lua_xmove(L, co, narg)
     status = lua_resume(co, L, narg, addr(nres))
-    if (int64((status == 0 || status == 1 ? 1 : 0) != 0 ? 1 : 0) != 0) {
-        if (int64((!(lua_checkstack(L, nres + 1) != 0) ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (status == 0 || status == 1) {
+        if (!(lua_checkstack(L, nres + 1) != 0)) {
+            // remove results anyway
             lua_settop(co, -nres - 1)
             lua_pushstring(L, reinterpret<uint8?>("too many results to resume"))
+            // error flag
             return -1
         }
+        // move yielded values
         lua_xmove(co, L, nres)
         return nres
     } else {
+        // move error message
         lua_xmove(co, L, 1)
+        // error flag
         return -1
     }
 }
@@ -50,13 +66,15 @@ def private luaB_coresume(var L : lua_State?) : int {
     var co : lua_State? = getco(L)
     var r : int
     r = auxresume(L, co, lua_gettop(L) - 1)
-    if (int64((r < 0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    if (r < 0) {
         lua_pushboolean(L, 0)
         lua_rotate(L, -2, 1)
+        // return false + error message
         return 2
     } else {
         lua_pushboolean(L, 1)
         lua_rotate(L, -(r + 1), 1)
+        // return true + 'resume' returns
         return r + 1
     }
 }
@@ -64,17 +82,25 @@ def private luaB_coresume(var L : lua_State?) : int {
 def private luaB_auxwrap(var L : lua_State?) : int {
     var co : lua_State? = lua_tothread(L, -1000000 - 1000 - 1)
     var r : int = auxresume(L, co, lua_gettop(L))
-    if (int64((r < 0 ? 1 : 0) != 0 ? 1 : 0) != 0) {
+    // error?
+    if (r < 0) {
         var stat : int = lua_status(co)
-        if (stat != 0 && stat != 1) {
+        // error in the coroutine?
+        if (stat != LUA_OK && stat != LUA_YIELD) {
+            // close its tbc variables
             stat = lua_closethread(co, L)
+            // move error message to the caller
             lua_xmove(co, L, 1)
         }
-        if (stat != 4 && lua_type(L, -1) == 4) {
+        // not a memory error and ...
+        if (stat != LUA_ERRMEM && lua_type(L, -1) == LUA_TSTRING) {
+            // ... error object is a string?
+            // add extra info, if available
             luaL_where(L, 1)
             lua_rotate(L, -2, 1)
             lua_concat(L, 2)
         }
+        // propagate error
         return lua_error(L)
     }
     return r
@@ -82,9 +108,11 @@ def private luaB_auxwrap(var L : lua_State?) : int {
 
 def private luaB_cocreate(var L : lua_State?) : int {
     var NL : lua_State?
-    luaL_checktype(L, 1, 6)
+    luaL_checktype(L, 1, LUA_TFUNCTION)
     NL = lua_newthread(L)
+    // move function to top
     lua_pushvalue(L, 1)
+    // move function from L to NL
     lua_xmove(L, NL, 1)
     return 1
 }
@@ -102,31 +130,34 @@ def private luaB_yield(var L : lua_State?) : int {
 [c_function]
 def private auxstatus(var L : lua_State?; var co : lua_State?) : int {
     if (intptr(L) == intptr(co)) {
-        return 0
+        return COS_RUN
     } else {
         let _cond = lua_status(co)
         while (true) {
             var _flag = false
-            _flag ||= _cond == 1
-            if (_flag) {
-                return 2
+            if (_cond == 1) {
+                return COS_YIELD
             }
             _flag ||= _cond == 0
             if (_flag) {
                 {
                     var ar : lua_Debug
+                    // does it have frames?
                     if (lua_getstack(co, 0, addr(ar)) != 0) {
-                        return 3
+                        // it is running
+                        return COS_NORM
                     } elif (lua_gettop(co) == 0) {
-                        return 1
+                        return COS_DEAD
                     } else {
-                        return 2
+                        // initial state
+                        return COS_YIELD
                     }
                 }
             }
             _flag ||= !(_cond == 1 || _cond == 0)
             if (_flag) {
-                return 1
+                // some error occurred
+                return COS_DEAD
             }
             break
         }
@@ -164,11 +195,12 @@ def private luaB_close(var L : lua_State?) : int {
         if (_flag) {
             {
                 status = lua_closethread(co, L)
-                if (status == 0) {
+                if (status == LUA_OK) {
                     lua_pushboolean(L, 1)
                     return 1
                 } else {
                     lua_pushboolean(L, 0)
+                    // move error message
                     lua_xmove(co, L, 1)
                     return 2
                 }
@@ -176,6 +208,7 @@ def private luaB_close(var L : lua_State?) : int {
         }
         _flag ||= !(_cond == 1 || _cond == 2)
         if (_flag) {
+            // normal or running coroutine
             return luaL_error`va(L, reinterpret<uint8?>("cannot close a %s coroutine"), (statname[status],))
         }
         break

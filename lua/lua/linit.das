@@ -23,10 +23,12 @@ var private loadedlibs : luaL_Reg[11] = fixed_array(luaL_Reg(name = unsafe(reint
 [c_function]
 def luaL_openlibs(var L : lua_State?) {
     var lib : luaL_Reg?
+    // "require" functions from 'loadedlibs' and set results to global table
     {
         lib = addr(loadedlibs[0])
         while (lib.func != null) {
             luaL_requiref(L, lib.name, lib.func, 1)
+            // remove lib
             lua_settop(L, -1 - 1)
             lib = lib + 1
         }
