@@ -16,9 +16,9 @@ numbers of that generation.
 
 Each cell is the geometric mean, over the program's workloads (its startup row aside), of the lane's time over the native build's; a lane covering only some workloads names how many. A program's README holds its tables, its machine and its raw captures.
 
-| Program              | Captured             | Machine                    | Workloads | interpreter |   JIT |           exe |     AOT |
-| :------------------- | :------------------- | :------------------------- | --------: | ----------: | ----: | ------------: | ------: |
-| [lua](lua/README.md) | 2026-11-03 10:17 UTC | x86_64, AMD Ryzen 7 7435HS |         5 |      134.83 | 12.57 | 5.01 (4 of 5) | not yet |
+| Program              | Captured             | Machine                                      | Workloads | interpreter |  JIT |           exe |     AOT |
+| :------------------- | :------------------- | :------------------------------------------- | --------: | ----------: | ---: | ------------: | ------: |
+| [lua](lua/README.md) | 2026-11-03 11:55 UTC | x86_64, AMD Ryzen 3 1200 Quad-Core Processor |         5 |      130.84 | 9.49 | 4.02 (4 of 5) | not yet |
 
 ## Head-to-head with the Rust translator
 
