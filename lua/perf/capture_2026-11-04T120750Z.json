@@ -1,0 +1,1037 @@
+{
+	"command" : "scripts/publish_ports.sh --program lua --perf --samples 3 --lanes interp,jit,exe,aot,interp-source-cut,jit-source-cut,interp-single,jit-single --timeout 1800",
+	"program" : "lua",
+	"workloads" : [
+		{
+			"name" : "startup",
+			"args" : "-e \"print(1)\"",
+			"startup" : true
+		},
+		{
+			"name" : "fib",
+			"args" : "bench/timed.lua bench/fib.lua",
+			"startup" : false
+		},
+		{
+			"name" : "binary_trees",
+			"args" : "bench/timed.lua bench/binary_trees.lua",
+			"startup" : false
+		},
+		{
+			"name" : "nbody",
+			"args" : "bench/timed.lua bench/nbody.lua",
+			"startup" : false
+		},
+		{
+			"name" : "spectral_norm",
+			"args" : "bench/timed.lua bench/spectral_norm.lua",
+			"startup" : false
+		},
+		{
+			"name" : "test suite",
+			"args" : "-e \"_port=true\" bench/timed.lua all.lua",
+			"startup" : false
+		}
+	],
+	"lanes" : [
+		{
+			"name" : "native",
+			"command" : "/root/libclang/bin/clang -O3 -w -funsigned-char -o lua_native lapi.c lcode.c lctype.c ldebug.c ldo.c ldump.c lfunc.c lgc.c llex.c lmem.c lobject.c lopcodes.c lparser.c lstate.c lstring.c ltable.c ltm.c lundump.c lvm.c lzio.c lauxlib.c lbaselib.c lcorolib.c ldblib.c liolib.c lmathlib.c loadlib.c loslib.c lstrlib.c ltablib.c lutf8lib.c linit.c lua.c -lm",
+			"error" : ""
+		},
+		{
+			"name" : "interp",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "exe",
+			"command" : "daslang -exe lua/lua.das, the binary run",
+			"error" : ""
+		},
+		{
+			"name" : "aot",
+			"command" : "the -ctx context and its host compiled by clang++ -O3 (c2das-re converter/tiers.das), the binary run with `--`",
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label"
+		},
+		{
+			"name" : "interp-source-cut",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime source-cut/lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit-source-cut",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit source-cut/lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "interp-single",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime single/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit-single",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit single/lua.das --",
+			"error" : ""
+		}
+	],
+	"machine" : {
+		"arch" : "x86_64",
+		"cpu" : "AMD Ryzen 7 7435HS",
+		"box" : "PC",
+		"clang" : "clang version 22.1.8 (https://github.com/llvm/llvm-project ca7933e47d3a3451d81e72ac174dcb5aa28b59d1)",
+		"clang_path" : "/root/libclang/bin/clang",
+		"daslang" : "0.6.4"
+	},
+	"cells" : [
+		{
+			"work_time" : 0,
+			"spread" : 0.05711035030909182,
+			"work_samples" : [],
+			"time" : 0.009286399,
+			"error" : "",
+			"samples" : [
+				0.010178199,
+				0.0091175,
+				0.009286399
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.029805949479484284,
+			"work_samples" : [],
+			"time" : 3.490235987,
+			"error" : "",
+			"samples" : [
+				3.595081783,
+				3.490235987,
+				3.387022188
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.02124666739368952,
+			"work_samples" : [],
+			"time" : 3.953154085,
+			"error" : "",
+			"samples" : [
+				3.975192285,
+				3.953154085,
+				3.807209585
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.002797376318512266,
+			"work_samples" : [],
+			"time" : 0.0427186,
+			"error" : "",
+			"samples" : [
+				0.0425178,
+				0.0427568,
+				0.0427186
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0,
+			"work_samples" : [],
+			"time" : 0,
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label",
+			"samples" : [],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "aot"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.007308522298979278,
+			"work_samples" : [],
+			"time" : 0.667966697,
+			"error" : "",
+			"samples" : [
+				0.661744398,
+				0.667966697,
+				0.671508097
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "interp-source-cut"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.028886799283465256,
+			"work_samples" : [],
+			"time" : 0.995028896,
+			"error" : "",
+			"samples" : [
+				1.042585796,
+				0.995028896,
+				0.985099396
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "jit-source-cut"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.014394555302820033,
+			"work_samples" : [],
+			"time" : 5.662484098,
+			"error" : "",
+			"samples" : [
+				5.708992447,
+				5.545974566,
+				5.662484098
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "interp-single"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.010991613022268342,
+			"work_samples" : [],
+			"time" : 6.101240952,
+			"error" : "",
+			"samples" : [
+				6.129264127,
+				6.101240952,
+				5.995139168
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "jit-single"
+		},
+		{
+			"work_time" : 0.253764,
+			"spread" : 0.007121759148999325,
+			"work_samples" : [
+				0.256845,
+				0.252923,
+				0.253764
+			],
+			"time" : 0.262989798,
+			"error" : "",
+			"samples" : [
+				0.266365398,
+				0.262619498,
+				0.262989798
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.007727652464494533,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 70.433198,
+			"spread" : 0.029337364211733934,
+			"work_samples" : [
+				72.209758,
+				70.433198,
+				67.967273
+			],
+			"time" : 73.977215807,
+			"error" : "",
+			"samples" : [
+				75.805158845,
+				73.977215807,
+				71.464565798
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.030117083424211318,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 2.400926,
+			"spread" : 0.030348640297638226,
+			"work_samples" : [
+				2.400926,
+				2.386674,
+				2.420379
+			],
+			"time" : 6.512871419,
+			"error" : "",
+			"samples" : [
+				6.512871419,
+				6.278576807,
+				6.673890391
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.0070191667714873075,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 2.034241,
+			"spread" : 0.008411977374671286,
+			"work_samples" : [
+				2.054629,
+				2.034241,
+				2.02546
+			],
+			"time" : 2.076373987,
+			"error" : "",
+			"samples" : [
+				2.102802696,
+				2.076373987,
+				2.067869874
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.007169504498237917,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0,
+			"work_samples" : [],
+			"time" : 0,
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label",
+			"samples" : [],
+			"workload" : "fib",
+			"work_time_spread" : 0,
+			"lane" : "aot"
+		},
+		{
+			"work_time" : 67.885066,
+			"spread" : 0.0019451863803855865,
+			"work_samples" : [
+				68.125349,
+				67.881023,
+				67.885066
+			],
+			"time" : 68.586538208,
+			"error" : "",
+			"samples" : [
+				68.831817581,
+				68.564990381,
+				68.586538208
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.0017995563265711559,
+			"lane" : "interp-source-cut"
+		},
+		{
+			"work_time" : 2.50132,
+			"spread" : 0.025329869571991778,
+			"work_samples" : [
+				2.465383,
+				2.50132,
+				2.541619
+			],
+			"time" : 3.524968802,
+			"error" : "",
+			"samples" : [
+				3.628488909,
+				3.449914909,
+				3.524968802
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.015239153726832181,
+			"lane" : "jit-source-cut"
+		},
+		{
+			"work_time" : 67.635038,
+			"spread" : 0.0029924190924332838,
+			"work_samples" : [
+				68.043119,
+				67.635038,
+				67.545405
+			],
+			"time" : 73.643251561,
+			"error" : "",
+			"samples" : [
+				73.975419117,
+				73.534676173,
+				73.643251561
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.0036794094800390443,
+			"lane" : "interp-single"
+		},
+		{
+			"work_time" : 2.086751,
+			"spread" : 0.014555601331425944,
+			"work_samples" : [
+				2.127065,
+				2.077816,
+				2.086751
+			],
+			"time" : 8.100781707,
+			"error" : "",
+			"samples" : [
+				8.276363005,
+				8.100781707,
+				8.040539507
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.011800401677056845,
+			"lane" : "jit-single"
+		},
+		{
+			"work_time" : 0.337438,
+			"spread" : 0.03622689083936136,
+			"work_samples" : [
+				0.337358,
+				0.360875,
+				0.337438
+			],
+			"time" : 0.352994701,
+			"error" : "",
+			"samples" : [
+				0.352994701,
+				0.377342301,
+				0.3517665
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.03484640141300033,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 35.727105,
+			"spread" : 0.007174695507639153,
+			"work_samples" : [
+				35.727105,
+				35.772129,
+				35.324033
+			],
+			"time" : 39.149651954,
+			"error" : "",
+			"samples" : [
+				39.322935294,
+				39.149651954,
+				38.76116163
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.006271093053859242,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 1.381249,
+			"spread" : 0.01808178233301071,
+			"work_samples" : [
+				1.346674,
+				1.381249,
+				1.45296
+			],
+			"time" : 5.418948099,
+			"error" : "",
+			"samples" : [
+				5.60919216,
+				5.41322368,
+				5.418948099
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.03847459799065922,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 1.09106,
+			"spread" : 0.00977936529276815,
+			"work_samples" : [
+				1.09106,
+				1.108946,
+				1.085734
+			],
+			"time" : 1.144588597,
+			"error" : "",
+			"samples" : [
+				1.144588597,
+				1.158122096,
+				1.135735396
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.010637361831613299,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0,
+			"work_samples" : [],
+			"time" : 0,
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label",
+			"samples" : [],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0,
+			"lane" : "aot"
+		},
+		{
+			"work_time" : 35.99173,
+			"spread" : 0.00623763551666798,
+			"work_samples" : [
+				35.942284,
+				36.380372,
+				35.99173
+			],
+			"time" : 36.74284645,
+			"error" : "",
+			"samples" : [
+				36.631864716,
+				37.090241684,
+				36.74284645
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.006085953634348787,
+			"lane" : "interp-source-cut"
+		},
+		{
+			"work_time" : 1.382604,
+			"spread" : 0.035433702165475194,
+			"work_samples" : [
+				1.38246,
+				1.398977,
+				1.382604
+			],
+			"time" : 2.367826176,
+			"error" : "",
+			"samples" : [
+				2.522115835,
+				2.35431414,
+				2.367826176
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.005973149216984723,
+			"lane" : "jit-source-cut"
+		},
+		{
+			"work_time" : 35.874874,
+			"spread" : 0.000806751948607531,
+			"work_samples" : [
+				35.989265,
+				35.874874,
+				35.721317
+			],
+			"time" : 41.773110134,
+			"error" : "",
+			"samples" : [
+				41.827811015,
+				41.773110134,
+				41.760409939
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.003734480015177253,
+			"lane" : "interp-single"
+		},
+		{
+			"work_time" : 1.488747,
+			"spread" : 0.025315863857972756,
+			"work_samples" : [
+				1.488747,
+				1.389261,
+				1.513112
+			],
+			"time" : 7.621223873,
+			"error" : "",
+			"samples" : [
+				7.944016733,
+				7.558141001,
+				7.621223873
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.04159571774116083,
+			"lane" : "jit-single"
+		},
+		{
+			"work_time" : 0.353052,
+			"spread" : 0.05713481057271865,
+			"work_samples" : [
+				0.350836,
+				0.393312,
+				0.353052
+			],
+			"time" : 0.362875107,
+			"error" : "",
+			"samples" : [
+				0.361858507,
+				0.403324108,
+				0.362875107
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.0601554445237529,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 69.055619,
+			"spread" : 0.017411914751992462,
+			"work_samples" : [
+				68.381267,
+				70.697797,
+				69.055619
+			],
+			"time" : 72.602712482,
+			"error" : "",
+			"samples" : [
+				71.839746455,
+				74.368050936,
+				72.602712482
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.016772929079094927,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 1.824902,
+			"spread" : 0.027164397110380066,
+			"work_samples" : [
+				1.897327,
+				1.824902,
+				1.755855
+			],
+			"time" : 5.955662382,
+			"error" : "",
+			"samples" : [
+				6.173149581,
+				5.955662382,
+				5.849585625
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.038761533496045275,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 1.336938,
+			"spread" : 0.01049575543636647,
+			"work_samples" : [
+				1.346602,
+				1.336938,
+				1.32232
+			],
+			"time" : 1.380529309,
+			"error" : "",
+			"samples" : [
+				1.392751809,
+				1.380529309,
+				1.363772413
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.00908119897856151,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0,
+			"work_samples" : [],
+			"time" : 0,
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label",
+			"samples" : [],
+			"workload" : "nbody",
+			"work_time_spread" : 0,
+			"lane" : "aot"
+		},
+		{
+			"work_time" : 69.165969,
+			"spread" : 0.006723346139992317,
+			"work_samples" : [
+				68.508953,
+				69.165969,
+				69.40235
+			],
+			"time" : 69.890844561,
+			"error" : "",
+			"samples" : [
+				69.217452735,
+				69.890844561,
+				70.157253415
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.006458356710075102,
+			"lane" : "interp-source-cut"
+		},
+		{
+			"work_time" : 1.832971,
+			"spread" : 0.036843649659553834,
+			"work_samples" : [
+				1.832971,
+				1.832384,
+				1.869407
+			],
+			"time" : 2.81516899,
+			"error" : "",
+			"samples" : [
+				2.981222999,
+				2.773780799,
+				2.81516899
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.010099177782954567,
+			"lane" : "jit-source-cut"
+		},
+		{
+			"work_time" : 68.451343,
+			"spread" : 0.020006521726973047,
+			"work_samples" : [
+				68.12919,
+				68.451343,
+				70.975706
+			],
+			"time" : 74.229752641,
+			"error" : "",
+			"samples" : [
+				74.000670852,
+				74.229752641,
+				76.97082917
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.02079225823224541,
+			"lane" : "interp-single"
+		},
+		{
+			"work_time" : 1.260405,
+			"spread" : 0.01943123726562235,
+			"work_samples" : [
+				1.268925,
+				1.254773,
+				1.260405
+			],
+			"time" : 7.373440921,
+			"error" : "",
+			"samples" : [
+				7.373440921,
+				7.119698512,
+				7.406248672
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.005614068493857199,
+			"lane" : "jit-single"
+		},
+		{
+			"work_time" : 0.357615,
+			"spread" : 0.020290639091532486,
+			"work_samples" : [
+				0.369271,
+				0.355646,
+				0.357615
+			],
+			"time" : 0.367851893,
+			"error" : "",
+			"samples" : [
+				0.380123093,
+				0.365195193,
+				0.367851893
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.019049816143058874,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 88.094239,
+			"spread" : 0.002263638529642624,
+			"work_samples" : [
+				88.186177,
+				87.568224,
+				88.094239
+			],
+			"time" : 91.910998278,
+			"error" : "",
+			"samples" : [
+				91.935775044,
+				91.51966849,
+				91.910998278
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.003507340587844796,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 2.724729,
+			"spread" : 0.021893716069623224,
+			"work_samples" : [
+				2.757567,
+				2.724729,
+				2.712106
+			],
+			"time" : 6.697073993,
+			"error" : "",
+			"samples" : [
+				6.985000771,
+				6.697073993,
+				6.691753098
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.008342297527570626,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 2.161241,
+			"spread" : 0.018774461270113885,
+			"work_samples" : [
+				2.15666,
+				2.242963,
+				2.161241
+			],
+			"time" : 2.205003297,
+			"error" : "",
+			"samples" : [
+				2.205003297,
+				2.287166095,
+				2.204370597
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.01996607504669771,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0,
+			"work_samples" : [],
+			"time" : 0,
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label",
+			"samples" : [],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0,
+			"lane" : "aot"
+		},
+		{
+			"work_time" : 89.360356,
+			"spread" : 0.011570403161288743,
+			"work_samples" : [
+				90.039851,
+				89.360356,
+				87.890929
+			],
+			"time" : 90.274226571,
+			"error" : "",
+			"samples" : [
+				90.742680524,
+				90.274226571,
+				88.653662131
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.01202391136400575,
+			"lane" : "interp-source-cut"
+		},
+		{
+			"work_time" : 2.70664,
+			"spread" : 0.03315607542634526,
+			"work_samples" : [
+				2.70664,
+				2.712871,
+				2.699504
+			],
+			"time" : 3.655501999,
+			"error" : "",
+			"samples" : [
+				3.8802999,
+				3.655501999,
+				3.6378957
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.0024692977270711442,
+			"lane" : "jit-source-cut"
+		},
+		{
+			"work_time" : 87.8932,
+			"spread" : 0.01799259500292718,
+			"work_samples" : [
+				87.8932,
+				87.403301,
+				89.91234
+			],
+			"time" : 93.591685342,
+			"error" : "",
+			"samples" : [
+				93.591685342,
+				93.427459546,
+				96.795374126
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.014273225915087865,
+			"lane" : "interp-single"
+		},
+		{
+			"work_time" : 2.207211,
+			"spread" : 0.020449871664737534,
+			"work_samples" : [
+				2.186566,
+				2.207211,
+				2.20783
+			],
+			"time" : 8.664666894,
+			"error" : "",
+			"samples" : [
+				8.673203663,
+				8.318821011,
+				8.664666894
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.00481693866150539,
+			"lane" : "jit-single"
+		},
+		{
+			"work_time" : 5.726204,
+			"spread" : 0.022009569505110283,
+			"work_samples" : [
+				5.55217,
+				5.81997,
+				5.726204
+			],
+			"time" : 5.755033031,
+			"error" : "",
+			"samples" : [
+				5.596147326,
+				5.849478925,
+				5.755033031
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.023383728557347883,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 156.420784,
+			"spread" : 0.0030538516097396028,
+			"work_samples" : [
+				157.279952,
+				156.034956,
+				156.420784
+			],
+			"time" : 162.143412411,
+			"error" : "",
+			"samples" : [
+				162.765497245,
+				161.775173403,
+				162.143412411
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.003979637386295208,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 8.663407,
+			"spread" : 0.007348944250877932,
+			"work_samples" : [
+				8.663407,
+				8.530281,
+				8.677779
+			],
+			"time" : 12.668310416,
+			"error" : "",
+			"samples" : [
+				12.668310416,
+				12.603255202,
+				12.789452616
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.008512701758095794,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0,
+			"work_samples" : [],
+			"time" : 0,
+			"error" : "exited 1 where the native build exits 0: dynamic module `Module_CRT` failed to load: dasCRuntime/dasModuleCRuntime.shared_module (dasCRuntime/dasModuleCRunti...",
+			"samples" : [
+				0.0545458
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0,
+			"work_samples" : [],
+			"time" : 0,
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label",
+			"samples" : [],
+			"workload" : "test suite",
+			"work_time_spread" : 0,
+			"lane" : "aot"
+		},
+		{
+			"work_time" : 156.454113,
+			"spread" : 0.00810668865656265,
+			"work_samples" : [
+				155.519532,
+				156.454113,
+				156.613589
+			],
+			"time" : 159.072400598,
+			"error" : "",
+			"samples" : [
+				156.941801771,
+				159.072400598,
+				159.520902622
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.00349641495203131,
+			"lane" : "interp-source-cut"
+		},
+		{
+			"work_time" : 8.223435,
+			"spread" : 0.004936938933850559,
+			"work_samples" : [
+				8.194304,
+				8.223435,
+				8.272084
+			],
+			"time" : 9.208318071,
+			"error" : "",
+			"samples" : [
+				9.198826778,
+				9.208318071,
+				9.289748586
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.004729167312686173,
+			"lane" : "jit-source-cut"
+		},
+		{
+			"work_time" : 157.406115,
+			"spread" : 0.0032790802361973917,
+			"work_samples" : [
+				157.406115,
+				158.836885,
+				157.29842
+			],
+			"time" : 164.958340613,
+			"error" : "",
+			"samples" : [
+				164.8272025,
+				165.909025769,
+				164.958340613
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.004886928948090747,
+			"lane" : "interp-single"
+		},
+		{
+			"work_time" : 8.735297,
+			"spread" : 0.00802124372875407,
+			"work_samples" : [
+				8.705178,
+				9.042317,
+				8.735297
+			],
+			"time" : 15.133088721,
+			"error" : "",
+			"samples" : [
+				15.133088721,
+				15.293586916,
+				15.05081453
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.01929751215098929,
+			"lane" : "jit-single"
+		}
+	],
+	"commit" : "81aa06ff8276e2639a779e4b85dcd80d33ee7fde",
+	"samples" : 3,
+	"timeout" : 1800,
+	"timestamp" : "2026-11-04 12:07 UTC"
+}
