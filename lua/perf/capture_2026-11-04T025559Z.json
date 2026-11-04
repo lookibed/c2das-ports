@@ -1,0 +1,719 @@
+{
+	"command" : "scripts/publish_ports.sh --program lua --perf --samples 3 --lanes interp,jit,exe,aot,interp-source-cut,jit-source-cut,interp-single,jit-single --timeout 1800",
+	"program" : "lua",
+	"workloads" : [
+		{
+			"name" : "startup",
+			"args" : "-e \"print(1)\"",
+			"startup" : true
+		},
+		{
+			"name" : "fib",
+			"args" : "bench/fib.lua",
+			"startup" : false
+		},
+		{
+			"name" : "binary_trees",
+			"args" : "bench/binary_trees.lua",
+			"startup" : false
+		},
+		{
+			"name" : "nbody",
+			"args" : "bench/nbody.lua",
+			"startup" : false
+		},
+		{
+			"name" : "spectral_norm",
+			"args" : "bench/spectral_norm.lua",
+			"startup" : false
+		},
+		{
+			"name" : "test suite",
+			"args" : "-e \"_port=true\" all.lua",
+			"startup" : false
+		}
+	],
+	"lanes" : [
+		{
+			"name" : "native",
+			"command" : "/root/libclang/bin/clang -O3 -w -funsigned-char -o lua_native lapi.c lcode.c lctype.c ldebug.c ldo.c ldump.c lfunc.c lgc.c llex.c lmem.c lobject.c lopcodes.c lparser.c lstate.c lstring.c ltable.c ltm.c lundump.c lvm.c lzio.c lauxlib.c lbaselib.c lcorolib.c ldblib.c liolib.c lmathlib.c loadlib.c loslib.c lstrlib.c ltablib.c lutf8lib.c linit.c lua.c -lm",
+			"error" : ""
+		},
+		{
+			"name" : "interp",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "exe",
+			"command" : "daslang -exe lua/lua.das, the binary run",
+			"error" : ""
+		},
+		{
+			"name" : "aot",
+			"command" : "the -ctx context and its host compiled by clang++ -O3 (c2das-re converter/tiers.das), the binary run with `--`",
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label"
+		},
+		{
+			"name" : "interp-source-cut",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime source-cut/lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit-source-cut",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit source-cut/lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "interp-single",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime single/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit-single",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit single/lua.das --",
+			"error" : ""
+		}
+	],
+	"machine" : {
+		"arch" : "x86_64",
+		"cpu" : "AMD Ryzen 7 7435HS",
+		"box" : "PC",
+		"clang" : "clang version 22.1.8 (https://github.com/llvm/llvm-project ca7933e47d3a3451d81e72ac174dcb5aa28b59d1)",
+		"clang_path" : "/root/libclang/bin/clang",
+		"daslang" : "0.6.4"
+	},
+	"cells" : [
+		{
+			"workload" : "startup",
+			"lane" : "native",
+			"time" : 0.0080571,
+			"spread" : 0.03833265070558884,
+			"samples" : [
+				0.0083769,
+				0.0077592,
+				0.0080571
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "interp",
+			"time" : 3.569228759,
+			"spread" : 0.025484186960738328,
+			"samples" : [
+				3.513529389,
+				3.695447175,
+				3.569228759
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "jit",
+			"time" : 4.157816583,
+			"spread" : 0.042635644685435604,
+			"samples" : [
+				4.35941896,
+				4.004876579,
+				4.157816583
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "exe",
+			"time" : 0.0396984,
+			"spread" : 0.009685528887814104,
+			"samples" : [
+				0.0400203,
+				0.0396984,
+				0.0392513
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label"
+		},
+		{
+			"workload" : "startup",
+			"lane" : "interp-source-cut",
+			"time" : 0.653442198,
+			"spread" : 0.02315323305765443,
+			"samples" : [
+				0.653442198,
+				0.646181599,
+				0.676440198
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "jit-source-cut",
+			"time" : 0.979362498,
+			"spread" : 0.024188898439931928,
+			"samples" : [
+				1.026136898,
+				0.979362498,
+				0.978757498
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "interp-single",
+			"time" : 5.867446846,
+			"spread" : 0.012749329301721265,
+			"samples" : [
+				5.867446846,
+				5.867114067,
+				6.016726091
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "startup",
+			"lane" : "jit-single",
+			"time" : 6.294032388,
+			"spread" : 0.04452779763801881,
+			"samples" : [
+				6.156513487,
+				6.717032288,
+				6.294032388
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "native",
+			"time" : 0.262482599,
+			"spread" : 0.0075654557961764,
+			"samples" : [
+				0.2647738,
+				0.262482599,
+				0.260802199
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "interp",
+			"time" : 71.244059895,
+			"spread" : 0.024091425959295434,
+			"samples" : [
+				73.786015481,
+				71.244059895,
+				70.353273493
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "jit",
+			"time" : 6.425630282,
+			"spread" : 0.009468353271184993,
+			"samples" : [
+				6.533780613,
+				6.412100338,
+				6.425630282
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "exe",
+			"time" : 2.1238966,
+			"spread" : 0.0011391091261222614,
+			"samples" : [
+				2.1213412,
+				2.1261799,
+				2.1238966
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label"
+		},
+		{
+			"workload" : "fib",
+			"lane" : "interp-source-cut",
+			"time" : 69.748135328,
+			"spread" : 0.01008910148193604,
+			"samples" : [
+				69.748135328,
+				69.229519271,
+				70.636911302
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "jit-source-cut",
+			"time" : 3.570482587,
+			"spread" : 0.00610001714594551,
+			"samples" : [
+				3.570482587,
+				3.611179987,
+				3.567619977
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "interp-single",
+			"time" : 75.598440567,
+			"spread" : 0.008444767672610862,
+			"samples" : [
+				76.851837862,
+				75.598440567,
+				75.575015328
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "fib",
+			"lane" : "jit-single",
+			"time" : 8.597322441,
+			"spread" : 0.0016353589267456962,
+			"samples" : [
+				8.589240854,
+				8.61736027,
+				8.597322441
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "native",
+			"time" : 0.351587895,
+			"spread" : 0.008308590942813924,
+			"samples" : [
+				0.356878695,
+				0.351587895,
+				0.351036295
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "interp",
+			"time" : 39.611321632,
+			"spread" : 0.007542317870016369,
+			"samples" : [
+				39.611321632,
+				39.660098504,
+				39.062576146
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "jit",
+			"time" : 5.54766789,
+			"spread" : 0.016981297523201242,
+			"samples" : [
+				5.54766789,
+				5.59237869,
+				5.403965492
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "exe",
+			"time" : 1.163414698,
+			"spread" : 0.0040905023016994495,
+			"samples" : [
+				1.157048498,
+				1.166566399,
+				1.163414698
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label"
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "interp-source-cut",
+			"time" : 36.352785876,
+			"spread" : 0.004354840865291643,
+			"samples" : [
+				36.147065946,
+				36.463687141,
+				36.352785876
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "jit-source-cut",
+			"time" : 2.375921599,
+			"spread" : 0.03627205145837812,
+			"samples" : [
+				2.5196937,
+				2.375921599,
+				2.347334599
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "interp-single",
+			"time" : 42.016206804,
+			"spread" : 0.0031799841457196996,
+			"samples" : [
+				41.793609222,
+				42.016206804,
+				42.060830965
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "binary_trees",
+			"lane" : "jit-single",
+			"time" : 7.793108674,
+			"spread" : 0.040169981081416194,
+			"samples" : [
+				8.037316645,
+				7.793108674,
+				7.411218589
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "native",
+			"time" : 0.359960699,
+			"spread" : 0.012032703881375739,
+			"samples" : [
+				0.357954399,
+				0.366617,
+				0.359960699
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "interp",
+			"time" : 71.950500437,
+			"spread" : 0.01849583400973333,
+			"samples" : [
+				71.950500437,
+				70.770089267,
+				73.431658293
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "jit",
+			"time" : 5.820465049,
+			"spread" : 0.022406666804468955,
+			"samples" : [
+				5.820465049,
+				5.919123012,
+				5.65828857
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "exe",
+			"time" : 1.345850604,
+			"spread" : 0.011325179744838884,
+			"samples" : [
+				1.365163603,
+				1.345850604,
+				1.334679603
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label"
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "interp-source-cut",
+			"time" : 70.322484038,
+			"spread" : 0.036756923285065364,
+			"samples" : [
+				69.408486733,
+				74.578163035,
+				70.322484038
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "jit-source-cut",
+			"time" : 2.805961098,
+			"spread" : 0.06448188042555682,
+			"samples" : [
+				3.129000194,
+				2.767132898,
+				2.805961098
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "interp-single",
+			"time" : 76.876770184,
+			"spread" : 0.015189578532047054,
+			"samples" : [
+				76.876770184,
+				77.042874565,
+				74.707423089
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "nbody",
+			"lane" : "jit-single",
+			"time" : 7.428301678,
+			"spread" : 0.010890939545387706,
+			"samples" : [
+				7.452611293,
+				7.290808924,
+				7.428301678
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "native",
+			"time" : 0.371539299,
+			"spread" : 0.009291883817652332,
+			"samples" : [
+				0.376808099,
+				0.371539299,
+				0.369903499
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "interp",
+			"time" : 93.227959034,
+			"spread" : 0.028763359847039528,
+			"samples" : [
+				93.227959034,
+				92.511632295,
+				97.874730962
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "jit",
+			"time" : 6.672063991,
+			"spread" : 0.030257099043461515,
+			"samples" : [
+				6.849519796,
+				6.445765194,
+				6.672063991
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "exe",
+			"time" : 2.245139581,
+			"spread" : 0.01630270532387,
+			"samples" : [
+				2.295102479,
+				2.245139581,
+				2.221898781
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label"
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "interp-source-cut",
+			"time" : 89.11830812,
+			"spread" : 0.018003553639501065,
+			"samples" : [
+				88.3012667,
+				89.11830812,
+				91.510159181
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "jit-source-cut",
+			"time" : 3.763184722,
+			"spread" : 0.04106244030398677,
+			"samples" : [
+				3.917521013,
+				3.763184722,
+				3.608469917
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "interp-single",
+			"time" : 96.829389499,
+			"spread" : 0.005516477856193799,
+			"samples" : [
+				97.102654452,
+				96.829389499,
+				96.034340086
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "spectral_norm",
+			"lane" : "jit-single",
+			"time" : 8.316564261,
+			"spread" : 0.01270642156828509,
+			"samples" : [
+				8.316564261,
+				8.374723705,
+				8.163376162
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "native",
+			"time" : 5.606386987,
+			"spread" : 0.016420911758940632,
+			"samples" : [
+				5.579435877,
+				5.763559849,
+				5.606386987
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "interp",
+			"time" : 167.975304082,
+			"spread" : 0.0006944681817218328,
+			"samples" : [
+				167.975304082,
+				168.051188688,
+				167.81788168
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "jit",
+			"time" : 13.132660695,
+			"spread" : 0.01668022909351504,
+			"samples" : [
+				12.983089617,
+				13.421201195,
+				13.132660695
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "exe",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [
+				0.0545554
+			],
+			"error" : "exited 1 where the native build exits 0: dynamic module `Module_CRT` failed to load: dasCRuntime/dasModuleCRuntime.shared_module (dasCRuntime/dasModuleCRunti..."
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "aot",
+			"time" : 0,
+			"spread" : 0,
+			"samples" : [],
+			"error" : "the build exited 1 and left no binary: lua/work/bench/ctx/lua.das.cpp:22309:73: error: cannot jump from this goto statement to its label"
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "interp-source-cut",
+			"time" : 167.149705823,
+			"spread" : 0.010173140084976497,
+			"samples" : [
+				163.965704425,
+				167.36657917,
+				167.149705823
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "jit-source-cut",
+			"time" : 9.678309295,
+			"spread" : 0.008052190121704526,
+			"samples" : [
+				9.747922773,
+				9.678309295,
+				9.5920596
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "interp-single",
+			"time" : 172.023236231,
+			"spread" : 0.009271443427900034,
+			"samples" : [
+				169.574128478,
+				172.023236231,
+				172.763935884
+			],
+			"error" : ""
+		},
+		{
+			"workload" : "test suite",
+			"lane" : "jit-single",
+			"time" : 15.380684518,
+			"spread" : 0.015806104774822586,
+			"samples" : [
+				15.201678016,
+				15.687895438,
+				15.380684518
+			],
+			"error" : ""
+		}
+	],
+	"commit" : "61aa9c181cf8c528d7a5ec19edad79c8ad4af04e",
+	"samples" : 3,
+	"timeout" : 1800,
+	"timestamp" : "2026-11-04 02:55 UTC"
+}

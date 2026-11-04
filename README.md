@@ -14,11 +14,43 @@ numbers of that generation.
 
 ## Programs
 
-Each cell is the geometric mean, over the program's workloads (its startup row aside), of the lane's time over the native build's; a lane covering only some workloads names how many. A program's README holds its tables, its machine and its raw captures.
+Each cell is the geometric mean, over the program's workloads (its startup row aside), of the lane's work time over the native build's, a work time being the workload's median less the same lane's startup median; a lane covering only some workloads names how many. A program's README holds its tables, its startup times, its machine and its raw captures.
 
-| Program              | Captured             | Machine                                      | Workloads | interpreter |  JIT |           exe |     AOT |
-| :------------------- | :------------------- | :------------------------------------------- | --------: | ----------: | ---: | ------------: | ------: |
-| [lua](lua/README.md) | 2026-11-03 11:55 UTC | x86_64, AMD Ryzen 3 1200 Quad-Core Processor |         5 |      130.84 | 9.49 | 4.02 (4 of 5) | not yet |
+| Program              | Captured             | Machine                         | Workloads | interpreter |  JIT |           exe |     AOT | interpreter, source-cut layout | JIT, source-cut layout | interpreter, single module | JIT, single module |
+| :------------------- | :------------------- | :------------------------------ | --------: | ----------: | ---: | ------------: | ------: | -----------------------------: | ---------------------: | -------------------------: | -----------------: |
+| [lua](lua/README.md) | 2026-11-04 02:55 UTC | x86_64, PC (AMD Ryzen 7 7435HS) |         5 |      131.47 | 4.52 | 4.96 (4 of 5) | not yet |                         132.24 |                   4.80 |                     134.01 |      4.34 (3 of 5) |
+
+Raw captures beside this README, each copied whole from c2das-re when its tree holds it: `compare/results_linux.json`, `metrics/criteria_linux.json`, `perf/results_linux.json`, `perf/results_method_linux.json`, `perf/dasprofile_linux.json`.
+
+## Readability criteria
+
+The compliance, in percent, per criterion and per input group, from c2das-re's `metrics/criteria_linux.json`: it counts lines and reads no clock, so it holds on any machine.
+
+| Criterion          |  lua/lua | lua/lua@source-cut | lua/lua@single | lua/luac | lua/luac@source-cut | lua/luac@single | c_testsuite |   csmith | gcc_torture |      all |
+| :----------------- | -------: | -----------------: | -------------: | -------: | ------------------: | --------------: | ----------: | -------: | ----------: | -------: |
+| comments           |     83.6 |               83.6 |           83.6 |     86.1 |                86.1 |            86.1 |        29.2 |     30.3 |        18.0 |     65.2 |
+| constant_names     |      0.0 |                0.0 |            0.0 |      0.0 |                 0.0 |             0.0 |         0.0 |      0.0 |         0.0 |      0.0 |
+| char_literals      |     88.6 |               88.6 |           88.6 |     92.0 |                92.0 |            92.0 |        82.8 |      n/a |        91.6 |     89.5 |
+| macro_blowup       |     83.6 |               83.6 |           83.6 |     80.3 |                80.3 |            80.3 |        95.3 |     62.9 |        85.6 |     81.7 |
+| repeated_blocks    |     92.1 |               91.5 |           93.2 |     91.5 |                90.6 |            91.8 |       100.0 |    100.0 |        91.4 |     93.6 |
+| switch_flags       |     80.2 |               80.2 |           80.2 |     85.3 |                85.3 |            85.3 |       100.0 |      n/a |        85.7 |     85.3 |
+| temporaries        |     85.8 |               85.8 |           85.8 |     88.0 |                88.0 |            88.0 |        93.8 |    100.0 |        94.4 |     90.0 |
+| addr_deref         |     90.5 |               90.5 |           90.5 |     87.5 |                87.5 |            87.5 |        99.6 |    100.0 |        98.8 |     92.5 |
+| reinterpret_casts  |     73.1 |               73.1 |           73.1 |     68.1 |                68.1 |            68.1 |        96.5 |    100.0 |        92.1 |     79.1 |
+| late_binding       |    100.0 |               79.2 |          100.0 |    100.0 |                73.0 |           100.0 |       100.0 |    100.0 |       100.0 |     94.7 |
+| qualified_calls    |    100.0 |               93.8 |          100.0 |    100.0 |                91.3 |           100.0 |       100.0 |    100.0 |       100.0 |     98.3 |
+| require_lines      |    100.0 |              100.0 |          100.0 |    100.0 |               100.0 |           100.0 |        39.4 |    100.0 |         7.4 |     83.0 |
+| setjmp             |      0.0 |                0.0 |            0.0 |      0.0 |                 0.0 |             0.0 |         n/a |      n/a |         0.0 |      0.0 |
+| layout_checks      |     72.9 |               64.6 |            0.0 |     78.4 |                67.6 |             0.0 |        84.5 |     41.1 |        72.3 |     53.5 |
+| stray_braces       |     74.4 |               74.4 |           74.4 |     70.1 |                70.1 |            70.1 |        89.5 |     17.2 |        88.7 |     69.9 |
+| label_stubs        |     99.4 |               99.4 |           99.4 |     99.3 |                99.3 |            99.3 |        98.0 |    100.0 |        99.3 |     99.3 |
+| string_literals    |      0.0 |                0.0 |            0.0 |      0.0 |                 0.0 |             0.0 |         0.0 |      0.0 |         0.0 |      0.0 |
+| lost_parens        |     76.6 |               76.6 |           76.6 |     67.5 |                67.5 |            67.5 |       100.0 |    100.0 |        97.8 |     81.1 |
+| literal_arithmetic |     66.1 |               66.1 |           66.1 |     61.4 |                61.4 |            61.4 |        94.5 |    100.0 |        93.3 |     74.5 |
+| bool_roundtrip     |     92.3 |               92.3 |           92.3 |     92.8 |                92.8 |            92.8 |        90.2 |    100.0 |        90.3 |     92.9 |
+| c_renames          |     93.0 |               93.0 |           93.0 |     91.9 |                91.9 |            91.9 |        98.0 |    100.0 |        98.2 |     94.5 |
+| long_lines         |     27.1 |               29.2 |            0.0 |     37.8 |                40.5 |             0.0 |        97.0 |      0.0 |        90.1 |     35.8 |
+| **total**          | **71.8** |           **70.2** |       **67.3** | **71.7** |            **69.7** |        **66.5** |    **80.4** | **71.1** |    **72.5** | **70.7** |
 
 ## Head-to-head with the Rust translator
 
@@ -26,7 +58,7 @@ Rendered from c2das-re's `compare/results_linux.json` alone, never edited by han
 
 ### Suites
 
-Captured: c_testsuite (Rust `ce4647af2826`, 2026-11-01 02:54 UTC); csmith (Rust `ce4647af2826`, 2026-11-01 03:12 UTC); gcc_torture (Rust `ce4647af2826`, 2026-11-01 03:04 UTC). Ours is the ratchet (c2das-re's `suites/<suite>/expected_pass.txt`); the Rust side runs every id under `--libc std --strict`, the interpreter.
+Captured: c_testsuite (Rust `ce4647af2826`, 2026-11-01 02:54 UTC, unlabelled box); csmith (Rust `ce4647af2826`, 2026-11-01 03:12 UTC, unlabelled box); gcc_torture (Rust `ce4647af2826`, 2026-11-01 03:04 UTC, unlabelled box). Ours is the ratchet (c2das-re's `suites/<suite>/expected_pass.txt`); the Rust side runs every id under `--libc std --strict`, the interpreter.
 
 | Suite       |  ids | ours pass (ratchet) | Rust pass | Rust pass of ours | of our skips | of unlisted | Rust refused | Rust compile | Rust timeout | Rust exit | Rust output | Rust native | Rust crash |
 | :---------- | ---: | ------------------: | --------: | ----------------: | -----------: | ----------: | -----------: | -----------: | -----------: | --------: | ----------: | ----------: | ---------: |
@@ -37,7 +69,7 @@ Captured: c_testsuite (Rust `ce4647af2826`, 2026-11-01 02:54 UTC); csmith (Rust 
 
 ### Speed
 
-Captured 2026-11-01 07:27 UTC on linux x86_64, AMD FX(tm)-6300 Six-Core Processor; clang version 22.1.8 (https://github.com/llvm/llvm-project ca7933e47d3a3451d81e72ac174dcb5aa28b59d1); daslang 0.6.4; Rust `ce4647af2826`; 5 samples a cell. A cell is a lane's time over the native build's (lower is faster); the geomean row covers the kernels where native and both sides stand, their count in parentheses.
+Captured 2026-11-01 07:27 UTC on linux x86_64, fx (AMD FX(tm)-6300 Six-Core Processor); clang version 22.1.8 (https://github.com/llvm/llvm-project ca7933e47d3a3451d81e72ac174dcb5aa28b59d1); daslang 0.6.4; Rust `ce4647af2826`; 5 samples a cell. A cell is a lane's time over the native build's (lower is faster); the geomean row covers the kernels where native and both sides stand, their count in parentheses.
 
 | Kernel                   | native (s) | ours interpreter | Rust interpreter |  ours JIT |  Rust JIT |  ours exe |  Rust exe |  ours AOT |  Rust AOT |
 | :----------------------- | ---------: | ---------------: | ---------------: | --------: | --------: | --------: | --------: | --------: | --------: |
@@ -76,7 +108,7 @@ Error cells:
 
 ### Readability and size
 
-Captured Rust `b1d012eb5d26`, 2026-11-01 11:19 UTC, over every input both sides translated into daslang that compiles. The Rust lines hold the runtime it writes into every module; ours sits in `c_runtime` and `crt`. The Rust counters count its whole module, runtime included.
+Captured Rust `b1d012eb5d26`, 2026-11-01 11:19 UTC, unlabelled box, over every input both sides translated into daslang that compiles. The Rust lines hold the runtime it writes into every module; ours sits in `c_runtime` and `crt`. The Rust counters count its whole module, runtime included.
 
 | Group       | keys counted | files ours | files Rust | lines ours | lines Rust | Rust runtime | Rust without runtime | Rust / ours | without runtime / ours |
 | :---------- | -----------: | ---------: | ---------: | ---------: | ---------: | -----------: | -------------------: | ----------: | ---------------------: |
@@ -514,7 +546,7 @@ Doom: pending (P6).
 
 ### Real projects
 
-Each project of the Rust repository's `tests/manual` on its own fixture, checked against the `expected.stdout` of its canonical case in the Rust repository's `tests/canonical/cases.json`; the native build (the pinned clang with the README's flags) must print it too. Captured: binjgb (Rust `b1d012eb5d26`, 2026-11-03 00:18 UTC, 4 GiB address-space cap); doomgeneric (Rust `b1d012eb5d26`, 2026-11-03 00:41 UTC, 4 GiB address-space cap); h264bsd-mp4 (Rust `b1d012eb5d26`, 2026-11-03 00:23 UTC, 4 GiB address-space cap); plmpeg-stream (Rust `b1d012eb5d26`, 2026-11-03 00:22 UTC, 4 GiB address-space cap); quakegeneric (Rust `b1d012eb5d26`, 2026-11-03 00:33 UTC, 4 GiB address-space cap); wasm3 (Rust `b1d012eb5d26`, 2026-11-03 00:39 UTC, 4 GiB address-space cap).
+Each project of the Rust repository's `tests/manual` on its own fixture, checked against the `expected.stdout` of its canonical case in the Rust repository's `tests/canonical/cases.json`; the native build (the pinned clang with the README's flags) must print it too. Captured: binjgb (Rust `b1d012eb5d26`, 2026-11-03 12:02 UTC, unlabelled box, 4 GiB address-space cap); doomgeneric (Rust `b1d012eb5d26`, 2026-11-03 12:24 UTC, unlabelled box, 4 GiB address-space cap); h264bsd-mp4 (Rust `b1d012eb5d26`, 2026-11-03 12:19 UTC, unlabelled box, 4 GiB address-space cap); plmpeg-stream (Rust `b1d012eb5d26`, 2026-11-03 12:14 UTC, unlabelled box, 4 GiB address-space cap); quakegeneric (Rust `b1d012eb5d26`, 2026-11-03 12:37 UTC, unlabelled box, 4 GiB address-space cap); wasm3 (Rust `b1d012eb5d26`, 2026-11-03 12:09 UTC, unlabelled box, 4 GiB address-space cap).
 
 | Project       | Side | Native | interpreter |     JIT |     exe |     AOT |
 | :------------ | :--- | :----- | ----------: | ------: | ------: | ------: |
@@ -537,36 +569,36 @@ Defines of our side's sidecar alone (the Rust side and the native build do not g
 
 Why a lane does not pass:
 
-- binjgb, Ours, AOT: compile: aot build: the build exited 1 and left no binary: compare/work/projects/binjgb/ours_run/aot/ctx/binjgb_all.das.cpp:8637:9: error: cannot jump from t...
-- doomgeneric, Ours, interpreter JIT exe AOT: refused: dumper: /root/c2das/tests/manual/doomgeneric/upstream/doomgeneric/doomgeneric/d_main.c:1336:13: a block-scope `extern` declaration of `forwardmove` ...
+- binjgb, Ours, AOT: compile: aot build: the build exited 1 and left no binary: compare/work/projects/binjgb/ours_run/aot/ctx/binjgb_all.das.cpp:8334:9: error: cannot jump from t...
+- doomgeneric, Ours, interpreter JIT exe AOT: refused: dumper: /root/c2das/tests/manual/doomgeneric/upstream/doomgeneric/doomgeneric/m_config.c:109:4: unsupported type spelling ``
 - doomgeneric, Rust, AOT: timeout: the build or its run took longer than 300 s
-- h264bsd-mp4, Ours, interpreter JIT exe AOT: refused: dumper: /root/c2das/tests/manual/h264bsd-mp4/src/../upstream/h264bsd/src/h264bsd_deblocking.c:669:21: a reference to `h264bsdClip` before a definiti...
-- quakegeneric, Ours, interpreter JIT exe AOT: refused: dumper: /root/c2das/tests/manual/quakegeneric/upstream/quakegeneric/source/console.c:520:14: a block-scope `extern` declaration of `chat_buffer` wit...
+- h264bsd-mp4, Ours, interpreter JIT exe AOT: refused: compile check: error[30341]: too many matching functions or generics malloc
+- quakegeneric, Ours, interpreter JIT exe AOT: refused: emitter: /root/c2das/tests/manual/quakegeneric/upstream/quakegeneric/source/sys_null.c:160:2: external function `vfprintf` has no c_runtime mapping
 - quakegeneric, Rust, JIT: output: line 1: got `[W] LLVM JIT: return inside try/recover leaves the try arm, not the function. at compare/work/projects/quakegeneric/rust/host.das.inc:66...
 - wasm3, Ours, interpreter JIT exe AOT: refused: dumper: /root/c2das/tests/manual/wasm3/upstream/wasm3/source/m3_exec_defs.h:55:29: unsupported type spelling `vectorcall m3ret_t`
 
-The bench entry's timed loop (`decode_us`), a lane's median over the native build's (lower is faster), not measured in this capture (`--samples 0`):
+The bench entry's timed loop (`decode_us`), a lane's median over the native build's (lower is faster), 3 samples a cell:
 
-| Project       | Side | Native compiler      |     Native s |  interpreter |          JIT |          exe |          AOT |
-| :------------ | :--- | :------------------- | -----------: | -----------: | -----------: | -----------: | -----------: |
-| binjgb        | Ours | clang version 22.1.8 | not measured | not measured | not measured | not measured | not measured |
-| binjgb        | Rust | clang version 22.1.8 | not measured | not measured | not measured | not measured | not measured |
-| doomgeneric   | Ours | clang version 22.1.8 | not measured | not measured | not measured | not measured | not measured |
-| doomgeneric   | Rust | clang version 22.1.8 | not measured | not measured | not measured | not measured | not measured |
-| h264bsd-mp4   | Ours | clang version 22.1.8 | not measured | not measured | not measured | not measured | not measured |
-| h264bsd-mp4   | Rust | clang version 22.1.8 | not measured | not measured | not measured | not measured | not measured |
-| plmpeg-stream | Ours | clang version 22.1.8 | not measured | not measured | not measured | not measured | not measured |
-| plmpeg-stream | Rust | clang version 22.1.8 | not measured | not measured | not measured | not measured | not measured |
-| quakegeneric  | Ours | clang version 22.1.8 | not measured | not measured | not measured | not measured | not measured |
-| quakegeneric  | Rust | clang version 22.1.8 | not measured | not measured | not measured | not measured | not measured |
-| wasm3         | Ours | clang version 22.1.8 | not measured | not measured | not measured | not measured | not measured |
-| wasm3         | Rust | clang version 22.1.8 | not measured | not measured | not measured | not measured | not measured |
+| Project       | Side | Native compiler      | Native s | interpreter |      JIT |      exe |      AOT |
+| :------------ | :--- | :------------------- | -------: | ----------: | -------: | -------: | -------: |
+| binjgb        | Ours | clang version 22.1.8 | 0.102919 |       80.57 |     1.22 |     1.29 |  compile |
+| binjgb        | Rust | clang version 22.1.8 | 0.102919 |       73.01 |     1.08 |     1.05 |     1.10 |
+| doomgeneric   | Ours | clang version 22.1.8 | 0.173015 |     refused |  refused |  refused |  refused |
+| doomgeneric   | Rust | clang version 22.1.8 | 0.173015 |       36.96 |     1.11 |     1.11 |  timeout |
+| h264bsd-mp4   | Ours | clang version 22.1.8 | 0.120014 |     refused |  refused |  refused |  refused |
+| h264bsd-mp4   | Rust | clang version 22.1.8 | 0.120014 |       50.73 |     1.04 |     1.04 |     1.14 |
+| plmpeg-stream | Ours | clang version 22.1.8 | 0.062770 |       49.44 |     1.08 |     1.18 |     1.13 |
+| plmpeg-stream | Rust | clang version 22.1.8 | 0.062770 |       39.15 |     0.95 |     1.01 |     1.05 |
+| quakegeneric  | Ours | clang version 22.1.8 | no bench |    no bench | no bench | no bench | no bench |
+| quakegeneric  | Rust | clang version 22.1.8 | no bench |    no bench | no bench | no bench | no bench |
+| wasm3         | Ours | clang version 22.1.8 | 0.003862 |     refused |  refused |  refused |  refused |
+| wasm3         | Rust | clang version 22.1.8 | 0.003862 |       64.39 |     1.99 |     2.02 |     1.43 |
 
 The code of each side's module (the Rust runtime is its `c2da_rt_` and `c2da_std_` declarations):
 
 | Project       | Side | Code    | Files | Lines | Runtime lines | c_function | goto | label | literal_named | pointer_arith | pointer_index | reinterpret | unsafe_block | unsafe_expr | while_rangeable |
 | :------------ | :--- | :------ | ----: | ----: | ------------: | ---------: | ---: | ----: | ------------: | ------------: | ------------: | ----------: | -----------: | ----------: | --------------: |
-| binjgb        | Ours | ok      |     1 |  8260 |             0 |        110 |   38 |    19 |          1778 |            88 |            43 |         295 |            0 |         119 |              23 |
+| binjgb        | Ours | ok      |     1 |  8260 |             0 |        110 |   38 |    19 |          1778 |            88 |            43 |         810 |            0 |         119 |              23 |
 | binjgb        | Rust | ok      |     1 | 11481 |           956 |          0 |  670 |   867 |          2393 |            33 |           939 |        3818 |            8 |        5049 |              12 |
 | doomgeneric   | Ours | refused |     - |     - |             - |          - |    - |     - |             - |             - |             - |           - |            - |           - |               - |
 | doomgeneric   | Rust | ok      |     1 | 37045 |          1579 |          0 |  435 |   612 |         43595 |           523 |          3454 |       10418 |          260 |       15426 |             169 |
