@@ -1191,12 +1191,12 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
             }
             // low-level line tracing for debugging Lua
             // invalidate top for instructions not expecting it
-            let _cond = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
+            var _cond = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
             var _goto = 0
             while (true) {
                 label 1:  // re-dispatch
                 var _flag = false
-                if (_goto == 0 && _cond == OpCode.OP_MOVE) {
+                if (_cond == OpCode.OP_MOVE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         {
@@ -1208,7 +1208,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LOADI) {
+                if (_cond == OpCode.OP_LOADI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var b : int64 = int64(int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u) - ((1 << 8 + 8 + 1) - 1 >> 1))
@@ -1220,7 +1220,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LOADF) {
+                if (_cond == OpCode.OP_LOADF) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var b : int = int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u) - ((1 << 8 + 8 + 1) - 1 >> 1)
@@ -1232,7 +1232,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LOADK) {
+                if (_cond == OpCode.OP_LOADK) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = k + int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u)
@@ -1245,7 +1245,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LOADKX) {
+                if (_cond == OpCode.OP_LOADKX) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue?
@@ -1260,14 +1260,14 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LOADFALSE) {
+                if (_cond == OpCode.OP_LOADFALSE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         addr(ra.val).tt_ = uint8(1 | 0 << 4)
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LFALSESKIP) {
+                if (_cond == OpCode.OP_LFALSESKIP) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         addr(ra.val).tt_ = uint8(1 | 0 << 4)
@@ -1276,14 +1276,14 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LOADTRUE) {
+                if (_cond == OpCode.OP_LOADTRUE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         addr(ra.val).tt_ = uint8(1 | 1 << 4)
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LOADNIL) {
+                if (_cond == OpCode.OP_LOADNIL) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
@@ -1304,7 +1304,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_GETUPVAL) {
+                if (_cond == OpCode.OP_GETUPVAL) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
@@ -1317,7 +1317,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SETUPVAL) {
+                if (_cond == OpCode.OP_SETUPVAL) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var uv : UpVal? = deref(addr(cl.upvals[0]) + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u))
@@ -1335,7 +1335,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_GETTABUP) {
+                if (_cond == OpCode.OP_GETTABUP) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
@@ -1367,7 +1367,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_GETTABLE) {
+                if (_cond == OpCode.OP_GETTABLE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
@@ -1414,7 +1414,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_GETI) {
+                if (_cond == OpCode.OP_GETI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
@@ -1450,7 +1450,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_GETFIELD) {
+                if (_cond == OpCode.OP_GETFIELD) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
@@ -1482,7 +1482,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SETTABUP) {
+                if (_cond == OpCode.OP_SETTABUP) {
                     {
                         var slot : TValue?
                         var upval : TValue? = deref(addr(cl.upvals[0]) + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)).v.p
@@ -1521,7 +1521,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SETTABLE) {
+                if (_cond == OpCode.OP_SETTABLE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
@@ -1577,7 +1577,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SETI) {
+                if (_cond == OpCode.OP_SETI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
@@ -1620,7 +1620,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SETFIELD) {
+                if (_cond == OpCode.OP_SETFIELD) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
@@ -1659,7 +1659,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_NEWTABLE) {
+                if (_cond == OpCode.OP_NEWTABLE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         // log2(hash size) + 1
@@ -1707,7 +1707,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SELF) {
+                if (_cond == OpCode.OP_SELF) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var slot : TValue?
@@ -1745,7 +1745,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_ADDI) {
+                if (_cond == OpCode.OP_ADDI) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -1773,7 +1773,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_ADDK) {
+                if (_cond == OpCode.OP_ADDK) {
                     {
                         {
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -1838,7 +1838,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SUBK) {
+                if (_cond == OpCode.OP_SUBK) {
                     {
                         {
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -1903,7 +1903,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_MULK) {
+                if (_cond == OpCode.OP_MULK) {
                     {
                         {
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -1968,7 +1968,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_MODK) {
+                if (_cond == OpCode.OP_MODK) {
                     {
                         // in case of division by 0
                         ci.u.l.savedpc = pc
@@ -2036,7 +2036,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_POWK) {
+                if (_cond == OpCode.OP_POWK) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -2090,7 +2090,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_DIVK) {
+                if (_cond == OpCode.OP_DIVK) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -2144,7 +2144,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_IDIVK) {
+                if (_cond == OpCode.OP_IDIVK) {
                     {
                         // in case of division by 0
                         ci.u.l.savedpc = pc
@@ -2212,7 +2212,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_BANDK) {
+                if (_cond == OpCode.OP_BANDK) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -2239,7 +2239,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_BORK) {
+                if (_cond == OpCode.OP_BORK) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -2266,7 +2266,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_BXORK) {
+                if (_cond == OpCode.OP_BXORK) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -2293,7 +2293,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SHRI) {
+                if (_cond == OpCode.OP_SHRI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -2317,7 +2317,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SHLI) {
+                if (_cond == OpCode.OP_SHLI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -2341,7 +2341,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_ADD) {
+                if (_cond == OpCode.OP_ADD) {
                     {
                         {
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -2406,7 +2406,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SUB) {
+                if (_cond == OpCode.OP_SUB) {
                     {
                         {
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -2471,7 +2471,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_MUL) {
+                if (_cond == OpCode.OP_MUL) {
                     {
                         {
                             var v1 : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -2536,7 +2536,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_MOD) {
+                if (_cond == OpCode.OP_MOD) {
                     {
                         // in case of division by 0
                         ci.u.l.savedpc = pc
@@ -2604,7 +2604,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_POW) {
+                if (_cond == OpCode.OP_POW) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -2658,7 +2658,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_DIV) {
+                if (_cond == OpCode.OP_DIV) {
                     {
                         {
                             // float division (always with floats)
@@ -2713,7 +2713,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_IDIV) {
+                if (_cond == OpCode.OP_IDIV) {
                     {
                         // floor division
                         // in case of division by 0
@@ -2782,7 +2782,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_BAND) {
+                if (_cond == OpCode.OP_BAND) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -2820,7 +2820,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_BOR) {
+                if (_cond == OpCode.OP_BOR) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -2858,7 +2858,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_BXOR) {
+                if (_cond == OpCode.OP_BXOR) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -2896,7 +2896,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SHR) {
+                if (_cond == OpCode.OP_SHR) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -2934,7 +2934,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SHL) {
+                if (_cond == OpCode.OP_SHL) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -2972,7 +2972,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_MMBIN) {
+                if (_cond == OpCode.OP_MMBIN) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         // original arith. expression
@@ -2987,7 +2987,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_MMBINI) {
+                if (_cond == OpCode.OP_MMBINI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         // original arith. expression
@@ -3003,7 +3003,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_MMBINK) {
+                if (_cond == OpCode.OP_MMBINK) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         // original arith. expression
@@ -3019,7 +3019,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_UNM) {
+                if (_cond == OpCode.OP_UNM) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -3062,7 +3062,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_BNOT) {
+                if (_cond == OpCode.OP_BNOT) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -3089,7 +3089,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_NOT) {
+                if (_cond == OpCode.OP_NOT) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -3101,7 +3101,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LEN) {
+                if (_cond == OpCode.OP_LEN) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         ci.u.l.savedpc = pc
@@ -3111,7 +3111,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_CONCAT) {
+                if (_cond == OpCode.OP_CONCAT) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         // number of elements to concatenate
@@ -3137,7 +3137,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_CLOSE) {
+                if (_cond == OpCode.OP_CLOSE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         ci.u.l.savedpc = pc
@@ -3147,7 +3147,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_TBC) {
+                if (_cond == OpCode.OP_TBC) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         // create new to-be-closed upvalue
@@ -3157,7 +3157,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_JMP) {
+                if (_cond == OpCode.OP_JMP) {
                     {
                         {
                             pc = pc + (int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1) + 0)
@@ -3166,7 +3166,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_EQ) {
+                if (_cond == OpCode.OP_EQ) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var cond : int
@@ -3187,7 +3187,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LT) {
+                if (_cond == OpCode.OP_LT) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -3218,7 +3218,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LE) {
+                if (_cond == OpCode.OP_LE) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -3249,7 +3249,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_EQK) {
+                if (_cond == OpCode.OP_EQK) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = k + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
@@ -3267,7 +3267,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_EQI) {
+                if (_cond == OpCode.OP_EQI) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var cond : int
@@ -3292,7 +3292,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LTI) {
+                if (_cond == OpCode.OP_LTI) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -3324,7 +3324,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_LEI) {
+                if (_cond == OpCode.OP_LEI) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -3356,7 +3356,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_GTI) {
+                if (_cond == OpCode.OP_GTI) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -3388,7 +3388,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_GEI) {
+                if (_cond == OpCode.OP_GEI) {
                     {
                         {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -3420,7 +3420,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_TEST) {
+                if (_cond == OpCode.OP_TEST) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var cond : int = !(int(addr(ra.val).tt_) == (1 | 0 << 4) || (int(addr(ra.val).tt_) & 15) == 0) ? 1 : 0
@@ -3436,7 +3436,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_TESTSET) {
+                if (_cond == OpCode.OP_TESTSET) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var rb : TValue? = addr((base + int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)).val)
@@ -3460,7 +3460,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_CALL) {
+                if (_cond == OpCode.OP_CALL) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var newci : CallInfo?
@@ -3486,7 +3486,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_TAILCALL
+                _flag ||= _cond == OpCode.OP_TAILCALL
                 if (_flag) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -3525,11 +3525,12 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             trap = c_volatile_load(ci.u.l.trap)
                             // caller returns after the tail call
                             _goto = 1
+                            _cond = enum_from_int(type<OpCode>, -1)
                             goto label 1
                         }
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_RETURN
+                _flag ||= _cond == OpCode.OP_RETURN
                 if (_flag) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -3568,10 +3569,11 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         // 'luaD_poscall' can change hooks
                         trap = c_volatile_load(ci.u.l.trap)
                         _goto = 1
+                        _cond = enum_from_int(type<OpCode>, -1)
                         goto label 1
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_RETURN0) {
+                if (_cond == OpCode.OP_RETURN0) {
                     {
                         if (c_volatile_load(L.hookmask) != 0) {
                             var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -3598,10 +3600,11 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             }
                         }
                         _goto = 1
+                        _cond = enum_from_int(type<OpCode>, -1)
                         goto label 1
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_RETURN1
+                _flag ||= _cond == OpCode.OP_RETURN1
                 if (_flag) {
                     if (c_volatile_load(L.hookmask) != 0) {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -3653,7 +3656,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         goto label 3
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_FORLOOP
+                _flag ||= _cond == OpCode.OP_FORLOOP
                 if (_flag) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
@@ -3696,7 +3699,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_FORPREP) {
+                if (_cond == OpCode.OP_FORPREP) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         // in case of errors
@@ -3709,7 +3712,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_TFORPREP) {
+                if (_cond == OpCode.OP_TFORPREP) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         // create to-be-closed upvalue (if needed)
@@ -3722,10 +3725,11 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         pc = pc + 1
                         i = deref(_t113)
                         _goto = 2
+                        _cond = enum_from_int(type<OpCode>, -1)
                         goto label 1
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_TFORCALL
+                _flag ||= _cond == OpCode.OP_TFORCALL
                 _flag ||= _goto == 2  // l_tforcall
                 if (_flag) {
                     _goto = 0
@@ -3754,10 +3758,11 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         pc = pc + 1
                         i = deref(_t114)
                         _goto = 3
+                        _cond = enum_from_int(type<OpCode>, -1)
                         goto label 1
                     }
                 }
-                _flag ||= _goto == 0 && _cond == OpCode.OP_TFORLOOP
+                _flag ||= _cond == OpCode.OP_TFORLOOP
                 _flag ||= _goto == 3  // l_tforloop
                 if (_flag) {
                     _goto = 0
@@ -3778,7 +3783,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_SETLIST) {
+                if (_cond == OpCode.OP_SETLIST) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var n : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
@@ -3822,7 +3827,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_CLOSURE) {
+                if (_cond == OpCode.OP_CLOSURE) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var p : Proto? = deref(cl.p.p + int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u))
@@ -3844,7 +3849,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_VARARG) {
+                if (_cond == OpCode.OP_VARARG) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         // required results
@@ -3856,7 +3861,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_VARARGPREP) {
+                if (_cond == OpCode.OP_VARARGPREP) {
                     {
                         ci.u.l.savedpc = pc
                         luaT_adjustvarargs(L, int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u), ci, cl.p)
@@ -3872,7 +3877,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         break
                     }
                 }
-                if (_goto == 0 && _cond == OpCode.OP_EXTRAARG) {
+                if (_cond == OpCode.OP_EXTRAARG) {
                     {
                         break
                     }
