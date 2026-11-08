@@ -1,0 +1,539 @@
+bspfile_h
+c_types
+cd_null
+chase_cluster: cluster of 59: chase cl_demo cl_input cl_main cl_parse cl_tent cmd common console cvar d_edge d_init d_modech d_part d_polyse d_scan d_sky d_sprite d_surf draw host_cmd host in_null keys mathlib menu model net_loop net_main net_none net_vcr pr_edict pr_exec r_aclip r_alias r_bsp r_draw r_edge r_efrag r_light r_main r_misc r_part r_sky r_sprite r_surf sbar screen sv_main sv_move pr_cmds sv_phys sv_user vid_null view wad world zone qg_platform
+client_h
+cmd_h
+common_h
+crc
+cvar_h
+d_fill
+d_iface_h
+d_local_h_cluster: cluster of 3: model_h render_h d_local_h
+d_vars
+d_zpoint
+keys_h
+modelgen_h
+net_h
+nonintel
+pr_comp_h
+progdefs_h
+progs_h
+quake_entry
+quakedef_h
+quakegeneric
+r_local_h
+r_shared_h
+r_vars
+server_h
+snd_null
+sound_h
+spritegn_h
+sys_null
+vid_h
+wad_h
+world_h
+zone_h
+chase_cluster: chase -> cl_main: cl
+chase_cluster: chase -> cvar: Cvar_RegisterVariable
+chase_cluster: chase -> mathlib: VectorMA, AngleVectors
+chase_cluster: chase -> r_main: r_refdef
+chase_cluster: chase -> view: forward, right, up
+chase_cluster: chase -> world: SV_RecursiveHullCheck
+chase_cluster: cl_demo -> cl_main: cls, CL_Disconnect, cl
+chase_cluster: cl_demo -> cmd: Cmd_ExecuteString, Cmd_Argc, Cmd_Argv, cmd_source
+chase_cluster: cl_demo -> common: va, SZ_Clear, LittleLong, LittleFloat, com_gamedir, MSG_WriteByte, COM_FOpenFile, COM_DefaultExtension
+chase_cluster: cl_demo -> console: Con_Printf
+chase_cluster: cl_demo -> host: host_framecount, realtime
+chase_cluster: cl_demo -> net_main: NET_GetMessage, net_message
+chase_cluster: cl_input -> cl_main: lookspring, cls, CL_Disconnect, cl
+chase_cluster: cl_input -> cmd: Cmd_AddCommand, Cmd_Argv
+chase_cluster: cl_input -> common: MSG_WriteFloat, MSG_WriteShort, Q_atoi, MSG_WriteByte, MSG_WriteAngle, Q_memset
+chase_cluster: cl_input -> console: Con_Printf
+chase_cluster: cl_input -> host: host_frametime
+chase_cluster: cl_input -> mathlib: anglemod
+chase_cluster: cl_input -> net_main: NET_SendUnreliableMessage
+chase_cluster: cl_input -> sv_user: cmd
+chase_cluster: cl_input -> view: V_StartPitchDrift, up, V_StopPitchDrift
+chase_cluster: cl_main -> chase: chase_active
+chase_cluster: cl_main -> cl_demo: CL_GetMessage, CL_Record_f, CL_Stop_f, CL_StopPlayback, CL_TimeDemo_f, CL_PlayDemo_f
+chase_cluster: cl_main -> cl_input: cl_sidespeed, cl_yawspeed, cl_anglespeedkey, cl_upspeed, CL_SendMove, CL_BaseMove, CL_InitInput, cl_pitchspeed, cl_backspeed, cl_forwardspeed, cl_movespeedkey
+chase_cluster: cl_main -> cl_parse: CL_ParseServerMessage
+chase_cluster: cl_main -> cl_tent: cl_beams, CL_InitTEnts, CL_UpdateTEnts, cl_temp_entities
+chase_cluster: cl_main -> cmd: Cmd_AddCommand, Cbuf_InsertText
+chase_cluster: cl_main -> common: va, SZ_Alloc, SZ_Clear, MSG_WriteString, MSG_WriteByte
+chase_cluster: cl_main -> console: Con_DPrintf, Con_Printf
+chase_cluster: cl_main -> cvar: Cvar_RegisterVariable
+chase_cluster: cl_main -> host: host_frametime, Host_ShutdownServer, Host_Error, Host_ClearMemory, realtime
+chase_cluster: cl_main -> in_null: IN_Move
+chase_cluster: cl_main -> mathlib: VectorMA, anglemod, AngleVectors
+chase_cluster: cl_main -> net_main: NET_CanSendMessage, NET_SendUnreliableMessage, NET_Close, NET_Connect, NET_SendMessage
+chase_cluster: cl_main -> r_edge: fv
+chase_cluster: cl_main -> r_efrag: R_RemoveEfrags
+chase_cluster: cl_main -> r_part: R_EntityParticles, R_RocketTrail
+chase_cluster: cl_main -> screen: SCR_EndLoadingPlaque, SCR_BeginLoadingPlaque
+chase_cluster: cl_main -> sv_main: sv
+chase_cluster: cl_main -> sv_user: cmd
+chase_cluster: cl_main -> zone: Cache_Report
+chase_cluster: cl_parse -> cl_demo: CL_GetMessage
+chase_cluster: cl_parse -> cl_main: CL_SignonReply, cl_shownet, cls, cl_lightstyle, cl_entities, CL_ClearState, cl_static_entities, cl
+chase_cluster: cl_parse -> cl_tent: CL_ParseTEnt
+chase_cluster: cl_parse -> cmd: Cmd_ExecuteString, Cbuf_AddText
+chase_cluster: cl_parse -> common: MSG_ReadByte, msg_badread, standard_quake, MSG_ReadLong, MSG_ReadShort, Q_strcpy, msg_readcount, MSG_ReadChar, MSG_ReadString, SZ_Clear, MSG_ReadAngle, MSG_ReadFloat, MSG_ReadCoord, MSG_WriteByte, MSG_BeginReading, Q_strlen
+chase_cluster: cl_parse -> console: Con_DPrintf, Con_Printf
+chase_cluster: cl_parse -> host_cmd: noclip_anglehack
+chase_cluster: cl_parse -> host: Host_Error, Host_EndGame
+chase_cluster: cl_parse -> model: Mod_ForName, Mod_TouchModel
+chase_cluster: cl_parse -> net_main: net_message, NET_SendMessage
+chase_cluster: cl_parse -> r_efrag: R_AddEfrags
+chase_cluster: cl_parse -> r_main: R_NewMap
+chase_cluster: cl_parse -> r_part: R_ParseParticleEffect
+chase_cluster: cl_parse -> sbar: Sbar_Changed
+chase_cluster: cl_parse -> screen: SCR_CenterPrint
+chase_cluster: cl_parse -> sv_main: sv
+chase_cluster: cl_parse -> sv_user: cmd
+chase_cluster: cl_parse -> vid_null: vid
+chase_cluster: cl_parse -> view: V_ParseDamage
+chase_cluster: cl_parse -> zone: Hunk_Check, Hunk_AllocName
+chase_cluster: cl_tent -> cl_main: CL_AllocDlight, cl_numvisedicts, cl_entities, cl_visedicts, cl
+chase_cluster: cl_tent -> common: MSG_ReadByte, MSG_ReadShort, MSG_ReadCoord
+chase_cluster: cl_tent -> console: Con_Printf
+chase_cluster: cl_tent -> mathlib: VectorNormalize, vec3_origin
+chase_cluster: cl_tent -> model: Mod_ForName
+chase_cluster: cl_tent -> r_part: R_TeleportSplash, R_RunParticleEffect, R_BlobExplosion, R_ParticleExplosion2, R_ParticleExplosion, R_LavaSplash
+chase_cluster: cl_tent -> vid_null: vid
+chase_cluster: cl_tent -> view: forward
+chase_cluster: cmd -> cl_main: cls
+chase_cluster: cmd -> common: SZ_Print, Q_strncmp, Q_strcpy, SZ_Write, Q_strcmp, SZ_Alloc, com_token, Q_strcasecmp, SZ_Clear, COM_LoadHunkFile, Q_memcpy, Q_strcat, COM_Parse, com_argc, com_argv, MSG_WriteByte, Q_strlen
+chase_cluster: cmd -> console: Con_Printf
+chase_cluster: cmd -> cvar: Cvar_Command, Cvar_VariableString
+chase_cluster: cmd -> host: host_initialized
+chase_cluster: cmd -> sv_user: cmd
+chase_cluster: cmd -> zone: Hunk_FreeToLowMark, Hunk_Alloc, Hunk_LowMark, Z_Free, Z_Malloc
+chase_cluster: common -> cmd: Cmd_AddCommand
+chase_cluster: common -> console: Con_Printf
+chase_cluster: common -> cvar: Cvar_Set, Cvar_RegisterVariable
+chase_cluster: common -> draw: Draw_EndDisc, Draw_BeginDisc
+chase_cluster: common -> host: host_parms
+chase_cluster: common -> net_main: net_message
+chase_cluster: common -> zone: Z_Malloc, Hunk_Alloc, Hunk_TempAlloc, Cache_Alloc, Hunk_AllocName
+chase_cluster: console -> cl_main: cls
+chase_cluster: console -> cmd: Cmd_AddCommand
+chase_cluster: console -> common: va, COM_CheckParm, Q_memcpy, com_gamedir, Q_memset
+chase_cluster: console -> cvar: Cvar_RegisterVariable
+chase_cluster: console -> draw: Draw_ConsoleBackground, Draw_String, Draw_Character
+chase_cluster: console -> host: developer, realtime
+chase_cluster: console -> keys: key_lines, chat_buffer, team_message, key_dest, key_linepos, key_count, edit_line
+chase_cluster: console -> menu: M_Menu_Main_f
+chase_cluster: console -> screen: SCR_UpdateScreen, scr_disabled_for_loading, SCR_EndLoadingPlaque, clearnotify, scr_copytop
+chase_cluster: console -> vid_null: vid
+chase_cluster: console -> zone: Hunk_AllocName
+chase_cluster: cvar -> cmd: Cmd_Argv, Cmd_Argc, Cmd_Exists
+chase_cluster: cvar -> common: Q_strcmp, Q_atof, Q_strncmp, Q_strlen, Q_strcpy
+chase_cluster: cvar -> console: Con_Printf
+chase_cluster: cvar -> host: SV_BroadcastPrintf
+chase_cluster: cvar -> sv_main: sv
+chase_cluster: cvar -> zone: Z_Malloc, Z_Free
+chase_cluster: d_edge -> cl_main: cl_entities
+chase_cluster: d_edge -> d_init: d_scalemip, d_drawspans, d_minmip
+chase_cluster: d_edge -> d_scan: Turbulent8, D_DrawZSpans
+chase_cluster: d_edge -> d_sky: D_DrawSkyScans8
+chase_cluster: d_edge -> d_surf: D_CacheSurface
+chase_cluster: d_edge -> mathlib: VectorScale
+chase_cluster: d_edge -> r_bsp: R_RotateBmodel, base_modelorg, modelorg, currententity
+chase_cluster: d_edge -> r_edge: surface_p, surfaces
+chase_cluster: d_edge -> r_main: vpn, base_vup, vright, r_clearcolor, screenwidth, r_origin, xcenter, r_drawnpolycount, base_vpn, vup, yscaleinv, r_drawflat, base_vright, xscaleinv, ycenter
+chase_cluster: d_edge -> r_misc: TransformVector, R_TransformFrustum
+chase_cluster: d_edge -> r_sky: R_MakeSky, r_skymade
+chase_cluster: d_init -> cvar: Cvar_RegisterVariable
+chase_cluster: d_init -> d_polyse: d_aflatcolor
+chase_cluster: d_init -> d_scan: D_DrawSpans8
+chase_cluster: d_init -> d_surf: sc_rover
+chase_cluster: d_init -> r_main: screenwidth, r_aliasuvscale, r_worldpolysbacktofront, r_warpbuffer, r_dowarp, r_recursiveaffinetriangles, r_drawpolys
+chase_cluster: d_init -> r_sky: r_skydirect
+chase_cluster: d_init -> vid_null: vid
+chase_cluster: d_modech -> d_edge: scale_for_mip
+chase_cluster: d_modech -> r_main: xscale, r_refdef, pixelAspect, r_dowarp, yscale
+chase_cluster: d_modech -> vid_null: vid
+chase_cluster: d_part -> d_modech: d_pix_max, d_vrectright_particle, d_pix_shift, d_vrectbottom_particle, d_pix_min, d_scantable, d_vrecty, d_vrectx, d_y_aspect_shift
+chase_cluster: d_part -> r_main: r_origin, screenwidth, xcenter, ycenter
+chase_cluster: d_part -> r_part: r_ppn, r_pup, r_pright
+chase_cluster: d_polyse -> d_edge: erroradjustup, erroradjustdown, ubasestep, errorterm
+chase_cluster: d_polyse -> d_modech: zspantable, d_scantable
+chase_cluster: d_polyse -> mathlib: FloorDivMod
+chase_cluster: d_polyse -> r_alias: r_affinetridesc, acolormap
+chase_cluster: d_polyse -> r_edge: fv
+chase_cluster: d_polyse -> r_main: r_refdef, screenwidth
+chase_cluster: d_scan -> cl_main: cl
+chase_cluster: d_scan -> r_draw: sintable, intsintable
+chase_cluster: d_scan -> r_main: r_refdef, screenwidth
+chase_cluster: d_scan -> screen: scr_vrect
+chase_cluster: d_scan -> vid_null: vid
+chase_cluster: d_sky -> mathlib: VectorNormalize
+chase_cluster: d_sky -> r_main: screenwidth, vpn, r_refdef, vright, vup
+chase_cluster: d_sky -> r_sky: r_skysource, skytime, skyspeed
+chase_cluster: d_sky -> vid_null: vid
+chase_cluster: d_sprite -> mathlib: VectorInverse
+chase_cluster: d_sprite -> r_bsp: modelorg
+chase_cluster: d_sprite -> r_main: r_refdef, screenwidth, xcenter, yscaleinv, xscaleinv, ycenter
+chase_cluster: d_sprite -> r_misc: TransformVector
+chase_cluster: d_sprite -> r_sprite: r_spritedesc
+chase_cluster: d_surf -> common: Q_atoi, COM_CheckParm, msg_suppress_1, com_argv
+chase_cluster: d_surf -> console: Con_Printf
+chase_cluster: d_surf -> d_init: d_roverwrapped, d_initial_rover
+chase_cluster: d_surf -> r_main: d_lightstylevalue, r_framecount, c_surf
+chase_cluster: d_surf -> r_surf: R_DrawSurface, R_TextureAnimation, r_drawsurf
+chase_cluster: draw -> common: Q_memcpy, COM_LoadCacheFile
+chase_cluster: draw -> vid_null: vid, D_EndDirectRect, D_BeginDirectRect
+chase_cluster: draw -> wad: SwapPic, W_GetLumpName
+chase_cluster: draw -> zone: Cache_Check
+chase_cluster: host_cmd -> cl_demo: CL_StopPlayback
+chase_cluster: host_cmd -> cl_main: CL_Disconnect_f, cls, CL_Disconnect, cl_name, cl_color, CL_EstablishConnection, CL_NextDemo, cl
+chase_cluster: host_cmd -> cmd: Cmd_ExecuteString, Cmd_Argv, Cmd_ForwardToServer, Cbuf_AddText, Cmd_AddCommand, Cmd_Argc, Cmd_Args, cmd_source
+chase_cluster: host_cmd -> common: Q_strcpy, rogue, Q_strcmp, SZ_Clear, Q_atof, Q_strcat, MSG_WriteByte, Q_strlen, hipnotic, MSG_WriteLong, SZ_Write, MSG_WriteFloat, com_token, MSG_WriteShort, COM_DefaultExtension, Q_strcasecmp, MSG_WriteString, com_gamedir, COM_Parse, MSG_WriteAngle
+chase_cluster: host_cmd -> console: Con_Printf
+chase_cluster: host_cmd -> cvar: Cvar_Set, Cvar_SetValue, Cvar_VariableString
+chase_cluster: host_cmd -> host: SV_ClientPrintf, Host_ShutdownServer, teamplay, host_client, SV_DropClient, SV_BroadcastPrintf, pausable
+chase_cluster: host_cmd -> keys: key_dest
+chase_cluster: host_cmd -> menu: M_Menu_Quit_f
+chase_cluster: host_cmd -> model: Mod_Extradata, Mod_Print, Mod_ForName
+chase_cluster: host_cmd -> net_main: ipxAvailable, tcpipAvailable, my_ipx_address, net_activeconnections, net_time, my_tcpip_address, hostname
+chase_cluster: host_cmd -> pr_edict: EDICT_NUM, ED_ParseGlobals, ED_ParseEdict, ED_Write, ED_WriteGlobals, progs, NUM_FOR_EDICT, pr_global_struct, pr_strings, GetEdictFieldValue
+chase_cluster: host_cmd -> pr_exec: PR_ExecuteProgram
+chase_cluster: host_cmd -> screen: SCR_BeginLoadingPlaque
+chase_cluster: host_cmd -> sv_main: svs, SV_SaveSpawnparms, sv, SV_SpawnServer, SV_WriteClientdataToMessage
+chase_cluster: host_cmd -> sv_user: sv_player
+chase_cluster: host_cmd -> world: SV_LinkEdict
+chase_cluster: host_cmd -> zone: Hunk_Alloc
+chase_cluster: host -> chase: Chase_Init
+chase_cluster: host -> cl_main: cls, CL_Disconnect, CL_SendCmd, CL_ReadFromServer, CL_Init, CL_DecayLights, CL_NextDemo, cl
+chase_cluster: host -> cmd: Cmd_Init, Cbuf_InsertText, Cbuf_AddText, Cbuf_Init, Cbuf_Execute
+chase_cluster: host -> common: standard_quake, SZ_Clear, COM_LoadHunkFile, com_argc, MSG_WriteByte, Q_strlen, va, COM_CheckParm, MSG_WriteShort, COM_Init, Q_atoi, MSG_WriteString, com_gamedir, com_argv
+chase_cluster: host -> console: Con_Init, Con_DPrintf, Con_Printf
+chase_cluster: host -> cvar: Cvar_RegisterVariable, Cvar_SetValue, Cvar_WriteVariables
+chase_cluster: host -> d_surf: D_FlushCaches
+chase_cluster: host -> draw: Draw_Init
+chase_cluster: host -> host_cmd: Host_InitCommands
+chase_cluster: host -> in_null: IN_Init, IN_Shutdown, IN_Commands
+chase_cluster: host -> keys: Key_WriteBindings, key_dest, Key_Init
+chase_cluster: host -> mathlib: vec3_origin
+chase_cluster: host -> menu: M_Init
+chase_cluster: host -> model: Mod_ClearAll, Mod_Init
+chase_cluster: host -> net_main: NET_CanSendMessage, NET_GetMessage, NET_Poll, NET_Close, NET_SendToAll, NET_Init, net_activeconnections, vcrFile, NET_SendMessage, NET_Shutdown
+chase_cluster: host -> pr_edict: PR_Init, pr_global_struct
+chase_cluster: host -> pr_exec: PR_ExecuteProgram
+chase_cluster: host -> r_main: vright, r_origin, vup, vpn, R_InitTextures, R_Init
+chase_cluster: host -> sbar: Sbar_Init
+chase_cluster: host -> screen: SCR_Init, SCR_UpdateScreen, scr_disabled_for_loading, SCR_EndLoadingPlaque
+chase_cluster: host -> sv_main: svs, sv, SV_Init, SV_ClearDatagram, SV_CheckForNewClients, SV_SendClientMessages
+chase_cluster: host -> sv_phys: SV_Physics
+chase_cluster: host -> sv_user: SV_RunClients, cmd
+chase_cluster: host -> vid_null: VID_Shutdown, VID_Init
+chase_cluster: host -> view: V_Init
+chase_cluster: host -> wad: W_LoadWadFile
+chase_cluster: host -> zone: Hunk_FreeToLowMark, Hunk_LowMark, Memory_Init, Hunk_AllocName
+chase_cluster: in_null -> cl_input: cl_sidespeed, in_mlook, cl_pitchspeed, cl_yawspeed, in_strafe, in_speed, cl_forwardspeed, cl_movespeedkey
+chase_cluster: in_null -> cl_main: lookspring, m_forward, lookstrafe, m_side, m_pitch, m_yaw, sensitivity, cl
+chase_cluster: in_null -> cmd: Cmd_AddCommand
+chase_cluster: in_null -> cvar: Cvar_RegisterVariable
+chase_cluster: in_null -> host_cmd: noclip_anglehack
+chase_cluster: in_null -> host: host_frametime
+chase_cluster: in_null -> keys: Key_Event
+chase_cluster: in_null -> sv_user: cmd
+chase_cluster: in_null -> view: V_StopPitchDrift
+chase_cluster: in_null -> qg_platform: QG_GetKey, QG_GetMouseMove, QG_GetJoyAxes
+chase_cluster: keys -> cl_main: cls
+chase_cluster: keys -> cmd: Cmd_AddCommand, Cmd_Argc, Cmd_Argv, Cbuf_AddText, Cmd_CompleteCommand
+chase_cluster: keys -> common: Q_strcpy, Q_strcasecmp, Q_strlen
+chase_cluster: keys -> console: con_backscroll, Con_Printf, con_totallines, con_forcedup
+chase_cluster: keys -> cvar: Cvar_CompleteVariable
+chase_cluster: keys -> menu: M_ToggleMenu_f, M_Keydown
+chase_cluster: keys -> screen: SCR_UpdateScreen
+chase_cluster: keys -> sv_user: cmd
+chase_cluster: keys -> vid_null: vid
+chase_cluster: keys -> zone: Z_Free, Z_Malloc
+chase_cluster: mathlib -> r_main: vup
+chase_cluster: mathlib -> sv_user: angles
+chase_cluster: mathlib -> view: right, forward, up
+chase_cluster: menu -> cl_input: cl_forwardspeed
+chase_cluster: menu -> cl_main: cls, cl_name, lookstrafe, lookspring, cl_color, CL_NextDemo, m_pitch, sensitivity, cl
+chase_cluster: menu -> cmd: Cbuf_AddText, Cmd_AddCommand, Cbuf_InsertText
+chase_cluster: menu -> common: rogue, Q_strcmp, Q_strcpy, hipnotic, va, registered, Q_atoi, Q_memcpy, com_gamedir
+chase_cluster: menu -> console: Con_ToggleConsole_f
+chase_cluster: menu -> cvar: Cvar_Set, Cvar_SetValue
+chase_cluster: menu -> draw: Draw_CachePic, Draw_ConsoleBackground, Draw_TransPic, Draw_FadeScreen, Draw_Character, Draw_Pic, Draw_TransPicTranslate
+chase_cluster: menu -> host_cmd: Host_Quit_f
+chase_cluster: menu -> host: skill, coop, host_time, teamplay, realtime, timelimit, fraglimit
+chase_cluster: menu -> keys: Key_KeynumToString, Key_SetBinding, key_dest, keybindings
+chase_cluster: menu -> net_main: GetModemConfig, NET_Poll, ipxAvailable, slistLocal, tcpipAvailable, net_hostport, hostCacheCount, GetComPortConfig, my_ipx_address, NET_Slist_f, serialAvailable, my_tcpip_address, DEFAULTnet_hostport, slistSilent, hostcache, slistInProgress, SetComPortConfig, SetModemConfig, hostname
+chase_cluster: menu -> screen: scr_con_current, scr_copyeverything, SCR_BeginLoadingPlaque, SCR_ModalMessage, scr_fullupdate, scr_viewsize
+chase_cluster: menu -> sv_main: svs, sv
+chase_cluster: menu -> sv_user: cmd
+chase_cluster: menu -> vid_null: vid
+chase_cluster: menu -> view: v_gamma
+chase_cluster: model -> common: Q_strncmp, LittleFloat, COM_FileBase, COM_LoadStackFile, Q_memcpy, LittleLong, LittleShort, Q_memset
+chase_cluster: model -> console: Con_Printf
+chase_cluster: model -> mathlib: Length
+chase_cluster: model -> r_main: r_notexture_mip
+chase_cluster: model -> r_sky: R_InitSky
+chase_cluster: model -> sv_user: origin
+chase_cluster: model -> zone: Hunk_FreeToLowMark, Cache_Check, Cache_Free, Hunk_LowMark, Cache_Alloc, Hunk_AllocName
+chase_cluster: net_loop -> cl_main: cls
+chase_cluster: net_loop -> common: SZ_Write, Q_strcmp, SZ_Clear, Q_memcpy, Q_strcpy
+chase_cluster: net_loop -> console: Con_Printf
+chase_cluster: net_loop -> net_main: net_activeconnections, net_driverlevel, net_message, hostcache, NET_NewQSocket, hostname, hostCacheCount
+chase_cluster: net_loop -> sv_main: sv, svs
+chase_cluster: net_main -> cl_main: cls
+chase_cluster: net_main -> cmd: Cmd_AddCommand, Cmd_Argc, Cmd_Argv, Cbuf_AddText
+chase_cluster: net_main -> common: COM_CheckParm, Q_strcpy, SZ_Alloc, Q_strcasecmp, Q_atoi, com_argc, com_argv
+chase_cluster: net_main -> console: Con_DPrintf, Con_Printf
+chase_cluster: net_main -> cvar: Cvar_Set, Cvar_RegisterVariable
+chase_cluster: net_main -> host: host_time, host_client
+chase_cluster: net_main -> net_none: net_numdrivers, net_drivers
+chase_cluster: net_main -> net_vcr: VCR_Init
+chase_cluster: net_main -> sv_main: sv, svs
+chase_cluster: net_main -> zone: Hunk_AllocName
+chase_cluster: net_none -> net_loop: Loop_SendUnreliableMessage, Loop_Init, Loop_Close, Loop_CanSendMessage, Loop_CanSendUnreliableMessage, Loop_GetMessage, Loop_SearchForHosts, Loop_CheckNewConnections, Loop_Shutdown, Loop_Connect, Loop_Listen, Loop_SendMessage
+chase_cluster: net_vcr -> host: host_time
+chase_cluster: net_vcr -> net_main: vcrFile, net_message, NET_NewQSocket
+chase_cluster: net_vcr -> net_none: net_drivers
+chase_cluster: pr_edict -> cmd: Cmd_AddCommand, Cmd_Argv
+chase_cluster: pr_edict -> common: com_token, com_filesize, Q_atoi, COM_LoadHunkFile, LittleLong, COM_Parse, LittleShort
+chase_cluster: pr_edict -> console: Con_DPrintf, Con_Printf
+chase_cluster: pr_edict -> cvar: Cvar_RegisterVariable
+chase_cluster: pr_edict -> host_cmd: current_skill
+chase_cluster: pr_edict -> host: deathmatch, Host_Error
+chase_cluster: pr_edict -> mathlib: vec3_origin
+chase_cluster: pr_edict -> pr_exec: PR_Profile_f, PR_ExecuteProgram
+chase_cluster: pr_edict -> sv_main: sv, svs
+chase_cluster: pr_edict -> world: SV_UnlinkEdict
+chase_cluster: pr_edict -> zone: Hunk_Alloc
+chase_cluster: pr_exec -> console: Con_Printf
+chase_cluster: pr_exec -> host: Host_Error
+chase_cluster: pr_exec -> pr_cmds: pr_numbuiltins, pr_builtins
+chase_cluster: pr_exec -> pr_edict: pr_globals, pr_statements, pr_global_struct, ED_Print, pr_strings, PR_GlobalStringNoContents, progs, pr_functions, PR_GlobalString
+chase_cluster: pr_exec -> sv_main: sv
+chase_cluster: r_aclip -> d_polyse: D_PolysetDraw
+chase_cluster: r_aclip -> r_alias: pfinalverts, pauxverts, R_AliasProjectFinalVert, r_affinetridesc
+chase_cluster: r_aclip -> r_edge: fv
+chase_cluster: r_aclip -> r_main: r_refdef
+chase_cluster: r_alias -> cl_main: cl
+chase_cluster: r_alias -> console: Con_DPrintf
+chase_cluster: r_alias -> d_polyse: D_PolysetUpdateTables, D_PolysetDraw, D_PolysetDrawFinalVerts
+chase_cluster: r_alias -> mathlib: R_ConcatTransforms, AngleVectors, VectorInverse
+chase_cluster: r_alias -> model: Mod_Extradata
+chase_cluster: r_alias -> r_aclip: R_AliasClipTriangle
+chase_cluster: r_alias -> r_bsp: modelorg, currententity
+chase_cluster: r_alias -> r_edge: fv
+chase_cluster: r_alias -> r_main: vpn, r_refdef, aliasxscale, aliasyscale, vright, aliasxcenter, aliasycenter, yscale, xscale, xcenter, r_resfudge, vup, r_aliastransition, r_recursiveaffinetriangles, ycenter
+chase_cluster: r_alias -> sv_user: angles
+chase_cluster: r_bsp -> cl_main: cl_entities, cl
+chase_cluster: r_bsp -> console: Con_Printf
+chase_cluster: r_bsp -> host: temp1
+chase_cluster: r_bsp -> mathlib: R_ConcatRotations
+chase_cluster: r_bsp -> r_draw: R_RenderPoly, view_clipplanes, R_RenderBmodelFace, R_RenderFace
+chase_cluster: r_bsp -> r_edge: r_currentkey
+chase_cluster: r_bsp -> r_efrag: R_StoreEfrags
+chase_cluster: r_bsp -> r_main: vpn, r_pcurrentvertbase, r_worldpolysbacktofront, r_framecount, vright, numbtofpolys, pbtofpolys, pfrustum_indexes, r_origin, vup, r_visframecount, r_drawpolys
+chase_cluster: r_bsp -> r_misc: R_TransformFrustum
+chase_cluster: r_draw -> d_edge: D_DrawPoly
+chase_cluster: r_draw -> r_bsp: r_currentbkey, modelorg, currententity, insubmodel
+chase_cluster: r_draw -> r_edge: surface_p, r_currentkey, surfaces, removeedges, newedges, edge_p, edge_max, r_edges, surf_max
+chase_cluster: r_draw -> r_main: r_outofedges, r_pcurrentvertbase, r_refdef, r_framecount, yscale, r_polycount, xscale, r_outofsurfaces, xcenter, yscaleinv, r_clipflags, xscaleinv, ycenter
+chase_cluster: r_draw -> r_misc: TransformVector
+chase_cluster: r_edge -> cl_main: cl_entities
+chase_cluster: r_edge -> d_edge: D_DrawSurfaces
+chase_cluster: r_edge -> r_bsp: currententity
+chase_cluster: r_edge -> r_draw: R_RenderPoly
+chase_cluster: r_edge -> r_main: r_refdef, r_drawculledpolys, r_worldpolysbacktofront, r_draworder, r_numallocatededges
+chase_cluster: r_efrag -> cl_main: cl_numvisedicts, cl_entities, cl_visedicts, cl
+chase_cluster: r_efrag -> console: Con_Printf
+chase_cluster: r_efrag -> mathlib: BoxOnPlaneSide
+chase_cluster: r_efrag -> r_main: r_framecount, r_visframecount
+chase_cluster: r_light -> cl_main: cl, cl_dlights, cl_lightstyle
+chase_cluster: r_light -> r_main: r_refdef, d_lightstylevalue, r_framecount
+chase_cluster: r_main -> cl_main: cl_numvisedicts, cl_entities, cl_visedicts, cl, cl_dlights
+chase_cluster: r_main -> cmd: Cmd_AddCommand
+chase_cluster: r_main -> console: Con_Printf
+chase_cluster: r_main -> cvar: Cvar_RegisterVariable, Cvar_SetValue
+chase_cluster: r_main -> d_init: D_TurnZOn, D_Init
+chase_cluster: r_main -> d_modech: D_ViewChanged
+chase_cluster: r_main -> d_scan: D_WarpScreen
+chase_cluster: r_main -> mathlib: VectorNormalize, VectorInverse, Length
+chase_cluster: r_main -> model: Mod_LeafPVS
+chase_cluster: r_main -> r_alias: R_AliasDrawModel, R_AliasCheckBBox
+chase_cluster: r_main -> r_bsp: r_worldmodelorg, R_DrawSubmodelPolygons, modelorg, r_entorigin, currententity, insubmodel, R_DrawSolidClippedSubmodelPolygons, R_RenderWorld, R_RotateBmodel, base_modelorg
+chase_cluster: r_main -> r_draw: sintable, intsintable, view_clipplanes, R_ZDrawSubmodelPolys
+chase_cluster: r_main -> r_edge: surf_max, auxedges, surface_p, surfaces, R_BeginEdgeFrame, R_ScanEdges, r_edges
+chase_cluster: r_main -> r_efrag: r_pefragtopnode, r_emins, R_SplitEntityOnNode2, r_emaxs
+chase_cluster: r_main -> r_light: R_LightPoint, r_dlightframecount, R_MarkLights
+chase_cluster: r_main -> r_misc: R_SetupFrame, R_PrintTimes, R_PrintDSpeeds, R_TimeGraph, R_PrintAliasStats, R_TransformFrustum, R_TimeRefresh_f
+chase_cluster: r_main -> r_part: R_DrawParticles, R_InitParticles, R_ClearParticles, R_ReadPointFile_f
+chase_cluster: r_main -> r_sprite: R_DrawSprite
+chase_cluster: r_main -> screen: scr_viewsize, scr_fov
+chase_cluster: r_main -> view: lcd_x, V_SetContentsColor
+chase_cluster: r_main -> zone: Hunk_LowMark, Hunk_AllocName
+chase_cluster: r_misc -> cl_main: cl
+chase_cluster: r_misc -> console: Con_Printf
+chase_cluster: r_misc -> cvar: Cvar_Set
+chase_cluster: r_misc -> d_init: D_SetupFrame
+chase_cluster: r_misc -> d_surf: D_FlushCaches, r_cache_thrash
+chase_cluster: r_misc -> host: host_basepal
+chase_cluster: r_misc -> mathlib: AngleVectors
+chase_cluster: r_misc -> model: Mod_PointInLeaf
+chase_cluster: r_misc -> r_alias: r_amodels_drawn
+chase_cluster: r_misc -> r_bsp: base_modelorg, modelorg
+chase_cluster: r_misc -> r_draw: view_clipplanes, c_faceclip
+chase_cluster: r_misc -> r_edge: surface_p, surfaces, edge_p, surf_max, r_edges
+chase_cluster: r_misc -> r_light: R_AnimateLight
+chase_cluster: r_misc -> r_main: r_outofedges, vpn, r_wholepolycount, r_refdef, dp_time2, dp_time1, db_time2, db_time1, de_time2, de_time1, dv_time2, dv_time1, r_ambient, r_graphheight, r_dowarpold, base_vup, r_viewchanged, r_framecount, r_frustum_indexes, rw_time2, rw_time1, vright, numbtofpolys, se_time2, se_time1, r_maxedgesseen, c_surf, r_polycount, r_numedges, r_origin, pfrustum_indexes, r_outofsurfaces, r_drawnpolycount, r_oldviewleaf, d_spanpixcount, r_time1, base_vpn, vup, R_ViewChanged, r_dowarp, screenedge, r_draworder, base_vright, r_viewleaf, r_numsurfs, R_RenderView, r_waterwarp, r_fullbright, r_maxsurfsseen, r_numallocatededges
+chase_cluster: r_misc -> r_sky: R_SetSkyFrame
+chase_cluster: r_misc -> sbar: sb_lines
+chase_cluster: r_misc -> sv_main: sv
+chase_cluster: r_misc -> vid_null: vid, VID_ShiftPalette, VID_Update
+chase_cluster: r_misc -> view: lcd_x
+chase_cluster: r_part -> cl_main: cl
+chase_cluster: r_part -> common: MSG_ReadByte, COM_CheckParm, COM_FOpenFile, MSG_ReadChar, Q_atoi, MSG_ReadCoord, com_argv
+chase_cluster: r_part -> console: Con_Printf
+chase_cluster: r_part -> d_part: D_StartParticles, D_EndParticles, D_DrawParticle
+chase_cluster: r_part -> mathlib: VectorNormalize, vec3_origin, VectorScale
+chase_cluster: r_part -> r_alias: r_avertexnormals
+chase_cluster: r_part -> r_main: vpn, vright, xscaleshrink, vup, yscaleshrink
+chase_cluster: r_part -> sv_main: sv
+chase_cluster: r_part -> sv_phys: sv_gravity
+chase_cluster: r_part -> view: forward
+chase_cluster: r_part -> zone: Hunk_AllocName
+chase_cluster: r_sky -> cl_main: cl
+chase_cluster: r_sky -> mathlib: GreatestCommonDivisor
+chase_cluster: r_sprite -> cl_main: cl
+chase_cluster: r_sprite -> common: Q_memcpy
+chase_cluster: r_sprite -> console: Con_Printf
+chase_cluster: r_sprite -> d_sprite: D_DrawSprite
+chase_cluster: r_sprite -> mathlib: VectorNormalize, AngleVectors, VectorScale
+chase_cluster: r_sprite -> r_bsp: modelorg, r_entorigin, currententity
+chase_cluster: r_sprite -> r_draw: view_clipplanes
+chase_cluster: r_sprite -> r_main: vpn, vright, yscale, xscale, r_origin, xcenter, vup, ycenter
+chase_cluster: r_sprite -> r_misc: TransformVector
+chase_cluster: r_sprite -> r_part: beamlength
+chase_cluster: r_sprite -> view: right, up
+chase_cluster: r_surf -> cl_main: cl_dlights, cl
+chase_cluster: r_surf -> r_bsp: currententity
+chase_cluster: r_surf -> r_draw: sintable
+chase_cluster: r_surf -> r_main: r_refdef, r_framecount, r_fullbright
+chase_cluster: r_surf -> r_sky: R_GenSkyTile
+chase_cluster: r_surf -> vid_null: vid
+chase_cluster: sbar -> cl_main: cl
+chase_cluster: sbar -> cmd: Cmd_AddCommand
+chase_cluster: sbar -> common: va, rogue, hipnotic
+chase_cluster: sbar -> draw: Draw_String, Draw_Fill, Draw_TransPic, Draw_Character, draw_disc, Draw_Pic, Draw_PicFromWad, Draw_TileClear, Draw_CachePic
+chase_cluster: sbar -> host: teamplay
+chase_cluster: sbar -> menu: M_DrawPic
+chase_cluster: sbar -> screen: scr_con_current, scr_fullupdate, scr_copyeverything
+chase_cluster: sbar -> vid_null: vid
+chase_cluster: screen -> cl_main: cls, cl
+chase_cluster: screen -> cmd: Cmd_AddCommand
+chase_cluster: screen -> common: COM_WriteFile, com_gamedir, LittleShort, Q_memset
+chase_cluster: screen -> console: Con_DrawNotify, Con_CheckResize, con_notifylines, Con_DrawConsole, con_forcedup, con_initialized, Con_ClearNotify, Con_Printf
+chase_cluster: screen -> cvar: Cvar_Set, Cvar_RegisterVariable, Cvar_SetValue
+chase_cluster: screen -> d_init: D_EnableBackBufferAccess, D_DisableBackBufferAccess, D_UpdateRects
+chase_cluster: screen -> d_surf: r_cache_thrash
+chase_cluster: screen -> draw: Draw_CachePic, Draw_FadeScreen, Draw_Character, Draw_Pic, Draw_PicFromWad, Draw_TileClear
+chase_cluster: screen -> host: host_frametime, host_basepal, realtime
+chase_cluster: screen -> keys: key_dest, key_count, key_lastpress
+chase_cluster: screen -> menu: M_Draw
+chase_cluster: screen -> r_main: r_refdef, R_SetVrect, R_ViewChanged
+chase_cluster: screen -> sbar: sb_lines, Sbar_IntermissionOverlay, Sbar_FinaleOverlay, Sbar_Draw, Sbar_Changed
+chase_cluster: screen -> vid_null: vid, VID_Update, VID_SetPalette
+chase_cluster: screen -> view: lcd_x, V_UpdatePalette, V_RenderView
+chase_cluster: screen -> zone: Hunk_TempAlloc
+chase_cluster: sv_main -> cl_main: cls
+chase_cluster: sv_main -> cmd: Cmd_ExecuteString
+chase_cluster: sv_main -> common: standard_quake, MSG_WriteCoord, SZ_Clear, MSG_WriteByte, MSG_WriteLong, SZ_Write, MSG_WriteFloat, MSG_WriteChar, MSG_WriteShort, MSG_WriteString, MSG_WriteAngle, Q_memset
+chase_cluster: sv_main -> console: Con_DPrintf, Con_Printf
+chase_cluster: sv_main -> cvar: Cvar_Set, Cvar_RegisterVariable, Cvar_SetValue
+chase_cluster: sv_main -> host_cmd: current_skill
+chase_cluster: sv_main -> host: deathmatch, host_frametime, skill, host_client, realtime, SV_DropClient, coop, Host_ClearMemory
+chase_cluster: sv_main -> model: Mod_LeafPVS, Mod_ForName
+chase_cluster: sv_main -> net_main: NET_CanSendMessage, NET_SendUnreliableMessage, NET_SendToAll, NET_CheckNewConnections, net_activeconnections, NET_SendMessage, hostname
+chase_cluster: sv_main -> pr_cmds: sv_aim
+chase_cluster: sv_main -> pr_edict: pr_crc, EDICT_NUM, pr_edict_size, progs, NUM_FOR_EDICT, pr_global_struct, ED_LoadFromFile, pr_strings, GetEdictFieldValue, PR_LoadProgs
+chase_cluster: sv_main -> pr_exec: PR_ExecuteProgram
+chase_cluster: sv_main -> screen: scr_centertime_off
+chase_cluster: sv_main -> sv_phys: sv_nostep, sv_maxvelocity, sv_friction, sv_stopspeed, sv_gravity, SV_Physics
+chase_cluster: sv_main -> sv_user: sv_maxspeed, sv_edgefriction, sv_idealpitchscale, sv_accelerate, SV_SetIdealPitch
+chase_cluster: sv_main -> world: SV_ClearWorld
+chase_cluster: sv_main -> zone: Hunk_AllocName
+chase_cluster: sv_move -> mathlib: anglemod, vec3_origin
+chase_cluster: sv_move -> pr_cmds: PF_changeyaw
+chase_cluster: sv_move -> pr_edict: pr_globals, pr_global_struct
+chase_cluster: sv_move -> sv_main: sv
+chase_cluster: sv_move -> world: SV_Move, SV_LinkEdict, SV_PointContents
+chase_cluster: pr_cmds -> cmd: Cbuf_AddText
+chase_cluster: pr_cmds -> common: MSG_WriteCoord, MSG_WriteByte, va, MSG_WriteLong, MSG_WriteShort, MSG_WriteChar, MSG_WriteString, MSG_WriteAngle
+chase_cluster: pr_cmds -> console: Con_DPrintf, Con_Printf
+chase_cluster: pr_cmds -> cvar: Cvar_Set, Cvar_VariableValue
+chase_cluster: pr_cmds -> host: teamplay, host_client, SV_BroadcastPrintf, Host_Error, Host_ClientCommands
+chase_cluster: pr_cmds -> mathlib: VectorMA, VectorNormalize, anglemod, VectorScale, vec3_origin, Length, AngleVectors
+chase_cluster: pr_cmds -> model: Mod_LeafPVS, Mod_ForName, Mod_PointInLeaf
+chase_cluster: pr_cmds -> pr_edict: ED_PrintNum, ED_Alloc, ED_Free, ED_PrintEdicts, EDICT_NUM, pr_globals, nomonsters, pr_edict_size, NUM_FOR_EDICT, pr_global_struct, ED_Print, pr_strings
+chase_cluster: pr_cmds -> pr_exec: PR_RunError, pr_xfunction, pr_argc, pr_trace
+chase_cluster: pr_cmds -> sv_main: SV_ModelIndex, svs, sv, SV_StartSound, SV_StartParticle
+chase_cluster: pr_cmds -> sv_move: SV_movestep, SV_CheckBottom, SV_MoveToGoal
+chase_cluster: pr_cmds -> sv_user: angles
+chase_cluster: pr_cmds -> view: forward
+chase_cluster: pr_cmds -> world: SV_Move, SV_PointContents, SV_LinkEdict
+chase_cluster: sv_phys -> console: Con_DPrintf, Con_Printf
+chase_cluster: sv_phys -> host: host_frametime
+chase_cluster: sv_phys -> mathlib: VectorMA, CrossProduct, vec3_origin, nanmask, AngleVectors, VectorScale
+chase_cluster: sv_phys -> pr_edict: pr_global_struct, pr_strings, GetEdictFieldValue, pr_edict_size
+chase_cluster: sv_phys -> pr_exec: PR_ExecuteProgram
+chase_cluster: sv_phys -> sv_main: sv, svs, SV_StartSound
+chase_cluster: sv_phys -> sv_user: sv_player
+chase_cluster: sv_phys -> view: right, forward, up
+chase_cluster: sv_phys -> world: SV_Move, SV_PointContents, SV_TestEntityPosition, SV_LinkEdict
+chase_cluster: sv_user -> cmd: Cmd_ExecuteString, Cbuf_InsertText
+chase_cluster: sv_user -> common: MSG_ReadByte, msg_badread, MSG_ReadShort, Q_strncasecmp, MSG_ReadChar, MSG_ReadString, MSG_ReadAngle, MSG_ReadFloat, MSG_BeginReading
+chase_cluster: sv_user -> console: Con_DPrintf
+chase_cluster: sv_user -> host: host_frametime, host_client, SV_DropClient
+chase_cluster: sv_user -> keys: key_dest
+chase_cluster: sv_user -> mathlib: VectorNormalize, vec3_origin, Length, AngleVectors, VectorScale
+chase_cluster: sv_user -> net_main: NET_GetMessage
+chase_cluster: sv_user -> sv_main: sv, svs
+chase_cluster: sv_user -> sv_phys: sv_stopspeed, sv_friction
+chase_cluster: sv_user -> view: V_CalcRoll, right, forward, up
+chase_cluster: sv_user -> world: SV_Move
+chase_cluster: vid_null -> common: LittleLong
+chase_cluster: vid_null -> d_surf: D_InitCaches, D_SurfaceCacheForRes
+chase_cluster: vid_null -> host: host_colormap
+chase_cluster: vid_null -> qg_platform: QG_DrawFrame, QG_SetPalette, QG_Init
+chase_cluster: view -> chase: Chase_Update, chase_active
+chase_cluster: view -> cl_input: cl_forwardspeed
+chase_cluster: view -> cl_main: cls, cl_entities, cl
+chase_cluster: view -> cmd: Cmd_AddCommand, Cmd_Argv
+chase_cluster: view -> common: MSG_ReadByte, MSG_ReadCoord
+chase_cluster: view -> console: con_forcedup
+chase_cluster: view -> cvar: Cvar_Set, Cvar_RegisterVariable
+chase_cluster: view -> draw: Draw_Character
+chase_cluster: view -> host_cmd: noclip_anglehack
+chase_cluster: view -> host: host_frametime, host_basepal
+chase_cluster: view -> mathlib: VectorNormalize, anglemod, AngleVectors
+chase_cluster: view -> r_light: R_PushDlights
+chase_cluster: view -> r_main: r_refdef, R_RenderView
+chase_cluster: view -> screen: scr_vrect, scr_viewsize
+chase_cluster: view -> sv_user: angles, velocity
+chase_cluster: view -> vid_null: vid, VID_ShiftPalette
+chase_cluster: wad -> common: COM_LoadHunkFile, LittleLong
+chase_cluster: world -> common: InsertLinkBefore, RemoveLink, ClearLink
+chase_cluster: world -> console: Con_DPrintf
+chase_cluster: world -> mathlib: BoxOnPlaneSide, vec3_origin
+chase_cluster: world -> pr_edict: pr_global_struct
+chase_cluster: world -> pr_exec: PR_ExecuteProgram
+chase_cluster: world -> sv_main: sv
+chase_cluster: zone -> cmd: Cmd_AddCommand
+chase_cluster: zone -> common: COM_CheckParm, Q_strncpy, Q_atoi, Q_memcpy, com_argc, com_argv, Q_memset
+chase_cluster: zone -> console: Con_DPrintf, Con_Printf
+chase_cluster: qg_platform -> screen: scr_con_current
+d_local_h_cluster: model_h -> render_h: struct efrag_s
+d_local_h_cluster: model_h -> d_local_h: struct surfcache_s
+d_local_h_cluster: render_h -> model_h: struct mleaf_s, struct model_s, struct mnode_s
+d_local_h_cluster: d_local_h -> model_h: struct texture_s

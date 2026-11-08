@@ -1,0 +1,11 @@
+{
+	"defines" : [],
+	"include_dirs" : [
+		"<c2das>/tests/manual/quakegeneric/upstream/quakegeneric/source",
+		"<c2das>/tests/manual/quakegeneric/src"
+	],
+	"include_files" : [
+		"<c2das>/tests/manual/quakegeneric/src/engine_config.h"
+	],
+	"program_root" : "<c2das>/tests/manual/quakegeneric"
+}
