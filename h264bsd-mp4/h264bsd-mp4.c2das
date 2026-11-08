@@ -1,0 +1,11 @@
+{
+	"defines" : [],
+	"include_dirs" : [
+		"<c2das>/tests/manual/h264bsd-mp4/include",
+		"<c2das>/tests/manual/h264bsd-mp4/upstream/h264bsd/src",
+		"<c2das>/tests/manual/h264bsd-mp4/upstream/minimp4",
+		"<c2das>/tests/manual/h264bsd-mp4/src"
+	],
+	"include_files" : [],
+	"program_root" : "<c2das>/tests/manual/h264bsd-mp4"
+}
