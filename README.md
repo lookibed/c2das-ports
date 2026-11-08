@@ -24,6 +24,7 @@ Raw captures beside this README, each copied whole from c2das-re when its tree h
 
 ## Directories
 
+- [binjgb](binjgb/)
 - [lua](lua/)
 
 ## Readability criteria
