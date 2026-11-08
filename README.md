@@ -28,6 +28,7 @@ Raw captures beside this README, each copied whole from c2das-re when its tree h
 - [h264bsd-mp4](h264bsd-mp4/)
 - [lua](lua/)
 - [plmpeg-stream](plmpeg-stream/)
+- [wasm3](wasm3/)
 
 ## Readability criteria
 

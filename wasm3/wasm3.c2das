@@ -1,0 +1,10 @@
+{
+	"defines" : [],
+	"include_dirs" : [
+		"<c2das>/tests/manual/wasm3/include",
+		"<c2das>/tests/manual/wasm3/upstream/wasm3/source",
+		"<c2das>/tests/manual/wasm3/src"
+	],
+	"include_files" : [],
+	"program_root" : "<c2das>/tests/manual/wasm3"
+}
