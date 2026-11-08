@@ -1,0 +1,14 @@
+{
+	"defines" : [
+		"PLM_NO_STDIO",
+		"c2da_rt_reset(...)="
+	],
+	"include_dirs" : [
+		"<c2das>/tests/manual/plmpeg-stream/include",
+		"<c2das>/tests/manual/plmpeg-stream/upstream",
+		"<c2das>/tests/manual/plmpeg-stream/fixtures",
+		"<c2das>/tests/manual/plmpeg-stream/src"
+	],
+	"include_files" : [],
+	"program_root" : "<c2das>/tests/manual/plmpeg-stream"
+}
