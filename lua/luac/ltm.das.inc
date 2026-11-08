@@ -6,15 +6,10 @@ var private luaT_init_luaT_eventname : uint8? [25] = fixed_array<uint8?>(unsafe(
 [c_function]
 def luaT_init(var L : lua_State?) {
     // ORDER TM
-    var i : int
-    {
-        i = 0
-        while (i < int(TMS.TM_N)) {
-            L.l_G.tmname[i] = luaS_new(L, luaT_init_luaT_eventname[i])
-            // never collect these names
-            luaC_fix(L, addr(reinterpret<GCUnion?>(L.l_G.tmname[i]).gc))
-            i++
-        }
+    for (i in range(int(TMS.TM_N))) {
+        L.l_G.tmname[i] = luaS_new(L, luaT_init_luaT_eventname[i])
+        // never collect these names
+        luaC_fix(L, addr(reinterpret<GCUnion?>(L.l_G.tmname[i]).gc))
     }
 }
 

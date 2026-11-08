@@ -3,9 +3,11 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+options jit_split_modules = 0
 require c_runtime/c_args
 require c_runtime/c_exit
 require c_runtime/c_function
+require c_runtime/c_jit_build
 require c_runtime/cstr_array
 require c_runtime/enum_from_int
 require c_runtime/printf
@@ -173,19 +175,14 @@ def private pmain(var L : lua_State?) : int {
     var argc : int = int(lua_tointegerx(L, 1, null))
     var argv : uint8 ?? = reinterpret<uint8 ??>(lua_touserdata(L, 2))
     var f : Proto?
-    var i : int
     tmname = addr(L.l_G.tmname[0])
     if (!(lua_checkstack(L, argc) != 0)) {
         fatal(reinterpret<uint8?>("too many input files"))
     }
-    {
-        i = 0
-        while (i < argc) {
-            var filename : uint8? = crt::strcmp(deref(argv + i), reinterpret<uint8?>("-")) == 0 ? default<uint8?> : deref(argv + i)
-            if (luaL_loadfilex(L, filename, null) != LUA_OK) {
-                fatal(lua_tolstring(L, -1, null))
-            }
-            i++
+    for (i in range(argc)) {
+        var filename : uint8? = crt::strcmp(deref(argv + i), reinterpret<uint8?>("-")) == 0 ? default<uint8?> : deref(argv + i)
+        if (luaL_loadfilex(L, filename, null) != LUA_OK) {
+            fatal(lua_tolstring(L, -1, null))
         }
     }
     f = combine(L, argc)
@@ -234,40 +231,35 @@ def c_main(var argc : int; var argv : uint8 ??) : int {
 [c_function]
 def private PrintString(var ts : TString?) {
     var s : uint8? = addr(ts.contents[0])
-    var i : uint64
     var n : uint64 = int(ts.shrlen) != 255 ? uint64(ts.shrlen) : ts.u.lnglen
     printf(reinterpret<uint8?>("\""))
-    {
-        i = uint64(0)
-        while (i < n) {
-            var c : int = int(uint8(deref(s + i)))
-            let _cond = c
-            if (_cond == '"') {
-                printf(reinterpret<uint8?>("\\\""))
-            } elif (_cond == '\\') {
-                printf(reinterpret<uint8?>("\\\\"))
-            } elif (_cond == 7) {
-                printf(reinterpret<uint8?>("\\a"))
-            } elif (_cond == '\b') {
-                printf(reinterpret<uint8?>("\\b"))
-            } elif (_cond == '\f') {
-                printf(reinterpret<uint8?>("\\f"))
-            } elif (_cond == '\n') {
-                printf(reinterpret<uint8?>("\\n"))
-            } elif (_cond == '\r') {
-                printf(reinterpret<uint8?>("\\r"))
-            } elif (_cond == '\t') {
-                printf(reinterpret<uint8?>("\\t"))
-            } elif (_cond == 11) {
-                printf(reinterpret<uint8?>("\\v"))
+    for (i in urange64(n)) {
+        var c : int = int(uint8(deref(s + i)))
+        let _cond = c
+        if (_cond == '"') {
+            printf(reinterpret<uint8?>("\\\""))
+        } elif (_cond == '\\') {
+            printf(reinterpret<uint8?>("\\\\"))
+        } elif (_cond == 7) {
+            printf(reinterpret<uint8?>("\\a"))
+        } elif (_cond == '\b') {
+            printf(reinterpret<uint8?>("\\b"))
+        } elif (_cond == '\f') {
+            printf(reinterpret<uint8?>("\\f"))
+        } elif (_cond == '\n') {
+            printf(reinterpret<uint8?>("\\n"))
+        } elif (_cond == '\r') {
+            printf(reinterpret<uint8?>("\\r"))
+        } elif (_cond == '\t') {
+            printf(reinterpret<uint8?>("\\t"))
+        } elif (_cond == 11) {
+            printf(reinterpret<uint8?>("\\v"))
+        } else {
+            if (crt::isprint(c) != 0) {
+                printf(reinterpret<uint8?>("%c"), c)
             } else {
-                if (crt::isprint(c) != 0) {
-                    printf(reinterpret<uint8?>("%c"), c)
-                } else {
-                    printf(reinterpret<uint8?>("\\%03d"), c)
-                }
+                printf(reinterpret<uint8?>("\\%03d"), c)
             }
-            i++
         }
     }
     printf(reinterpret<uint8?>("\""))
@@ -326,303 +318,298 @@ def private PrintConstant(var f : Proto?; i : int) {
 [c_function]
 def private PrintCode(var f : Proto?) {
     var code : uint? = f.code
-    var pc : int
     var n : int = f.sizecode
-    {
-        pc = 0
-        while (pc < n) {
-            var i : uint = deref(code + pc)
-            var o : OpCode = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
-            var a : int = int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
-            var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
-            var c : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
-            var ax : int = int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u)
-            var bx : int = int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u)
-            var sb : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u) - ((1 << 8) - 1 >> 1)
-            var sc : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) - ((1 << 8) - 1 >> 1)
-            var sbx : int = int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u) - ((1 << 8 + 8 + 1) - 1 >> 1)
-            var isk : int = int(i >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u)
-            var line : int = luaG_getfuncline(f, pc)
-            printf(reinterpret<uint8?>("\t%d\t"), pc + 1)
-            if (line > 0) {
-                printf(reinterpret<uint8?>("[%d]\t"), line)
-            } else {
-                printf(reinterpret<uint8?>("[-]\t"))
-            }
-            printf(reinterpret<uint8?>("%-9s\t"), opnames[int(o)])
-            let _cond = o
-            if (_cond == OpCode.OP_MOVE) {
-                printf(reinterpret<uint8?>("%d %d"), a, b)
-            } elif (_cond == OpCode.OP_LOADI) {
-                printf(reinterpret<uint8?>("%d %d"), a, sbx)
-            } elif (_cond == OpCode.OP_LOADF) {
-                printf(reinterpret<uint8?>("%d %d"), a, sbx)
-            } elif (_cond == OpCode.OP_LOADK) {
-                printf(reinterpret<uint8?>("%d %d"), a, bx)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, bx)
-            } elif (_cond == OpCode.OP_LOADKX) {
-                printf(reinterpret<uint8?>("%d"), a)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, int(deref(code + (pc + 1)) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u))
-            } elif (_cond == OpCode.OP_LOADFALSE) {
-                printf(reinterpret<uint8?>("%d"), a)
-            } elif (_cond == OpCode.OP_LFALSESKIP) {
-                printf(reinterpret<uint8?>("%d"), a)
-            } elif (_cond == OpCode.OP_LOADTRUE) {
-                printf(reinterpret<uint8?>("%d"), a)
-            } elif (_cond == OpCode.OP_LOADNIL) {
-                printf(reinterpret<uint8?>("%d %d"), a, b)
-                printf(reinterpret<uint8?>("\t; %d out"), b + 1)
-            } elif (_cond == OpCode.OP_GETUPVAL) {
-                printf(reinterpret<uint8?>("%d %d"), a, b)
-                printf(reinterpret<uint8?>("\t; %s"), deref(f.upvalues + b).name != null ? addr(deref(f.upvalues + b).name.contents[0]) : reinterpret<uint8?>("-"))
-            } elif (_cond == OpCode.OP_SETUPVAL) {
-                printf(reinterpret<uint8?>("%d %d"), a, b)
-                printf(reinterpret<uint8?>("\t; %s"), deref(f.upvalues + b).name != null ? addr(deref(f.upvalues + b).name.contents[0]) : reinterpret<uint8?>("-"))
-            } elif (_cond == OpCode.OP_GETTABUP) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; %s"), deref(f.upvalues + b).name != null ? addr(deref(f.upvalues + b).name.contents[0]) : reinterpret<uint8?>("-"))
-                printf(reinterpret<uint8?>(" "))
-                PrintConstant(f, c)
-            } elif (_cond == OpCode.OP_GETTABLE) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_GETI) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_GETFIELD) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, c)
-            } elif (_cond == OpCode.OP_SETTABUP) {
-                printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
-                printf(reinterpret<uint8?>("\t; %s"), deref(f.upvalues + a).name != null ? addr(deref(f.upvalues + a).name.contents[0]) : reinterpret<uint8?>("-"))
-                printf(reinterpret<uint8?>(" "))
-                PrintConstant(f, b)
-                if (isk != 0) {
-                    printf(reinterpret<uint8?>(" "))
-                    PrintConstant(f, c)
-                }
-            } elif (_cond == OpCode.OP_SETTABLE) {
-                printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
-                if (isk != 0) {
-                    printf(reinterpret<uint8?>("\t; "))
-                    PrintConstant(f, c)
-                }
-            } elif (_cond == OpCode.OP_SETI) {
-                printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
-                if (isk != 0) {
-                    printf(reinterpret<uint8?>("\t; "))
-                    PrintConstant(f, c)
-                }
-            } elif (_cond == OpCode.OP_SETFIELD) {
-                printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, b)
-                if (isk != 0) {
-                    printf(reinterpret<uint8?>(" "))
-                    PrintConstant(f, c)
-                }
-            } elif (_cond == OpCode.OP_NEWTABLE) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; %d"), c + int(deref(code + (pc + 1)) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) * ((1 << 8) - 1 + 1))
-            } elif (_cond == OpCode.OP_SELF) {
-                printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
-                if (isk != 0) {
-                    printf(reinterpret<uint8?>("\t; "))
-                    PrintConstant(f, c)
-                }
-            } elif (_cond == OpCode.OP_ADDI) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, sc)
-            } elif (_cond == OpCode.OP_ADDK) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, c)
-            } elif (_cond == OpCode.OP_SUBK) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, c)
-            } elif (_cond == OpCode.OP_MULK) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, c)
-            } elif (_cond == OpCode.OP_MODK) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, c)
-            } elif (_cond == OpCode.OP_POWK) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, c)
-            } elif (_cond == OpCode.OP_DIVK) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, c)
-            } elif (_cond == OpCode.OP_IDIVK) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, c)
-            } elif (_cond == OpCode.OP_BANDK) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, c)
-            } elif (_cond == OpCode.OP_BORK) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, c)
-            } elif (_cond == OpCode.OP_BXORK) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, c)
-            } elif (_cond == OpCode.OP_SHRI) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, sc)
-            } elif (_cond == OpCode.OP_SHLI) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, sc)
-            } elif (_cond == OpCode.OP_ADD) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_SUB) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_MUL) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_MOD) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_POW) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_DIV) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_IDIV) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_BAND) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_BOR) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_BXOR) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_SHL) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_SHR) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            } elif (_cond == OpCode.OP_MMBIN) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; %s"), addr(deref(tmname + c).contents[0]))
-            } elif (_cond == OpCode.OP_MMBINI) {
-                printf(reinterpret<uint8?>("%d %d %d %d"), a, sb, c, isk)
-                printf(reinterpret<uint8?>("\t; %s"), addr(deref(tmname + c).contents[0]))
-                if (isk != 0) {
-                    printf(reinterpret<uint8?>(" flip"))
-                }
-            } elif (_cond == OpCode.OP_MMBINK) {
-                printf(reinterpret<uint8?>("%d %d %d %d"), a, b, c, isk)
-                printf(reinterpret<uint8?>("\t; %s "), addr(deref(tmname + c).contents[0]))
-                PrintConstant(f, b)
-                if (isk != 0) {
-                    printf(reinterpret<uint8?>(" flip"))
-                }
-            } elif (_cond == OpCode.OP_UNM) {
-                printf(reinterpret<uint8?>("%d %d"), a, b)
-            } elif (_cond == OpCode.OP_BNOT) {
-                printf(reinterpret<uint8?>("%d %d"), a, b)
-            } elif (_cond == OpCode.OP_NOT) {
-                printf(reinterpret<uint8?>("%d %d"), a, b)
-            } elif (_cond == OpCode.OP_LEN) {
-                printf(reinterpret<uint8?>("%d %d"), a, b)
-            } elif (_cond == OpCode.OP_CONCAT) {
-                printf(reinterpret<uint8?>("%d %d"), a, b)
-            } elif (_cond == OpCode.OP_CLOSE) {
-                printf(reinterpret<uint8?>("%d"), a)
-            } elif (_cond == OpCode.OP_TBC) {
-                printf(reinterpret<uint8?>("%d"), a)
-            } elif (_cond == OpCode.OP_JMP) {
-                printf(reinterpret<uint8?>("%d"), int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1))
-                printf(reinterpret<uint8?>("\t; to %d"), int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1) + pc + 2)
-            } elif (_cond == OpCode.OP_EQ) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
-            } elif (_cond == OpCode.OP_LT) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
-            } elif (_cond == OpCode.OP_LE) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
-            } elif (_cond == OpCode.OP_EQK) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
-                printf(reinterpret<uint8?>("\t; "))
-                PrintConstant(f, b)
-            } elif (_cond == OpCode.OP_EQI) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
-            } elif (_cond == OpCode.OP_LTI) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
-            } elif (_cond == OpCode.OP_LEI) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
-            } elif (_cond == OpCode.OP_GTI) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
-            } elif (_cond == OpCode.OP_GEI) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
-            } elif (_cond == OpCode.OP_TEST) {
-                printf(reinterpret<uint8?>("%d %d"), a, isk)
-            } elif (_cond == OpCode.OP_TESTSET) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
-            } elif (_cond == OpCode.OP_CALL) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                printf(reinterpret<uint8?>("\t; "))
-                if (b == 0) {
-                    printf(reinterpret<uint8?>("all in "))
-                } else {
-                    printf(reinterpret<uint8?>("%d in "), b - 1)
-                }
-                if (c == 0) {
-                    printf(reinterpret<uint8?>("all out"))
-                } else {
-                    printf(reinterpret<uint8?>("%d out"), c - 1)
-                }
-            } elif (_cond == OpCode.OP_TAILCALL) {
-                printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
-                printf(reinterpret<uint8?>("\t; %d in"), b - 1)
-            } elif (_cond == OpCode.OP_RETURN) {
-                printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
-                printf(reinterpret<uint8?>("\t; "))
-                if (b == 0) {
-                    printf(reinterpret<uint8?>("all out"))
-                } else {
-                    printf(reinterpret<uint8?>("%d out"), b - 1)
-                }
-            } elif (_cond == OpCode.OP_RETURN0) {
-            } elif (_cond == OpCode.OP_RETURN1) {
-                printf(reinterpret<uint8?>("%d"), a)
-            } elif (_cond == OpCode.OP_FORLOOP) {
-                printf(reinterpret<uint8?>("%d %d"), a, bx)
-                printf(reinterpret<uint8?>("\t; to %d"), pc - bx + 2)
-            } elif (_cond == OpCode.OP_FORPREP) {
-                printf(reinterpret<uint8?>("%d %d"), a, bx)
-                printf(reinterpret<uint8?>("\t; exit to %d"), pc + bx + 3)
-            } elif (_cond == OpCode.OP_TFORPREP) {
-                printf(reinterpret<uint8?>("%d %d"), a, bx)
-                printf(reinterpret<uint8?>("\t; to %d"), pc + bx + 2)
-            } elif (_cond == OpCode.OP_TFORCALL) {
-                printf(reinterpret<uint8?>("%d %d"), a, c)
-            } elif (_cond == OpCode.OP_TFORLOOP) {
-                printf(reinterpret<uint8?>("%d %d"), a, bx)
-                printf(reinterpret<uint8?>("\t; to %d"), pc - bx + 2)
-            } elif (_cond == OpCode.OP_SETLIST) {
-                printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-                if (isk != 0) {
-                    printf(reinterpret<uint8?>("\t; %d"), c + int(deref(code + (pc + 1)) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) * ((1 << 8) - 1 + 1))
-                }
-            } elif (_cond == OpCode.OP_CLOSURE) {
-                printf(reinterpret<uint8?>("%d %d"), a, bx)
-                printf(reinterpret<uint8?>("\t; %p"), reinterpret<uint8?>(reinterpret<void?>(deref(f.p + bx))))
-            } elif (_cond == OpCode.OP_VARARG) {
-                printf(reinterpret<uint8?>("%d %d"), a, c)
-                printf(reinterpret<uint8?>("\t; "))
-                if (c == 0) {
-                    printf(reinterpret<uint8?>("all out"))
-                } else {
-                    printf(reinterpret<uint8?>("%d out"), c - 1)
-                }
-            } elif (_cond == OpCode.OP_VARARGPREP) {
-                printf(reinterpret<uint8?>("%d"), a)
-            } elif (_cond == OpCode.OP_EXTRAARG) {
-                printf(reinterpret<uint8?>("%d"), ax)
-            }
-            printf(reinterpret<uint8?>("\n"))
-            pc++
+    for (pc in range(n)) {
+        var i : uint = deref(code + pc)
+        var o : OpCode = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
+        var a : int = int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+        var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
+        var c : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
+        var ax : int = int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u)
+        var bx : int = int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u)
+        var sb : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u) - ((1 << 8) - 1 >> 1)
+        var sc : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) - ((1 << 8) - 1 >> 1)
+        var sbx : int = int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u) - ((1 << 8 + 8 + 1) - 1 >> 1)
+        var isk : int = int(i >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u)
+        var line : int = luaG_getfuncline(f, pc)
+        printf(reinterpret<uint8?>("\t%d\t"), pc + 1)
+        if (line > 0) {
+            printf(reinterpret<uint8?>("[%d]\t"), line)
+        } else {
+            printf(reinterpret<uint8?>("[-]\t"))
         }
+        printf(reinterpret<uint8?>("%-9s\t"), opnames[int(o)])
+        let _cond = o
+        if (_cond == OpCode.OP_MOVE) {
+            printf(reinterpret<uint8?>("%d %d"), a, b)
+        } elif (_cond == OpCode.OP_LOADI) {
+            printf(reinterpret<uint8?>("%d %d"), a, sbx)
+        } elif (_cond == OpCode.OP_LOADF) {
+            printf(reinterpret<uint8?>("%d %d"), a, sbx)
+        } elif (_cond == OpCode.OP_LOADK) {
+            printf(reinterpret<uint8?>("%d %d"), a, bx)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, bx)
+        } elif (_cond == OpCode.OP_LOADKX) {
+            printf(reinterpret<uint8?>("%d"), a)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, int(deref(code + (pc + 1)) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u))
+        } elif (_cond == OpCode.OP_LOADFALSE) {
+            printf(reinterpret<uint8?>("%d"), a)
+        } elif (_cond == OpCode.OP_LFALSESKIP) {
+            printf(reinterpret<uint8?>("%d"), a)
+        } elif (_cond == OpCode.OP_LOADTRUE) {
+            printf(reinterpret<uint8?>("%d"), a)
+        } elif (_cond == OpCode.OP_LOADNIL) {
+            printf(reinterpret<uint8?>("%d %d"), a, b)
+            printf(reinterpret<uint8?>("\t; %d out"), b + 1)
+        } elif (_cond == OpCode.OP_GETUPVAL) {
+            printf(reinterpret<uint8?>("%d %d"), a, b)
+            printf(reinterpret<uint8?>("\t; %s"), deref(f.upvalues + b).name != null ? addr(deref(f.upvalues + b).name.contents[0]) : reinterpret<uint8?>("-"))
+        } elif (_cond == OpCode.OP_SETUPVAL) {
+            printf(reinterpret<uint8?>("%d %d"), a, b)
+            printf(reinterpret<uint8?>("\t; %s"), deref(f.upvalues + b).name != null ? addr(deref(f.upvalues + b).name.contents[0]) : reinterpret<uint8?>("-"))
+        } elif (_cond == OpCode.OP_GETTABUP) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; %s"), deref(f.upvalues + b).name != null ? addr(deref(f.upvalues + b).name.contents[0]) : reinterpret<uint8?>("-"))
+            printf(reinterpret<uint8?>(" "))
+            PrintConstant(f, c)
+        } elif (_cond == OpCode.OP_GETTABLE) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_GETI) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_GETFIELD) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, c)
+        } elif (_cond == OpCode.OP_SETTABUP) {
+            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
+            printf(reinterpret<uint8?>("\t; %s"), deref(f.upvalues + a).name != null ? addr(deref(f.upvalues + a).name.contents[0]) : reinterpret<uint8?>("-"))
+            printf(reinterpret<uint8?>(" "))
+            PrintConstant(f, b)
+            if (isk != 0) {
+                printf(reinterpret<uint8?>(" "))
+                PrintConstant(f, c)
+            }
+        } elif (_cond == OpCode.OP_SETTABLE) {
+            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
+            if (isk != 0) {
+                printf(reinterpret<uint8?>("\t; "))
+                PrintConstant(f, c)
+            }
+        } elif (_cond == OpCode.OP_SETI) {
+            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
+            if (isk != 0) {
+                printf(reinterpret<uint8?>("\t; "))
+                PrintConstant(f, c)
+            }
+        } elif (_cond == OpCode.OP_SETFIELD) {
+            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, b)
+            if (isk != 0) {
+                printf(reinterpret<uint8?>(" "))
+                PrintConstant(f, c)
+            }
+        } elif (_cond == OpCode.OP_NEWTABLE) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; %d"), c + int(deref(code + (pc + 1)) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) * ((1 << 8) - 1 + 1))
+        } elif (_cond == OpCode.OP_SELF) {
+            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
+            if (isk != 0) {
+                printf(reinterpret<uint8?>("\t; "))
+                PrintConstant(f, c)
+            }
+        } elif (_cond == OpCode.OP_ADDI) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, sc)
+        } elif (_cond == OpCode.OP_ADDK) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, c)
+        } elif (_cond == OpCode.OP_SUBK) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, c)
+        } elif (_cond == OpCode.OP_MULK) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, c)
+        } elif (_cond == OpCode.OP_MODK) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, c)
+        } elif (_cond == OpCode.OP_POWK) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, c)
+        } elif (_cond == OpCode.OP_DIVK) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, c)
+        } elif (_cond == OpCode.OP_IDIVK) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, c)
+        } elif (_cond == OpCode.OP_BANDK) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, c)
+        } elif (_cond == OpCode.OP_BORK) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, c)
+        } elif (_cond == OpCode.OP_BXORK) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, c)
+        } elif (_cond == OpCode.OP_SHRI) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, sc)
+        } elif (_cond == OpCode.OP_SHLI) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, sc)
+        } elif (_cond == OpCode.OP_ADD) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_SUB) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_MUL) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_MOD) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_POW) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_DIV) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_IDIV) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_BAND) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_BOR) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_BXOR) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_SHL) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_SHR) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+        } elif (_cond == OpCode.OP_MMBIN) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; %s"), addr(deref(tmname + c).contents[0]))
+        } elif (_cond == OpCode.OP_MMBINI) {
+            printf(reinterpret<uint8?>("%d %d %d %d"), a, sb, c, isk)
+            printf(reinterpret<uint8?>("\t; %s"), addr(deref(tmname + c).contents[0]))
+            if (isk != 0) {
+                printf(reinterpret<uint8?>(" flip"))
+            }
+        } elif (_cond == OpCode.OP_MMBINK) {
+            printf(reinterpret<uint8?>("%d %d %d %d"), a, b, c, isk)
+            printf(reinterpret<uint8?>("\t; %s "), addr(deref(tmname + c).contents[0]))
+            PrintConstant(f, b)
+            if (isk != 0) {
+                printf(reinterpret<uint8?>(" flip"))
+            }
+        } elif (_cond == OpCode.OP_UNM) {
+            printf(reinterpret<uint8?>("%d %d"), a, b)
+        } elif (_cond == OpCode.OP_BNOT) {
+            printf(reinterpret<uint8?>("%d %d"), a, b)
+        } elif (_cond == OpCode.OP_NOT) {
+            printf(reinterpret<uint8?>("%d %d"), a, b)
+        } elif (_cond == OpCode.OP_LEN) {
+            printf(reinterpret<uint8?>("%d %d"), a, b)
+        } elif (_cond == OpCode.OP_CONCAT) {
+            printf(reinterpret<uint8?>("%d %d"), a, b)
+        } elif (_cond == OpCode.OP_CLOSE) {
+            printf(reinterpret<uint8?>("%d"), a)
+        } elif (_cond == OpCode.OP_TBC) {
+            printf(reinterpret<uint8?>("%d"), a)
+        } elif (_cond == OpCode.OP_JMP) {
+            printf(reinterpret<uint8?>("%d"), int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1))
+            printf(reinterpret<uint8?>("\t; to %d"), int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1) + pc + 2)
+        } elif (_cond == OpCode.OP_EQ) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
+        } elif (_cond == OpCode.OP_LT) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
+        } elif (_cond == OpCode.OP_LE) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
+        } elif (_cond == OpCode.OP_EQK) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
+            printf(reinterpret<uint8?>("\t; "))
+            PrintConstant(f, b)
+        } elif (_cond == OpCode.OP_EQI) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
+        } elif (_cond == OpCode.OP_LTI) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
+        } elif (_cond == OpCode.OP_LEI) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
+        } elif (_cond == OpCode.OP_GTI) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
+        } elif (_cond == OpCode.OP_GEI) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
+        } elif (_cond == OpCode.OP_TEST) {
+            printf(reinterpret<uint8?>("%d %d"), a, isk)
+        } elif (_cond == OpCode.OP_TESTSET) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
+        } elif (_cond == OpCode.OP_CALL) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(reinterpret<uint8?>("\t; "))
+            if (b == 0) {
+                printf(reinterpret<uint8?>("all in "))
+            } else {
+                printf(reinterpret<uint8?>("%d in "), b - 1)
+            }
+            if (c == 0) {
+                printf(reinterpret<uint8?>("all out"))
+            } else {
+                printf(reinterpret<uint8?>("%d out"), c - 1)
+            }
+        } elif (_cond == OpCode.OP_TAILCALL) {
+            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
+            printf(reinterpret<uint8?>("\t; %d in"), b - 1)
+        } elif (_cond == OpCode.OP_RETURN) {
+            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
+            printf(reinterpret<uint8?>("\t; "))
+            if (b == 0) {
+                printf(reinterpret<uint8?>("all out"))
+            } else {
+                printf(reinterpret<uint8?>("%d out"), b - 1)
+            }
+        } elif (_cond == OpCode.OP_RETURN0) {
+        } elif (_cond == OpCode.OP_RETURN1) {
+            printf(reinterpret<uint8?>("%d"), a)
+        } elif (_cond == OpCode.OP_FORLOOP) {
+            printf(reinterpret<uint8?>("%d %d"), a, bx)
+            printf(reinterpret<uint8?>("\t; to %d"), pc - bx + 2)
+        } elif (_cond == OpCode.OP_FORPREP) {
+            printf(reinterpret<uint8?>("%d %d"), a, bx)
+            printf(reinterpret<uint8?>("\t; exit to %d"), pc + bx + 3)
+        } elif (_cond == OpCode.OP_TFORPREP) {
+            printf(reinterpret<uint8?>("%d %d"), a, bx)
+            printf(reinterpret<uint8?>("\t; to %d"), pc + bx + 2)
+        } elif (_cond == OpCode.OP_TFORCALL) {
+            printf(reinterpret<uint8?>("%d %d"), a, c)
+        } elif (_cond == OpCode.OP_TFORLOOP) {
+            printf(reinterpret<uint8?>("%d %d"), a, bx)
+            printf(reinterpret<uint8?>("\t; to %d"), pc - bx + 2)
+        } elif (_cond == OpCode.OP_SETLIST) {
+            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            if (isk != 0) {
+                printf(reinterpret<uint8?>("\t; %d"), c + int(deref(code + (pc + 1)) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) * ((1 << 8) - 1 + 1))
+            }
+        } elif (_cond == OpCode.OP_CLOSURE) {
+            printf(reinterpret<uint8?>("%d %d"), a, bx)
+            printf(reinterpret<uint8?>("\t; %p"), reinterpret<uint8?>(reinterpret<void?>(deref(f.p + bx))))
+        } elif (_cond == OpCode.OP_VARARG) {
+            printf(reinterpret<uint8?>("%d %d"), a, c)
+            printf(reinterpret<uint8?>("\t; "))
+            if (c == 0) {
+                printf(reinterpret<uint8?>("all out"))
+            } else {
+                printf(reinterpret<uint8?>("%d out"), c - 1)
+            }
+        } elif (_cond == OpCode.OP_VARARGPREP) {
+            printf(reinterpret<uint8?>("%d"), a)
+        } elif (_cond == OpCode.OP_EXTRAARG) {
+            printf(reinterpret<uint8?>("%d"), ax)
+        }
+        printf(reinterpret<uint8?>("\n"))
     }
 }
 
@@ -643,55 +630,37 @@ def private PrintHeader(var f : Proto?) {
 
 [c_function]
 def private PrintDebug(var f : Proto?) {
-    var i : int
     var n : int
     n = f.sizek
     printf(reinterpret<uint8?>("constants (%d) for %p:\n"), n, reinterpret<uint8?>(reinterpret<void?>(f)))
-    {
-        i = 0
-        while (i < n) {
-            printf(reinterpret<uint8?>("\t%d\t"), i)
-            PrintType(f, i)
-            PrintConstant(f, i)
-            printf(reinterpret<uint8?>("\n"))
-            i++
-        }
+    for (i in range(n)) {
+        printf(reinterpret<uint8?>("\t%d\t"), i)
+        PrintType(f, i)
+        PrintConstant(f, i)
+        printf(reinterpret<uint8?>("\n"))
     }
     n = f.sizelocvars
     printf(reinterpret<uint8?>("locals (%d) for %p:\n"), n, reinterpret<uint8?>(reinterpret<void?>(f)))
-    {
-        i = 0
-        while (i < n) {
-            printf(reinterpret<uint8?>("\t%d\t%s\t%d\t%d\n"), i, addr(deref(f.locvars + i).varname.contents[0]), deref(f.locvars + i).startpc + 1, deref(f.locvars + i).endpc + 1)
-            i++
-        }
+    for (i in range(n)) {
+        printf(reinterpret<uint8?>("\t%d\t%s\t%d\t%d\n"), i, addr(deref(f.locvars + i).varname.contents[0]), deref(f.locvars + i).startpc + 1, deref(f.locvars + i).endpc + 1)
     }
     n = f.sizeupvalues
     printf(reinterpret<uint8?>("upvalues (%d) for %p:\n"), n, reinterpret<uint8?>(reinterpret<void?>(f)))
-    {
-        i = 0
-        while (i < n) {
-            printf(reinterpret<uint8?>("\t%d\t%s\t%d\t%d\n"), i, deref(f.upvalues + i).name != null ? addr(deref(f.upvalues + i).name.contents[0]) : reinterpret<uint8?>("-"), int(deref(f.upvalues + i).instack), int(deref(f.upvalues + i).idx))
-            i++
-        }
+    for (i in range(n)) {
+        printf(reinterpret<uint8?>("\t%d\t%s\t%d\t%d\n"), i, deref(f.upvalues + i).name != null ? addr(deref(f.upvalues + i).name.contents[0]) : reinterpret<uint8?>("-"), int(deref(f.upvalues + i).instack), int(deref(f.upvalues + i).idx))
     }
 }
 
 [c_function]
 def private PrintFunction(var f : Proto?; full : int) {
-    var i : int
     var n : int = f.sizep
     PrintHeader(f)
     PrintCode(f)
     if (full != 0) {
         PrintDebug(f)
     }
-    {
-        i = 0
-        while (i < n) {
-            PrintFunction(deref(f.p + i), full)
-            i++
-        }
+    for (i in range(n)) {
+        PrintFunction(deref(f.p + i), full)
     }
 }
 

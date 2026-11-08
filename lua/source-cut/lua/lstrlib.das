@@ -309,7 +309,6 @@ def private str_byte(var L : lua_State?) : int {
     var posi : uint64 = posrelatI(pi, l)
     var pose : uint64 = getendpos(L, 3, pi, l)
     var n : int
-    var i : int
     // empty interval; return no values
     if (posi > pose) {
         return 0
@@ -320,12 +319,8 @@ def private str_byte(var L : lua_State?) : int {
     }
     n = int(pose - posi) + 1
     luaL_checkstack(L, n, reinterpret<uint8?>("string slice too long"))
-    {
-        i = 0
-        while (i < n) {
-            lua_pushinteger(L, int64(uint8(deref(s + (posi + uint64(i) - uint64(1))))))
-            i++
-        }
+    for (i in range(n)) {
+        lua_pushinteger(L, int64(uint8(deref(s + (posi + uint64(i) - uint64(1))))))
     }
     return n
 }
@@ -495,9 +490,7 @@ def private classend(var ms : MatchState?; var p : uint8?) : uint8? {
                 p = p + 1
             }
             // look for a ']'
-            var _first = true
-            while (_first || int(deref(p)) != ']') {
-                _first = false
+            while (true) {
                 if (intptr(p) == intptr(ms.p_end)) {
                     luaL_error`va(ms.L, reinterpret<uint8?>("malformed pattern (missing ']')"), VaNone())
                 }
@@ -506,6 +499,9 @@ def private classend(var ms : MatchState?; var p : uint8?) : uint8? {
                 if (int(deref(_t1)) == '%' && intptr(p) < intptr(ms.p_end)) {
                     // skip escapes (e.g. '%]')
                     p = p + 1
+                }
+                if (!(int(deref(p)) != ']')) {
+                    break
                 }
             }
             return p + 1
@@ -973,15 +969,10 @@ def private push_onecapture(var ms : MatchState?; i : int; var s : uint8?; var e
 
 [c_function]
 def private push_captures(var ms : MatchState?; var s : uint8?; var e : uint8?) : int {
-    var i : int
     var nlevels : int = int(ms.level) == 0 && s != null ? 1 : int(ms.level)
     luaL_checkstack(ms.L, nlevels, reinterpret<uint8?>("too many captures"))
-    {
-        i = 0
-        while (i < nlevels) {
-            push_onecapture(ms, i, s, e)
-            i++
-        }
+    for (i in range(nlevels)) {
+        push_onecapture(ms, i, s, e)
     }
     // number of strings pushed
     return nlevels
@@ -991,15 +982,16 @@ def private push_captures(var ms : MatchState?; var s : uint8?; var e : uint8?) 
 [c_function]
 def private nospecials(var p : uint8?; l : uint64) : int {
     var upto : uint64 = uint64(0)
-    var _first = true
-    while (_first || upto <= l) {
-        _first = false
+    while (true) {
         if (crt::strpbrk(p + upto, reinterpret<uint8?>("^$*+?.([%-")) != null) {
             // pattern has a special character
             return 0
         }
         // may have more after \0
         upto += crt::strlen(p + upto) + uint64(1)
+        if (!(upto <= l)) {
+            break
+        }
     }
     // no special chars found
     return 1
@@ -1050,16 +1042,7 @@ def private str_find_aux(var L : lua_State?; find : int) : int {
             lp--
         }
         prepstate(addr(ms), L, s, ls, p, lp)
-        var _first = true
         while (true) {
-            if (!_first) {
-                var _t0 = s1
-                s1 = s1 + 1
-                if (!(intptr(_t0) < intptr(ms.src_end) && !(anchor != 0))) {
-                    break
-                }
-            }
-            _first = false
             var res : uint8?
             reprepstate(addr(ms))
             res = _c_match(addr(ms), s1, p)
@@ -1073,6 +1056,11 @@ def private str_find_aux(var L : lua_State?; find : int) : int {
                 } else {
                     return push_captures(addr(ms), s1, res)
                 }
+            }
+            var _t0 = s1
+            s1 = s1 + 1
+            if (!(intptr(_t0) < intptr(ms.src_end) && !(anchor != 0))) {
+                break
             }
         }
     }
@@ -1681,12 +1669,13 @@ def private getnum(var fmt : uint8 ??; df : int) : int {
         return df
     } else {
         var a : int = 0
-        var _first = true
-        while (_first || digit(int(deref(deref(fmt)))) != 0 && a <= (int(uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int>)) ? ~uint64(0) : uint64(2147483647)) - 9) / 10) {
-            _first = false
+        while (true) {
             var _t0 = deref(fmt)
             deref(fmt) = deref(fmt) + 1
             a = a * 10 + (int(deref(_t0)) - '0')
+            if (!(digit(int(deref(deref(fmt)))) != 0 && a <= (int(uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int>)) ? ~uint64(0) : uint64(2147483647)) - 9) / 10)) {
+                break
+            }
         }
         return a
     }
@@ -1838,26 +1827,17 @@ def private getdetails(var h : Header?; totalsize : uint64; var fmt : uint8 ??; 
 [c_function]
 def private packint(var b : luaL_Buffer?; var n : uint64; islittle : int; size : int; neg : int) {
     var buff : uint8? = luaL_prepbuffsize(b, uint64(size))
-    var i : int
     // first byte
     deref(buff + (islittle != 0 ? 0 : size - 1)) = uint8(n & uint64(MC))
-    {
-        i = 1
-        while (i < size) {
-            n >>= 8ul
-            deref(buff + (islittle != 0 ? i : size - 1 - i)) = uint8(n & uint64(MC))
-            i++
-        }
+    for (i in range(1, size)) {
+        n >>= 8ul
+        deref(buff + (islittle != 0 ? i : size - 1 - i)) = uint8(n & uint64(MC))
     }
     // negative number need sign extension?
     if (neg != 0 && size > SZINT) {
         // correct extra bytes
-        {
-            i = SZINT
-            while (i < size) {
-                deref(buff + (islittle != 0 ? i : size - 1 - i)) = uint8(MC)
-                i++
-            }
+        for (i in range(SZINT, size)) {
+            deref(buff + (islittle != 0 ? i : size - 1 - i)) = uint8(MC)
         }
     }
     // add result to buffer
@@ -2109,13 +2089,9 @@ def private unpackint(var L : lua_State?; var str : uint8?; islittle : int; size
     } elif (size > SZINT) {
         // must check unread bytes
         var mask : int = !(issigned != 0) || int64(res) >= int64(0) ? 0 : MC
-        {
-            i = limit
-            while (i < size) {
-                if (int(uint8(deref(str + (islittle != 0 ? i : size - 1 - i)))) != mask) {
-                    luaL_error`va(L, reinterpret<uint8?>("%d-byte integer does not fit into Lua Integer"), (size,))
-                }
-                i++
+        for (i1 in range(limit, size)) {
+            if (int(uint8(deref(str + (islittle != 0 ? i1 : size - 1 - i1)))) != mask) {
+                luaL_error`va(L, reinterpret<uint8?>("%d-byte integer does not fit into Lua Integer"), (size,))
             }
         }
     }

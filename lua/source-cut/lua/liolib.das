@@ -396,10 +396,11 @@ def private read_number(var L : lua_State?; var f : _IO_FILE?) : int {
     // always accept a dot
     decp[1] = uint8('.')
     // skip spaces
-    var _first = true
-    while (_first || crt::isspace(rn.c) != 0) {
-        _first = false
+    while (true) {
         rn.c = crt::getc(reinterpret<void?>(rn.f))
+        if (!(crt::isspace(rn.c) != 0)) {
+            break
+        }
     }
     // optional sign
     test2(addr(rn), reinterpret<uint8?>("-+"))
@@ -457,9 +458,7 @@ def private read_line(var L : lua_State?; var f : _IO_FILE?; chop : int) : int {
     var c : int
     luaL_buffinit(L, addr(b))
     // may need to read several chunks to get whole line
-    var _first = true
-    while (_first || c != -1 && c != '\n') {
-        _first = false
+    while (true) {
         // preallocate buffer space
         var buff : uint8? = luaL_prepbuffsize(addr(b), uint64(int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>)))))
         var i : int = 0
@@ -479,6 +478,9 @@ def private read_line(var L : lua_State?; var f : _IO_FILE?; chop : int) : int {
             deref(buff + _t1) = uint8(c)
         }
         addr(b).n += uint64(i)
+        if (!(c != -1 && c != '\n')) {
+            break
+        }
     }
     // repeat until end of line
     // want a newline and have one?
@@ -501,12 +503,13 @@ def private read_all(var L : lua_State?; var f : _IO_FILE?) {
     var b : luaL_Buffer
     luaL_buffinit(L, addr(b))
     // read file in chunks of LUAL_BUFFERSIZE bytes
-    var _first = true
-    while (_first || nr == uint64(LUAL_BUFFERSIZE)) {
-        _first = false
+    while (true) {
         var p : uint8? = luaL_prepbuffsize(addr(b), uint64(int(uint64(16) * uint64(typeinfo sizeof(type<void?>)) * uint64(typeinfo sizeof(type<double>)))))
         nr = crt::fread(reinterpret<void?>(p), uint64(typeinfo sizeof(type<uint8>)), uint64(LUAL_BUFFERSIZE), reinterpret<void?>(f))
         addr(b).n += nr
+        if (!(nr == uint64(LUAL_BUFFERSIZE))) {
+            break
+        }
     }
     // close buffer
     luaL_pushresult(addr(b))

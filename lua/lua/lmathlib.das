@@ -383,19 +383,14 @@ def private math_random(var L : lua_State?) : int {
 
 [c_function]
 def private setseed(var L : lua_State?; var state : uint64?; n1 : uint64; n2 : uint64) {
-    var i : int
     deref(state + 0) = uint64(n1)
     // avoid a zero state
     deref(state + 1) = uint64(255)
     deref(state + 2) = uint64(n2)
     deref(state + 3) = uint64(0)
-    {
-        i = 0
-        while (i < 16) {
-            // discard initial values to "spread" seed
-            nextrand(state)
-            i++
-        }
+    for (i in range(16)) {
+        // discard initial values to "spread" seed
+        nextrand(state)
     }
     lua_pushinteger(L, int64(n1))
     lua_pushinteger(L, int64(n2))

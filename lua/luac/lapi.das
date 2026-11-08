@@ -114,24 +114,19 @@ def lua_checkstack(var L : lua_State?; n : int) : int {
 
 [c_function]
 def lua_xmove(var from : lua_State?; var to : lua_State?; n : int) {
-    var i : int
     if (intptr(from) == intptr(to)) {
         return
     }
     from.top.p = from.top.p - n
-    {
-        i = 0
-        while (i < n) {
-            {
-                var io1 : TValue? = addr(to.top.p.val)
-                var io2 : TValue? = addr((from.top.p + i).val)
-                io1.value_ = io2.value_
-                io1.tt_ = io2.tt_
-            }
-            // stack already checked by previous 'api_check'
-            to.top.p = to.top.p + 1
-            i++
+    for (i in range(n)) {
+        {
+            var io1 : TValue? = addr(to.top.p.val)
+            var io2 : TValue? = addr((from.top.p + i).val)
+            io1.value_ = io2.value_
+            io1.tt_ = io2.tt_
         }
+        // stack already checked by previous 'api_check'
+        to.top.p = to.top.p + 1
     }
 }
 

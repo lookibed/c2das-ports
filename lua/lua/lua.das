@@ -3,8 +3,10 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+options jit_split_modules = 0
 require c_runtime/c_args
 require c_runtime/c_function
+require c_runtime/c_jit_build
 require c_runtime/c_signal
 require c_runtime/printf
 require c_runtime/variadic
@@ -170,18 +172,13 @@ def private print_version {
 // table sizes are zero.)
 [c_function]
 def private createargtable(var L : lua_State?; var argv : uint8 ??; argc : int; script : int) {
-    var i : int
     var narg : int
     // number of positive indices
     narg = argc - (script + 1)
     lua_createtable(L, narg, script + 1)
-    {
-        i = 0
-        while (i < argc) {
-            lua_pushstring(L, deref(argv + i))
-            lua_rawseti(L, -2, int64(i - script))
-            i++
-        }
+    for (i in range(argc)) {
+        lua_pushstring(L, deref(argv + i))
+        lua_rawseti(L, -2, int64(i - script))
     }
     lua_setglobal(L, reinterpret<uint8?>("arg"))
 }

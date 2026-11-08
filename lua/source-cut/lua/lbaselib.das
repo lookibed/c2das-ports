@@ -73,12 +73,8 @@ def private luaB_warn(var L : lua_State?) : int {
         }
     }
     // compose warning
-    {
-        i = 1
-        while (i < n) {
-            lua_warning(L, lua_tolstring(L, i, null), 1)
-            i++
-        }
+    for (i1 in range(1, n)) {
+        lua_warning(L, lua_tolstring(L, i1, null), 1)
     }
     // close warning
     lua_warning(L, lua_tolstring(L, n, null), 0)
@@ -102,9 +98,7 @@ def private b_str2int(var s : uint8?; base : int; var pn : int64?) : uint8? {
     if (!(crt::isalnum(int(uint8(deref(s)))) != 0)) {
         return null
     }
-    var _first = true
-    while (_first || crt::isalnum(int(uint8(deref(s)))) != 0) {
-        _first = false
+    while (true) {
         var digit : int = crt::isdigit(int(uint8(deref(s)))) != 0 ? int(deref(s)) - '0' : crt::toupper(int(uint8(deref(s)))) - 'A' + 10
         // invalid numeral
         if (digit >= base) {
@@ -112,6 +106,9 @@ def private b_str2int(var s : uint8?; base : int; var pn : int64?) : uint8? {
         }
         n = n * uint64(base) + uint64(digit)
         s = s + 1
+        if (!(crt::isalnum(int(uint8(deref(s)))) != 0)) {
+            break
+        }
     }
     // skip trailing spaces
     s = s + crt::strspn(s, reinterpret<uint8?>(" \x0c\n\r\t\x0b"))

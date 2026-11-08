@@ -298,60 +298,55 @@ def private floatforloop(var ra : StackValue?) : int {
 [c_function]
 def luaV_finishget(var L : lua_State?; var t : TValue?; var key : TValue?; var val : StackValue?; var slot : TValue?) {
     // counter to avoid infinite loops
-    var loop : int
     // metamethod
     var tm : TValue?
-    {
-        loop = 0
-        while (loop < MAXTAGLOOP) {
-            // 't' is not a table?
-            if (slot == null) {
-                tm = luaT_gettmbyobj(L, t, TMS.TM_INDEX)
-                if ((int(tm.tt_) & 15) == 0) {
-                    // no metamethod
-                    luaG_typeerror(L, t, reinterpret<uint8?>("index"))
-                }
-            } else {
-                // else will try the metamethod
-                // 't' is a table
-                // table's metamethod
-                tm = addr(reinterpret<GCUnion?>(t.value_.gc).h).metatable == null ? default<TValue?> : ((uint(addr(reinterpret<GCUnion?>(t.value_.gc).h).metatable.flags) & 1u << uint(int(TMS.TM_INDEX))) != 0 ? default<TValue?> : luaT_gettm(addr(reinterpret<GCUnion?>(t.value_.gc).h).metatable, TMS.TM_INDEX, L.l_G.tmname[int(TMS.TM_INDEX)]))
-                // no metamethod?
-                if (tm == null) {
-                    // result is nil
-                    addr(val.val).tt_ = uint8(0 | 0 << 4)
-                    return
-                }
+    for (loop in range(MAXTAGLOOP)) {
+        // 't' is not a table?
+        if (slot == null) {
+            tm = luaT_gettmbyobj(L, t, TMS.TM_INDEX)
+            if ((int(tm.tt_) & 15) == 0) {
+                // no metamethod
+                luaG_typeerror(L, t, reinterpret<uint8?>("index"))
             }
+        } else {
             // else will try the metamethod
-            // is metamethod a function?
-            if ((int(tm.tt_) & 15) == 6) {
-                // call it
-                luaT_callTMres(L, tm, t, key, val)
+            // 't' is a table
+            // table's metamethod
+            tm = addr(reinterpret<GCUnion?>(t.value_.gc).h).metatable == null ? default<TValue?> : ((uint(addr(reinterpret<GCUnion?>(t.value_.gc).h).metatable.flags) & 1u << uint(int(TMS.TM_INDEX))) != 0 ? default<TValue?> : luaT_gettm(addr(reinterpret<GCUnion?>(t.value_.gc).h).metatable, TMS.TM_INDEX, L.l_G.tmname[int(TMS.TM_INDEX)]))
+            // no metamethod?
+            if (tm == null) {
+                // result is nil
+                addr(val.val).tt_ = uint8(0 | 0 << 4)
                 return
             }
-            // else try to access 'tm[key]'
-            t = tm
-            // fast track?
-            var _t0 : int
-            if (!(int(t.tt_) == (5 | 0 << 4 | 1 << 6))) {
-                slot = null
-                _t0 = 0
-            } else {
-                slot = luaH_get(addr(reinterpret<GCUnion?>(t.value_.gc).h), key)
-                _t0 = !((int(slot.tt_) & 15) == 0) ? 1 : 0
+        }
+        // else will try the metamethod
+        // is metamethod a function?
+        if ((int(tm.tt_) & 15) == 6) {
+            // call it
+            luaT_callTMres(L, tm, t, key, val)
+            return
+        }
+        // else try to access 'tm[key]'
+        t = tm
+        // fast track?
+        var _t0 : int
+        if (!(int(t.tt_) == (5 | 0 << 4 | 1 << 6))) {
+            slot = null
+            _t0 = 0
+        } else {
+            slot = luaH_get(addr(reinterpret<GCUnion?>(t.value_.gc).h), key)
+            _t0 = !((int(slot.tt_) & 15) == 0) ? 1 : 0
+        }
+        if (_t0 != 0) {
+            {
+                // done
+                var io1 : TValue? = addr(val.val)
+                var io2 : TValue? = slot
+                io1.value_ = io2.value_
+                io1.tt_ = io2.tt_
             }
-            if (_t0 != 0) {
-                {
-                    // done
-                    var io1 : TValue? = addr(val.val)
-                    var io2 : TValue? = slot
-                    io1.value_ = io2.value_
-                    io1.tt_ = io2.tt_
-                }
-                return
-            }
-            loop++
+            return
         }
     }
     // else repeat (tail call 'luaV_finishget')
@@ -366,82 +361,77 @@ def luaV_finishget(var L : lua_State?; var t : TValue?; var key : TValue?; var v
 [c_function]
 def luaV_finishset(var L : lua_State?; var t : TValue?; var key : TValue?; var val : TValue?; var slot : TValue?) {
     // counter to avoid infinite loops
-    var loop : int
-    {
-        loop = 0
-        while (loop < MAXTAGLOOP) {
-            // '__newindex' metamethod
-            var tm : TValue?
-            // is 't' a table?
-            if (slot != null) {
-                // save 't' table
-                var h : Table? = addr(reinterpret<GCUnion?>(t.value_.gc).h)
-                // slot must be empty
-                // get metamethod
-                tm = h.metatable == null ? default<TValue?> : ((uint(h.metatable.flags) & 1u << uint(int(TMS.TM_NEWINDEX))) != 0 ? default<TValue?> : luaT_gettm(h.metatable, TMS.TM_NEWINDEX, L.l_G.tmname[int(TMS.TM_NEWINDEX)]))
-                // no metamethod?
-                if (tm == null) {
-                    {
-                        // anchor 't'
-                        var io : TValue? = addr(L.top.p.val)
-                        var x_ : Table? = h
-                        io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-                        io.tt_ = uint8(5 | 0 << 4 | 1 << 6)
-                    }
-                    // assume EXTRA_STACK
-                    L.top.p = L.top.p + 1
-                    // set new value
-                    luaH_finishset(L, h, key, slot, val)
-                    L.top.p = L.top.p - 1
-                    h.flags = uint8(uint(h.flags) & ~~(~0u << uint(int(TMS.TM_EQ) + 1)))
-                    if ((int(val.tt_) & 1 << 6) != 0) {
-                        if ((int(addr(reinterpret<GCUnion?>(h).gc).marked) & 1 << 5) != 0 && (int(val.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                            luaC_barrierback_(L, addr(reinterpret<GCUnion?>(h).gc))
-                        }
-                    }
-                    return
-                }
-            } else {
-                // else will try the metamethod
-                // not a table; check metamethod
-                tm = luaT_gettmbyobj(L, t, TMS.TM_NEWINDEX)
-                if ((int(tm.tt_) & 15) == 0) {
-                    luaG_typeerror(L, t, reinterpret<uint8?>("index"))
-                }
-            }
-            // try the metamethod
-            if ((int(tm.tt_) & 15) == 6) {
-                luaT_callTM(L, tm, t, key, val)
-                return
-            }
-            // else repeat assignment over 'tm'
-            t = tm
-            var _t0 : int
-            if (!(int(t.tt_) == (5 | 0 << 4 | 1 << 6))) {
-                slot = null
-                _t0 = 0
-            } else {
-                slot = luaH_get(addr(reinterpret<GCUnion?>(t.value_.gc).h), key)
-                _t0 = !((int(slot.tt_) & 15) == 0) ? 1 : 0
-            }
-            if (_t0 != 0) {
+    for (loop in range(MAXTAGLOOP)) {
+        // '__newindex' metamethod
+        var tm : TValue?
+        // is 't' a table?
+        if (slot != null) {
+            // save 't' table
+            var h : Table? = addr(reinterpret<GCUnion?>(t.value_.gc).h)
+            // slot must be empty
+            // get metamethod
+            tm = h.metatable == null ? default<TValue?> : ((uint(h.metatable.flags) & 1u << uint(int(TMS.TM_NEWINDEX))) != 0 ? default<TValue?> : luaT_gettm(h.metatable, TMS.TM_NEWINDEX, L.l_G.tmname[int(TMS.TM_NEWINDEX)]))
+            // no metamethod?
+            if (tm == null) {
                 {
-                    {
-                        var io1 : TValue? = slot
-                        var io2 : TValue? = val
-                        io1.value_ = io2.value_
-                        io1.tt_ = io2.tt_
-                    }
-                    if ((int(val.tt_) & 1 << 6) != 0) {
-                        if ((int(t.value_.gc.marked) & 1 << 5) != 0 && (int(val.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                            luaC_barrierback_(L, t.value_.gc)
-                        }
+                    // anchor 't'
+                    var io : TValue? = addr(L.top.p.val)
+                    var x_ : Table? = h
+                    io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
+                    io.tt_ = uint8(5 | 0 << 4 | 1 << 6)
+                }
+                // assume EXTRA_STACK
+                L.top.p = L.top.p + 1
+                // set new value
+                luaH_finishset(L, h, key, slot, val)
+                L.top.p = L.top.p - 1
+                h.flags = uint8(uint(h.flags) & ~~(~0u << uint(int(TMS.TM_EQ) + 1)))
+                if ((int(val.tt_) & 1 << 6) != 0) {
+                    if ((int(addr(reinterpret<GCUnion?>(h).gc).marked) & 1 << 5) != 0 && (int(val.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+                        luaC_barrierback_(L, addr(reinterpret<GCUnion?>(h).gc))
                     }
                 }
-                // done
                 return
             }
-            loop++
+        } else {
+            // else will try the metamethod
+            // not a table; check metamethod
+            tm = luaT_gettmbyobj(L, t, TMS.TM_NEWINDEX)
+            if ((int(tm.tt_) & 15) == 0) {
+                luaG_typeerror(L, t, reinterpret<uint8?>("index"))
+            }
+        }
+        // try the metamethod
+        if ((int(tm.tt_) & 15) == 6) {
+            luaT_callTM(L, tm, t, key, val)
+            return
+        }
+        // else repeat assignment over 'tm'
+        t = tm
+        var _t0 : int
+        if (!(int(t.tt_) == (5 | 0 << 4 | 1 << 6))) {
+            slot = null
+            _t0 = 0
+        } else {
+            slot = luaH_get(addr(reinterpret<GCUnion?>(t.value_.gc).h), key)
+            _t0 = !((int(slot.tt_) & 15) == 0) ? 1 : 0
+        }
+        if (_t0 != 0) {
+            {
+                {
+                    var io1 : TValue? = slot
+                    var io2 : TValue? = val
+                    io1.value_ = io2.value_
+                    io1.tt_ = io2.tt_
+                }
+                if ((int(val.tt_) & 1 << 6) != 0) {
+                    if ((int(t.value_.gc.marked) & 1 << 5) != 0 && (int(val.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+                        luaC_barrierback_(L, t.value_.gc)
+                    }
+                }
+            }
+            // done
+            return
         }
     }
     // else 'return luaV_finishset(L, t, key, val, slot)' (loop)
@@ -765,20 +755,16 @@ def luaV_equalobj(var L : lua_State?; var t1 : TValue?; var t2 : TValue?) : int 
 def private copy2buff(var top : StackValue?; var n : int; var buff : uint8?) {
     // size already copied
     var tl : uint64 = uint64(0)
-    var _first = true
     while (true) {
-        if (!_first) {
-            n--
-            if (!(n > 0)) {
-                break
-            }
-        }
-        _first = false
         var st : TString? = addr(reinterpret<GCUnion?>(addr((top - n).val).value_.gc).ts)
         // length of string being copied
         var l : uint64 = int(st.shrlen) != 255 ? uint64(st.shrlen) : st.u.lnglen
         crt::memcpy(reinterpret<void?>(buff + tl), reinterpret<void?>(addr(st.contents[0])), l * uint64(typeinfo sizeof(type<uint8>)))
         tl += l
+        n--
+        if (!(n > 0)) {
+            break
+        }
     }
 }
 
@@ -790,9 +776,7 @@ def luaV_concat(var L : lua_State?; var total : int) {
         // "all" values already concatenated
         return
     }
-    var _first = true
-    while (_first || total > 1) {
-        _first = false
+    while (true) {
         var top : StackValue? = L.top.p
         // number of elements handled in this pass (at least 2)
         var n : int = 2
@@ -891,6 +875,9 @@ def luaV_concat(var L : lua_State?; var total : int) {
         total -= n - 1
         // popped 'n' strings and pushed one
         L.top.p = L.top.p - (n - 1)
+        if (!(total > 1)) {
+            break
+        }
     }
 }
 
@@ -1039,7 +1026,6 @@ def luaV_shiftl(x : int64; y : int64) : int64 {
 def private pushclosure(var L : lua_State?; var p : Proto?; var encup : UpVal ??; var base : StackValue?; var ra : StackValue?) {
     var nup : int = p.sizeupvalues
     var uv : Upvaldesc? = p.upvalues
-    var i : int
     var ncl : LClosure? = luaF_newLclosure(L, nup)
     ncl.p = p
     {
@@ -1050,20 +1036,16 @@ def private pushclosure(var L : lua_State?; var p : Proto?; var encup : UpVal ??
         io.tt_ = uint8(6 | 0 << 4 | 1 << 6)
     }
     // fill in its upvalues
-    {
-        i = 0
-        while (i < nup) {
-            // upvalue refers to local variable?
-            if (deref(uv + i).instack != 0) {
-                deref(addr(ncl.upvals[0]) + i) = luaF_findupval(L, base + int(deref(uv + i).idx))
-            } else {
-                // get upvalue from enclosing function
-                deref(addr(ncl.upvals[0]) + i) = deref(encup + int(deref(uv + i).idx))
-            }
-            if ((int(ncl.marked) & 1 << 5) != 0 && (int(deref(addr(ncl.upvals[0]) + i).marked) & (1 << 3 | 1 << 4)) != 0) {
-                luaC_barrier_(L, addr(reinterpret<GCUnion?>(ncl).gc), addr(reinterpret<GCUnion?>(deref(addr(ncl.upvals[0]) + i)).gc))
-            }
-            i++
+    for (i in range(nup)) {
+        // upvalue refers to local variable?
+        if (deref(uv + i).instack != 0) {
+            deref(addr(ncl.upvals[0]) + i) = luaF_findupval(L, base + int(deref(uv + i).idx))
+        } else {
+            // get upvalue from enclosing function
+            deref(addr(ncl.upvals[0]) + i) = deref(encup + int(deref(uv + i).idx))
+        }
+        if ((int(ncl.marked) & 1 << 5) != 0 && (int(deref(addr(ncl.upvals[0]) + i).marked) & (1 << 3 | 1 << 4)) != 0) {
+            luaC_barrier_(L, addr(reinterpret<GCUnion?>(ncl).gc), addr(reinterpret<GCUnion?>(deref(addr(ncl.upvals[0]) + i)).gc))
         }
     }
 }
@@ -1287,19 +1269,15 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                     {
                         var ra : StackValue? = base + int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
                         var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
-                        var _first = true
                         while (true) {
-                            if (!_first) {
-                                let _t1 = b
-                                b--
-                                if (!(_t1 != 0)) {
-                                    break
-                                }
-                            }
-                            _first = false
-                            var _t2 = ra
+                            var _t1 = ra
                             ra = ra + 1
-                            addr(_t2.val).tt_ = uint8(0 | 0 << 4)
+                            addr(_t1.val).tt_ = uint8(0 | 0 << 4)
+                            let _t2 = b
+                            b--
+                            if (!(_t2 != 0)) {
+                                break
+                            }
                         }
                         break
                     }

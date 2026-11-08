@@ -174,7 +174,7 @@ include ltable.das.inc
 include ltm.das.inc
 include lundump.das.inc
 include lvm.das.inc
-// the fragments' digest: 0xba51212bb2845d2d
+// the fragments' digest: 0x6b508753d880e0a0
 
 [init]
 def private c2das_layout_check {

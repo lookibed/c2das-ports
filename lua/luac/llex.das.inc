@@ -20,21 +20,16 @@ def private save(var ls : LexState?; c : int) {
 
 [c_function]
 def luaX_init(var L : lua_State?) {
-    var i : int
     // create env name
     var e : TString? = luaS_newlstr(L, reinterpret<uint8?>("_ENV"), uint64(typeinfo sizeof(type<uint8[5]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
     // never collect this name
     luaC_fix(L, addr(reinterpret<GCUnion?>(e).gc))
-    {
-        i = 0
-        while (i < NUM_RESERVED) {
-            var ts : TString? = luaS_new(L, luaX_tokens[i])
-            // reserved words are never collected
-            luaC_fix(L, addr(reinterpret<GCUnion?>(ts).gc))
-            // reserved word
-            ts.extra = uint8(i + 1)
-            i++
-        }
+    for (i in range(NUM_RESERVED)) {
+        var ts : TString? = luaS_new(L, luaX_tokens[i])
+        // reserved words are never collected
+        luaC_fix(L, addr(reinterpret<GCUnion?>(ts).gc))
+        // reserved word
+        ts.extra = uint8(i + 1)
     }
 }
 
@@ -1088,9 +1083,7 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                         // identifier or reserved word?
                         if ((int(luai_ctype_[ls.current + 1]) & 1 << 0) != 0) {
                             var ts : TString?
-                            var _first = true
-                            while (_first || (int(luai_ctype_[ls.current + 1]) & (1 << 0 | 1 << 1)) != 0) {
-                                _first = false
+                            while (true) {
                                 save(ls, ls.current)
                                 let _t33 = ls.z.n
                                 ls.z.n--
@@ -1103,6 +1096,9 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                                     _t35 = luaZ_fill(ls.z)
                                 }
                                 ls.current = _t35
+                                if (!((int(luai_ctype_[ls.current + 1]) & (1 << 0 | 1 << 1)) != 0)) {
+                                    break
+                                }
                             }
                             ts = luaX_newstring(ls, ls.buff.buffer, ls.buff.n)
                             seminfo.ts = ts

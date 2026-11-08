@@ -792,10 +792,11 @@ def private skipcomment(var f : _IO_FILE?; var cp : int?) : int {
     // first line is a comment (Unix exec. file)?
     if (c == '#') {
         // skip first line
-        var _first = true
-        while (_first || c != -1 && c != '\n') {
-            _first = false
+        while (true) {
             c = crt::getc(reinterpret<void?>(f))
+            if (!(c != -1 && c != '\n')) {
+                break
+            }
         }
         // next character after comment, if present
         deref(cp) = crt::getc(reinterpret<void?>(f))
@@ -999,14 +1000,9 @@ def luaL_setfuncs(var L : lua_State?; var l : luaL_Reg?; nup : int) {
             if (l.func == null) {
                 lua_pushboolean(L, 0)
             } else {
-                var i : int
                 // copy upvalues to the top
-                {
-                    i = 0
-                    while (i < nup) {
-                        lua_pushvalue(L, -nup)
-                        i++
-                    }
+                for (i in range(nup)) {
+                    lua_pushvalue(L, -nup)
                 }
                 // closure with those upvalues
                 lua_pushcclosure(L, l.func, nup)

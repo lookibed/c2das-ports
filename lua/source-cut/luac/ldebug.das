@@ -501,7 +501,6 @@ def private filterpc(pc : int; jmptarget : int) : int {
 // Try to find last instruction before 'lastpc' that modified register 'reg'.
 [c_function]
 def private findsetreg(var p : Proto?; var lastpc : int; reg : int) : int {
-    var pc : int
     // keep last instruction that changed 'reg'
     var setreg : int = -1
     // any code before this address is conditional
@@ -510,51 +509,47 @@ def private findsetreg(var p : Proto?; var lastpc : int; reg : int) : int {
         // previous instruction was not actually executed
         lastpc--
     }
-    {
-        pc = 0
-        while (pc < lastpc) {
-            var i : uint = deref(p.code + pc)
-            var op : OpCode = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
-            var a : int = int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
-            // true if current instruction changed 'reg'
-            var change : int
-            let _cond = op
-            if (_cond == OpCode.OP_LOADNIL) {
-                {
-                    // set registers from 'a' to 'a+b'
-                    var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
-                    change = a <= reg && reg <= a + b ? 1 : 0
-                }
-            } elif (_cond == OpCode.OP_TFORCALL) {
-                {
-                    // affect all regs above its base
-                    change = reg >= a + 2 ? 1 : 0
-                }
-            } elif (_cond == OpCode.OP_CALL || _cond == OpCode.OP_TAILCALL) {
-                {
-                    // affect all registers above base
-                    change = reg >= a ? 1 : 0
-                }
-            } elif (_cond == OpCode.OP_JMP) {
-                {
-                    // doesn't change registers, but changes 'jmptarget'
-                    var b : int = int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1)
-                    var dest : int = pc + 1 + b
-                    // jump does not skip 'lastpc' and is larger than current one?
-                    if (dest <= lastpc && dest > jmptarget) {
-                        // update 'jmptarget'
-                        jmptarget = dest
-                    }
-                    change = 0
-                }
-            } else {
-                // any instruction that sets A
-                change = (int(luaP_opmodes[int(op)]) & 1 << 3) != 0 && reg == a ? 1 : 0
+    for (pc in range(lastpc)) {
+        var i : uint = deref(p.code + pc)
+        var op : OpCode = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
+        var a : int = int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+        // true if current instruction changed 'reg'
+        var change : int
+        let _cond = op
+        if (_cond == OpCode.OP_LOADNIL) {
+            {
+                // set registers from 'a' to 'a+b'
+                var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
+                change = a <= reg && reg <= a + b ? 1 : 0
             }
-            if (change != 0) {
-                setreg = filterpc(pc, jmptarget)
+        } elif (_cond == OpCode.OP_TFORCALL) {
+            {
+                // affect all regs above its base
+                change = reg >= a + 2 ? 1 : 0
             }
-            pc++
+        } elif (_cond == OpCode.OP_CALL || _cond == OpCode.OP_TAILCALL) {
+            {
+                // affect all registers above base
+                change = reg >= a ? 1 : 0
+            }
+        } elif (_cond == OpCode.OP_JMP) {
+            {
+                // doesn't change registers, but changes 'jmptarget'
+                var b : int = int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1)
+                var dest : int = pc + 1 + b
+                // jump does not skip 'lastpc' and is larger than current one?
+                if (dest <= lastpc && dest > jmptarget) {
+                    // update 'jmptarget'
+                    jmptarget = dest
+                }
+                change = 0
+            }
+        } else {
+            // any instruction that sets A
+            change = (int(luaP_opmodes[int(op)]) & 1 << 3) != 0 && reg == a ? 1 : 0
+        }
+        if (change != 0) {
+            setreg = filterpc(pc, jmptarget)
         }
     }
     return setreg

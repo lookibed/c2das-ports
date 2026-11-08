@@ -51,33 +51,24 @@ def luaS_hashlongstr(var ts : TString?) : uint {
 
 [c_function]
 def private tablerehash(var vect : TString ??; osize : int; nsize : int) {
-    var i : int
     // clear new elements
-    {
-        i = osize
-        while (i < nsize) {
-            deref(vect + i) = null
-            i++
-        }
+    for (i in range(osize, nsize)) {
+        deref(vect + i) = null
     }
     // rehash old part of the array
-    {
-        i = 0
-        while (i < osize) {
-            var p : TString? = deref(vect + i)
-            deref(vect + i) = null
-            // for each string in the list
-            while (p != null) {
-                // save next
-                var hnext : TString? = p.u.hnext
-                // new position
-                var h : uint = uint(int(p.hash & uint(nsize - 1)))
-                // chain it into array
-                p.u.hnext = deref(vect + h)
-                deref(vect + h) = p
-                p = hnext
-            }
-            i++
+    for (i in range(osize)) {
+        var p : TString? = deref(vect + i)
+        deref(vect + i) = null
+        // for each string in the list
+        while (p != null) {
+            // save next
+            var hnext : TString? = p.u.hnext
+            // new position
+            var h : uint = uint(int(p.hash & uint(nsize - 1)))
+            // chain it into array
+            p.u.hnext = deref(vect + h)
+            deref(vect + h) = p
+            p = hnext
         }
     }
 }
@@ -118,23 +109,13 @@ def luaS_resize(var L : lua_State?; nsize : int) {
 // Clear API string cache. (Entries cannot be empty, so fill them with
 // a non-collectable string.)
 def luaS_clearcache(var g : global_State?) {
-    var i : int
-    var j : int
-    {
-        i = 0
-        while (i < STRCACHE_N) {
-            {
-                j = 0
-                while (j < STRCACHE_M) {
-                    // will entry be collected?
-                    if ((int(g.strcache[i][j].marked) & (1 << 3 | 1 << 4)) != 0) {
-                        // replace it with something fixed
-                        g.strcache[i][j] = g.memerrmsg
-                    }
-                    j++
-                }
+    for (i in range(STRCACHE_N)) {
+        for (j in range(STRCACHE_M)) {
+            // will entry be collected?
+            if ((int(g.strcache[i][j].marked) & (1 << 3 | 1 << 4)) != 0) {
+                // replace it with something fixed
+                g.strcache[i][j] = g.memerrmsg
             }
-            i++
         }
     }
 }
@@ -143,8 +124,6 @@ def luaS_clearcache(var g : global_State?) {
 [c_function]
 def luaS_init(var L : lua_State?) {
     var g : global_State? = L.l_G
-    var i : int
-    var j : int
     var tb : stringtable? = addr(L.l_G.strt)
     tb.hash = reinterpret<TString ??>(luaM_malloc_(L, uint64(128) * uint64(typeinfo sizeof(type<TString?>)), 0))
     // clear array
@@ -155,17 +134,9 @@ def luaS_init(var L : lua_State?) {
     // it should never be collected
     luaC_fix(L, addr(reinterpret<GCUnion?>(g.memerrmsg).gc))
     // fill cache with valid strings
-    {
-        i = 0
-        while (i < STRCACHE_N) {
-            {
-                j = 0
-                while (j < STRCACHE_M) {
-                    g.strcache[i][j] = g.memerrmsg
-                    j++
-                }
-            }
-            i++
+    for (i in range(STRCACHE_N)) {
+        for (j in range(STRCACHE_M)) {
+            g.strcache[i][j] = g.memerrmsg
         }
     }
 }
@@ -292,15 +263,11 @@ def luaS_new(var L : lua_State?; var str : uint8?) : TString? {
     var i : uint = uint(uint64(intptr(str)) & uint64(uint(2147483647) * 2u + 1u)) % uint(STRCACHE_N)
     var j : int
     var p : TString ?? = addr(L.l_G.strcache[i][0])
-    {
-        j = 0
-        while (j < STRCACHE_M) {
-            // hit?
-            if (crt::strcmp(str, addr(deref(p + j).contents[0])) == 0) {
-                // that is it
-                return deref(p + j)
-            }
-            j++
+    for (j1 in range(STRCACHE_M)) {
+        // hit?
+        if (crt::strcmp(str, addr(deref(p + j1).contents[0])) == 0) {
+            // that is it
+            return deref(p + j1)
         }
     }
     // normal route
@@ -320,7 +287,6 @@ def luaS_new(var L : lua_State?; var str : uint8?) : TString? {
 [c_function]
 def luaS_newudata(var L : lua_State?; s : uint64; nuvalue : int) : Udata? {
     var u : Udata?
-    var i : int
     var o : GCObject?
     if (s > (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? ~uint64(0) : uint64(9223372036854775807l)) - (nuvalue == 0 ? uint64(typeinfo offsetof < bindata > (type<Udata0>)) : uint64(typeinfo offsetof < uv > (type<Udata>)) + uint64(typeinfo sizeof(type<UValue>)) * uint64(nuvalue))) {
         luaM_toobig(L)
@@ -330,12 +296,8 @@ def luaS_newudata(var L : lua_State?; s : uint64; nuvalue : int) : Udata? {
     u.len = s
     u.nuvalue = uint16(nuvalue)
     u.metatable = null
-    {
-        i = 0
-        while (i < nuvalue) {
-            addr(deref(addr(u.uv[0]) + i).uv).tt_ = uint8(0 | 0 << 4)
-            i++
-        }
+    for (i in range(nuvalue)) {
+        addr(deref(addr(u.uv[0]) + i).uv).tt_ = uint8(0 | 0 << 4)
     }
     return u
 }

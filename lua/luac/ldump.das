@@ -45,13 +45,14 @@ def private dumpByte(var D : DumpState?; y : int) {
 def private dumpSize(var D : DumpState?; var x : uint64) {
     var buff : uint8[10]
     var n : int = 0
-    var _first = true
-    while (_first || x != uint64(0)) {
-        _first = false
+    while (true) {
         // fill buffer in reverse order
         n++
         buff[DIBS - uint64(n)] = uint8(x & uint64(127))
         x >>= 7ul
+        if (!(x != uint64(0))) {
+            break
+        }
     }
     // mark last byte
     buff[DIBS - uint64(1)] = uint8(int(buff[DIBS - uint64(1)]) | 128)
@@ -92,95 +93,67 @@ def private dumpCode(var D : DumpState?; var f : Proto?) {
 
 [c_function]
 def private dumpConstants(var D : DumpState?; var f : Proto?) {
-    var i : int
     var n : int = f.sizek
     dumpInt(D, n)
-    {
-        i = 0
-        while (i < n) {
-            var o : TValue? = addr(deref(f.k + i))
-            var tt : int = int(o.tt_) & 63
-            dumpByte(D, tt)
-            let _cond = tt
-            if (_cond == 19) {
-                dumpNumber(D, o.value_.n)
-            } elif (_cond == 3) {
-                dumpInteger(D, o.value_.i)
-            } elif (_cond == 4 || _cond == 20) {
-                dumpString(D, addr(reinterpret<GCUnion?>(o.value_.gc).ts))
-            } else {
-            }
-            i++
+    for (i in range(n)) {
+        var o : TValue? = addr(deref(f.k + i))
+        var tt : int = int(o.tt_) & 63
+        dumpByte(D, tt)
+        let _cond = tt
+        if (_cond == 19) {
+            dumpNumber(D, o.value_.n)
+        } elif (_cond == 3) {
+            dumpInteger(D, o.value_.i)
+        } elif (_cond == 4 || _cond == 20) {
+            dumpString(D, addr(reinterpret<GCUnion?>(o.value_.gc).ts))
+        } else {
         }
     }
 }
 
 [c_function]
 def private dumpProtos(var D : DumpState?; var f : Proto?) {
-    var i : int
     var n : int = f.sizep
     dumpInt(D, n)
-    {
-        i = 0
-        while (i < n) {
-            dumpFunction(D, deref(f.p + i), f.source)
-            i++
-        }
+    for (i in range(n)) {
+        dumpFunction(D, deref(f.p + i), f.source)
     }
 }
 
 [c_function]
 def private dumpUpvalues(var D : DumpState?; var f : Proto?) {
-    var i : int
     var n : int = f.sizeupvalues
     dumpInt(D, n)
-    {
-        i = 0
-        while (i < n) {
-            dumpByte(D, int(deref(f.upvalues + i).instack))
-            dumpByte(D, int(deref(f.upvalues + i).idx))
-            dumpByte(D, int(deref(f.upvalues + i).kind))
-            i++
-        }
+    for (i in range(n)) {
+        dumpByte(D, int(deref(f.upvalues + i).instack))
+        dumpByte(D, int(deref(f.upvalues + i).idx))
+        dumpByte(D, int(deref(f.upvalues + i).kind))
     }
 }
 
 [c_function]
 def private dumpDebug(var D : DumpState?; var f : Proto?) {
-    var i : int
     var n : int
     n = D.strip != 0 ? 0 : f.sizelineinfo
     dumpInt(D, n)
     dumpBlock(D, reinterpret<void?>(f.lineinfo), uint64(n) * uint64(typeinfo sizeof(type<int8>)))
     n = D.strip != 0 ? 0 : f.sizeabslineinfo
     dumpInt(D, n)
-    {
-        i = 0
-        while (i < n) {
-            dumpInt(D, deref(f.abslineinfo + i).pc)
-            dumpInt(D, deref(f.abslineinfo + i).line)
-            i++
-        }
+    for (i in range(n)) {
+        dumpInt(D, deref(f.abslineinfo + i).pc)
+        dumpInt(D, deref(f.abslineinfo + i).line)
     }
     n = D.strip != 0 ? 0 : f.sizelocvars
     dumpInt(D, n)
-    {
-        i = 0
-        while (i < n) {
-            dumpString(D, deref(f.locvars + i).varname)
-            dumpInt(D, deref(f.locvars + i).startpc)
-            dumpInt(D, deref(f.locvars + i).endpc)
-            i++
-        }
+    for (i in range(n)) {
+        dumpString(D, deref(f.locvars + i).varname)
+        dumpInt(D, deref(f.locvars + i).startpc)
+        dumpInt(D, deref(f.locvars + i).endpc)
     }
     n = D.strip != 0 ? 0 : f.sizeupvalues
     dumpInt(D, n)
-    {
-        i = 0
-        while (i < n) {
-            dumpString(D, deref(f.upvalues + i).name)
-            i++
-        }
+    for (i in range(n)) {
+        dumpString(D, deref(f.upvalues + i).name)
     }
 }
 

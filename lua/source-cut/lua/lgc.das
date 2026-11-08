@@ -286,16 +286,11 @@ def private reallymarkobject(var g : global_State?; var o : GCObject?) {
 // mark metamethods for basic types
 [c_function]
 def private markmt(var g : global_State?) {
-    var i : int
-    {
-        i = 0
-        while (i < LUA_NUMTAGS) {
-            if (g.mt[i] != null) {
-                if ((int(g.mt[i].marked) & (1 << 3 | 1 << 4)) != 0) {
-                    reallymarkobject(g, addr(reinterpret<GCUnion?>(g.mt[i]).gc))
-                }
+    for (i in range(LUA_NUMTAGS)) {
+        if (g.mt[i] != null) {
+            if ((int(g.mt[i].marked) & (1 << 3 | 1 << 4)) != 0) {
+                reallymarkobject(g, addr(reinterpret<GCUnion?>(g.mt[i]).gc))
             }
-            i++
         }
     }
 }
@@ -482,46 +477,37 @@ def private traverseephemeron(var g : global_State?; var h : Table?; inv : int) 
     var hasclears : int = 0
     // true if table has entry "white-key -> white-value"
     var hasww : int = 0
-    var i : uint
     var asize : uint = luaH_realasize(h)
     var nsize : uint = uint(1 << int(h.lsizenode))
     // traverse array part
-    {
-        i = uint(0)
-        while (i < asize) {
-            if ((int(addr(deref(h._c_array + i)).tt_) & 1 << 6) != 0 && (int(addr(deref(h._c_array + i)).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                marked = 1
-                reallymarkobject(g, addr(deref(h._c_array + i)).value_.gc)
-            }
-            i++
+    for (i in urange(asize)) {
+        if ((int(addr(deref(h._c_array + i)).tt_) & 1 << 6) != 0 && (int(addr(deref(h._c_array + i)).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+            marked = 1
+            reallymarkobject(g, addr(deref(h._c_array + i)).value_.gc)
         }
     }
     // traverse hash part; if 'inv', traverse descending
     // (see 'convergeephemerons')
-    {
-        i = uint(0)
-        while (i < nsize) {
-            var n : Node? = inv != 0 ? addr(deref(h.node + (nsize - uint(1) - i))) : addr(deref(h.node + i))
-            // entry is empty?
-            if ((int(addr(n.i_val).tt_) & 15) == 0) {
-                // clear its key
-                clearkey(n)
-            } elif (iscleared(g, (int(n.u.key_tt) & 1 << 6) != 0 ? n.u.key_val.gc : null) != 0) {
-                // key is not marked (yet)?
-                // table must be cleared
-                hasclears = 1
-                // value not marked yet?
-                if ((int(addr(n.i_val).tt_) & 1 << 6) != 0 && (int(addr(n.i_val).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                    // white-white entry
-                    hasww = 1
-                }
-            } elif ((int(addr(n.i_val).tt_) & 1 << 6) != 0 && (int(addr(n.i_val).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                // value not marked yet?
-                marked = 1
-                // mark it now
-                reallymarkobject(g, addr(n.i_val).value_.gc)
+    for (i in urange(nsize)) {
+        var n : Node? = inv != 0 ? addr(deref(h.node + (nsize - uint(1) - i))) : addr(deref(h.node + i))
+        // entry is empty?
+        if ((int(addr(n.i_val).tt_) & 15) == 0) {
+            // clear its key
+            clearkey(n)
+        } elif (iscleared(g, (int(n.u.key_tt) & 1 << 6) != 0 ? n.u.key_val.gc : null) != 0) {
+            // key is not marked (yet)?
+            // table must be cleared
+            hasclears = 1
+            // value not marked yet?
+            if ((int(addr(n.i_val).tt_) & 1 << 6) != 0 && (int(addr(n.i_val).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+                // white-white entry
+                hasww = 1
             }
-            i++
+        } elif ((int(addr(n.i_val).tt_) & 1 << 6) != 0 && (int(addr(n.i_val).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+            // value not marked yet?
+            marked = 1
+            // mark it now
+            reallymarkobject(g, addr(n.i_val).value_.gc)
         }
     }
     // link table into proper list
@@ -547,17 +533,12 @@ def private traverseephemeron(var g : global_State?; var h : Table?; inv : int) 
 def private traversestrongtable(var g : global_State?; var h : Table?) {
     var n : Node?
     var limit : Node? = addr(deref(h.node + uint64(1 << int(h.lsizenode))))
-    var i : uint
     var asize : uint = luaH_realasize(h)
     // traverse array part
-    {
-        i = uint(0)
-        while (i < asize) {
-            let _t0 = g.mainthread
-            if ((int(addr(deref(h._c_array + i)).tt_) & 1 << 6) != 0 && (int(addr(deref(h._c_array + i)).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                reallymarkobject(g, addr(deref(h._c_array + i)).value_.gc)
-            }
-            i++
+    for (i in urange(asize)) {
+        let _t0 = g.mainthread
+        if ((int(addr(deref(h._c_array + i)).tt_) & 1 << 6) != 0 && (int(addr(deref(h._c_array + i)).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+            reallymarkobject(g, addr(deref(h._c_array + i)).value_.gc)
         }
     }
     // traverse hash part
@@ -873,9 +854,7 @@ def private propagateall(var g : global_State?) : uint64 {
 def private convergeephemerons(var g : global_State?) {
     var changed : int
     var dir : int = 0
-    var _first = true
-    while (_first || changed != 0) {
-        _first = false
+    while (true) {
         var w : GCObject?
         // get ephemeron list
         var next : GCObject? = g.ephemeron
@@ -903,6 +882,9 @@ def private convergeephemerons(var g : global_State?) {
         }
         // invert direction next time
         dir = !(dir != 0) ? 1 : 0
+        if (!(changed != 0)) {
+            break
+        }
     }
 }
 
@@ -944,18 +926,13 @@ def private clearbyvalues(var g : global_State?; var l : GCObject?; var f : GCOb
             var h : Table? = addr(reinterpret<GCUnion?>(l).h)
             var n : Node?
             var limit : Node? = addr(deref(h.node + uint64(1 << int(h.lsizenode))))
-            var i : uint
             var asize : uint = luaH_realasize(h)
-            {
-                i = uint(0)
-                while (i < asize) {
-                    var o : TValue? = addr(deref(h._c_array + i))
-                    // value was collected?
-                    if (iscleared(g, (int(o.tt_) & 1 << 6) != 0 ? o.value_.gc : null) != 0) {
-                        // remove entry
-                        o.tt_ = uint8(0 | 1 << 4)
-                    }
-                    i++
+            for (i in urange(asize)) {
+                var o : TValue? = addr(deref(h._c_array + i))
+                // value was collected?
+                if (iscleared(g, (int(o.tt_) & 1 << 6) != 0 ? o.value_.gc : null) != 0) {
+                    // remove entry
+                    o.tt_ = uint8(0 | 1 << 4)
                 }
             }
             {
@@ -1071,10 +1048,11 @@ def private sweeplist(var L : lua_State?; var p : GCObject ??; countin : int; va
 // sweep a list until a live object (or end of list)
 def private sweeptolive(var L : lua_State?; var p : GCObject ??) : GCObject ?? {
     var old : GCObject ?? = p
-    var _first = true
-    while (_first || intptr(p) == intptr(old)) {
-        _first = false
+    while (true) {
         p = sweeplist(L, p, 1, null)
+        if (!(intptr(p) == intptr(old))) {
+            break
+        }
     }
     return p
 }
@@ -1981,12 +1959,13 @@ def private incstep(var L : lua_State?; var g : global_State?) {
     var stepsize : int64 = int64(uint64(g.gcstepsize) <= uint64(typeinfo sizeof(type<int64>)) * uint64(8) - uint64(2) ? uint64(int64(1) << int64(int(g.gcstepsize))) / WORK2MEM * uint64(stepmul) : uint64(MAX_LMEM))
     // overflow; keep maximum value
     // repeat until pause or enough "credit" (negative debt)
-    var _first = true
-    while (_first || debt > -stepsize && int(g.gcstate) != GCSpause) {
-        _first = false
+    while (true) {
         // perform one single step
         var work : uint64 = singlestep(L)
         debt = int64(uint64(debt) - work)
+        if (!(debt > -stepsize && int(g.gcstate) != GCSpause)) {
+            break
+        }
     }
     if (int(g.gcstate) == GCSpause) {
         // pause until next cycle

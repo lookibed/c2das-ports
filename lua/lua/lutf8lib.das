@@ -223,10 +223,11 @@ def private byteoffset(var L : lua_State?) : int {
             // move back
             while (n < int64(0) && posi > int64(0)) {
                 // find beginning of previous character
-                var _first = true
-                while (_first || posi > int64(0) && (int(deref(s + posi)) & 192) == 128) {
-                    _first = false
+                while (true) {
                     posi--
+                    if (!(posi > int64(0) && (int(deref(s + posi)) & 192) == 128)) {
+                        break
+                    }
                 }
                 n++
             }
@@ -235,10 +236,11 @@ def private byteoffset(var L : lua_State?) : int {
             n--
             while (n > int64(0) && posi < int64(len)) {
                 // find beginning of next character
-                var _first2 = true
-                while (_first2 || (int(deref(s + posi)) & 192) == 128) {
-                    _first2 = false
+                while (true) {
                     posi++
+                    if (!((int(deref(s + posi)) & 192) == 128)) {
+                        break
+                    }
                 }
                 // (cannot pass final '\0')
                 n--

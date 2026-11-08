@@ -1903,18 +1903,13 @@ def luaK_setlist(var fs : FuncState?; base : int; var nelems : int; var tostore 
 // return the final target of a jump (skipping jumps to jumps)
 [c_function]
 def private finaltarget(var code : uint?; var i : int) : int {
-    var count : int
     // avoid infinite loops
-    {
-        count = 0
-        while (count < 100) {
-            var pc : uint = deref(code + i)
-            if (enum_from_int(type<OpCode>, int(pc >> 0u & ~(~uint(0) << 7u) << 0u)) != OpCode.OP_JMP) {
-                break
-            } else {
-                i += int(pc >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1) + 1
-            }
-            count++
+    for (count in range(100)) {
+        var pc : uint = deref(code + i)
+        if (enum_from_int(type<OpCode>, int(pc >> 0u & ~(~uint(0) << 7u) << 0u)) != OpCode.OP_JMP) {
+            break
+        } else {
+            i += int(pc >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1) + 1
         }
     }
     return i

@@ -465,22 +465,17 @@ def private setnodevector(var L : lua_State?; var t : Table?; var size : uint) {
         // signal that it is using dummy node
         t.lastfree = null
     } else {
-        var i : int
         var lsize : int = luaO_ceillog2(size)
         if (lsize > MAXHBITS || 1u << uint(lsize) > (uint64(1u << uint(int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)) - 1)) <= ~uint64(0) / uint64(typeinfo sizeof(type<Node>)) ? 1u << uint(int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)) - 1) : uint(~uint64(0) / uint64(typeinfo sizeof(type<Node>))))) {
             luaG_runerror`va(L, reinterpret<uint8?>("table overflow"), VaNone())
         }
         size = uint(1 << lsize)
         t.node = reinterpret<Node?>(luaM_malloc_(L, uint64(size) * uint64(typeinfo sizeof(type<Node>)), 0))
-        {
-            i = 0
-            while (i < int(size)) {
-                var n : Node? = addr(deref(t.node + i))
-                n.u.next = 0
-                n.u.key_tt = uint8(0)
-                addr(n.i_val).tt_ = uint8(0 | 1 << 4)
-                i++
-            }
+        for (i in range(int(size))) {
+            var n : Node? = addr(deref(t.node + i))
+            n.u.next = 0
+            n.u.key_tt = uint8(0)
+            addr(n.i_val).tt_ = uint8(0 | 1 << 4)
         }
         t.lsizenode = uint8(lsize)
         // all positions are free
@@ -491,25 +486,20 @@ def private setnodevector(var L : lua_State?; var t : Table?; var size : uint) {
 // (Re)insert all elements from the hash part of 'ot' into table 't'.
 [c_function]
 def private reinsert(var L : lua_State?; var ot : Table?; var t : Table?) {
-    var j : int
     var size : int = 1 << int(ot.lsizenode)
-    {
-        j = 0
-        while (j < size) {
-            var old : Node? = addr(deref(ot.node + j))
-            if (!((int(addr(old.i_val).tt_) & 15) == 0)) {
-                // doesn't need barrier/invalidate cache, as entry was
-                // already present in the table
-                var k : TValue
-                {
-                    var io_ : TValue? = addr(k)
-                    var n_ : Node? = old
-                    io_.value_ = n_.u.key_val
-                    io_.tt_ = n_.u.key_tt
-                }
-                luaH_set(L, t, addr(k), addr(old.i_val))
+    for (j in range(size)) {
+        var old : Node? = addr(deref(ot.node + j))
+        if (!((int(addr(old.i_val).tt_) & 15) == 0)) {
+            // doesn't need barrier/invalidate cache, as entry was
+            // already present in the table
+            var k : TValue
+            {
+                var io_ : TValue? = addr(k)
+                var n_ : Node? = old
+                io_.value_ = n_.u.key_val
+                io_.tt_ = n_.u.key_tt
             }
-            j++
+            luaH_set(L, t, addr(k), addr(old.i_val))
         }
     }
 }
@@ -540,7 +530,6 @@ def private exchangehashpart(var t1 : Table?; var t2 : Table?) {
 // parts of the table.
 [c_function]
 def luaH_resize(var L : lua_State?; var t : Table?; newasize : uint; nhsize : uint) {
-    var i : uint
     // to keep the new hash part
     var newt : Table
     var oldasize : uint = setlimittosize(t)
@@ -554,13 +543,9 @@ def luaH_resize(var L : lua_State?; var t : Table?; newasize : uint; nhsize : ui
         // and new hash
         exchangehashpart(t, addr(newt))
         // re-insert into the new hash the elements from vanishing slice
-        {
-            i = newasize
-            while (i < oldasize) {
-                if (!((int(addr(deref(t._c_array + i)).tt_) & 15) == 0)) {
-                    luaH_setint(L, t, int64(i + uint(1)), addr(deref(t._c_array + i)))
-                }
-                i++
+        for (i in urange(newasize, oldasize)) {
+            if (!((int(addr(deref(t._c_array + i)).tt_) & 15) == 0)) {
+                luaH_setint(L, t, int64(i + uint(1)), addr(deref(t._c_array + i)))
             }
         }
         // restore current size...
@@ -584,12 +569,8 @@ def luaH_resize(var L : lua_State?; var t : Table?; newasize : uint; nhsize : ui
     t._c_array = newarray
     t.alimit = newasize
     // clear new slice of the array
-    {
-        i = oldasize
-        while (i < newasize) {
-            addr(deref(t._c_array + i)).tt_ = uint8(0 | 1 << 4)
-            i++
-        }
+    for (i in urange(oldasize, newasize)) {
+        addr(deref(t._c_array + i)).tt_ = uint8(0 | 1 << 4)
     }
     // re-insert elements from old hash part into new parts
     // 'newt' now has the old hash
@@ -959,9 +940,7 @@ def private hash_search(var t : Table?; var j : uint64) : uint64 {
     if (j == uint64(0)) {
         j++
     }
-    var _first = true
-    while (_first || !((int(luaH_getint(t, int64(j)).tt_) & 15) == 0)) {
-        _first = false
+    while (true) {
         // 'i' is a present index
         i = j
         if (j <= uint64(9223372036854775807l) / uint64(2)) {
@@ -977,6 +956,9 @@ def private hash_search(var t : Table?; var j : uint64) : uint64 {
                 // well, max integer is a boundary...
                 return j
             }
+        }
+        if (!(!((int(luaH_getint(t, int64(j)).tt_) & 15) == 0))) {
+            break
         }
     }
     // repeat until an absent t[j]

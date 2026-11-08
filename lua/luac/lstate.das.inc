@@ -140,18 +140,13 @@ def luaE_incCstack(var L : lua_State?) {
 
 [c_function]
 def private stack_init(var L1 : lua_State?; var L : lua_State?) {
-    var i : int
     var ci : CallInfo?
     // initialize stack array
     L1.stack.p = reinterpret<StackValue?>(luaM_malloc_(L, uint64(2 * 20 + 5) * uint64(typeinfo sizeof(type<StackValue>)), 0))
     L1.tbclist.p = L1.stack.p
-    {
-        i = 0
-        while (i < BASIC_STACK_SIZE + EXTRA_STACK) {
-            // erase new stack
-            addr((L1.stack.p + i).val).tt_ = uint8(0 | 0 << 4)
-            i++
-        }
+    for (i in range(BASIC_STACK_SIZE + EXTRA_STACK)) {
+        // erase new stack
+        addr((L1.stack.p + i).val).tt_ = uint8(0 | 0 << 4)
     }
     L1.top.p = L1.stack.p
     L1.stack_last.p = L1.stack.p + BASIC_STACK_SIZE
@@ -361,7 +356,6 @@ def lua_resetthread(var L : lua_State?) : int {
 
 [c_function]
 def lua_newstate(f : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 : uint64) : void?>; var ud : void?) : lua_State? {
-    var i : int
     var L : lua_State?
     var g : global_State?
     var l : LG? = reinterpret<LG?>(invoke(f, ud, null, uint64(8), uint64(typeinfo sizeof(type<LG>))))
@@ -427,12 +421,8 @@ def lua_newstate(f : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 :
     g.gcstepsize = uint8(LUAI_GCSTEPSIZE)
     g.genmajormul = uint8(100 / 4)
     g.genminormul = uint8(LUAI_GENMINORMUL)
-    {
-        i = 0
-        while (i < LUA_NUMTAGS) {
-            g.mt[i] = null
-            i++
-        }
+    for (i in range(LUA_NUMTAGS)) {
+        g.mt[i] = null
     }
     if (luaD_rawrunprotected(L, @@f_luaopen, null) != LUA_OK) {
         // memory allocation error: free partial state

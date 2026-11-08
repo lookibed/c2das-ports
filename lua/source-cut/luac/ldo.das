@@ -254,7 +254,6 @@ def luaD_errerr(var L : lua_State?) {
 [c_function]
 def luaD_reallocstack(var L : lua_State?; newsize : int; raiseerror : int) : int {
     var oldsize : int = int(int64(L.stack_last.p - L.stack.p))
-    var i : int
     var newstack : StackValue?
     var oldgcstop : int = int(L.l_G.gcstopem)
     // change pointers to offsets
@@ -279,13 +278,9 @@ def luaD_reallocstack(var L : lua_State?; newsize : int; raiseerror : int) : int
     // change offsets back to pointers
     correctstack(L)
     L.stack_last.p = L.stack.p + newsize
-    {
-        i = oldsize + EXTRA_STACK
-        while (i < newsize + EXTRA_STACK) {
-            // erase new segment
-            addr((newstack + i).val).tt_ = uint8(0 | 0 << 4)
-            i++
-        }
+    for (i in range(oldsize + EXTRA_STACK, newsize + EXTRA_STACK)) {
+        // erase new segment
+        addr((newstack + i).val).tt_ = uint8(0 | 0 << 4)
     }
     return 1
 }

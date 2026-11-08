@@ -493,9 +493,7 @@ def luaO_utf8esc(var buff : uint8?; var x : uint64) : int {
         // maximum that fits in first byte
         var mfb : uint = uint(63)
         // add continuation bytes
-        var _first = true
-        while (_first || x > uint64(mfb)) {
-            _first = false
+        while (true) {
             let _t0 = n
             n++
             deref(buff + (UTF8BUFFSZ - _t0)) = uint8(uint64(128) | x & uint64(63))
@@ -503,6 +501,9 @@ def luaO_utf8esc(var buff : uint8?; var x : uint64) : int {
             x >>= 6ul
             // now there is one less bit available in first byte
             mfb >>= 1u
+            if (!(x > uint64(mfb))) {
+                break
+            }
         }
         // still needs continuation byte?
         // add first byte

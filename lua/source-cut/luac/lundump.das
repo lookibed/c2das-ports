@@ -76,14 +76,15 @@ def private loadUnsigned(var S : LoadState?; var limit : uint64) : uint64 {
     var x : uint64 = uint64(0)
     var b : int
     limit >>= 7ul
-    var _first = true
-    while (_first || (b & 128) == 0) {
-        _first = false
+    while (true) {
         b = int(loadByte(S))
         if (x >= limit) {
             error(S, reinterpret<uint8?>("integer overflow"))
         }
         x = x << 7ul | uint64(b & 127)
+        if (!((b & 128) == 0)) {
+            break
+        }
     }
     return x
 }
@@ -175,85 +176,67 @@ def private loadCode(var S : LoadState?; var f : Proto?) {
 
 [c_function]
 def private loadConstants(var S : LoadState?; var f : Proto?) {
-    var i : int
     var n : int = loadInt(S)
     if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + uint64(1) > ~uint64(0) / uint64(typeinfo sizeof(type<TValue>))) {
         luaM_toobig(S.L)
     }
     f.k = reinterpret<TValue?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<TValue>)), 0))
     f.sizek = n
-    {
-        i = 0
-        while (i < n) {
-            addr(deref(f.k + i)).tt_ = uint8(0 | 0 << 4)
-            i++
-        }
+    for (i in range(n)) {
+        addr(deref(f.k + i)).tt_ = uint8(0 | 0 << 4)
     }
-    {
-        i = 0
-        while (i < n) {
-            var o : TValue? = addr(deref(f.k + i))
-            var t : int = int(loadByte(S))
-            let _cond = t
-            if (_cond == 0) {
-                o.tt_ = uint8(0 | 0 << 4)
-            } elif (_cond == 1) {
-                o.tt_ = uint8(1 | 0 << 4)
-            } elif (_cond == 17) {
-                o.tt_ = uint8(1 | 1 << 4)
-            } elif (_cond == 19) {
-                {
-                    var io : TValue? = o
-                    io.value_.n = loadNumber(S)
-                    io.tt_ = uint8(3 | 1 << 4)
-                }
-            } elif (_cond == 3) {
-                {
-                    var io : TValue? = o
-                    io.value_.i = loadInteger(S)
-                    io.tt_ = uint8(3 | 0 << 4)
-                }
-            } elif (_cond == 4 || _cond == 20) {
-                {
-                    var io : TValue? = o
-                    var x_ : TString? = loadString(S, f)
-                    io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-                    io.tt_ = uint8(int(x_.tt) | 1 << 6)
-                    let _t0 = S.L
-                }
-            } else {
+    for (i in range(n)) {
+        var o : TValue? = addr(deref(f.k + i))
+        var t : int = int(loadByte(S))
+        let _cond = t
+        if (_cond == 0) {
+            o.tt_ = uint8(0 | 0 << 4)
+        } elif (_cond == 1) {
+            o.tt_ = uint8(1 | 0 << 4)
+        } elif (_cond == 17) {
+            o.tt_ = uint8(1 | 1 << 4)
+        } elif (_cond == 19) {
+            {
+                var io : TValue? = o
+                io.value_.n = loadNumber(S)
+                io.tt_ = uint8(3 | 1 << 4)
             }
-            i++
+        } elif (_cond == 3) {
+            {
+                var io : TValue? = o
+                io.value_.i = loadInteger(S)
+                io.tt_ = uint8(3 | 0 << 4)
+            }
+        } elif (_cond == 4 || _cond == 20) {
+            {
+                var io : TValue? = o
+                var x_ : TString? = loadString(S, f)
+                io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
+                io.tt_ = uint8(int(x_.tt) | 1 << 6)
+                let _t0 = S.L
+            }
+        } else {
         }
     }
 }
 
 [c_function]
 def private loadProtos(var S : LoadState?; var f : Proto?) {
-    var i : int
     var n : int = loadInt(S)
     if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + uint64(1) > ~uint64(0) / uint64(typeinfo sizeof(type<Proto?>))) {
         luaM_toobig(S.L)
     }
     f.p = reinterpret<Proto ??>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<Proto?>)), 0))
     f.sizep = n
-    {
-        i = 0
-        while (i < n) {
-            deref(f.p + i) = null
-            i++
-        }
+    for (i in range(n)) {
+        deref(f.p + i) = null
     }
-    {
-        i = 0
-        while (i < n) {
-            deref(f.p + i) = luaF_newproto(S.L)
-            if ((int(f.marked) & 1 << 5) != 0 && (int(deref(f.p + i).marked) & (1 << 3 | 1 << 4)) != 0) {
-                luaC_barrier_(S.L, addr(reinterpret<GCUnion?>(f).gc), addr(reinterpret<GCUnion?>(deref(f.p + i)).gc))
-            }
-            loadFunction(S, deref(f.p + i), f.source)
-            i++
+    for (i in range(n)) {
+        deref(f.p + i) = luaF_newproto(S.L)
+        if ((int(f.marked) & 1 << 5) != 0 && (int(deref(f.p + i).marked) & (1 << 3 | 1 << 4)) != 0) {
+            luaC_barrier_(S.L, addr(reinterpret<GCUnion?>(f).gc), addr(reinterpret<GCUnion?>(deref(f.p + i)).gc))
         }
+        loadFunction(S, deref(f.p + i), f.source)
     }
 }
 
@@ -263,7 +246,6 @@ def private loadProtos(var S : LoadState?; var f : Proto?) {
 // in that case all prototypes must be consistent for the GC.
 [c_function]
 def private loadUpvalues(var S : LoadState?; var f : Proto?) {
-    var i : int
     var n : int
     n = loadInt(S)
     if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + uint64(1) > ~uint64(0) / uint64(typeinfo sizeof(type<Upvaldesc>))) {
@@ -272,28 +254,19 @@ def private loadUpvalues(var S : LoadState?; var f : Proto?) {
     f.upvalues = reinterpret<Upvaldesc?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<Upvaldesc>)), 0))
     f.sizeupvalues = n
     // make array valid for GC
-    {
-        i = 0
-        while (i < n) {
-            deref(f.upvalues + i).name = null
-            i++
-        }
+    for (i in range(n)) {
+        deref(f.upvalues + i).name = null
     }
     // following calls can raise errors
-    {
-        i = 0
-        while (i < n) {
-            deref(f.upvalues + i).instack = loadByte(S)
-            deref(f.upvalues + i).idx = loadByte(S)
-            deref(f.upvalues + i).kind = loadByte(S)
-            i++
-        }
+    for (i in range(n)) {
+        deref(f.upvalues + i).instack = loadByte(S)
+        deref(f.upvalues + i).idx = loadByte(S)
+        deref(f.upvalues + i).kind = loadByte(S)
     }
 }
 
 [c_function]
 def private loadDebug(var S : LoadState?; var f : Proto?) {
-    var i : int
     var n : int
     n = loadInt(S)
     if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + uint64(1) > ~uint64(0) / uint64(typeinfo sizeof(type<int8>))) {
@@ -308,13 +281,9 @@ def private loadDebug(var S : LoadState?; var f : Proto?) {
     }
     f.abslineinfo = reinterpret<AbsLineInfo?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<AbsLineInfo>)), 0))
     f.sizeabslineinfo = n
-    {
-        i = 0
-        while (i < n) {
-            deref(f.abslineinfo + i).pc = loadInt(S)
-            deref(f.abslineinfo + i).line = loadInt(S)
-            i++
-        }
+    for (i in range(n)) {
+        deref(f.abslineinfo + i).pc = loadInt(S)
+        deref(f.abslineinfo + i).line = loadInt(S)
     }
     n = loadInt(S)
     if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + uint64(1) > ~uint64(0) / uint64(typeinfo sizeof(type<LocVar>))) {
@@ -322,21 +291,13 @@ def private loadDebug(var S : LoadState?; var f : Proto?) {
     }
     f.locvars = reinterpret<LocVar?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<LocVar>)), 0))
     f.sizelocvars = n
-    {
-        i = 0
-        while (i < n) {
-            deref(f.locvars + i).varname = null
-            i++
-        }
+    for (i in range(n)) {
+        deref(f.locvars + i).varname = null
     }
-    {
-        i = 0
-        while (i < n) {
-            deref(f.locvars + i).varname = loadStringN(S, f)
-            deref(f.locvars + i).startpc = loadInt(S)
-            deref(f.locvars + i).endpc = loadInt(S)
-            i++
-        }
+    for (i in range(n)) {
+        deref(f.locvars + i).varname = loadStringN(S, f)
+        deref(f.locvars + i).startpc = loadInt(S)
+        deref(f.locvars + i).endpc = loadInt(S)
     }
     n = loadInt(S)
     // does it have debug information?
@@ -344,12 +305,8 @@ def private loadDebug(var S : LoadState?; var f : Proto?) {
         // must be this many
         n = f.sizeupvalues
     }
-    {
-        i = 0
-        while (i < n) {
-            deref(f.upvalues + i).name = loadStringN(S, f)
-            i++
-        }
+    for (i in range(n)) {
+        deref(f.upvalues + i).name = loadStringN(S, f)
     }
 }
 

@@ -294,20 +294,15 @@ def private check_readonly(var ls : LexState?; var e : expdesc?) {
 def private adjustlocalvars(var ls : LexState?; nvars : int) {
     var fs : FuncState? = ls.fs
     var reglevel : int = __::luaY_nvarstack(fs)
-    var i : int
-    {
-        i = 0
-        while (i < nvars) {
-            let _t0 = fs.nactvar
-            fs.nactvar = uint8(uint(fs.nactvar) + 1)
-            var vidx : int = int(_t0)
-            var _c_var : Vardesc? = getlocalvardesc(fs, vidx)
-            let _t1 = reglevel
-            reglevel++
-            _c_var.vd.ridx = uint8(_t1)
-            _c_var.vd.pidx = int16(registerlocalvar(ls, fs, _c_var.vd.name))
-            i++
-        }
+    for (i in range(nvars)) {
+        let _t0 = fs.nactvar
+        fs.nactvar = uint8(uint(fs.nactvar) + 1)
+        var vidx : int = int(_t0)
+        var _c_var : Vardesc? = getlocalvardesc(fs, vidx)
+        let _t1 = reglevel
+        reglevel++
+        _c_var.vd.ridx = uint8(_t1)
+        _c_var.vd.pidx = int16(registerlocalvar(ls, fs, _c_var.vd.name))
     }
 }
 
@@ -986,14 +981,15 @@ def private constructor(var ls : LexState?; var t : expdesc?) {
     // no value (yet)
     init_exp(addr(cc.v), expkind.VVOID, 0)
     checknext(ls, '{')
-    var _first = true
-    while (_first || (testnext(ls, ',') != 0 || testnext(ls, ';') != 0)) {
-        _first = false
+    while (true) {
         if (ls.t.token == '}') {
             break
         }
         closelistfield(fs, addr(cc))
         field(ls, addr(cc))
+        if (!(testnext(ls, ',') != 0 || testnext(ls, ';') != 0)) {
+            break
+        }
     }
     check_match(ls, '}', '{', line)
     lastlistfield(fs, addr(cc))
@@ -1014,9 +1010,7 @@ def private parlist(var ls : LexState?) {
     var isvararg : int = 0
     // is 'parlist' not empty?
     if (ls.t.token != ')') {
-        var _first = true
-        while (_first || !(isvararg != 0) && testnext(ls, ',') != 0) {
-            _first = false
+        while (true) {
             let _cond = ls.t.token
             if (_cond == 291) {
                 {
@@ -1030,6 +1024,9 @@ def private parlist(var ls : LexState?) {
                 }
             } else {
                 luaX_syntaxerror(ls, reinterpret<uint8?>("<name> or '...' expected"))
+            }
+            if (!(!(isvararg != 0) && testnext(ls, ',') != 0)) {
+                break
             }
         }
     }
@@ -1887,9 +1884,7 @@ def private localstat(var ls : LexState?) {
     var nvars : int = 0
     var nexps : int
     var e : expdesc
-    var _first = true
-    while (_first || testnext(ls, ',') != 0) {
-        _first = false
+    while (true) {
         vidx = new_localvar(ls, str_checkname(ls))
         kind = getlocalattribute(ls)
         getlocalvardesc(fs, vidx).vd.kind = uint8(kind)
@@ -1902,6 +1897,9 @@ def private localstat(var ls : LexState?) {
             toclose = int(fs.nactvar) + nvars
         }
         nvars++
+        if (!(testnext(ls, ',') != 0)) {
+            break
+        }
     }
     if (testnext(ls, '=') != 0) {
         nexps = explist(ls, addr(e))

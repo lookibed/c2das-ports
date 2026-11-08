@@ -167,13 +167,9 @@ def private tmove(var L : lua_State?) : int {
         n = e - f + int64(1)
         let _t1 = t <= 9223372036854775807l - n + int64(1) || luaL_argerror(L, 4, reinterpret<uint8?>("destination wrap around")) != 0
         if (t > e || t <= f || tt != 1 && !(lua_compare(L, 1, tt, LUA_OPEQ) != 0)) {
-            {
-                i = int64(0)
-                while (i < n) {
-                    lua_geti(L, 1, f + i)
-                    lua_seti(L, tt, t + i)
-                    i++
-                }
+            for (i1 in range64(n)) {
+                lua_geti(L, 1, f + i1)
+                lua_seti(L, tt, t + i1)
             }
         } else {
             {
