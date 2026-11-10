@@ -3,6 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+options strict_aliasing = false
 require c_runtime/c_args
 require c_runtime/c_bounds
 require c_runtime/c_exit
@@ -11,12 +12,6 @@ require c_runtime/c_union
 require c_runtime/enum_from_int
 require c_runtime/printf
 require crt
-
-// a C label's statement: the optimizer keeps a [sideeffects] call after the label
-[sideeffects]
-def private c_label_end {
-    pass
-}
 
 [init]
 def private c2das_dialect {
@@ -1628,7 +1623,7 @@ def memchr1(var src : void?; value : int; count : uint64) : void? {
 [c_function]
 def strlen1(var src : uint8?) : uint64 {
     var count : uint64 = uint64(0)
-    while (int(deref(src + count)) != 0) {
+    while (int(deref(src + count)) != '\0') {
         count += uint64(1)
     }
     return count
@@ -1644,7 +1639,7 @@ def strdup(var src : uint8?) : uint8? {
     for (index in urange64(length)) {
         deref(copy + index) = deref(src + index)
     }
-    deref(copy + length) = uint8(0)
+    deref(copy + length) = uint8('\0')
     return copy
 }
 
@@ -4454,7 +4449,7 @@ def h264bsdProfile(var pStorage : storage?) : uint {
 }
 
 [c_function]
-def h264bsdAlloc : storage ? {
+def h264bsdAlloc : storage? {
     return reinterpret<storage?>(malloc1(uint64(typeinfo sizeof(type<storage>))))
 }
 
@@ -6185,7 +6180,7 @@ def private h264_file_all__GetPredictionMv(var mv : mv_t?; var a : interNeighbou
 }
 
 [c_function]
-def get_h264bsdClip : uint8 ? {
+def get_h264bsdClip : uint8? {
     return addr(h264bsdClip[0])
 }
 
@@ -10290,7 +10285,7 @@ def private h264_file_all__FillRow1(var ref : uint8?; var fill : uint8?; left : 
 // ------------------------------------------------------------------------------
 [c_function]
 def h264bsdFillRow7(var ref : uint8?; var fill : uint8?; var left : int; var center : int; var right : int) {
-    var tmp : uint8 = uint8(0)
+    var tmp : uint8 = uint8('\0')
     if (left != 0) {
         tmp = deref(ref)
     }
@@ -19152,7 +19147,6 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
         if (stack[depth].format == boxtype_t.BOX_ATOM) {
             box_bytes = uint64(h264_file_all__minimp4_read(mp4, 4, addr(eof_flag)))
             label 1:  // broken_android_meta_hack
-            c_label_end()
             if (eof_flag != 0) {
                 // normal exit
                 break
