@@ -9,7 +9,6 @@ require lzio_h
 
 include llex_h.das.inc
 include lparser_h.das.inc
-// the fragments' digest: 0xb1797e54a20dc94f
 
 [init]
 def private c2das_layout_check {

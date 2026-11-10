@@ -144,7 +144,7 @@ def private pushfuncname(var L : lua_State?; var ar : lua_Debug?) {
         // remove name
         lua_rotate(L, -2, -1)
         lua_settop(L, -1 - 1)
-    } elif (int(deref(ar.namewhat)) != 0) {
+    } elif (int(deref(ar.namewhat)) != '\0') {
         // is there a name from code?
         // use it
         lua_pushfstring`va(L, reinterpret<uint8?>("%s '%s'"), (ar.namewhat, ar.name))
@@ -974,7 +974,7 @@ def luaL_tolstring(var L : lua_State?; var idx : int; var len : uint64?) : uint8
                 // try name
                 var tt : int = luaL_getmetafield(L, idx, reinterpret<uint8?>("__name"))
                 var kind : uint8? = tt == LUA_TSTRING ? lua_tolstring(L, -1, null) : lua_typename(L, lua_type(L, idx))
-                lua_pushfstring`va(L, reinterpret<uint8?>("%s: %p"), (kind, reinterpret<uint8?>(lua_topointer(L, idx))))
+                lua_pushfstring`va(L, reinterpret<uint8?>("%s: %p"), (kind, lua_topointer(L, idx)))
                 if (tt != LUA_TNIL) {
                     // remove '__name'
                     lua_rotate(L, -2, -1)
@@ -1187,7 +1187,7 @@ def private warnfon(var ud : void?; var message : uint8?; tocont : int) {
 }
 
 [c_function]
-def luaL_newstate : lua_State ? {
+def luaL_newstate : lua_State? {
     var L : lua_State? = lua_newstate(@@l_alloc, null)
     if (L != null) {
         lua_atpanic(L, @@_c_panic)

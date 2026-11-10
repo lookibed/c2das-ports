@@ -308,7 +308,7 @@ def luaopen_utf8(var L : lua_State?) : int {
     luaL_checkversion_(L, double(504), uint64(typeinfo sizeof(type<int64>)) * uint64(16) + uint64(typeinfo sizeof(type<double>)))
     lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[7]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - uint64(1)))
     luaL_setfuncs(L, addr(funcs[0]), 0)
-    lua_pushlstring(L, reinterpret<uint8?>("[\x00-\x7f\xc2-\xfd][\x80-\xbf]*"), uint64(typeinfo sizeof(type<uint8[15]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
+    lua_pushlstring(L, reinterpret<uint8?>("[\0-\x7f\xc2-\xfd][\x80-\xbf]*"), uint64(typeinfo sizeof(type<uint8[15]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
     lua_setfield(L, -2, reinterpret<uint8?>("charpattern"))
     return 1
 }

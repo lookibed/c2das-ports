@@ -1144,11 +1144,9 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
     var base : StackValue?
     var pc : uint?
     var trap : int
-    label 2:  // startfunc
-    c_label_end()
+    label 1:  // startfunc
     trap = c_volatile_load(L.hookmask)
-    label 3:  // returning
-    c_label_end()
+    label 2:  // returning
     // trap already set
     cl = addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l)
     k = cl.p.k
@@ -1176,7 +1174,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
             var _cond = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
             var _goto = 0
             while (true) {
-                label 1:  // re-dispatch
+                label 6:  // re-dispatch
                 var _flag = false
                 if (_cond == OpCode.OP_MOVE) {
                     {
@@ -3459,7 +3457,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         } else {
                             // Lua call: run function in this same C frame
                             ci = newci
-                            goto label 2
+                            goto label 1
                         }
                         break
                     }
@@ -3492,7 +3490,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         n = luaD_pretailcall(L, ci, ra, b, delta)
                         if (n < 0) {
                             // execute the callee
-                            goto label 2
+                            goto label 1
                         } else {
                             // C function?
                             // restore 'func' (if vararg)
@@ -3504,7 +3502,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             // caller returns after the tail call
                             _goto = 1
                             _cond = enum_from_int(type<OpCode>, -1)
-                            goto label 1
+                            goto label 6
                         }
                     }
                 }
@@ -3548,7 +3546,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         trap = c_volatile_load(ci.u.l.trap)
                         _goto = 1
                         _cond = enum_from_int(type<OpCode>, -1)
-                        goto label 1
+                        goto label 6
                     }
                 }
                 if (_cond == OpCode.OP_RETURN0) {
@@ -3579,7 +3577,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         }
                         _goto = 1
                         _cond = enum_from_int(type<OpCode>, -1)
-                        goto label 1
+                        goto label 6
                     }
                 }
                 _flag ||= _cond == OpCode.OP_RETURN1
@@ -3631,7 +3629,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                     } else {
                         ci = ci.previous
                         // continue running caller in this frame
-                        goto label 3
+                        goto label 2
                     }
                 }
                 _flag ||= _cond == OpCode.OP_FORLOOP
@@ -3704,7 +3702,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         i = deref(_t113)
                         _goto = 2
                         _cond = enum_from_int(type<OpCode>, -1)
-                        goto label 1
+                        goto label 6
                     }
                 }
                 _flag ||= _cond == OpCode.OP_TFORCALL
@@ -3737,7 +3735,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         i = deref(_t114)
                         _goto = 3
                         _cond = enum_from_int(type<OpCode>, -1)
-                        goto label 1
+                        goto label 6
                     }
                 }
                 _flag ||= _cond == OpCode.OP_TFORLOOP

@@ -59,7 +59,7 @@ def luaX_token2str(var ls : LexState?; token : int) : uint8? {
 def private txtToken(var ls : LexState?; token : int) : uint8? {
     let _cond = token
     if (_cond == 291 || _cond == 292 || _cond == 289 || _cond == 290) {
-        save(ls, 0)
+        save(ls, '\0')
         return luaO_pushfstring`va(ls.L, reinterpret<uint8?>("'%s'"), (ls.buff.buffer,))
     } else {
         return luaX_token2str(ls, token)
@@ -294,7 +294,7 @@ def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
         }
         ls.current = _t8
     }
-    save(ls, 0)
+    save(ls, '\0')
     // format error?
     if (luaO_str2num(ls.buff.buffer, addr(obj)) == uint64(0)) {
         lexerror(ls, reinterpret<uint8?>("malformed number"), int(RESERVED.TK_FLT))
@@ -440,7 +440,6 @@ def private read_long_string(var ls : LexState?; var seminfo : SemInfo?; sep : u
         }
     }
     label 1:  // endloop
-    c_label_end()
     if (seminfo != null) {
         seminfo.ts = luaX_newstring(ls, ls.buff.buffer + sep, ls.buff.n - uint64(2) * sep)
     }
@@ -640,7 +639,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 ls.current = _t5
                 let _cond2 = ls.current
                 if (_cond2 == 'a') {
-                    c = 7
+                    c = '\a'
                     goto label 1
                 } elif (_cond2 == 'b') {
                     c = '\b'
@@ -658,7 +657,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                     c = '\t'
                     goto label 1
                 } elif (_cond2 == 'v') {
-                    c = 11
+                    c = '\v'
                     goto label 1
                 } elif (_cond2 == 'x') {
                     c = readhexaesc(ls)
@@ -721,7 +720,6 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                     }
                 }
                 label 1:  // read_save
-                c_label_end()
                 let _t12 = ls.z.n
                 ls.z.n--
                 var _t14 : int
@@ -734,13 +732,11 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 }
                 ls.current = _t14
                 label 2:  // only_save
-                c_label_end()
                 // go through
                 // remove '\\'
                 ls.buff.n -= uint64(1)
                 save(ls, c)
                 label 3:  // no_save
-                c_label_end()
             }
         } else {
             // go through
@@ -789,7 +785,7 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                         break
                     }
                 }
-                if (_cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == 11) {
+                if (_cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == '\v') {
                     {
                         // spaces
                         let _t0 = ls.z.n
@@ -1078,7 +1074,7 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                         return int(RESERVED.TK_EOS)
                     }
                 }
-                if (!(_cond == '\n' || _cond == '\r' || _cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == 11 || _cond == '-' || _cond == '[' || _cond == '=' || _cond == '<' || _cond == '>' || _cond == '/' || _cond == '~' || _cond == ':' || _cond == '"' || _cond == '\'' || _cond == '.' || _cond == '0' || _cond == '1' || _cond == '2' || _cond == '3' || _cond == '4' || _cond == '5' || _cond == '6' || _cond == '7' || _cond == '8' || _cond == '9' || _cond == -1)) {
+                if (!(_cond == '\n' || _cond == '\r' || _cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == '\v' || _cond == '-' || _cond == '[' || _cond == '=' || _cond == '<' || _cond == '>' || _cond == '/' || _cond == '~' || _cond == ':' || _cond == '"' || _cond == '\'' || _cond == '.' || _cond == '0' || _cond == '1' || _cond == '2' || _cond == '3' || _cond == '4' || _cond == '5' || _cond == '6' || _cond == '7' || _cond == '8' || _cond == '9' || _cond == -1)) {
                     {
                         // identifier or reserved word?
                         if ((int(luai_ctype_[ls.current + 1]) & 1 << 0) != 0) {

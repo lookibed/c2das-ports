@@ -612,7 +612,6 @@ def private precallC(var L : lua_State?; var func : StackValue?; nresults : int;
 [c_function]
 def luaD_pretailcall(var L : lua_State?; var ci : CallInfo?; var func : StackValue?; var narg1 : int; delta : int) : int {
     label 1:  // retry
-    c_label_end()
     let _cond = int(addr(func.val).tt_) & 63
     if (_cond == 38) {
         // C closure
@@ -693,7 +692,6 @@ def luaD_pretailcall(var L : lua_State?; var ci : CallInfo?; var func : StackVal
 [c_function]
 def luaD_precall(var L : lua_State?; var func : StackValue?; nresults : int) : CallInfo? {
     label 1:  // retry
-    c_label_end()
     let _cond = int(addr(func.val).tt_) & 63
     if (_cond == 38) {
         // C closure

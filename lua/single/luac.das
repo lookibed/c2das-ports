@@ -3,6 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+options strict_aliasing = false
 options jit_split_modules = 0
 require c_runtime/c_args
 require c_runtime/c_exit
@@ -19,12 +20,6 @@ require crt
 require math
 
 var private c2das_empty : uint8[1] = fixed_array(uint8(0))
-
-// a C label's statement: the optimizer keeps a [sideeffects] call after the label
-[sideeffects]
-def private c_label_end {
-    pass
-}
 
 [init]
 def private c2das_dialect {
@@ -5922,7 +5917,7 @@ def luaG_addinfo(var L : lua_State?; var msg : uint8?; var src : TString?; line 
     } else {
         // no source available; use "?" instead
         buff[0] = uint8('?')
-        buff[1] = uint8(0)
+        buff[1] = uint8('\0')
     }
     return luaO_pushfstring`va(L, reinterpret<uint8?>("%s:%d: %s"), (addr(buff[0]), line, msg))
 }
@@ -6733,7 +6728,6 @@ def private precallC(var L : lua_State?; var func : StackValue?; nresults : int;
 [c_function]
 def luaD_pretailcall(var L : lua_State?; var ci : CallInfo?; var func : StackValue?; var narg1 : int; delta : int) : int {
     label 1:  // retry
-    c_label_end()
     let _cond = int(addr(func.val).tt_) & 63
     if (_cond == 38) {
         // C closure
@@ -6814,7 +6808,6 @@ def luaD_pretailcall(var L : lua_State?; var ci : CallInfo?; var func : StackVal
 [c_function]
 def luaD_precall(var L : lua_State?; var func : StackValue?; nresults : int) : CallInfo? {
     label 1:  // retry
-    c_label_end()
     let _cond = int(addr(func.val).tt_) & 63
     if (_cond == 38) {
         // C closure
@@ -9876,7 +9869,7 @@ def luaX_token2str(var ls : LexState?; token : int) : uint8? {
 def private txtToken(var ls : LexState?; token : int) : uint8? {
     let _cond = token
     if (_cond == 291 || _cond == 292 || _cond == 289 || _cond == 290) {
-        save(ls, 0)
+        save(ls, '\0')
         return luaO_pushfstring`va(ls.L, reinterpret<uint8?>("'%s'"), (ls.buff.buffer,))
     } else {
         return luaX_token2str(ls, token)
@@ -10111,7 +10104,7 @@ def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
         }
         ls.current = _t8
     }
-    save(ls, 0)
+    save(ls, '\0')
     // format error?
     if (luaO_str2num(ls.buff.buffer, addr(obj)) == uint64(0)) {
         lexerror(ls, reinterpret<uint8?>("malformed number"), int(RESERVED.TK_FLT))
@@ -10257,7 +10250,6 @@ def private read_long_string(var ls : LexState?; var seminfo : SemInfo?; sep : u
         }
     }
     label 1:  // endloop
-    c_label_end()
     if (seminfo != null) {
         seminfo.ts = luaX_newstring(ls, ls.buff.buffer + sep, ls.buff.n - uint64(2) * sep)
     }
@@ -10457,7 +10449,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 ls.current = _t5
                 let _cond2 = ls.current
                 if (_cond2 == 'a') {
-                    c = 7
+                    c = '\a'
                     goto label 1
                 } elif (_cond2 == 'b') {
                     c = '\b'
@@ -10475,7 +10467,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                     c = '\t'
                     goto label 1
                 } elif (_cond2 == 'v') {
-                    c = 11
+                    c = '\v'
                     goto label 1
                 } elif (_cond2 == 'x') {
                     c = readhexaesc(ls)
@@ -10538,7 +10530,6 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                     }
                 }
                 label 1:  // read_save
-                c_label_end()
                 let _t12 = ls.z.n
                 ls.z.n--
                 var _t14 : int
@@ -10551,13 +10542,11 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 }
                 ls.current = _t14
                 label 2:  // only_save
-                c_label_end()
                 // go through
                 // remove '\\'
                 ls.buff.n -= uint64(1)
                 save(ls, c)
                 label 3:  // no_save
-                c_label_end()
             }
         } else {
             // go through
@@ -10606,7 +10595,7 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                         break
                     }
                 }
-                if (_cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == 11) {
+                if (_cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == '\v') {
                     {
                         // spaces
                         let _t0 = ls.z.n
@@ -10895,7 +10884,7 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                         return int(RESERVED.TK_EOS)
                     }
                 }
-                if (!(_cond == '\n' || _cond == '\r' || _cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == 11 || _cond == '-' || _cond == '[' || _cond == '=' || _cond == '<' || _cond == '>' || _cond == '/' || _cond == '~' || _cond == ':' || _cond == '"' || _cond == '\'' || _cond == '.' || _cond == '0' || _cond == '1' || _cond == '2' || _cond == '3' || _cond == '4' || _cond == '5' || _cond == '6' || _cond == '7' || _cond == '8' || _cond == '9' || _cond == -1)) {
+                if (!(_cond == '\n' || _cond == '\r' || _cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == '\v' || _cond == '-' || _cond == '[' || _cond == '=' || _cond == '<' || _cond == '>' || _cond == '/' || _cond == '~' || _cond == ':' || _cond == '"' || _cond == '\'' || _cond == '.' || _cond == '0' || _cond == '1' || _cond == '2' || _cond == '3' || _cond == '4' || _cond == '5' || _cond == '6' || _cond == '7' || _cond == '8' || _cond == '9' || _cond == -1)) {
                     {
                         // identifier or reserved word?
                         if ((int(luai_ctype_[ls.current + 1]) & 1 << 0) != 0) {
@@ -11364,7 +11353,7 @@ def private l_str2dloc(var s : uint8?; var result : double?; mode : int) : uint8
         endptr = endptr + 1
     }
     // OK iff no trailing chars
-    return int(deref(endptr)) == 0 ? endptr : null
+    return int(deref(endptr)) == '\0' ? endptr : null
 }
 
 // Convert string 's' to a Lua number (put in 'result') handling the
@@ -11454,7 +11443,7 @@ def private l_str2int(var s : uint8?; var result : int64?) : uint8? {
         s = s + 1
     }
     // something wrong in the numeral
-    if (empty != 0 || int(deref(s)) != 0) {
+    if (empty != 0 || int(deref(s)) != '\0') {
         return null
     } else {
         deref(result) = int64(neg != 0 ? uint64(0u) - a : a)
@@ -11533,7 +11522,7 @@ def private tostringbuff(var obj : TValue?; var buff : uint8?) : int {
     } else {
         len = snprintf(buff, uint64(44), reinterpret<uint8?>("%.14g"), obj.value_.n)
         // looks like an int?
-        if (int(deref(buff + crt::strspn(buff, reinterpret<uint8?>("-0123456789")))) == 0) {
+        if (int(deref(buff + crt::strspn(buff, reinterpret<uint8?>("-0123456789")))) == '\0') {
             let _t0 = len
             len++
             deref(buff + _t0) = deref(reinterpret<lconv?>(crt::localeconv()).decimal_point + 0)
@@ -11709,7 +11698,7 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
                 var sz : int = int(uint64(3) * uint64(typeinfo sizeof(type<void?>)) + uint64(8))
                 var bf : uint8? = getbuff(addr(buff), sz)
                 var p : void? = reinterpret<void?>(va_p(argp))
-                var len : int = snprintf(bf, uint64(sz), reinterpret<uint8?>("%p"), reinterpret<uint8?>(p))
+                var len : int = snprintf(bf, uint64(sz), reinterpret<uint8?>("%p"), p)
                 addr(buff).blen += len
             }
         } elif (_cond == 'U') {
@@ -11760,7 +11749,7 @@ def luaO_chunkid(var out : uint8?; var source : uint8?; var srclen : uint64) {
             // truncate it
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1), (bufflen - uint64(1)) * uint64(typeinfo sizeof(type<uint8>)))
             out = out + (bufflen - uint64(1))
-            deref(out) = uint8(0)
+            deref(out) = uint8('\0')
         }
     } elif (int(deref(source)) == '@') {
         // file name
@@ -14509,7 +14498,7 @@ def private createstrobj(var L : lua_State?; l : uint64; tag : int; h : uint) : 
     ts.hash = h
     ts.extra = uint8(0)
     // ending 0
-    deref(addr(ts.contents[0]) + l) = uint8(0)
+    deref(addr(ts.contents[0]) + l) = uint8('\0')
     return ts
 }
 
@@ -17566,11 +17555,9 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
     var base : StackValue?
     var pc : uint?
     var trap : int
-    label 2:  // startfunc
-    c_label_end()
+    label 1:  // startfunc
     trap = c_volatile_load(L.hookmask)
-    label 3:  // returning
-    c_label_end()
+    label 2:  // returning
     // trap already set
     cl = addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l)
     k = cl.p.k
@@ -17598,7 +17585,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
             var _cond = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
             var _goto = 0
             while (true) {
-                label 1:  // re-dispatch
+                label 6:  // re-dispatch
                 var _flag = false
                 if (_cond == OpCode.OP_MOVE) {
                     {
@@ -19881,7 +19868,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         } else {
                             // Lua call: run function in this same C frame
                             ci = newci
-                            goto label 2
+                            goto label 1
                         }
                         break
                     }
@@ -19914,7 +19901,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         n = luaD_pretailcall(L, ci, ra, b, delta)
                         if (n < 0) {
                             // execute the callee
-                            goto label 2
+                            goto label 1
                         } else {
                             // C function?
                             // restore 'func' (if vararg)
@@ -19926,7 +19913,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             // caller returns after the tail call
                             _goto = 1
                             _cond = enum_from_int(type<OpCode>, -1)
-                            goto label 1
+                            goto label 6
                         }
                     }
                 }
@@ -19970,7 +19957,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         trap = c_volatile_load(ci.u.l.trap)
                         _goto = 1
                         _cond = enum_from_int(type<OpCode>, -1)
-                        goto label 1
+                        goto label 6
                     }
                 }
                 if (_cond == OpCode.OP_RETURN0) {
@@ -20001,7 +19988,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         }
                         _goto = 1
                         _cond = enum_from_int(type<OpCode>, -1)
-                        goto label 1
+                        goto label 6
                     }
                 }
                 _flag ||= _cond == OpCode.OP_RETURN1
@@ -20053,7 +20040,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                     } else {
                         ci = ci.previous
                         // continue running caller in this frame
-                        goto label 3
+                        goto label 2
                     }
                 }
                 _flag ||= _cond == OpCode.OP_FORLOOP
@@ -20126,7 +20113,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         i = deref(_t113)
                         _goto = 2
                         _cond = enum_from_int(type<OpCode>, -1)
-                        goto label 1
+                        goto label 6
                     }
                 }
                 _flag ||= _cond == OpCode.OP_TFORCALL
@@ -20159,7 +20146,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         i = deref(_t114)
                         _goto = 3
                         _cond = enum_from_int(type<OpCode>, -1)
-                        goto label 1
+                        goto label 6
                     }
                 }
                 _flag ||= _cond == OpCode.OP_TFORLOOP
@@ -20419,7 +20406,7 @@ def private pushfuncname(var L : lua_State?; var ar : lua_Debug?) {
         // remove name
         lua_rotate(L, -2, -1)
         lua_settop(L, -1 - 1)
-    } elif (int(deref(ar.namewhat)) != 0) {
+    } elif (int(deref(ar.namewhat)) != '\0') {
         // is there a name from code?
         // use it
         lua_pushfstring`va(L, reinterpret<uint8?>("%s '%s'"), (ar.namewhat, ar.name))
@@ -21249,7 +21236,7 @@ def luaL_tolstring(var L : lua_State?; var idx : int; var len : uint64?) : uint8
                 // try name
                 var tt : int = luaL_getmetafield(L, idx, reinterpret<uint8?>("__name"))
                 var kind : uint8? = tt == LUA_TSTRING ? lua_tolstring(L, -1, null) : lua_typename(L, lua_type(L, idx))
-                lua_pushfstring`va(L, reinterpret<uint8?>("%s: %p"), (kind, reinterpret<uint8?>(lua_topointer(L, idx))))
+                lua_pushfstring`va(L, reinterpret<uint8?>("%s: %p"), (kind, lua_topointer(L, idx)))
                 if (tt != LUA_TNIL) {
                     // remove '__name'
                     lua_rotate(L, -2, -1)
@@ -21462,7 +21449,7 @@ def private warnfon(var ud : void?; var message : uint8?; tocont : int) {
 }
 
 [c_function]
-def luaL_newstate : lua_State ? {
+def luaL_newstate : lua_State? {
     var L : lua_State? = lua_newstate(@@l_alloc, null)
     if (L != null) {
         lua_atpanic(L, @@_c_panic)
@@ -21685,7 +21672,7 @@ def private PrintString(var ts : TString?) {
             printf(reinterpret<uint8?>("\\\""))
         } elif (_cond == '\\') {
             printf(reinterpret<uint8?>("\\\\"))
-        } elif (_cond == 7) {
+        } elif (_cond == '\a') {
             printf(reinterpret<uint8?>("\\a"))
         } elif (_cond == '\b') {
             printf(reinterpret<uint8?>("\\b"))
@@ -21697,7 +21684,7 @@ def private PrintString(var ts : TString?) {
             printf(reinterpret<uint8?>("\\r"))
         } elif (_cond == '\t') {
             printf(reinterpret<uint8?>("\\t"))
-        } elif (_cond == 11) {
+        } elif (_cond == '\v') {
             printf(reinterpret<uint8?>("\\v"))
         } else {
             if (crt::isprint(c) != 0) {
@@ -21746,7 +21733,7 @@ def private PrintConstant(var f : Proto?; i : int) {
             var buff : uint8[100]
             sprintf(addr(buff[0]), reinterpret<uint8?>("%.14g"), o.value_.n)
             printf(reinterpret<uint8?>("%s"), addr(buff[0]))
-            if (int(buff[crt::strspn(addr(buff[0]), reinterpret<uint8?>("-0123456789"))]) == 0) {
+            if (int(buff[crt::strspn(addr(buff[0]), reinterpret<uint8?>("-0123456789"))]) == '\0') {
                 printf(reinterpret<uint8?>(".0"))
             }
         }
@@ -22040,7 +22027,7 @@ def private PrintCode(var f : Proto?) {
             }
         } elif (_cond == OpCode.OP_CLOSURE) {
             printf(reinterpret<uint8?>("%d %d"), a, bx)
-            printf(reinterpret<uint8?>("\t; %p"), reinterpret<uint8?>(reinterpret<void?>(deref(f.p + bx))))
+            printf(reinterpret<uint8?>("\t; %p"), reinterpret<void?>(deref(f.p + bx)))
         } elif (_cond == OpCode.OP_VARARG) {
             printf(reinterpret<uint8?>("%d %d"), a, c)
             printf(reinterpret<uint8?>("\t; "))
@@ -22068,7 +22055,7 @@ def private PrintHeader(var f : Proto?) {
     } else {
         s = reinterpret<uint8?>("(string)")
     }
-    printf(reinterpret<uint8?>("\n%s <%s:%d,%d> (%d instruction%s at %p)\n"), f.linedefined == 0 ? reinterpret<uint8?>("main") : reinterpret<uint8?>("function"), s, f.linedefined, f.lastlinedefined, f.sizecode, f.sizecode == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), reinterpret<uint8?>(reinterpret<void?>(f)))
+    printf(reinterpret<uint8?>("\n%s <%s:%d,%d> (%d instruction%s at %p)\n"), f.linedefined == 0 ? reinterpret<uint8?>("main") : reinterpret<uint8?>("function"), s, f.linedefined, f.lastlinedefined, f.sizecode, f.sizecode == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), reinterpret<void?>(f))
     printf(reinterpret<uint8?>("%d%s param%s, %d slot%s, %d upvalue%s, "), int(f.numparams), f.is_vararg != 0 ? reinterpret<uint8?>("+") : addr(c2das_empty[0]), int(f.numparams) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), int(f.maxstacksize), int(f.maxstacksize) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizeupvalues, f.sizeupvalues == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"))
     printf(reinterpret<uint8?>("%d local%s, %d constant%s, %d function%s\n"), f.sizelocvars, f.sizelocvars == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizek, f.sizek == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizep, f.sizep == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"))
 }
@@ -22077,7 +22064,7 @@ def private PrintHeader(var f : Proto?) {
 def private PrintDebug(var f : Proto?) {
     var n : int
     n = f.sizek
-    printf(reinterpret<uint8?>("constants (%d) for %p:\n"), n, reinterpret<uint8?>(reinterpret<void?>(f)))
+    printf(reinterpret<uint8?>("constants (%d) for %p:\n"), n, reinterpret<void?>(f))
     for (i in range(n)) {
         printf(reinterpret<uint8?>("\t%d\t"), i)
         PrintType(f, i)
@@ -22085,12 +22072,12 @@ def private PrintDebug(var f : Proto?) {
         printf(reinterpret<uint8?>("\n"))
     }
     n = f.sizelocvars
-    printf(reinterpret<uint8?>("locals (%d) for %p:\n"), n, reinterpret<uint8?>(reinterpret<void?>(f)))
+    printf(reinterpret<uint8?>("locals (%d) for %p:\n"), n, reinterpret<void?>(f))
     for (i in range(n)) {
         printf(reinterpret<uint8?>("\t%d\t%s\t%d\t%d\n"), i, addr(deref(f.locvars + i).varname.contents[0]), deref(f.locvars + i).startpc + 1, deref(f.locvars + i).endpc + 1)
     }
     n = f.sizeupvalues
-    printf(reinterpret<uint8?>("upvalues (%d) for %p:\n"), n, reinterpret<uint8?>(reinterpret<void?>(f)))
+    printf(reinterpret<uint8?>("upvalues (%d) for %p:\n"), n, reinterpret<void?>(f))
     for (i in range(n)) {
         printf(reinterpret<uint8?>("\t%d\t%s\t%d\t%d\n"), i, deref(f.upvalues + i).name != null ? addr(deref(f.upvalues + i).name.contents[0]) : reinterpret<uint8?>("-"), int(deref(f.upvalues + i).instack), int(deref(f.upvalues + i).idx))
     }

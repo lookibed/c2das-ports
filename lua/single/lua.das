@@ -3,6 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+options strict_aliasing = false
 options jit_split_modules = 0
 require c_runtime/c_args
 require c_runtime/c_exit
@@ -20,12 +21,6 @@ require crt
 require math
 
 var private c2das_empty : uint8[1] = fixed_array(uint8(0))
-
-// a C label's statement: the optimizer keeps a [sideeffects] call after the label
-[sideeffects]
-def private c_label_end {
-    pass
-}
 
 [init]
 def private c2das_dialect {
@@ -6122,7 +6117,7 @@ def luaG_addinfo(var L : lua_State?; var msg : uint8?; var src : TString?; line 
     } else {
         // no source available; use "?" instead
         buff[0] = uint8('?')
-        buff[1] = uint8(0)
+        buff[1] = uint8('\0')
     }
     return luaO_pushfstring`va(L, reinterpret<uint8?>("%s:%d: %s"), (addr(buff[0]), line, msg))
 }
@@ -6933,7 +6928,6 @@ def private precallC(var L : lua_State?; var func : StackValue?; nresults : int;
 [c_function]
 def luaD_pretailcall(var L : lua_State?; var ci : CallInfo?; var func : StackValue?; var narg1 : int; delta : int) : int {
     label 1:  // retry
-    c_label_end()
     let _cond = int(addr(func.val).tt_) & 63
     if (_cond == 38) {
         // C closure
@@ -7014,7 +7008,6 @@ def luaD_pretailcall(var L : lua_State?; var ci : CallInfo?; var func : StackVal
 [c_function]
 def luaD_precall(var L : lua_State?; var func : StackValue?; nresults : int) : CallInfo? {
     label 1:  // retry
-    c_label_end()
     let _cond = int(addr(func.val).tt_) & 63
     if (_cond == 38) {
         // C closure
@@ -10076,7 +10069,7 @@ def luaX_token2str(var ls : LexState?; token : int) : uint8? {
 def private txtToken(var ls : LexState?; token : int) : uint8? {
     let _cond = token
     if (_cond == 291 || _cond == 292 || _cond == 289 || _cond == 290) {
-        save(ls, 0)
+        save(ls, '\0')
         return luaO_pushfstring`va(ls.L, reinterpret<uint8?>("'%s'"), (ls.buff.buffer,))
     } else {
         return luaX_token2str(ls, token)
@@ -10311,7 +10304,7 @@ def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
         }
         ls.current = _t8
     }
-    save(ls, 0)
+    save(ls, '\0')
     // format error?
     if (luaO_str2num(ls.buff.buffer, addr(obj)) == uint64(0)) {
         lexerror(ls, reinterpret<uint8?>("malformed number"), int(RESERVED.TK_FLT))
@@ -10457,7 +10450,6 @@ def private read_long_string(var ls : LexState?; var seminfo : SemInfo?; sep : u
         }
     }
     label 1:  // endloop
-    c_label_end()
     if (seminfo != null) {
         seminfo.ts = luaX_newstring(ls, ls.buff.buffer + sep, ls.buff.n - uint64(2) * sep)
     }
@@ -10657,7 +10649,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 ls.current = _t5
                 let _cond2 = ls.current
                 if (_cond2 == 'a') {
-                    c = 7
+                    c = '\a'
                     goto label 1
                 } elif (_cond2 == 'b') {
                     c = '\b'
@@ -10675,7 +10667,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                     c = '\t'
                     goto label 1
                 } elif (_cond2 == 'v') {
-                    c = 11
+                    c = '\v'
                     goto label 1
                 } elif (_cond2 == 'x') {
                     c = readhexaesc(ls)
@@ -10738,7 +10730,6 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                     }
                 }
                 label 1:  // read_save
-                c_label_end()
                 let _t12 = ls.z.n
                 ls.z.n--
                 var _t14 : int
@@ -10751,13 +10742,11 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 }
                 ls.current = _t14
                 label 2:  // only_save
-                c_label_end()
                 // go through
                 // remove '\\'
                 ls.buff.n -= uint64(1)
                 save(ls, c)
                 label 3:  // no_save
-                c_label_end()
             }
         } else {
             // go through
@@ -10806,7 +10795,7 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                         break
                     }
                 }
-                if (_cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == 11) {
+                if (_cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == '\v') {
                     {
                         // spaces
                         let _t0 = ls.z.n
@@ -11095,7 +11084,7 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                         return int(RESERVED.TK_EOS)
                     }
                 }
-                if (!(_cond == '\n' || _cond == '\r' || _cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == 11 || _cond == '-' || _cond == '[' || _cond == '=' || _cond == '<' || _cond == '>' || _cond == '/' || _cond == '~' || _cond == ':' || _cond == '"' || _cond == '\'' || _cond == '.' || _cond == '0' || _cond == '1' || _cond == '2' || _cond == '3' || _cond == '4' || _cond == '5' || _cond == '6' || _cond == '7' || _cond == '8' || _cond == '9' || _cond == -1)) {
+                if (!(_cond == '\n' || _cond == '\r' || _cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == '\v' || _cond == '-' || _cond == '[' || _cond == '=' || _cond == '<' || _cond == '>' || _cond == '/' || _cond == '~' || _cond == ':' || _cond == '"' || _cond == '\'' || _cond == '.' || _cond == '0' || _cond == '1' || _cond == '2' || _cond == '3' || _cond == '4' || _cond == '5' || _cond == '6' || _cond == '7' || _cond == '8' || _cond == '9' || _cond == -1)) {
                     {
                         // identifier or reserved word?
                         if ((int(luai_ctype_[ls.current + 1]) & 1 << 0) != 0) {
@@ -11564,7 +11553,7 @@ def private l_str2dloc(var s : uint8?; var result : double?; mode : int) : uint8
         endptr = endptr + 1
     }
     // OK iff no trailing chars
-    return int(deref(endptr)) == 0 ? endptr : null
+    return int(deref(endptr)) == '\0' ? endptr : null
 }
 
 // Convert string 's' to a Lua number (put in 'result') handling the
@@ -11654,7 +11643,7 @@ def private l_str2int(var s : uint8?; var result : int64?) : uint8? {
         s = s + 1
     }
     // something wrong in the numeral
-    if (empty != 0 || int(deref(s)) != 0) {
+    if (empty != 0 || int(deref(s)) != '\0') {
         return null
     } else {
         deref(result) = int64(neg != 0 ? uint64(0u) - a : a)
@@ -11733,7 +11722,7 @@ def private tostringbuff(var obj : TValue?; var buff : uint8?) : int {
     } else {
         len = snprintf(buff, uint64(44), reinterpret<uint8?>("%.14g"), obj.value_.n)
         // looks like an int?
-        if (int(deref(buff + crt::strspn(buff, reinterpret<uint8?>("-0123456789")))) == 0) {
+        if (int(deref(buff + crt::strspn(buff, reinterpret<uint8?>("-0123456789")))) == '\0') {
             let _t0 = len
             len++
             deref(buff + _t0) = deref(reinterpret<lconv?>(crt::localeconv()).decimal_point + 0)
@@ -11909,7 +11898,7 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
                 var sz : int = int(uint64(3) * uint64(typeinfo sizeof(type<void?>)) + uint64(8))
                 var bf : uint8? = getbuff(addr(buff), sz)
                 var p : void? = reinterpret<void?>(va_p(argp))
-                var len : int = snprintf(bf, uint64(sz), reinterpret<uint8?>("%p"), reinterpret<uint8?>(p))
+                var len : int = snprintf(bf, uint64(sz), reinterpret<uint8?>("%p"), p)
                 addr(buff).blen += len
             }
         } elif (_cond == 'U') {
@@ -11960,7 +11949,7 @@ def luaO_chunkid(var out : uint8?; var source : uint8?; var srclen : uint64) {
             // truncate it
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1), (bufflen - uint64(1)) * uint64(typeinfo sizeof(type<uint8>)))
             out = out + (bufflen - uint64(1))
-            deref(out) = uint8(0)
+            deref(out) = uint8('\0')
         }
     } elif (int(deref(source)) == '@') {
         // file name
@@ -14709,7 +14698,7 @@ def private createstrobj(var L : lua_State?; l : uint64; tag : int; h : uint) : 
     ts.hash = h
     ts.extra = uint8(0)
     // ending 0
-    deref(addr(ts.contents[0]) + l) = uint8(0)
+    deref(addr(ts.contents[0]) + l) = uint8('\0')
     return ts
 }
 
@@ -17766,11 +17755,9 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
     var base : StackValue?
     var pc : uint?
     var trap : int
-    label 2:  // startfunc
-    c_label_end()
+    label 1:  // startfunc
     trap = c_volatile_load(L.hookmask)
-    label 3:  // returning
-    c_label_end()
+    label 2:  // returning
     // trap already set
     cl = addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l)
     k = cl.p.k
@@ -17798,7 +17785,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
             var _cond = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
             var _goto = 0
             while (true) {
-                label 1:  // re-dispatch
+                label 6:  // re-dispatch
                 var _flag = false
                 if (_cond == OpCode.OP_MOVE) {
                     {
@@ -20081,7 +20068,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         } else {
                             // Lua call: run function in this same C frame
                             ci = newci
-                            goto label 2
+                            goto label 1
                         }
                         break
                     }
@@ -20114,7 +20101,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         n = luaD_pretailcall(L, ci, ra, b, delta)
                         if (n < 0) {
                             // execute the callee
-                            goto label 2
+                            goto label 1
                         } else {
                             // C function?
                             // restore 'func' (if vararg)
@@ -20126,7 +20113,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                             // caller returns after the tail call
                             _goto = 1
                             _cond = enum_from_int(type<OpCode>, -1)
-                            goto label 1
+                            goto label 6
                         }
                     }
                 }
@@ -20170,7 +20157,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         trap = c_volatile_load(ci.u.l.trap)
                         _goto = 1
                         _cond = enum_from_int(type<OpCode>, -1)
-                        goto label 1
+                        goto label 6
                     }
                 }
                 if (_cond == OpCode.OP_RETURN0) {
@@ -20201,7 +20188,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         }
                         _goto = 1
                         _cond = enum_from_int(type<OpCode>, -1)
-                        goto label 1
+                        goto label 6
                     }
                 }
                 _flag ||= _cond == OpCode.OP_RETURN1
@@ -20253,7 +20240,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                     } else {
                         ci = ci.previous
                         // continue running caller in this frame
-                        goto label 3
+                        goto label 2
                     }
                 }
                 _flag ||= _cond == OpCode.OP_FORLOOP
@@ -20326,7 +20313,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         i = deref(_t113)
                         _goto = 2
                         _cond = enum_from_int(type<OpCode>, -1)
-                        goto label 1
+                        goto label 6
                     }
                 }
                 _flag ||= _cond == OpCode.OP_TFORCALL
@@ -20359,7 +20346,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                         i = deref(_t114)
                         _goto = 3
                         _cond = enum_from_int(type<OpCode>, -1)
-                        goto label 1
+                        goto label 6
                     }
                 }
                 _flag ||= _cond == OpCode.OP_TFORLOOP
@@ -20619,7 +20606,7 @@ def private pushfuncname(var L : lua_State?; var ar : lua_Debug?) {
         // remove name
         lua_rotate(L, -2, -1)
         lua_settop(L, -1 - 1)
-    } elif (int(deref(ar.namewhat)) != 0) {
+    } elif (int(deref(ar.namewhat)) != '\0') {
         // is there a name from code?
         // use it
         lua_pushfstring`va(L, reinterpret<uint8?>("%s '%s'"), (ar.namewhat, ar.name))
@@ -21449,7 +21436,7 @@ def luaL_tolstring(var L : lua_State?; var idx : int; var len : uint64?) : uint8
                 // try name
                 var tt : int = luaL_getmetafield(L, idx, reinterpret<uint8?>("__name"))
                 var kind : uint8? = tt == LUA_TSTRING ? lua_tolstring(L, -1, null) : lua_typename(L, lua_type(L, idx))
-                lua_pushfstring`va(L, reinterpret<uint8?>("%s: %p"), (kind, reinterpret<uint8?>(lua_topointer(L, idx))))
+                lua_pushfstring`va(L, reinterpret<uint8?>("%s: %p"), (kind, lua_topointer(L, idx)))
                 if (tt != LUA_TNIL) {
                     // remove '__name'
                     lua_rotate(L, -2, -1)
@@ -21662,7 +21649,7 @@ def private warnfon(var ud : void?; var message : uint8?; tocont : int) {
 }
 
 [c_function]
-def luaL_newstate : lua_State ? {
+def luaL_newstate : lua_State? {
     var L : lua_State? = lua_newstate(@@l_alloc, null)
     if (L != null) {
         lua_atpanic(L, @@_c_panic)
@@ -21743,7 +21730,7 @@ def private b_str2int(var s : uint8?; base : int; var pn : int64?) : uint8? {
     var n : uint64 = uint64(0)
     var neg : int = 0
     // skip initial spaces
-    s = s + crt::strspn(s, reinterpret<uint8?>(" \x0c\n\r\t\x0b"))
+    s = s + crt::strspn(s, reinterpret<uint8?>(" \f\n\r\t\v"))
     // handle sign
     if (int(deref(s)) == '-') {
         s = s + 1
@@ -21768,7 +21755,7 @@ def private b_str2int(var s : uint8?; base : int; var pn : int64?) : uint8? {
         }
     }
     // skip trailing spaces
-    s = s + crt::strspn(s, reinterpret<uint8?>(" \x0c\n\r\t\x0b"))
+    s = s + crt::strspn(s, reinterpret<uint8?>(" \f\n\r\t\v"))
     deref(pn) = int64(neg != 0 ? uint64(0u) - n : n)
     return s
 }
@@ -22824,7 +22811,7 @@ def private unmakemask(mask : int; var smask : uint8?) : uint8? {
         i++
         deref(smask + _t2) = uint8('l')
     }
-    deref(smask + i) = uint8(0)
+    deref(smask + i) = uint8('\0')
     return smask
 }
 
@@ -22958,7 +22945,7 @@ def luaopen_debug(var L : lua_State?) : int {
 // Check whether 'mode' matches '[rwa]%+?[L_MODEEXT]*'
 [c_function]
 def private l_checkmode(var mode : uint8?) : int {
-    var _t1 = int(deref(mode)) != 0
+    var _t1 = int(deref(mode)) != '\0'
     if (_t1) {
         var _t0 = mode
         mode = mode + 1
@@ -23114,7 +23101,7 @@ def private io_popen(var L : lua_State?) : int {
     var filename : uint8? = luaL_checklstring(L, 1, null)
     var mode : uint8? = luaL_optlstring(L, 2, reinterpret<uint8?>("r"), null)
     var p : luaL_Stream? = newprefile(L)
-    let _t0 = (int(deref(mode + 0)) == 'r' || int(deref(mode + 0)) == 'w') && int(deref(mode + 1)) == 0 || luaL_argerror(L, 2, reinterpret<uint8?>("invalid mode")) != 0
+    let _t0 = (int(deref(mode + 0)) == 'r' || int(deref(mode + 0)) == 'w') && int(deref(mode + 1)) == '\0' || luaL_argerror(L, 2, reinterpret<uint8?>("invalid mode")) != 0
     deref(crt::c_errno_location()) = 0
     luaL_error`va(L, reinterpret<uint8?>("'popen' not supported"), VaNone())
     p.f = null
@@ -23250,7 +23237,7 @@ def private nextc(var rn : RN?) : int {
     // buffer overflow?
     if (rn.n >= 200) {
         // invalidate result
-        rn.buff[0] = uint8(0)
+        rn.buff[0] = uint8('\0')
         // fail
         return 0
     } else {
@@ -23334,7 +23321,7 @@ def private read_number(var L : lua_State?; var f : _IO_FILE?) : int {
     // unread look-ahead char
     crt::ungetc(rn.c, reinterpret<void?>(rn.f))
     // finish string
-    rn.buff[rn.n] = uint8(0)
+    rn.buff[rn.n] = uint8('\0')
     if (lua_stringtonumber(L, addr(rn.buff[0])) != uint64(0)) {
         // ok, it is a valid number
         return 1
@@ -24333,7 +24320,7 @@ def private getnextfilename(var path : uint8 ??; var end : uint8?) : uint8? {
     if (intptr(name) == intptr(end)) {
         // no more names
         return null
-    } elif (int(deref(name)) == 0) {
+    } elif (int(deref(name)) == '\0') {
         // from previous iteration?
         // restore separator
         deref(name) = deref(reinterpret<uint8?>(";"))
@@ -24348,7 +24335,7 @@ def private getnextfilename(var path : uint8 ??; var end : uint8?) : uint8? {
         sep = end
     }
     // finish file name
-    deref(sep) = uint8(0)
+    deref(sep) = uint8('\0')
     // will start next search from here
     deref(path) = sep
     return name
@@ -24376,7 +24363,7 @@ def private searchpath(var L : lua_State?; var name : uint8?; var path : uint8?;
     var endpathname : uint8?
     var filename : uint8?
     // separator is non-empty and appears in 'name'?
-    if (int(deref(sep)) != 0 && crt::strchr(name, int(deref(sep))) != null) {
+    if (int(deref(sep)) != '\0' && crt::strchr(name, int(deref(sep))) != null) {
         // replace it by 'dirsep'
         name = luaL_gsub(L, name, sep, dirsep)
     }
@@ -24386,7 +24373,7 @@ def private searchpath(var L : lua_State?; var name : uint8?; var path : uint8?;
     let _t0 = addr(buff).n < addr(buff).size || luaL_prepbuffsize(addr(buff), uint64(1)) != null
     let _t1 = addr(buff).n
     addr(buff).n++
-    deref(addr(buff).b + _t1) = uint8(0)
+    deref(addr(buff).b + _t1) = uint8('\0')
     // writable list of file names
     pathname = addr(buff).b
     endpathname = pathname + addr(buff).n + -(1)
@@ -24841,7 +24828,7 @@ def private checkoption(var L : lua_State?; var conv : uint8?; convlen : int64; 
     // length of options being checked
     var oplen : int = 1
     {
-        while (int(deref(option)) != 0 && int64(oplen) <= convlen) {
+        while (int(deref(option)) != '\0' && int64(oplen) <= convlen) {
             // next block?
             if (int(deref(option)) == '|') {
                 // will check options with next length (+1)
@@ -24850,7 +24837,7 @@ def private checkoption(var L : lua_State?; var conv : uint8?; convlen : int64; 
                 // match?
                 // copy valid option to buffer
                 crt::memcpy(reinterpret<void?>(buff), reinterpret<void?>(conv), uint64(oplen))
-                deref(buff + oplen) = uint8(0)
+                deref(buff + oplen) = uint8('\0')
                 // return next item
                 return conv + oplen
             }
@@ -25564,15 +25551,14 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
     if (_t0 == 0) {
         luaL_error`va(ms.L, reinterpret<uint8?>("pattern too complex"), VaNone())
     }
-    label 2:  // init
-    c_label_end()
+    label 1:  // init
     // using goto to optimize tail recursion
     // end of pattern?
     if (intptr(p) != intptr(ms.p_end)) {
         var _cond = int(deref(p))
         var _goto = 0
         while (true) {
-            label 1:  // re-dispatch
+            label 3:  // re-dispatch
             var _flag = false
             if (_cond == '(') {
                 {
@@ -25600,7 +25586,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                         // no; go to default
                         _goto = 1
                         _cond = 35
-                        goto label 1
+                        goto label 3
                     }
                     // check end of string
                     s = intptr(s) == intptr(ms.src_end) ? s : null
@@ -25618,7 +25604,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                             if (s != null) {
                                 // return match(ms, s, p + 4);
                                 p = p + 4
-                                goto label 2
+                                goto label 1
                             }
                         }
                     } elif (_cond2 == 'f') {
@@ -25633,11 +25619,11 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                             }
                             // points to what is next
                             ep = classend(ms, p)
-                            previous = uint8(intptr(s) == intptr(ms.src_init) ? 0 : int(deref(s - 1)))
+                            previous = uint8(intptr(s) == intptr(ms.src_init) ? '\0' : int(deref(s - 1)))
                             if (!(matchbracketclass(int(uint8(previous)), p, ep - 1) != 0) && matchbracketclass(int(uint8(deref(s))), p, ep - 1) != 0) {
                                 // return match(ms, s, ep);
                                 p = ep
-                                goto label 2
+                                goto label 1
                             }
                             // match failed
                             s = null
@@ -25649,13 +25635,13 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                             if (s != null) {
                                 // return match(ms, s, p + 2)
                                 p = p + 2
-                                goto label 2
+                                goto label 1
                             }
                         }
                     } else {
                         _goto = 1
                         _cond = 35
-                        goto label 1
+                        goto label 3
                     }
                     break
                 }
@@ -25674,7 +25660,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                         if (int(deref(ep)) == '*' || int(deref(ep)) == '?' || int(deref(ep)) == '-') {
                             // return match(ms, s, ep + 1);
                             p = ep + 1
-                            goto label 2
+                            goto label 1
                         } else {
                             // '+' or no suffix
                             // fail
@@ -25696,7 +25682,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                                     } else {
                                         // else return match(ms, s, ep + 1);
                                         p = ep + 1
-                                        goto label 2
+                                        goto label 1
                                     }
                                     break
                                 }
@@ -25724,7 +25710,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                                 // return match(ms, s + 1, ep);
                                 s = s + 1
                                 p = ep
-                                goto label 2
+                                goto label 1
                             }
                             break
                         }
@@ -26308,7 +26294,7 @@ def private getformat(var L : lua_State?; var strfrmt : uint8?; var form : uint8
     form = form + 1
     deref(_t0) = uint8('%')
     crt::memcpy(reinterpret<void?>(form), reinterpret<void?>(strfrmt), len * uint64(typeinfo sizeof(type<uint8>)))
-    deref(form + len) = uint8(0)
+    deref(form + len) = uint8('\0')
     return strfrmt + len + -(1)
 }
 
@@ -26320,7 +26306,7 @@ def private addlenmod(var form : uint8?; var lenmod : uint8?) {
     var spec : uint8 = deref(form + (l - uint64(1)))
     crt::strcpy(form + l + -(1), lenmod)
     deref(form + (l + lm - uint64(1))) = spec
-    deref(form + (l + lm)) = uint8(0)
+    deref(form + (l + lm)) = uint8('\0')
 }
 
 [c_function]
@@ -26371,7 +26357,7 @@ def private str_format(var L : lua_State?) : int {
                 var _cond = int(deref(_t6))
                 var _goto = 0
                 while (true) {
-                    label 1:  // re-dispatch
+                    label 2:  // re-dispatch
                     var _flag = false
                     if (_cond == 'c') {
                         {
@@ -26384,13 +26370,13 @@ def private str_format(var L : lua_State?) : int {
                         flags = reinterpret<uint8?>("-+0 ")
                         _goto = 1
                         _cond = 64
-                        goto label 1
+                        goto label 2
                     }
                     if (_cond == 'u') {
                         flags = reinterpret<uint8?>("-0")
                         _goto = 1
                         _cond = 64
-                        goto label 1
+                        goto label 2
                     }
                     _flag ||= _cond == 'o'
                     _flag ||= _cond == 'x'
@@ -26446,14 +26432,14 @@ def private str_format(var L : lua_State?) : int {
                                 // format it as a string
                                 form[crt::strlen(addr(form[0])) - uint64(1)] = uint8('s')
                             }
-                            nb = snprintf(buff, uint64(maxitem), addr(form[0]), reinterpret<uint8?>(p))
+                            nb = snprintf(buff, uint64(maxitem), addr(form[0]), p)
                             break
                         }
                     }
                     if (_cond == 'q') {
                         {
                             // modifiers?
-                            if (int(form[2]) != 0) {
+                            if (int(form[2]) != '\0') {
                                 return luaL_error`va(L, reinterpret<uint8?>("specifier '%%q' cannot have modifiers"), VaNone())
                             }
                             addliteral(L, addr(b), arg)
@@ -26465,7 +26451,7 @@ def private str_format(var L : lua_State?) : int {
                             var l : uint64
                             var s : uint8? = luaL_tolstring(L, arg, addr(l))
                             // no modifiers?
-                            if (int(form[2]) == 0) {
+                            if (int(form[2]) == '\0') {
                                 // keep entire string
                                 luaL_addvalue(addr(b))
                             } else {
@@ -26645,7 +26631,7 @@ def private getdetails(var h : Header?; totalsize : uint64; var fmt : uint8 ??; 
     var align : int = deref(psize)
     // 'X' gets alignment from following option
     if (opt == KOption.Kpaddalign) {
-        if (int(deref(deref(fmt))) == 0 || getoption(h, fmt, addr(align)) == KOption.Kchar || align == 0) {
+        if (int(deref(deref(fmt))) == '\0' || getoption(h, fmt, addr(align)) == KOption.Kchar || align == 0) {
             luaL_argerror(h.L, 1, reinterpret<uint8?>("invalid next option for option 'X'"))
         }
     }
@@ -26727,7 +26713,7 @@ def private str_pack(var L : lua_State?) : int {
     // mark to separate arguments from string buffer
     lua_pushnil(L)
     luaL_buffinit(L, addr(b))
-    while (int(deref(fmt)) != 0) {
+    while (int(deref(fmt)) != '\0') {
         var size : int
         var ntoalign : int
         var opt : KOption = getdetails(addr(h), totalsize, addr(fmt), addr(size), addr(ntoalign))
@@ -26856,7 +26842,7 @@ def private str_pack(var L : lua_State?) : int {
                     let _t11 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), uint64(1)) != null
                     let _t12 = addr(b).n
                     addr(b).n++
-                    deref(addr(b).b + _t12) = uint8(0)
+                    deref(addr(b).b + _t12) = uint8('\0')
                     totalsize += len + uint64(1)
                     break
                 }
@@ -26891,7 +26877,7 @@ def private str_packsize(var L : lua_State?) : int {
     // accumulate total size of result
     var totalsize : uint64 = uint64(0)
     initheader(L, addr(h))
-    while (int(deref(fmt)) != 0) {
+    while (int(deref(fmt)) != '\0') {
         var size : int
         var ntoalign : int
         var opt : KOption = getdetails(addr(h), totalsize, addr(fmt), addr(size), addr(ntoalign))
@@ -26955,7 +26941,7 @@ def private str_unpack(var L : lua_State?) : int {
     var n : int = 0
     let _t0 = pos <= ld || luaL_argerror(L, 3, reinterpret<uint8?>("initial position out of string")) != 0
     initheader(L, addr(h))
-    while (int(deref(fmt)) != 0) {
+    while (int(deref(fmt)) != '\0') {
         var size : int
         var ntoalign : int
         var opt : KOption = getdetails(addr(h), pos, addr(fmt), addr(size), addr(ntoalign))
@@ -27833,7 +27819,7 @@ def luaopen_utf8(var L : lua_State?) : int {
     luaL_checkversion_(L, double(504), uint64(typeinfo sizeof(type<int64>)) * uint64(16) + uint64(typeinfo sizeof(type<double>)))
     lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[7]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - uint64(1)))
     luaL_setfuncs(L, addr(funcs[0]), 0)
-    lua_pushlstring(L, reinterpret<uint8?>("[\x00-\x7f\xc2-\xfd][\x80-\xbf]*"), uint64(typeinfo sizeof(type<uint8[15]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
+    lua_pushlstring(L, reinterpret<uint8?>("[\0-\x7f\xc2-\xfd][\x80-\xbf]*"), uint64(typeinfo sizeof(type<uint8[15]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
     lua_setfield(L, -2, reinterpret<uint8?>("charpattern"))
     return 1
 }
@@ -28020,7 +28006,7 @@ def private dolibrary(var L : lua_State?; var globname : uint8?) : int {
         suffix = crt::strchr(modname, int(deref(reinterpret<uint8?>("-"))))
     } else {
         // global name ends here
-        deref(modname) = uint8(0)
+        deref(modname) = uint8('\0')
         // module name starts after the '='
         modname = modname + 1
     }
@@ -28032,7 +28018,7 @@ def private dolibrary(var L : lua_State?; var globname : uint8?) : int {
         // is there a suffix mark?
         if (suffix != null) {
             // remove suffix from global name
-            deref(suffix) = uint8(0)
+            deref(suffix) = uint8('\0')
         }
         // globname = require(modname)
         lua_setglobal(L, globname)
@@ -28118,21 +28104,21 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
                 if (_cond == '-') {
                     // '--'
                     // extra characters after '--'?
-                    if (int(deref(deref(argv + i) + 2)) != 0) {
+                    if (int(deref(deref(argv + i) + 2)) != '\0') {
                         // invalid option
                         return has_error
                     }
                     deref(first) = i + 1
                     return args
                 }
-                if (_cond == 0) {
+                if (_cond == '\0') {
                     // '-'
                     // script "name" is '-'
                     return args
                 }
                 if (_cond == 'E') {
                     // extra characters?
-                    if (int(deref(deref(argv + i) + 2)) != 0) {
+                    if (int(deref(deref(argv + i) + 2)) != '\0') {
                         // invalid option
                         return has_error
                     }
@@ -28141,7 +28127,7 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
                 }
                 if (_cond == 'W') {
                     // extra characters?
-                    if (int(deref(deref(argv + i) + 2)) != 0) {
+                    if (int(deref(deref(argv + i) + 2)) != '\0') {
                         // invalid option
                         return has_error
                     }
@@ -28155,7 +28141,7 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
                 _flag ||= _cond == 'v'
                 if (_flag) {
                     // extra characters?
-                    if (int(deref(deref(argv + i) + 2)) != 0) {
+                    if (int(deref(deref(argv + i) + 2)) != '\0') {
                         // invalid option
                         return has_error
                     }
@@ -28171,7 +28157,7 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
                 if (_flag) {
                     // both options need an argument
                     // no concatenated argument?
-                    if (int(deref(deref(argv + i) + 2)) == 0) {
+                    if (int(deref(deref(argv + i) + 2)) == '\0') {
                         // try next 'argv'
                         i++
                         if (deref(argv + i) == null || int(deref(deref(argv + i) + 0)) == '-') {
@@ -28181,7 +28167,7 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
                     }
                     break
                 }
-                if (!(_cond == '-' || _cond == 0 || _cond == 'E' || _cond == 'W' || _cond == 'i' || _cond == 'v' || _cond == 'e' || _cond == 'l')) {
+                if (!(_cond == '-' || _cond == '\0' || _cond == 'E' || _cond == 'W' || _cond == 'i' || _cond == 'v' || _cond == 'e' || _cond == 'l')) {
                     // invalid option
                     return has_error
                 }
@@ -28212,7 +28198,7 @@ def private runargs(var L : lua_State?; var argv : uint8 ??; n : int) : int {
                     var status : int
                     // both options need an argument
                     var extra : uint8? = deref(argv + i) + 2
-                    if (int(deref(extra)) == 0) {
+                    if (int(deref(extra)) == '\0') {
                         i++
                         extra = deref(argv + i)
                     }
@@ -28304,7 +28290,7 @@ def private pushline(var L : lua_State?; firstline : int) : int {
     if (l > uint64(0) && int(deref(b + (l - uint64(1)))) == '\n') {
         // remove it
         l--
-        deref(b + l) = uint8(0)
+        deref(b + l) = uint8('\0')
     }
     // for compatibility with 5.2, ...
     if (firstline != 0 && int(deref(b + 0)) == '=') {
@@ -28331,7 +28317,7 @@ def private addreturn(var L : lua_State?) : int {
         lua_rotate(L, -2, -1)
         lua_settop(L, -1 - 1)
         // non empty?
-        if (int(deref(line + 0)) != 0) {
+        if (int(deref(line + 0)) != '\0') {
             // keep history
         }
     } else {

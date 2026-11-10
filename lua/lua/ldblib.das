@@ -398,7 +398,7 @@ def private unmakemask(mask : int; var smask : uint8?) : uint8? {
         i++
         deref(smask + _t2) = uint8('l')
     }
-    deref(smask + i) = uint8(0)
+    deref(smask + i) = uint8('\0')
     return smask
 }
 

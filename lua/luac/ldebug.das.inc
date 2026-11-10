@@ -895,7 +895,7 @@ def luaG_addinfo(var L : lua_State?; var msg : uint8?; var src : TString?; line 
     } else {
         // no source available; use "?" instead
         buff[0] = uint8('?')
-        buff[1] = uint8(0)
+        buff[1] = uint8('\0')
     }
     return luaO_pushfstring`va(L, reinterpret<uint8?>("%s:%d: %s"), (addr(buff[0]), line, msg))
 }

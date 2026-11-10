@@ -288,7 +288,7 @@ def private l_str2dloc(var s : uint8?; var result : double?; mode : int) : uint8
         endptr = endptr + 1
     }
     // OK iff no trailing chars
-    return int(deref(endptr)) == 0 ? endptr : null
+    return int(deref(endptr)) == '\0' ? endptr : null
 }
 
 // Convert string 's' to a Lua number (put in 'result') handling the
@@ -378,7 +378,7 @@ def private l_str2int(var s : uint8?; var result : int64?) : uint8? {
         s = s + 1
     }
     // something wrong in the numeral
-    if (empty != 0 || int(deref(s)) != 0) {
+    if (empty != 0 || int(deref(s)) != '\0') {
         return null
     } else {
         deref(result) = int64(neg != 0 ? uint64(0u) - a : a)
@@ -457,7 +457,7 @@ def private tostringbuff(var obj : TValue?; var buff : uint8?) : int {
     } else {
         len = snprintf(buff, uint64(44), reinterpret<uint8?>("%.14g"), obj.value_.n)
         // looks like an int?
-        if (int(deref(buff + crt::strspn(buff, reinterpret<uint8?>("-0123456789")))) == 0) {
+        if (int(deref(buff + crt::strspn(buff, reinterpret<uint8?>("-0123456789")))) == '\0') {
             let _t0 = len
             len++
             deref(buff + _t0) = deref(reinterpret<lconv?>(crt::localeconv()).decimal_point + 0)
@@ -633,7 +633,7 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
                 var sz : int = int(uint64(3) * uint64(typeinfo sizeof(type<void?>)) + uint64(8))
                 var bf : uint8? = getbuff(addr(buff), sz)
                 var p : void? = reinterpret<void?>(va_p(argp))
-                var len : int = snprintf(bf, uint64(sz), reinterpret<uint8?>("%p"), reinterpret<uint8?>(p))
+                var len : int = snprintf(bf, uint64(sz), reinterpret<uint8?>("%p"), p)
                 addr(buff).blen += len
             }
         } elif (_cond == 'U') {
@@ -684,7 +684,7 @@ def luaO_chunkid(var out : uint8?; var source : uint8?; var srclen : uint64) {
             // truncate it
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1), (bufflen - uint64(1)) * uint64(typeinfo sizeof(type<uint8>)))
             out = out + (bufflen - uint64(1))
-            deref(out) = uint8(0)
+            deref(out) = uint8('\0')
         }
     } elif (int(deref(source)) == '@') {
         // file name

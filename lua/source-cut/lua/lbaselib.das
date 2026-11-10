@@ -86,7 +86,7 @@ def private b_str2int(var s : uint8?; base : int; var pn : int64?) : uint8? {
     var n : uint64 = uint64(0)
     var neg : int = 0
     // skip initial spaces
-    s = s + crt::strspn(s, reinterpret<uint8?>(" \x0c\n\r\t\x0b"))
+    s = s + crt::strspn(s, reinterpret<uint8?>(" \f\n\r\t\v"))
     // handle sign
     if (int(deref(s)) == '-') {
         s = s + 1
@@ -111,7 +111,7 @@ def private b_str2int(var s : uint8?; base : int; var pn : int64?) : uint8? {
         }
     }
     // skip trailing spaces
-    s = s + crt::strspn(s, reinterpret<uint8?>(" \x0c\n\r\t\x0b"))
+    s = s + crt::strspn(s, reinterpret<uint8?>(" \f\n\r\t\v"))
     deref(pn) = int64(neg != 0 ? uint64(0u) - n : n)
     return s
 }

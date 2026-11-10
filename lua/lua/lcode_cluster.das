@@ -27,12 +27,6 @@ require math
 
 var private c2das_empty : uint8[1] = fixed_array(uint8(0))
 
-// a C label's statement: the optimizer keeps a [sideeffects] call after the label
-[sideeffects]
-def private c_label_end {
-    pass
-}
-
 [init]
 def private c2das_dialect {
     c_long_bits = 64
@@ -174,7 +168,6 @@ include ltable.das.inc
 include ltm.das.inc
 include lundump.das.inc
 include lvm.das.inc
-// the fragments' digest: 0x6b508753d880e0a0
 
 [init]
 def private c2das_layout_check {

@@ -154,7 +154,7 @@ def private createstrobj(var L : lua_State?; l : uint64; tag : int; h : uint) : 
     ts.hash = h
     ts.extra = uint8(0)
     // ending 0
-    deref(addr(ts.contents[0]) + l) = uint8(0)
+    deref(addr(ts.contents[0]) + l) = uint8('\0')
     return ts
 }
 

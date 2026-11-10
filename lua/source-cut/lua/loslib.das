@@ -175,7 +175,7 @@ def private checkoption(var L : lua_State?; var conv : uint8?; convlen : int64; 
     // length of options being checked
     var oplen : int = 1
     {
-        while (int(deref(option)) != 0 && int64(oplen) <= convlen) {
+        while (int(deref(option)) != '\0' && int64(oplen) <= convlen) {
             // next block?
             if (int(deref(option)) == '|') {
                 // will check options with next length (+1)
@@ -184,7 +184,7 @@ def private checkoption(var L : lua_State?; var conv : uint8?; convlen : int64; 
                 // match?
                 // copy valid option to buffer
                 crt::memcpy(reinterpret<void?>(buff), reinterpret<void?>(conv), uint64(oplen))
-                deref(buff + oplen) = uint8(0)
+                deref(buff + oplen) = uint8('\0')
                 // return next item
                 return conv + oplen
             }

@@ -3,6 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+options strict_aliasing = false
 options jit_split_modules = 0
 require c_runtime/c_args
 require c_runtime/c_function
@@ -215,7 +216,7 @@ def private dolibrary(var L : lua_State?; var globname : uint8?) : int {
         suffix = crt::strchr(modname, int(deref(reinterpret<uint8?>("-"))))
     } else {
         // global name ends here
-        deref(modname) = uint8(0)
+        deref(modname) = uint8('\0')
         // module name starts after the '='
         modname = modname + 1
     }
@@ -227,7 +228,7 @@ def private dolibrary(var L : lua_State?; var globname : uint8?) : int {
         // is there a suffix mark?
         if (suffix != null) {
             // remove suffix from global name
-            deref(suffix) = uint8(0)
+            deref(suffix) = uint8('\0')
         }
         // globname = require(modname)
         lua_setglobal(L, globname)
@@ -313,21 +314,21 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
                 if (_cond == '-') {
                     // '--'
                     // extra characters after '--'?
-                    if (int(deref(deref(argv + i) + 2)) != 0) {
+                    if (int(deref(deref(argv + i) + 2)) != '\0') {
                         // invalid option
                         return has_error
                     }
                     deref(first) = i + 1
                     return args
                 }
-                if (_cond == 0) {
+                if (_cond == '\0') {
                     // '-'
                     // script "name" is '-'
                     return args
                 }
                 if (_cond == 'E') {
                     // extra characters?
-                    if (int(deref(deref(argv + i) + 2)) != 0) {
+                    if (int(deref(deref(argv + i) + 2)) != '\0') {
                         // invalid option
                         return has_error
                     }
@@ -336,7 +337,7 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
                 }
                 if (_cond == 'W') {
                     // extra characters?
-                    if (int(deref(deref(argv + i) + 2)) != 0) {
+                    if (int(deref(deref(argv + i) + 2)) != '\0') {
                         // invalid option
                         return has_error
                     }
@@ -350,7 +351,7 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
                 _flag ||= _cond == 'v'
                 if (_flag) {
                     // extra characters?
-                    if (int(deref(deref(argv + i) + 2)) != 0) {
+                    if (int(deref(deref(argv + i) + 2)) != '\0') {
                         // invalid option
                         return has_error
                     }
@@ -366,7 +367,7 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
                 if (_flag) {
                     // both options need an argument
                     // no concatenated argument?
-                    if (int(deref(deref(argv + i) + 2)) == 0) {
+                    if (int(deref(deref(argv + i) + 2)) == '\0') {
                         // try next 'argv'
                         i++
                         if (deref(argv + i) == null || int(deref(deref(argv + i) + 0)) == '-') {
@@ -376,7 +377,7 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
                     }
                     break
                 }
-                if (!(_cond == '-' || _cond == 0 || _cond == 'E' || _cond == 'W' || _cond == 'i' || _cond == 'v' || _cond == 'e' || _cond == 'l')) {
+                if (!(_cond == '-' || _cond == '\0' || _cond == 'E' || _cond == 'W' || _cond == 'i' || _cond == 'v' || _cond == 'e' || _cond == 'l')) {
                     // invalid option
                     return has_error
                 }
@@ -407,7 +408,7 @@ def private runargs(var L : lua_State?; var argv : uint8 ??; n : int) : int {
                     var status : int
                     // both options need an argument
                     var extra : uint8? = deref(argv + i) + 2
-                    if (int(deref(extra)) == 0) {
+                    if (int(deref(extra)) == '\0') {
                         i++
                         extra = deref(argv + i)
                     }
@@ -499,7 +500,7 @@ def private pushline(var L : lua_State?; firstline : int) : int {
     if (l > uint64(0) && int(deref(b + (l - uint64(1)))) == '\n') {
         // remove it
         l--
-        deref(b + l) = uint8(0)
+        deref(b + l) = uint8('\0')
     }
     // for compatibility with 5.2, ...
     if (firstline != 0 && int(deref(b + 0)) == '=') {
@@ -526,7 +527,7 @@ def private addreturn(var L : lua_State?) : int {
         lua_rotate(L, -2, -1)
         lua_settop(L, -1 - 1)
         // non empty?
-        if (int(deref(line + 0)) != 0) {
+        if (int(deref(line + 0)) != '\0') {
             // keep history
         }
     } else {

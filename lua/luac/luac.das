@@ -3,6 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+options strict_aliasing = false
 options jit_split_modules = 0
 require c_runtime/c_args
 require c_runtime/c_exit
@@ -240,7 +241,7 @@ def private PrintString(var ts : TString?) {
             printf(reinterpret<uint8?>("\\\""))
         } elif (_cond == '\\') {
             printf(reinterpret<uint8?>("\\\\"))
-        } elif (_cond == 7) {
+        } elif (_cond == '\a') {
             printf(reinterpret<uint8?>("\\a"))
         } elif (_cond == '\b') {
             printf(reinterpret<uint8?>("\\b"))
@@ -252,7 +253,7 @@ def private PrintString(var ts : TString?) {
             printf(reinterpret<uint8?>("\\r"))
         } elif (_cond == '\t') {
             printf(reinterpret<uint8?>("\\t"))
-        } elif (_cond == 11) {
+        } elif (_cond == '\v') {
             printf(reinterpret<uint8?>("\\v"))
         } else {
             if (crt::isprint(c) != 0) {
@@ -301,7 +302,7 @@ def private PrintConstant(var f : Proto?; i : int) {
             var buff : uint8[100]
             sprintf(addr(buff[0]), reinterpret<uint8?>("%.14g"), o.value_.n)
             printf(reinterpret<uint8?>("%s"), addr(buff[0]))
-            if (int(buff[crt::strspn(addr(buff[0]), reinterpret<uint8?>("-0123456789"))]) == 0) {
+            if (int(buff[crt::strspn(addr(buff[0]), reinterpret<uint8?>("-0123456789"))]) == '\0') {
                 printf(reinterpret<uint8?>(".0"))
             }
         }
@@ -595,7 +596,7 @@ def private PrintCode(var f : Proto?) {
             }
         } elif (_cond == OpCode.OP_CLOSURE) {
             printf(reinterpret<uint8?>("%d %d"), a, bx)
-            printf(reinterpret<uint8?>("\t; %p"), reinterpret<uint8?>(reinterpret<void?>(deref(f.p + bx))))
+            printf(reinterpret<uint8?>("\t; %p"), reinterpret<void?>(deref(f.p + bx)))
         } elif (_cond == OpCode.OP_VARARG) {
             printf(reinterpret<uint8?>("%d %d"), a, c)
             printf(reinterpret<uint8?>("\t; "))
@@ -623,7 +624,7 @@ def private PrintHeader(var f : Proto?) {
     } else {
         s = reinterpret<uint8?>("(string)")
     }
-    printf(reinterpret<uint8?>("\n%s <%s:%d,%d> (%d instruction%s at %p)\n"), f.linedefined == 0 ? reinterpret<uint8?>("main") : reinterpret<uint8?>("function"), s, f.linedefined, f.lastlinedefined, f.sizecode, f.sizecode == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), reinterpret<uint8?>(reinterpret<void?>(f)))
+    printf(reinterpret<uint8?>("\n%s <%s:%d,%d> (%d instruction%s at %p)\n"), f.linedefined == 0 ? reinterpret<uint8?>("main") : reinterpret<uint8?>("function"), s, f.linedefined, f.lastlinedefined, f.sizecode, f.sizecode == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), reinterpret<void?>(f))
     printf(reinterpret<uint8?>("%d%s param%s, %d slot%s, %d upvalue%s, "), int(f.numparams), f.is_vararg != 0 ? reinterpret<uint8?>("+") : addr(c2das_empty[0]), int(f.numparams) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), int(f.maxstacksize), int(f.maxstacksize) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizeupvalues, f.sizeupvalues == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"))
     printf(reinterpret<uint8?>("%d local%s, %d constant%s, %d function%s\n"), f.sizelocvars, f.sizelocvars == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizek, f.sizek == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizep, f.sizep == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"))
 }
@@ -632,7 +633,7 @@ def private PrintHeader(var f : Proto?) {
 def private PrintDebug(var f : Proto?) {
     var n : int
     n = f.sizek
-    printf(reinterpret<uint8?>("constants (%d) for %p:\n"), n, reinterpret<uint8?>(reinterpret<void?>(f)))
+    printf(reinterpret<uint8?>("constants (%d) for %p:\n"), n, reinterpret<void?>(f))
     for (i in range(n)) {
         printf(reinterpret<uint8?>("\t%d\t"), i)
         PrintType(f, i)
@@ -640,12 +641,12 @@ def private PrintDebug(var f : Proto?) {
         printf(reinterpret<uint8?>("\n"))
     }
     n = f.sizelocvars
-    printf(reinterpret<uint8?>("locals (%d) for %p:\n"), n, reinterpret<uint8?>(reinterpret<void?>(f)))
+    printf(reinterpret<uint8?>("locals (%d) for %p:\n"), n, reinterpret<void?>(f))
     for (i in range(n)) {
         printf(reinterpret<uint8?>("\t%d\t%s\t%d\t%d\n"), i, addr(deref(f.locvars + i).varname.contents[0]), deref(f.locvars + i).startpc + 1, deref(f.locvars + i).endpc + 1)
     }
     n = f.sizeupvalues
-    printf(reinterpret<uint8?>("upvalues (%d) for %p:\n"), n, reinterpret<uint8?>(reinterpret<void?>(f)))
+    printf(reinterpret<uint8?>("upvalues (%d) for %p:\n"), n, reinterpret<void?>(f))
     for (i in range(n)) {
         printf(reinterpret<uint8?>("\t%d\t%s\t%d\t%d\n"), i, deref(f.upvalues + i).name != null ? addr(deref(f.upvalues + i).name.contents[0]) : reinterpret<uint8?>("-"), int(deref(f.upvalues + i).instack), int(deref(f.upvalues + i).idx))
     }

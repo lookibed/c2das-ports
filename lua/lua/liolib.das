@@ -54,7 +54,7 @@ let private LUA_TNUMBER = 3
 // Check whether 'mode' matches '[rwa]%+?[L_MODEEXT]*'
 [c_function]
 def private l_checkmode(var mode : uint8?) : int {
-    var _t1 = int(deref(mode)) != 0
+    var _t1 = int(deref(mode)) != '\0'
     if (_t1) {
         var _t0 = mode
         mode = mode + 1
@@ -210,7 +210,7 @@ def private io_popen(var L : lua_State?) : int {
     var filename : uint8? = luaL_checklstring(L, 1, null)
     var mode : uint8? = luaL_optlstring(L, 2, reinterpret<uint8?>("r"), null)
     var p : luaL_Stream? = newprefile(L)
-    let _t0 = (int(deref(mode + 0)) == 'r' || int(deref(mode + 0)) == 'w') && int(deref(mode + 1)) == 0 || luaL_argerror(L, 2, reinterpret<uint8?>("invalid mode")) != 0
+    let _t0 = (int(deref(mode + 0)) == 'r' || int(deref(mode + 0)) == 'w') && int(deref(mode + 1)) == '\0' || luaL_argerror(L, 2, reinterpret<uint8?>("invalid mode")) != 0
     deref(crt::c_errno_location()) = 0
     luaL_error`va(L, reinterpret<uint8?>("'popen' not supported"), VaNone())
     p.f = null
@@ -346,7 +346,7 @@ def private nextc(var rn : RN?) : int {
     // buffer overflow?
     if (rn.n >= 200) {
         // invalidate result
-        rn.buff[0] = uint8(0)
+        rn.buff[0] = uint8('\0')
         // fail
         return 0
     } else {
@@ -430,7 +430,7 @@ def private read_number(var L : lua_State?; var f : _IO_FILE?) : int {
     // unread look-ahead char
     crt::ungetc(rn.c, reinterpret<void?>(rn.f))
     // finish string
-    rn.buff[rn.n] = uint8(0)
+    rn.buff[rn.n] = uint8('\0')
     if (lua_stringtonumber(L, addr(rn.buff[0])) != uint64(0)) {
         // ok, it is a valid number
         return 1

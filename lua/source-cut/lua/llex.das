@@ -19,12 +19,6 @@ require lua_link
 require lzio
 require lzio_h
 
-// a C label's statement: the optimizer keeps a [sideeffects] call after the label
-[sideeffects]
-def private c_label_end {
-    pass
-}
-
 var private luaX_tokens : uint8? [37] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("and")), unsafe(reinterpret<uint8?>("break")), unsafe(reinterpret<uint8?>("do")), unsafe(reinterpret<uint8?>("else")), unsafe(reinterpret<uint8?>("elseif")), unsafe(reinterpret<uint8?>("end")), unsafe(reinterpret<uint8?>("false")), unsafe(reinterpret<uint8?>("for")), unsafe(reinterpret<uint8?>("function")), unsafe(reinterpret<uint8?>("goto")), unsafe(reinterpret<uint8?>("if")), unsafe(reinterpret<uint8?>("in")), unsafe(reinterpret<uint8?>("local")), unsafe(reinterpret<uint8?>("nil")), unsafe(reinterpret<uint8?>("not")), unsafe(reinterpret<uint8?>("or")), unsafe(reinterpret<uint8?>("repeat")), unsafe(reinterpret<uint8?>("return")), unsafe(reinterpret<uint8?>("then")), unsafe(reinterpret<uint8?>("true")), unsafe(reinterpret<uint8?>("until")), unsafe(reinterpret<uint8?>("while")), unsafe(reinterpret<uint8?>("//")), unsafe(reinterpret<uint8?>("..")), unsafe(reinterpret<uint8?>("...")), unsafe(reinterpret<uint8?>("==")), unsafe(reinterpret<uint8?>(">=")), unsafe(reinterpret<uint8?>("<=")), unsafe(reinterpret<uint8?>("~=")), unsafe(reinterpret<uint8?>("<<")), unsafe(reinterpret<uint8?>(">>")), unsafe(reinterpret<uint8?>("::")), unsafe(reinterpret<uint8?>("<eof>")), unsafe(reinterpret<uint8?>("<number>")), unsafe(reinterpret<uint8?>("<integer>")), unsafe(reinterpret<uint8?>("<name>")), unsafe(reinterpret<uint8?>("<string>")))
 
 let private NUM_RESERVED = int(RESERVED.TK_WHILE) - (127 * 2 + 1 + 1) + 1
@@ -91,7 +85,7 @@ def luaX_token2str(var ls : LexState?; token : int) : uint8? {
 def private txtToken(var ls : LexState?; token : int) : uint8? {
     let _cond = token
     if (_cond == 291 || _cond == 292 || _cond == 289 || _cond == 290) {
-        save(ls, 0)
+        save(ls, '\0')
         return luaO_pushfstring`va(ls.L, reinterpret<uint8?>("'%s'"), (ls.buff.buffer,))
     } else {
         return luaX_token2str(ls, token)
@@ -326,7 +320,7 @@ def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
         }
         ls.current = _t8
     }
-    save(ls, 0)
+    save(ls, '\0')
     // format error?
     if (luaO_str2num(ls.buff.buffer, addr(obj)) == uint64(0)) {
         lexerror(ls, reinterpret<uint8?>("malformed number"), int(RESERVED.TK_FLT))
@@ -472,7 +466,6 @@ def private read_long_string(var ls : LexState?; var seminfo : SemInfo?; sep : u
         }
     }
     label 1:  // endloop
-    c_label_end()
     if (seminfo != null) {
         seminfo.ts = luaX_newstring(ls, ls.buff.buffer + sep, ls.buff.n - uint64(2) * sep)
     }
@@ -672,7 +665,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 ls.current = _t5
                 let _cond2 = ls.current
                 if (_cond2 == 'a') {
-                    c = 7
+                    c = '\a'
                     goto label 1
                 } elif (_cond2 == 'b') {
                     c = '\b'
@@ -690,7 +683,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                     c = '\t'
                     goto label 1
                 } elif (_cond2 == 'v') {
-                    c = 11
+                    c = '\v'
                     goto label 1
                 } elif (_cond2 == 'x') {
                     c = readhexaesc(ls)
@@ -753,7 +746,6 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                     }
                 }
                 label 1:  // read_save
-                c_label_end()
                 let _t12 = ls.z.n
                 ls.z.n--
                 var _t14 : int
@@ -766,13 +758,11 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 }
                 ls.current = _t14
                 label 2:  // only_save
-                c_label_end()
                 // go through
                 // remove '\\'
                 ls.buff.n -= uint64(1)
                 save(ls, c)
                 label 3:  // no_save
-                c_label_end()
             }
         } else {
             // go through
@@ -821,7 +811,7 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                         break
                     }
                 }
-                if (_cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == 11) {
+                if (_cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == '\v') {
                     {
                         // spaces
                         let _t0 = ls.z.n
@@ -1110,7 +1100,7 @@ def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
                         return int(RESERVED.TK_EOS)
                     }
                 }
-                if (!(_cond == '\n' || _cond == '\r' || _cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == 11 || _cond == '-' || _cond == '[' || _cond == '=' || _cond == '<' || _cond == '>' || _cond == '/' || _cond == '~' || _cond == ':' || _cond == '"' || _cond == '\'' || _cond == '.' || _cond == '0' || _cond == '1' || _cond == '2' || _cond == '3' || _cond == '4' || _cond == '5' || _cond == '6' || _cond == '7' || _cond == '8' || _cond == '9' || _cond == -1)) {
+                if (!(_cond == '\n' || _cond == '\r' || _cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == '\v' || _cond == '-' || _cond == '[' || _cond == '=' || _cond == '<' || _cond == '>' || _cond == '/' || _cond == '~' || _cond == ':' || _cond == '"' || _cond == '\'' || _cond == '.' || _cond == '0' || _cond == '1' || _cond == '2' || _cond == '3' || _cond == '4' || _cond == '5' || _cond == '6' || _cond == '7' || _cond == '8' || _cond == '9' || _cond == -1)) {
                     {
                         // identifier or reserved word?
                         if ((int(luai_ctype_[ls.current + 1]) & 1 << 0) != 0) {

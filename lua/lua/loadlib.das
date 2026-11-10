@@ -233,7 +233,7 @@ def private getnextfilename(var path : uint8 ??; var end : uint8?) : uint8? {
     if (intptr(name) == intptr(end)) {
         // no more names
         return null
-    } elif (int(deref(name)) == 0) {
+    } elif (int(deref(name)) == '\0') {
         // from previous iteration?
         // restore separator
         deref(name) = deref(reinterpret<uint8?>(";"))
@@ -248,7 +248,7 @@ def private getnextfilename(var path : uint8 ??; var end : uint8?) : uint8? {
         sep = end
     }
     // finish file name
-    deref(sep) = uint8(0)
+    deref(sep) = uint8('\0')
     // will start next search from here
     deref(path) = sep
     return name
@@ -276,7 +276,7 @@ def private searchpath(var L : lua_State?; var name : uint8?; var path : uint8?;
     var endpathname : uint8?
     var filename : uint8?
     // separator is non-empty and appears in 'name'?
-    if (int(deref(sep)) != 0 && crt::strchr(name, int(deref(sep))) != null) {
+    if (int(deref(sep)) != '\0' && crt::strchr(name, int(deref(sep))) != null) {
         // replace it by 'dirsep'
         name = luaL_gsub(L, name, sep, dirsep)
     }
@@ -286,7 +286,7 @@ def private searchpath(var L : lua_State?; var name : uint8?; var path : uint8?;
     let _t0 = addr(buff).n < addr(buff).size || luaL_prepbuffsize(addr(buff), uint64(1)) != null
     let _t1 = addr(buff).n
     addr(buff).n++
-    deref(addr(buff).b + _t1) = uint8(0)
+    deref(addr(buff).b + _t1) = uint8('\0')
     // writable list of file names
     pathname = addr(buff).b
     endpathname = pathname + addr(buff).n + -(1)

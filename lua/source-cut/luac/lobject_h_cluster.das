@@ -10,7 +10,6 @@ require ltm_h
 include lobject_h.das.inc
 include lstate_h.das.inc
 include lua_h.das.inc
-// the fragments' digest: 0x39cf81c13d0a5f7b
 
 [init]
 def private c2das_layout_check {

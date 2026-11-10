@@ -16,12 +16,6 @@ require lobject_h_cluster
 
 var private c2das_empty : uint8[1] = fixed_array(uint8(0))
 
-// a C label's statement: the optimizer keeps a [sideeffects] call after the label
-[sideeffects]
-def private c_label_end {
-    pass
-}
-
 [init]
 def private c2das_dialect {
     c_long_bits = 64
@@ -718,15 +712,14 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
     if (_t0 == 0) {
         luaL_error`va(ms.L, reinterpret<uint8?>("pattern too complex"), VaNone())
     }
-    label 2:  // init
-    c_label_end()
+    label 1:  // init
     // using goto to optimize tail recursion
     // end of pattern?
     if (intptr(p) != intptr(ms.p_end)) {
         var _cond = int(deref(p))
         var _goto = 0
         while (true) {
-            label 1:  // re-dispatch
+            label 3:  // re-dispatch
             var _flag = false
             if (_cond == '(') {
                 {
@@ -754,7 +747,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                         // no; go to default
                         _goto = 1
                         _cond = 35
-                        goto label 1
+                        goto label 3
                     }
                     // check end of string
                     s = intptr(s) == intptr(ms.src_end) ? s : null
@@ -772,7 +765,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                             if (s != null) {
                                 // return match(ms, s, p + 4);
                                 p = p + 4
-                                goto label 2
+                                goto label 1
                             }
                         }
                     } elif (_cond2 == 'f') {
@@ -787,11 +780,11 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                             }
                             // points to what is next
                             ep = classend(ms, p)
-                            previous = uint8(intptr(s) == intptr(ms.src_init) ? 0 : int(deref(s - 1)))
+                            previous = uint8(intptr(s) == intptr(ms.src_init) ? '\0' : int(deref(s - 1)))
                             if (!(matchbracketclass(int(uint8(previous)), p, ep - 1) != 0) && matchbracketclass(int(uint8(deref(s))), p, ep - 1) != 0) {
                                 // return match(ms, s, ep);
                                 p = ep
-                                goto label 2
+                                goto label 1
                             }
                             // match failed
                             s = null
@@ -803,13 +796,13 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                             if (s != null) {
                                 // return match(ms, s, p + 2)
                                 p = p + 2
-                                goto label 2
+                                goto label 1
                             }
                         }
                     } else {
                         _goto = 1
                         _cond = 35
-                        goto label 1
+                        goto label 3
                     }
                     break
                 }
@@ -828,7 +821,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                         if (int(deref(ep)) == '*' || int(deref(ep)) == '?' || int(deref(ep)) == '-') {
                             // return match(ms, s, ep + 1);
                             p = ep + 1
-                            goto label 2
+                            goto label 1
                         } else {
                             // '+' or no suffix
                             // fail
@@ -850,7 +843,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                                     } else {
                                         // else return match(ms, s, ep + 1);
                                         p = ep + 1
-                                        goto label 2
+                                        goto label 1
                                     }
                                     break
                                 }
@@ -878,7 +871,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                                 // return match(ms, s + 1, ep);
                                 s = s + 1
                                 p = ep
-                                goto label 2
+                                goto label 1
                             }
                             break
                         }
@@ -1462,7 +1455,7 @@ def private getformat(var L : lua_State?; var strfrmt : uint8?; var form : uint8
     form = form + 1
     deref(_t0) = uint8('%')
     crt::memcpy(reinterpret<void?>(form), reinterpret<void?>(strfrmt), len * uint64(typeinfo sizeof(type<uint8>)))
-    deref(form + len) = uint8(0)
+    deref(form + len) = uint8('\0')
     return strfrmt + len + -(1)
 }
 
@@ -1474,7 +1467,7 @@ def private addlenmod(var form : uint8?; var lenmod : uint8?) {
     var spec : uint8 = deref(form + (l - uint64(1)))
     crt::strcpy(form + l + -(1), lenmod)
     deref(form + (l + lm - uint64(1))) = spec
-    deref(form + (l + lm)) = uint8(0)
+    deref(form + (l + lm)) = uint8('\0')
 }
 
 [c_function]
@@ -1525,7 +1518,7 @@ def private str_format(var L : lua_State?) : int {
                 var _cond = int(deref(_t6))
                 var _goto = 0
                 while (true) {
-                    label 1:  // re-dispatch
+                    label 2:  // re-dispatch
                     var _flag = false
                     if (_cond == 'c') {
                         {
@@ -1538,13 +1531,13 @@ def private str_format(var L : lua_State?) : int {
                         flags = reinterpret<uint8?>("-+0 ")
                         _goto = 1
                         _cond = 64
-                        goto label 1
+                        goto label 2
                     }
                     if (_cond == 'u') {
                         flags = reinterpret<uint8?>("-0")
                         _goto = 1
                         _cond = 64
-                        goto label 1
+                        goto label 2
                     }
                     _flag ||= _cond == 'o'
                     _flag ||= _cond == 'x'
@@ -1600,14 +1593,14 @@ def private str_format(var L : lua_State?) : int {
                                 // format it as a string
                                 form[crt::strlen(addr(form[0])) - uint64(1)] = uint8('s')
                             }
-                            nb = snprintf(buff, uint64(maxitem), addr(form[0]), reinterpret<uint8?>(p))
+                            nb = snprintf(buff, uint64(maxitem), addr(form[0]), p)
                             break
                         }
                     }
                     if (_cond == 'q') {
                         {
                             // modifiers?
-                            if (int(form[2]) != 0) {
+                            if (int(form[2]) != '\0') {
                                 return luaL_error`va(L, reinterpret<uint8?>("specifier '%%q' cannot have modifiers"), VaNone())
                             }
                             addliteral(L, addr(b), arg)
@@ -1619,7 +1612,7 @@ def private str_format(var L : lua_State?) : int {
                             var l : uint64
                             var s : uint8? = luaL_tolstring(L, arg, addr(l))
                             // no modifiers?
-                            if (int(form[2]) == 0) {
+                            if (int(form[2]) == '\0') {
                                 // keep entire string
                                 luaL_addvalue(addr(b))
                             } else {
@@ -1799,7 +1792,7 @@ def private getdetails(var h : Header?; totalsize : uint64; var fmt : uint8 ??; 
     var align : int = deref(psize)
     // 'X' gets alignment from following option
     if (opt == KOption.Kpaddalign) {
-        if (int(deref(deref(fmt))) == 0 || getoption(h, fmt, addr(align)) == KOption.Kchar || align == 0) {
+        if (int(deref(deref(fmt))) == '\0' || getoption(h, fmt, addr(align)) == KOption.Kchar || align == 0) {
             luaL_argerror(h.L, 1, reinterpret<uint8?>("invalid next option for option 'X'"))
         }
     }
@@ -1881,7 +1874,7 @@ def private str_pack(var L : lua_State?) : int {
     // mark to separate arguments from string buffer
     lua_pushnil(L)
     luaL_buffinit(L, addr(b))
-    while (int(deref(fmt)) != 0) {
+    while (int(deref(fmt)) != '\0') {
         var size : int
         var ntoalign : int
         var opt : KOption = getdetails(addr(h), totalsize, addr(fmt), addr(size), addr(ntoalign))
@@ -2010,7 +2003,7 @@ def private str_pack(var L : lua_State?) : int {
                     let _t11 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), uint64(1)) != null
                     let _t12 = addr(b).n
                     addr(b).n++
-                    deref(addr(b).b + _t12) = uint8(0)
+                    deref(addr(b).b + _t12) = uint8('\0')
                     totalsize += len + uint64(1)
                     break
                 }
@@ -2045,7 +2038,7 @@ def private str_packsize(var L : lua_State?) : int {
     // accumulate total size of result
     var totalsize : uint64 = uint64(0)
     initheader(L, addr(h))
-    while (int(deref(fmt)) != 0) {
+    while (int(deref(fmt)) != '\0') {
         var size : int
         var ntoalign : int
         var opt : KOption = getdetails(addr(h), totalsize, addr(fmt), addr(size), addr(ntoalign))
@@ -2109,7 +2102,7 @@ def private str_unpack(var L : lua_State?) : int {
     var n : int = 0
     let _t0 = pos <= ld || luaL_argerror(L, 3, reinterpret<uint8?>("initial position out of string")) != 0
     initheader(L, addr(h))
-    while (int(deref(fmt)) != 0) {
+    while (int(deref(fmt)) != '\0') {
         var size : int
         var ntoalign : int
         var opt : KOption = getdetails(addr(h), pos, addr(fmt), addr(size), addr(ntoalign))
