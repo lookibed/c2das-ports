@@ -3,6 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+options strict_aliasing = false
 require c_runtime/c_args
 require c_runtime/c_bounds
 require c_runtime/c_exit
@@ -11,12 +12,6 @@ require c_runtime/c_union
 require c_runtime/enum_from_int
 require c_runtime/printf
 require crt
-
-// a C label's statement: the optimizer keeps a [sideeffects] call after the label
-[sideeffects]
-def private c_label_end {
-    pass
-}
 
 [init]
 def private c2das_dialect {
@@ -1519,7 +1514,6 @@ def private binjgb_all__get_file_size(var f : FILE?; var out_size : int64?) : Re
     deref(out_size) = size
     return Result.OK
     label 1:  // error
-    c_label_end()
     return Result.ERROR
 }
 
@@ -1559,7 +1553,6 @@ def file_read_aligned(var filename : uint8?; align : uint64; var out_file_data :
     out_file_data.size = uint64(aligned_size)
     return Result.OK
     label 1:  // error
-    c_label_end()
     if (f != null) {
         crt::fclose(reinterpret<void?>(f))
     }
@@ -1582,7 +1575,6 @@ def file_write(var filename : uint8?; var file_data : FileData?) : Result {
     crt::fclose(reinterpret<void?>(f))
     return Result.OK
     label 1:  // error
-    c_label_end()
     if (f != null) {
         crt::fclose(reinterpret<void?>(f))
     }
@@ -1848,7 +1840,6 @@ def private binjgb_all__get_cart_info(var file_data : FileData?; offset : uint64
     cart_info.size = deref(max_file_size)
     return Result.OK
     label 1:  // error
-    c_label_end()
     return Result.ERROR
 }
 
@@ -1885,7 +1876,6 @@ def private binjgb_all__get_cart_infos(var e : Emulator?) : Result {
     }
     i = uint(0)
     label 1:  // done
-    c_label_end()
     if (max_file_size > file_size) {
         file_data_resize(addr(e.file_data), max_file_size)
         // Fix cart_info data pointers.
@@ -1900,7 +1890,6 @@ def private binjgb_all__get_cart_infos(var e : Emulator?) : Result {
     binjgb_all__set_cart_info(e, uint8(i))
     return Result.OK
     label 2:  // error
-    c_label_end()
     return Result.ERROR
 }
 
@@ -7510,7 +7499,7 @@ def private binjgb_all__get_result_string(value : Result) : uint8? {
 def private binjgb_all__log_cart_info(var cart_info : CartInfo?) {
     var title : uint8[17] = fixed_array(uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0))
     var title_start : uint8? = reinterpret<uint8?>(cart_info.data) + TITLE_START_ADDR
-    var title_end : uint8? = reinterpret<uint8?>(crt::memchr(reinterpret<void?>(title_start), 0, uint64(TITLE_MAX_LENGTH)))
+    var title_end : uint8? = reinterpret<uint8?>(crt::memchr(reinterpret<void?>(title_start), '\0', uint64(TITLE_MAX_LENGTH)))
     var title_length : int = int(title_end != null ? int64(title_end - title_start) : int64(TITLE_MAX_LENGTH))
     crt::memcpy(reinterpret<void?>(addr(title[0])), reinterpret<void?>(title_start), uint64(title_length))
     // Change all non-ascii characters to ' '.
@@ -7544,7 +7533,6 @@ def init_audio_buffer(var e : Emulator?; frequency : uint; frames : uint) : Resu
     audio_buffer.frequency = frequency
     return Result.OK
     label 1:  // error
-    c_label_end()
     return Result.ERROR
 }
 
@@ -7671,7 +7659,6 @@ def init_emulator(var e : Emulator?; var init : EmulatorInit?) : Result {
     binjgb_all__calculate_next_ppu_intr(e)
     return Result.OK
     label 1:  // error
-    c_label_end()
     return Result.ERROR
 }
 
@@ -7754,7 +7741,6 @@ def private binjgb_all__set_rom_file_data(var e : Emulator?; var file_data : Fil
     e.file_data = deref(file_data)
     return Result.OK
     label 1:  // error
-    c_label_end()
     return Result.ERROR
 }
 
@@ -7800,7 +7786,6 @@ def emulator_read_state(var e : Emulator?; var file_data : FileData?) : Result {
     binjgb_all__update_bw_palette_rgba(e, PaletteType.PALETTE_TYPE_OBP1)
     return Result.OK
     label 1:  // error
-    c_label_end()
     return Result.ERROR
 }
 
@@ -7816,7 +7801,6 @@ def emulator_write_state(var e : Emulator?; var file_data : FileData?) : Result 
     crt::memcpy(reinterpret<void?>(file_data.data), reinterpret<void?>(addr(e.state)), file_data.size)
     return Result.OK
     label 1:  // error
-    c_label_end()
     return Result.ERROR
 }
 
@@ -7833,7 +7817,6 @@ def emulator_read_ext_ram(var e : Emulator?; var file_data : FileData?) : Result
     crt::memcpy(reinterpret<void?>(addr(e.state.ext_ram.data[0])), reinterpret<void?>(file_data.data), file_data.size)
     return Result.OK
     label 1:  // error
-    c_label_end()
     return Result.ERROR
 }
 
@@ -7851,7 +7834,6 @@ def emulator_write_ext_ram(var e : Emulator?; var file_data : FileData?) : Resul
     crt::memcpy(reinterpret<void?>(file_data.data), reinterpret<void?>(addr(e.state.ext_ram.data[0])), file_data.size)
     return Result.OK
     label 1:  // error
-    c_label_end()
     return Result.ERROR
 }
 
@@ -7877,7 +7859,6 @@ def emulator_read_ext_ram_from_file(var e : Emulator?; var filename : uint8?) : 
     }
     result = Result.OK
     label 1:  // error
-    c_label_end()
     file_data_delete(addr(file_data))
     return result
 }
@@ -7905,7 +7886,6 @@ def emulator_write_ext_ram_to_file(var e : Emulator?; var filename : uint8?) : R
     }
     result = Result.OK
     label 1:  // error
-    c_label_end()
     file_data_delete(addr(file_data))
     return result
 }
@@ -7929,7 +7909,6 @@ def emulator_read_state_from_file(var e : Emulator?; var filename : uint8?) : Re
     }
     result = Result.OK
     label 1:  // error
-    c_label_end()
     file_data_delete(addr(file_data))
     return result
 }
@@ -7953,7 +7932,6 @@ def emulator_write_state_to_file(var e : Emulator?; var filename : uint8?) : Res
     }
     result = Result.OK
     label 1:  // error
-    c_label_end()
     file_data_delete(addr(file_data))
     return result
 }
@@ -7981,7 +7959,6 @@ def emulator_new(var init : EmulatorInit?) : Emulator? {
     }
     return e
     label 1:  // error
-    c_label_end()
     emulator_delete(e)
     return null
 }
@@ -8096,7 +8073,7 @@ def set_audio_channel_mute(var e : Emulator?; channel : int; muted : Bool) : Boo
 }
 
 [c_function]
-def joypad_new : JoypadBuffer ? {
+def joypad_new : JoypadBuffer? {
     var buffer : JoypadBuffer? = reinterpret<JoypadBuffer?>(crt::malloc(uint64(typeinfo sizeof(type<JoypadBuffer>))))
     crt::memset(reinterpret<void?>(addr(deref(buffer))), 0, uint64(typeinfo sizeof(type<JoypadBuffer>)))
     buffer.sentinel.prev = addr(buffer.sentinel)
@@ -8366,7 +8343,6 @@ def joypad_read(var file_data : FileData?; var out_buffer : JoypadBuffer ??) : R
     deref(out_buffer) = buffer
     return Result.OK
     label 1:  // error
-    c_label_end()
     return Result.ERROR
 }
 
