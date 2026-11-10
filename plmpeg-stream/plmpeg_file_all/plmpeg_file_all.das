@@ -3,6 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+options strict_aliasing = false
 require c_runtime/c_args
 require c_runtime/c_bounds
 require c_runtime/c_exit
@@ -3254,7 +3255,7 @@ def private plmpeg_file_all__fold_bytes(var bytes : uint8?; length : int) : uint
 // is a segfault), and in either graph a second session would otherwise see a
 // stream the first one already shifted.
 [c_function]
-def private plmpeg_file_all__sample_copy : uint8 ? {
+def private plmpeg_file_all__sample_copy : uint8? {
     var copy : uint8? = reinterpret<uint8?>(crt::malloc(uint64(plmpeg_file_all__sample_mpg_len)))
     if (!(copy != null)) {
         return null
