@@ -68,7 +68,7 @@ def D_PostEvent(var ev : event_t?) {
 }
 
 [c_function]
-def D_PopEvent : event_t ? {
+def D_PopEvent : event_t? {
     var result : event_t?
     // No more events waiting.
     if (d_event__eventtail == d_event__eventhead) {
