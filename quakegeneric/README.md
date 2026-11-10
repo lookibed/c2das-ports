@@ -23,17 +23,17 @@ What does convert: each C file of the program converted alone, 7 of 70 (`files/`
 | upstream/quakegeneric/source/crc.c          | converted                                                                                                                                                                               |
 | upstream/quakegeneric/source/cvar.c         | refused: emitter: upstream/quakegeneric/source/cvar.c:37:3: external function `Q_strcmp` has no c_runtime mapping                                                                       |
 | upstream/quakegeneric/source/d_edge.c       | refused: emitter: upstream/quakegeneric/source/d_edge.c:135:2: external function `TransformVector` has no c_runtime mapping                                                             |
-| upstream/quakegeneric/source/d_fill.c       | refused: compile check: error[30838]: can't locate variable 'vid'                                                                                                                       |
+| upstream/quakegeneric/source/d_fill.c       | refused: compile check: error[30808]: Don't know what 'vid' is                                                                                                                          |
 | upstream/quakegeneric/source/d_init.c       | refused: emitter: upstream/quakegeneric/source/d_init.c:53:2: external function `Cvar_RegisterVariable` has no c_runtime mapping                                                        |
 | upstream/quakegeneric/source/d_modech.c     | refused: compile check: error[30838]: can't locate variable 'r_dowarp'                                                                                                                  |
 | upstream/quakegeneric/source/d_part.c       | refused: compile check: error[30838]: can't locate variable 'r_origin'                                                                                                                  |
 | upstream/quakegeneric/source/d_polyse.c     | refused: emitter: upstream/quakegeneric/source/d_polyse.c:506:3: external function `FloorDivMod` has no c_runtime mapping                                                               |
-| upstream/quakegeneric/source/d_scan.c       | refused: compile check: error[30838]: can't locate variable 'r_refdef'                                                                                                                  |
+| upstream/quakegeneric/source/d_scan.c       | refused: compile check: error[30808]: Don't know what 'r_refdef' is                                                                                                                     |
 | upstream/quakegeneric/source/d_sky.c        | refused: emitter: upstream/quakegeneric/source/d_sky.c:52:2: external function `VectorNormalize` has no c_runtime mapping                                                               |
 | upstream/quakegeneric/source/d_sprite.c     | refused: emitter: upstream/quakegeneric/source/d_sprite.c:343:2: external function `TransformVector` has no c_runtime mapping                                                           |
 | upstream/quakegeneric/source/d_surf.c       | refused: emitter: upstream/quakegeneric/source/d_surf.c:39:2: external function `COM_CheckParm` has no c_runtime mapping                                                                |
 | upstream/quakegeneric/source/d_vars.c       | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/d_zpoint.c     | refused: compile check: error[30838]: can't locate variable 'd_pzbuffer' (+2 more on this line)                                                                                         |
+| upstream/quakegeneric/source/d_zpoint.c     | refused: compile check: error[30838]: can't locate variable 'd_pzbuffer' (+1 more on this line)                                                                                         |
 | upstream/quakegeneric/source/draw.c         | refused: emitter: upstream/quakegeneric/source/draw.c:56:2: external function `W_GetLumpName` has no c_runtime mapping                                                                  |
 | upstream/quakegeneric/source/host_cmd.c     | refused: emitter: upstream/quakegeneric/source/host_cmd.c:41:3: external function `M_Menu_Quit_f` has no c_runtime mapping                                                              |
 | upstream/quakegeneric/source/host.c         | refused: emitter: upstream/quakegeneric/source/host.c:94:2: external function `Con_DPrintf` has no c_runtime mapping                                                                    |
@@ -56,7 +56,7 @@ What does convert: each C file of the program converted alone, 7 of 70 (`files/`
 | upstream/quakegeneric/source/r_draw.c       | refused: emitter: upstream/quakegeneric/source/r_draw.c:101:3: external function `TransformVector` has no c_runtime mapping                                                             |
 | upstream/quakegeneric/source/r_edge.c       | refused: emitter: upstream/quakegeneric/source/r_edge.c:101:5: external function `R_RenderPoly` has no c_runtime mapping                                                                |
 | upstream/quakegeneric/source/r_efrag.c      | refused: emitter: upstream/quakegeneric/source/r_efrag.c:116:4: external function `Con_Printf` has no c_runtime mapping                                                                 |
-| upstream/quakegeneric/source/r_light.c      | refused: compile check: error[30838]: can't locate variable 'cl'                                                                                                                        |
+| upstream/quakegeneric/source/r_light.c      | refused: compile check: error[30808]: Don't know what 'cl' is                                                                                                                           |
 | upstream/quakegeneric/source/r_main.c       | refused: emitter: upstream/quakegeneric/source/r_main.c:155:2: external function `Hunk_AllocName` has no c_runtime mapping                                                              |
 | upstream/quakegeneric/source/r_misc.c       | refused: emitter: upstream/quakegeneric/source/r_misc.c:38:3: external function `D_FlushCaches` has no c_runtime mapping                                                                |
 | upstream/quakegeneric/source/r_part.c       | refused: emitter: upstream/quakegeneric/source/r_part.c:50:2: external function `COM_CheckParm` has no c_runtime mapping                                                                |
@@ -90,7 +90,7 @@ What does convert: each C file of the program converted alone, 7 of 70 (`files/`
 ## Source
 
 - The C sources: `tests/manual/quakegeneric/` of lookibed/c2das at `b1d012eb5d268f9f743168caa962a9218cf275f7`; its `UPSTREAM.md` names each upstream and its revision.
-- Generated by c2das-re `v0.5.0-508-gca0b17a` (`ca0b17aa9b45d9eea46f55c0891e1616048a6a8a`, committed 2026-11-08)
+- Generated by c2das-re `v0.5.0-579-g852c24f` (`852c24fd4d0cd22d04faa908173345c3f79cfc82`, committed 2026-11-10)
 
 ## Running
 
@@ -106,21 +106,21 @@ Its output must equal `expected.stdout` of the canonical case `quakegeneric-demo
 
 ## Performance
 
-Measured 2026-11-06 02:41 UTC (capture committed at c2das-re `4e63dc045622`), output changed since: the converter changed after that date; no new timing yet.
+Measured 2026-11-09 17:02 UTC (capture committed at c2das-re `bba9010df546`), output changed since: the converter changed after that date; no new timing yet.
 
 From c2das-re's `compare/results_linux.json` (`compare/run.das --project quakegeneric`), our side against the Rust translator's:
 
-Each project of the Rust repository's `tests/manual` on its own fixture, checked against the `expected.stdout` of its canonical case in the Rust repository's `tests/canonical/cases.json`; the native build (the pinned clang with the README's flags) must print it too. Captured: quakegeneric (Rust `b1d012eb5d26`, 2026-11-06 02:41 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap).
+Each project of the Rust repository's `tests/manual` on its own fixture, checked against the `expected.stdout` of its canonical case in the Rust repository's `tests/canonical/cases.json`; the native build (the pinned clang with the README's flags) must print it too. Captured: quakegeneric (Rust `b1d012eb5d26`, 2026-11-09 17:02 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap).
 
 | Project      | Side | Native | interpreter |     JIT |     exe |     AOT |
 | :----------- | :--- | :----- | ----------: | ------: | ------: | ------: |
 | quakegeneric | Ours | pass   |     refused | refused | refused | refused |
-| quakegeneric | Rust | pass   |        pass |  output |    pass |    pass |
+| quakegeneric | Rust | pass   |     compile | compile | compile | compile |
 
 Why a lane does not pass:
 
 - quakegeneric, Ours, interpreter JIT exe AOT: refused: emitter: /root/c2das/tests/manual/quakegeneric/upstream/quakegeneric/source/host_cmd.c:63:10: a pointer to a variadic function is not lowered yet
-- quakegeneric, Rust, JIT: output: line 1: got `[W] LLVM JIT: return inside try/recover leaves the try arm, not the function. at compare/work/projects/quakegeneric/rust/host.das.inc:66...
+- quakegeneric, Rust, interpreter JIT exe AOT: compile: error[30299]: return inside a try/recover arm; set a variable in the arm and return after the pair
 
 The bench entry's timed loop (`decode_us`), a lane's median over the native build's (lower is faster), 3 samples a cell; a cell whose spread is above 20% is `suspect` with its spread, no ratio, as is a lane over a suspect native build:
 
@@ -134,7 +134,7 @@ The code of each side's module (the Rust runtime is its `c2da_rt_` and `c2da_std
 | Project      | Side | Code    | Files | Lines | Runtime lines | c_function | goto | label | literal_named | pointer_arith | pointer_index | reinterpret | unsafe_block | unsafe_expr | while_rangeable |
 | :----------- | :--- | :------ | ----: | ----: | ------------: | ---------: | ---: | ----: | ------------: | ------------: | ------------: | ----------: | -----------: | ----------: | --------------: |
 | quakegeneric | Ours | refused |     - |     - |             - |          - |    - |     - |             - |             - |             - |           - |            - |           - |               - |
-| quakegeneric | Rust | ok      |    72 | 59613 |          1781 |          0 |  461 |   578 |          2275 |           745 |          5761 |       10506 |          219 |       20287 |             203 |
+| quakegeneric | Rust | compile |     - |     - |             - |          - |    - |     - |             - |             - |             - |           - |            - |           - |               - |
 
 #### `quakegeneric`: `D_DrawSpans8`
 
@@ -328,7 +328,7 @@ def D_DrawZSpans(var pspan_0 : espan_s?) {
 
 ## Readability criteria
 
-From c2das-re's `metrics/criteria_linux.json` (`scripts/run_criteria.sh`), its row `project/quakegeneric`, recorded at c2das-re `0cee42734855`, output changed since: the converter changed after that commit; not re-measured yet. Measured on the 7 of 70 C files that convert alone, since the program does not convert whole; the other files are in no count, so these criteria describe only the converted files, converted as this directory's conversion is. The compliance in percent per criterion, 100 being what a human port would have (c2das-re's `metrics/ARCHITECTURE_CRITERIA.md` defines each); it counts lines and reads no clock.
+From c2das-re's `metrics/criteria_linux.json` (`scripts/run_criteria.sh`), its row `project/quakegeneric`, recorded at c2das-re `84845419a65b`, output changed since: the converter changed after that commit; not re-measured yet. Measured on the 7 of 70 C files that convert alone, since the program does not convert whole; the other files are in no count, so these criteria describe only the converted files, converted as this directory's conversion is. The compliance in percent per criterion, 100 being what a human port would have (c2das-re's `metrics/ARCHITECTURE_CRITERIA.md` defines each); it counts lines and reads no clock.
 
 | Criterion          | project/quakegeneric |
 | :----------------- | -------------------: |

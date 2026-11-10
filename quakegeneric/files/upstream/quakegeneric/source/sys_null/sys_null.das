@@ -2055,7 +2055,7 @@ def Sys_FloatTime : double {
     return Sys_FloatTime_t
 }
 
-def Sys_ConsoleInput : uint8 ? {
+def Sys_ConsoleInput : uint8? {
     return null
 }
 
