@@ -3,7 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
-require c_runtime/c_function
+require c_runtime/cstr
 
 enum GameMission_t {
     doom
@@ -80,16 +80,14 @@ var private d_mode__valid_versions : anon_26[10] = fixed_array(anon_26(mission =
 
 def D_ValidGameMode(mission : GameMission_t; mode : GameMode_t) : uint {
     var i : int
-    {
-        i = 0
-        while (uint64(i) < uint64(typeinfo sizeof(type<anon_21[13]>)) / uint64(typeinfo sizeof(type<anon_21>))) {
-            if (d_mode__valid_modes[i].mode == mode && d_mode__valid_modes[i].mission == mission) {
-                return uint(1)
-            }
-            i++
+    i = 0
+    while (uint64(i) < uint64(typeinfo sizeof(type<anon_21[13]>)) / uint64(typeinfo sizeof(type<anon_21>))) {
+        if (d_mode__valid_modes[i].mode == mode && d_mode__valid_modes[i].mission == mission) {
+            return 1u
         }
+        i++
     }
-    return uint(0)
+    return 0u
 }
 
 def D_ValidEpisodeMap(mission : GameMission_t; mode : GameMode_t; episode : int; map : int) : uint {
@@ -103,17 +101,15 @@ def D_ValidEpisodeMap(mission : GameMission_t; mode : GameMode_t; episode : int;
         }
     }
     // Find the table entry for this mission/mode combination.
-    {
-        i = 0
-        while (uint64(i) < uint64(typeinfo sizeof(type<anon_21[13]>)) / uint64(typeinfo sizeof(type<anon_21>))) {
-            if (mission == d_mode__valid_modes[i].mission && mode == d_mode__valid_modes[i].mode) {
-                return uint(episode >= 1 && episode <= d_mode__valid_modes[i].episode && map >= 1 && map <= d_mode__valid_modes[i].map ? 1 : 0)
-            }
-            i++
+    i = 0
+    while (uint64(i) < uint64(typeinfo sizeof(type<anon_21[13]>)) / uint64(typeinfo sizeof(type<anon_21>))) {
+        if (mission == d_mode__valid_modes[i].mission && mode == d_mode__valid_modes[i].mode) {
+            return uint(episode >= 1 && episode <= d_mode__valid_modes[i].episode && map >= 1 && map <= d_mode__valid_modes[i].map ? 1 : 0)
         }
+        i++
     }
     // Unknown mode/mission combination
-    return uint(0)
+    return 0u
 }
 
 def D_GetNumEpisodes(mission : GameMission_t; mode : GameMode_t) : int {
@@ -131,52 +127,47 @@ def D_ValidGameVersion(var mission : GameMission_t; version : GameVersion_t) : u
     if (mission == GameMission_t.doom2 || mission == GameMission_t.pack_plut || mission == GameMission_t.pack_tnt || mission == GameMission_t.pack_hacx || mission == GameMission_t.pack_chex) {
         mission = GameMission_t.doom
     }
-    {
-        i = 0
-        while (uint64(i) < uint64(typeinfo sizeof(type<anon_26[10]>)) / uint64(typeinfo sizeof(type<anon_26>))) {
-            if (d_mode__valid_versions[i].mission == mission && d_mode__valid_versions[i].version == version) {
-                return uint(1)
-            }
-            i++
+    i = 0
+    while (uint64(i) < uint64(typeinfo sizeof(type<anon_26[10]>)) / uint64(typeinfo sizeof(type<anon_26>))) {
+        if (d_mode__valid_versions[i].mission == mission && d_mode__valid_versions[i].version == version) {
+            return 1u
         }
+        i++
     }
-    return uint(0)
+    return 0u
 }
 
 def D_IsEpisodeMap(mission : GameMission_t) : uint {
     let _cond = mission
     if (_cond == GameMission_t.doom || _cond == GameMission_t.heretic || _cond == GameMission_t.pack_chex) {
-        return uint(1)
+        return 1u
     } else {
-        return uint(0)
+        return 0u
     }
-    return uint(0)
 }
 
-[c_function]
 def D_GameMissionString(mission : GameMission_t) : uint8? {
     let _cond = mission
     if (_cond == GameMission_t.doom) {
-        return reinterpret<uint8?>("doom")
+        return cstr("doom")
     } elif (_cond == GameMission_t.doom2) {
-        return reinterpret<uint8?>("doom2")
+        return cstr("doom2")
     } elif (_cond == GameMission_t.pack_tnt) {
-        return reinterpret<uint8?>("tnt")
+        return cstr("tnt")
     } elif (_cond == GameMission_t.pack_plut) {
-        return reinterpret<uint8?>("plutonia")
+        return cstr("plutonia")
     } elif (_cond == GameMission_t.pack_hacx) {
-        return reinterpret<uint8?>("hacx")
+        return cstr("hacx")
     } elif (_cond == GameMission_t.pack_chex) {
-        return reinterpret<uint8?>("chex")
+        return cstr("chex")
     } elif (_cond == GameMission_t.heretic) {
-        return reinterpret<uint8?>("heretic")
+        return cstr("heretic")
     } elif (_cond == GameMission_t.hexen) {
-        return reinterpret<uint8?>("hexen")
+        return cstr("hexen")
     } elif (_cond == GameMission_t.strife) {
-        return reinterpret<uint8?>("strife")
+        return cstr("strife")
     } else {
-        return reinterpret<uint8?>("none")
+        return cstr("none")
     }
-    return null
 }
 

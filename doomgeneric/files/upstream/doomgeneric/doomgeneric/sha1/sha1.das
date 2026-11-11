@@ -25,13 +25,18 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < count > (type<sha1_context_s>) == 88, "sha1_context_s.count: clang puts it at 88")
 }
 
+let private K1 = 1518500249l
+let private K2 = 1859775393l
+let private K3 = 2400959708l
+let private K4 = 3395469782l
+
 def SHA1_Init(var hd : sha1_context_s?) {
-    hd.h0 = uint(1732584193)
+    hd.h0 = 1732584193u
     hd.h1 = 4023233417u
     hd.h2 = 2562383102u
-    hd.h3 = uint(271733878)
+    hd.h3 = 271733878u
     hd.h4 = 3285377520u
-    hd.nblocks = uint(0)
+    hd.nblocks = 0u
     hd.count = 0
 }
 
@@ -54,474 +59,472 @@ def private sha1__Transform(var hd : sha1_context_s?; var data : uint8?) {
     {
         var i : int
         var p2 : uint8?
-        {
-            i = 0
-            p2 = reinterpret<uint8?>(addr(x[0]))
-            while (i < 16) {
-                var _t0 = data
-                data = data + 1
-                deref(p2 + 3) = deref(_t0)
-                var _t1 = data
-                data = data + 1
-                deref(p2 + 2) = deref(_t1)
-                var _t2 = data
-                data = data + 1
-                deref(p2 + 1) = deref(_t2)
-                var _t3 = data
-                data = data + 1
-                deref(p2 + 0) = deref(_t3)
-                i++
-                p2 = p2 + 4
-            }
+        i = 0
+        p2 = reinterpret<uint8?>(addr(x[0]))
+        while (i < 16) {
+            var _t0 = data
+            data = data + 1
+            p2[3] = deref(_t0)
+            var _t1 = data
+            data = data + 1
+            p2[2] = deref(_t1)
+            var _t2 = data
+            data = data + 1
+            p2[1] = deref(_t2)
+            var _t3 = data
+            data = data + 1
+            p2[0] = deref(_t3)
+            i++
+            p2 = p2 + 4
         }
     }
     {
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (d ^ b & (c ^ d))) + 1518500249l + int64(x[0])))
-        b = b << 30u | b >> uint(32 - 30)
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + (d ^ (b & (c ^ d)))) + K1 + int64(x[0])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (c ^ a & (b ^ c))) + 1518500249l + int64(x[1])))
-        a = a << 30u | a >> uint(32 - 30)
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + (c ^ (a & (b ^ c)))) + K1 + int64(x[1])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (b ^ e & (a ^ b))) + 1518500249l + int64(x[2])))
-        e = e << 30u | e >> uint(32 - 30)
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + (b ^ (e & (a ^ b)))) + K1 + int64(x[2])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (a ^ d & (e ^ a))) + 1518500249l + int64(x[3])))
-        d = d << 30u | d >> uint(32 - 30)
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + (a ^ (d & (e ^ a)))) + K1 + int64(x[3])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (e ^ c & (d ^ e))) + 1518500249l + int64(x[4])))
-        c = c << 30u | c >> uint(32 - 30)
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + (e ^ (c & (d ^ e)))) + K1 + int64(x[4])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (d ^ b & (c ^ d))) + 1518500249l + int64(x[5])))
-        b = b << 30u | b >> uint(32 - 30)
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + (d ^ (b & (c ^ d)))) + K1 + int64(x[5])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (c ^ a & (b ^ c))) + 1518500249l + int64(x[6])))
-        a = a << 30u | a >> uint(32 - 30)
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + (c ^ (a & (b ^ c)))) + K1 + int64(x[6])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (b ^ e & (a ^ b))) + 1518500249l + int64(x[7])))
-        e = e << 30u | e >> uint(32 - 30)
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + (b ^ (e & (a ^ b)))) + K1 + int64(x[7])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (a ^ d & (e ^ a))) + 1518500249l + int64(x[8])))
-        d = d << 30u | d >> uint(32 - 30)
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + (a ^ (d & (e ^ a)))) + K1 + int64(x[8])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (e ^ c & (d ^ e))) + 1518500249l + int64(x[9])))
-        c = c << 30u | c >> uint(32 - 30)
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + (e ^ (c & (d ^ e)))) + K1 + int64(x[9])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (d ^ b & (c ^ d))) + 1518500249l + int64(x[10])))
-        b = b << 30u | b >> uint(32 - 30)
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + (d ^ (b & (c ^ d)))) + K1 + int64(x[10])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (c ^ a & (b ^ c))) + 1518500249l + int64(x[11])))
-        a = a << 30u | a >> uint(32 - 30)
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + (c ^ (a & (b ^ c)))) + K1 + int64(x[11])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (b ^ e & (a ^ b))) + 1518500249l + int64(x[12])))
-        e = e << 30u | e >> uint(32 - 30)
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + (b ^ (e & (a ^ b)))) + K1 + int64(x[12])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (a ^ d & (e ^ a))) + 1518500249l + int64(x[13])))
-        d = d << 30u | d >> uint(32 - 30)
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + (a ^ (d & (e ^ a)))) + K1 + int64(x[13])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (e ^ c & (d ^ e))) + 1518500249l + int64(x[14])))
-        c = c << 30u | c >> uint(32 - 30)
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + (e ^ (c & (d ^ e)))) + K1 + int64(x[14])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (d ^ b & (c ^ d))) + 1518500249l + int64(x[15])))
-        b = b << 30u | b >> uint(32 - 30)
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + (d ^ (b & (c ^ d)))) + K1 + int64(x[15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[16 & 15] ^ x[16 - 14 & 15] ^ x[16 - 8 & 15] ^ x[16 - 3 & 15]
-        x[16 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (c ^ a & (b ^ c))) + 1518500249l + int64(x[16 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[16 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + (c ^ (a & (b ^ c)))) + K1 + int64(x[16 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[17 & 15] ^ x[17 - 14 & 15] ^ x[17 - 8 & 15] ^ x[17 - 3 & 15]
-        x[17 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (b ^ e & (a ^ b))) + 1518500249l + int64(x[17 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[17 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + (b ^ (e & (a ^ b)))) + K1 + int64(x[17 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[18 & 15] ^ x[18 - 14 & 15] ^ x[18 - 8 & 15] ^ x[18 - 3 & 15]
-        x[18 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (a ^ d & (e ^ a))) + 1518500249l + int64(x[18 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[18 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + (a ^ (d & (e ^ a)))) + K1 + int64(x[18 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[19 & 15] ^ x[19 - 14 & 15] ^ x[19 - 8 & 15] ^ x[19 - 3 & 15]
-        x[19 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (e ^ c & (d ^ e))) + 1518500249l + int64(x[19 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[19 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + (e ^ (c & (d ^ e)))) + K1 + int64(x[19 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
         tm = x[20 & 15] ^ x[20 - 14 & 15] ^ x[20 - 8 & 15] ^ x[20 - 3 & 15]
-        x[20 & 15] = tm << 1u | tm >> uint(32 - 1)
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (b ^ c ^ d)) + 1859775393l + int64(x[20 & 15])))
-        b = b << 30u | b >> uint(32 - 30)
+        x[20 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + (b ^ c ^ d)) + K2 + int64(x[20 & 15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[21 & 15] ^ x[21 - 14 & 15] ^ x[21 - 8 & 15] ^ x[21 - 3 & 15]
-        x[21 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (a ^ b ^ c)) + 1859775393l + int64(x[21 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[21 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + (a ^ b ^ c)) + K2 + int64(x[21 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[22 & 15] ^ x[22 - 14 & 15] ^ x[22 - 8 & 15] ^ x[22 - 3 & 15]
-        x[22 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (e ^ a ^ b)) + 1859775393l + int64(x[22 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[22 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + (e ^ a ^ b)) + K2 + int64(x[22 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[23 & 15] ^ x[23 - 14 & 15] ^ x[23 - 8 & 15] ^ x[23 - 3 & 15]
-        x[23 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (d ^ e ^ a)) + 1859775393l + int64(x[23 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[23 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + (d ^ e ^ a)) + K2 + int64(x[23 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[24 & 15] ^ x[24 - 14 & 15] ^ x[24 - 8 & 15] ^ x[24 - 3 & 15]
-        x[24 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (c ^ d ^ e)) + 1859775393l + int64(x[24 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[24 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + (c ^ d ^ e)) + K2 + int64(x[24 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
         tm = x[25 & 15] ^ x[25 - 14 & 15] ^ x[25 - 8 & 15] ^ x[25 - 3 & 15]
-        x[25 & 15] = tm << 1u | tm >> uint(32 - 1)
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (b ^ c ^ d)) + 1859775393l + int64(x[25 & 15])))
-        b = b << 30u | b >> uint(32 - 30)
+        x[25 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + (b ^ c ^ d)) + K2 + int64(x[25 & 15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[26 & 15] ^ x[26 - 14 & 15] ^ x[26 - 8 & 15] ^ x[26 - 3 & 15]
-        x[26 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (a ^ b ^ c)) + 1859775393l + int64(x[26 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[26 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + (a ^ b ^ c)) + K2 + int64(x[26 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[27 & 15] ^ x[27 - 14 & 15] ^ x[27 - 8 & 15] ^ x[27 - 3 & 15]
-        x[27 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (e ^ a ^ b)) + 1859775393l + int64(x[27 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[27 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + (e ^ a ^ b)) + K2 + int64(x[27 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[28 & 15] ^ x[28 - 14 & 15] ^ x[28 - 8 & 15] ^ x[28 - 3 & 15]
-        x[28 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (d ^ e ^ a)) + 1859775393l + int64(x[28 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[28 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + (d ^ e ^ a)) + K2 + int64(x[28 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[29 & 15] ^ x[29 - 14 & 15] ^ x[29 - 8 & 15] ^ x[29 - 3 & 15]
-        x[29 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (c ^ d ^ e)) + 1859775393l + int64(x[29 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[29 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + (c ^ d ^ e)) + K2 + int64(x[29 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
         tm = x[30 & 15] ^ x[30 - 14 & 15] ^ x[30 - 8 & 15] ^ x[30 - 3 & 15]
-        x[30 & 15] = tm << 1u | tm >> uint(32 - 1)
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (b ^ c ^ d)) + 1859775393l + int64(x[30 & 15])))
-        b = b << 30u | b >> uint(32 - 30)
+        x[30 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + (b ^ c ^ d)) + K2 + int64(x[30 & 15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[31 & 15] ^ x[31 - 14 & 15] ^ x[31 - 8 & 15] ^ x[31 - 3 & 15]
-        x[31 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (a ^ b ^ c)) + 1859775393l + int64(x[31 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[31 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + (a ^ b ^ c)) + K2 + int64(x[31 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[32 & 15] ^ x[32 - 14 & 15] ^ x[32 - 8 & 15] ^ x[32 - 3 & 15]
-        x[32 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (e ^ a ^ b)) + 1859775393l + int64(x[32 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[32 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + (e ^ a ^ b)) + K2 + int64(x[32 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[33 & 15] ^ x[33 - 14 & 15] ^ x[33 - 8 & 15] ^ x[33 - 3 & 15]
-        x[33 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (d ^ e ^ a)) + 1859775393l + int64(x[33 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[33 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + (d ^ e ^ a)) + K2 + int64(x[33 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[34 & 15] ^ x[34 - 14 & 15] ^ x[34 - 8 & 15] ^ x[34 - 3 & 15]
-        x[34 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (c ^ d ^ e)) + 1859775393l + int64(x[34 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[34 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + (c ^ d ^ e)) + K2 + int64(x[34 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
         tm = x[35 & 15] ^ x[35 - 14 & 15] ^ x[35 - 8 & 15] ^ x[35 - 3 & 15]
-        x[35 & 15] = tm << 1u | tm >> uint(32 - 1)
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (b ^ c ^ d)) + 1859775393l + int64(x[35 & 15])))
-        b = b << 30u | b >> uint(32 - 30)
+        x[35 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + (b ^ c ^ d)) + K2 + int64(x[35 & 15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[36 & 15] ^ x[36 - 14 & 15] ^ x[36 - 8 & 15] ^ x[36 - 3 & 15]
-        x[36 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (a ^ b ^ c)) + 1859775393l + int64(x[36 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[36 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + (a ^ b ^ c)) + K2 + int64(x[36 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[37 & 15] ^ x[37 - 14 & 15] ^ x[37 - 8 & 15] ^ x[37 - 3 & 15]
-        x[37 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (e ^ a ^ b)) + 1859775393l + int64(x[37 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[37 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + (e ^ a ^ b)) + K2 + int64(x[37 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[38 & 15] ^ x[38 - 14 & 15] ^ x[38 - 8 & 15] ^ x[38 - 3 & 15]
-        x[38 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (d ^ e ^ a)) + 1859775393l + int64(x[38 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[38 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + (d ^ e ^ a)) + K2 + int64(x[38 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[39 & 15] ^ x[39 - 14 & 15] ^ x[39 - 8 & 15] ^ x[39 - 3 & 15]
-        x[39 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (c ^ d ^ e)) + 1859775393l + int64(x[39 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[39 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + (c ^ d ^ e)) + K2 + int64(x[39 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
         tm = x[40 & 15] ^ x[40 - 14 & 15] ^ x[40 - 8 & 15] ^ x[40 - 3 & 15]
-        x[40 & 15] = tm << 1u | tm >> uint(32 - 1)
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (b & c | d & (b | c))) + 2400959708l + int64(x[40 & 15])))
-        b = b << 30u | b >> uint(32 - 30)
+        x[40 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + ((b & c) | (d & (b | c)))) + K3 + int64(x[40 & 15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[41 & 15] ^ x[41 - 14 & 15] ^ x[41 - 8 & 15] ^ x[41 - 3 & 15]
-        x[41 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (a & b | c & (a | b))) + 2400959708l + int64(x[41 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[41 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + ((a & b) | (c & (a | b)))) + K3 + int64(x[41 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[42 & 15] ^ x[42 - 14 & 15] ^ x[42 - 8 & 15] ^ x[42 - 3 & 15]
-        x[42 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (e & a | b & (e | a))) + 2400959708l + int64(x[42 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[42 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + ((e & a) | (b & (e | a)))) + K3 + int64(x[42 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[43 & 15] ^ x[43 - 14 & 15] ^ x[43 - 8 & 15] ^ x[43 - 3 & 15]
-        x[43 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (d & e | a & (d | e))) + 2400959708l + int64(x[43 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[43 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + ((d & e) | (a & (d | e)))) + K3 + int64(x[43 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[44 & 15] ^ x[44 - 14 & 15] ^ x[44 - 8 & 15] ^ x[44 - 3 & 15]
-        x[44 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (c & d | e & (c | d))) + 2400959708l + int64(x[44 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[44 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + ((c & d) | (e & (c | d)))) + K3 + int64(x[44 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
         tm = x[45 & 15] ^ x[45 - 14 & 15] ^ x[45 - 8 & 15] ^ x[45 - 3 & 15]
-        x[45 & 15] = tm << 1u | tm >> uint(32 - 1)
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (b & c | d & (b | c))) + 2400959708l + int64(x[45 & 15])))
-        b = b << 30u | b >> uint(32 - 30)
+        x[45 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + ((b & c) | (d & (b | c)))) + K3 + int64(x[45 & 15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[46 & 15] ^ x[46 - 14 & 15] ^ x[46 - 8 & 15] ^ x[46 - 3 & 15]
-        x[46 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (a & b | c & (a | b))) + 2400959708l + int64(x[46 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[46 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + ((a & b) | (c & (a | b)))) + K3 + int64(x[46 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[47 & 15] ^ x[47 - 14 & 15] ^ x[47 - 8 & 15] ^ x[47 - 3 & 15]
-        x[47 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (e & a | b & (e | a))) + 2400959708l + int64(x[47 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[47 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + ((e & a) | (b & (e | a)))) + K3 + int64(x[47 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[48 & 15] ^ x[48 - 14 & 15] ^ x[48 - 8 & 15] ^ x[48 - 3 & 15]
-        x[48 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (d & e | a & (d | e))) + 2400959708l + int64(x[48 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[48 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + ((d & e) | (a & (d | e)))) + K3 + int64(x[48 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[49 & 15] ^ x[49 - 14 & 15] ^ x[49 - 8 & 15] ^ x[49 - 3 & 15]
-        x[49 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (c & d | e & (c | d))) + 2400959708l + int64(x[49 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[49 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + ((c & d) | (e & (c | d)))) + K3 + int64(x[49 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
         tm = x[50 & 15] ^ x[50 - 14 & 15] ^ x[50 - 8 & 15] ^ x[50 - 3 & 15]
-        x[50 & 15] = tm << 1u | tm >> uint(32 - 1)
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (b & c | d & (b | c))) + 2400959708l + int64(x[50 & 15])))
-        b = b << 30u | b >> uint(32 - 30)
+        x[50 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + ((b & c) | (d & (b | c)))) + K3 + int64(x[50 & 15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[51 & 15] ^ x[51 - 14 & 15] ^ x[51 - 8 & 15] ^ x[51 - 3 & 15]
-        x[51 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (a & b | c & (a | b))) + 2400959708l + int64(x[51 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[51 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + ((a & b) | (c & (a | b)))) + K3 + int64(x[51 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[52 & 15] ^ x[52 - 14 & 15] ^ x[52 - 8 & 15] ^ x[52 - 3 & 15]
-        x[52 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (e & a | b & (e | a))) + 2400959708l + int64(x[52 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[52 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + ((e & a) | (b & (e | a)))) + K3 + int64(x[52 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[53 & 15] ^ x[53 - 14 & 15] ^ x[53 - 8 & 15] ^ x[53 - 3 & 15]
-        x[53 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (d & e | a & (d | e))) + 2400959708l + int64(x[53 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[53 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + ((d & e) | (a & (d | e)))) + K3 + int64(x[53 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[54 & 15] ^ x[54 - 14 & 15] ^ x[54 - 8 & 15] ^ x[54 - 3 & 15]
-        x[54 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (c & d | e & (c | d))) + 2400959708l + int64(x[54 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[54 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + ((c & d) | (e & (c | d)))) + K3 + int64(x[54 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
         tm = x[55 & 15] ^ x[55 - 14 & 15] ^ x[55 - 8 & 15] ^ x[55 - 3 & 15]
-        x[55 & 15] = tm << 1u | tm >> uint(32 - 1)
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (b & c | d & (b | c))) + 2400959708l + int64(x[55 & 15])))
-        b = b << 30u | b >> uint(32 - 30)
+        x[55 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + ((b & c) | (d & (b | c)))) + K3 + int64(x[55 & 15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[56 & 15] ^ x[56 - 14 & 15] ^ x[56 - 8 & 15] ^ x[56 - 3 & 15]
-        x[56 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (a & b | c & (a | b))) + 2400959708l + int64(x[56 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[56 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + ((a & b) | (c & (a | b)))) + K3 + int64(x[56 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[57 & 15] ^ x[57 - 14 & 15] ^ x[57 - 8 & 15] ^ x[57 - 3 & 15]
-        x[57 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (e & a | b & (e | a))) + 2400959708l + int64(x[57 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[57 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + ((e & a) | (b & (e | a)))) + K3 + int64(x[57 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[58 & 15] ^ x[58 - 14 & 15] ^ x[58 - 8 & 15] ^ x[58 - 3 & 15]
-        x[58 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (d & e | a & (d | e))) + 2400959708l + int64(x[58 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[58 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + ((d & e) | (a & (d | e)))) + K3 + int64(x[58 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[59 & 15] ^ x[59 - 14 & 15] ^ x[59 - 8 & 15] ^ x[59 - 3 & 15]
-        x[59 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (c & d | e & (c | d))) + 2400959708l + int64(x[59 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[59 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + ((c & d) | (e & (c | d)))) + K3 + int64(x[59 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
         tm = x[60 & 15] ^ x[60 - 14 & 15] ^ x[60 - 8 & 15] ^ x[60 - 3 & 15]
-        x[60 & 15] = tm << 1u | tm >> uint(32 - 1)
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (b ^ c ^ d)) + 3395469782l + int64(x[60 & 15])))
-        b = b << 30u | b >> uint(32 - 30)
+        x[60 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + (b ^ c ^ d)) + K4 + int64(x[60 & 15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[61 & 15] ^ x[61 - 14 & 15] ^ x[61 - 8 & 15] ^ x[61 - 3 & 15]
-        x[61 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (a ^ b ^ c)) + 3395469782l + int64(x[61 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[61 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + (a ^ b ^ c)) + K4 + int64(x[61 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[62 & 15] ^ x[62 - 14 & 15] ^ x[62 - 8 & 15] ^ x[62 - 3 & 15]
-        x[62 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (e ^ a ^ b)) + 3395469782l + int64(x[62 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[62 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + (e ^ a ^ b)) + K4 + int64(x[62 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[63 & 15] ^ x[63 - 14 & 15] ^ x[63 - 8 & 15] ^ x[63 - 3 & 15]
-        x[63 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (d ^ e ^ a)) + 3395469782l + int64(x[63 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[63 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + (d ^ e ^ a)) + K4 + int64(x[63 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[64 & 15] ^ x[64 - 14 & 15] ^ x[64 - 8 & 15] ^ x[64 - 3 & 15]
-        x[64 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (c ^ d ^ e)) + 3395469782l + int64(x[64 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[64 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + (c ^ d ^ e)) + K4 + int64(x[64 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
         tm = x[65 & 15] ^ x[65 - 14 & 15] ^ x[65 - 8 & 15] ^ x[65 - 3 & 15]
-        x[65 & 15] = tm << 1u | tm >> uint(32 - 1)
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (b ^ c ^ d)) + 3395469782l + int64(x[65 & 15])))
-        b = b << 30u | b >> uint(32 - 30)
+        x[65 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + (b ^ c ^ d)) + K4 + int64(x[65 & 15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[66 & 15] ^ x[66 - 14 & 15] ^ x[66 - 8 & 15] ^ x[66 - 3 & 15]
-        x[66 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (a ^ b ^ c)) + 3395469782l + int64(x[66 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[66 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + (a ^ b ^ c)) + K4 + int64(x[66 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[67 & 15] ^ x[67 - 14 & 15] ^ x[67 - 8 & 15] ^ x[67 - 3 & 15]
-        x[67 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (e ^ a ^ b)) + 3395469782l + int64(x[67 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[67 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + (e ^ a ^ b)) + K4 + int64(x[67 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[68 & 15] ^ x[68 - 14 & 15] ^ x[68 - 8 & 15] ^ x[68 - 3 & 15]
-        x[68 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (d ^ e ^ a)) + 3395469782l + int64(x[68 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[68 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + (d ^ e ^ a)) + K4 + int64(x[68 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[69 & 15] ^ x[69 - 14 & 15] ^ x[69 - 8 & 15] ^ x[69 - 3 & 15]
-        x[69 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (c ^ d ^ e)) + 3395469782l + int64(x[69 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[69 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + (c ^ d ^ e)) + K4 + int64(x[69 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
         tm = x[70 & 15] ^ x[70 - 14 & 15] ^ x[70 - 8 & 15] ^ x[70 - 3 & 15]
-        x[70 & 15] = tm << 1u | tm >> uint(32 - 1)
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (b ^ c ^ d)) + 3395469782l + int64(x[70 & 15])))
-        b = b << 30u | b >> uint(32 - 30)
+        x[70 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + (b ^ c ^ d)) + K4 + int64(x[70 & 15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[71 & 15] ^ x[71 - 14 & 15] ^ x[71 - 8 & 15] ^ x[71 - 3 & 15]
-        x[71 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (a ^ b ^ c)) + 3395469782l + int64(x[71 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[71 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + (a ^ b ^ c)) + K4 + int64(x[71 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[72 & 15] ^ x[72 - 14 & 15] ^ x[72 - 8 & 15] ^ x[72 - 3 & 15]
-        x[72 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (e ^ a ^ b)) + 3395469782l + int64(x[72 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[72 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + (e ^ a ^ b)) + K4 + int64(x[72 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[73 & 15] ^ x[73 - 14 & 15] ^ x[73 - 8 & 15] ^ x[73 - 3 & 15]
-        x[73 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (d ^ e ^ a)) + 3395469782l + int64(x[73 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[73 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + (d ^ e ^ a)) + K4 + int64(x[73 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[74 & 15] ^ x[74 - 14 & 15] ^ x[74 - 8 & 15] ^ x[74 - 3 & 15]
-        x[74 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (c ^ d ^ e)) + 3395469782l + int64(x[74 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[74 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + (c ^ d ^ e)) + K4 + int64(x[74 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     {
         tm = x[75 & 15] ^ x[75 - 14 & 15] ^ x[75 - 8 & 15] ^ x[75 - 3 & 15]
-        x[75 & 15] = tm << 1u | tm >> uint(32 - 1)
-        e = uint(int64(e) + (int64((a << 5u | a >> uint(32 - 5)) + (b ^ c ^ d)) + 3395469782l + int64(x[75 & 15])))
-        b = b << 30u | b >> uint(32 - 30)
+        x[75 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        e = uint(int64(e) + (int64(((a << 5u) | (a >> uint(32 - 5))) + (b ^ c ^ d)) + K4 + int64(x[75 & 15])))
+        b = (b << 30u) | (b >> uint(32 - 30))
     }
     {
         tm = x[76 & 15] ^ x[76 - 14 & 15] ^ x[76 - 8 & 15] ^ x[76 - 3 & 15]
-        x[76 & 15] = tm << 1u | tm >> uint(32 - 1)
-        d = uint(int64(d) + (int64((e << 5u | e >> uint(32 - 5)) + (a ^ b ^ c)) + 3395469782l + int64(x[76 & 15])))
-        a = a << 30u | a >> uint(32 - 30)
+        x[76 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        d = uint(int64(d) + (int64(((e << 5u) | (e >> uint(32 - 5))) + (a ^ b ^ c)) + K4 + int64(x[76 & 15])))
+        a = (a << 30u) | (a >> uint(32 - 30))
     }
     {
         tm = x[77 & 15] ^ x[77 - 14 & 15] ^ x[77 - 8 & 15] ^ x[77 - 3 & 15]
-        x[77 & 15] = tm << 1u | tm >> uint(32 - 1)
-        c = uint(int64(c) + (int64((d << 5u | d >> uint(32 - 5)) + (e ^ a ^ b)) + 3395469782l + int64(x[77 & 15])))
-        e = e << 30u | e >> uint(32 - 30)
+        x[77 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        c = uint(int64(c) + (int64(((d << 5u) | (d >> uint(32 - 5))) + (e ^ a ^ b)) + K4 + int64(x[77 & 15])))
+        e = (e << 30u) | (e >> uint(32 - 30))
     }
     {
         tm = x[78 & 15] ^ x[78 - 14 & 15] ^ x[78 - 8 & 15] ^ x[78 - 3 & 15]
-        x[78 & 15] = tm << 1u | tm >> uint(32 - 1)
-        b = uint(int64(b) + (int64((c << 5u | c >> uint(32 - 5)) + (d ^ e ^ a)) + 3395469782l + int64(x[78 & 15])))
-        d = d << 30u | d >> uint(32 - 30)
+        x[78 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        b = uint(int64(b) + (int64(((c << 5u) | (c >> uint(32 - 5))) + (d ^ e ^ a)) + K4 + int64(x[78 & 15])))
+        d = (d << 30u) | (d >> uint(32 - 30))
     }
     {
         tm = x[79 & 15] ^ x[79 - 14 & 15] ^ x[79 - 8 & 15] ^ x[79 - 3 & 15]
-        x[79 & 15] = tm << 1u | tm >> uint(32 - 1)
-        a = uint(int64(a) + (int64((b << 5u | b >> uint(32 - 5)) + (c ^ d ^ e)) + 3395469782l + int64(x[79 & 15])))
-        c = c << 30u | c >> uint(32 - 30)
+        x[79 & 15] = (tm << 1u) | (tm >> uint(32 - 1))
+        a = uint(int64(a) + (int64(((b << 5u) | (b >> uint(32 - 5))) + (c ^ d ^ e)) + K4 + int64(x[79 & 15])))
+        c = (c << 30u) | (c >> uint(32 - 30))
     }
     // update chainig vars
     hd.h0 += a
@@ -545,37 +548,33 @@ def SHA1_Update(var hd : sha1_context_s?; var inbuf : uint8?; var inlen : uint64
         return
     }
     if (hd.count != 0) {
-        {
-            while (inlen != 0 && hd.count < 64) {
-                let _t0 = hd.count
-                hd.count++
-                var _t1 = inbuf
-                inbuf = inbuf + 1
-                hd.buf[_t0] = deref(_t1)
-                inlen--
-            }
+        while (inlen != 0 && hd.count < 64) {
+            let _t0 = hd.count
+            hd.count++
+            var _t1 = inbuf
+            inbuf = inbuf + 1
+            hd.buf[_t0] = deref(_t1)
+            inlen--
         }
-        SHA1_Update(hd, null, uint64(0))
+        SHA1_Update(hd, null, 0ul)
         if (!(inlen != 0)) {
             return
         }
     }
-    while (inlen >= uint64(64)) {
+    while (inlen >= 64ul) {
         sha1__Transform(hd, inbuf)
         hd.count = 0
         hd.nblocks++
-        inlen -= uint64(64)
+        inlen -= 64ul
         inbuf = inbuf + 64
     }
-    {
-        while (inlen != 0 && hd.count < 64) {
-            let _t2 = hd.count
-            hd.count++
-            var _t3 = inbuf
-            inbuf = inbuf + 1
-            hd.buf[_t2] = deref(_t3)
-            inlen--
-        }
+    while (inlen != 0 && hd.count < 64) {
+        let _t2 = hd.count
+        hd.count++
+        var _t3 = inbuf
+        inbuf = inbuf + 1
+        hd.buf[_t2] = deref(_t3)
+        inlen--
     }
 }
 
@@ -586,7 +585,7 @@ def SHA1_Final(var digest : uint8?; var hd : sha1_context_s?) {
     var lsb : uint
     var p : uint8?
     // flush
-    SHA1_Update(hd, null, uint64(0))
+    SHA1_Update(hd, null, 0ul)
     t = hd.nblocks
     // multiply by 64 to make a byte count
     lsb = t << 6u
@@ -607,28 +606,28 @@ def SHA1_Final(var digest : uint8?; var hd : sha1_context_s?) {
         // pad
         let _t0 = hd.count
         hd.count++
-        hd.buf[_t0] = uint8(128)
+        hd.buf[_t0] = 128u8
         while (hd.count < 56) {
             // pad
             let _t1 = hd.count
             hd.count++
-            hd.buf[_t1] = uint8(0)
+            hd.buf[_t1] = 0u8
         }
     } else {
         // need one extra block
         // pad character
         let _t2 = hd.count
         hd.count++
-        hd.buf[_t2] = uint8(128)
+        hd.buf[_t2] = 128u8
         while (hd.count < 64) {
             let _t3 = hd.count
             hd.count++
-            hd.buf[_t3] = uint8(0)
+            hd.buf[_t3] = 0u8
         }
         // flush
-        SHA1_Update(hd, null, uint64(0))
+        SHA1_Update(hd, null, 0ul)
         // fill next block with zeroes
-        crt::memset(reinterpret<void?>(addr(hd.buf[0])), 0, uint64(56))
+        crt::memset(reinterpret<void?>(addr(hd.buf[0])), 0, 56ul)
     }
     // append the 64 bit count
     hd.buf[56] = uint8(msb >> 24u)
@@ -718,15 +717,15 @@ def SHA1_Final(var digest : uint8?; var hd : sha1_context_s?) {
 [c_function]
 def SHA1_UpdateInt32(var context : sha1_context_s?; val : uint) {
     var buf : uint8[4]
-    buf[0] = uint8(val >> 24u & uint(255))
-    buf[1] = uint8(val >> 16u & uint(255))
-    buf[2] = uint8(val >> 8u & uint(255))
-    buf[3] = uint8(val & uint(255))
-    SHA1_Update(context, addr(buf[0]), uint64(4))
+    buf[0] = uint8((val >> 24u) & 255u)
+    buf[1] = uint8((val >> 16u) & 255u)
+    buf[2] = uint8((val >> 8u) & 255u)
+    buf[3] = uint8(val & 255u)
+    SHA1_Update(context, addr(buf[0]), 4ul)
 }
 
 [c_function]
 def SHA1_UpdateString(var context : sha1_context_s?; var str : uint8?) {
-    SHA1_Update(context, reinterpret<uint8?>(str), crt::strlen(str) + uint64(1))
+    SHA1_Update(context, reinterpret<uint8?>(str), crt::strlen(str) + 1ul)
 }
 

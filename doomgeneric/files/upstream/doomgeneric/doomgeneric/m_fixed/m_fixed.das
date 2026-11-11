@@ -75,12 +75,12 @@ def private c2das_layout_check {
 let private FRACBITS = 16
 
 def FixedMul(a : int; b : int) : int {
-    return int(int64(a) * int64(b) >> 16l)
+    return int((int64(a) * int64(b)) >> int64(FRACBITS))
 }
 
 [c_function]
 def FixedDiv(a : int; b : int) : int {
-    if (crt::abs(a) >> 14 >= crt::abs(b)) {
+    if ((crt::abs(a) >> 14) >= crt::abs(b)) {
         return (a ^ b) < 0 ? -2147483647 - 1 : 2147483647
     } else {
         var result : int64

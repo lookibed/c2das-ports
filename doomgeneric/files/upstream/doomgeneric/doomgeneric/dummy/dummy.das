@@ -4,8 +4,8 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 
-var net_client_connected : uint = uint(0)
-var drone : uint = uint(0)
+var net_client_connected : uint = 0u
+var drone : uint = 0u
 
 def I_InitTimidityConfig {
 }

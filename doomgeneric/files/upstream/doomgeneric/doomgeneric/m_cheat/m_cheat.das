@@ -42,7 +42,7 @@ def cht_CheckCheat(var cht : cheatseq_t?; key : uint8) : int {
         if (int(key) == int(cht.sequence[cht.chars_read])) {
             cht.chars_read++
         } else {
-            cht.chars_read = uint64(0)
+            cht.chars_read = 0ul
         }
         cht.param_chars_read = 0
     } elif (cht.param_chars_read < cht.parameter_chars) {

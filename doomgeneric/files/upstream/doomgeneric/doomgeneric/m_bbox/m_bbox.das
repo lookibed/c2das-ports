@@ -14,23 +14,23 @@ enum anon_3 {
 
 [c_function]
 def M_ClearBox(var box : int?) {
-    deref(box + int(anon_3.BOXRIGHT)) = -2147483647 - 1
-    deref(box + int(anon_3.BOXTOP)) = deref(box + int(anon_3.BOXRIGHT))
-    deref(box + int(anon_3.BOXLEFT)) = 2147483647
-    deref(box + int(anon_3.BOXBOTTOM)) = deref(box + int(anon_3.BOXLEFT))
+    box[int(anon_3.BOXRIGHT)] = -2147483647 - 1
+    box[int(anon_3.BOXTOP)] = box[int(anon_3.BOXRIGHT)]
+    box[int(anon_3.BOXLEFT)] = 2147483647
+    box[int(anon_3.BOXBOTTOM)] = box[int(anon_3.BOXLEFT)]
 }
 
 [c_function]
 def M_AddToBox(var box : int?; x : int; y : int) {
-    if (x < deref(box + int(anon_3.BOXLEFT))) {
-        deref(box + int(anon_3.BOXLEFT)) = x
-    } elif (x > deref(box + int(anon_3.BOXRIGHT))) {
-        deref(box + int(anon_3.BOXRIGHT)) = x
+    if (x < box[int(anon_3.BOXLEFT)]) {
+        box[int(anon_3.BOXLEFT)] = x
+    } elif (x > box[int(anon_3.BOXRIGHT)]) {
+        box[int(anon_3.BOXRIGHT)] = x
     }
-    if (y < deref(box + int(anon_3.BOXBOTTOM))) {
-        deref(box + int(anon_3.BOXBOTTOM)) = y
-    } elif (y > deref(box + int(anon_3.BOXTOP))) {
-        deref(box + int(anon_3.BOXTOP)) = y
+    if (y < box[int(anon_3.BOXBOTTOM)]) {
+        box[int(anon_3.BOXBOTTOM)] = y
+    } elif (y > box[int(anon_3.BOXTOP)]) {
+        box[int(anon_3.BOXTOP)] = y
     }
 }
 
