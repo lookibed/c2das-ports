@@ -5,16 +5,14 @@ struct LoadState {
     name : uint8?
 }
 
-[c_function]
 def private error(var S : LoadState?; var why : uint8?) {
-    luaO_pushfstring`va(S.L, reinterpret<uint8?>("%s: bad binary format (%s)"), (S.name, why))
+    luaO_pushfstring`va(S.L, cstr("%s: bad binary format (%s)"), (S.name, why))
     luaD_throw(S.L, LUA_ERRSYNTAX)
 }
 
-[c_function]
 def private loadBlock(var S : LoadState?; var b : void?; size : uint64) {
-    if (luaZ_read(S.Z, b, size) != uint64(0)) {
-        error(S, reinterpret<uint8?>("truncated chunk"))
+    if (luaZ_read(S.Z, b, size) != 0ul) {
+        error(S, cstr("truncated chunk"))
     }
 }
 
@@ -23,7 +21,7 @@ def private loadByte(var S : LoadState?) : uint8 {
     let _t0 = S.Z.n
     S.Z.n--
     var _t2 : int
-    if (_t0 > uint64(0)) {
+    if (_t0 > 0ul) {
         var _t1 = S.Z.p
         S.Z.p = S.Z.p + 1
         _t2 = int(uint8(deref(_t1)))
@@ -32,22 +30,21 @@ def private loadByte(var S : LoadState?) : uint8 {
     }
     var b : int = _t2
     if (b == EOZ) {
-        error(S, reinterpret<uint8?>("truncated chunk"))
+        error(S, cstr("truncated chunk"))
     }
     return uint8(b)
 }
 
-[c_function]
 def private loadUnsigned(var S : LoadState?; var limit : uint64) : uint64 {
-    var x : uint64 = uint64(0)
+    var x : uint64 = 0ul
     var b : int
     limit >>= 7ul
     while (true) {
         b = int(loadByte(S))
         if (x >= limit) {
-            error(S, reinterpret<uint8?>("integer overflow"))
+            error(S, cstr("integer overflow"))
         }
-        x = x << 7ul | uint64(b & 127)
+        x = (x << 7ul) | uint64(b & 127)
         if (!((b & 128) == 0)) {
             break
         }
@@ -60,20 +57,20 @@ def private loadSize(var S : LoadState?) : uint64 {
 }
 
 def private loadInt(var S : LoadState?) : int {
-    return int(loadUnsigned(S, uint64(2147483647)))
+    return int(loadUnsigned(S, 2147483647ul))
 }
 
 [c_function]
 def private loadNumber(var S : LoadState?) : double {
     var x : double
-    loadBlock(S, reinterpret<void?>(addr(x)), uint64(1) * uint64(typeinfo sizeof(type<double>)))
+    loadBlock(S, reinterpret<void?>(addr(x)), 1ul * uint64(typeinfo sizeof(type<double>)))
     return x
 }
 
 [c_function]
 def private loadInteger(var S : LoadState?) : int64 {
     var x : int64
-    loadBlock(S, reinterpret<void?>(addr(x)), uint64(1) * uint64(typeinfo sizeof(type<int64>)))
+    loadBlock(S, reinterpret<void?>(addr(x)), 1ul * uint64(typeinfo sizeof(type<int64>)))
     return x
 }
 
@@ -84,7 +81,7 @@ def private loadStringN(var S : LoadState?; var p : Proto?) : TString? {
     var ts : TString?
     var size : uint64 = loadSize(S)
     // no string?
-    if (size == uint64(0)) {
+    if (size == 0ul) {
         return null
     } else {
         // short string?
@@ -104,7 +101,7 @@ def private loadStringN(var S : LoadState?; var p : Proto?) : TString? {
                 var io : TValue? = addr(L.top.p.val)
                 var x_ : TString? = ts
                 io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-                io.tt_ = uint8(int(x_.tt) | 1 << 6)
+                io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
             }
             luaD_inctop(L)
             // load directly in final place
@@ -113,7 +110,7 @@ def private loadStringN(var S : LoadState?; var p : Proto?) : TString? {
             L.top.p = L.top.p - 1
         }
     }
-    if ((int(p.marked) & 1 << 5) != 0 && (int(ts.marked) & (1 << 3 | 1 << 4)) != 0) {
+    if ((int(p.marked) & (1 << BLACKBIT)) != 0 && (int(ts.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
         luaC_barrier_(L, addr(reinterpret<GCUnion?>(p).gc), addr(reinterpret<GCUnion?>(ts).gc))
     }
     return ts
@@ -124,7 +121,7 @@ def private loadStringN(var S : LoadState?; var p : Proto?) : TString? {
 def private loadString(var S : LoadState?; var p : Proto?) : TString? {
     var st : TString? = loadStringN(S, p)
     if (st == null) {
-        error(S, reinterpret<uint8?>("bad format for constant string"))
+        error(S, cstr("bad format for constant string"))
     }
     return st
 }
@@ -132,7 +129,7 @@ def private loadString(var S : LoadState?; var p : Proto?) : TString? {
 [c_function]
 def private loadCode(var S : LoadState?; var f : Proto?) {
     var n : int = loadInt(S)
-    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + uint64(1) > ~uint64(0) / uint64(typeinfo sizeof(type<uint>))) {
+    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + 1ul > MAX_SIZET / uint64(typeinfo sizeof(type<uint>))) {
         luaM_toobig(S.L)
     }
     f.code = reinterpret<uint?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<uint>)), 0))
@@ -143,42 +140,42 @@ def private loadCode(var S : LoadState?; var f : Proto?) {
 [c_function]
 def private loadConstants(var S : LoadState?; var f : Proto?) {
     var n : int = loadInt(S)
-    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + uint64(1) > ~uint64(0) / uint64(typeinfo sizeof(type<TValue>))) {
+    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + 1ul > MAX_SIZET / uint64(typeinfo sizeof(type<TValue>))) {
         luaM_toobig(S.L)
     }
     f.k = reinterpret<TValue?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<TValue>)), 0))
     f.sizek = n
     for (i in range(n)) {
-        addr(deref(f.k + i)).tt_ = uint8(0 | 0 << 4)
+        addr(f.k[i]).tt_ = uint8(LUA_TNIL | (0 << 4))
     }
     for (i in range(n)) {
-        var o : TValue? = addr(deref(f.k + i))
+        var o : TValue? = addr(f.k[i])
         var t : int = int(loadByte(S))
         let _cond = t
         if (_cond == 0) {
-            o.tt_ = uint8(0 | 0 << 4)
+            o.tt_ = uint8(LUA_TNIL | (0 << 4))
         } elif (_cond == 1) {
-            o.tt_ = uint8(1 | 0 << 4)
+            o.tt_ = uint8(LUA_TBOOLEAN | (0 << 4))
         } elif (_cond == 17) {
-            o.tt_ = uint8(1 | 1 << 4)
+            o.tt_ = uint8(LUA_TBOOLEAN | (1 << 4))
         } elif (_cond == 19) {
             {
                 var io : TValue? = o
                 io.value_.n = loadNumber(S)
-                io.tt_ = uint8(3 | 1 << 4)
+                io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
             }
         } elif (_cond == 3) {
             {
                 var io : TValue? = o
                 io.value_.i = loadInteger(S)
-                io.tt_ = uint8(3 | 0 << 4)
+                io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
             }
         } elif (_cond == 4 || _cond == 20) {
             {
                 var io : TValue? = o
                 var x_ : TString? = loadString(S, f)
                 io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-                io.tt_ = uint8(int(x_.tt) | 1 << 6)
+                io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
                 let _t0 = S.L
             }
         } else {
@@ -189,20 +186,20 @@ def private loadConstants(var S : LoadState?; var f : Proto?) {
 [c_function]
 def private loadProtos(var S : LoadState?; var f : Proto?) {
     var n : int = loadInt(S)
-    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + uint64(1) > ~uint64(0) / uint64(typeinfo sizeof(type<Proto?>))) {
+    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + 1ul > MAX_SIZET / uint64(typeinfo sizeof(type<Proto?>))) {
         luaM_toobig(S.L)
     }
     f.p = reinterpret<Proto ??>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<Proto?>)), 0))
     f.sizep = n
     for (i in range(n)) {
-        deref(f.p + i) = null
+        f.p[i] = null
     }
     for (i in range(n)) {
-        deref(f.p + i) = luaF_newproto(S.L)
-        if ((int(f.marked) & 1 << 5) != 0 && (int(deref(f.p + i).marked) & (1 << 3 | 1 << 4)) != 0) {
-            luaC_barrier_(S.L, addr(reinterpret<GCUnion?>(f).gc), addr(reinterpret<GCUnion?>(deref(f.p + i)).gc))
+        f.p[i] = luaF_newproto(S.L)
+        if ((int(f.marked) & (1 << BLACKBIT)) != 0 && (int(f.p[i].marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            luaC_barrier_(S.L, addr(reinterpret<GCUnion?>(f).gc), addr(reinterpret<GCUnion?>(f.p[i]).gc))
         }
-        loadFunction(S, deref(f.p + i), f.source)
+        loadFunction(S, f.p[i], f.source)
     }
 }
 
@@ -214,20 +211,20 @@ def private loadProtos(var S : LoadState?; var f : Proto?) {
 def private loadUpvalues(var S : LoadState?; var f : Proto?) {
     var n : int
     n = loadInt(S)
-    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + uint64(1) > ~uint64(0) / uint64(typeinfo sizeof(type<Upvaldesc>))) {
+    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + 1ul > MAX_SIZET / uint64(typeinfo sizeof(type<Upvaldesc>))) {
         luaM_toobig(S.L)
     }
     f.upvalues = reinterpret<Upvaldesc?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<Upvaldesc>)), 0))
     f.sizeupvalues = n
     // make array valid for GC
     for (i in range(n)) {
-        deref(f.upvalues + i).name = null
+        f.upvalues[i].name = null
     }
     // following calls can raise errors
     for (i in range(n)) {
-        deref(f.upvalues + i).instack = loadByte(S)
-        deref(f.upvalues + i).idx = loadByte(S)
-        deref(f.upvalues + i).kind = loadByte(S)
+        f.upvalues[i].instack = loadByte(S)
+        f.upvalues[i].idx = loadByte(S)
+        f.upvalues[i].kind = loadByte(S)
     }
 }
 
@@ -235,35 +232,35 @@ def private loadUpvalues(var S : LoadState?; var f : Proto?) {
 def private loadDebug(var S : LoadState?; var f : Proto?) {
     var n : int
     n = loadInt(S)
-    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + uint64(1) > ~uint64(0) / uint64(typeinfo sizeof(type<int8>))) {
+    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + 1ul > MAX_SIZET / uint64(typeinfo sizeof(type<int8>))) {
         luaM_toobig(S.L)
     }
     f.lineinfo = reinterpret<int8?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<int8>)), 0))
     f.sizelineinfo = n
     loadBlock(S, reinterpret<void?>(f.lineinfo), uint64(n) * uint64(typeinfo sizeof(type<int8>)))
     n = loadInt(S)
-    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + uint64(1) > ~uint64(0) / uint64(typeinfo sizeof(type<AbsLineInfo>))) {
+    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + 1ul > MAX_SIZET / uint64(typeinfo sizeof(type<AbsLineInfo>))) {
         luaM_toobig(S.L)
     }
     f.abslineinfo = reinterpret<AbsLineInfo?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<AbsLineInfo>)), 0))
     f.sizeabslineinfo = n
     for (i in range(n)) {
-        deref(f.abslineinfo + i).pc = loadInt(S)
-        deref(f.abslineinfo + i).line = loadInt(S)
+        f.abslineinfo[i].pc = loadInt(S)
+        f.abslineinfo[i].line = loadInt(S)
     }
     n = loadInt(S)
-    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + uint64(1) > ~uint64(0) / uint64(typeinfo sizeof(type<LocVar>))) {
+    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + 1ul > MAX_SIZET / uint64(typeinfo sizeof(type<LocVar>))) {
         luaM_toobig(S.L)
     }
     f.locvars = reinterpret<LocVar?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<LocVar>)), 0))
     f.sizelocvars = n
     for (i in range(n)) {
-        deref(f.locvars + i).varname = null
+        f.locvars[i].varname = null
     }
     for (i in range(n)) {
-        deref(f.locvars + i).varname = loadStringN(S, f)
-        deref(f.locvars + i).startpc = loadInt(S)
-        deref(f.locvars + i).endpc = loadInt(S)
+        f.locvars[i].varname = loadStringN(S, f)
+        f.locvars[i].startpc = loadInt(S)
+        f.locvars[i].endpc = loadInt(S)
     }
     n = loadInt(S)
     // does it have debug information?
@@ -272,7 +269,7 @@ def private loadDebug(var S : LoadState?; var f : Proto?) {
         n = f.sizeupvalues
     }
     for (i in range(n)) {
-        deref(f.upvalues + i).name = loadStringN(S, f)
+        f.upvalues[i].name = loadStringN(S, f)
     }
 }
 
@@ -307,32 +304,31 @@ def private checkliteral(var S : LoadState?; var s : uint8?; var msg : uint8?) {
     }
 }
 
-[c_function]
 def private fchecksize(var S : LoadState?; size : uint64; var tname : uint8?) {
     if (uint64(loadByte(S)) != size) {
-        error(S, luaO_pushfstring`va(S.L, reinterpret<uint8?>("%s size mismatch"), (tname,)))
+        error(S, luaO_pushfstring`va(S.L, cstr("%s size mismatch"), (tname,)))
     }
 }
 
 [c_function]
 def private checkHeader(var S : LoadState?) {
     // skip 1st char (already read and checked)
-    checkliteral(S, addr(deref(reinterpret<uint8?>("\x1bLua") + 1)), reinterpret<uint8?>("not a binary chunk"))
+    checkliteral(S, addr(cstr("\x1bLua")[1]), cstr("not a binary chunk"))
     if (int(loadByte(S)) != LUAC_VERSION) {
-        error(S, reinterpret<uint8?>("version mismatch"))
+        error(S, cstr("version mismatch"))
     }
     if (int(loadByte(S)) != LUAC_FORMAT) {
-        error(S, reinterpret<uint8?>("format mismatch"))
+        error(S, cstr("format mismatch"))
     }
-    checkliteral(S, reinterpret<uint8?>("\x19\x93\r\n\x1a\n"), reinterpret<uint8?>("corrupted chunk"))
-    fchecksize(S, uint64(typeinfo sizeof(type<uint>)), reinterpret<uint8?>("Instruction"))
-    fchecksize(S, uint64(typeinfo sizeof(type<int64>)), reinterpret<uint8?>("lua_Integer"))
-    fchecksize(S, uint64(typeinfo sizeof(type<double>)), reinterpret<uint8?>("lua_Number"))
+    checkliteral(S, cstr("\x19\x93\r\n\x1a\n"), cstr("corrupted chunk"))
+    fchecksize(S, uint64(typeinfo sizeof(type<uint>)), cstr("Instruction"))
+    fchecksize(S, uint64(typeinfo sizeof(type<int64>)), cstr("lua_Integer"))
+    fchecksize(S, uint64(typeinfo sizeof(type<double>)), cstr("lua_Number"))
     if (loadInteger(S) != int64(LUAC_INT)) {
-        error(S, reinterpret<uint8?>("integer format mismatch"))
+        error(S, cstr("integer format mismatch"))
     }
     if (loadNumber(S) != 370.5lf) {
-        error(S, reinterpret<uint8?>("float format mismatch"))
+        error(S, cstr("float format mismatch"))
     }
 }
 
@@ -343,8 +339,8 @@ def luaU_undump(var L : lua_State?; var Z : Zio?; var name : uint8?) : LClosure?
     var cl : LClosure?
     if (int(deref(name)) == '@' || int(deref(name)) == '=') {
         S.name = name + 1
-    } elif (int(deref(name)) == int(deref(reinterpret<uint8?>("\x1bLua") + 0))) {
-        S.name = reinterpret<uint8?>("binary string")
+    } elif (int(deref(name)) == int(cstr("\x1bLua")[0])) {
+        S.name = cstr("binary string")
     } else {
         S.name = name
     }
@@ -356,11 +352,11 @@ def luaU_undump(var L : lua_State?; var Z : Zio?; var name : uint8?) : LClosure?
         var io : TValue? = addr(L.top.p.val)
         var x_ : LClosure? = cl
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8(6 | 0 << 4 | 1 << 6)
+        io.tt_ = uint8((LUA_TFUNCTION | (0 << 4)) | BIT_ISCOLLECTABLE)
     }
     luaD_inctop(L)
     cl.p = luaF_newproto(L)
-    if ((int(cl.marked) & 1 << 5) != 0 && (int(cl.p.marked) & (1 << 3 | 1 << 4)) != 0) {
+    if ((int(cl.marked) & (1 << BLACKBIT)) != 0 && (int(cl.p.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
         luaC_barrier_(L, addr(reinterpret<GCUnion?>(cl).gc), addr(reinterpret<GCUnion?>(cl.p).gc))
     }
     loadFunction(addr(S), cl.p, null)

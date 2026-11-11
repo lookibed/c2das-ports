@@ -11,32 +11,5 @@ struct lconv {
     int_frac_digits, frac_digits, p_cs_precedes, p_sep_by_space, n_cs_precedes, n_sep_by_space, p_sign_posn, n_sign_posn, int_p_cs_precedes, int_p_sep_by_space, int_n_cs_precedes, int_n_sep_by_space, int_p_sign_posn, int_n_sign_posn : uint8
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<lconv>) == 96 && typeinfo alignof(type<lconv>) == 8, "lconv: clang lays it out as size 96, align 8")
-    static_assert(typeinfo offsetof < decimal_point > (type<lconv>) == 0, "lconv.decimal_point: clang puts it at 0")
-    static_assert(typeinfo offsetof < thousands_sep > (type<lconv>) == 8, "lconv.thousands_sep: clang puts it at 8")
-    static_assert(typeinfo offsetof < grouping > (type<lconv>) == 16, "lconv.grouping: clang puts it at 16")
-    static_assert(typeinfo offsetof < int_curr_symbol > (type<lconv>) == 24, "lconv.int_curr_symbol: clang puts it at 24")
-    static_assert(typeinfo offsetof < currency_symbol > (type<lconv>) == 32, "lconv.currency_symbol: clang puts it at 32")
-    static_assert(typeinfo offsetof < mon_decimal_point > (type<lconv>) == 40, "lconv.mon_decimal_point: clang puts it at 40")
-    static_assert(typeinfo offsetof < mon_thousands_sep > (type<lconv>) == 48, "lconv.mon_thousands_sep: clang puts it at 48")
-    static_assert(typeinfo offsetof < mon_grouping > (type<lconv>) == 56, "lconv.mon_grouping: clang puts it at 56")
-    static_assert(typeinfo offsetof < positive_sign > (type<lconv>) == 64, "lconv.positive_sign: clang puts it at 64")
-    static_assert(typeinfo offsetof < negative_sign > (type<lconv>) == 72, "lconv.negative_sign: clang puts it at 72")
-    static_assert(typeinfo offsetof < int_frac_digits > (type<lconv>) == 80, "lconv.int_frac_digits: clang puts it at 80")
-    static_assert(typeinfo offsetof < frac_digits > (type<lconv>) == 81, "lconv.frac_digits: clang puts it at 81")
-    static_assert(typeinfo offsetof < p_cs_precedes > (type<lconv>) == 82, "lconv.p_cs_precedes: clang puts it at 82")
-    static_assert(typeinfo offsetof < p_sep_by_space > (type<lconv>) == 83, "lconv.p_sep_by_space: clang puts it at 83")
-    static_assert(typeinfo offsetof < n_cs_precedes > (type<lconv>) == 84, "lconv.n_cs_precedes: clang puts it at 84")
-    static_assert(typeinfo offsetof < n_sep_by_space > (type<lconv>) == 85, "lconv.n_sep_by_space: clang puts it at 85")
-    static_assert(typeinfo offsetof < p_sign_posn > (type<lconv>) == 86, "lconv.p_sign_posn: clang puts it at 86")
-    static_assert(typeinfo offsetof < n_sign_posn > (type<lconv>) == 87, "lconv.n_sign_posn: clang puts it at 87")
-    static_assert(typeinfo offsetof < int_p_cs_precedes > (type<lconv>) == 88, "lconv.int_p_cs_precedes: clang puts it at 88")
-    static_assert(typeinfo offsetof < int_p_sep_by_space > (type<lconv>) == 89, "lconv.int_p_sep_by_space: clang puts it at 89")
-    static_assert(typeinfo offsetof < int_n_cs_precedes > (type<lconv>) == 90, "lconv.int_n_cs_precedes: clang puts it at 90")
-    static_assert(typeinfo offsetof < int_n_sep_by_space > (type<lconv>) == 91, "lconv.int_n_sep_by_space: clang puts it at 91")
-    static_assert(typeinfo offsetof < int_p_sign_posn > (type<lconv>) == 92, "lconv.int_p_sign_posn: clang puts it at 92")
-    static_assert(typeinfo offsetof < int_n_sign_posn > (type<lconv>) == 93, "lconv.int_n_sign_posn: clang puts it at 93")
-}
+include c_types.layout.das.inc
 

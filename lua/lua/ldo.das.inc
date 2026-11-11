@@ -16,31 +16,25 @@ def luaD_seterrorobj(var L : lua_State?; errcode : int; var oldtop : StackValue?
     let _cond = errcode
     if (_cond == 4) {
         {
-            {
-                // memory error?
-                // reuse preregistered msg.
-                var io : TValue? = addr(oldtop.val)
-                var x_ : TString? = L.l_G.memerrmsg
-                io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-                io.tt_ = uint8(int(x_.tt) | 1 << 6)
-            }
+            // memory error?
+            // reuse preregistered msg.
+            var io : TValue? = addr(oldtop.val)
+            var x_ : TString? = L.l_G.memerrmsg
+            io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
+            io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
         }
     } elif (_cond == 0) {
-        {
-            // special case only for closing upvalues
-            // no error message
-            addr(oldtop.val).tt_ = uint8(0 | 0 << 4)
-        }
+        // special case only for closing upvalues
+        // no error message
+        addr(oldtop.val).tt_ = uint8(LUA_TNIL | (0 << 4))
     } else {
+        // real error
         {
-            // real error
-            {
-                // error message on current top
-                var io1 : TValue? = addr(oldtop.val)
-                var io2 : TValue? = addr((L.top.p - 1).val)
-                io1.value_ = io2.value_
-                io1.tt_ = io2.tt_
-            }
+            // error message on current top
+            var io1 : TValue? = addr(oldtop.val)
+            var io2 : TValue? = addr((L.top.p - 1).val)
+            io1.value_ = io2.value_
+            io1.tt_ = io2.tt_
         }
     }
     L.top.p = oldtop + 1
@@ -114,20 +108,16 @@ def private relstack(var L : lua_State?) {
     var up : UpVal?
     L.top.offset = int64(reinterpret<uint8?>(L.top.p) - reinterpret<uint8?>(L.stack.p))
     L.tbclist.offset = int64(reinterpret<uint8?>(L.tbclist.p) - reinterpret<uint8?>(L.stack.p))
-    {
-        up = L.openupval
-        while (up != null) {
-            up.v.offset = int64(reinterpret<uint8?>(reinterpret<StackValue?>(up.v.p)) - reinterpret<uint8?>(L.stack.p))
-            up = up.u.open.next
-        }
+    up = L.openupval
+    while (up != null) {
+        up.v.offset = int64(reinterpret<uint8?>(reinterpret<StackValue?>(up.v.p)) - reinterpret<uint8?>(L.stack.p))
+        up = up.u.open.next
     }
-    {
-        ci = L.ci
-        while (ci != null) {
-            ci.top.offset = int64(reinterpret<uint8?>(ci.top.p) - reinterpret<uint8?>(L.stack.p))
-            ci.func.offset = int64(reinterpret<uint8?>(ci.func.p) - reinterpret<uint8?>(L.stack.p))
-            ci = ci.previous
-        }
+    ci = L.ci
+    while (ci != null) {
+        ci.top.offset = int64(reinterpret<uint8?>(ci.top.p) - reinterpret<uint8?>(L.stack.p))
+        ci.func.offset = int64(reinterpret<uint8?>(ci.func.p) - reinterpret<uint8?>(L.stack.p))
+        ci = ci.previous
     }
 }
 
@@ -138,36 +128,32 @@ def private correctstack(var L : lua_State?) {
     var up : UpVal?
     L.top.p = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + L.top.offset)
     L.tbclist.p = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + L.tbclist.offset)
-    {
-        up = L.openupval
-        while (up != null) {
-            up.v.p = addr(reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + up.v.offset).val)
-            up = up.u.open.next
-        }
+    up = L.openupval
+    while (up != null) {
+        up.v.p = addr(reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + up.v.offset).val)
+        up = up.u.open.next
     }
-    {
-        ci = L.ci
-        while (ci != null) {
-            ci.top.p = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + ci.top.offset)
-            ci.func.p = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + ci.func.offset)
-            if (!((int(ci.callstatus) & 1 << 1) != 0)) {
-                // signal to update 'trap' in 'luaV_execute'
-                c_volatile_store(ci.u.l.trap, 1)
-            }
-            ci = ci.previous
+    ci = L.ci
+    while (ci != null) {
+        ci.top.p = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + ci.top.offset)
+        ci.func.p = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + ci.func.offset)
+        if (!((int(ci.callstatus) & CIST_C) != 0)) {
+            // signal to update 'trap' in 'luaV_execute'
+            c_volatile_store(ci.u.l.trap, 1)
         }
+        ci = ci.previous
     }
 }
 
 // raise an error while running the message handler
 [c_function]
 def luaD_errerr(var L : lua_State?) {
-    var msg : TString? = luaS_newlstr(L, reinterpret<uint8?>("error in error handling"), uint64(typeinfo sizeof(type<uint8[24]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
+    var msg : TString? = luaS_newlstr(L, cstr("error in error handling"), uint64(typeinfo sizeof(type<uint8[24]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul)
     {
         var io : TValue? = addr(L.top.p.val)
         var x_ : TString? = msg
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8(int(x_.tt) | 1 << 6)
+        io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
     }
     // assume EXTRA_STACK
     L.top.p = L.top.p + 1
@@ -190,8 +176,8 @@ def luaD_reallocstack(var L : lua_State?; newsize : int; raiseerror : int) : int
     // change pointers to offsets
     relstack(L)
     // stop emergency collection
-    L.l_G.gcstopem = uint8(1)
-    newstack = reinterpret<StackValue?>(luaM_realloc_(L, reinterpret<void?>(L.stack.p), uint64(oldsize + 5) * uint64(typeinfo sizeof(type<StackValue>)), uint64(newsize + 5) * uint64(typeinfo sizeof(type<StackValue>))))
+    L.l_G.gcstopem = 1u8
+    newstack = reinterpret<StackValue?>(luaM_realloc_(L, reinterpret<void?>(L.stack.p), uint64(oldsize + EXTRA_STACK) * uint64(typeinfo sizeof(type<StackValue>)), uint64(newsize + EXTRA_STACK) * uint64(typeinfo sizeof(type<StackValue>))))
     // restore emergency collection
     L.l_G.gcstopem = uint8(oldgcstop)
     // reallocation failed?
@@ -199,7 +185,7 @@ def luaD_reallocstack(var L : lua_State?; newsize : int; raiseerror : int) : int
         // change offsets back to pointers
         correctstack(L)
         if (raiseerror != 0) {
-            luaD_throw(L, 4)
+            luaD_throw(L, LUA_ERRMEM)
         } else {
             // do not raise an error
             return 0
@@ -211,7 +197,7 @@ def luaD_reallocstack(var L : lua_State?; newsize : int; raiseerror : int) : int
     L.stack_last.p = L.stack.p + newsize
     for (i in range(oldsize + EXTRA_STACK, newsize + EXTRA_STACK)) {
         // erase new segment
-        addr((newstack + i).val).tt_ = uint8(0 | 0 << 4)
+        addr((newstack + i).val).tt_ = uint8(LUA_TNIL | (0 << 4))
     }
     return 1
 }
@@ -221,7 +207,7 @@ def luaD_reallocstack(var L : lua_State?; newsize : int; raiseerror : int) : int
 [c_function]
 def luaD_growstack(var L : lua_State?; n : int; raiseerror : int) : int {
     var size : int = int(int64(L.stack_last.p - L.stack.p))
-    if (size > 1000000) {
+    if (size > LUAI_MAXSTACK) {
         // if stack is larger than maximum, thread is already using the
         // extra space reserved for errors, that is, thread is handling
         // a stack error; cannot grow further than that.
@@ -244,7 +230,7 @@ def luaD_growstack(var L : lua_State?; n : int; raiseerror : int) : int {
         if (newsize < needed) {
             newsize = needed
         }
-        if (newsize <= 1000000) {
+        if (newsize <= LUAI_MAXSTACK) {
             return luaD_reallocstack(L, newsize, raiseerror)
         }
     }
@@ -252,7 +238,7 @@ def luaD_growstack(var L : lua_State?; n : int; raiseerror : int) : int {
     // add extra size to be able to handle the error message
     luaD_reallocstack(L, ERRORSTACKSIZE, raiseerror)
     if (raiseerror != 0) {
-        luaG_runerror`va(L, reinterpret<uint8?>("stack overflow"), VaNone())
+        luaG_runerror`va(L, cstr("stack overflow"), VaNone())
     }
     return 0
 }
@@ -264,14 +250,12 @@ def private stackinuse(var L : lua_State?) : int {
     var ci : CallInfo?
     var res : int
     var lim : StackValue? = L.top.p
-    {
-        ci = L.ci
-        while (ci != null) {
-            if (intptr(lim) < intptr(ci.top.p)) {
-                lim = ci.top.p
-            }
-            ci = ci.previous
+    ci = L.ci
+    while (ci != null) {
+        if (intptr(lim) < intptr(ci.top.p)) {
+            lim = ci.top.p
         }
+        ci = ci.previous
     }
     // part of stack in use
     res = int(int64(lim - L.stack.p)) + 1
@@ -292,11 +276,11 @@ def private stackinuse(var L : lua_State?) : int {
 [c_function]
 def luaD_shrinkstack(var L : lua_State?) {
     var inuse : int = stackinuse(L)
-    var max : int = inuse > LUAI_MAXSTACK / 3 ? LUAI_MAXSTACK : inuse * 3
+    var max : int = (inuse > LUAI_MAXSTACK / 3) ? LUAI_MAXSTACK : inuse * 3
     // if thread is currently not handling a stack overflow and its
     // size is larger than maximum "reasonable" size, shrink it
     if (inuse <= LUAI_MAXSTACK && int(int64(L.stack_last.p - L.stack.p)) > max) {
-        var nsize : int = inuse > LUAI_MAXSTACK / 2 ? LUAI_MAXSTACK : inuse * 2
+        var nsize : int = (inuse > LUAI_MAXSTACK / 2) ? LUAI_MAXSTACK : inuse * 2
         // ok if that fails
         luaD_reallocstack(L, nsize, 0)
     } else {
@@ -309,7 +293,7 @@ def luaD_shrinkstack(var L : lua_State?) {
 
 [c_function]
 def luaD_inctop(var L : lua_State?) {
-    if (int64(L.stack_last.p - L.top.p) <= int64(1)) {
+    if (int64(L.stack_last.p - L.top.p) <= 1l) {
         luaD_growstack(L, 1, 1)
     } else {
     }
@@ -340,23 +324,23 @@ def luaD_hook(var L : lua_State?; event : int; line : int; ftransfer : int; ntra
             ci.u2.transferinfo.ftransfer = uint16(ftransfer)
             ci.u2.transferinfo.ntransfer = uint16(ntransfer)
         }
-        if (!((int(ci.callstatus) & 1 << 1) != 0) && intptr(L.top.p) < intptr(ci.top.p)) {
+        if (!((int(ci.callstatus) & CIST_C) != 0) && intptr(L.top.p) < intptr(ci.top.p)) {
             // protect entire activation register
             L.top.p = ci.top.p
         }
         // ensure minimum stack size
-        if (int64(L.stack_last.p - L.top.p) <= int64(20)) {
-            luaD_growstack(L, 20, 1)
+        if (int64(L.stack_last.p - L.top.p) <= int64(LUA_MINSTACK)) {
+            luaD_growstack(L, LUA_MINSTACK, 1)
         } else {
         }
         if (intptr(ci.top.p) < intptr(L.top.p + LUA_MINSTACK)) {
             ci.top.p = L.top.p + LUA_MINSTACK
         }
         // cannot call hooks inside a hook
-        L.allowhook = uint8(0)
+        L.allowhook = 0u8
         ci.callstatus = uint16(int(ci.callstatus) | mask)
         invoke(hook, L, addr(ar))
-        L.allowhook = uint8(1)
+        L.allowhook = 1u8
         ci.top.p = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + ci_top)
         L.top.p = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + top)
         ci.callstatus = uint16(int(ci.callstatus) & ~mask)
@@ -394,7 +378,7 @@ def private rethook(var L : lua_State?; var ci : CallInfo?; nres : int) {
         // correction for vararg functions
         var delta : int = 0
         var ftransfer : int
-        if (!((int(ci.callstatus) & 1 << 1) != 0)) {
+        if (!((int(ci.callstatus) & CIST_C) != 0)) {
             var p : Proto? = addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p
             if (p.is_vararg != 0) {
                 delta = ci.u.l.nextraargs + int(p.numparams) + 1
@@ -408,7 +392,7 @@ def private rethook(var L : lua_State?; var ci : CallInfo?; nres : int) {
         ci.func.p = ci.func.p - delta
     }
     ci = ci.previous
-    if (!((int(ci.callstatus) & 1 << 1) != 0)) {
+    if (!((int(ci.callstatus) & CIST_C) != 0)) {
         // set 'oldpc'
         L.oldpc = int(int64(ci.u.l.savedpc - addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p.code)) - 1
     }
@@ -422,12 +406,10 @@ def private tryfuncTM(var L : lua_State?; var func : StackValue?) : StackValue? 
     var tm : TValue?
     var p : StackValue?
     // space for metamethod
-    if (int64(L.stack_last.p - L.top.p) <= int64(1)) {
+    if (int64(L.stack_last.p - L.top.p) <= 1l) {
         var t__ : int64 = int64(reinterpret<uint8?>(func) - reinterpret<uint8?>(L.stack.p))
-        {
-            if (L.l_G.GCdebt > int64(0)) {
-                luaC_step(L)
-            }
+        if (L.l_G.GCdebt > 0l) {
+            luaC_step(L)
         }
         luaD_growstack(L, 1, 1)
         func = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + t__)
@@ -435,20 +417,18 @@ def private tryfuncTM(var L : lua_State?; var func : StackValue?) : StackValue? 
     }
     // (after previous GC)
     tm = luaT_gettmbyobj(L, addr(func.val), TMS.TM_CALL)
-    if ((int(tm.tt_) & 15) == 0) {
+    if ((int(tm.tt_) & 15) == LUA_TNIL) {
         // nothing to call
         luaG_callerror(L, addr(func.val))
     }
     // open space for metamethod
-    {
-        p = L.top.p
-        while (intptr(p) > intptr(func)) {
-            var io1 : TValue? = addr(p.val)
-            var io2 : TValue? = addr((p - 1).val)
-            io1.value_ = io2.value_
-            io1.tt_ = io2.tt_
-            p = p - 1
-        }
+    p = L.top.p
+    while (intptr(p) > intptr(func)) {
+        var io1 : TValue? = addr(p.val)
+        var io2 : TValue? = addr((p - 1).val)
+        io1.value_ = io2.value_
+        io1.tt_ = io2.tt_
+        p = p - 1
     }
     // stack space pre-allocated by the caller
     L.top.p = L.top.p + 1
@@ -481,7 +461,7 @@ def private moveresults(var L : lua_State?; var res : StackValue?; var nres : in
         // no results?
         if (nres == 0) {
             // adjust with nil
-            addr(res.val).tt_ = uint8(0 | 0 << 4)
+            addr(res.val).tt_ = uint8(LUA_TNIL | (0 << 4))
         } else {
             // at least one result
             // move it to proper place
@@ -498,7 +478,7 @@ def private moveresults(var L : lua_State?; var res : StackValue?; var nres : in
     } else {
         // two/more results and/or to-be-closed variables
         // to-be-closed variables?
-        if (wanted < -1) {
+        if (wanted < LUA_MULTRET) {
             // in case of yields
             L.ci.callstatus = uint16(int(L.ci.callstatus) | CIST_CLSRET)
             L.ci.u2.nres = nres
@@ -527,22 +507,18 @@ def private moveresults(var L : lua_State?; var res : StackValue?; var nres : in
         nres = wanted
     }
     // move all results to correct place
-    {
-        i = 0
-        while (i < nres) {
-            var io1 : TValue? = addr((res + i).val)
-            var io2 : TValue? = addr((firstresult + i).val)
-            io1.value_ = io2.value_
-            io1.tt_ = io2.tt_
-            i++
-        }
+    i = 0
+    while (i < nres) {
+        var io1 : TValue? = addr((res + i).val)
+        var io2 : TValue? = addr((firstresult + i).val)
+        io1.value_ = io2.value_
+        io1.tt_ = io2.tt_
+        i++
     }
     // complete wanted number of results
-    {
-        while (i < wanted) {
-            addr((res + i).val).tt_ = uint8(0 | 0 << 4)
-            i++
-        }
+    while (i < wanted) {
+        addr((res + i).val).tt_ = uint8(LUA_TNIL | (0 << 4))
+        i++
     }
     // top points after the last result
     L.top.p = res + wanted
@@ -554,7 +530,7 @@ def private moveresults(var L : lua_State?; var res : StackValue?; var nres : in
 // that.
 def luaD_poscall(var L : lua_State?; var ci : CallInfo?; nres : int) {
     var wanted : int = int(ci.nresults)
-    if (c_volatile_load(L.hookmask) != 0 && !(wanted < -1)) {
+    if (c_volatile_load(L.hookmask) != 0 && !(wanted < LUA_MULTRET)) {
         rethook(L, ci, nres)
     }
     // move results to proper place
@@ -582,20 +558,18 @@ def private precallC(var L : lua_State?; var func : StackValue?; nresults : int;
     var n : int
     var ci : CallInfo?
     // ensure minimum stack size
-    if (int64(L.stack_last.p - L.top.p) <= int64(20)) {
+    if (int64(L.stack_last.p - L.top.p) <= int64(LUA_MINSTACK)) {
         var t__ : int64 = int64(reinterpret<uint8?>(func) - reinterpret<uint8?>(L.stack.p))
-        {
-            if (L.l_G.GCdebt > int64(0)) {
-                luaC_step(L)
-            }
+        if (L.l_G.GCdebt > 0l) {
+            luaC_step(L)
         }
-        luaD_growstack(L, 20, 1)
+        luaD_growstack(L, LUA_MINSTACK, 1)
         func = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + t__)
     } else {
     }
     ci = prepCallInfo(L, func, nresults, CIST_C, L.top.p + LUA_MINSTACK)
     L.ci = ci
-    if ((c_volatile_load(L.hookmask) & 1 << 0) != 0) {
+    if ((c_volatile_load(L.hookmask) & LUA_MASKCALL) != 0) {
         var narg : int = int(int64(L.top.p - func)) - 1
         luaD_hook(L, LUA_HOOKCALL, -1, 1, narg)
     }
@@ -629,10 +603,8 @@ def luaD_pretailcall(var L : lua_State?; var ci : CallInfo?; var func : StackVal
             var i : int
             if (int64(L.stack_last.p - L.top.p) <= int64(fsize - delta)) {
                 var t__ : int64 = int64(reinterpret<uint8?>(func) - reinterpret<uint8?>(L.stack.p))
-                {
-                    if (L.l_G.GCdebt > int64(0)) {
-                        luaC_step(L)
-                    }
+                if (L.l_G.GCdebt > 0l) {
+                    luaC_step(L)
                 }
                 luaD_growstack(L, fsize - delta, 1)
                 func = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + t__)
@@ -641,24 +613,20 @@ def luaD_pretailcall(var L : lua_State?; var ci : CallInfo?; var func : StackVal
             // restore 'func' (if vararg)
             ci.func.p = ci.func.p - delta
             // move down function and arguments
-            {
-                i = 0
-                while (i < narg1) {
-                    var io1 : TValue? = addr((ci.func.p + i).val)
-                    var io2 : TValue? = addr((func + i).val)
-                    io1.value_ = io2.value_
-                    io1.tt_ = io2.tt_
-                    i++
-                }
+            i = 0
+            while (i < narg1) {
+                var io1 : TValue? = addr((ci.func.p + i).val)
+                var io2 : TValue? = addr((func + i).val)
+                io1.value_ = io2.value_
+                io1.tt_ = io2.tt_
+                i++
             }
             // moved-down function
             func = ci.func.p
-            {
-                while (narg1 <= nfixparams) {
-                    // complete missing arguments
-                    addr((func + narg1).val).tt_ = uint8(0 | 0 << 4)
-                    narg1++
-                }
+            while (narg1 <= nfixparams) {
+                // complete missing arguments
+                addr((func + narg1).val).tt_ = uint8(LUA_TNIL | (0 << 4))
+                narg1++
             }
             // top for new function
             ci.top.p = func + 1 + fsize
@@ -670,15 +638,13 @@ def luaD_pretailcall(var L : lua_State?; var ci : CallInfo?; var func : StackVal
             return -1
         }
     } else {
-        {
-            // not a function
-            // try to get '__call' metamethod
-            func = tryfuncTM(L, func)
-            // return luaD_pretailcall(L, ci, func, narg1 + 1, delta);
-            narg1++
-            // try again
-            goto label 1
-        }
+        // not a function
+        // try to get '__call' metamethod
+        func = tryfuncTM(L, func)
+        // return luaD_pretailcall(L, ci, func, narg1 + 1, delta);
+        narg1++
+        // try again
+        goto label 1
     }
     return 0
 }
@@ -713,10 +679,8 @@ def luaD_precall(var L : lua_State?; var func : StackValue?; nresults : int) : C
             var fsize : int = int(p.maxstacksize)
             if (int64(L.stack_last.p - L.top.p) <= int64(fsize)) {
                 var t__ : int64 = int64(reinterpret<uint8?>(func) - reinterpret<uint8?>(L.stack.p))
-                {
-                    if (L.l_G.GCdebt > int64(0)) {
-                        luaC_step(L)
-                    }
+                if (L.l_G.GCdebt > 0l) {
+                    luaC_step(L)
                 }
                 luaD_growstack(L, fsize, 1)
                 func = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + t__)
@@ -726,26 +690,22 @@ def luaD_precall(var L : lua_State?; var func : StackValue?; nresults : int) : C
             L.ci = ci
             // starting point
             ci.u.l.savedpc = p.code
-            {
-                while (narg < nfixparams) {
-                    // complete missing arguments
-                    var _t0 = L.top.p
-                    L.top.p = L.top.p + 1
-                    addr(_t0.val).tt_ = uint8(0 | 0 << 4)
-                    narg++
-                }
+            while (narg < nfixparams) {
+                // complete missing arguments
+                var _t0 = L.top.p
+                L.top.p = L.top.p + 1
+                addr(_t0.val).tt_ = uint8(LUA_TNIL | (0 << 4))
+                narg++
             }
             return ci
         }
     } else {
-        {
-            // not a function
-            // try to get '__call' metamethod
-            func = tryfuncTM(L, func)
-            // return luaD_precall(L, func, nresults);
-            // try again with metamethod
-            goto label 1
-        }
+        // not a function
+        // try to get '__call' metamethod
+        func = tryfuncTM(L, func)
+        // return luaD_precall(L, func, nresults);
+        // try again with metamethod
+        goto label 1
     }
     return null
 }
@@ -760,9 +720,9 @@ def luaD_precall(var L : lua_State?; var func : StackValue?; nresults : int) : C
 def private ccall(var L : lua_State?; var func : StackValue?; nResults : int; inc : uint) {
     var ci : CallInfo?
     L.nCcalls += inc
-    if ((L.nCcalls & uint(65535)) >= uint(200)) {
+    if ((L.nCcalls & 65535u) >= uint(LUAI_MAXCCALLS)) {
         // free any use of EXTRA_STACK
-        if (int64(L.stack_last.p - L.top.p) <= int64(0)) {
+        if (int64(L.stack_last.p - L.top.p) <= 0l) {
             var t__ : int64 = int64(reinterpret<uint8?>(func) - reinterpret<uint8?>(L.stack.p))
             luaD_growstack(L, 0, 1)
             func = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + t__)
@@ -783,7 +743,7 @@ def private ccall(var L : lua_State?; var func : StackValue?; nResults : int; in
 
 // External interface for 'ccall'
 def luaD_call(var L : lua_State?; var func : StackValue?; nResults : int) {
-    ccall(L, func, nResults, uint(1))
+    ccall(L, func, nResults, 1u)
 }
 
 // Similar to 'luaD_call', but does not allow yields during the call.
@@ -808,23 +768,23 @@ def luaD_callnoyield(var L : lua_State?; var func : StackValue?; nResults : int)
 [c_function]
 def private finishpcallk(var L : lua_State?; var ci : CallInfo?) : int {
     // get original status
-    var status : int = int(ci.callstatus) >> 10 & 7
+    var status : int = (int(ci.callstatus) >> CIST_RECST) & 7
     // no error?
-    if (status == 0) {
+    if (status == LUA_OK) {
         // was interrupted by an yield
         status = LUA_YIELD
     } else {
         // error
         var func : StackValue? = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + ci.u2.funcidx)
         // restore 'allowhook'
-        L.allowhook = uint8(int(ci.callstatus) & 1 << 0)
+        L.allowhook = uint8(int(ci.callstatus) & CIST_OAH)
         // can yield or raise an error
         func = luaF_close(L, func, status, 1)
         luaD_seterrorobj(L, status, func)
         // restore stack size in case of overflow
         luaD_shrinkstack(L)
         // clear original status
-        ci.callstatus = uint16(int(ci.callstatus) & ~(7 << 10) | 0 << 10)
+        ci.callstatus = uint16((int(ci.callstatus) & ~(7 << CIST_RECST)) | (LUA_OK << CIST_RECST))
     }
     ci.callstatus = uint16(int(ci.callstatus) & ~CIST_YPCALL)
     L.errfunc = ci.u.c.old_errfunc
@@ -861,11 +821,9 @@ def private finishCcall(var L : lua_State?; var ci : CallInfo?) {
             // finish it
             status = finishpcallk(L, ci)
         }
-        {
-            // finish 'lua_callk'
-            if (-1 <= -1 && intptr(L.ci.top.p) < intptr(L.top.p)) {
-                L.ci.top.p = L.top.p
-            }
+        // finish 'lua_callk'
+        if (LUA_MULTRET <= LUA_MULTRET && intptr(L.ci.top.p) < intptr(L.top.p)) {
+            L.ci.top.p = L.top.p
         }
         // call continuation
         n = invoke(ci.u.c.k, L, status, ci.u.c.ctx)
@@ -887,7 +845,7 @@ def private unroll(var L : lua_State?; var ud : void?) {
             break
         }
         // C function?
-        if (!!((int(ci.callstatus) & 1 << 1) != 0)) {
+        if (!!((int(ci.callstatus) & CIST_C) != 0)) {
             // complete its execution
             finishCcall(L, ci)
         } else {
@@ -906,14 +864,12 @@ def private unroll(var L : lua_State?; var ud : void?) {
 def private findpcall(var L : lua_State?) : CallInfo? {
     var ci : CallInfo?
     // search for a pcall
-    {
-        ci = L.ci
-        while (ci != null) {
-            if ((int(ci.callstatus) & CIST_YPCALL) != 0) {
-                return ci
-            }
-            ci = ci.previous
+    ci = L.ci
+    while (ci != null) {
+        if ((int(ci.callstatus) & CIST_YPCALL) != 0) {
+            return ci
         }
+        ci = ci.previous
     }
     // no pending pcall
     return null
@@ -931,11 +887,9 @@ def private resume_error(var L : lua_State?; var msg : uint8?; narg : int) : int
         var io : TValue? = addr(L.top.p.val)
         var x_ : TString? = luaS_new(L, msg)
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8(int(x_.tt) | 1 << 6)
+        io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
     }
-    {
-        L.top.p = L.top.p + 1
-    }
+    L.top.p = L.top.p + 1
     return LUA_ERRRUN
 }
 
@@ -954,13 +908,13 @@ def private resume(var L : lua_State?; var ud : void?) {
     // starting a coroutine?
     if (int(L.status) == LUA_OK) {
         // just call its body
-        ccall(L, firstArg - 1, LUA_MULTRET, uint(0))
+        ccall(L, firstArg - 1, LUA_MULTRET, 0u)
     } else {
         // resuming from previous yield
         // mark that it is running (again)
         L.status = uint8(LUA_OK)
         // yielded inside a hook?
-        if (!((int(ci.callstatus) & 1 << 1) != 0)) {
+        if (!((int(ci.callstatus) & CIST_C) != 0)) {
             // undo increment made by 'luaG_traceexec': instruction was not
             // executed yet
             ci.u.l.savedpc = ci.u.l.savedpc - 1
@@ -993,7 +947,7 @@ def private resume(var L : lua_State?; var ud : void?) {
 def private precover(var L : lua_State?; var status : int) : int {
     var ci : CallInfo?
     while (true) {
-        var _t0 = status > 1
+        var _t0 = status > LUA_YIELD
         if (_t0) {
             ci = findpcall(L)
             _t0 = ci != null
@@ -1004,7 +958,7 @@ def private precover(var L : lua_State?; var status : int) : int {
         // go down to recovery functions
         L.ci = ci
         // status to finish 'pcall'
-        ci.callstatus = uint16(int(ci.callstatus) & ~(7 << 10) | status << 10)
+        ci.callstatus = uint16((int(ci.callstatus) & ~(7 << CIST_RECST)) | (status << CIST_RECST))
         status = luaD_rawrunprotected(L, @@unroll, null)
     }
     return status
@@ -1017,24 +971,24 @@ def lua_resume(var L : lua_State?; var from : lua_State?; var nargs : int; var n
     if (int(L.status) == LUA_OK) {
         // not in base level?
         if (intptr(L.ci) != intptr(addr(L.base_ci))) {
-            return resume_error(L, reinterpret<uint8?>("cannot resume non-suspended coroutine"), nargs)
+            return resume_error(L, cstr("cannot resume non-suspended coroutine"), nargs)
         } elif (int64(L.top.p - (L.ci.func.p + 1)) == int64(nargs)) {
             // no function?
-            return resume_error(L, reinterpret<uint8?>("cannot resume dead coroutine"), nargs)
+            return resume_error(L, cstr("cannot resume dead coroutine"), nargs)
         }
     } elif (int(L.status) != LUA_YIELD) {
         // ended with errors?
-        return resume_error(L, reinterpret<uint8?>("cannot resume dead coroutine"), nargs)
+        return resume_error(L, cstr("cannot resume dead coroutine"), nargs)
     }
-    L.nCcalls = from != null ? from.nCcalls & uint(65535) : uint(0)
-    if ((L.nCcalls & uint(65535)) >= uint(LUAI_MAXCCALLS)) {
-        return resume_error(L, reinterpret<uint8?>("C stack overflow"), nargs)
+    L.nCcalls = from != null ? (from.nCcalls & 65535u) : 0u
+    if ((L.nCcalls & 65535u) >= uint(LUAI_MAXCCALLS)) {
+        return resume_error(L, cstr("C stack overflow"), nargs)
     }
     L.nCcalls++
     status = luaD_rawrunprotected(L, @@resume, reinterpret<void?>(addr(nargs)))
     // continue running after recoverable errors
     status = precover(L, status)
-    if (!(status > 1)) {
+    if (!(status > LUA_YIELD)) {
         // normal end or yield
     } else {
         // unrecoverable error
@@ -1044,30 +998,29 @@ def lua_resume(var L : lua_State?; var from : lua_State?; var nargs : int; var n
         luaD_seterrorobj(L, status, L.top.p)
         L.ci.top.p = L.top.p
     }
-    deref(nresults) = status == LUA_YIELD ? L.ci.u2.nyield : int(int64(L.top.p - (L.ci.func.p + 1)))
+    deref(nresults) = (status == LUA_YIELD) ? L.ci.u2.nyield : int(int64(L.top.p - (L.ci.func.p + 1)))
     return status
 }
 
 def lua_isyieldable(var L : lua_State?) : int {
-    return (L.nCcalls & 4294901760u) == uint(0) ? 1 : 0
+    return (L.nCcalls & 4294901760u) == 0u ? 1 : 0
 }
 
-[c_function]
 def lua_yieldk(var L : lua_State?; nresults : int; ctx : int64; k : function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>) : int {
     var ci : CallInfo?
     ci = L.ci
-    if (!((L.nCcalls & 4294901760u) == uint(0))) {
+    if (!((L.nCcalls & 4294901760u) == 0u)) {
         if (intptr(L) != intptr(L.l_G.mainthread)) {
-            luaG_runerror`va(L, reinterpret<uint8?>("attempt to yield across a C-call boundary"), VaNone())
+            luaG_runerror`va(L, cstr("attempt to yield across a C-call boundary"), VaNone())
         } else {
-            luaG_runerror`va(L, reinterpret<uint8?>("attempt to yield from outside a coroutine"), VaNone())
+            luaG_runerror`va(L, cstr("attempt to yield from outside a coroutine"), VaNone())
         }
     }
     L.status = uint8(LUA_YIELD)
     // save number of results
     ci.u2.nyield = nresults
     // inside a hook?
-    if (!((int(ci.callstatus) & 1 << 1) != 0)) {
+    if (!((int(ci.callstatus) & CIST_C) != 0)) {
     } else {
         // is there a continuation?
         ci.u.c.k = k
@@ -1096,20 +1049,18 @@ def luaD_closeprotected(var L : lua_State?; level : int64; var status : int) : i
     var old_ci : CallInfo? = L.ci
     var old_allowhooks : uint8 = L.allowhook
     // keep closing upvalues until no more errors
-    {
-        while (true) {
-            var pcl : CloseP
-            pcl.level = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + level)
-            pcl.status = status
-            status = luaD_rawrunprotected(L, @@closepaux, reinterpret<void?>(addr(pcl)))
-            // no more errors?
-            if (status == 0) {
-                return pcl.status
-            } else {
-                // an error occurred; restore saved state and repeat
-                L.ci = old_ci
-                L.allowhook = old_allowhooks
-            }
+    while (true) {
+        var pcl : CloseP
+        pcl.level = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + level)
+        pcl.status = status
+        status = luaD_rawrunprotected(L, @@closepaux, reinterpret<void?>(addr(pcl)))
+        // no more errors?
+        if (status == LUA_OK) {
+            return pcl.status
+        } else {
+            // an error occurred; restore saved state and repeat
+            L.ci = old_ci
+            L.allowhook = old_allowhooks
         }
     }
     return 0
@@ -1127,7 +1078,7 @@ def luaD_pcall(var L : lua_State?; func : function<(var a0 : lua_State?; var a1 
     L.errfunc = ef
     status = luaD_rawrunprotected(L, func, u)
     // an error occurred?
-    if (status != 0) {
+    if (status != LUA_OK) {
         L.ci = old_ci
         L.allowhook = old_allowhooks
         status = luaD_closeprotected(L, old_top, status)
@@ -1141,8 +1092,8 @@ def luaD_pcall(var L : lua_State?; func : function<(var a0 : lua_State?; var a1 
 
 [c_function]
 def private checkmode(var L : lua_State?; var mode : uint8?; var x : uint8?) {
-    if (mode != null && crt::strchr(mode, int(deref(x + 0))) == null) {
-        luaO_pushfstring`va(L, reinterpret<uint8?>("attempt to load a %s chunk (mode is '%s')"), (x, mode))
+    if (mode != null && crt::strchr(mode, int(x[0])) == null) {
+        luaO_pushfstring`va(L, cstr("attempt to load a %s chunk (mode is '%s')"), (x, mode))
         luaD_throw(L, LUA_ERRSYNTAX)
     }
 }
@@ -1155,7 +1106,7 @@ def private f_parser(var L : lua_State?; var ud : void?) {
     let _t0 = p.z.n
     p.z.n--
     var _t2 : int
-    if (_t0 > uint64(0)) {
+    if (_t0 > 0ul) {
         var _t1 = p.z.p
         p.z.p = p.z.p + 1
         _t2 = int(uint8(deref(_t1)))
@@ -1163,11 +1114,11 @@ def private f_parser(var L : lua_State?; var ud : void?) {
         _t2 = luaZ_fill(p.z)
     }
     var c : int = _t2
-    if (c == int(deref(reinterpret<uint8?>("\x1bLua") + 0))) {
-        checkmode(L, p.mode, reinterpret<uint8?>("binary"))
+    if (c == int(cstr("\x1bLua")[0])) {
+        checkmode(L, p.mode, cstr("binary"))
         cl = luaU_undump(L, p.z, p.name)
     } else {
-        checkmode(L, p.mode, reinterpret<uint8?>("text"))
+        checkmode(L, p.mode, cstr("text"))
         cl = luaY_parser(L, p.z, addr(p.buff), addr(p.dyd), p.name, c)
     }
     luaF_initupvals(L, cl)
@@ -1178,7 +1129,7 @@ def luaD_protectedparser(var L : lua_State?; var z : Zio?; var name : uint8?; va
     var p : SParser
     var status : int
     // cannot yield during parsing
-    L.nCcalls += uint(65536)
+    L.nCcalls += 65536u
     p.z = z
     p.name = name
     p.mode = mode
@@ -1189,14 +1140,14 @@ def luaD_protectedparser(var L : lua_State?; var z : Zio?; var name : uint8?; va
     p.dyd._c_label.arr = null
     p.dyd._c_label.size = 0
     addr(p.buff).buffer = null
-    addr(p.buff).buffsize = uint64(0)
+    addr(p.buff).buffsize = 0ul
     status = luaD_pcall(L, @@f_parser, reinterpret<void?>(addr(p)), int64(reinterpret<uint8?>(L.top.p) - reinterpret<uint8?>(L.stack.p)), L.errfunc)
-    addr(p.buff).buffer = reinterpret<uint8?>(luaM_saferealloc_(L, reinterpret<void?>(addr(p.buff).buffer), addr(p.buff).buffsize * uint64(typeinfo sizeof(type<uint8>)), uint64(0) * uint64(typeinfo sizeof(type<uint8>))))
-    addr(p.buff).buffsize = uint64(0)
+    addr(p.buff).buffer = reinterpret<uint8?>(luaM_saferealloc_(L, reinterpret<void?>(addr(p.buff).buffer), addr(p.buff).buffsize * uint64(typeinfo sizeof(type<uint8>)), 0ul * uint64(typeinfo sizeof(type<uint8>))))
+    addr(p.buff).buffsize = 0ul
     luaM_free_(L, reinterpret<void?>(p.dyd.actvar.arr), uint64(p.dyd.actvar.size) * uint64(typeinfo sizeof(type<Vardesc>)))
     luaM_free_(L, reinterpret<void?>(p.dyd.gt.arr), uint64(p.dyd.gt.size) * uint64(typeinfo sizeof(type<Labeldesc>)))
     luaM_free_(L, reinterpret<void?>(p.dyd._c_label.arr), uint64(p.dyd._c_label.size) * uint64(typeinfo sizeof(type<Labeldesc>)))
-    L.nCcalls -= uint(65536)
+    L.nCcalls -= 65536u
     return status
 }
 

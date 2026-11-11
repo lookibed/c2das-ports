@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/cstr
 require c_runtime/variadic
 require lctype
 require ldebug
@@ -19,35 +20,46 @@ require luac_link
 require lzio
 require lzio_h
 
-var private luaX_tokens : uint8? [37] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("and")), unsafe(reinterpret<uint8?>("break")), unsafe(reinterpret<uint8?>("do")), unsafe(reinterpret<uint8?>("else")), unsafe(reinterpret<uint8?>("elseif")), unsafe(reinterpret<uint8?>("end")), unsafe(reinterpret<uint8?>("false")), unsafe(reinterpret<uint8?>("for")), unsafe(reinterpret<uint8?>("function")), unsafe(reinterpret<uint8?>("goto")), unsafe(reinterpret<uint8?>("if")), unsafe(reinterpret<uint8?>("in")), unsafe(reinterpret<uint8?>("local")), unsafe(reinterpret<uint8?>("nil")), unsafe(reinterpret<uint8?>("not")), unsafe(reinterpret<uint8?>("or")), unsafe(reinterpret<uint8?>("repeat")), unsafe(reinterpret<uint8?>("return")), unsafe(reinterpret<uint8?>("then")), unsafe(reinterpret<uint8?>("true")), unsafe(reinterpret<uint8?>("until")), unsafe(reinterpret<uint8?>("while")), unsafe(reinterpret<uint8?>("//")), unsafe(reinterpret<uint8?>("..")), unsafe(reinterpret<uint8?>("...")), unsafe(reinterpret<uint8?>("==")), unsafe(reinterpret<uint8?>(">=")), unsafe(reinterpret<uint8?>("<=")), unsafe(reinterpret<uint8?>("~=")), unsafe(reinterpret<uint8?>("<<")), unsafe(reinterpret<uint8?>(">>")), unsafe(reinterpret<uint8?>("::")), unsafe(reinterpret<uint8?>("<eof>")), unsafe(reinterpret<uint8?>("<number>")), unsafe(reinterpret<uint8?>("<integer>")), unsafe(reinterpret<uint8?>("<name>")), unsafe(reinterpret<uint8?>("<string>")))
+var private luaX_tokens : uint8? [37] = fixed_array<uint8?>(cstr("and"), cstr("break"), cstr("do"), cstr("else"), cstr("elseif"), cstr("end"), cstr("false"), cstr("for"), cstr("function"), cstr("goto"), cstr("if"), cstr("in"), cstr("local"), cstr("nil"), cstr("not"), cstr("or"), cstr("repeat"), cstr("return"), cstr("then"), cstr("true"), cstr("until"), cstr("while"), cstr("//"), cstr(".."), cstr("..."), cstr("=="), cstr(">="), cstr("<="), cstr("~="), cstr("<<"), cstr(">>"), cstr("::"), cstr("<eof>"), cstr("<number>"), cstr("<integer>"), cstr("<name>"), cstr("<string>"))
 
-let private NUM_RESERVED = int(RESERVED.TK_WHILE) - (127 * 2 + 1 + 1) + 1
+let private MAX_SIZET = ~0ul
 let private FIRST_RESERVED = 127 * 2 + 1 + 1
+let private NUM_RESERVED = int(RESERVED.TK_WHILE) - FIRST_RESERVED + 1
+let private PRINTBIT = 2
 let private LUA_ERRSYNTAX = 3
+let private LUA_TNIL = 0
+let private BIT_ISCOLLECTABLE = 1 << 6
+let private LUA_MINBUFFER = 32
+let private XDIGITBIT = 4
+let private ALPHABIT = 0
+let private LUA_TNUMBER = 3
 let private EOZ = -1
 let private UTF8BUFFSZ = 8
+let private DIGITBIT = 1
+let private SPACEBIT = 3
+let private LUA_TSTRING = 4
 
 [c_function]
 def private save(var ls : LexState?; c : int) {
     var b : Mbuffer? = ls.buff
-    if (b.n + uint64(1) > b.buffsize) {
+    if (b.n + 1ul > b.buffsize) {
         var newsize : uint64
-        if (b.buffsize >= (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? ~uint64(0) : uint64(9223372036854775807l)) / uint64(2)) {
-            lexerror(ls, reinterpret<uint8?>("lexical element too long"), 0)
+        if (b.buffsize >= (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? MAX_SIZET : uint64(9223372036854775807l)) / 2ul) {
+            lexerror(ls, cstr("lexical element too long"), 0)
         }
-        newsize = b.buffsize * uint64(2)
+        newsize = b.buffsize * 2ul
         b.buffer = reinterpret<uint8?>(luaM_saferealloc_(ls.L, reinterpret<void?>(b.buffer), b.buffsize * uint64(typeinfo sizeof(type<uint8>)), newsize * uint64(typeinfo sizeof(type<uint8>))))
         b.buffsize = newsize
     }
     let _t0 = b.n
     b.n++
-    deref(b.buffer + _t0) = uint8(c)
+    b.buffer[_t0] = uint8(c)
 }
 
 [c_function]
 def luaX_init(var L : lua_State?) {
     // create env name
-    var e : TString? = luaS_newlstr(L, reinterpret<uint8?>("_ENV"), uint64(typeinfo sizeof(type<uint8[5]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
+    var e : TString? = luaS_newlstr(L, cstr("_ENV"), uint64(typeinfo sizeof(type<uint8[5]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul)
     // never collect this name
     lgc::luaC_fix(L, addr(reinterpret<GCUnion?>(e).gc))
     for (i in range(NUM_RESERVED)) {
@@ -59,21 +71,20 @@ def luaX_init(var L : lua_State?) {
     }
 }
 
-[c_function]
 def luaX_token2str(var ls : LexState?; token : int) : uint8? {
     // single-byte symbols?
     if (token < FIRST_RESERVED) {
-        if ((int(luai_ctype_[token + 1]) & 1 << 2) != 0) {
-            return luaO_pushfstring`va(ls.L, reinterpret<uint8?>("'%c'"), (token,))
+        if ((int(luai_ctype_[token + 1]) & (1 << PRINTBIT)) != 0) {
+            return luaO_pushfstring`va(ls.L, cstr("'%c'"), (token,))
         } else {
             // control character
-            return luaO_pushfstring`va(ls.L, reinterpret<uint8?>("'<\\%d>'"), (token,))
+            return luaO_pushfstring`va(ls.L, cstr("'<\\%d>'"), (token,))
         }
     } else {
         var s : uint8? = luaX_tokens[token - FIRST_RESERVED]
         // fixed format (symbols and reserved words)?
         if (token < int(RESERVED.TK_EOS)) {
-            return luaO_pushfstring`va(ls.L, reinterpret<uint8?>("'%s'"), (s,))
+            return luaO_pushfstring`va(ls.L, cstr("'%s'"), (s,))
         } else {
             // names, strings, and numerals
             return s
@@ -81,23 +92,20 @@ def luaX_token2str(var ls : LexState?; token : int) : uint8? {
     }
 }
 
-[c_function]
 def private txtToken(var ls : LexState?; token : int) : uint8? {
     let _cond = token
     if (_cond == 291 || _cond == 292 || _cond == 289 || _cond == 290) {
         save(ls, '\0')
-        return luaO_pushfstring`va(ls.L, reinterpret<uint8?>("'%s'"), (ls.buff.buffer,))
+        return luaO_pushfstring`va(ls.L, cstr("'%s'"), (ls.buff.buffer,))
     } else {
         return luaX_token2str(ls, token)
     }
-    return null
 }
 
-[c_function]
 def private lexerror(var ls : LexState?; var msg : uint8?; token : int) {
     msg = luaG_addinfo(ls.L, msg, ls.source, ls.linenumber)
     if (token != 0) {
-        luaO_pushfstring`va(ls.L, reinterpret<uint8?>("%s near %s"), (msg, txtToken(ls, token)))
+        luaO_pushfstring`va(ls.L, cstr("%s near %s"), (msg, txtToken(ls, token)))
     }
     ldo::luaD_throw(ls.L, LUA_ERRSYNTAX)
 }
@@ -121,7 +129,7 @@ def luaX_newstring(var ls : LexState?; var str : uint8?; l : uint64) : TString? 
     var ts : TString? = luaS_newlstr(L, str, l)
     var o : TValue? = luaH_getstr(ls.h, ts)
     // string already present?
-    if (!((int(o.tt_) & 15) == 0)) {
+    if (!((int(o.tt_) & 15) == LUA_TNIL)) {
         // get saved copy
         ts = addr(reinterpret<GCUnion?>(reinterpret<Node?>(o).u.key_val.gc).ts)
     } else {
@@ -135,15 +143,13 @@ def luaX_newstring(var ls : LexState?; var str : uint8?; l : uint64) : TString? 
             var io : TValue? = stv
             var x_ : TString? = ts
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-            io.tt_ = uint8(int(x_.tt) | 1 << 6)
+            io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
         }
         // t[string] = string
         luaH_finishset(L, ls.h, stv, o, stv)
-        {
-            // table is not a metatable, so it does not need to invalidate cache
-            if (L.l_G.GCdebt > int64(0)) {
-                lgc::luaC_step(L)
-            }
+        // table is not a metatable, so it does not need to invalidate cache
+        if (L.l_G.GCdebt > 0l) {
+            lgc::luaC_step(L)
         }
         // remove string from stack
         L.top.p = L.top.p - 1
@@ -160,7 +166,7 @@ def private inclinenumber(var ls : LexState?) {
     let _t0 = ls.z.n
     ls.z.n--
     var _t2 : int
-    if (_t0 > uint64(0)) {
+    if (_t0 > 0ul) {
         var _t1 = ls.z.p
         ls.z.p = ls.z.p + 1
         _t2 = int(uint8(deref(_t1)))
@@ -173,7 +179,7 @@ def private inclinenumber(var ls : LexState?) {
         let _t3 = ls.z.n
         ls.z.n--
         var _t5 : int
-        if (_t3 > uint64(0)) {
+        if (_t3 > 0ul) {
             var _t4 = ls.z.p
             ls.z.p = ls.z.p + 1
             _t5 = int(uint8(deref(_t4)))
@@ -184,7 +190,7 @@ def private inclinenumber(var ls : LexState?) {
     }
     ls.linenumber++
     if (ls.linenumber >= 2147483647) {
-        lexerror(ls, reinterpret<uint8?>("chunk has too many lines"), 0)
+        lexerror(ls, cstr("chunk has too many lines"), 0)
     }
 }
 
@@ -201,10 +207,10 @@ def luaX_setinput(var L : lua_State?; var ls : LexState?; var z : Zio?; var sour
     ls.lastline = 1
     ls.source = source
     // get env name
-    ls.envn = luaS_newlstr(L, reinterpret<uint8?>("_ENV"), uint64(typeinfo sizeof(type<uint8[5]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
+    ls.envn = luaS_newlstr(L, cstr("_ENV"), uint64(typeinfo sizeof(type<uint8[5]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul)
     // initialize buffer
-    ls.buff.buffer = reinterpret<uint8?>(luaM_saferealloc_(ls.L, reinterpret<void?>(ls.buff.buffer), ls.buff.buffsize * uint64(typeinfo sizeof(type<uint8>)), uint64(32) * uint64(typeinfo sizeof(type<uint8>))))
-    ls.buff.buffsize = uint64(32)
+    ls.buff.buffer = reinterpret<uint8?>(luaM_saferealloc_(ls.L, reinterpret<void?>(ls.buff.buffer), ls.buff.buffsize * uint64(typeinfo sizeof(type<uint8>)), uint64(LUA_MINBUFFER) * uint64(typeinfo sizeof(type<uint8>))))
+    ls.buff.buffsize = uint64(LUA_MINBUFFER)
 }
 
 [c_function]
@@ -213,7 +219,7 @@ def private check_next1(var ls : LexState?; c : int) : int {
         let _t0 = ls.z.n
         ls.z.n--
         var _t2 : int
-        if (_t0 > uint64(0)) {
+        if (_t0 > 0ul) {
             var _t1 = ls.z.p
             ls.z.p = ls.z.p + 1
             _t2 = int(uint8(deref(_t1)))
@@ -231,12 +237,12 @@ def private check_next1(var ls : LexState?; c : int) : int {
 // saves it
 [c_function]
 def private check_next2(var ls : LexState?; var set : uint8?) : int {
-    if (ls.current == int(deref(set + 0)) || ls.current == int(deref(set + 1))) {
+    if (ls.current == int(set[0]) || ls.current == int(set[1])) {
         save(ls, ls.current)
         let _t0 = ls.z.n
         ls.z.n--
         var _t2 : int
-        if (_t0 > uint64(0)) {
+        if (_t0 > 0ul) {
             var _t1 = ls.z.p
             ls.z.p = ls.z.p + 1
             _t2 = int(uint8(deref(_t1)))
@@ -261,13 +267,13 @@ def private check_next2(var ls : LexState?; var set : uint8?) : int {
 [c_function]
 def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
     var obj : TValue
-    var expo : uint8? = reinterpret<uint8?>("Ee")
+    var expo : uint8? = cstr("Ee")
     var first : int = ls.current
     save(ls, ls.current)
     let _t0 = ls.z.n
     ls.z.n--
     var _t2 : int
-    if (_t0 > uint64(0)) {
+    if (_t0 > 0ul) {
         var _t1 = ls.z.p
         ls.z.p = ls.z.p + 1
         _t2 = int(uint8(deref(_t1)))
@@ -276,42 +282,40 @@ def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
     }
     ls.current = _t2
     // hexadecimal?
-    if (first == '0' && check_next2(ls, reinterpret<uint8?>("xX")) != 0) {
-        expo = reinterpret<uint8?>("Pp")
+    if (first == '0' && check_next2(ls, cstr("xX")) != 0) {
+        expo = cstr("Pp")
     }
-    {
-        while (true) {
-            // exponent mark?
-            if (check_next2(ls, expo) != 0) {
-                // optional exponent sign
-                check_next2(ls, reinterpret<uint8?>("-+"))
-            } elif ((int(luai_ctype_[ls.current + 1]) & 1 << 4) != 0 || ls.current == '.') {
-                // '%x|%.'
-                save(ls, ls.current)
-                let _t3 = ls.z.n
-                ls.z.n--
-                var _t5 : int
-                if (_t3 > uint64(0)) {
-                    var _t4 = ls.z.p
-                    ls.z.p = ls.z.p + 1
-                    _t5 = int(uint8(deref(_t4)))
-                } else {
-                    _t5 = luaZ_fill(ls.z)
-                }
-                ls.current = _t5
+    while (true) {
+        // exponent mark?
+        if (check_next2(ls, expo) != 0) {
+            // optional exponent sign
+            check_next2(ls, cstr("-+"))
+        } elif ((int(luai_ctype_[ls.current + 1]) & (1 << XDIGITBIT)) != 0 || ls.current == '.') {
+            // '%x|%.'
+            save(ls, ls.current)
+            let _t3 = ls.z.n
+            ls.z.n--
+            var _t5 : int
+            if (_t3 > 0ul) {
+                var _t4 = ls.z.p
+                ls.z.p = ls.z.p + 1
+                _t5 = int(uint8(deref(_t4)))
             } else {
-                break
+                _t5 = luaZ_fill(ls.z)
             }
+            ls.current = _t5
+        } else {
+            break
         }
     }
     // is numeral touching a letter?
-    if ((int(luai_ctype_[ls.current + 1]) & 1 << 0) != 0) {
+    if ((int(luai_ctype_[ls.current + 1]) & (1 << ALPHABIT)) != 0) {
         // force an error
         save(ls, ls.current)
         let _t6 = ls.z.n
         ls.z.n--
         var _t8 : int
-        if (_t6 > uint64(0)) {
+        if (_t6 > 0ul) {
             var _t7 = ls.z.p
             ls.z.p = ls.z.p + 1
             _t8 = int(uint8(deref(_t7)))
@@ -322,10 +326,10 @@ def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
     }
     save(ls, '\0')
     // format error?
-    if (luaO_str2num(ls.buff.buffer, addr(obj)) == uint64(0)) {
-        lexerror(ls, reinterpret<uint8?>("malformed number"), int(RESERVED.TK_FLT))
+    if (luaO_str2num(ls.buff.buffer, addr(obj)) == 0ul) {
+        lexerror(ls, cstr("malformed number"), int(RESERVED.TK_FLT))
     }
-    if (int(addr(obj).tt_) == (3 | 0 << 4)) {
+    if (int(addr(obj).tt_) == (LUA_TNUMBER | (0 << 4))) {
         seminfo.i = addr(obj).value_.i
         return int(RESERVED.TK_INT)
     } else {
@@ -340,13 +344,13 @@ def private read_numeral(var ls : LexState?; var seminfo : SemInfo?) : int {
 // otherwise (an unfinished '[==...') return 0.
 [c_function]
 def private skip_sep(var ls : LexState?) : uint64 {
-    var count : uint64 = uint64(0)
+    var count : uint64 = 0ul
     var s : int = ls.current
     save(ls, ls.current)
     let _t0 = ls.z.n
     ls.z.n--
     var _t2 : int
-    if (_t0 > uint64(0)) {
+    if (_t0 > 0ul) {
         var _t1 = ls.z.p
         ls.z.p = ls.z.p + 1
         _t2 = int(uint8(deref(_t1)))
@@ -359,7 +363,7 @@ def private skip_sep(var ls : LexState?) : uint64 {
         let _t3 = ls.z.n
         ls.z.n--
         var _t5 : int
-        if (_t3 > uint64(0)) {
+        if (_t3 > 0ul) {
             var _t4 = ls.z.p
             ls.z.p = ls.z.p + 1
             _t5 = int(uint8(deref(_t4)))
@@ -369,7 +373,7 @@ def private skip_sep(var ls : LexState?) : uint64 {
         ls.current = _t5
         count++
     }
-    return ls.current == s ? count + uint64(2) : uint64(count == uint64(0) ? 1 : 0)
+    return (ls.current == s) ? count + 2ul : uint64((count == 0ul) ? 1 : 0)
 }
 
 [c_function]
@@ -381,7 +385,7 @@ def private read_long_string(var ls : LexState?; var seminfo : SemInfo?; sep : u
     let _t0 = ls.z.n
     ls.z.n--
     var _t2 : int
-    if (_t0 > uint64(0)) {
+    if (_t0 > 0ul) {
         var _t1 = ls.z.p
         ls.z.p = ls.z.p + 1
         _t2 = int(uint8(deref(_t1)))
@@ -394,80 +398,72 @@ def private read_long_string(var ls : LexState?; var seminfo : SemInfo?; sep : u
         // skip it
         inclinenumber(ls)
     }
-    {
-        while (true) {
-            let _cond = ls.current
-            if (_cond == -1) {
-                {
-                    // error
-                    var what : uint8? = seminfo != null ? reinterpret<uint8?>("string") : reinterpret<uint8?>("comment")
-                    var msg : uint8? = luaO_pushfstring`va(ls.L, reinterpret<uint8?>("unfinished long %s (starting at line %d)"), (what, line))
-                    lexerror(ls, msg, int(RESERVED.TK_EOS))
+    while (true) {
+        let _cond = ls.current
+        if (_cond == -1) {
+            {
+                // error
+                var what : uint8? = seminfo != null ? cstr("string") : cstr("comment")
+                var msg : uint8? = luaO_pushfstring`va(ls.L, cstr("unfinished long %s (starting at line %d)"), (what, line))
+                lexerror(ls, msg, int(RESERVED.TK_EOS))
+            }
+        } elif (_cond == ']') {
+            // to avoid warnings
+            if (skip_sep(ls) == sep) {
+                // skip 2nd ']'
+                save(ls, ls.current)
+                let _t3 = ls.z.n
+                ls.z.n--
+                var _t5 : int
+                if (_t3 > 0ul) {
+                    var _t4 = ls.z.p
+                    ls.z.p = ls.z.p + 1
+                    _t5 = int(uint8(deref(_t4)))
+                } else {
+                    _t5 = luaZ_fill(ls.z)
                 }
-            } elif (_cond == ']') {
-                {
-                    // to avoid warnings
-                    if (skip_sep(ls) == sep) {
-                        // skip 2nd ']'
-                        save(ls, ls.current)
-                        let _t3 = ls.z.n
-                        ls.z.n--
-                        var _t5 : int
-                        if (_t3 > uint64(0)) {
-                            var _t4 = ls.z.p
-                            ls.z.p = ls.z.p + 1
-                            _t5 = int(uint8(deref(_t4)))
-                        } else {
-                            _t5 = luaZ_fill(ls.z)
-                        }
-                        ls.current = _t5
-                        goto label 1
-                    }
+                ls.current = _t5
+                goto label 1
+            }
+        } elif (_cond == '\n' || _cond == '\r') {
+            save(ls, '\n')
+            inclinenumber(ls)
+            // avoid wasting space
+            if (!(seminfo != null)) {
+                ls.buff.n = 0ul
+            }
+        } else {
+            if (seminfo != null) {
+                save(ls, ls.current)
+                let _t6 = ls.z.n
+                ls.z.n--
+                var _t8 : int
+                if (_t6 > 0ul) {
+                    var _t7 = ls.z.p
+                    ls.z.p = ls.z.p + 1
+                    _t8 = int(uint8(deref(_t7)))
+                } else {
+                    _t8 = luaZ_fill(ls.z)
                 }
-            } elif (_cond == '\n' || _cond == '\r') {
-                {
-                    save(ls, '\n')
-                    inclinenumber(ls)
-                    // avoid wasting space
-                    if (!(seminfo != null)) {
-                        ls.buff.n = uint64(0)
-                    }
-                }
+                ls.current = _t8
             } else {
-                {
-                    if (seminfo != null) {
-                        save(ls, ls.current)
-                        let _t6 = ls.z.n
-                        ls.z.n--
-                        var _t8 : int
-                        if (_t6 > uint64(0)) {
-                            var _t7 = ls.z.p
-                            ls.z.p = ls.z.p + 1
-                            _t8 = int(uint8(deref(_t7)))
-                        } else {
-                            _t8 = luaZ_fill(ls.z)
-                        }
-                        ls.current = _t8
-                    } else {
-                        let _t9 = ls.z.n
-                        ls.z.n--
-                        var _t11 : int
-                        if (_t9 > uint64(0)) {
-                            var _t10 = ls.z.p
-                            ls.z.p = ls.z.p + 1
-                            _t11 = int(uint8(deref(_t10)))
-                        } else {
-                            _t11 = luaZ_fill(ls.z)
-                        }
-                        ls.current = _t11
-                    }
+                let _t9 = ls.z.n
+                ls.z.n--
+                var _t11 : int
+                if (_t9 > 0ul) {
+                    var _t10 = ls.z.p
+                    ls.z.p = ls.z.p + 1
+                    _t11 = int(uint8(deref(_t10)))
+                } else {
+                    _t11 = luaZ_fill(ls.z)
                 }
+                ls.current = _t11
             }
         }
     }
     label 1:  // endloop
     if (seminfo != null) {
-        seminfo.ts = luaX_newstring(ls, ls.buff.buffer + sep, ls.buff.n - uint64(2) * sep)
+        seminfo.ts = luaX_newstring(ls, ls.buff.buffer + sep, ls.buff.n - 2ul * sep)
     }
 }
 
@@ -480,7 +476,7 @@ def private esccheck(var ls : LexState?; c : int; var msg : uint8?) {
             let _t0 = ls.z.n
             ls.z.n--
             var _t2 : int
-            if (_t0 > uint64(0)) {
+            if (_t0 > 0ul) {
                 var _t1 = ls.z.p
                 ls.z.p = ls.z.p + 1
                 _t2 = int(uint8(deref(_t1)))
@@ -499,7 +495,7 @@ def private gethexa(var ls : LexState?) : int {
     let _t0 = ls.z.n
     ls.z.n--
     var _t2 : int
-    if (_t0 > uint64(0)) {
+    if (_t0 > 0ul) {
         var _t1 = ls.z.p
         ls.z.p = ls.z.p + 1
         _t2 = int(uint8(deref(_t1)))
@@ -507,7 +503,7 @@ def private gethexa(var ls : LexState?) : int {
         _t2 = luaZ_fill(ls.z)
     }
     ls.current = _t2
-    esccheck(ls, int(luai_ctype_[ls.current + 1]) & 1 << 4, reinterpret<uint8?>("hexadecimal digit expected"))
+    esccheck(ls, int(luai_ctype_[ls.current + 1]) & (1 << XDIGITBIT), cstr("hexadecimal digit expected"))
     return luaO_hexavalue(ls.current)
 }
 
@@ -515,7 +511,7 @@ def private readhexaesc(var ls : LexState?) : int {
     var r : int = gethexa(ls)
     r = (r << 4) + gethexa(ls)
     // remove saved chars from buffer
-    ls.buff.n -= uint64(2)
+    ls.buff.n -= 2ul
     return r
 }
 
@@ -529,7 +525,7 @@ def private readutf8esc(var ls : LexState?) : uint64 {
     let _t0 = ls.z.n
     ls.z.n--
     var _t2 : int
-    if (_t0 > uint64(0)) {
+    if (_t0 > 0ul) {
         var _t1 = ls.z.p
         ls.z.p = ls.z.p + 1
         _t2 = int(uint8(deref(_t1)))
@@ -537,7 +533,7 @@ def private readutf8esc(var ls : LexState?) : uint64 {
         _t2 = luaZ_fill(ls.z)
     }
     ls.current = _t2
-    esccheck(ls, ls.current == '{' ? 1 : 0, reinterpret<uint8?>("missing '\{'"))
+    esccheck(ls, ls.current == '{' ? 1 : 0, cstr("missing '\{'"))
     // must have at least one digit
     r = uint64(gethexa(ls))
     while (true) {
@@ -545,7 +541,7 @@ def private readutf8esc(var ls : LexState?) : uint64 {
         let _t3 = ls.z.n
         ls.z.n--
         var _t5 : int
-        if (_t3 > uint64(0)) {
+        if (_t3 > 0ul) {
             var _t4 = ls.z.p
             ls.z.p = ls.z.p + 1
             _t5 = int(uint8(deref(_t4)))
@@ -553,19 +549,19 @@ def private readutf8esc(var ls : LexState?) : uint64 {
             _t5 = luaZ_fill(ls.z)
         }
         ls.current = _t5
-        if (!((int(luai_ctype_[ls.current + 1]) & 1 << 4) != 0)) {
+        if (!((int(luai_ctype_[ls.current + 1]) & (1 << XDIGITBIT)) != 0)) {
             break
         }
         i++
-        esccheck(ls, r <= uint64(2147483647u >> 4u) ? 1 : 0, reinterpret<uint8?>("UTF-8 value too large"))
+        esccheck(ls, r <= uint64(2147483647u >> 4u) ? 1 : 0, cstr("UTF-8 value too large"))
         r = (r << 4ul) + uint64(luaO_hexavalue(ls.current))
     }
-    esccheck(ls, ls.current == '}' ? 1 : 0, reinterpret<uint8?>("missing '\}'"))
+    esccheck(ls, ls.current == '}' ? 1 : 0, cstr("missing '\}'"))
     // skip '}'
     let _t6 = ls.z.n
     ls.z.n--
     var _t8 : int
-    if (_t6 > uint64(0)) {
+    if (_t6 > 0ul) {
         var _t7 = ls.z.p
         ls.z.p = ls.z.p + 1
         _t8 = int(uint8(deref(_t7)))
@@ -583,11 +579,9 @@ def private utf8esc(var ls : LexState?) {
     var buff : uint8[8]
     var n : int = luaO_utf8esc(addr(buff[0]), readutf8esc(ls))
     // add 'buff' to string
-    {
-        while (n > 0) {
-            save(ls, int(buff[UTF8BUFFSZ - n]))
-            n--
-        }
+    while (n > 0) {
+        save(ls, int(buff[UTF8BUFFSZ - n]))
+        n--
     }
 }
 
@@ -597,26 +591,24 @@ def private readdecesc(var ls : LexState?) : int {
     // result accumulator
     var r : int = 0
     // read up to 3 digits
-    {
-        i = 0
-        while (i < 3 && (int(luai_ctype_[ls.current + 1]) & 1 << 1) != 0) {
-            r = 10 * r + ls.current - '0'
-            save(ls, ls.current)
-            let _t0 = ls.z.n
-            ls.z.n--
-            var _t2 : int
-            if (_t0 > uint64(0)) {
-                var _t1 = ls.z.p
-                ls.z.p = ls.z.p + 1
-                _t2 = int(uint8(deref(_t1)))
-            } else {
-                _t2 = luaZ_fill(ls.z)
-            }
-            ls.current = _t2
-            i++
+    i = 0
+    while (i < 3 && (int(luai_ctype_[ls.current + 1]) & (1 << DIGITBIT)) != 0) {
+        r = 10 * r + ls.current - '0'
+        save(ls, ls.current)
+        let _t0 = ls.z.n
+        ls.z.n--
+        var _t2 : int
+        if (_t0 > 0ul) {
+            var _t1 = ls.z.p
+            ls.z.p = ls.z.p + 1
+            _t2 = int(uint8(deref(_t1)))
+        } else {
+            _t2 = luaZ_fill(ls.z)
         }
+        ls.current = _t2
+        i++
     }
-    esccheck(ls, r <= 127 * 2 + 1 ? 1 : 0, reinterpret<uint8?>("decimal escape too large"))
+    esccheck(ls, r <= 127 * 2 + 1 ? 1 : 0, cstr("decimal escape too large"))
     // remove read digits from buffer
     ls.buff.n -= uint64(i)
     return r
@@ -629,7 +621,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
     let _t0 = ls.z.n
     ls.z.n--
     var _t2 : int
-    if (_t0 > uint64(0)) {
+    if (_t0 > 0ul) {
         var _t1 = ls.z.p
         ls.z.p = ls.z.p + 1
         _t2 = int(uint8(deref(_t1)))
@@ -640,10 +632,10 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
     while (ls.current != del) {
         let _cond = ls.current
         if (_cond == -1) {
-            lexerror(ls, reinterpret<uint8?>("unfinished string"), int(RESERVED.TK_EOS))
+            lexerror(ls, cstr("unfinished string"), int(RESERVED.TK_EOS))
         } elif (_cond == '\n' || _cond == '\r') {
             // to avoid warnings
-            lexerror(ls, reinterpret<uint8?>("unfinished string"), int(RESERVED.TK_STRING))
+            lexerror(ls, cstr("unfinished string"), int(RESERVED.TK_STRING))
         } elif (_cond == '\\') {
             {
                 // to avoid warnings
@@ -655,7 +647,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 let _t3 = ls.z.n
                 ls.z.n--
                 var _t5 : int
-                if (_t3 > uint64(0)) {
+                if (_t3 > 0ul) {
                     var _t4 = ls.z.p
                     ls.z.p = ls.z.p + 1
                     _t5 = int(uint8(deref(_t4)))
@@ -705,12 +697,12 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                     {
                         // zap following span of spaces
                         // remove '\\'
-                        ls.buff.n -= uint64(1)
+                        ls.buff.n -= 1ul
                         // skip the 'z'
                         let _t6 = ls.z.n
                         ls.z.n--
                         var _t8 : int
-                        if (_t6 > uint64(0)) {
+                        if (_t6 > 0ul) {
                             var _t7 = ls.z.p
                             ls.z.p = ls.z.p + 1
                             _t8 = int(uint8(deref(_t7)))
@@ -718,14 +710,14 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                             _t8 = luaZ_fill(ls.z)
                         }
                         ls.current = _t8
-                        while ((int(luai_ctype_[ls.current + 1]) & 1 << 3) != 0) {
+                        while ((int(luai_ctype_[ls.current + 1]) & (1 << SPACEBIT)) != 0) {
                             if (ls.current == '\n' || ls.current == '\r') {
                                 inclinenumber(ls)
                             } else {
                                 let _t9 = ls.z.n
                                 ls.z.n--
                                 var _t11 : int
-                                if (_t9 > uint64(0)) {
+                                if (_t9 > 0ul) {
                                     var _t10 = ls.z.p
                                     ls.z.p = ls.z.p + 1
                                     _t11 = int(uint8(deref(_t10)))
@@ -738,18 +730,16 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                         goto label 3
                     }
                 } else {
-                    {
-                        esccheck(ls, int(luai_ctype_[ls.current + 1]) & 1 << 1, reinterpret<uint8?>("invalid escape sequence"))
-                        // digital escape '\ddd'
-                        c = readdecesc(ls)
-                        goto label 2
-                    }
+                    esccheck(ls, int(luai_ctype_[ls.current + 1]) & (1 << DIGITBIT), cstr("invalid escape sequence"))
+                    // digital escape '\ddd'
+                    c = readdecesc(ls)
+                    goto label 2
                 }
                 label 1:  // read_save
                 let _t12 = ls.z.n
                 ls.z.n--
                 var _t14 : int
-                if (_t12 > uint64(0)) {
+                if (_t12 > 0ul) {
                     var _t13 = ls.z.p
                     ls.z.p = ls.z.p + 1
                     _t14 = int(uint8(deref(_t13)))
@@ -760,7 +750,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
                 label 2:  // only_save
                 // go through
                 // remove '\\'
-                ls.buff.n -= uint64(1)
+                ls.buff.n -= 1ul
                 save(ls, c)
                 label 3:  // no_save
             }
@@ -770,7 +760,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
             let _t15 = ls.z.n
             ls.z.n--
             var _t17 : int
-            if (_t15 > uint64(0)) {
+            if (_t15 > 0ul) {
                 var _t16 = ls.z.p
                 ls.z.p = ls.z.p + 1
                 _t17 = int(uint8(deref(_t16)))
@@ -785,7 +775,7 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
     let _t18 = ls.z.n
     ls.z.n--
     var _t20 : int
-    if (_t18 > uint64(0)) {
+    if (_t18 > 0ul) {
         var _t19 = ls.z.p
         ls.z.p = ls.z.p + 1
         _t20 = int(uint8(deref(_t19)))
@@ -793,363 +783,351 @@ def private read_string(var ls : LexState?; del : int; var seminfo : SemInfo?) {
         _t20 = luaZ_fill(ls.z)
     }
     ls.current = _t20
-    seminfo.ts = luaX_newstring(ls, ls.buff.buffer + 1, ls.buff.n - uint64(2))
+    seminfo.ts = luaX_newstring(ls, ls.buff.buffer + 1, ls.buff.n - 2ul)
 }
 
 [c_function]
 def private llex(var ls : LexState?; var seminfo : SemInfo?) : int {
-    ls.buff.n = uint64(0)
-    {
+    ls.buff.n = 0ul
+    while (true) {
+        let _cond = ls.current
         while (true) {
-            let _cond = ls.current
-            while (true) {
-                var _flag = false
-                if (_cond == '\n' || _cond == '\r') {
-                    {
-                        // line breaks
-                        inclinenumber(ls)
-                        break
+            var _flag = false
+            if (_cond == '\n' || _cond == '\r') {
+                // line breaks
+                inclinenumber(ls)
+                break
+            }
+            if (_cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == '\v') {
+                {
+                    // spaces
+                    let _t0 = ls.z.n
+                    ls.z.n--
+                    var _t2 : int
+                    if (_t0 > 0ul) {
+                        var _t1 = ls.z.p
+                        ls.z.p = ls.z.p + 1
+                        _t2 = int(uint8(deref(_t1)))
+                    } else {
+                        _t2 = luaZ_fill(ls.z)
                     }
+                    ls.current = _t2
+                    break
                 }
-                if (_cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == '\v') {
-                    {
-                        // spaces
-                        let _t0 = ls.z.n
-                        ls.z.n--
-                        var _t2 : int
-                        if (_t0 > uint64(0)) {
-                            var _t1 = ls.z.p
-                            ls.z.p = ls.z.p + 1
-                            _t2 = int(uint8(deref(_t1)))
-                        } else {
-                            _t2 = luaZ_fill(ls.z)
-                        }
-                        ls.current = _t2
-                        break
+            }
+            if (_cond == '-') {
+                {
+                    // '-' or '--' (comment)
+                    let _t3 = ls.z.n
+                    ls.z.n--
+                    var _t5 : int
+                    if (_t3 > 0ul) {
+                        var _t4 = ls.z.p
+                        ls.z.p = ls.z.p + 1
+                        _t5 = int(uint8(deref(_t4)))
+                    } else {
+                        _t5 = luaZ_fill(ls.z)
                     }
-                }
-                if (_cond == '-') {
-                    {
-                        // '-' or '--' (comment)
-                        let _t3 = ls.z.n
-                        ls.z.n--
-                        var _t5 : int
-                        if (_t3 > uint64(0)) {
-                            var _t4 = ls.z.p
-                            ls.z.p = ls.z.p + 1
-                            _t5 = int(uint8(deref(_t4)))
-                        } else {
-                            _t5 = luaZ_fill(ls.z)
-                        }
-                        ls.current = _t5
-                        if (ls.current != '-') {
-                            return '-'
-                        }
-                        // else is a comment
-                        let _t6 = ls.z.n
-                        ls.z.n--
-                        var _t8 : int
-                        if (_t6 > uint64(0)) {
-                            var _t7 = ls.z.p
-                            ls.z.p = ls.z.p + 1
-                            _t8 = int(uint8(deref(_t7)))
-                        } else {
-                            _t8 = luaZ_fill(ls.z)
-                        }
-                        ls.current = _t8
-                        // long comment?
-                        if (ls.current == '[') {
-                            var sep : uint64 = skip_sep(ls)
-                            // 'skip_sep' may dirty the buffer
-                            ls.buff.n = uint64(0)
-                            if (sep >= uint64(2)) {
-                                // skip long comment
-                                read_long_string(ls, null, sep)
-                                // previous call may dirty the buff.
-                                ls.buff.n = uint64(0)
-                                break
-                            }
-                        }
-                        // else short comment
-                        while (!(ls.current == '\n' || ls.current == '\r') && ls.current != EOZ) {
-                            // skip until end of line (or end of file)
-                            let _t9 = ls.z.n
-                            ls.z.n--
-                            var _t11 : int
-                            if (_t9 > uint64(0)) {
-                                var _t10 = ls.z.p
-                                ls.z.p = ls.z.p + 1
-                                _t11 = int(uint8(deref(_t10)))
-                            } else {
-                                _t11 = luaZ_fill(ls.z)
-                            }
-                            ls.current = _t11
-                        }
-                        break
+                    ls.current = _t5
+                    if (ls.current != '-') {
+                        return '-'
                     }
-                }
-                if (_cond == '[') {
-                    {
-                        // long string or simply '['
+                    // else is a comment
+                    let _t6 = ls.z.n
+                    ls.z.n--
+                    var _t8 : int
+                    if (_t6 > 0ul) {
+                        var _t7 = ls.z.p
+                        ls.z.p = ls.z.p + 1
+                        _t8 = int(uint8(deref(_t7)))
+                    } else {
+                        _t8 = luaZ_fill(ls.z)
+                    }
+                    ls.current = _t8
+                    // long comment?
+                    if (ls.current == '[') {
                         var sep : uint64 = skip_sep(ls)
-                        if (sep >= uint64(2)) {
-                            read_long_string(ls, seminfo, sep)
-                            return int(RESERVED.TK_STRING)
-                        } elif (sep == uint64(0)) {
-                            // '[=...' missing second bracket?
-                            lexerror(ls, reinterpret<uint8?>("invalid long string delimiter"), int(RESERVED.TK_STRING))
+                        // 'skip_sep' may dirty the buffer
+                        ls.buff.n = 0ul
+                        if (sep >= 2ul) {
+                            // skip long comment
+                            read_long_string(ls, null, sep)
+                            // previous call may dirty the buff.
+                            ls.buff.n = 0ul
+                            break
                         }
-                        return '['
                     }
-                }
-                _flag ||= _cond == '='
-                if (_flag) {
-                    {
-                        let _t12 = ls.z.n
+                    // else short comment
+                    while (!(ls.current == '\n' || ls.current == '\r') && ls.current != EOZ) {
+                        // skip until end of line (or end of file)
+                        let _t9 = ls.z.n
                         ls.z.n--
-                        var _t14 : int
-                        if (_t12 > uint64(0)) {
-                            var _t13 = ls.z.p
+                        var _t11 : int
+                        if (_t9 > 0ul) {
+                            var _t10 = ls.z.p
                             ls.z.p = ls.z.p + 1
-                            _t14 = int(uint8(deref(_t13)))
+                            _t11 = int(uint8(deref(_t10)))
                         } else {
-                            _t14 = luaZ_fill(ls.z)
+                            _t11 = luaZ_fill(ls.z)
                         }
-                        ls.current = _t14
-                        // '=='
-                        if (check_next1(ls, '=') != 0) {
-                            return int(RESERVED.TK_EQ)
-                        } else {
-                            return '='
-                        }
+                        ls.current = _t11
                     }
+                    break
                 }
-                _flag ||= _cond == '<'
-                if (_flag) {
-                    {
-                        let _t15 = ls.z.n
-                        ls.z.n--
-                        var _t17 : int
-                        if (_t15 > uint64(0)) {
-                            var _t16 = ls.z.p
-                            ls.z.p = ls.z.p + 1
-                            _t17 = int(uint8(deref(_t16)))
-                        } else {
-                            _t17 = luaZ_fill(ls.z)
-                        }
-                        ls.current = _t17
-                        // '<='
-                        if (check_next1(ls, '=') != 0) {
-                            return int(RESERVED.TK_LE)
-                        } elif (check_next1(ls, '<') != 0) {
-                            // '<<'
-                            return int(RESERVED.TK_SHL)
-                        } else {
-                            return '<'
-                        }
-                    }
-                }
-                _flag ||= _cond == '>'
-                if (_flag) {
-                    {
-                        let _t18 = ls.z.n
-                        ls.z.n--
-                        var _t20 : int
-                        if (_t18 > uint64(0)) {
-                            var _t19 = ls.z.p
-                            ls.z.p = ls.z.p + 1
-                            _t20 = int(uint8(deref(_t19)))
-                        } else {
-                            _t20 = luaZ_fill(ls.z)
-                        }
-                        ls.current = _t20
-                        // '>='
-                        if (check_next1(ls, '=') != 0) {
-                            return int(RESERVED.TK_GE)
-                        } elif (check_next1(ls, '>') != 0) {
-                            // '>>'
-                            return int(RESERVED.TK_SHR)
-                        } else {
-                            return '>'
-                        }
-                    }
-                }
-                _flag ||= _cond == '/'
-                if (_flag) {
-                    {
-                        let _t21 = ls.z.n
-                        ls.z.n--
-                        var _t23 : int
-                        if (_t21 > uint64(0)) {
-                            var _t22 = ls.z.p
-                            ls.z.p = ls.z.p + 1
-                            _t23 = int(uint8(deref(_t22)))
-                        } else {
-                            _t23 = luaZ_fill(ls.z)
-                        }
-                        ls.current = _t23
-                        // '//'
-                        if (check_next1(ls, '/') != 0) {
-                            return int(RESERVED.TK_IDIV)
-                        } else {
-                            return '/'
-                        }
-                    }
-                }
-                _flag ||= _cond == '~'
-                if (_flag) {
-                    {
-                        let _t24 = ls.z.n
-                        ls.z.n--
-                        var _t26 : int
-                        if (_t24 > uint64(0)) {
-                            var _t25 = ls.z.p
-                            ls.z.p = ls.z.p + 1
-                            _t26 = int(uint8(deref(_t25)))
-                        } else {
-                            _t26 = luaZ_fill(ls.z)
-                        }
-                        ls.current = _t26
-                        // '~='
-                        if (check_next1(ls, '=') != 0) {
-                            return int(RESERVED.TK_NE)
-                        } else {
-                            return '~'
-                        }
-                    }
-                }
-                _flag ||= _cond == ':'
-                if (_flag) {
-                    {
-                        let _t27 = ls.z.n
-                        ls.z.n--
-                        var _t29 : int
-                        if (_t27 > uint64(0)) {
-                            var _t28 = ls.z.p
-                            ls.z.p = ls.z.p + 1
-                            _t29 = int(uint8(deref(_t28)))
-                        } else {
-                            _t29 = luaZ_fill(ls.z)
-                        }
-                        ls.current = _t29
-                        // '::'
-                        if (check_next1(ls, ':') != 0) {
-                            return int(RESERVED.TK_DBCOLON)
-                        } else {
-                            return ':'
-                        }
-                    }
-                }
-                _flag ||= _cond == '"'
-                _flag ||= _cond == '\''
-                if (_flag) {
-                    {
-                        // short literal strings
-                        read_string(ls, ls.current, seminfo)
+            }
+            if (_cond == '[') {
+                {
+                    // long string or simply '['
+                    var sep : uint64 = skip_sep(ls)
+                    if (sep >= 2ul) {
+                        read_long_string(ls, seminfo, sep)
                         return int(RESERVED.TK_STRING)
+                    } elif (sep == 0ul) {
+                        // '[=...' missing second bracket?
+                        lexerror(ls, cstr("invalid long string delimiter"), int(RESERVED.TK_STRING))
+                    }
+                    return '['
+                }
+            }
+            _flag ||= _cond == '='
+            if (_flag) {
+                {
+                    let _t12 = ls.z.n
+                    ls.z.n--
+                    var _t14 : int
+                    if (_t12 > 0ul) {
+                        var _t13 = ls.z.p
+                        ls.z.p = ls.z.p + 1
+                        _t14 = int(uint8(deref(_t13)))
+                    } else {
+                        _t14 = luaZ_fill(ls.z)
+                    }
+                    ls.current = _t14
+                    // '=='
+                    if (check_next1(ls, '=') != 0) {
+                        return int(RESERVED.TK_EQ)
+                    } else {
+                        return '='
                     }
                 }
-                _flag ||= _cond == '.'
-                if (_flag) {
-                    {
-                        // '.', '..', '...', or number
-                        save(ls, ls.current)
-                        let _t30 = ls.z.n
-                        ls.z.n--
-                        var _t32 : int
-                        if (_t30 > uint64(0)) {
-                            var _t31 = ls.z.p
-                            ls.z.p = ls.z.p + 1
-                            _t32 = int(uint8(deref(_t31)))
-                        } else {
-                            _t32 = luaZ_fill(ls.z)
-                        }
-                        ls.current = _t32
+            }
+            _flag ||= _cond == '<'
+            if (_flag) {
+                {
+                    let _t15 = ls.z.n
+                    ls.z.n--
+                    var _t17 : int
+                    if (_t15 > 0ul) {
+                        var _t16 = ls.z.p
+                        ls.z.p = ls.z.p + 1
+                        _t17 = int(uint8(deref(_t16)))
+                    } else {
+                        _t17 = luaZ_fill(ls.z)
+                    }
+                    ls.current = _t17
+                    // '<='
+                    if (check_next1(ls, '=') != 0) {
+                        return int(RESERVED.TK_LE)
+                    } elif (check_next1(ls, '<') != 0) {
+                        // '<<'
+                        return int(RESERVED.TK_SHL)
+                    } else {
+                        return '<'
+                    }
+                }
+            }
+            _flag ||= _cond == '>'
+            if (_flag) {
+                {
+                    let _t18 = ls.z.n
+                    ls.z.n--
+                    var _t20 : int
+                    if (_t18 > 0ul) {
+                        var _t19 = ls.z.p
+                        ls.z.p = ls.z.p + 1
+                        _t20 = int(uint8(deref(_t19)))
+                    } else {
+                        _t20 = luaZ_fill(ls.z)
+                    }
+                    ls.current = _t20
+                    // '>='
+                    if (check_next1(ls, '=') != 0) {
+                        return int(RESERVED.TK_GE)
+                    } elif (check_next1(ls, '>') != 0) {
+                        // '>>'
+                        return int(RESERVED.TK_SHR)
+                    } else {
+                        return '>'
+                    }
+                }
+            }
+            _flag ||= _cond == '/'
+            if (_flag) {
+                {
+                    let _t21 = ls.z.n
+                    ls.z.n--
+                    var _t23 : int
+                    if (_t21 > 0ul) {
+                        var _t22 = ls.z.p
+                        ls.z.p = ls.z.p + 1
+                        _t23 = int(uint8(deref(_t22)))
+                    } else {
+                        _t23 = luaZ_fill(ls.z)
+                    }
+                    ls.current = _t23
+                    // '//'
+                    if (check_next1(ls, '/') != 0) {
+                        return int(RESERVED.TK_IDIV)
+                    } else {
+                        return '/'
+                    }
+                }
+            }
+            _flag ||= _cond == '~'
+            if (_flag) {
+                {
+                    let _t24 = ls.z.n
+                    ls.z.n--
+                    var _t26 : int
+                    if (_t24 > 0ul) {
+                        var _t25 = ls.z.p
+                        ls.z.p = ls.z.p + 1
+                        _t26 = int(uint8(deref(_t25)))
+                    } else {
+                        _t26 = luaZ_fill(ls.z)
+                    }
+                    ls.current = _t26
+                    // '~='
+                    if (check_next1(ls, '=') != 0) {
+                        return int(RESERVED.TK_NE)
+                    } else {
+                        return '~'
+                    }
+                }
+            }
+            _flag ||= _cond == ':'
+            if (_flag) {
+                {
+                    let _t27 = ls.z.n
+                    ls.z.n--
+                    var _t29 : int
+                    if (_t27 > 0ul) {
+                        var _t28 = ls.z.p
+                        ls.z.p = ls.z.p + 1
+                        _t29 = int(uint8(deref(_t28)))
+                    } else {
+                        _t29 = luaZ_fill(ls.z)
+                    }
+                    ls.current = _t29
+                    // '::'
+                    if (check_next1(ls, ':') != 0) {
+                        return int(RESERVED.TK_DBCOLON)
+                    } else {
+                        return ':'
+                    }
+                }
+            }
+            _flag ||= _cond == '"'
+            _flag ||= _cond == '\''
+            if (_flag) {
+                // short literal strings
+                read_string(ls, ls.current, seminfo)
+                return int(RESERVED.TK_STRING)
+            }
+            _flag ||= _cond == '.'
+            if (_flag) {
+                {
+                    // '.', '..', '...', or number
+                    save(ls, ls.current)
+                    let _t30 = ls.z.n
+                    ls.z.n--
+                    var _t32 : int
+                    if (_t30 > 0ul) {
+                        var _t31 = ls.z.p
+                        ls.z.p = ls.z.p + 1
+                        _t32 = int(uint8(deref(_t31)))
+                    } else {
+                        _t32 = luaZ_fill(ls.z)
+                    }
+                    ls.current = _t32
+                    if (check_next1(ls, '.') != 0) {
                         if (check_next1(ls, '.') != 0) {
-                            if (check_next1(ls, '.') != 0) {
-                                // '...'
-                                return int(RESERVED.TK_DOTS)
-                            } else {
-                                // '..'
-                                return int(RESERVED.TK_CONCAT)
-                            }
-                        } elif (!((int(luai_ctype_[ls.current + 1]) & 1 << 1) != 0)) {
-                            return '.'
+                            // '...'
+                            return int(RESERVED.TK_DOTS)
                         } else {
-                            return read_numeral(ls, seminfo)
+                            // '..'
+                            return int(RESERVED.TK_CONCAT)
                         }
-                    }
-                }
-                _flag ||= _cond == '0'
-                _flag ||= _cond == '1'
-                _flag ||= _cond == '2'
-                _flag ||= _cond == '3'
-                _flag ||= _cond == '4'
-                _flag ||= _cond == '5'
-                _flag ||= _cond == '6'
-                _flag ||= _cond == '7'
-                _flag ||= _cond == '8'
-                _flag ||= _cond == '9'
-                if (_flag) {
-                    {
+                    } elif (!((int(luai_ctype_[ls.current + 1]) & (1 << DIGITBIT)) != 0)) {
+                        return '.'
+                    } else {
                         return read_numeral(ls, seminfo)
                     }
                 }
-                if (_cond == -1) {
-                    {
-                        return int(RESERVED.TK_EOS)
-                    }
-                }
-                if (!(_cond == '\n' || _cond == '\r' || _cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == '\v' || _cond == '-' || _cond == '[' || _cond == '=' || _cond == '<' || _cond == '>' || _cond == '/' || _cond == '~' || _cond == ':' || _cond == '"' || _cond == '\'' || _cond == '.' || _cond == '0' || _cond == '1' || _cond == '2' || _cond == '3' || _cond == '4' || _cond == '5' || _cond == '6' || _cond == '7' || _cond == '8' || _cond == '9' || _cond == -1)) {
-                    {
-                        // identifier or reserved word?
-                        if ((int(luai_ctype_[ls.current + 1]) & 1 << 0) != 0) {
-                            var ts : TString?
-                            while (true) {
-                                save(ls, ls.current)
-                                let _t33 = ls.z.n
-                                ls.z.n--
-                                var _t35 : int
-                                if (_t33 > uint64(0)) {
-                                    var _t34 = ls.z.p
-                                    ls.z.p = ls.z.p + 1
-                                    _t35 = int(uint8(deref(_t34)))
-                                } else {
-                                    _t35 = luaZ_fill(ls.z)
-                                }
-                                ls.current = _t35
-                                if (!((int(luai_ctype_[ls.current + 1]) & (1 << 0 | 1 << 1)) != 0)) {
-                                    break
-                                }
-                            }
-                            ts = luaX_newstring(ls, ls.buff.buffer, ls.buff.n)
-                            seminfo.ts = ts
-                            // reserved word?
-                            if (int(ts.tt) == (4 | 0 << 4) && int(ts.extra) > 0) {
-                                return int(ts.extra) - 1 + FIRST_RESERVED
-                            } else {
-                                return int(RESERVED.TK_NAME)
-                            }
+            }
+            _flag ||= _cond == '0'
+            _flag ||= _cond == '1'
+            _flag ||= _cond == '2'
+            _flag ||= _cond == '3'
+            _flag ||= _cond == '4'
+            _flag ||= _cond == '5'
+            _flag ||= _cond == '6'
+            _flag ||= _cond == '7'
+            _flag ||= _cond == '8'
+            _flag ||= _cond == '9'
+            if (_flag) {
+                return read_numeral(ls, seminfo)
+            }
+            if (_cond == -1) {
+                return int(RESERVED.TK_EOS)
+            }
+            if (!(_cond == '\n' || _cond == '\r' || _cond == ' ' || _cond == '\f' || _cond == '\t' || _cond == '\v' || _cond == '-' || _cond == '[' || _cond == '=' || _cond == '<' || _cond == '>' || _cond == '/' || _cond == '~' || _cond == ':' || _cond == '"' || _cond == '\'' || _cond == '.' || _cond == '0' || _cond == '1' || _cond == '2' || _cond == '3' || _cond == '4' || _cond == '5' || _cond == '6' || _cond == '7' || _cond == '8' || _cond == '9' || _cond == -1)) {
+                // identifier or reserved word?
+                if ((int(luai_ctype_[ls.current + 1]) & (1 << ALPHABIT)) != 0) {
+                    var ts : TString?
+                    while (true) {
+                        save(ls, ls.current)
+                        let _t33 = ls.z.n
+                        ls.z.n--
+                        var _t35 : int
+                        if (_t33 > 0ul) {
+                            var _t34 = ls.z.p
+                            ls.z.p = ls.z.p + 1
+                            _t35 = int(uint8(deref(_t34)))
                         } else {
-                            // single-char tokens ('+', '*', '%', '{', '}', ...)
-                            var c : int = ls.current
-                            let _t36 = ls.z.n
-                            ls.z.n--
-                            var _t38 : int
-                            if (_t36 > uint64(0)) {
-                                var _t37 = ls.z.p
-                                ls.z.p = ls.z.p + 1
-                                _t38 = int(uint8(deref(_t37)))
-                            } else {
-                                _t38 = luaZ_fill(ls.z)
-                            }
-                            ls.current = _t38
-                            return c
+                            _t35 = luaZ_fill(ls.z)
+                        }
+                        ls.current = _t35
+                        if (!((int(luai_ctype_[ls.current + 1]) & ((1 << ALPHABIT) | (1 << DIGITBIT))) != 0)) {
+                            break
                         }
                     }
+                    ts = luaX_newstring(ls, ls.buff.buffer, ls.buff.n)
+                    seminfo.ts = ts
+                    // reserved word?
+                    if (int(ts.tt) == (LUA_TSTRING | (0 << 4)) && int(ts.extra) > 0) {
+                        return int(ts.extra) - 1 + FIRST_RESERVED
+                    } else {
+                        return int(RESERVED.TK_NAME)
+                    }
+                } else {
+                    // single-char tokens ('+', '*', '%', '{', '}', ...)
+                    var c : int = ls.current
+                    let _t36 = ls.z.n
+                    ls.z.n--
+                    var _t38 : int
+                    if (_t36 > 0ul) {
+                        var _t37 = ls.z.p
+                        ls.z.p = ls.z.p + 1
+                        _t38 = int(uint8(deref(_t37)))
+                    } else {
+                        _t38 = luaZ_fill(ls.z)
+                    }
+                    ls.current = _t38
+                    return c
                 }
-                break
             }
+            break
         }
     }
     return 0

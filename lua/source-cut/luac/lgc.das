@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/cstr
 require crt
 require lmem
 require lobject_h_cluster
@@ -14,34 +15,50 @@ require ltm
 require ltm_h
 require luac_link
 
-var private sweepgen_nextage : uint8[7] = fixed_array(uint8(1), uint8(3), uint8(3), uint8(4), uint8(4), uint8(5), uint8(6))
+var private sweepgen_nextage : uint8[7] = fixed_array(1u8, 3u8, 3u8, 4u8, 4u8, 5u8, 6u8)
 
+let private BLACKBIT = 5
+let private WHITE0BIT = 3
+let private WHITE1BIT = 4
+let private maskcolors = (1 << BLACKBIT) | ((1 << WHITE0BIT) | (1 << WHITE1BIT))
+let private BIT_ISCOLLECTABLE = 1 << 6
+let private LUA_NUMTYPES = 9
+let private LUA_TDEADKEY = LUA_NUMTYPES + 2
 let private LUA_TSTRING = 4
+let private GCSatomic = 2
+let private AGEBITS = 7
+let private G_SURVIVAL = 1
+let private G_OLD0 = 2
 let private KGC_INC = 0
 let private G_TOUCHED2 = 6
-let private LUA_NUMTAGS = 9
 let private G_TOUCHED1 = 5
-let private GCSatomic = 2
+let private G_OLD = 4
+let private LUA_NUMTAGS = 9
+let private LUA_TNIL = 0
 let private GCSpropagate = 0
 let private EXTRA_STACK = 5
+let private maskgcbits = maskcolors | AGEBITS
+let private FINALIZEDBIT = 6
+let private GCSswpallgc = 3
+let private GCSswpend = 6
 let private G_OLD1 = 3
 let private GCSTPGC = 2
 let private CIST_FIN = 1 << 7
+let private LUA_OK = 0
 let private GCSTPCLS = 4
 let private PAUSEADJ = 100
-let private MAX_LMEM = int64(~uint64(0) >> 1ul)
-let private LUA_VTHREAD = 8 | 0 << 4
-let private LUA_VUPVAL = 9 | 0 << 4
+let private MAX_LUMEM = ~0ul
+let private MAX_LMEM = int64(MAX_LUMEM >> 1ul)
+let private LUA_TTHREAD = 8
+let private LUA_VTHREAD = LUA_TTHREAD | (0 << 4)
+let private LUA_VUPVAL = LUA_NUMTYPES | (0 << 4)
 let private G_NEW = 0
-let private maskgcbits = 1 << 5 | (1 << 3 | 1 << 4) | 7
-let private GCSswpallgc = 3
 let private KGC_GEN = 1
 let private GCSpause = 8
 let private GCSWEEPMAX = 100
 let private GCSenteratomic = 1
 let private GCSswpfinobj = 4
 let private GCSswptobefnz = 5
-let private GCSswpend = 6
 let private GCScallfin = 7
 let private GCFINMAX = 10
 let private GCFINALIZECOST = 50
@@ -68,7 +85,6 @@ def private getgclist(var o : GCObject?) : GCObject ?? {
     } else {
         return null
     }
-    return null
 }
 
 [c_function]
@@ -77,7 +93,7 @@ def private linkgclist_(var o : GCObject?; var pnext : GCObject ??; var list : G
     deref(pnext) = deref(list)
     deref(list) = o
     // now it is
-    o.marked = uint8(int(o.marked) & int(uint8(~(1 << 5 | (1 << 3 | 1 << 4)))))
+    o.marked = uint8(int(o.marked) & int(uint8(~maskcolors)))
 }
 
 // Clear keys for empty entries in tables. If entry is empty, mark its
@@ -87,9 +103,9 @@ def private linkgclist_(var o : GCObject?; var pnext : GCObject ??; var list : G
 // its associated empty value is enough to signal that the entry is
 // logically empty.
 def private clearkey(var n : Node?) {
-    if ((int(n.u.key_tt) & 1 << 6) != 0) {
+    if ((int(n.u.key_tt) & BIT_ISCOLLECTABLE) != 0) {
         // unused key; remove it
-        n.u.key_tt = uint8(9 + 2)
+        n.u.key_tt = uint8(LUA_TDEADKEY)
     }
 }
 
@@ -104,15 +120,13 @@ def private iscleared(var g : global_State?; var o : GCObject?) : int {
     if (o == null) {
         return 0
     } elif ((int(o.tt) & 15) == LUA_TSTRING) {
-        {
-            // strings are 'values', so are never weak
-            if ((int(o.marked) & (1 << 3 | 1 << 4)) != 0) {
-                reallymarkobject(g, addr(reinterpret<GCUnion?>(o).gc))
-            }
+        // strings are 'values', so are never weak
+        if ((int(o.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            reallymarkobject(g, addr(reinterpret<GCUnion?>(o).gc))
         }
         return 0
     } else {
-        return int(o.marked) & (1 << 3 | 1 << 4)
+        return int(o.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))
     }
 }
 
@@ -130,20 +144,20 @@ def private iscleared(var g : global_State?; var o : GCObject?) : int {
 def luaC_barrier_(var L : lua_State?; var o : GCObject?; var v : GCObject?) {
     var g : global_State? = L.l_G
     // must keep invariant?
-    if (int(g.gcstate) <= 2) {
+    if (int(g.gcstate) <= GCSatomic) {
         // restore invariant
         reallymarkobject(g, v)
-        if ((int(o.marked) & 7) > 1) {
+        if ((int(o.marked) & AGEBITS) > G_SURVIVAL) {
             // white object could not be old
             // restore generational invariant
-            v.marked = uint8(int(v.marked) & ~7 | 2)
+            v.marked = uint8((int(v.marked) & ~AGEBITS) | G_OLD0)
         }
     } else {
         // sweep phase
         // incremental mode?
         if (int(g.gckind) == KGC_INC) {
             // mark 'o' as white to avoid other barriers
-            o.marked = uint8(int(o.marked) & ~(1 << 5 | (1 << 3 | 1 << 4)) | int(uint8(int(g.currentwhite) & (1 << 3 | 1 << 4))))
+            o.marked = uint8((int(o.marked) & ~maskcolors) | int(uint8(int(g.currentwhite) & ((1 << WHITE0BIT) | (1 << WHITE1BIT)))))
         }
     }
 }
@@ -154,17 +168,17 @@ def luaC_barrier_(var L : lua_State?; var o : GCObject?; var v : GCObject?) {
 def luaC_barrierback_(var L : lua_State?; var o : GCObject?) {
     var g : global_State? = L.l_G
     // already in gray list?
-    if ((int(o.marked) & 7) == G_TOUCHED2) {
+    if ((int(o.marked) & AGEBITS) == G_TOUCHED2) {
         // make it gray to become touched1
-        o.marked = uint8(int(o.marked) & int(uint8(~(1 << 5 | (1 << 3 | 1 << 4)))))
+        o.marked = uint8(int(o.marked) & int(uint8(~maskcolors)))
     } else {
         // link it in 'grayagain' and paint it gray
         linkgclist_(addr(reinterpret<GCUnion?>(o).gc), getgclist(o), addr(g.grayagain))
     }
     // generational mode?
-    if ((int(o.marked) & 7) > 1) {
+    if ((int(o.marked) & AGEBITS) > G_SURVIVAL) {
         // touched in current cycle
-        o.marked = uint8(int(o.marked) & ~7 | 5)
+        o.marked = uint8((int(o.marked) & ~AGEBITS) | G_TOUCHED1)
     }
 }
 
@@ -172,9 +186,9 @@ def luaC_fix(var L : lua_State?; var o : GCObject?) {
     var g : global_State? = L.l_G
     // object must be 1st in 'allgc' list!
     // they will be gray forever
-    o.marked = uint8(int(o.marked) & int(uint8(~(1 << 5 | (1 << 3 | 1 << 4)))))
+    o.marked = uint8(int(o.marked) & int(uint8(~maskcolors)))
     // and old forever
-    o.marked = uint8(int(o.marked) & ~7 | 4)
+    o.marked = uint8((int(o.marked) & ~AGEBITS) | G_OLD)
     // remove object from 'allgc' list
     g.allgc = o.next
     // link it to 'fixedgc' list
@@ -189,7 +203,7 @@ def luaC_newobjdt(var L : lua_State?; tt : int; sz : uint64; offset : uint64) : 
     var g : global_State? = L.l_G
     var p : uint8? = reinterpret<uint8?>(luaM_malloc_(L, sz, tt & 15))
     var o : GCObject? = reinterpret<GCObject?>(p + offset)
-    o.marked = uint8(int(g.currentwhite) & (1 << 3 | 1 << 4))
+    o.marked = uint8(int(g.currentwhite) & ((1 << WHITE0BIT) | (1 << WHITE1BIT)))
     o.tt = uint8(tt)
     o.next = g.allgc
     g.allgc = o
@@ -197,7 +211,7 @@ def luaC_newobjdt(var L : lua_State?; tt : int; sz : uint64; offset : uint64) : 
 }
 
 def luaC_newobj(var L : lua_State?; tt : int; sz : uint64) : GCObject? {
-    return __::luaC_newobjdt(L, tt, sz, uint64(0))
+    return __::luaC_newobjdt(L, tt, sz, 0ul)
 }
 
 // Mark an object. Userdata with no user values, strings, and closed
@@ -216,26 +230,24 @@ def private reallymarkobject(var g : global_State?; var o : GCObject?) {
     while (true) {
         var _flag = false
         if (_cond == 4 || _cond == 20) {
-            {
-                // nothing to visit
-                o.marked = uint8(int(o.marked) & ~(1 << 3 | 1 << 4) | 1 << 5)
-                break
-            }
+            // nothing to visit
+            o.marked = uint8((int(o.marked) & ~((1 << WHITE0BIT) | (1 << WHITE1BIT))) | (1 << BLACKBIT))
+            break
         }
         if (_cond == 9) {
             {
                 var uv : UpVal? = addr(reinterpret<GCUnion?>(o).upv)
                 if (intptr(uv.v.p) != intptr(addr(uv.u.value))) {
                     // open upvalues are kept gray
-                    uv.marked = uint8(int(uv.marked) & int(uint8(~(1 << 5 | (1 << 3 | 1 << 4)))))
+                    uv.marked = uint8(int(uv.marked) & int(uint8(~maskcolors)))
                 } else {
                     // closed upvalues are visited here
-                    uv.marked = uint8(int(uv.marked) & ~(1 << 3 | 1 << 4) | 1 << 5)
+                    uv.marked = uint8((int(uv.marked) & ~((1 << WHITE0BIT) | (1 << WHITE1BIT))) | (1 << BLACKBIT))
                 }
                 {
                     // mark its content
                     let _t0 = g.mainthread
-                    if ((int(uv.v.p.tt_) & 1 << 6) != 0 && (int(uv.v.p.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+                    if ((int(uv.v.p.tt_) & BIT_ISCOLLECTABLE) != 0 && (int(uv.v.p.value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
                         reallymarkobject(g, uv.v.p.value_.gc)
                     }
                 }
@@ -248,16 +260,14 @@ def private reallymarkobject(var g : global_State?; var o : GCObject?) {
                 var u : Udata? = addr(reinterpret<GCUnion?>(o).u)
                 // no user values?
                 if (int(u.nuvalue) == 0) {
-                    {
-                        // mark its metatable
-                        if (u.metatable != null) {
-                            if ((int(u.metatable.marked) & (1 << 3 | 1 << 4)) != 0) {
-                                reallymarkobject(g, addr(reinterpret<GCUnion?>(u.metatable).gc))
-                            }
+                    // mark its metatable
+                    if (u.metatable != null) {
+                        if ((int(u.metatable.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+                            reallymarkobject(g, addr(reinterpret<GCUnion?>(u.metatable).gc))
                         }
                     }
                     // nothing else to mark
-                    u.marked = uint8(int(u.marked) & ~(1 << 3 | 1 << 4) | 1 << 5)
+                    u.marked = uint8((int(u.marked) & ~((1 << WHITE0BIT) | (1 << WHITE1BIT))) | (1 << BLACKBIT))
                     break
                 }
             }
@@ -268,13 +278,11 @@ def private reallymarkobject(var g : global_State?; var o : GCObject?) {
         _flag ||= _cond == 8
         _flag ||= _cond == 10
         if (_flag) {
-            {
-                // else...
-                // FALLTHROUGH
-                // to be visited later
-                linkgclist_(addr(reinterpret<GCUnion?>(o).gc), getgclist(o), addr(g.gray))
-                break
-            }
+            // else...
+            // FALLTHROUGH
+            // to be visited later
+            linkgclist_(addr(reinterpret<GCUnion?>(o).gc), getgclist(o), addr(g.gray))
+            break
         }
         if (!(_cond == 4 || _cond == 20 || _cond == 9 || _cond == 7 || _cond == 6 || _cond == 38 || _cond == 5 || _cond == 8 || _cond == 10)) {
             break
@@ -288,7 +296,7 @@ def private reallymarkobject(var g : global_State?; var o : GCObject?) {
 def private markmt(var g : global_State?) {
     for (i in range(LUA_NUMTAGS)) {
         if (g.mt[i] != null) {
-            if ((int(g.mt[i].marked) & (1 << 3 | 1 << 4)) != 0) {
+            if ((int(g.mt[i].marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
                 reallymarkobject(g, addr(reinterpret<GCUnion?>(g.mt[i]).gc))
             }
         }
@@ -299,18 +307,14 @@ def private markmt(var g : global_State?) {
 [c_function]
 def private markbeingfnz(var g : global_State?) : uint64 {
     var o : GCObject?
-    var count : uint64 = uint64(0)
-    {
-        o = g.tobefnz
-        while (o != null) {
-            count++
-            {
-                if ((int(o.marked) & (1 << 3 | 1 << 4)) != 0) {
-                    reallymarkobject(g, addr(reinterpret<GCUnion?>(o).gc))
-                }
-            }
-            o = o.next
+    var count : uint64 = 0ul
+    o = g.tobefnz
+    while (o != null) {
+        count++
+        if ((int(o.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            reallymarkobject(g, addr(reinterpret<GCUnion?>(o).gc))
         }
+        o = o.next
     }
     return count
 }
@@ -336,7 +340,7 @@ def private remarkupvals(var g : global_State?) : int {
             break
         }
         work++
-        if (!((int(thread.marked) & (1 << 3 | 1 << 4)) != 0) && thread.openupval != null) {
+        if (!((int(thread.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) && thread.openupval != null) {
             // keep marked thread with upvalues in the list
             p = addr(thread.twups)
         } else {
@@ -346,22 +350,20 @@ def private remarkupvals(var g : global_State?) : int {
             deref(p) = thread.twups
             // mark that it is out of list
             thread.twups = thread
-            {
-                uv = thread.openupval
-                while (uv != null) {
-                    work++
-                    // upvalue already visited?
-                    if (!((int(uv.marked) & (1 << 3 | 1 << 4)) != 0)) {
-                        {
-                            // mark its value
-                            let _t0 = g.mainthread
-                            if ((int(uv.v.p.tt_) & 1 << 6) != 0 && (int(uv.v.p.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                                reallymarkobject(g, uv.v.p.value_.gc)
-                            }
+            uv = thread.openupval
+            while (uv != null) {
+                work++
+                // upvalue already visited?
+                if (!((int(uv.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0)) {
+                    {
+                        // mark its value
+                        let _t0 = g.mainthread
+                        if ((int(uv.v.p.tt_) & BIT_ISCOLLECTABLE) != 0 && (int(uv.v.p.value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+                            reallymarkobject(g, uv.v.p.value_.gc)
                         }
                     }
-                    uv = uv.u.open.next
                 }
+                uv = uv.u.open.next
             }
         }
     }
@@ -380,14 +382,12 @@ def private cleargraylists(var g : global_State?) {
 [c_function]
 def private restartcollection(var g : global_State?) {
     cleargraylists(g)
-    {
-        if ((int(g.mainthread.marked) & (1 << 3 | 1 << 4)) != 0) {
-            reallymarkobject(g, addr(reinterpret<GCUnion?>(g.mainthread).gc))
-        }
+    if ((int(g.mainthread.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+        reallymarkobject(g, addr(reinterpret<GCUnion?>(g.mainthread).gc))
     }
     {
         let _t0 = g.mainthread
-        if ((int(addr(g.l_registry).tt_) & 1 << 6) != 0 && (int(addr(g.l_registry).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+        if ((int(addr(g.l_registry).tt_) & BIT_ISCOLLECTABLE) != 0 && (int(addr(g.l_registry).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
             reallymarkobject(g, addr(g.l_registry).value_.gc)
         }
     }
@@ -406,13 +406,13 @@ def private restartcollection(var g : global_State?) {
 [c_function]
 def private genlink(var g : global_State?; var o : GCObject?) {
     // touched in this cycle?
-    if ((int(o.marked) & 7) == G_TOUCHED1) {
+    if ((int(o.marked) & AGEBITS) == G_TOUCHED1) {
         // link it back in 'grayagain'
         linkgclist_(addr(reinterpret<GCUnion?>(o).gc), getgclist(o), addr(g.grayagain))
-    } elif ((int(o.marked) & 7) == G_TOUCHED2) {
+    } elif ((int(o.marked) & AGEBITS) == G_TOUCHED2) {
         // everything else do not need to be linked back
         // advance age
-        o.marked = uint8(int(o.marked) ^ (6 ^ 4))
+        o.marked = uint8(int(o.marked) ^ (G_TOUCHED2 ^ G_OLD))
     }
 }
 
@@ -423,32 +423,28 @@ def private genlink(var g : global_State?; var o : GCObject?) {
 [c_function]
 def private traverseweakvalue(var g : global_State?; var h : Table?) {
     var n : Node?
-    var limit : Node? = addr(deref(h.node + uint64(1 << int(h.lsizenode))))
+    var limit : Node? = addr(h.node[uint64(1 << int(h.lsizenode))])
     // if there is array part, assume it may have white values (it is not
     // worth traversing it now just to check)
-    var hasclears : int = h.alimit > uint(0) ? 1 : 0
+    var hasclears : int = (h.alimit > 0u) ? 1 : 0
     // traverse hash part
-    {
-        n = addr(deref(h.node + 0))
-        while (intptr(n) < intptr(limit)) {
-            // entry is empty?
-            if ((int(addr(n.i_val).tt_) & 15) == 0) {
-                // clear its key
-                clearkey(n)
-            } else {
-                {
-                    if ((int(n.u.key_tt) & 1 << 6) != 0 && (int(n.u.key_val.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                        reallymarkobject(g, n.u.key_val.gc)
-                    }
-                }
-                // a white value?
-                if (!(hasclears != 0) && iscleared(g, (int(addr(n.i_val).tt_) & 1 << 6) != 0 ? addr(n.i_val).value_.gc : null) != 0) {
-                    // table will have to be cleared
-                    hasclears = 1
-                }
+    n = addr(h.node[0])
+    while (intptr(n) < intptr(limit)) {
+        // entry is empty?
+        if ((int(addr(n.i_val).tt_) & 15) == LUA_TNIL) {
+            // clear its key
+            clearkey(n)
+        } else {
+            if ((int(n.u.key_tt) & BIT_ISCOLLECTABLE) != 0 && (int(n.u.key_val.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+                reallymarkobject(g, n.u.key_val.gc)
             }
-            n = n + 1
+            // a white value?
+            if (!(hasclears != 0) && iscleared(g, (int(addr(n.i_val).tt_) & BIT_ISCOLLECTABLE) != 0 ? addr(n.i_val).value_.gc : null) != 0) {
+                // table will have to be cleared
+                hasclears = 1
+            }
         }
+        n = n + 1
     }
     if (int(g.gcstate) == GCSatomic && hasclears != 0) {
         // has to be cleared later
@@ -481,29 +477,29 @@ def private traverseephemeron(var g : global_State?; var h : Table?; inv : int) 
     var nsize : uint = uint(1 << int(h.lsizenode))
     // traverse array part
     for (i in urange(asize)) {
-        if ((int(addr(deref(h._c_array + i)).tt_) & 1 << 6) != 0 && (int(addr(deref(h._c_array + i)).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+        if ((int(addr(h._c_array[i]).tt_) & BIT_ISCOLLECTABLE) != 0 && (int(addr(h._c_array[i]).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
             marked = 1
-            reallymarkobject(g, addr(deref(h._c_array + i)).value_.gc)
+            reallymarkobject(g, addr(h._c_array[i]).value_.gc)
         }
     }
     // traverse hash part; if 'inv', traverse descending
     // (see 'convergeephemerons')
     for (i in urange(nsize)) {
-        var n : Node? = inv != 0 ? addr(deref(h.node + (nsize - uint(1) - i))) : addr(deref(h.node + i))
+        var n : Node? = inv != 0 ? addr(h.node[nsize - 1u - i]) : addr(h.node[i])
         // entry is empty?
-        if ((int(addr(n.i_val).tt_) & 15) == 0) {
+        if ((int(addr(n.i_val).tt_) & 15) == LUA_TNIL) {
             // clear its key
             clearkey(n)
-        } elif (iscleared(g, (int(n.u.key_tt) & 1 << 6) != 0 ? n.u.key_val.gc : null) != 0) {
+        } elif (iscleared(g, (int(n.u.key_tt) & BIT_ISCOLLECTABLE) != 0 ? n.u.key_val.gc : null) != 0) {
             // key is not marked (yet)?
             // table must be cleared
             hasclears = 1
             // value not marked yet?
-            if ((int(addr(n.i_val).tt_) & 1 << 6) != 0 && (int(addr(n.i_val).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+            if ((int(addr(n.i_val).tt_) & BIT_ISCOLLECTABLE) != 0 && (int(addr(n.i_val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
                 // white-white entry
                 hasww = 1
             }
-        } elif ((int(addr(n.i_val).tt_) & 1 << 6) != 0 && (int(addr(n.i_val).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+        } elif ((int(addr(n.i_val).tt_) & BIT_ISCOLLECTABLE) != 0 && (int(addr(n.i_val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
             // value not marked yet?
             marked = 1
             // mark it now
@@ -532,38 +528,34 @@ def private traverseephemeron(var g : global_State?; var h : Table?; inv : int) 
 [c_function]
 def private traversestrongtable(var g : global_State?; var h : Table?) {
     var n : Node?
-    var limit : Node? = addr(deref(h.node + uint64(1 << int(h.lsizenode))))
+    var limit : Node? = addr(h.node[uint64(1 << int(h.lsizenode))])
     var asize : uint = luaH_realasize(h)
     // traverse array part
     for (i in urange(asize)) {
         let _t0 = g.mainthread
-        if ((int(addr(deref(h._c_array + i)).tt_) & 1 << 6) != 0 && (int(addr(deref(h._c_array + i)).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-            reallymarkobject(g, addr(deref(h._c_array + i)).value_.gc)
+        if ((int(addr(h._c_array[i]).tt_) & BIT_ISCOLLECTABLE) != 0 && (int(addr(h._c_array[i]).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            reallymarkobject(g, addr(h._c_array[i]).value_.gc)
         }
     }
     // traverse hash part
-    {
-        n = addr(deref(h.node + 0))
-        while (intptr(n) < intptr(limit)) {
-            // entry is empty?
-            if ((int(addr(n.i_val).tt_) & 15) == 0) {
-                // clear its key
-                clearkey(n)
-            } else {
-                {
-                    if ((int(n.u.key_tt) & 1 << 6) != 0 && (int(n.u.key_val.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                        reallymarkobject(g, n.u.key_val.gc)
-                    }
-                }
-                {
-                    let _t1 = g.mainthread
-                    if ((int(addr(n.i_val).tt_) & 1 << 6) != 0 && (int(addr(n.i_val).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                        reallymarkobject(g, addr(n.i_val).value_.gc)
-                    }
+    n = addr(h.node[0])
+    while (intptr(n) < intptr(limit)) {
+        // entry is empty?
+        if ((int(addr(n.i_val).tt_) & 15) == LUA_TNIL) {
+            // clear its key
+            clearkey(n)
+        } else {
+            if ((int(n.u.key_tt) & BIT_ISCOLLECTABLE) != 0 && (int(n.u.key_val.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+                reallymarkobject(g, n.u.key_val.gc)
+            }
+            {
+                let _t1 = g.mainthread
+                if ((int(addr(n.i_val).tt_) & BIT_ISCOLLECTABLE) != 0 && (int(addr(n.i_val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+                    reallymarkobject(g, addr(n.i_val).value_.gc)
                 }
             }
-            n = n + 1
         }
+        n = n + 1
     }
     genlink(g, addr(reinterpret<GCUnion?>(h).gc))
 }
@@ -572,17 +564,15 @@ def private traversestrongtable(var g : global_State?; var h : Table?) {
 def private traversetable(var g : global_State?; var h : Table?) : uint64 {
     var weakkey : uint8?
     var weakvalue : uint8?
-    var mode : TValue? = h.metatable == null ? default<TValue?> : ((uint(h.metatable.flags) & 1u << uint(int(TMS.TM_MODE))) != 0 ? default<TValue?> : luaT_gettm(h.metatable, TMS.TM_MODE, g.tmname[int(TMS.TM_MODE)]))
+    var mode : TValue? = h.metatable == null ? default<TValue?> : ((uint(h.metatable.flags) & (1u << uint(int(TMS.TM_MODE)))) != 0 ? default<TValue?> : luaT_gettm(h.metatable, TMS.TM_MODE, g.tmname[int(TMS.TM_MODE)]))
     var smode : TString?
-    {
-        if (h.metatable != null) {
-            if ((int(h.metatable.marked) & (1 << 3 | 1 << 4)) != 0) {
-                reallymarkobject(g, addr(reinterpret<GCUnion?>(h.metatable).gc))
-            }
+    if (h.metatable != null) {
+        if ((int(h.metatable.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            reallymarkobject(g, addr(reinterpret<GCUnion?>(h.metatable).gc))
         }
     }
     // is there a weak mode?
-    var _t0 = mode != null && int(mode.tt_) == (4 | 0 << 4 | 1 << 6)
+    var _t0 = mode != null && int(mode.tt_) == ((LUA_TSTRING | (0 << 4)) | BIT_ISCOLLECTABLE)
     if (_t0) {
         smode = addr(reinterpret<GCUnion?>(mode.value_.gc).ts)
         weakkey = crt::strchr(addr(smode.contents[0]), 'k')
@@ -606,29 +596,25 @@ def private traversetable(var g : global_State?; var h : Table?) : uint64 {
         // not weak
         traversestrongtable(g, h)
     }
-    return uint64(uint(1) + h.alimit + uint(2 * (h.lastfree == null ? 0 : 1 << int(h.lsizenode))))
+    return uint64(1u + h.alimit + uint(2 * (h.lastfree == null ? 0 : (1 << int(h.lsizenode)))))
 }
 
 [c_function]
 def private traverseudata(var g : global_State?; var u : Udata?) : int {
     var i : int
-    {
-        // mark its metatable
-        if (u.metatable != null) {
-            if ((int(u.metatable.marked) & (1 << 3 | 1 << 4)) != 0) {
-                reallymarkobject(g, addr(reinterpret<GCUnion?>(u.metatable).gc))
-            }
+    // mark its metatable
+    if (u.metatable != null) {
+        if ((int(u.metatable.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            reallymarkobject(g, addr(reinterpret<GCUnion?>(u.metatable).gc))
         }
     }
-    {
-        i = 0
-        while (i < int(u.nuvalue)) {
-            let _t0 = g.mainthread
-            if ((int(addr(deref(addr(u.uv[0]) + i).uv).tt_) & 1 << 6) != 0 && (int(addr(deref(addr(u.uv[0]) + i).uv).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                reallymarkobject(g, addr(deref(addr(u.uv[0]) + i).uv).value_.gc)
-            }
-            i++
+    i = 0
+    while (i < int(u.nuvalue)) {
+        let _t0 = g.mainthread
+        if ((int(addr(addr(u.uv[0])[i].uv).tt_) & BIT_ISCOLLECTABLE) != 0 && (int(addr(addr(u.uv[0])[i].uv).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            reallymarkobject(g, addr(addr(u.uv[0])[i].uv).value_.gc)
         }
+        i++
     }
     genlink(g, addr(reinterpret<GCUnion?>(u).gc))
     return 1 + int(u.nuvalue)
@@ -640,59 +626,49 @@ def private traverseudata(var g : global_State?; var u : Udata?) : int {
 [c_function]
 def private traverseproto(var g : global_State?; var f : Proto?) : int {
     var i : int
-    {
-        if (f.source != null) {
-            if ((int(f.source.marked) & (1 << 3 | 1 << 4)) != 0) {
-                reallymarkobject(g, addr(reinterpret<GCUnion?>(f.source).gc))
-            }
+    if (f.source != null) {
+        if ((int(f.source.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            reallymarkobject(g, addr(reinterpret<GCUnion?>(f.source).gc))
         }
     }
     // mark literals
-    {
-        i = 0
-        while (i < f.sizek) {
-            let _t0 = g.mainthread
-            if ((int(addr(deref(f.k + i)).tt_) & 1 << 6) != 0 && (int(addr(deref(f.k + i)).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                reallymarkobject(g, addr(deref(f.k + i)).value_.gc)
-            }
-            i++
+    i = 0
+    while (i < f.sizek) {
+        let _t0 = g.mainthread
+        if ((int(addr(f.k[i]).tt_) & BIT_ISCOLLECTABLE) != 0 && (int(addr(f.k[i]).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            reallymarkobject(g, addr(f.k[i]).value_.gc)
         }
+        i++
     }
     // mark upvalue names
-    {
-        i = 0
-        while (i < f.sizeupvalues) {
-            if (deref(f.upvalues + i).name != null) {
-                if ((int(deref(f.upvalues + i).name.marked) & (1 << 3 | 1 << 4)) != 0) {
-                    reallymarkobject(g, addr(reinterpret<GCUnion?>(deref(f.upvalues + i).name).gc))
-                }
+    i = 0
+    while (i < f.sizeupvalues) {
+        if (f.upvalues[i].name != null) {
+            if ((int(f.upvalues[i].name.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+                reallymarkobject(g, addr(reinterpret<GCUnion?>(f.upvalues[i].name).gc))
             }
-            i++
         }
+        i++
     }
     // mark nested protos
-    {
-        i = 0
-        while (i < f.sizep) {
-            if (deref(f.p + i) != null) {
-                if ((int(deref(f.p + i).marked) & (1 << 3 | 1 << 4)) != 0) {
-                    reallymarkobject(g, addr(reinterpret<GCUnion?>(deref(f.p + i)).gc))
-                }
+    i = 0
+    while (i < f.sizep) {
+        if (f.p[i] != null) {
+            if ((int(f.p[i].marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+                reallymarkobject(g, addr(reinterpret<GCUnion?>(f.p[i]).gc))
             }
-            i++
         }
+        i++
     }
     // mark local-variable names
-    {
-        i = 0
-        while (i < f.sizelocvars) {
-            if (deref(f.locvars + i).varname != null) {
-                if ((int(deref(f.locvars + i).varname.marked) & (1 << 3 | 1 << 4)) != 0) {
-                    reallymarkobject(g, addr(reinterpret<GCUnion?>(deref(f.locvars + i).varname).gc))
-                }
+    i = 0
+    while (i < f.sizelocvars) {
+        if (f.locvars[i].varname != null) {
+            if ((int(f.locvars[i].varname.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+                reallymarkobject(g, addr(reinterpret<GCUnion?>(f.locvars[i].varname).gc))
             }
-            i++
         }
+        i++
     }
     return 1 + f.sizek + f.sizeupvalues + f.sizep + f.sizelocvars
 }
@@ -701,15 +677,13 @@ def private traverseproto(var g : global_State?; var f : Proto?) : int {
 def private traverseCclosure(var g : global_State?; var cl : CClosure?) : int {
     var i : int
     // mark its upvalues
-    {
-        i = 0
-        while (i < int(cl.nupvalues)) {
-            let _t0 = g.mainthread
-            if ((int(addr(deref(addr(cl.upvalue[0]) + i)).tt_) & 1 << 6) != 0 && (int(addr(deref(addr(cl.upvalue[0]) + i)).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                reallymarkobject(g, addr(deref(addr(cl.upvalue[0]) + i)).value_.gc)
-            }
-            i++
+    i = 0
+    while (i < int(cl.nupvalues)) {
+        let _t0 = g.mainthread
+        if ((int(addr(addr(cl.upvalue[0])[i]).tt_) & BIT_ISCOLLECTABLE) != 0 && (int(addr(addr(cl.upvalue[0])[i]).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            reallymarkobject(g, addr(addr(cl.upvalue[0])[i]).value_.gc)
         }
+        i++
     }
     return 1 + int(cl.nupvalues)
 }
@@ -719,29 +693,23 @@ def private traverseCclosure(var g : global_State?; var cl : CClosure?) : int {
 [c_function]
 def private traverseLclosure(var g : global_State?; var cl : LClosure?) : int {
     var i : int
-    {
-        // mark its prototype
-        if (cl.p != null) {
-            if ((int(cl.p.marked) & (1 << 3 | 1 << 4)) != 0) {
-                reallymarkobject(g, addr(reinterpret<GCUnion?>(cl.p).gc))
-            }
+    // mark its prototype
+    if (cl.p != null) {
+        if ((int(cl.p.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            reallymarkobject(g, addr(reinterpret<GCUnion?>(cl.p).gc))
         }
     }
     // visit its upvalues
-    {
-        i = 0
-        while (i < int(cl.nupvalues)) {
-            var uv : UpVal? = deref(addr(cl.upvals[0]) + i)
-            {
-                // mark upvalue
-                if (uv != null) {
-                    if ((int(uv.marked) & (1 << 3 | 1 << 4)) != 0) {
-                        reallymarkobject(g, addr(reinterpret<GCUnion?>(uv).gc))
-                    }
-                }
+    i = 0
+    while (i < int(cl.nupvalues)) {
+        var uv : UpVal? = addr(cl.upvals[0])[i]
+        // mark upvalue
+        if (uv != null) {
+            if ((int(uv.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+                reallymarkobject(g, addr(reinterpret<GCUnion?>(uv).gc))
             }
-            i++
         }
+        i++
     }
     return 1 + int(cl.nupvalues)
 }
@@ -760,7 +728,7 @@ def private traverseLclosure(var g : global_State?; var cl : LClosure?) : int {
 def private traversethread(var g : global_State?; var th : lua_State?) : int {
     var uv : UpVal?
     var o : StackValue? = th.stack.p
-    if ((int(th.marked) & 7) > 1 || int(g.gcstate) == GCSpropagate) {
+    if ((int(th.marked) & AGEBITS) > G_SURVIVAL || int(g.gcstate) == GCSpropagate) {
         // insert into 'grayagain' list
         linkgclist_(addr(reinterpret<GCUnion?>(th).gc), addr(th.gclist), addr(g.grayagain))
     }
@@ -769,24 +737,20 @@ def private traversethread(var g : global_State?; var th : lua_State?) : int {
         return 1
     }
     // mark live elements in the stack
-    {
-        while (intptr(o) < intptr(th.top.p)) {
-            let _t0 = g.mainthread
-            if ((int(addr(o.val).tt_) & 1 << 6) != 0 && (int(addr(o.val).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
-                reallymarkobject(g, addr(o.val).value_.gc)
-            }
-            o = o + 1
+    while (intptr(o) < intptr(th.top.p)) {
+        let _t0 = g.mainthread
+        if ((int(addr(o.val).tt_) & BIT_ISCOLLECTABLE) != 0 && (int(addr(o.val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            reallymarkobject(g, addr(o.val).value_.gc)
         }
+        o = o + 1
     }
-    {
-        uv = th.openupval
-        while (uv != null) {
-            // open upvalues cannot be collected
-            if ((int(uv.marked) & (1 << 3 | 1 << 4)) != 0) {
-                reallymarkobject(g, addr(reinterpret<GCUnion?>(uv).gc))
-            }
-            uv = uv.u.open.next
+    uv = th.openupval
+    while (uv != null) {
+        // open upvalues cannot be collected
+        if ((int(uv.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            reallymarkobject(g, addr(reinterpret<GCUnion?>(uv).gc))
         }
+        uv = uv.u.open.next
     }
     // final traversal?
     if (int(g.gcstate) == GCSatomic) {
@@ -794,13 +758,11 @@ def private traversethread(var g : global_State?; var th : lua_State?) : int {
             // do not change stack in emergency cycle
             luaD_shrinkstack(th)
         }
-        {
-            o = th.top.p
-            while (intptr(o) < intptr(th.stack_last.p + EXTRA_STACK)) {
-                // clear dead stack slice
-                addr(o.val).tt_ = uint8(0 | 0 << 4)
-                o = o + 1
-            }
+        o = th.top.p
+        while (intptr(o) < intptr(th.stack_last.p + EXTRA_STACK)) {
+            // clear dead stack slice
+            addr(o.val).tt_ = uint8(LUA_TNIL | (0 << 4))
+            o = o + 1
         }
         // 'remarkupvals' may have removed thread from 'twups' list
         if (!(intptr(th.twups) != intptr(th)) && th.openupval != null) {
@@ -816,7 +778,7 @@ def private traversethread(var g : global_State?; var th : lua_State?) : int {
 [c_function]
 def private propagatemark(var g : global_State?) : uint64 {
     var o : GCObject? = g.gray
-    o.marked = uint8(int(o.marked) | 1 << 5)
+    o.marked = uint8(int(o.marked) | (1 << BLACKBIT))
     // remove from 'gray' list
     g.gray = deref(getgclist(o))
     let _cond = int(o.tt)
@@ -833,13 +795,12 @@ def private propagatemark(var g : global_State?) : uint64 {
     } elif (_cond == 8) {
         return uint64(traversethread(g, addr(reinterpret<GCUnion?>(o).th)))
     } else {
-        return uint64(0)
+        return 0ul
     }
-    return uint64(0)
 }
 
 def private propagateall(var g : global_State?) : uint64 {
-    var tot : uint64 = uint64(0)
+    var tot : uint64 = 0ul
     while (g.gray != null) {
         tot += propagatemark(g)
     }
@@ -871,7 +832,7 @@ def private convergeephemerons(var g : global_State?) {
             // list is rebuilt during loop
             next = h.gclist
             // out of the list (for now)
-            h.marked = uint8(int(h.marked) | 1 << 5)
+            h.marked = uint8(int(h.marked) | (1 << BLACKBIT))
             // marked some value?
             if (traverseephemeron(g, h, dir) != 0) {
                 // propagate changes
@@ -891,29 +852,25 @@ def private convergeephemerons(var g : global_State?) {
 // clear entries with unmarked keys from all weaktables in list 'l'
 [c_function]
 def private clearbykeys(var g : global_State?; var l : GCObject?) {
-    {
-        while (l != null) {
-            var h : Table? = addr(reinterpret<GCUnion?>(l).h)
-            var limit : Node? = addr(deref(h.node + uint64(1 << int(h.lsizenode))))
-            var n : Node?
-            {
-                n = addr(deref(h.node + 0))
-                while (intptr(n) < intptr(limit)) {
-                    // unmarked key?
-                    if (iscleared(g, (int(n.u.key_tt) & 1 << 6) != 0 ? n.u.key_val.gc : null) != 0) {
-                        // remove entry
-                        addr(n.i_val).tt_ = uint8(0 | 1 << 4)
-                    }
-                    // is entry empty?
-                    if ((int(addr(n.i_val).tt_) & 15) == 0) {
-                        // clear its key
-                        clearkey(n)
-                    }
-                    n = n + 1
-                }
+    while (l != null) {
+        var h : Table? = addr(reinterpret<GCUnion?>(l).h)
+        var limit : Node? = addr(h.node[uint64(1 << int(h.lsizenode))])
+        var n : Node?
+        n = addr(h.node[0])
+        while (intptr(n) < intptr(limit)) {
+            // unmarked key?
+            if (iscleared(g, (int(n.u.key_tt) & BIT_ISCOLLECTABLE) != 0 ? n.u.key_val.gc : null) != 0) {
+                // remove entry
+                addr(n.i_val).tt_ = uint8(LUA_TNIL | (1 << 4))
             }
-            l = addr(reinterpret<GCUnion?>(l).h).gclist
+            // is entry empty?
+            if ((int(addr(n.i_val).tt_) & 15) == LUA_TNIL) {
+                // clear its key
+                clearkey(n)
+            }
+            n = n + 1
         }
+        l = addr(reinterpret<GCUnion?>(l).h).gclist
     }
 }
 
@@ -921,38 +878,34 @@ def private clearbykeys(var g : global_State?; var l : GCObject?) {
 // to element 'f'
 [c_function]
 def private clearbyvalues(var g : global_State?; var l : GCObject?; var f : GCObject?) {
-    {
-        while (intptr(l) != intptr(f)) {
-            var h : Table? = addr(reinterpret<GCUnion?>(l).h)
-            var n : Node?
-            var limit : Node? = addr(deref(h.node + uint64(1 << int(h.lsizenode))))
-            var asize : uint = luaH_realasize(h)
-            for (i in urange(asize)) {
-                var o : TValue? = addr(deref(h._c_array + i))
-                // value was collected?
-                if (iscleared(g, (int(o.tt_) & 1 << 6) != 0 ? o.value_.gc : null) != 0) {
-                    // remove entry
-                    o.tt_ = uint8(0 | 1 << 4)
-                }
+    while (intptr(l) != intptr(f)) {
+        var h : Table? = addr(reinterpret<GCUnion?>(l).h)
+        var n : Node?
+        var limit : Node? = addr(h.node[uint64(1 << int(h.lsizenode))])
+        var asize : uint = luaH_realasize(h)
+        for (i in urange(asize)) {
+            var o : TValue? = addr(h._c_array[i])
+            // value was collected?
+            if (iscleared(g, (int(o.tt_) & BIT_ISCOLLECTABLE) != 0 ? o.value_.gc : null) != 0) {
+                // remove entry
+                o.tt_ = uint8(LUA_TNIL | (1 << 4))
             }
-            {
-                n = addr(deref(h.node + 0))
-                while (intptr(n) < intptr(limit)) {
-                    // unmarked value?
-                    if (iscleared(g, (int(addr(n.i_val).tt_) & 1 << 6) != 0 ? addr(n.i_val).value_.gc : null) != 0) {
-                        // remove entry
-                        addr(n.i_val).tt_ = uint8(0 | 1 << 4)
-                    }
-                    // is entry empty?
-                    if ((int(addr(n.i_val).tt_) & 15) == 0) {
-                        // clear its key
-                        clearkey(n)
-                    }
-                    n = n + 1
-                }
-            }
-            l = addr(reinterpret<GCUnion?>(l).h).gclist
         }
+        n = addr(h.node[0])
+        while (intptr(n) < intptr(limit)) {
+            // unmarked value?
+            if (iscleared(g, (int(addr(n.i_val).tt_) & BIT_ISCOLLECTABLE) != 0 ? addr(n.i_val).value_.gc : null) != 0) {
+                // remove entry
+                addr(n.i_val).tt_ = uint8(LUA_TNIL | (1 << 4))
+            }
+            // is entry empty?
+            if ((int(addr(n.i_val).tt_) & 15) == LUA_TNIL) {
+                // clear its key
+                clearkey(n)
+            }
+            n = n + 1
+        }
+        l = addr(reinterpret<GCUnion?>(l).h).gclist
     }
 }
 
@@ -1000,7 +953,7 @@ def private freeobj(var L : lua_State?; var o : GCObject?) {
     } elif (_cond == 20) {
         {
             var ts : TString? = addr(reinterpret<GCUnion?>(o).ts)
-            luaM_free_(L, reinterpret<void?>(ts), uint64(typeinfo offsetof < contents > (type<TString>)) + (ts.u.lnglen + uint64(1)) * uint64(typeinfo sizeof(type<uint8>)))
+            luaM_free_(L, reinterpret<void?>(ts), uint64(typeinfo offsetof < contents > (type<TString>)) + (ts.u.lnglen + 1ul) * uint64(typeinfo sizeof(type<uint8>)))
         }
     } else {
     }
@@ -1014,35 +967,33 @@ def private freeobj(var L : lua_State?; var o : GCObject?) {
 [c_function]
 def private sweeplist(var L : lua_State?; var p : GCObject ??; countin : int; var countout : int?) : GCObject ?? {
     var g : global_State? = L.l_G
-    var ow : int = int(g.currentwhite) ^ (1 << 3 | 1 << 4)
+    var ow : int = int(g.currentwhite) ^ ((1 << WHITE0BIT) | (1 << WHITE1BIT))
     var i : int
     // current white
-    var white : int = int(uint8(int(g.currentwhite) & (1 << 3 | 1 << 4)))
-    {
-        i = 0
-        while (deref(p) != null && i < countin) {
-            var curr : GCObject? = deref(p)
-            var marked : int = int(curr.marked)
-            // is 'curr' dead?
-            if ((marked & ow) != 0) {
-                // remove 'curr' from list
-                deref(p) = curr.next
-                // erase 'curr'
-                freeobj(L, curr)
-            } else {
-                // change mark to 'white'
-                curr.marked = uint8(marked & ~(1 << 5 | (1 << 3 | 1 << 4) | 7) | white)
-                // go to next element
-                p = addr(curr.next)
-            }
-            i++
+    var white : int = int(uint8(int(g.currentwhite) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))))
+    i = 0
+    while (deref(p) != null && i < countin) {
+        var curr : GCObject? = deref(p)
+        var marked : int = int(curr.marked)
+        // is 'curr' dead?
+        if ((marked & ow) != 0) {
+            // remove 'curr' from list
+            deref(p) = curr.next
+            // erase 'curr'
+            freeobj(L, curr)
+        } else {
+            // change mark to 'white'
+            curr.marked = uint8((marked & ~maskgcbits) | white)
+            // go to next element
+            p = addr(curr.next)
         }
+        i++
     }
     if (countout != null) {
         // number of elements traversed
         deref(countout) = i
     }
-    return deref(p) == null ? default<GCObject ??> : p
+    return (deref(p) == null) ? default<GCObject ??> : p
 }
 
 // sweep a list until a live object (or end of list)
@@ -1081,11 +1032,11 @@ def private udata2finalize(var g : global_State?) : GCObject? {
     o.next = g.allgc
     g.allgc = o
     // object is "normal" again
-    o.marked = uint8(int(o.marked) & int(uint8(~(1 << 6))))
-    if (3 <= int(g.gcstate) && int(g.gcstate) <= 6) {
+    o.marked = uint8(int(o.marked) & int(uint8(~(1 << FINALIZEDBIT))))
+    if (GCSswpallgc <= int(g.gcstate) && int(g.gcstate) <= GCSswpend) {
         // "sweep" object
-        o.marked = uint8(int(o.marked) & ~(1 << 5 | (1 << 3 | 1 << 4)) | int(uint8(int(g.currentwhite) & (1 << 3 | 1 << 4))))
-    } elif ((int(o.marked) & 7) == G_OLD1) {
+        o.marked = uint8((int(o.marked) & ~maskcolors) | int(uint8(int(g.currentwhite) & ((1 << WHITE0BIT) | (1 << WHITE1BIT)))))
+    } elif ((int(o.marked) & AGEBITS) == G_OLD1) {
         // it is the first OLD1 object in the list
         g.firstold1 = o
     }
@@ -1106,18 +1057,18 @@ def private GCTM(var L : lua_State?) {
         var io : TValue? = addr(v)
         var i_g : GCObject? = udata2finalize(g)
         io.value_.gc = i_g
-        io.tt_ = uint8(int(i_g.tt) | 1 << 6)
+        io.tt_ = uint8(int(i_g.tt) | BIT_ISCOLLECTABLE)
     }
     tm = luaT_gettmbyobj(L, addr(v), TMS.TM_GC)
     // is there a finalizer?
-    if (!((int(tm.tt_) & 15) == 0)) {
+    if (!((int(tm.tt_) & 15) == LUA_TNIL)) {
         var status : int
         var oldah : uint8 = L.allowhook
         var oldgcstp : int = int(g.gcstp)
         // avoid GC steps
         g.gcstp = uint8(int(g.gcstp) | GCSTPGC)
         // stop debug hooks during GC metamethod
-        L.allowhook = uint8(0)
+        L.allowhook = 0u8
         {
             // push finalizer...
             var _t0 = L.top.p
@@ -1138,7 +1089,7 @@ def private GCTM(var L : lua_State?) {
         }
         // will run a finalizer
         L.ci.callstatus = uint16(int(L.ci.callstatus) | CIST_FIN)
-        status = luaD_pcall(L, @@dothecall, null, int64(reinterpret<uint8?>(L.top.p - 2) - reinterpret<uint8?>(L.stack.p)), int64(0))
+        status = luaD_pcall(L, @@dothecall, null, int64(reinterpret<uint8?>(L.top.p - 2) - reinterpret<uint8?>(L.stack.p)), 0l)
         // not running a finalizer anymore
         L.ci.callstatus = uint16(int(L.ci.callstatus) & ~CIST_FIN)
         // restore hooks
@@ -1146,8 +1097,8 @@ def private GCTM(var L : lua_State?) {
         // restore state
         g.gcstp = uint8(oldgcstp)
         // error while running __gc?
-        if (status != 0) {
-            luaE_warnerror(L, reinterpret<uint8?>("__gc"))
+        if (status != LUA_OK) {
+            luaE_warnerror(L, cstr("__gc"))
             // pops error object
             L.top.p = L.top.p - 1
         }
@@ -1158,13 +1109,11 @@ def private GCTM(var L : lua_State?) {
 def private runafewfinalizers(var L : lua_State?; n : int) : int {
     var g : global_State? = L.l_G
     var i : int
-    {
-        i = 0
-        while (i < n && g.tobefnz != null) {
-            // call one finalizer
-            GCTM(L)
-            i++
-        }
+    i = 0
+    while (i < n && g.tobefnz != null) {
+        // call one finalizer
+        GCTM(L)
+        i++
     }
     return i
 }
@@ -1203,7 +1152,7 @@ def private separatetobefnz(var g : global_State?; all : int) {
             break
         }
         // not being collected?
-        if (!((int(curr.marked) & (1 << 3 | 1 << 4)) != 0 || all != 0)) {
+        if (!((int(curr.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0 || all != 0)) {
             // don't bother with it
             p = addr(curr.next)
         } else {
@@ -1246,7 +1195,7 @@ def private correctpointers(var g : global_State?; var o : GCObject?) {
 def luaC_checkfinalizer(var L : lua_State?; var o : GCObject?; var mt : Table?) {
     var g : global_State? = L.l_G
     // obj. is already marked...
-    if ((int(o.marked) & 1 << 6) != 0 || (mt == null ? default<TValue?> : ((uint(mt.flags) & 1u << uint(int(TMS.TM_GC))) != 0 ? default<TValue?> : luaT_gettm(mt, TMS.TM_GC, g.tmname[int(TMS.TM_GC)]))) == null || (int(g.gcstp) & GCSTPCLS) != 0) {
+    if ((int(o.marked) & (1 << FINALIZEDBIT)) != 0 || (mt == null ? default<TValue?> : ((uint(mt.flags) & (1u << uint(int(TMS.TM_GC)))) != 0 ? default<TValue?> : luaT_gettm(mt, TMS.TM_GC, g.tmname[int(TMS.TM_GC)]))) == null || (int(g.gcstp) & GCSTPCLS) != 0) {
         // or has no finalizer...
         // or closing state?
         // nothing to be done
@@ -1254,9 +1203,9 @@ def luaC_checkfinalizer(var L : lua_State?; var o : GCObject?; var mt : Table?) 
     } else {
         // move 'o' to 'finobj' list
         var p : GCObject ??
-        if (3 <= int(g.gcstate) && int(g.gcstate) <= 6) {
+        if (GCSswpallgc <= int(g.gcstate) && int(g.gcstate) <= GCSswpend) {
             // "sweep" object 'o'
-            o.marked = uint8(int(o.marked) & ~(1 << 5 | (1 << 3 | 1 << 4)) | int(uint8(int(g.currentwhite) & (1 << 3 | 1 << 4))))
+            o.marked = uint8((int(o.marked) & ~maskcolors) | int(uint8(int(g.currentwhite) & ((1 << WHITE0BIT) | (1 << WHITE1BIT)))))
             // should not remove 'sweepgc' object
             if (intptr(g.sweepgc) == intptr(addr(o.next))) {
                 // change 'sweepgc'
@@ -1267,11 +1216,9 @@ def luaC_checkfinalizer(var L : lua_State?; var o : GCObject?; var mt : Table?) 
         }
         // search for pointer pointing to 'o'
         // empty
-        {
-            p = addr(g.allgc)
-            while (intptr(deref(p)) != intptr(o)) {
-                p = addr(deref(p).next)
-            }
+        p = addr(g.allgc)
+        while (intptr(deref(p)) != intptr(o)) {
+            p = addr(deref(p).next)
         }
         // remove 'o' from 'allgc' list
         deref(p) = o.next
@@ -1279,7 +1226,7 @@ def luaC_checkfinalizer(var L : lua_State?; var o : GCObject?; var mt : Table?) 
         o.next = g.finobj
         g.finobj = o
         // mark it as such
-        o.marked = uint8(int(o.marked) | 1 << 6)
+        o.marked = uint8(int(o.marked) | (1 << FINALIZEDBIT))
     }
 }
 
@@ -1294,12 +1241,12 @@ def private setpause(var g : global_State?) {
     // adjust 'estimate'
     var estimate : int64 = int64(g.GCestimate / uint64(PAUSEADJ))
     // overflow?
-    threshold = int64(pause) < MAX_LMEM / estimate ? estimate * int64(pause) : MAX_LMEM
+    threshold = (int64(pause) < MAX_LMEM / estimate) ? estimate * int64(pause) : MAX_LMEM
     // no overflow
     // overflow; truncate to maximum
     debt = g.totalbytes + g.GCdebt - threshold
-    if (debt > int64(0)) {
-        debt = int64(0)
+    if (debt > 0l) {
+        debt = 0l
     }
     luaE_setdebt(g, debt)
 }
@@ -1318,14 +1265,14 @@ def private sweep2old(var L : lua_State?; var p : GCObject ??) {
             break
         }
         // is 'curr' dead?
-        if ((int(curr.marked) & (1 << 3 | 1 << 4)) != 0) {
+        if ((int(curr.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
             // remove 'curr' from list
             deref(p) = curr.next
             // erase 'curr'
             freeobj(L, curr)
         } else {
             // all surviving objects become old
-            curr.marked = uint8(int(curr.marked) & ~7 | 4)
+            curr.marked = uint8((int(curr.marked) & ~AGEBITS) | G_OLD)
             // threads must be watched
             if (int(curr.tt) == LUA_VTHREAD) {
                 var th : lua_State? = addr(reinterpret<GCUnion?>(curr).th)
@@ -1333,10 +1280,10 @@ def private sweep2old(var L : lua_State?; var p : GCObject ??) {
                 linkgclist_(addr(reinterpret<GCUnion?>(th).gc), addr(th.gclist), addr(g.grayagain))
             } elif (int(curr.tt) == LUA_VUPVAL && intptr(addr(reinterpret<GCUnion?>(curr).upv).v.p) != intptr(addr(addr(reinterpret<GCUnion?>(curr).upv).u.value))) {
                 // open upvalues are always gray
-                curr.marked = uint8(int(curr.marked) & int(uint8(~(1 << 5 | (1 << 3 | 1 << 4)))))
+                curr.marked = uint8(int(curr.marked) & int(uint8(~maskcolors)))
             } else {
                 // everything else is black
-                curr.marked = uint8(int(curr.marked) | 1 << 5)
+                curr.marked = uint8(int(curr.marked) | (1 << BLACKBIT))
             }
             // go to next element
             p = addr(curr.next)
@@ -1362,7 +1309,7 @@ def private sweepgen(var L : lua_State?; var g : global_State?; var p : GCObject
     // from G_OLD (do not change)
     // from G_TOUCHED1 (do not change)
     // from G_TOUCHED2 (do not change)
-    var white : int = int(uint8(int(g.currentwhite) & (1 << 3 | 1 << 4)))
+    var white : int = int(uint8(int(g.currentwhite) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))))
     var curr : GCObject?
     while (true) {
         curr = deref(p)
@@ -1370,7 +1317,7 @@ def private sweepgen(var L : lua_State?; var g : global_State?; var p : GCObject
             break
         }
         // is 'curr' dead?
-        if ((int(curr.marked) & (1 << 3 | 1 << 4)) != 0) {
+        if ((int(curr.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
             // remove 'curr' from list
             deref(p) = curr.next
             // erase 'curr'
@@ -1378,14 +1325,14 @@ def private sweepgen(var L : lua_State?; var g : global_State?; var p : GCObject
         } else {
             // correct mark and age
             // new objects go back to white
-            if ((int(curr.marked) & 7) == G_NEW) {
+            if ((int(curr.marked) & AGEBITS) == G_NEW) {
                 // erase GC bits
                 var marked : int = int(curr.marked) & ~maskgcbits
-                curr.marked = uint8(marked | 1 | white)
+                curr.marked = uint8(marked | G_SURVIVAL | white)
             } else {
                 // all other objects will be old, and so keep their color
-                curr.marked = uint8(int(curr.marked) & ~7 | int(sweepgen_nextage[int(curr.marked) & 7]))
-                if ((int(curr.marked) & 7) == G_OLD1 && deref(pfirstold1) == null) {
+                curr.marked = uint8((int(curr.marked) & ~AGEBITS) | int(sweepgen_nextage[int(curr.marked) & AGEBITS]))
+                if ((int(curr.marked) & AGEBITS) == G_OLD1 && deref(pfirstold1) == null) {
                     // first OLD1 object in the list
                     deref(pfirstold1) = curr
                 }
@@ -1402,12 +1349,10 @@ def private sweepgen(var L : lua_State?; var g : global_State?; var p : GCObject
 // except for fixed strings (which are always old).
 [c_function]
 def private whitelist(var g : global_State?; var p : GCObject?) {
-    var white : int = int(uint8(int(g.currentwhite) & (1 << 3 | 1 << 4)))
-    {
-        while (p != null) {
-            p.marked = uint8(int(p.marked) & ~(1 << 5 | (1 << 3 | 1 << 4) | 7) | white)
-            p = p.next
-        }
+    var white : int = int(uint8(int(g.currentwhite) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))))
+    while (p != null) {
+        p.marked = uint8((int(p.marked) & ~maskgcbits) | white)
+        p = p.next
     }
 }
 
@@ -1427,14 +1372,14 @@ def private correctgraylist(var p : GCObject ??) : GCObject ?? {
             break
         }
         var next : GCObject ?? = getgclist(curr)
-        if ((int(curr.marked) & (1 << 3 | 1 << 4)) != 0) {
+        if ((int(curr.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
             // remove all white objects
             goto label 1
-        } elif ((int(curr.marked) & 7) == G_TOUCHED1) {
+        } elif ((int(curr.marked) & AGEBITS) == G_TOUCHED1) {
             // touched in this cycle?
             // make it black, for next barrier
-            curr.marked = uint8(int(curr.marked) | 1 << 5)
-            curr.marked = uint8(int(curr.marked) ^ (5 ^ 6))
+            curr.marked = uint8(int(curr.marked) | (1 << BLACKBIT))
+            curr.marked = uint8(int(curr.marked) ^ (G_TOUCHED1 ^ G_TOUCHED2))
             // keep it in the list and go to next element
             goto label 2
         } elif (int(curr.tt) == LUA_VTHREAD) {
@@ -1444,12 +1389,12 @@ def private correctgraylist(var p : GCObject ??) : GCObject ?? {
             // everything else is removed
             // young objects should be white here
             // advance from TOUCHED2...
-            if ((int(curr.marked) & 7) == G_TOUCHED2) {
+            if ((int(curr.marked) & AGEBITS) == G_TOUCHED2) {
                 // ... to OLD
-                curr.marked = uint8(int(curr.marked) ^ (6 ^ 4))
+                curr.marked = uint8(int(curr.marked) ^ (G_TOUCHED2 ^ G_OLD))
             }
             // make object black (to be removed)
-            curr.marked = uint8(int(curr.marked) | 1 << 5)
+            curr.marked = uint8(int(curr.marked) | (1 << BLACKBIT))
             goto label 1
         }
         label 1:  // remove
@@ -1482,18 +1427,16 @@ def private correctgraylists(var g : global_State?) {
 // in the atomic step.
 def private markold(var g : global_State?; var from : GCObject?; var to : GCObject?) {
     var p : GCObject?
-    {
-        p = from
-        while (intptr(p) != intptr(to)) {
-            if ((int(p.marked) & 7) == G_OLD1) {
-                // now they are old
-                p.marked = uint8(int(p.marked) ^ (3 ^ 4))
-                if ((int(p.marked) & 1 << 5) != 0) {
-                    reallymarkobject(g, p)
-                }
+    p = from
+    while (intptr(p) != intptr(to)) {
+        if ((int(p.marked) & AGEBITS) == G_OLD1) {
+            // now they are old
+            p.marked = uint8(int(p.marked) ^ (G_OLD1 ^ G_OLD))
+            if ((int(p.marked) & (1 << BLACKBIT)) != 0) {
+                reallymarkobject(g, p)
             }
-            p = p.next
         }
+        p = p.next
     }
 }
 
@@ -1575,7 +1518,7 @@ def private atomic2gen(var L : lua_State?; var g : global_State?) {
     g.finobjrold = g.finobjold1
     sweep2old(L, addr(g.tobefnz))
     g.gckind = uint8(KGC_GEN)
-    g.lastatomic = uint64(0)
+    g.lastatomic = 0ul
     // base for memory control
     g.GCestimate = uint64(g.totalbytes + g.GCdebt)
     finishgencycle(L, g)
@@ -1584,7 +1527,7 @@ def private atomic2gen(var L : lua_State?; var g : global_State?) {
 // Set debt for the next minor collection, which will happen when
 // memory grows 'genminormul'%.
 def private setminordebt(var g : global_State?) {
-    luaE_setdebt(g, -(int64(uint64(g.totalbytes + g.GCdebt) / uint64(100)) * int64(g.genminormul)))
+    luaE_setdebt(g, -(int64(uint64(g.totalbytes + g.GCdebt) / 100ul) * int64(g.genminormul)))
 }
 
 // Enter generational mode. Must go until the end of an atomic cycle
@@ -1594,9 +1537,9 @@ def private setminordebt(var g : global_State?) {
 def private entergen(var L : lua_State?; var g : global_State?) : uint64 {
     var numobjs : uint64
     // prepare to start a new cycle
-    luaC_runtilstate(L, 1 << 8)
+    luaC_runtilstate(L, 1 << GCSpause)
     // start new cycle
-    luaC_runtilstate(L, 1 << 0)
+    luaC_runtilstate(L, 1 << GCSpropagate)
     // propagates all and then do the atomic stuff
     numobjs = atomic(L)
     atomic2gen(L, g)
@@ -1620,7 +1563,7 @@ def private enterinc(var g : global_State?) {
     g.finobjrold = g.finobjold1
     g.gcstate = uint8(GCSpause)
     g.gckind = uint8(KGC_INC)
-    g.lastatomic = uint64(0)
+    g.lastatomic = 0ul
 }
 
 // Change collector mode to 'newmode'.
@@ -1635,7 +1578,7 @@ def luaC_changemode(var L : lua_State?; newmode : int) {
             enterinc(g)
         }
     }
-    g.lastatomic = uint64(0)
+    g.lastatomic = 0ul
 }
 
 // Does a full collection in generational mode.
@@ -1673,7 +1616,7 @@ def private stepgenfull(var L : lua_State?; var g : global_State?) {
         enterinc(g)
     }
     // start new cycle
-    luaC_runtilstate(L, 1 << 0)
+    luaC_runtilstate(L, 1 << GCSpropagate)
     // mark everybody
     newatomic = atomic(L)
     // good collection?
@@ -1687,7 +1630,7 @@ def private stepgenfull(var L : lua_State?; var g : global_State?) {
         g.GCestimate = uint64(g.totalbytes + g.GCdebt)
         entersweep(L)
         // finish collection
-        luaC_runtilstate(L, 1 << 8)
+        luaC_runtilstate(L, 1 << GCSpause)
         setpause(g)
         g.lastatomic = newatomic
     }
@@ -1710,17 +1653,17 @@ def private stepgenfull(var L : lua_State?; var g : global_State?) {
 // in that case, do a minor collection.
 def private genstep(var L : lua_State?; var g : global_State?) {
     // last collection was a bad one?
-    if (g.lastatomic != uint64(0)) {
+    if (g.lastatomic != 0ul) {
         // do a full step
         stepgenfull(L, g)
     } else {
         // memory after last major collection
         var majorbase : uint64 = g.GCestimate
-        var majorinc : uint64 = majorbase / uint64(100) * uint64(int(g.genmajormul) * 4)
-        if (g.GCdebt > int64(0) && uint64(g.totalbytes + g.GCdebt) > majorbase + majorinc) {
+        var majorinc : uint64 = (majorbase / 100ul) * uint64(int(g.genmajormul) * 4)
+        if (g.GCdebt > 0l && uint64(g.totalbytes + g.GCdebt) > majorbase + majorinc) {
             // do a major collection
             var numobjs : uint64 = fullgen(L, g)
-            if (uint64(g.totalbytes + g.GCdebt) < majorbase + majorinc / uint64(2)) {
+            if (uint64(g.totalbytes + g.GCdebt) < majorbase + (majorinc / 2ul)) {
                 // collected at least half of memory growth since last major
                 // collection; keep doing minor collections.
             } else {
@@ -1782,23 +1725,21 @@ def luaC_freeallobjects(var L : lua_State?) {
 [c_function]
 def private atomic(var L : lua_State?) : uint64 {
     var g : global_State? = L.l_G
-    var work : uint64 = uint64(0)
+    var work : uint64 = 0ul
     var origweak : GCObject?
     var origall : GCObject?
     // save original list
     var grayagain : GCObject? = g.grayagain
     g.grayagain = null
     g.gcstate = uint8(GCSatomic)
-    {
-        // mark running thread
-        if ((int(L.marked) & (1 << 3 | 1 << 4)) != 0) {
-            reallymarkobject(g, addr(reinterpret<GCUnion?>(L).gc))
-        }
+    // mark running thread
+    if ((int(L.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+        reallymarkobject(g, addr(reinterpret<GCUnion?>(L).gc))
     }
     {
         // registry and global metatables may be changed by API
         let _t0 = g.mainthread
-        if ((int(addr(g.l_registry).tt_) & 1 << 6) != 0 && (int(addr(g.l_registry).value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+        if ((int(addr(g.l_registry).tt_) & BIT_ISCOLLECTABLE) != 0 && (int(addr(g.l_registry).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
             reallymarkobject(g, addr(g.l_registry).value_.gc)
         }
     }
@@ -1838,7 +1779,7 @@ def private atomic(var L : lua_State?) : uint64 {
     clearbyvalues(g, g.allweak, origall)
     luaS_clearcache(g)
     // flip current white
-    g.currentwhite = uint8(int(g.currentwhite) ^ (1 << 3 | 1 << 4))
+    g.currentwhite = uint8(int(g.currentwhite) ^ ((1 << WHITE0BIT) | (1 << WHITE1BIT)))
     // estimate of slots marked by 'atomic'
     return work
 }
@@ -1867,74 +1808,58 @@ def private singlestep(var L : lua_State?) : uint64 {
     var work : uint64
     // collector is not reentrant
     // no emergency collections while collecting
-    g.gcstopem = uint8(1)
+    g.gcstopem = 1u8
     let _cond = int(g.gcstate)
     if (_cond == 8) {
-        {
-            restartcollection(g)
-            g.gcstate = uint8(GCSpropagate)
-            work = uint64(1)
-        }
+        restartcollection(g)
+        g.gcstate = uint8(GCSpropagate)
+        work = 1ul
     } elif (_cond == 0) {
-        {
-            // no more gray objects?
-            if (g.gray == null) {
-                // finish propagate phase
-                g.gcstate = uint8(GCSenteratomic)
-                work = uint64(0)
-            } else {
-                // traverse one gray object
-                work = propagatemark(g)
-            }
+        // no more gray objects?
+        if (g.gray == null) {
+            // finish propagate phase
+            g.gcstate = uint8(GCSenteratomic)
+            work = 0ul
+        } else {
+            // traverse one gray object
+            work = propagatemark(g)
         }
     } elif (_cond == 1) {
-        {
-            // work is what was traversed by 'atomic'
-            work = atomic(L)
-            entersweep(L)
-            // first estimate
-            g.GCestimate = uint64(g.totalbytes + g.GCdebt)
-        }
+        // work is what was traversed by 'atomic'
+        work = atomic(L)
+        entersweep(L)
+        // first estimate
+        g.GCestimate = uint64(g.totalbytes + g.GCdebt)
     } elif (_cond == 3) {
-        {
-            // sweep "regular" objects
-            work = uint64(sweepstep(L, g, GCSswpfinobj, addr(g.finobj)))
-        }
+        // sweep "regular" objects
+        work = uint64(sweepstep(L, g, GCSswpfinobj, addr(g.finobj)))
     } elif (_cond == 4) {
-        {
-            // sweep objects with finalizers
-            work = uint64(sweepstep(L, g, GCSswptobefnz, addr(g.tobefnz)))
-        }
+        // sweep objects with finalizers
+        work = uint64(sweepstep(L, g, GCSswptobefnz, addr(g.tobefnz)))
     } elif (_cond == 5) {
-        {
-            // sweep objects to be finalized
-            work = uint64(sweepstep(L, g, GCSswpend, null))
-        }
+        // sweep objects to be finalized
+        work = uint64(sweepstep(L, g, GCSswpend, null))
     } elif (_cond == 6) {
-        {
-            // finish sweeps
-            checkSizes(L, g)
-            g.gcstate = uint8(GCScallfin)
-            work = uint64(0)
-        }
+        // finish sweeps
+        checkSizes(L, g)
+        g.gcstate = uint8(GCScallfin)
+        work = 0ul
     } elif (_cond == 7) {
-        {
-            // call remaining finalizers
-            if (g.tobefnz != null && !(g.gcemergency != 0)) {
-                // ok collections during finalizers
-                g.gcstopem = uint8(0)
-                work = uint64(runafewfinalizers(L, GCFINMAX) * GCFINALIZECOST)
-            } else {
-                // emergency mode or no more finalizers
-                // finish collection
-                g.gcstate = uint8(GCSpause)
-                work = uint64(0)
-            }
+        // call remaining finalizers
+        if (g.tobefnz != null && !(g.gcemergency != 0)) {
+            // ok collections during finalizers
+            g.gcstopem = 0u8
+            work = uint64(runafewfinalizers(L, GCFINMAX) * GCFINALIZECOST)
+        } else {
+            // emergency mode or no more finalizers
+            // finish collection
+            g.gcstate = uint8(GCSpause)
+            work = 0ul
         }
     } else {
-        return uint64(0)
+        return 0ul
     }
-    g.gcstopem = uint8(0)
+    g.gcstopem = 0u8
     return work
 }
 
@@ -1942,7 +1867,7 @@ def private singlestep(var L : lua_State?) : uint64 {
 // by 'statemask'
 def luaC_runtilstate(var L : lua_State?; statesmask : int) {
     var g : global_State? = L.l_G
-    while (!((statesmask & 1 << int(g.gcstate)) != 0)) {
+    while (!((statesmask & (1 << int(g.gcstate))) != 0)) {
         singlestep(L)
     }
 }
@@ -1955,8 +1880,8 @@ def luaC_runtilstate(var L : lua_State?; statesmask : int) {
 def private incstep(var L : lua_State?; var g : global_State?) {
     // avoid division by 0
     var stepmul : int = int(g.gcstepmul) * 4 | 1
-    var debt : int64 = int64(uint64(g.GCdebt) / WORK2MEM * uint64(stepmul))
-    var stepsize : int64 = int64(uint64(g.gcstepsize) <= uint64(typeinfo sizeof(type<int64>)) * uint64(8) - uint64(2) ? uint64(int64(1) << int64(int(g.gcstepsize))) / WORK2MEM * uint64(stepmul) : uint64(MAX_LMEM))
+    var debt : int64 = int64((uint64(g.GCdebt) / WORK2MEM) * uint64(stepmul))
+    var stepsize : int64 = int64((uint64(g.gcstepsize) <= uint64(typeinfo sizeof(type<int64>)) * 8ul - 2ul) ? (uint64(1l << int64(int(g.gcstepsize))) / WORK2MEM) * uint64(stepmul) : uint64(MAX_LMEM))
     // overflow; keep maximum value
     // repeat until pause or enough "credit" (negative debt)
     while (true) {
@@ -1984,9 +1909,9 @@ def luaC_step(var L : lua_State?) {
     var g : global_State? = L.l_G
     // not running?
     if (!(int(g.gcstp) == 0)) {
-        luaE_setdebt(g, int64(-2000))
+        luaE_setdebt(g, -2000l)
     } else {
-        if (int(g.gckind) == 1 || g.lastatomic != uint64(0)) {
+        if (int(g.gckind) == KGC_GEN || g.lastatomic != 0ul) {
             genstep(L, g)
         } else {
             incstep(L, g)
@@ -2001,21 +1926,21 @@ def luaC_step(var L : lua_State?) {
 // changed, nothing will be collected).
 def private fullinc(var L : lua_State?; var g : global_State?) {
     // black objects?
-    if (int(g.gcstate) <= 2) {
+    if (int(g.gcstate) <= GCSatomic) {
         // sweep everything to turn them back to white
         entersweep(L)
     }
     // finish any pending sweep phase to start a new cycle
-    luaC_runtilstate(L, 1 << 8)
+    luaC_runtilstate(L, 1 << GCSpause)
     // start new cycle
-    luaC_runtilstate(L, 1 << 0)
+    luaC_runtilstate(L, 1 << GCSpropagate)
     // go straight to atomic phase
     g.gcstate = uint8(GCSenteratomic)
     // run up to finalizers
-    luaC_runtilstate(L, 1 << 7)
+    luaC_runtilstate(L, 1 << GCScallfin)
     // estimate must be correct after a full GC cycle
     // finish collection
-    luaC_runtilstate(L, 1 << 8)
+    luaC_runtilstate(L, 1 << GCSpause)
     setpause(g)
 }
 
@@ -2031,7 +1956,7 @@ def luaC_fullgc(var L : lua_State?; isemergency : int) {
     } else {
         fullgen(L, g)
     }
-    g.gcemergency = uint8(0)
+    g.gcemergency = 0u8
 }
 
 [init]

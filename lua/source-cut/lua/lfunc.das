@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/cstr
 require c_runtime/variadic
 require lgc
 require lmem
@@ -12,11 +13,21 @@ require ltm
 require ltm_h
 require lua_link
 
-let private LUA_VCCL = 6 | 2 << 4
-let private LUA_VLCL = 6 | 0 << 4
-let private LUA_VUPVAL = 9 | 0 << 4
+let private LUA_TFUNCTION = 6
+let private LUA_VCCL = LUA_TFUNCTION | (2 << 4)
+let private LUA_VLCL = LUA_TFUNCTION | (0 << 4)
+let private LUA_NUMTYPES = 9
+let private LUA_VUPVAL = LUA_NUMTYPES | (0 << 4)
+let private LUA_TNIL = 0
+let private BLACKBIT = 5
+let private WHITE0BIT = 3
+let private WHITE1BIT = 4
 let private CLOSEKTOP = -1
-let private LUA_VPROTO = 9 + 1 | 0 << 4
+let private LUA_TBOOLEAN = 1
+let private MAXDELTA = (256ul << (uint64(typeinfo sizeof(type<uint16>)) - 1ul) * 8ul) - 1ul
+let private BIT_ISCOLLECTABLE = 1 << 6
+let private LUA_TPROTO = LUA_NUMTYPES + 1
+let private LUA_VPROTO = LUA_TPROTO | (0 << 4)
 
 [c_function]
 def luaF_newCclosure(var L : lua_State?; nupvals : int) : CClosure? {
@@ -38,7 +49,7 @@ def luaF_newLclosure(var L : lua_State?; var nupvals : int) : LClosure? {
         if (!(_t0 != 0)) {
             break
         }
-        deref(addr(c.upvals[0]) + nupvals) = null
+        addr(c.upvals[0])[nupvals] = null
     }
     return c
 }
@@ -47,20 +58,18 @@ def luaF_newLclosure(var L : lua_State?; var nupvals : int) : LClosure? {
 [c_function]
 def luaF_initupvals(var L : lua_State?; var cl : LClosure?) {
     var i : int
-    {
-        i = 0
-        while (i < int(cl.nupvalues)) {
-            var o : GCObject? = lgc::luaC_newobj(L, LUA_VUPVAL, uint64(typeinfo sizeof(type<UpVal>)))
-            var uv : UpVal? = addr(reinterpret<GCUnion?>(o).upv)
-            // make it closed
-            uv.v.p = addr(uv.u.value)
-            uv.v.p.tt_ = uint8(0 | 0 << 4)
-            deref(addr(cl.upvals[0]) + i) = uv
-            if ((int(cl.marked) & 1 << 5) != 0 && (int(uv.marked) & (1 << 3 | 1 << 4)) != 0) {
-                luaC_barrier_(L, addr(reinterpret<GCUnion?>(cl).gc), addr(reinterpret<GCUnion?>(uv).gc))
-            }
-            i++
+    i = 0
+    while (i < int(cl.nupvalues)) {
+        var o : GCObject? = lgc::luaC_newobj(L, LUA_VUPVAL, uint64(typeinfo sizeof(type<UpVal>)))
+        var uv : UpVal? = addr(reinterpret<GCUnion?>(o).upv)
+        // make it closed
+        uv.v.p = addr(uv.u.value)
+        uv.v.p.tt_ = uint8(LUA_TNIL | (0 << 4))
+        addr(cl.upvals[0])[i] = uv
+        if ((int(cl.marked) & (1 << BLACKBIT)) != 0 && (int(uv.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            luaC_barrier_(L, addr(reinterpret<GCUnion?>(cl).gc), addr(reinterpret<GCUnion?>(uv).gc))
         }
+        i++
     }
 }
 
@@ -155,14 +164,14 @@ def private callclosemethod(var L : lua_State?; var obj : TValue?; var err : TVa
 def private checkclosemth(var L : lua_State?; var level : StackValue?) {
     var tm : TValue? = luaT_gettmbyobj(L, addr(level.val), TMS.TM_CLOSE)
     // no metamethod?
-    if ((int(tm.tt_) & 15) == 0) {
+    if ((int(tm.tt_) & 15) == LUA_TNIL) {
         // variable index
         var idx : int = int(int64(level - L.ci.func.p))
         var vname : uint8? = luaG_findlocal(L, L.ci, idx, null)
         if (vname == null) {
-            vname = reinterpret<uint8?>("?")
+            vname = cstr("?")
         }
-        luaG_runerror`va(L, reinterpret<uint8?>("variable '%s' got a non-closable value"), (vname,))
+        luaG_runerror`va(L, cstr("variable '%s' got a non-closable value"), (vname,))
     }
 }
 
@@ -192,15 +201,15 @@ def private prepcallclosemth(var L : lua_State?; var level : StackValue?; status
 // Insert a variable in the list of to-be-closed variables.
 [c_function]
 def luaF_newtbcupval(var L : lua_State?; var level : StackValue?) {
-    if (int(addr(level.val).tt_) == (1 | 0 << 4) || (int(addr(level.val).tt_) & 15) == 0) {
+    if (int(addr(level.val).tt_) == (LUA_TBOOLEAN | (0 << 4)) || (int(addr(level.val).tt_) & 15) == LUA_TNIL) {
         // false doesn't need to be closed
         return
     }
     // value must have a close method
     checkclosemth(L, level)
-    while (uint64(uint(int64(level - L.tbclist.p))) > (256ul << (uint64(typeinfo sizeof(type<uint16>)) - uint64(1)) * uint64(8)) - uint64(1)) {
+    while (uint64(uint(int64(level - L.tbclist.p))) > MAXDELTA) {
         // create a dummy node at maximum delta
-        L.tbclist.p = L.tbclist.p + ((256ul << (uint64(typeinfo sizeof(type<uint16>)) - uint64(1)) * uint64(8)) - uint64(1))
+        L.tbclist.p = L.tbclist.p + MAXDELTA
         L.tbclist.p.tbclist.delta = uint16(0)
     }
     level.tbclist.delta = uint16(int64(level - L.tbclist.p))
@@ -245,11 +254,11 @@ def luaF_closeupval(var L : lua_State?; var level : StackValue?) {
         // now current value lives here
         uv.v.p = slot
         // neither white nor dead?
-        if (!((int(uv.marked) & (1 << 3 | 1 << 4)) != 0)) {
+        if (!((int(uv.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0)) {
             // closed upvalues cannot be gray
-            uv.marked = uint8(int(uv.marked) | 1 << 5)
-            if ((int(slot.tt_) & 1 << 6) != 0) {
-                if ((int(uv.marked) & 1 << 5) != 0 && (int(slot.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+            uv.marked = uint8(int(uv.marked) | (1 << BLACKBIT))
+            if ((int(slot.tt_) & BIT_ISCOLLECTABLE) != 0) {
+                if ((int(uv.marked) & (1 << BLACKBIT)) != 0 && (int(slot.value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
                     luaC_barrier_(L, addr(reinterpret<GCUnion?>(uv).gc), addr(reinterpret<GCUnion?>(slot.value_.gc).gc))
                 }
             }
@@ -265,7 +274,7 @@ def private poptbclist(var L : lua_State?) {
     tbc = tbc - int(tbc.tbclist.delta)
     while (intptr(tbc) > intptr(L.stack.p) && int(tbc.tbclist.delta) == 0) {
         // remove dummy nodes
-        tbc = tbc - ((256ul << (uint64(typeinfo sizeof(type<uint16>)) - uint64(1)) * uint64(8)) - uint64(1))
+        tbc = tbc - MAXDELTA
     }
     L.tbclist.p = tbc
 }
@@ -306,9 +315,9 @@ def luaF_newproto(var L : lua_State?) : Proto? {
     f.sizeabslineinfo = 0
     f.upvalues = null
     f.sizeupvalues = 0
-    f.numparams = uint8(0)
-    f.is_vararg = uint8(0)
-    f.maxstacksize = uint8(0)
+    f.numparams = 0u8
+    f.is_vararg = 0u8
+    f.maxstacksize = 0u8
     f.locvars = null
     f.sizelocvars = 0
     f.linedefined = 0
@@ -334,18 +343,16 @@ def luaF_freeproto(var L : lua_State?; var f : Proto?) {
 [c_function]
 def luaF_getlocalname(var f : Proto?; var local_number : int; pc : int) : uint8? {
     var i : int
-    {
-        i = 0
-        while (i < f.sizelocvars && deref(f.locvars + i).startpc <= pc) {
-            // is variable active?
-            if (pc < deref(f.locvars + i).endpc) {
-                local_number--
-                if (local_number == 0) {
-                    return addr(deref(f.locvars + i).varname.contents[0])
-                }
+    i = 0
+    while (i < f.sizelocvars && f.locvars[i].startpc <= pc) {
+        // is variable active?
+        if (pc < f.locvars[i].endpc) {
+            local_number--
+            if (local_number == 0) {
+                return addr(f.locvars[i].varname.contents[0])
             }
-            i++
         }
+        i++
     }
     // not found
     return null

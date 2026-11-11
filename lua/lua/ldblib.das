@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/cstr
 require c_runtime/printf
 require c_runtime/variadic
 require c_types
@@ -19,26 +20,35 @@ def private c2das_dialect {
     c_long_bits = 64
 }
 
-var private HOOKKEY : uint8? = unsafe(reinterpret<uint8?>("_HOOKKEY"))
-var private hookf_hooknames : uint8? [5] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("call")), unsafe(reinterpret<uint8?>("return")), unsafe(reinterpret<uint8?>("line")), unsafe(reinterpret<uint8?>("count")), unsafe(reinterpret<uint8?>("tail call")))
-var private dblib : luaL_Reg[18] = fixed_array(luaL_Reg(name = unsafe(reinterpret<uint8?>("debug")), func = @@db_debug), luaL_Reg(name = unsafe(reinterpret<uint8?>("getuservalue")), func = @@db_getuservalue), luaL_Reg(name = unsafe(reinterpret<uint8?>("gethook")), func = @@db_gethook), luaL_Reg(name = unsafe(reinterpret<uint8?>("getinfo")), func = @@db_getinfo), luaL_Reg(name = unsafe(reinterpret<uint8?>("getlocal")), func = @@db_getlocal), luaL_Reg(name = unsafe(reinterpret<uint8?>("getregistry")), func = @@db_getregistry), luaL_Reg(name = unsafe(reinterpret<uint8?>("getmetatable")), func = @@db_getmetatable), luaL_Reg(name = unsafe(reinterpret<uint8?>("getupvalue")), func = @@db_getupvalue), luaL_Reg(name = unsafe(reinterpret<uint8?>("upvaluejoin")), func = @@db_upvaluejoin), luaL_Reg(name = unsafe(reinterpret<uint8?>("upvalueid")), func = @@db_upvalueid), luaL_Reg(name = unsafe(reinterpret<uint8?>("setuservalue")), func = @@db_setuservalue), luaL_Reg(name = unsafe(reinterpret<uint8?>("sethook")), func = @@db_sethook), luaL_Reg(name = unsafe(reinterpret<uint8?>("setlocal")), func = @@db_setlocal), luaL_Reg(name = unsafe(reinterpret<uint8?>("setmetatable")), func = @@db_setmetatable), luaL_Reg(name = unsafe(reinterpret<uint8?>("setupvalue")), func = @@db_setupvalue), luaL_Reg(name = unsafe(reinterpret<uint8?>("traceback")), func = @@db_traceback), luaL_Reg(name = unsafe(reinterpret<uint8?>("setcstacklimit")), func = @@db_setcstacklimit), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private HOOKKEY : uint8? = cstr("_HOOKKEY")
+var private hookf_hooknames : uint8? [5] = fixed_array<uint8?>(cstr("call"), cstr("return"), cstr("line"), cstr("count"), cstr("tail call"))
+var private dblib : luaL_Reg[18] = fixed_array(luaL_Reg(name = cstr("debug"), func = @@db_debug), luaL_Reg(name = cstr("getuservalue"), func = @@db_getuservalue), luaL_Reg(name = cstr("gethook"), func = @@db_gethook), luaL_Reg(name = cstr("getinfo"), func = @@db_getinfo), luaL_Reg(name = cstr("getlocal"), func = @@db_getlocal), luaL_Reg(name = cstr("getregistry"), func = @@db_getregistry), luaL_Reg(name = cstr("getmetatable"), func = @@db_getmetatable), luaL_Reg(name = cstr("getupvalue"), func = @@db_getupvalue), luaL_Reg(name = cstr("upvaluejoin"), func = @@db_upvaluejoin), luaL_Reg(name = cstr("upvalueid"), func = @@db_upvalueid), luaL_Reg(name = cstr("setuservalue"), func = @@db_setuservalue), luaL_Reg(name = cstr("sethook"), func = @@db_sethook), luaL_Reg(name = cstr("setlocal"), func = @@db_setlocal), luaL_Reg(name = cstr("setmetatable"), func = @@db_setmetatable), luaL_Reg(name = cstr("setupvalue"), func = @@db_setupvalue), luaL_Reg(name = cstr("traceback"), func = @@db_traceback), luaL_Reg(name = cstr("setcstacklimit"), func = @@db_setcstacklimit), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
-let private LUA_REGISTRYINDEX = -1000000 - 1000
+let private LUAI_MAXSTACK = 1000000
+let private LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000
+let private LUA_TNIL = 0
+let private LUA_TTABLE = 5
 let private LUA_TUSERDATA = 7
 let private LUA_TNONE = -1
+let private LUA_TTHREAD = 8
 let private LUA_TFUNCTION = 6
-let private LUA_MASKCALL = 1 << 0
-let private LUA_MASKRET = 1 << 1
-let private LUA_MASKLINE = 1 << 2
-let private LUA_MASKCOUNT = 1 << 3
+let private LUA_HOOKCALL = 0
+let private LUA_MASKCALL = 1 << LUA_HOOKCALL
+let private LUA_HOOKRET = 1
+let private LUA_MASKRET = 1 << LUA_HOOKRET
+let private LUA_HOOKLINE = 2
+let private LUA_MASKLINE = 1 << LUA_HOOKLINE
+let private LUA_HOOKCOUNT = 3
+let private LUA_MASKCOUNT = 1 << LUA_HOOKCOUNT
+let private LUA_VERSION_NUM = 504
+let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64(typeinfo sizeof(type<double>))
 
 // If L1 != L, L1 can be in any state, and therefore there are no
 // guarantees about its stack space; any push in L1 must be
 // checked.
-[c_function]
 def private checkstack(var L : lua_State?; var L1 : lua_State?; n : int) {
     if (intptr(L) != intptr(L1) && !(lua_checkstack(L1, n) != 0)) {
-        luaL_error`va(L, reinterpret<uint8?>("stack overflow"), VaNone())
+        luaL_error`va(L, cstr("stack overflow"), VaNone())
     }
 }
 
@@ -56,10 +66,9 @@ def private db_getmetatable(var L : lua_State?) : int {
     return 1
 }
 
-[c_function]
 def private db_setmetatable(var L : lua_State?) : int {
     var t : int = lua_type(L, 2)
-    let _t0 = t == 0 || t == 5 || luaL_typeerror(L, 2, reinterpret<uint8?>("nil or table")) != 0
+    let _t0 = t == LUA_TNIL || t == LUA_TTABLE || luaL_typeerror(L, 2, cstr("nil or table")) != 0
     lua_settop(L, 2)
     lua_setmetatable(L, 1)
     // return 1st argument
@@ -67,7 +76,7 @@ def private db_setmetatable(var L : lua_State?) : int {
 }
 
 def private db_getuservalue(var L : lua_State?) : int {
-    var n : int = int(luaL_optinteger(L, 2, int64(1)))
+    var n : int = int(luaL_optinteger(L, 2, 1l))
     if (lua_type(L, 1) != LUA_TUSERDATA) {
         lua_pushnil(L)
     } elif (lua_getiuservalue(L, 1, n) != LUA_TNONE) {
@@ -78,7 +87,7 @@ def private db_getuservalue(var L : lua_State?) : int {
 }
 
 def private db_setuservalue(var L : lua_State?) : int {
-    var n : int = int(luaL_optinteger(L, 3, int64(1)))
+    var n : int = int(luaL_optinteger(L, 3, 1l))
     luaL_checktype(L, 1, LUA_TUSERDATA)
     luaL_checkany(L, 2)
     lua_settop(L, 2)
@@ -94,7 +103,7 @@ def private db_setuservalue(var L : lua_State?) : int {
 // access their other arguments)
 [c_function]
 def private getthread(var L : lua_State?; var arg : int?) : lua_State? {
-    if (lua_type(L, 1) == 8) {
+    if (lua_type(L, 1) == LUA_TTHREAD) {
         deref(arg) = 1
         return lua_tothread(L, 1)
     } else {
@@ -148,13 +157,13 @@ def private db_getinfo(var L : lua_State?) : int {
     var ar : lua_Debug
     var arg : int
     var L1 : lua_State? = getthread(L, addr(arg))
-    var _c_options : uint8? = luaL_optlstring(L, arg + 2, reinterpret<uint8?>("flnSrtu"), null)
+    var _c_options : uint8? = luaL_optlstring(L, arg + 2, cstr("flnSrtu"), null)
     checkstack(L, L1, 3)
-    let _t0 = int(deref(_c_options + 0)) != '>' || luaL_argerror(L, arg + 2, reinterpret<uint8?>("invalid option '>'")) != 0
+    let _t0 = int(_c_options[0]) != '>' || luaL_argerror(L, arg + 2, cstr("invalid option '>'")) != 0
     // info about a function?
-    if (lua_type(L, arg + 1) == 6) {
+    if (lua_type(L, arg + 1) == LUA_TFUNCTION) {
         // add '>' to 'options'
-        _c_options = lua_pushfstring`va(L, reinterpret<uint8?>(">%s"), (_c_options,))
+        _c_options = lua_pushfstring`va(L, cstr(">%s"), (_c_options,))
         // move function to 'L1' stack
         lua_pushvalue(L, arg + 1)
         lua_xmove(L, L1, 1)
@@ -167,42 +176,42 @@ def private db_getinfo(var L : lua_State?) : int {
         }
     }
     if (!(lua_getinfo(L1, _c_options, addr(ar)) != 0)) {
-        return luaL_argerror(L, arg + 2, reinterpret<uint8?>("invalid option"))
+        return luaL_argerror(L, arg + 2, cstr("invalid option"))
     }
     // table to collect results
     lua_createtable(L, 0, 0)
     if (crt::strchr(_c_options, 'S') != null) {
         lua_pushlstring(L, ar.source, ar.srclen)
-        lua_setfield(L, -2, reinterpret<uint8?>("source"))
-        settabss(L, reinterpret<uint8?>("short_src"), addr(ar.short_src[0]))
-        settabsi(L, reinterpret<uint8?>("linedefined"), ar.linedefined)
-        settabsi(L, reinterpret<uint8?>("lastlinedefined"), ar.lastlinedefined)
-        settabss(L, reinterpret<uint8?>("what"), ar.what)
+        lua_setfield(L, -2, cstr("source"))
+        settabss(L, cstr("short_src"), addr(ar.short_src[0]))
+        settabsi(L, cstr("linedefined"), ar.linedefined)
+        settabsi(L, cstr("lastlinedefined"), ar.lastlinedefined)
+        settabss(L, cstr("what"), ar.what)
     }
     if (crt::strchr(_c_options, 'l') != null) {
-        settabsi(L, reinterpret<uint8?>("currentline"), ar.currentline)
+        settabsi(L, cstr("currentline"), ar.currentline)
     }
     if (crt::strchr(_c_options, 'u') != null) {
-        settabsi(L, reinterpret<uint8?>("nups"), int(ar.nups))
-        settabsi(L, reinterpret<uint8?>("nparams"), int(ar.nparams))
-        settabsb(L, reinterpret<uint8?>("isvararg"), int(ar.isvararg))
+        settabsi(L, cstr("nups"), int(ar.nups))
+        settabsi(L, cstr("nparams"), int(ar.nparams))
+        settabsb(L, cstr("isvararg"), int(ar.isvararg))
     }
     if (crt::strchr(_c_options, 'n') != null) {
-        settabss(L, reinterpret<uint8?>("name"), ar.name)
-        settabss(L, reinterpret<uint8?>("namewhat"), ar.namewhat)
+        settabss(L, cstr("name"), ar.name)
+        settabss(L, cstr("namewhat"), ar.namewhat)
     }
     if (crt::strchr(_c_options, 'r') != null) {
-        settabsi(L, reinterpret<uint8?>("ftransfer"), int(ar.ftransfer))
-        settabsi(L, reinterpret<uint8?>("ntransfer"), int(ar.ntransfer))
+        settabsi(L, cstr("ftransfer"), int(ar.ftransfer))
+        settabsi(L, cstr("ntransfer"), int(ar.ntransfer))
     }
     if (crt::strchr(_c_options, 't') != null) {
-        settabsb(L, reinterpret<uint8?>("istailcall"), int(ar.istailcall))
+        settabsb(L, cstr("istailcall"), int(ar.istailcall))
     }
     if (crt::strchr(_c_options, 'L') != null) {
-        treatstackoption(L, L1, reinterpret<uint8?>("activelines"))
+        treatstackoption(L, L1, cstr("activelines"))
     }
     if (crt::strchr(_c_options, 'f') != null) {
-        treatstackoption(L, L1, reinterpret<uint8?>("func"))
+        treatstackoption(L, L1, cstr("func"))
     }
     // return table
     return 1
@@ -215,7 +224,7 @@ def private db_getlocal(var L : lua_State?) : int {
     // local-variable index
     var nvar : int = int(luaL_checkinteger(L, arg + 2))
     // function argument?
-    if (lua_type(L, arg + 1) == 6) {
+    if (lua_type(L, arg + 1) == LUA_TFUNCTION) {
         // push function
         lua_pushvalue(L, arg + 1)
         // push local name
@@ -229,7 +238,7 @@ def private db_getlocal(var L : lua_State?) : int {
         var level : int = int(luaL_checkinteger(L, arg + 1))
         // out of range?
         if (!(lua_getstack(L1, level, addr(ar)) != 0)) {
-            return luaL_argerror(L, arg + 1, reinterpret<uint8?>("level out of range"))
+            return luaL_argerror(L, arg + 1, cstr("level out of range"))
         }
         checkstack(L, L1, 1)
         name = lua_getlocal(L1, addr(ar), nvar)
@@ -259,7 +268,7 @@ def private db_setlocal(var L : lua_State?) : int {
     var nvar : int = int(luaL_checkinteger(L, arg + 2))
     // out of range?
     if (!(lua_getstack(L1, level, addr(ar)) != 0)) {
-        return luaL_argerror(L, arg + 1, reinterpret<uint8?>("level out of range"))
+        return luaL_argerror(L, arg + 1, cstr("level out of range"))
     }
     luaL_checkany(L, arg + 3)
     lua_settop(L, arg + 3)
@@ -312,7 +321,7 @@ def private checkupval(var L : lua_State?; argf : int; argnup : int; var pnup : 
     luaL_checktype(L, argf, LUA_TFUNCTION)
     id = lua_upvalueid(L, argf, nup)
     if (pnup != null) {
-        let _t0 = id != null || luaL_argerror(L, argnup, reinterpret<uint8?>("invalid upvalue index")) != 0
+        let _t0 = id != null || luaL_argerror(L, argnup, cstr("invalid upvalue index")) != 0
         deref(pnup) = nup
     }
     return id
@@ -334,8 +343,8 @@ def private db_upvaluejoin(var L : lua_State?) : int {
     var n2 : int
     checkupval(L, 1, 2, addr(n1))
     checkupval(L, 3, 4, addr(n2))
-    let _t0 = !(lua_iscfunction(L, 1) != 0) || luaL_argerror(L, 1, reinterpret<uint8?>("Lua function expected")) != 0
-    let _t1 = !(lua_iscfunction(L, 3) != 0) || luaL_argerror(L, 3, reinterpret<uint8?>("Lua function expected")) != 0
+    let _t0 = !(lua_iscfunction(L, 1) != 0) || luaL_argerror(L, 1, cstr("Lua function expected")) != 0
+    let _t1 = !(lua_iscfunction(L, 3) != 0) || luaL_argerror(L, 3, cstr("Lua function expected")) != 0
     lua_upvaluejoin(L, 1, n1, 3, n2)
     return 0
 }
@@ -356,7 +365,7 @@ def private hookf(var L : lua_State?; var ar : lua_Debug?) {
             lua_pushnil(L)
         }
         // call hook function
-        lua_callk(L, 2, 0, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+        lua_callk(L, 2, 0, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
     }
 }
 
@@ -386,19 +395,19 @@ def private unmakemask(mask : int; var smask : uint8?) : uint8? {
     if ((mask & LUA_MASKCALL) != 0) {
         let _t0 = i
         i++
-        deref(smask + _t0) = uint8('c')
+        smask[_t0] = uint8('c')
     }
     if ((mask & LUA_MASKRET) != 0) {
         let _t1 = i
         i++
-        deref(smask + _t1) = uint8('r')
+        smask[_t1] = uint8('r')
     }
     if ((mask & LUA_MASKLINE) != 0) {
         let _t2 = i
         i++
-        deref(smask + _t2) = uint8('l')
+        smask[_t2] = uint8('l')
     }
-    deref(smask + i) = uint8('\0')
+    smask[i] = uint8('\0')
     return smask
 }
 
@@ -419,15 +428,15 @@ def private db_sethook(var L : lua_State?) : int {
     } else {
         var smask : uint8? = luaL_checklstring(L, arg + 2, null)
         luaL_checktype(L, arg + 1, LUA_TFUNCTION)
-        count = int(luaL_optinteger(L, arg + 3, int64(0)))
+        count = int(luaL_optinteger(L, arg + 3, 0l))
         func = @@hookf
         mask = makemask(smask, count)
     }
     if (!(luaL_getsubtable(L, LUA_REGISTRYINDEX, HOOKKEY) != 0)) {
         // table just created; initialize it
-        lua_pushstring(L, reinterpret<uint8?>("k"))
+        lua_pushstring(L, cstr("k"))
         // hooktable.__mode = "k"
-        lua_setfield(L, -2, reinterpret<uint8?>("__mode"))
+        lua_setfield(L, -2, cstr("__mode"))
         lua_pushvalue(L, -1)
         // metatable(hooktable) = hooktable
         lua_setmetatable(L, -2)
@@ -457,7 +466,7 @@ def private db_gethook(var L : lua_State?) : int {
         return 1
     } elif (hook != @@hookf) {
         // external hook?
-        lua_pushstring(L, reinterpret<uint8?>("external hook"))
+        lua_pushstring(L, cstr("external hook"))
     } else {
         // hook table must exist
         lua_getfield(L, LUA_REGISTRYINDEX, HOOKKEY)
@@ -479,21 +488,19 @@ def private db_gethook(var L : lua_State?) : int {
 
 [c_function]
 def private db_debug(var L : lua_State?) : int {
-    {
-        while (true) {
-            var buffer : uint8[250]
-            fprintf(crt::c_stderr(), reinterpret<uint8?>("%s"), reinterpret<uint8?>("lua_debug> "))
-            crt::fflush(crt::c_stderr())
-            if (crt::fgets(addr(buffer[0]), int(uint64(typeinfo sizeof(type<uint8[250]>))), crt::c_stdin()) == null || crt::strcmp(addr(buffer[0]), reinterpret<uint8?>("cont\n")) == 0) {
-                return 0
-            }
-            if (luaL_loadbufferx(L, addr(buffer[0]), crt::strlen(addr(buffer[0])), reinterpret<uint8?>("=(debug command)"), null) != 0 || lua_pcallk(L, 0, 0, 0, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>) != 0) {
-                fprintf(crt::c_stderr(), reinterpret<uint8?>("%s\n"), luaL_tolstring(L, -1, null))
-                crt::fflush(crt::c_stderr())
-            }
-            // remove eventual returns
-            lua_settop(L, 0)
+    while (true) {
+        var buffer : uint8[250]
+        fprintf(crt::c_stderr(), cstr("%s"), cstr("lua_debug> "))
+        crt::fflush(crt::c_stderr())
+        if (crt::fgets(addr(buffer[0]), int(uint64(typeinfo sizeof(type<uint8[250]>))), crt::c_stdin()) == null || crt::strcmp(addr(buffer[0]), cstr("cont\n")) == 0) {
+            return 0
         }
+        if (luaL_loadbufferx(L, addr(buffer[0]), crt::strlen(addr(buffer[0])), cstr("=(debug command)"), null) != 0 || lua_pcallk(L, 0, 0, 0, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>) != 0) {
+            fprintf(crt::c_stderr(), cstr("%s\n"), luaL_tolstring(L, -1, null))
+            crt::fflush(crt::c_stderr())
+        }
+        // remove eventual returns
+        lua_settop(L, 0)
     }
     return 0
 }
@@ -508,7 +515,7 @@ def private db_traceback(var L : lua_State?) : int {
         // return it untouched
         lua_pushvalue(L, arg + 1)
     } else {
-        var level : int = int(luaL_optinteger(L, arg + 2, int64(intptr(L) == intptr(L1) ? 1 : 0)))
+        var level : int = int(luaL_optinteger(L, arg + 2, int64((intptr(L) == intptr(L1)) ? 1 : 0)))
         luaL_traceback(L, L1, msg, level)
     }
     return 1
@@ -523,8 +530,8 @@ def private db_setcstacklimit(var L : lua_State?) : int {
 
 [c_function]
 def luaopen_debug(var L : lua_State?) : int {
-    luaL_checkversion_(L, double(504), uint64(typeinfo sizeof(type<int64>)) * uint64(16) + uint64(typeinfo sizeof(type<double>)))
-    lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[18]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - uint64(1)))
+    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+    lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[18]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - 1ul))
     luaL_setfuncs(L, addr(dblib[0]), 0)
     return 1
 }

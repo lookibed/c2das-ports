@@ -9,6 +9,7 @@ require c_runtime/c_args
 require c_runtime/c_exit
 require c_runtime/c_function
 require c_runtime/c_jit_build
+require c_runtime/cstr
 require c_runtime/cstr_array
 require c_runtime/enum_from_int
 require c_runtime/printf
@@ -34,37 +35,55 @@ def private c2das_dialect {
     c_long_bits = 64
 }
 
-var private opnames : uint8? [84] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("MOVE")), unsafe(reinterpret<uint8?>("LOADI")), unsafe(reinterpret<uint8?>("LOADF")), unsafe(reinterpret<uint8?>("LOADK")), unsafe(reinterpret<uint8?>("LOADKX")), unsafe(reinterpret<uint8?>("LOADFALSE")), unsafe(reinterpret<uint8?>("LFALSESKIP")), unsafe(reinterpret<uint8?>("LOADTRUE")), unsafe(reinterpret<uint8?>("LOADNIL")), unsafe(reinterpret<uint8?>("GETUPVAL")), unsafe(reinterpret<uint8?>("SETUPVAL")), unsafe(reinterpret<uint8?>("GETTABUP")), unsafe(reinterpret<uint8?>("GETTABLE")), unsafe(reinterpret<uint8?>("GETI")), unsafe(reinterpret<uint8?>("GETFIELD")), unsafe(reinterpret<uint8?>("SETTABUP")), unsafe(reinterpret<uint8?>("SETTABLE")), unsafe(reinterpret<uint8?>("SETI")), unsafe(reinterpret<uint8?>("SETFIELD")), unsafe(reinterpret<uint8?>("NEWTABLE")), unsafe(reinterpret<uint8?>("SELF")), unsafe(reinterpret<uint8?>("ADDI")), unsafe(reinterpret<uint8?>("ADDK")), unsafe(reinterpret<uint8?>("SUBK")), unsafe(reinterpret<uint8?>("MULK")), unsafe(reinterpret<uint8?>("MODK")), unsafe(reinterpret<uint8?>("POWK")), unsafe(reinterpret<uint8?>("DIVK")), unsafe(reinterpret<uint8?>("IDIVK")), unsafe(reinterpret<uint8?>("BANDK")), unsafe(reinterpret<uint8?>("BORK")), unsafe(reinterpret<uint8?>("BXORK")), unsafe(reinterpret<uint8?>("SHRI")), unsafe(reinterpret<uint8?>("SHLI")), unsafe(reinterpret<uint8?>("ADD")), unsafe(reinterpret<uint8?>("SUB")), unsafe(reinterpret<uint8?>("MUL")), unsafe(reinterpret<uint8?>("MOD")), unsafe(reinterpret<uint8?>("POW")), unsafe(reinterpret<uint8?>("DIV")), unsafe(reinterpret<uint8?>("IDIV")), unsafe(reinterpret<uint8?>("BAND")), unsafe(reinterpret<uint8?>("BOR")), unsafe(reinterpret<uint8?>("BXOR")), unsafe(reinterpret<uint8?>("SHL")), unsafe(reinterpret<uint8?>("SHR")), unsafe(reinterpret<uint8?>("MMBIN")), unsafe(reinterpret<uint8?>("MMBINI")), unsafe(reinterpret<uint8?>("MMBINK")), unsafe(reinterpret<uint8?>("UNM")), unsafe(reinterpret<uint8?>("BNOT")), unsafe(reinterpret<uint8?>("NOT")), unsafe(reinterpret<uint8?>("LEN")), unsafe(reinterpret<uint8?>("CONCAT")), unsafe(reinterpret<uint8?>("CLOSE")), unsafe(reinterpret<uint8?>("TBC")), unsafe(reinterpret<uint8?>("JMP")), unsafe(reinterpret<uint8?>("EQ")), unsafe(reinterpret<uint8?>("LT")), unsafe(reinterpret<uint8?>("LE")), unsafe(reinterpret<uint8?>("EQK")), unsafe(reinterpret<uint8?>("EQI")), unsafe(reinterpret<uint8?>("LTI")), unsafe(reinterpret<uint8?>("LEI")), unsafe(reinterpret<uint8?>("GTI")), unsafe(reinterpret<uint8?>("GEI")), unsafe(reinterpret<uint8?>("TEST")), unsafe(reinterpret<uint8?>("TESTSET")), unsafe(reinterpret<uint8?>("CALL")), unsafe(reinterpret<uint8?>("TAILCALL")), unsafe(reinterpret<uint8?>("RETURN")), unsafe(reinterpret<uint8?>("RETURN0")), unsafe(reinterpret<uint8?>("RETURN1")), unsafe(reinterpret<uint8?>("FORLOOP")), unsafe(reinterpret<uint8?>("FORPREP")), unsafe(reinterpret<uint8?>("TFORPREP")), unsafe(reinterpret<uint8?>("TFORCALL")), unsafe(reinterpret<uint8?>("TFORLOOP")), unsafe(reinterpret<uint8?>("SETLIST")), unsafe(reinterpret<uint8?>("CLOSURE")), unsafe(reinterpret<uint8?>("VARARG")), unsafe(reinterpret<uint8?>("VARARGPREP")), unsafe(reinterpret<uint8?>("EXTRAARG")), null)
+var private opnames : uint8? [84] = fixed_array<uint8?>(cstr("MOVE"), cstr("LOADI"), cstr("LOADF"), cstr("LOADK"), cstr("LOADKX"), cstr("LOADFALSE"), cstr("LFALSESKIP"), cstr("LOADTRUE"), cstr("LOADNIL"), cstr("GETUPVAL"), cstr("SETUPVAL"), cstr("GETTABUP"), cstr("GETTABLE"), cstr("GETI"), cstr("GETFIELD"), cstr("SETTABUP"), cstr("SETTABLE"), cstr("SETI"), cstr("SETFIELD"), cstr("NEWTABLE"), cstr("SELF"), cstr("ADDI"), cstr("ADDK"), cstr("SUBK"), cstr("MULK"), cstr("MODK"), cstr("POWK"), cstr("DIVK"), cstr("IDIVK"), cstr("BANDK"), cstr("BORK"), cstr("BXORK"), cstr("SHRI"), cstr("SHLI"), cstr("ADD"), cstr("SUB"), cstr("MUL"), cstr("MOD"), cstr("POW"), cstr("DIV"), cstr("IDIV"), cstr("BAND"), cstr("BOR"), cstr("BXOR"), cstr("SHL"), cstr("SHR"), cstr("MMBIN"), cstr("MMBINI"), cstr("MMBINK"), cstr("UNM"), cstr("BNOT"), cstr("NOT"), cstr("LEN"), cstr("CONCAT"), cstr("CLOSE"), cstr("TBC"), cstr("JMP"), cstr("EQ"), cstr("LT"), cstr("LE"), cstr("EQK"), cstr("EQI"), cstr("LTI"), cstr("LEI"), cstr("GTI"), cstr("GEI"), cstr("TEST"), cstr("TESTSET"), cstr("CALL"), cstr("TAILCALL"), cstr("RETURN"), cstr("RETURN0"), cstr("RETURN1"), cstr("FORLOOP"), cstr("FORPREP"), cstr("TFORPREP"), cstr("TFORCALL"), cstr("TFORLOOP"), cstr("SETLIST"), cstr("CLOSURE"), cstr("VARARG"), cstr("VARARGPREP"), cstr("EXTRAARG"), null)
 var private listing : int = 0
 var private dumping : int = 1
 var private stripping : int = 0
 var private Output : uint8[9] = cstr_array("luac.out", 9)
 var private output : uint8? = unsafe(addr(Output[0]))
-var private progname : uint8? = unsafe(reinterpret<uint8?>("luac"))
+var private progname : uint8? = cstr("luac")
 var private tmname : TString ??
 
 let private LUA_OK = 0
+let private POS_OP = 0
+let private SIZE_OP = 7
+let private POS_A = POS_OP + SIZE_OP
+let private SIZE_A = 8
+let private POS_k = POS_A + SIZE_A
+let private POS_B = POS_k + 1
+let private SIZE_B = 8
+let private POS_C = POS_B + SIZE_B
+let private SIZE_C = 8
+let private SIZE_Bx = SIZE_C + SIZE_B + 1
+let private SIZE_Ax = SIZE_Bx + SIZE_A
+let private MAXARG_C = (1 << SIZE_C) - 1
+let private OFFSET_sC = MAXARG_C >> 1
+let private MAXARG_Bx = (1 << SIZE_Bx) - 1
+let private OFFSET_sBx = MAXARG_Bx >> 1
+let private SIZE_sJ = SIZE_Bx + SIZE_A
+let private MAXARG_sJ = (1 << SIZE_sJ) - 1
+let private OFFSET_sJ = MAXARG_sJ >> 1
 
 [c_function]
 def private fatal(var message : uint8?) {
-    fprintf(crt::c_stderr(), reinterpret<uint8?>("%s: %s\n"), progname, message)
+    fprintf(crt::c_stderr(), cstr("%s: %s\n"), progname, message)
     c_exit(1)
 }
 
 [c_function]
 def private cannot(var what : uint8?) {
-    fprintf(crt::c_stderr(), reinterpret<uint8?>("%s: cannot %s %s: %s\n"), progname, what, output, crt::strerror(deref(crt::c_errno_location())))
+    fprintf(crt::c_stderr(), cstr("%s: cannot %s %s: %s\n"), progname, what, output, crt::strerror(deref(crt::c_errno_location())))
     c_exit(1)
 }
 
 [c_function]
 def private usage(var message : uint8?) {
     if (int(deref(message)) == '-') {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s: unrecognized option '%s'\n"), progname, message)
+        fprintf(crt::c_stderr(), cstr("%s: unrecognized option '%s'\n"), progname, message)
     } else {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s: %s\n"), progname, message)
+        fprintf(crt::c_stderr(), cstr("%s: %s\n"), progname, message)
     }
-    fprintf(crt::c_stderr(), reinterpret<uint8?>("usage: %s [options] [filenames]\nAvailable options are:\n  -l       list (use -l -l for full listing)\n  -o name  output to file 'name' (default is \"%s\")\n  -p       parse only\n  -s       strip debug information\n  -v       show version information\n  --       stop handling options\n  -        stop handling options and process stdin\n"), progname, addr(Output[0]))
+    fprintf(crt::c_stderr(), cstr("usage: %s [options] [filenames]\nAvailable options are:\n  -l       list (use -l -l for full listing)\n  -o name  output to file 'name' (default is \"%s\")\n  -p       parse only\n  -s       strip debug information\n  -v       show version information\n  --       stop handling options\n  -        stop handling options and process stdin\n"), progname, addr(Output[0]))
     c_exit(1)
 }
 
@@ -72,61 +91,59 @@ def private usage(var message : uint8?) {
 def private doargs(argc : int; var argv : uint8 ??) : int {
     var i : int
     var version : int = 0
-    if (deref(argv + 0) != null && int(deref(deref(argv + 0))) != 0) {
-        progname = deref(argv + 0)
+    if (argv[0] != null && int(deref(argv[0])) != 0) {
+        progname = argv[0]
     }
-    {
-        i = 1
-        while (i < argc) {
-            // end of options; keep it
-            if (int(deref(deref(argv + i))) != '-') {
-                break
-            } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("--")) == 0) {
-                // end of options; skip it
-                i++
-                if (version != 0) {
-                    version++
-                }
-                break
-            } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-")) == 0) {
-                // end of options; use stdin
-                break
-            } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-l")) == 0) {
-                // list
-                listing++
-            } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-o")) == 0) {
-                // output file
-                i++
-                output = deref(argv + i)
-                if (output == null || int(deref(output)) == 0 || int(deref(output)) == '-' && int(deref(output + 1)) != 0) {
-                    usage(reinterpret<uint8?>("'-o' needs argument"))
-                }
-                if (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-")) == 0) {
-                    output = null
-                }
-            } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-p")) == 0) {
-                // parse only
-                dumping = 0
-            } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-s")) == 0) {
-                // strip debug information
-                stripping = 1
-            } elif (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-v")) == 0) {
-                // show version
-                version++
-            } else {
-                // unknown option
-                usage(deref(argv + i))
-            }
+    i = 1
+    while (i < argc) {
+        // end of options; keep it
+        if (int(deref(argv[i])) != '-') {
+            break
+        } elif (crt::strcmp(argv[i], cstr("--")) == 0) {
+            // end of options; skip it
             i++
+            if (version != 0) {
+                version++
+            }
+            break
+        } elif (crt::strcmp(argv[i], cstr("-")) == 0) {
+            // end of options; use stdin
+            break
+        } elif (crt::strcmp(argv[i], cstr("-l")) == 0) {
+            // list
+            listing++
+        } elif (crt::strcmp(argv[i], cstr("-o")) == 0) {
+            // output file
+            i++
+            output = argv[i]
+            if (output == null || int(deref(output)) == 0 || (int(deref(output)) == '-' && int(output[1]) != 0)) {
+                usage(cstr("'-o' needs argument"))
+            }
+            if (crt::strcmp(argv[i], cstr("-")) == 0) {
+                output = null
+            }
+        } elif (crt::strcmp(argv[i], cstr("-p")) == 0) {
+            // parse only
+            dumping = 0
+        } elif (crt::strcmp(argv[i], cstr("-s")) == 0) {
+            // strip debug information
+            stripping = 1
+        } elif (crt::strcmp(argv[i], cstr("-v")) == 0) {
+            // show version
+            version++
+        } else {
+            // unknown option
+            usage(argv[i])
         }
+        i++
     }
     if (i == argc && (listing != 0 || !(dumping != 0))) {
         dumping = 0
         i--
-        deref(argv + i) = addr(Output[0])
+        argv[i] = addr(Output[0])
     }
     if (version != 0) {
-        printf(reinterpret<uint8?>("%s\n"), reinterpret<uint8?>("Lua 5.4.8  Copyright (C) 1994-2025 Lua.org, PUC-Rio"))
+        printf(cstr("%s\n"), cstr("Lua 5.4.8  Copyright (C) 1994-2025 Lua.org, PUC-Rio"))
         if (version == argc - 1) {
             c_exit(0)
         }
@@ -139,10 +156,10 @@ def private reader(var L : lua_State?; var ud : void?; var size : uint64?) : uin
     let _t0 = deref(reinterpret<int?>(ud))
     deref(reinterpret<int?>(ud))--
     if (_t0 != 0) {
-        deref(size) = uint64(typeinfo sizeof(type<uint8[20]>)) - uint64(1)
-        return reinterpret<uint8?>("(function()end)();\n")
+        deref(size) = uint64(typeinfo sizeof(type<uint8[20]>)) - 1ul
+        return cstr("(function()end)();\n")
     } else {
-        deref(size) = uint64(0)
+        deref(size) = 0ul
         return null
     }
 }
@@ -154,19 +171,17 @@ def private combine(var L : lua_State?; n : int) : Proto? {
     } else {
         var f : Proto?
         var i : int = n
-        if (lua_load(L, @@reader, reinterpret<void?>(addr(i)), reinterpret<uint8?>("=(luac)"), null) != LUA_OK) {
+        if (lua_load(L, @@reader, reinterpret<void?>(addr(i)), cstr("=(luac)"), null) != LUA_OK) {
             fatal(lua_tolstring(L, -1, null))
         }
         f = addr(reinterpret<GCUnion?>(addr((L.top.p + -1).val).value_.gc).cl.l).p
-        {
-            i = 0
-            while (i < n) {
-                deref(f.p + i) = addr(reinterpret<GCUnion?>(addr((L.top.p + (i - n - 1)).val).value_.gc).cl.l).p
-                if (deref(f.p + i).sizeupvalues > 0) {
-                    deref(deref(f.p + i).upvalues + 0).instack = uint8(0)
-                }
-                i++
+        i = 0
+        while (i < n) {
+            f.p[i] = addr(reinterpret<GCUnion?>(addr((L.top.p + (i - n - 1)).val).value_.gc).cl.l).p
+            if (f.p[i].sizeupvalues > 0) {
+                f.p[i].upvalues[0].instack = 0u8
             }
+            i++
         }
         return f
     }
@@ -174,7 +189,7 @@ def private combine(var L : lua_State?; n : int) : Proto? {
 
 [c_function]
 def private writer(var L : lua_State?; var p : void?; size : uint64; var u : void?) : int {
-    return crt::fwrite(p, size, uint64(1), reinterpret<void?>(reinterpret<_IO_FILE?>(u))) != uint64(1) && size != uint64(0) ? 1 : 0
+    return (crt::fwrite(p, size, 1ul, reinterpret<void?>(reinterpret<_IO_FILE?>(u))) != 1ul) && (size != 0ul) ? 1 : 0
 }
 
 [c_function]
@@ -184,10 +199,10 @@ def private pmain(var L : lua_State?) : int {
     var f : Proto?
     tmname = addr(L.l_G.tmname[0])
     if (!(lua_checkstack(L, argc) != 0)) {
-        fatal(reinterpret<uint8?>("too many input files"))
+        fatal(cstr("too many input files"))
     }
     for (i in range(argc)) {
-        var filename : uint8? = crt::strcmp(deref(argv + i), reinterpret<uint8?>("-")) == 0 ? default<uint8?> : deref(argv + i)
+        var filename : uint8? = crt::strcmp(argv[i], cstr("-")) == 0 ? default<uint8?> : argv[i]
         if (luaL_loadfilex(L, filename, null) != LUA_OK) {
             fatal(lua_tolstring(L, -1, null))
         }
@@ -197,16 +212,16 @@ def private pmain(var L : lua_State?) : int {
         PrintFunction(f, listing > 1 ? 1 : 0)
     }
     if (dumping != 0) {
-        var D : _IO_FILE? = output == null ? reinterpret<_IO_FILE?>(crt::c_stdout()) : reinterpret<_IO_FILE?>(crt::fopen(output, reinterpret<uint8?>("wb")))
+        var D : _IO_FILE? = (output == null) ? reinterpret<_IO_FILE?>(crt::c_stdout()) : reinterpret<_IO_FILE?>(crt::fopen(output, cstr("wb")))
         if (D == null) {
-            cannot(reinterpret<uint8?>("open"))
+            cannot(cstr("open"))
         }
         luaU_dump(L, f, @@writer, reinterpret<void?>(D), stripping)
         if (crt::ferror(reinterpret<void?>(D)) != 0) {
-            cannot(reinterpret<uint8?>("write"))
+            cannot(cstr("write"))
         }
         if (crt::fclose(reinterpret<void?>(D)) != 0) {
-            cannot(reinterpret<uint8?>("close"))
+            cannot(cstr("close"))
         }
     }
     return 0
@@ -219,16 +234,16 @@ def c_main(var argc : int; var argv : uint8 ??) : int {
     argc -= i
     argv = argv + i
     if (argc <= 0) {
-        usage(reinterpret<uint8?>("no input files given"))
+        usage(cstr("no input files given"))
     }
     L = luaL_newstate()
     if (L == null) {
-        fatal(reinterpret<uint8?>("cannot create state: not enough memory"))
+        fatal(cstr("cannot create state: not enough memory"))
     }
     lua_pushcclosure(L, @@pmain, 0)
     lua_pushinteger(L, int64(argc))
     lua_pushlightuserdata(L, reinterpret<void?>(argv))
-    if (lua_pcallk(L, 2, 0, 0, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>) != LUA_OK) {
+    if (lua_pcallk(L, 2, 0, 0, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>) != LUA_OK) {
         fatal(lua_tolstring(L, -1, null))
     }
     lua_close(L)
@@ -239,86 +254,86 @@ def c_main(var argc : int; var argv : uint8 ??) : int {
 def private PrintString(var ts : TString?) {
     var s : uint8? = addr(ts.contents[0])
     var n : uint64 = int(ts.shrlen) != 255 ? uint64(ts.shrlen) : ts.u.lnglen
-    printf(reinterpret<uint8?>("\""))
+    printf(cstr("\""))
     for (i in urange64(n)) {
-        var c : int = int(uint8(deref(s + i)))
+        var c : int = int(uint8(s[i]))
         let _cond = c
         if (_cond == '"') {
-            printf(reinterpret<uint8?>("\\\""))
+            printf(cstr("\\\""))
         } elif (_cond == '\\') {
-            printf(reinterpret<uint8?>("\\\\"))
+            printf(cstr("\\\\"))
         } elif (_cond == '\a') {
-            printf(reinterpret<uint8?>("\\a"))
+            printf(cstr("\\a"))
         } elif (_cond == '\b') {
-            printf(reinterpret<uint8?>("\\b"))
+            printf(cstr("\\b"))
         } elif (_cond == '\f') {
-            printf(reinterpret<uint8?>("\\f"))
+            printf(cstr("\\f"))
         } elif (_cond == '\n') {
-            printf(reinterpret<uint8?>("\\n"))
+            printf(cstr("\\n"))
         } elif (_cond == '\r') {
-            printf(reinterpret<uint8?>("\\r"))
+            printf(cstr("\\r"))
         } elif (_cond == '\t') {
-            printf(reinterpret<uint8?>("\\t"))
+            printf(cstr("\\t"))
         } elif (_cond == '\v') {
-            printf(reinterpret<uint8?>("\\v"))
+            printf(cstr("\\v"))
         } else {
             if (crt::isprint(c) != 0) {
-                printf(reinterpret<uint8?>("%c"), c)
+                printf(cstr("%c"), c)
             } else {
-                printf(reinterpret<uint8?>("\\%03d"), c)
+                printf(cstr("\\%03d"), c)
             }
         }
     }
-    printf(reinterpret<uint8?>("\""))
+    printf(cstr("\""))
 }
 
 [c_function]
 def private PrintType(var f : Proto?; i : int) {
-    var o : TValue? = addr(deref(f.k + i))
+    var o : TValue? = addr(f.k[i])
     let _cond = int(o.tt_) & 63
     if (_cond == 0) {
-        printf(reinterpret<uint8?>("N"))
+        printf(cstr("N"))
     } elif (_cond == 1 || _cond == 17) {
-        printf(reinterpret<uint8?>("B"))
+        printf(cstr("B"))
     } elif (_cond == 19) {
-        printf(reinterpret<uint8?>("F"))
+        printf(cstr("F"))
     } elif (_cond == 3) {
-        printf(reinterpret<uint8?>("I"))
+        printf(cstr("I"))
     } elif (_cond == 4 || _cond == 20) {
-        printf(reinterpret<uint8?>("S"))
+        printf(cstr("S"))
     } else {
         // cannot happen
-        printf(reinterpret<uint8?>("?%d"), int(o.tt_) & 63)
+        printf(cstr("?%d"), int(o.tt_) & 63)
     }
-    printf(reinterpret<uint8?>("\t"))
+    printf(cstr("\t"))
 }
 
 [c_function]
 def private PrintConstant(var f : Proto?; i : int) {
-    var o : TValue? = addr(deref(f.k + i))
+    var o : TValue? = addr(f.k[i])
     let _cond = int(o.tt_) & 63
     if (_cond == 0) {
-        printf(reinterpret<uint8?>("nil"))
+        printf(cstr("nil"))
     } elif (_cond == 1) {
-        printf(reinterpret<uint8?>("false"))
+        printf(cstr("false"))
     } elif (_cond == 17) {
-        printf(reinterpret<uint8?>("true"))
+        printf(cstr("true"))
     } elif (_cond == 19) {
         {
             var buff : uint8[100]
-            sprintf(addr(buff[0]), reinterpret<uint8?>("%.14g"), o.value_.n)
-            printf(reinterpret<uint8?>("%s"), addr(buff[0]))
-            if (int(buff[crt::strspn(addr(buff[0]), reinterpret<uint8?>("-0123456789"))]) == '\0') {
-                printf(reinterpret<uint8?>(".0"))
+            sprintf(addr(buff[0]), cstr("%.14g"), o.value_.n)
+            printf(cstr("%s"), addr(buff[0]))
+            if (int(buff[crt::strspn(addr(buff[0]), cstr("-0123456789"))]) == '\0') {
+                printf(cstr(".0"))
             }
         }
     } elif (_cond == 3) {
-        printf(reinterpret<uint8?>("%lld"), o.value_.i)
+        printf(cstr("%lld"), o.value_.i)
     } elif (_cond == 4 || _cond == 20) {
         PrintString(addr(reinterpret<GCUnion?>(o.value_.gc).ts))
     } else {
         // cannot happen
-        printf(reinterpret<uint8?>("?%d"), int(o.tt_) & 63)
+        printf(cstr("?%d"), int(o.tt_) & 63)
     }
 }
 
@@ -327,334 +342,334 @@ def private PrintCode(var f : Proto?) {
     var code : uint? = f.code
     var n : int = f.sizecode
     for (pc in range(n)) {
-        var i : uint = deref(code + pc)
-        var o : OpCode = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
-        var a : int = int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
-        var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
-        var c : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
-        var ax : int = int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u)
-        var bx : int = int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u)
-        var sb : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u) - ((1 << 8) - 1 >> 1)
-        var sc : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u) - ((1 << 8) - 1 >> 1)
-        var sbx : int = int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u) - ((1 << 8 + 8 + 1) - 1 >> 1)
-        var isk : int = int(i >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u)
+        var i : uint = code[pc]
+        var o : OpCode = enum_from_int(type<OpCode>, int((i >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u)))
+        var a : int = int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_A)) << 0u))
+        var b : int = int((i >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u))
+        var c : int = int((i >> uint(POS_C)) & (~(~0u << uint(SIZE_C)) << 0u))
+        var ax : int = int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_Ax)) << 0u))
+        var bx : int = int((i >> uint(POS_k)) & (~(~0u << uint(SIZE_Bx)) << 0u))
+        var sb : int = int((i >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u)) - OFFSET_sC
+        var sc : int = int((i >> uint(POS_C)) & (~(~0u << uint(SIZE_C)) << 0u)) - OFFSET_sC
+        var sbx : int = int((i >> uint(POS_k)) & (~(~0u << uint(SIZE_Bx)) << 0u)) - OFFSET_sBx
+        var isk : int = int((i >> uint(POS_k)) & (~(~0u << 1u) << 0u))
         var line : int = luaG_getfuncline(f, pc)
-        printf(reinterpret<uint8?>("\t%d\t"), pc + 1)
+        printf(cstr("\t%d\t"), pc + 1)
         if (line > 0) {
-            printf(reinterpret<uint8?>("[%d]\t"), line)
+            printf(cstr("[%d]\t"), line)
         } else {
-            printf(reinterpret<uint8?>("[-]\t"))
+            printf(cstr("[-]\t"))
         }
-        printf(reinterpret<uint8?>("%-9s\t"), opnames[int(o)])
+        printf(cstr("%-9s\t"), opnames[int(o)])
         let _cond = o
         if (_cond == OpCode.OP_MOVE) {
-            printf(reinterpret<uint8?>("%d %d"), a, b)
+            printf(cstr("%d %d"), a, b)
         } elif (_cond == OpCode.OP_LOADI) {
-            printf(reinterpret<uint8?>("%d %d"), a, sbx)
+            printf(cstr("%d %d"), a, sbx)
         } elif (_cond == OpCode.OP_LOADF) {
-            printf(reinterpret<uint8?>("%d %d"), a, sbx)
+            printf(cstr("%d %d"), a, sbx)
         } elif (_cond == OpCode.OP_LOADK) {
-            printf(reinterpret<uint8?>("%d %d"), a, bx)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d"), a, bx)
+            printf(cstr("\t; "))
             PrintConstant(f, bx)
         } elif (_cond == OpCode.OP_LOADKX) {
-            printf(reinterpret<uint8?>("%d"), a)
-            printf(reinterpret<uint8?>("\t; "))
-            PrintConstant(f, int(deref(code + (pc + 1)) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u))
+            printf(cstr("%d"), a)
+            printf(cstr("\t; "))
+            PrintConstant(f, int((code[pc + 1] >> uint(POS_A)) & (~(~0u << uint(SIZE_Ax)) << 0u)))
         } elif (_cond == OpCode.OP_LOADFALSE) {
-            printf(reinterpret<uint8?>("%d"), a)
+            printf(cstr("%d"), a)
         } elif (_cond == OpCode.OP_LFALSESKIP) {
-            printf(reinterpret<uint8?>("%d"), a)
+            printf(cstr("%d"), a)
         } elif (_cond == OpCode.OP_LOADTRUE) {
-            printf(reinterpret<uint8?>("%d"), a)
+            printf(cstr("%d"), a)
         } elif (_cond == OpCode.OP_LOADNIL) {
-            printf(reinterpret<uint8?>("%d %d"), a, b)
-            printf(reinterpret<uint8?>("\t; %d out"), b + 1)
+            printf(cstr("%d %d"), a, b)
+            printf(cstr("\t; %d out"), b + 1)
         } elif (_cond == OpCode.OP_GETUPVAL) {
-            printf(reinterpret<uint8?>("%d %d"), a, b)
-            printf(reinterpret<uint8?>("\t; %s"), deref(f.upvalues + b).name != null ? addr(deref(f.upvalues + b).name.contents[0]) : reinterpret<uint8?>("-"))
+            printf(cstr("%d %d"), a, b)
+            printf(cstr("\t; %s"), f.upvalues[b].name != null ? addr(f.upvalues[b].name.contents[0]) : cstr("-"))
         } elif (_cond == OpCode.OP_SETUPVAL) {
-            printf(reinterpret<uint8?>("%d %d"), a, b)
-            printf(reinterpret<uint8?>("\t; %s"), deref(f.upvalues + b).name != null ? addr(deref(f.upvalues + b).name.contents[0]) : reinterpret<uint8?>("-"))
+            printf(cstr("%d %d"), a, b)
+            printf(cstr("\t; %s"), f.upvalues[b].name != null ? addr(f.upvalues[b].name.contents[0]) : cstr("-"))
         } elif (_cond == OpCode.OP_GETTABUP) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; %s"), deref(f.upvalues + b).name != null ? addr(deref(f.upvalues + b).name.contents[0]) : reinterpret<uint8?>("-"))
-            printf(reinterpret<uint8?>(" "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; %s"), f.upvalues[b].name != null ? addr(f.upvalues[b].name.contents[0]) : cstr("-"))
+            printf(cstr(" "))
             PrintConstant(f, c)
         } elif (_cond == OpCode.OP_GETTABLE) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_GETI) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_GETFIELD) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; "))
             PrintConstant(f, c)
         } elif (_cond == OpCode.OP_SETTABUP) {
-            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
-            printf(reinterpret<uint8?>("\t; %s"), deref(f.upvalues + a).name != null ? addr(deref(f.upvalues + a).name.contents[0]) : reinterpret<uint8?>("-"))
-            printf(reinterpret<uint8?>(" "))
+            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
+            printf(cstr("\t; %s"), f.upvalues[a].name != null ? addr(f.upvalues[a].name.contents[0]) : cstr("-"))
+            printf(cstr(" "))
             PrintConstant(f, b)
             if (isk != 0) {
-                printf(reinterpret<uint8?>(" "))
+                printf(cstr(" "))
                 PrintConstant(f, c)
             }
         } elif (_cond == OpCode.OP_SETTABLE) {
-            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
+            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
             if (isk != 0) {
-                printf(reinterpret<uint8?>("\t; "))
+                printf(cstr("\t; "))
                 PrintConstant(f, c)
             }
         } elif (_cond == OpCode.OP_SETI) {
-            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
+            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
             if (isk != 0) {
-                printf(reinterpret<uint8?>("\t; "))
+                printf(cstr("\t; "))
                 PrintConstant(f, c)
             }
         } elif (_cond == OpCode.OP_SETFIELD) {
-            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
+            printf(cstr("\t; "))
             PrintConstant(f, b)
             if (isk != 0) {
-                printf(reinterpret<uint8?>(" "))
+                printf(cstr(" "))
                 PrintConstant(f, c)
             }
         } elif (_cond == OpCode.OP_NEWTABLE) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; %d"), c + int(deref(code + (pc + 1)) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) * ((1 << 8) - 1 + 1))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; %d"), c + int((code[pc + 1] >> uint(POS_A)) & (~(~0u << uint(SIZE_Ax)) << 0u)) * (MAXARG_C + 1))
         } elif (_cond == OpCode.OP_SELF) {
-            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
+            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
             if (isk != 0) {
-                printf(reinterpret<uint8?>("\t; "))
+                printf(cstr("\t; "))
                 PrintConstant(f, c)
             }
         } elif (_cond == OpCode.OP_ADDI) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, sc)
+            printf(cstr("%d %d %d"), a, b, sc)
         } elif (_cond == OpCode.OP_ADDK) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; "))
             PrintConstant(f, c)
         } elif (_cond == OpCode.OP_SUBK) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; "))
             PrintConstant(f, c)
         } elif (_cond == OpCode.OP_MULK) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; "))
             PrintConstant(f, c)
         } elif (_cond == OpCode.OP_MODK) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; "))
             PrintConstant(f, c)
         } elif (_cond == OpCode.OP_POWK) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; "))
             PrintConstant(f, c)
         } elif (_cond == OpCode.OP_DIVK) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; "))
             PrintConstant(f, c)
         } elif (_cond == OpCode.OP_IDIVK) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; "))
             PrintConstant(f, c)
         } elif (_cond == OpCode.OP_BANDK) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; "))
             PrintConstant(f, c)
         } elif (_cond == OpCode.OP_BORK) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; "))
             PrintConstant(f, c)
         } elif (_cond == OpCode.OP_BXORK) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; "))
             PrintConstant(f, c)
         } elif (_cond == OpCode.OP_SHRI) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, sc)
+            printf(cstr("%d %d %d"), a, b, sc)
         } elif (_cond == OpCode.OP_SHLI) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, sc)
+            printf(cstr("%d %d %d"), a, b, sc)
         } elif (_cond == OpCode.OP_ADD) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_SUB) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_MUL) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_MOD) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_POW) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_DIV) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_IDIV) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_BAND) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_BOR) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_BXOR) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_SHL) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_SHR) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
         } elif (_cond == OpCode.OP_MMBIN) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; %s"), addr(deref(tmname + c).contents[0]))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; %s"), addr(tmname[c].contents[0]))
         } elif (_cond == OpCode.OP_MMBINI) {
-            printf(reinterpret<uint8?>("%d %d %d %d"), a, sb, c, isk)
-            printf(reinterpret<uint8?>("\t; %s"), addr(deref(tmname + c).contents[0]))
+            printf(cstr("%d %d %d %d"), a, sb, c, isk)
+            printf(cstr("\t; %s"), addr(tmname[c].contents[0]))
             if (isk != 0) {
-                printf(reinterpret<uint8?>(" flip"))
+                printf(cstr(" flip"))
             }
         } elif (_cond == OpCode.OP_MMBINK) {
-            printf(reinterpret<uint8?>("%d %d %d %d"), a, b, c, isk)
-            printf(reinterpret<uint8?>("\t; %s "), addr(deref(tmname + c).contents[0]))
+            printf(cstr("%d %d %d %d"), a, b, c, isk)
+            printf(cstr("\t; %s "), addr(tmname[c].contents[0]))
             PrintConstant(f, b)
             if (isk != 0) {
-                printf(reinterpret<uint8?>(" flip"))
+                printf(cstr(" flip"))
             }
         } elif (_cond == OpCode.OP_UNM) {
-            printf(reinterpret<uint8?>("%d %d"), a, b)
+            printf(cstr("%d %d"), a, b)
         } elif (_cond == OpCode.OP_BNOT) {
-            printf(reinterpret<uint8?>("%d %d"), a, b)
+            printf(cstr("%d %d"), a, b)
         } elif (_cond == OpCode.OP_NOT) {
-            printf(reinterpret<uint8?>("%d %d"), a, b)
+            printf(cstr("%d %d"), a, b)
         } elif (_cond == OpCode.OP_LEN) {
-            printf(reinterpret<uint8?>("%d %d"), a, b)
+            printf(cstr("%d %d"), a, b)
         } elif (_cond == OpCode.OP_CONCAT) {
-            printf(reinterpret<uint8?>("%d %d"), a, b)
+            printf(cstr("%d %d"), a, b)
         } elif (_cond == OpCode.OP_CLOSE) {
-            printf(reinterpret<uint8?>("%d"), a)
+            printf(cstr("%d"), a)
         } elif (_cond == OpCode.OP_TBC) {
-            printf(reinterpret<uint8?>("%d"), a)
+            printf(cstr("%d"), a)
         } elif (_cond == OpCode.OP_JMP) {
-            printf(reinterpret<uint8?>("%d"), int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1))
-            printf(reinterpret<uint8?>("\t; to %d"), int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1) + pc + 2)
+            printf(cstr("%d"), int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ)
+            printf(cstr("\t; to %d"), int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ + pc + 2)
         } elif (_cond == OpCode.OP_EQ) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
+            printf(cstr("%d %d %d"), a, b, isk)
         } elif (_cond == OpCode.OP_LT) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
+            printf(cstr("%d %d %d"), a, b, isk)
         } elif (_cond == OpCode.OP_LE) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
+            printf(cstr("%d %d %d"), a, b, isk)
         } elif (_cond == OpCode.OP_EQK) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, isk)
+            printf(cstr("\t; "))
             PrintConstant(f, b)
         } elif (_cond == OpCode.OP_EQI) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
+            printf(cstr("%d %d %d"), a, sb, isk)
         } elif (_cond == OpCode.OP_LTI) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
+            printf(cstr("%d %d %d"), a, sb, isk)
         } elif (_cond == OpCode.OP_LEI) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
+            printf(cstr("%d %d %d"), a, sb, isk)
         } elif (_cond == OpCode.OP_GTI) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
+            printf(cstr("%d %d %d"), a, sb, isk)
         } elif (_cond == OpCode.OP_GEI) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, sb, isk)
+            printf(cstr("%d %d %d"), a, sb, isk)
         } elif (_cond == OpCode.OP_TEST) {
-            printf(reinterpret<uint8?>("%d %d"), a, isk)
+            printf(cstr("%d %d"), a, isk)
         } elif (_cond == OpCode.OP_TESTSET) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, isk)
+            printf(cstr("%d %d %d"), a, b, isk)
         } elif (_cond == OpCode.OP_CALL) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d"), a, b, c)
+            printf(cstr("\t; "))
             if (b == 0) {
-                printf(reinterpret<uint8?>("all in "))
+                printf(cstr("all in "))
             } else {
-                printf(reinterpret<uint8?>("%d in "), b - 1)
+                printf(cstr("%d in "), b - 1)
             }
             if (c == 0) {
-                printf(reinterpret<uint8?>("all out"))
+                printf(cstr("all out"))
             } else {
-                printf(reinterpret<uint8?>("%d out"), c - 1)
+                printf(cstr("%d out"), c - 1)
             }
         } elif (_cond == OpCode.OP_TAILCALL) {
-            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
-            printf(reinterpret<uint8?>("\t; %d in"), b - 1)
+            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
+            printf(cstr("\t; %d in"), b - 1)
         } elif (_cond == OpCode.OP_RETURN) {
-            printf(reinterpret<uint8?>("%d %d %d%s"), a, b, c, isk != 0 ? reinterpret<uint8?>("k") : addr(c2das_empty[0]))
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
+            printf(cstr("\t; "))
             if (b == 0) {
-                printf(reinterpret<uint8?>("all out"))
+                printf(cstr("all out"))
             } else {
-                printf(reinterpret<uint8?>("%d out"), b - 1)
+                printf(cstr("%d out"), b - 1)
             }
         } elif (_cond == OpCode.OP_RETURN0) {
         } elif (_cond == OpCode.OP_RETURN1) {
-            printf(reinterpret<uint8?>("%d"), a)
+            printf(cstr("%d"), a)
         } elif (_cond == OpCode.OP_FORLOOP) {
-            printf(reinterpret<uint8?>("%d %d"), a, bx)
-            printf(reinterpret<uint8?>("\t; to %d"), pc - bx + 2)
+            printf(cstr("%d %d"), a, bx)
+            printf(cstr("\t; to %d"), pc - bx + 2)
         } elif (_cond == OpCode.OP_FORPREP) {
-            printf(reinterpret<uint8?>("%d %d"), a, bx)
-            printf(reinterpret<uint8?>("\t; exit to %d"), pc + bx + 3)
+            printf(cstr("%d %d"), a, bx)
+            printf(cstr("\t; exit to %d"), pc + bx + 3)
         } elif (_cond == OpCode.OP_TFORPREP) {
-            printf(reinterpret<uint8?>("%d %d"), a, bx)
-            printf(reinterpret<uint8?>("\t; to %d"), pc + bx + 2)
+            printf(cstr("%d %d"), a, bx)
+            printf(cstr("\t; to %d"), pc + bx + 2)
         } elif (_cond == OpCode.OP_TFORCALL) {
-            printf(reinterpret<uint8?>("%d %d"), a, c)
+            printf(cstr("%d %d"), a, c)
         } elif (_cond == OpCode.OP_TFORLOOP) {
-            printf(reinterpret<uint8?>("%d %d"), a, bx)
-            printf(reinterpret<uint8?>("\t; to %d"), pc - bx + 2)
+            printf(cstr("%d %d"), a, bx)
+            printf(cstr("\t; to %d"), pc - bx + 2)
         } elif (_cond == OpCode.OP_SETLIST) {
-            printf(reinterpret<uint8?>("%d %d %d"), a, b, c)
+            printf(cstr("%d %d %d"), a, b, c)
             if (isk != 0) {
-                printf(reinterpret<uint8?>("\t; %d"), c + int(deref(code + (pc + 1)) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) * ((1 << 8) - 1 + 1))
+                printf(cstr("\t; %d"), c + int((code[pc + 1] >> uint(POS_A)) & (~(~0u << uint(SIZE_Ax)) << 0u)) * (MAXARG_C + 1))
             }
         } elif (_cond == OpCode.OP_CLOSURE) {
-            printf(reinterpret<uint8?>("%d %d"), a, bx)
-            printf(reinterpret<uint8?>("\t; %p"), reinterpret<void?>(deref(f.p + bx)))
+            printf(cstr("%d %d"), a, bx)
+            printf(cstr("\t; %p"), reinterpret<void?>(f.p[bx]))
         } elif (_cond == OpCode.OP_VARARG) {
-            printf(reinterpret<uint8?>("%d %d"), a, c)
-            printf(reinterpret<uint8?>("\t; "))
+            printf(cstr("%d %d"), a, c)
+            printf(cstr("\t; "))
             if (c == 0) {
-                printf(reinterpret<uint8?>("all out"))
+                printf(cstr("all out"))
             } else {
-                printf(reinterpret<uint8?>("%d out"), c - 1)
+                printf(cstr("%d out"), c - 1)
             }
         } elif (_cond == OpCode.OP_VARARGPREP) {
-            printf(reinterpret<uint8?>("%d"), a)
+            printf(cstr("%d"), a)
         } elif (_cond == OpCode.OP_EXTRAARG) {
-            printf(reinterpret<uint8?>("%d"), ax)
+            printf(cstr("%d"), ax)
         }
-        printf(reinterpret<uint8?>("\n"))
+        printf(cstr("\n"))
     }
 }
 
 [c_function]
 def private PrintHeader(var f : Proto?) {
-    var s : uint8? = f.source != null ? addr(f.source.contents[0]) : reinterpret<uint8?>("=?")
+    var s : uint8? = f.source != null ? addr(f.source.contents[0]) : cstr("=?")
     if (int(deref(s)) == '@' || int(deref(s)) == '=') {
         s = s + 1
-    } elif (int(deref(s)) == int(deref(reinterpret<uint8?>("\x1bLua") + 0))) {
-        s = reinterpret<uint8?>("(bstring)")
+    } elif (int(deref(s)) == int(cstr("\x1bLua")[0])) {
+        s = cstr("(bstring)")
     } else {
-        s = reinterpret<uint8?>("(string)")
+        s = cstr("(string)")
     }
-    printf(reinterpret<uint8?>("\n%s <%s:%d,%d> (%d instruction%s at %p)\n"), f.linedefined == 0 ? reinterpret<uint8?>("main") : reinterpret<uint8?>("function"), s, f.linedefined, f.lastlinedefined, f.sizecode, f.sizecode == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), reinterpret<void?>(f))
-    printf(reinterpret<uint8?>("%d%s param%s, %d slot%s, %d upvalue%s, "), int(f.numparams), f.is_vararg != 0 ? reinterpret<uint8?>("+") : addr(c2das_empty[0]), int(f.numparams) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), int(f.maxstacksize), int(f.maxstacksize) == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizeupvalues, f.sizeupvalues == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"))
-    printf(reinterpret<uint8?>("%d local%s, %d constant%s, %d function%s\n"), f.sizelocvars, f.sizelocvars == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizek, f.sizek == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"), f.sizep, f.sizep == 1 ? addr(c2das_empty[0]) : reinterpret<uint8?>("s"))
+    printf(cstr("\n%s <%s:%d,%d> (%d instruction%s at %p)\n"), (f.linedefined == 0) ? cstr("main") : cstr("function"), s, f.linedefined, f.lastlinedefined, f.sizecode, f.sizecode == 1 ? addr(c2das_empty[0]) : cstr("s"), reinterpret<void?>(f))
+    printf(cstr("%d%s param%s, %d slot%s, %d upvalue%s, "), int(f.numparams), f.is_vararg != 0 ? cstr("+") : addr(c2das_empty[0]), int(f.numparams) == 1 ? addr(c2das_empty[0]) : cstr("s"), int(f.maxstacksize), int(f.maxstacksize) == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizeupvalues, f.sizeupvalues == 1 ? addr(c2das_empty[0]) : cstr("s"))
+    printf(cstr("%d local%s, %d constant%s, %d function%s\n"), f.sizelocvars, f.sizelocvars == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizek, f.sizek == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizep, f.sizep == 1 ? addr(c2das_empty[0]) : cstr("s"))
 }
 
 [c_function]
 def private PrintDebug(var f : Proto?) {
     var n : int
     n = f.sizek
-    printf(reinterpret<uint8?>("constants (%d) for %p:\n"), n, reinterpret<void?>(f))
+    printf(cstr("constants (%d) for %p:\n"), n, reinterpret<void?>(f))
     for (i in range(n)) {
-        printf(reinterpret<uint8?>("\t%d\t"), i)
+        printf(cstr("\t%d\t"), i)
         PrintType(f, i)
         PrintConstant(f, i)
-        printf(reinterpret<uint8?>("\n"))
+        printf(cstr("\n"))
     }
     n = f.sizelocvars
-    printf(reinterpret<uint8?>("locals (%d) for %p:\n"), n, reinterpret<void?>(f))
+    printf(cstr("locals (%d) for %p:\n"), n, reinterpret<void?>(f))
     for (i in range(n)) {
-        printf(reinterpret<uint8?>("\t%d\t%s\t%d\t%d\n"), i, addr(deref(f.locvars + i).varname.contents[0]), deref(f.locvars + i).startpc + 1, deref(f.locvars + i).endpc + 1)
+        printf(cstr("\t%d\t%s\t%d\t%d\n"), i, addr(f.locvars[i].varname.contents[0]), f.locvars[i].startpc + 1, f.locvars[i].endpc + 1)
     }
     n = f.sizeupvalues
-    printf(reinterpret<uint8?>("upvalues (%d) for %p:\n"), n, reinterpret<void?>(f))
+    printf(cstr("upvalues (%d) for %p:\n"), n, reinterpret<void?>(f))
     for (i in range(n)) {
-        printf(reinterpret<uint8?>("\t%d\t%s\t%d\t%d\n"), i, deref(f.upvalues + i).name != null ? addr(deref(f.upvalues + i).name.contents[0]) : reinterpret<uint8?>("-"), int(deref(f.upvalues + i).instack), int(deref(f.upvalues + i).idx))
+        printf(cstr("\t%d\t%s\t%d\t%d\n"), i, f.upvalues[i].name != null ? addr(f.upvalues[i].name.contents[0]) : cstr("-"), int(f.upvalues[i].instack), int(f.upvalues[i].idx))
     }
 }
 
@@ -667,7 +682,7 @@ def private PrintFunction(var f : Proto?; full : int) {
         PrintDebug(f)
     }
     for (i in range(n)) {
-        PrintFunction(deref(f.p + i), full)
+        PrintFunction(f.p[i], full)
     }
 }
 

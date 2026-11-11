@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/cstr
 require c_runtime/variadic
 require crt
 require lapi
@@ -16,24 +17,25 @@ struct RanState {
     s : uint64[4]
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<RanState>) == 32 && typeinfo alignof(type<RanState>) == 8, "RanState: clang lays it out as size 32, align 8")
-    static_assert(typeinfo offsetof < s > (type<RanState>) == 0, "RanState.s: clang puts it at 0")
-}
+include lmathlib.layout.das.inc
 
-var private randfuncs : luaL_Reg[3] = fixed_array(luaL_Reg(name = unsafe(reinterpret<uint8?>("random")), func = @@math_random), luaL_Reg(name = unsafe(reinterpret<uint8?>("randomseed")), func = @@math_randomseed), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
-var private mathlib : luaL_Reg[28] = fixed_array(luaL_Reg(name = unsafe(reinterpret<uint8?>("abs")), func = @@math_abs), luaL_Reg(name = unsafe(reinterpret<uint8?>("acos")), func = @@math_acos), luaL_Reg(name = unsafe(reinterpret<uint8?>("asin")), func = @@math_asin), luaL_Reg(name = unsafe(reinterpret<uint8?>("atan")), func = @@math_atan), luaL_Reg(name = unsafe(reinterpret<uint8?>("ceil")), func = @@math_ceil), luaL_Reg(name = unsafe(reinterpret<uint8?>("cos")), func = @@math_cos), luaL_Reg(name = unsafe(reinterpret<uint8?>("deg")), func = @@math_deg), luaL_Reg(name = unsafe(reinterpret<uint8?>("exp")), func = @@math_exp), luaL_Reg(name = unsafe(reinterpret<uint8?>("tointeger")), func = @@math_toint), luaL_Reg(name = unsafe(reinterpret<uint8?>("floor")), func = @@math_floor), luaL_Reg(name = unsafe(reinterpret<uint8?>("fmod")), func = @@math_fmod), luaL_Reg(name = unsafe(reinterpret<uint8?>("ult")), func = @@math_ult), luaL_Reg(name = unsafe(reinterpret<uint8?>("log")), func = @@math_log), luaL_Reg(name = unsafe(reinterpret<uint8?>("max")), func = @@math_max), luaL_Reg(name = unsafe(reinterpret<uint8?>("min")), func = @@math_min), luaL_Reg(name = unsafe(reinterpret<uint8?>("modf")), func = @@math_modf), luaL_Reg(name = unsafe(reinterpret<uint8?>("rad")), func = @@math_rad), luaL_Reg(name = unsafe(reinterpret<uint8?>("sin")), func = @@math_sin), luaL_Reg(name = unsafe(reinterpret<uint8?>("sqrt")), func = @@math_sqrt), luaL_Reg(name = unsafe(reinterpret<uint8?>("tan")), func = @@math_tan), luaL_Reg(name = unsafe(reinterpret<uint8?>("type")), func = @@math_type), luaL_Reg(name = unsafe(reinterpret<uint8?>("random")), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = unsafe(reinterpret<uint8?>("randomseed")), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = unsafe(reinterpret<uint8?>("pi")), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = unsafe(reinterpret<uint8?>("huge")), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = unsafe(reinterpret<uint8?>("maxinteger")), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = unsafe(reinterpret<uint8?>("mininteger")), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private randfuncs : luaL_Reg[3] = fixed_array(luaL_Reg(name = cstr("random"), func = @@math_random), luaL_Reg(name = cstr("randomseed"), func = @@math_randomseed), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private mathlib : luaL_Reg[28] = fixed_array(luaL_Reg(name = cstr("abs"), func = @@math_abs), luaL_Reg(name = cstr("acos"), func = @@math_acos), luaL_Reg(name = cstr("asin"), func = @@math_asin), luaL_Reg(name = cstr("atan"), func = @@math_atan), luaL_Reg(name = cstr("ceil"), func = @@math_ceil), luaL_Reg(name = cstr("cos"), func = @@math_cos), luaL_Reg(name = cstr("deg"), func = @@math_deg), luaL_Reg(name = cstr("exp"), func = @@math_exp), luaL_Reg(name = cstr("tointeger"), func = @@math_toint), luaL_Reg(name = cstr("floor"), func = @@math_floor), luaL_Reg(name = cstr("fmod"), func = @@math_fmod), luaL_Reg(name = cstr("ult"), func = @@math_ult), luaL_Reg(name = cstr("log"), func = @@math_log), luaL_Reg(name = cstr("max"), func = @@math_max), luaL_Reg(name = cstr("min"), func = @@math_min), luaL_Reg(name = cstr("modf"), func = @@math_modf), luaL_Reg(name = cstr("rad"), func = @@math_rad), luaL_Reg(name = cstr("sin"), func = @@math_sin), luaL_Reg(name = cstr("sqrt"), func = @@math_sqrt), luaL_Reg(name = cstr("tan"), func = @@math_tan), luaL_Reg(name = cstr("type"), func = @@math_type), luaL_Reg(name = cstr("random"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("randomseed"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("pi"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("huge"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("maxinteger"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("mininteger"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
 let private LUA_OPLT = 1
 let private LUA_TNUMBER = 3
 let private shift64_FIG = 64 - 53
-let private scaleFIG = 0.5lf / double(uint64(1) << uint64(53 - 1))
+let private scaleFIG = 0.5lf / double(1ul << uint64(53 - 1))
+let private LUAI_MAXSTACK = 1000000
+let private LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000
+let private LUA_TNONE = -1
+let private LUA_VERSION_NUM = 504
+let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64(typeinfo sizeof(type<double>))
 
 def private math_abs(var L : lua_State?) : int {
     if (lua_isinteger(L, 1) != 0) {
         var n : int64 = lua_tointegerx(L, 1, null)
-        if (n < int64(0)) {
+        if (n < 0l) {
             n = int64(0u) - n
         }
         lua_pushinteger(L, n)
@@ -70,7 +72,7 @@ def private math_acos(var L : lua_State?) : int {
 
 def private math_atan(var L : lua_State?) : int {
     var y : double = luaL_checknumber(L, 1)
-    var x : double = luaL_optnumber(L, 2, double(1))
+    var x : double = luaL_optnumber(L, 2, 1.0lf)
     lua_pushnumber(L, math::atan2(y, x))
     return 1
 }
@@ -135,9 +137,9 @@ def private math_fmod(var L : lua_State?) : int {
         var d : int64 = lua_tointegerx(L, 2, null)
         // special cases: -1 or 0
         if (uint64(d) + uint64(1u) <= uint64(1u)) {
-            let _t0 = d != int64(0) || luaL_argerror(L, 2, reinterpret<uint8?>("zero")) != 0
+            let _t0 = d != 0l || luaL_argerror(L, 2, cstr("zero")) != 0
             // avoid overflow with 0x80000... / -1
-            lua_pushinteger(L, int64(0))
+            lua_pushinteger(L, 0l)
         } else {
             lua_pushinteger(L, lua_tointegerx(L, 1, null) % d)
         }
@@ -155,14 +157,14 @@ def private math_modf(var L : lua_State?) : int {
         // number is its own integer part
         lua_settop(L, 1)
         // no fractional part
-        lua_pushnumber(L, double(0))
+        lua_pushnumber(L, 0.0lf)
     } else {
         var n : double = luaL_checknumber(L, 1)
         // integer part (rounds toward zero)
-        var ip : double = n < double(0) ? math::ceil(n) : math::floor(n)
+        var ip : double = (n < 0.0lf) ? math::ceil(n) : math::floor(n)
         pushnumint(L, ip)
         // fractional part (test needed for inf/-inf)
-        lua_pushnumber(L, n == ip ? 0.0lf : n - ip)
+        lua_pushnumber(L, (n == ip) ? 0.0lf : (n - ip))
     }
     return 2
 }
@@ -213,52 +215,45 @@ def private math_rad(var L : lua_State?) : int {
     return 1
 }
 
-[c_function]
 def private math_min(var L : lua_State?) : int {
     // number of arguments
     var n : int = lua_gettop(L)
     // index of current minimum value
     var imin : int = 1
     var i : int
-    let _t0 = n >= 1 || luaL_argerror(L, 1, reinterpret<uint8?>("value expected")) != 0
-    {
-        i = 2
-        while (i <= n) {
-            if (lua_compare(L, i, imin, LUA_OPLT) != 0) {
-                imin = i
-            }
-            i++
+    let _t0 = n >= 1 || luaL_argerror(L, 1, cstr("value expected")) != 0
+    i = 2
+    while (i <= n) {
+        if (lua_compare(L, i, imin, LUA_OPLT) != 0) {
+            imin = i
         }
+        i++
     }
     lua_pushvalue(L, imin)
     return 1
 }
 
-[c_function]
 def private math_max(var L : lua_State?) : int {
     // number of arguments
     var n : int = lua_gettop(L)
     // index of current maximum value
     var imax : int = 1
     var i : int
-    let _t0 = n >= 1 || luaL_argerror(L, 1, reinterpret<uint8?>("value expected")) != 0
-    {
-        i = 2
-        while (i <= n) {
-            if (lua_compare(L, imax, i, LUA_OPLT) != 0) {
-                imax = i
-            }
-            i++
+    let _t0 = n >= 1 || luaL_argerror(L, 1, cstr("value expected")) != 0
+    i = 2
+    while (i <= n) {
+        if (lua_compare(L, imax, i, LUA_OPLT) != 0) {
+            imax = i
         }
+        i++
     }
     lua_pushvalue(L, imax)
     return 1
 }
 
-[c_function]
 def private math_type(var L : lua_State?) : int {
     if (lua_type(L, 1) == LUA_TNUMBER) {
-        lua_pushstring(L, lua_isinteger(L, 1) != 0 ? reinterpret<uint8?>("integer") : reinterpret<uint8?>("float"))
+        lua_pushstring(L, lua_isinteger(L, 1) != 0 ? cstr("integer") : cstr("float"))
     } else {
         luaL_checkany(L, 1)
         lua_pushnil(L)
@@ -268,27 +263,27 @@ def private math_type(var L : lua_State?) : int {
 
 // rotate left 'x' by 'n' bits
 def private rotl(x : uint64; n : int) : uint64 {
-    return x << uint64(n) | (x & 18446744073709551615ul) >> uint64(64 - n)
+    return (x << uint64(n)) | ((x & 18446744073709551615ul) >> uint64(64 - n))
 }
 
 [c_function]
 def private nextrand(var state : uint64?) : uint64 {
-    var state0 : uint64 = deref(state + 0)
-    var state1 : uint64 = deref(state + 1)
-    var state2 : uint64 = deref(state + 2) ^ state0
-    var state3 : uint64 = deref(state + 3) ^ state1
-    var res : uint64 = rotl(state1 * uint64(5), 7) * uint64(9)
-    deref(state + 0) = state0 ^ state3
-    deref(state + 1) = state1 ^ state2
-    deref(state + 2) = state2 ^ state1 << 17ul
-    deref(state + 3) = rotl(state3, 45)
+    var state0 : uint64 = state[0]
+    var state1 : uint64 = state[1]
+    var state2 : uint64 = state[2] ^ state0
+    var state3 : uint64 = state[3] ^ state1
+    var res : uint64 = rotl(state1 * 5ul, 7) * 9ul
+    state[0] = state0 ^ state3
+    state[1] = state1 ^ state2
+    state[2] = state2 ^ (state1 << 17ul)
+    state[3] = rotl(state3, 45)
     return res
 }
 
 def private I2d(x : uint64) : double {
     var sx : int64 = int64((x & 18446744073709551615ul) >> uint64(shift64_FIG))
     var res : double = double(sx) * scaleFIG
-    if (sx < int64(0)) {
+    if (sx < 0l) {
         // correct the two's complement if negative
         res += 1.0lf
     }
@@ -306,7 +301,7 @@ def private I2d(x : uint64) : double {
 [c_function]
 def private project(var ran : uint64; n : uint64; var state : RanState?) : uint64 {
     // is 'n + 1' a power of 2?
-    if ((n & n + uint64(1)) == uint64(0)) {
+    if ((n & (n + 1ul)) == 0ul) {
         // no bias
         return ran & n
     } else {
@@ -340,41 +335,35 @@ def private math_random(var L : lua_State?) : int {
     var low : int64
     var up : int64
     var p : uint64
-    var state : RanState? = reinterpret<RanState?>(lua_touserdata(L, -1000000 - 1000 - 1))
+    var state : RanState? = reinterpret<RanState?>(lua_touserdata(L, LUA_REGISTRYINDEX - 1))
     // next pseudo-random value
     var rv : uint64 = nextrand(addr(state.s[0]))
     // check number of arguments
     let _cond = lua_gettop(L)
     if (_cond == 0) {
-        {
-            // no arguments
-            // float between 0 and 1
-            lua_pushnumber(L, I2d(rv))
+        // no arguments
+        // float between 0 and 1
+        lua_pushnumber(L, I2d(rv))
+        return 1
+    } elif (_cond == 1) {
+        // only upper limit
+        low = 1l
+        up = luaL_checkinteger(L, 1)
+        // single 0 as argument?
+        if (up == 0l) {
+            // full random integer
+            lua_pushinteger(L, int64(uint64(rv & 18446744073709551615ul)))
             return 1
         }
-    } elif (_cond == 1) {
-        {
-            // only upper limit
-            low = int64(1)
-            up = luaL_checkinteger(L, 1)
-            // single 0 as argument?
-            if (up == int64(0)) {
-                // full random integer
-                lua_pushinteger(L, int64(uint64(rv & 18446744073709551615ul)))
-                return 1
-            }
-        }
     } elif (_cond == 2) {
-        {
-            // lower and upper limits
-            low = luaL_checkinteger(L, 1)
-            up = luaL_checkinteger(L, 2)
-        }
+        // lower and upper limits
+        low = luaL_checkinteger(L, 1)
+        up = luaL_checkinteger(L, 2)
     } else {
-        return luaL_error`va(L, reinterpret<uint8?>("wrong number of arguments"), VaNone())
+        return luaL_error`va(L, cstr("wrong number of arguments"), VaNone())
     }
     // random integer in the interval [low, up]
-    let _t0 = low <= up || luaL_argerror(L, 1, reinterpret<uint8?>("interval is empty")) != 0
+    let _t0 = low <= up || luaL_argerror(L, 1, cstr("interval is empty")) != 0
     // project random integer into the interval [0, up - low]
     p = project(uint64(rv & 18446744073709551615ul), uint64(up) - uint64(low), state)
     lua_pushinteger(L, int64(p + uint64(low)))
@@ -383,11 +372,11 @@ def private math_random(var L : lua_State?) : int {
 
 [c_function]
 def private setseed(var L : lua_State?; var state : uint64?; n1 : uint64; n2 : uint64) {
-    deref(state + 0) = uint64(n1)
+    state[0] = uint64(n1)
     // avoid a zero state
-    deref(state + 1) = uint64(255)
-    deref(state + 2) = uint64(n2)
-    deref(state + 3) = uint64(0)
+    state[1] = 255ul
+    state[2] = uint64(n2)
+    state[3] = 0ul
     for (i in range(16)) {
         // discard initial values to "spread" seed
         nextrand(state)
@@ -408,12 +397,12 @@ def private randseed(var L : lua_State?; var state : RanState?) {
 
 [c_function]
 def private math_randomseed(var L : lua_State?) : int {
-    var state : RanState? = reinterpret<RanState?>(lua_touserdata(L, -1000000 - 1000 - 1))
-    if (lua_type(L, 1) == -1) {
+    var state : RanState? = reinterpret<RanState?>(lua_touserdata(L, LUA_REGISTRYINDEX - 1))
+    if (lua_type(L, 1) == LUA_TNONE) {
         randseed(L, state)
     } else {
         var n1 : int64 = luaL_checkinteger(L, 1)
-        var n2 : int64 = luaL_optinteger(L, 2, int64(0))
+        var n2 : int64 = luaL_optinteger(L, 2, 0l)
         setseed(L, addr(state.s[0]), uint64(n1), uint64(n2))
     }
     // return seeds
@@ -434,17 +423,17 @@ def private setrandfunc(var L : lua_State?) {
 // Open math library
 [c_function]
 def luaopen_math(var L : lua_State?) : int {
-    luaL_checkversion_(L, double(504), uint64(typeinfo sizeof(type<int64>)) * uint64(16) + uint64(typeinfo sizeof(type<double>)))
-    lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[28]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - uint64(1)))
+    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+    lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[28]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - 1ul))
     luaL_setfuncs(L, addr(mathlib[0]), 0)
     lua_pushnumber(L, 3.141592653589793lf)
-    lua_setfield(L, -2, reinterpret<uint8?>("pi"))
+    lua_setfield(L, -2, cstr("pi"))
     lua_pushnumber(L, crt::HUGE_VAL)
-    lua_setfield(L, -2, reinterpret<uint8?>("huge"))
+    lua_setfield(L, -2, cstr("huge"))
     lua_pushinteger(L, 9223372036854775807l)
-    lua_setfield(L, -2, reinterpret<uint8?>("maxinteger"))
+    lua_setfield(L, -2, cstr("maxinteger"))
     lua_pushinteger(L, -9223372036854775807l - 1l)
-    lua_setfield(L, -2, reinterpret<uint8?>("mininteger"))
+    lua_setfield(L, -2, cstr("mininteger"))
     setrandfunc(L)
     return 1
 }

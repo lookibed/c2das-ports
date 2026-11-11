@@ -6,6 +6,7 @@ options stack = 8388608
 require c_runtime/c_exit
 require c_runtime/c_function
 require c_runtime/c_volatile
+require c_runtime/cstr
 require c_runtime/cstr_array
 require c_runtime/enum_from_int
 require c_runtime/printf
@@ -32,95 +33,139 @@ def private c2das_dialect {
     c_long_bits = 64
 }
 
+let private LUA_TNUMBER = 3
+let private LUA_TBOOLEAN = 1
+let private LUA_TNIL = 0
+let private BIT_ISCOLLECTABLE = 1 << 6
+let private POS_OP = 0
+let private SIZE_OP = 7
+let private POS_A = POS_OP + SIZE_OP
+let private SIZE_A = 8
+let private POS_k = POS_A + SIZE_A
+let private POS_B = POS_k + 1
+let private SIZE_B = 8
+let private SIZE_C = 8
+let private SIZE_Bx = SIZE_C + SIZE_B + 1
+let private SIZE_sJ = SIZE_Bx + SIZE_A
+let private MAXARG_sJ = (1 << SIZE_sJ) - 1
+let private OFFSET_sJ = MAXARG_sJ >> 1
 let private NO_JUMP = -1
-let private OFFSET_sJ = (1 << 8 + 8 + 1 + 8) - 1 >> 1
-let private MAXARG_sJ = (1 << 8 + 8 + 1 + 8) - 1
-let private NO_REG = (1 << 8) - 1
+let private NO_REG = (1 << SIZE_A) - 1
+let private POS_C = POS_B + SIZE_B
 let private LIMLINEDIFF = 128
 let private MAXIWTHABS = 128
+let private MAX_SIZET = ~0ul
 let private ABSLINEINFO = -128
-let private OFFSET_sBx = (1 << 8 + 8 + 1) - 1 >> 1
-let private MAXARG_Bx = (1 << 8 + 8 + 1) - 1
+let private MAXARG_Bx = (1 << SIZE_Bx) - 1
+let private OFFSET_sBx = MAXARG_Bx >> 1
 let private MAXREGS = 255
-let private OFFSET_sC = (1 << 8) - 1 >> 1
-let private MAXINDEXRK = (1 << 8) - 1
-let private MAXARG_B = (1 << 8) - 1
+let private SIZE_Ax = SIZE_Bx + SIZE_A
+let private MAXARG_Ax = (1 << SIZE_Ax) - 1
+let private BLACKBIT = 5
+let private WHITE0BIT = 3
+let private WHITE1BIT = 4
+let private LUA_TTABLE = 5
+let private MAXARG_C = (1 << SIZE_C) - 1
+let private OFFSET_sC = MAXARG_C >> 1
+let private MAXINDEXRK = (1 << SIZE_B) - 1
+let private MAXARG_B = (1 << SIZE_B) - 1
+let private LUA_TSTRING = 4
 let private LUA_OPUNM = 12
 let private LUA_OPADD = 0
-let private MAXARG_C = (1 << 8) - 1
 let private LUA_MULTRET = -1
+let private CIST_C = 1 << 1
+let private LUA_TFUNCTION = 6
 let private CIST_TAIL = 1 << 5
 let private CIST_TRAN = 1 << 8
 let private CIST_HOOKED = 1 << 3
 let private CIST_FIN = 1 << 7
 let private LUA_ERRRUN = 2
 let private CIST_HOOKYIELD = 1 << 6
-let private LUA_MASKLINE = 1 << 2
-let private LUA_MASKCOUNT = 1 << 3
-let private LUA_HOOKCOUNT = 3
 let private LUA_HOOKLINE = 2
+let private LUA_MASKLINE = 1 << LUA_HOOKLINE
+let private LUA_HOOKCOUNT = 3
+let private LUA_MASKCOUNT = 1 << LUA_HOOKCOUNT
 let private LUA_YIELD = 1
 let private LUA_OK = 0
 let private LUA_ERRERR = 5
 let private EXTRA_STACK = 5
+let private LUA_ERRMEM = 4
 let private LUAI_MAXSTACK = 1000000
-let private ERRORSTACKSIZE = 1000000 + 200
+let private ERRORSTACKSIZE = LUAI_MAXSTACK + 200
 let private LUA_MINSTACK = 20
-let private LUA_MASKCALL = 1 << 0
-let private LUA_HOOKTAILCALL = 4
 let private LUA_HOOKCALL = 0
-let private LUA_MASKRET = 1 << 1
+let private LUA_MASKCALL = 1 << LUA_HOOKCALL
+let private LUA_HOOKTAILCALL = 4
 let private LUA_HOOKRET = 1
+let private LUA_MASKRET = 1 << LUA_HOOKRET
 let private CIST_CLSRET = 1 << 9
 let private CLOSEKTOP = -1
-let private CIST_C = 1 << 1
+let private LUAI_MAXCCALLS = 200
 let private CIST_FRESH = 1 << 2
 let private nyci = 65536 | 1
+let private CIST_RECST = 10
+let private CIST_OAH = 1 << 0
 let private CIST_YPCALL = 1 << 4
-let private LUAI_MAXCCALLS = 200
 let private LUA_ERRSYNTAX = 3
-let private LUA_VCCL = 6 | 2 << 4
-let private LUA_VLCL = 6 | 0 << 4
-let private LUA_VUPVAL = 9 | 0 << 4
-let private LUA_VPROTO = 9 + 1 | 0 << 4
-let private LUA_TSTRING = 4
+let private LUA_VCCL = LUA_TFUNCTION | (2 << 4)
+let private LUA_VLCL = LUA_TFUNCTION | (0 << 4)
+let private LUA_NUMTYPES = 9
+let private LUA_VUPVAL = LUA_NUMTYPES | (0 << 4)
+let private MAXDELTA = (256ul << (uint64(typeinfo sizeof(type<uint16>)) - 1ul) * 8ul) - 1ul
+let private LUA_TPROTO = LUA_NUMTYPES + 1
+let private LUA_VPROTO = LUA_TPROTO | (0 << 4)
+let private maskcolors = (1 << BLACKBIT) | ((1 << WHITE0BIT) | (1 << WHITE1BIT))
+let private LUA_TDEADKEY = LUA_NUMTYPES + 2
+let private GCSatomic = 2
+let private AGEBITS = 7
+let private G_SURVIVAL = 1
+let private G_OLD0 = 2
 let private KGC_INC = 0
 let private G_TOUCHED2 = 6
-let private LUA_NUMTAGS = 9
 let private G_TOUCHED1 = 5
-let private GCSatomic = 2
+let private G_OLD = 4
+let private LUA_NUMTAGS = 9
 let private GCSpropagate = 0
+let private maskgcbits = maskcolors | AGEBITS
+let private FINALIZEDBIT = 6
+let private GCSswpallgc = 3
+let private GCSswpend = 6
 let private G_OLD1 = 3
 let private GCSTPGC = 2
 let private GCSTPCLS = 4
 let private PAUSEADJ = 100
-let private MAX_LMEM = int64(~uint64(0) >> 1ul)
-let private LUA_VTHREAD = 8 | 0 << 4
+let private MAX_LUMEM = ~0ul
+let private MAX_LMEM = int64(MAX_LUMEM >> 1ul)
+let private LUA_TTHREAD = 8
+let private LUA_VTHREAD = LUA_TTHREAD | (0 << 4)
 let private G_NEW = 0
-let private maskgcbits = 1 << 5 | (1 << 3 | 1 << 4) | 7
-let private GCSswpallgc = 3
 let private KGC_GEN = 1
 let private GCSpause = 8
 let private GCSWEEPMAX = 100
 let private GCSenteratomic = 1
 let private GCSswpfinobj = 4
 let private GCSswptobefnz = 5
-let private GCSswpend = 6
 let private GCScallfin = 7
 let private GCFINMAX = 10
 let private GCFINALIZECOST = 50
 let private WORK2MEM = uint64(typeinfo sizeof(type<TValue>))
-let private NUM_RESERVED = int(RESERVED.TK_WHILE) - (127 * 2 + 1 + 1) + 1
 let private FIRST_RESERVED = 127 * 2 + 1 + 1
+let private NUM_RESERVED = int(RESERVED.TK_WHILE) - FIRST_RESERVED + 1
+let private PRINTBIT = 2
+let private LUA_MINBUFFER = 32
+let private XDIGITBIT = 4
+let private ALPHABIT = 0
 let private EOZ = -1
 let private UTF8BUFFSZ = 8
+let private DIGITBIT = 1
+let private SPACEBIT = 3
 let private MINSIZEARRAY = 4
 let private L_MAXLENNUM = 200
-let private MAXBY10 = uint64(9223372036854775807l / int64(10))
-let private MAXLASTD = int(9223372036854775807l % int64(10))
-let private BUFVFS = 60 + 44 + 95
+let private MAXBY10 = uint64(9223372036854775807l / 10l)
+let private MAXLASTD = int(9223372036854775807l % 10l)
 let private MAXNUMBER2STR = 44
 let private LUA_IDSIZE = 60
+let private BUFVFS = LUA_IDSIZE + MAXNUMBER2STR + 95
 let private MAXVARS = 200
 let private VDKREG = 0
 let private RDKCTC = 3
@@ -129,29 +174,37 @@ let private LFIELDS_PER_FLUSH = 50
 let private UNARY_PRIORITY = 12
 let private RDKCONST = 1
 let private RDKTOCLOSE = 2
-let private BASIC_STACK_SIZE = 2 * 20
+let private BASIC_STACK_SIZE = 2 * LUA_MINSTACK
 let private LUA_RIDX_LAST = 2
-let private LUA_TTHREAD = 8
+let private LUA_RIDX_MAINTHREAD = 1
+let private LUA_RIDX_GLOBALS = 2
 let private LUA_EXTRASPACE = uint64(typeinfo sizeof(type<void?>))
+let private LUAI_GCPAUSE = 200
+let private LUAI_GCMUL = 100
 let private LUAI_GCSTEPSIZE = 13
+let private LUAI_GENMAJORMUL = 100
 let private LUAI_GENMINORMUL = 20
 let private STRCACHE_N = 53
 let private STRCACHE_M = 2
 let private MINSTRTABSIZE = 128
-let private LUA_VLNGSTR = 4 | 1 << 4
-let private LUA_VSHRSTR = 4 | 0 << 4
+let private LUA_VLNGSTR = LUA_TSTRING | (1 << 4)
+let private LUA_VSHRSTR = LUA_TSTRING | (0 << 4)
 let private LUAI_MAXSHORTLEN = 40
-let private LUA_VUSERDATA = 7 | 0 << 4
-let private MAXABITS = int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1))
-let private MAXHBITS = int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)) - 1
-let private LUA_VTABLE = 5 | 0 << 4
-let private MAX_SIZET = ~uint64(0)
-let private LUAC_VERSION = 504 / 100 * 16 + 504 % 100
+let private LUA_TUSERDATA = 7
+let private LUA_VUSERDATA = LUA_TUSERDATA | (0 << 4)
+let private BITRAS = 1 << 7
+let private MAXABITS = int(uint64(typeinfo sizeof(type<int>)) * 8ul - 1ul)
+let private MAXHBITS = int(uint64(typeinfo sizeof(type<int>)) * 8ul - 1ul) - 1
+let private LUA_VTABLE = LUA_TTABLE | (0 << 4)
+let private maskflags = ~(~0u << uint(int(TMS.TM_EQ) + 1))
+let private LUA_VERSION_NUM = 504
+let private LUAC_VERSION = LUA_VERSION_NUM / 100 * 16 + LUA_VERSION_NUM % 100
 let private LUAC_FORMAT = 0
 let private LUAC_INT = 22136
 let private MAXTAGLOOP = 2000
-let private LUA_TNUMBER = 3
-let private NBITS = int(uint64(typeinfo sizeof(type<int64>)) * uint64(8))
+let private NBM = 53
+let private MAXINTFITSF = 1ul << uint64(NBM)
+let private NBITS = int(uint64(typeinfo sizeof(type<int64>)) * 8ul)
 
 include lcode.das.inc
 include ldebug.das.inc
@@ -169,49 +222,11 @@ include ltm.das.inc
 include lundump.das.inc
 include lvm.das.inc
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<CloseP>) == 16 && typeinfo alignof(type<CloseP>) == 8, "CloseP: clang lays it out as size 16, align 8")
-    static_assert(typeinfo offsetof < level > (type<CloseP>) == 0, "CloseP.level: clang puts it at 0")
-    static_assert(typeinfo offsetof < status > (type<CloseP>) == 8, "CloseP.status: clang puts it at 8")
-    static_assert(typeinfo sizeof(type<SParser>) == 96 && typeinfo alignof(type<SParser>) == 8, "SParser: clang lays it out as size 96, align 8")
-    static_assert(typeinfo offsetof < z > (type<SParser>) == 0, "SParser.z: clang puts it at 0")
-    static_assert(typeinfo offsetof < buff > (type<SParser>) == 8, "SParser.buff: clang puts it at 8")
-    static_assert(typeinfo offsetof < dyd > (type<SParser>) == 32, "SParser.dyd: clang puts it at 32")
-    static_assert(typeinfo offsetof < mode > (type<SParser>) == 80, "SParser.mode: clang puts it at 80")
-    static_assert(typeinfo offsetof < name > (type<SParser>) == 88, "SParser.name: clang puts it at 88")
-    static_assert(typeinfo sizeof(type<BuffFS>) == 216 && typeinfo alignof(type<BuffFS>) == 8, "BuffFS: clang lays it out as size 216, align 8")
-    static_assert(typeinfo offsetof < L > (type<BuffFS>) == 0, "BuffFS.L: clang puts it at 0")
-    static_assert(typeinfo offsetof < pushed > (type<BuffFS>) == 8, "BuffFS.pushed: clang puts it at 8")
-    static_assert(typeinfo offsetof < blen > (type<BuffFS>) == 12, "BuffFS.blen: clang puts it at 12")
-    static_assert(typeinfo offsetof < space > (type<BuffFS>) == 16, "BuffFS.space: clang puts it at 16")
-    static_assert(typeinfo sizeof(type<ConsControl>) == 48 && typeinfo alignof(type<ConsControl>) == 8, "ConsControl: clang lays it out as size 48, align 8")
-    static_assert(typeinfo offsetof < v > (type<ConsControl>) == 0, "ConsControl.v: clang puts it at 0")
-    static_assert(typeinfo offsetof < t > (type<ConsControl>) == 24, "ConsControl.t: clang puts it at 24")
-    static_assert(typeinfo offsetof < nh > (type<ConsControl>) == 32, "ConsControl.nh: clang puts it at 32")
-    static_assert(typeinfo offsetof < na > (type<ConsControl>) == 36, "ConsControl.na: clang puts it at 36")
-    static_assert(typeinfo offsetof < tostore > (type<ConsControl>) == 40, "ConsControl.tostore: clang puts it at 40")
-    static_assert(typeinfo sizeof(type<anon_935>) == 2 && typeinfo alignof(type<anon_935>) == 1, "anon_935: clang lays it out as size 2, align 1")
-    static_assert(typeinfo offsetof < left > (type<anon_935>) == 0, "anon_935.left: clang puts it at 0")
-    static_assert(typeinfo offsetof < right > (type<anon_935>) == 1, "anon_935.right: clang puts it at 1")
-    static_assert(typeinfo sizeof(type<LHS_assign>) == 32 && typeinfo alignof(type<LHS_assign>) == 8, "LHS_assign: clang lays it out as size 32, align 8")
-    static_assert(typeinfo offsetof < prev > (type<LHS_assign>) == 0, "LHS_assign.prev: clang puts it at 0")
-    static_assert(typeinfo offsetof < v > (type<LHS_assign>) == 8, "LHS_assign.v: clang puts it at 8")
-    static_assert(typeinfo sizeof(type<LX>) == 208 && typeinfo alignof(type<LX>) == 8, "LX: clang lays it out as size 208, align 8")
-    static_assert(typeinfo offsetof < extra_ > (type<LX>) == 0, "LX.extra_: clang puts it at 0")
-    static_assert(typeinfo offsetof < l > (type<LX>) == 8, "LX.l: clang puts it at 8")
-    static_assert(typeinfo sizeof(type<LG>) == 1624 && typeinfo alignof(type<LG>) == 8, "LG: clang lays it out as size 1624, align 8")
-    static_assert(typeinfo offsetof < l > (type<LG>) == 0, "LG.l: clang puts it at 0")
-    static_assert(typeinfo offsetof < g > (type<LG>) == 208, "LG.g: clang puts it at 208")
-    static_assert(typeinfo sizeof(type<LoadState>) == 24 && typeinfo alignof(type<LoadState>) == 8, "LoadState: clang lays it out as size 24, align 8")
-    static_assert(typeinfo offsetof < L > (type<LoadState>) == 0, "LoadState.L: clang puts it at 0")
-    static_assert(typeinfo offsetof < Z > (type<LoadState>) == 8, "LoadState.Z: clang puts it at 8")
-    static_assert(typeinfo offsetof < name > (type<LoadState>) == 16, "LoadState.name: clang puts it at 16")
-}
+include lcode_cluster.layout.das.inc
 
 [init]
 def private c2das_init_globals {
-    dummynode_.u = NodeKey(tt_ = uint8(0 | 1 << 4), key_tt = uint8(0 | 0 << 4), next = 0)
-    luaT_typenames_ = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("no value")), unsafe(reinterpret<uint8?>("nil")), unsafe(reinterpret<uint8?>("boolean")), unsafe(addr(udatatypename[0])), unsafe(reinterpret<uint8?>("number")), unsafe(reinterpret<uint8?>("string")), unsafe(reinterpret<uint8?>("table")), unsafe(reinterpret<uint8?>("function")), unsafe(addr(udatatypename[0])), unsafe(reinterpret<uint8?>("thread")), unsafe(reinterpret<uint8?>("upvalue")), unsafe(reinterpret<uint8?>("proto")))
+    dummynode_.u = NodeKey(tt_ = uint8(0 | (1 << 4)), key_tt = uint8(0 | (0 << 4)), next = 0)
+    luaT_typenames_ = fixed_array<uint8?>(cstr("no value"), cstr("nil"), cstr("boolean"), unsafe(addr(udatatypename[0])), cstr("number"), cstr("string"), cstr("table"), cstr("function"), unsafe(addr(udatatypename[0])), cstr("thread"), cstr("upvalue"), cstr("proto"))
 }
 

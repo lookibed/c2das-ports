@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/cstr
 require c_runtime/enum_from_int
 require crt
 require lcode_h
@@ -21,25 +22,48 @@ require luac_link
 require lvm
 require lvm_h
 
-var private previousinstruction_invalidinstruction : uint = ~uint(0)
+var private previousinstruction_invalidinstruction : uint = ~0u
 var private luaK_prefix_ef : expdesc = expdesc(k = expkind.VKINT, t = -1, f = -1)
 
+let private LUA_TNUMBER = 3
+let private LUA_TBOOLEAN = 1
+let private LUA_TNIL = 0
+let private BIT_ISCOLLECTABLE = 1 << 6
+let private POS_OP = 0
+let private SIZE_OP = 7
+let private POS_A = POS_OP + SIZE_OP
+let private SIZE_A = 8
+let private POS_k = POS_A + SIZE_A
+let private POS_B = POS_k + 1
+let private SIZE_B = 8
+let private SIZE_C = 8
+let private SIZE_Bx = SIZE_C + SIZE_B + 1
+let private SIZE_sJ = SIZE_Bx + SIZE_A
+let private MAXARG_sJ = (1 << SIZE_sJ) - 1
+let private OFFSET_sJ = MAXARG_sJ >> 1
 let private NO_JUMP = -1
-let private OFFSET_sJ = (1 << 8 + 8 + 1 + 8) - 1 >> 1
-let private MAXARG_sJ = (1 << 8 + 8 + 1 + 8) - 1
-let private NO_REG = (1 << 8) - 1
+let private NO_REG = (1 << SIZE_A) - 1
+let private POS_C = POS_B + SIZE_B
 let private LIMLINEDIFF = 128
 let private MAXIWTHABS = 128
+let private MAX_SIZET = ~0ul
 let private ABSLINEINFO = -128
-let private OFFSET_sBx = (1 << 8 + 8 + 1) - 1 >> 1
-let private MAXARG_Bx = (1 << 8 + 8 + 1) - 1
+let private MAXARG_Bx = (1 << SIZE_Bx) - 1
+let private OFFSET_sBx = MAXARG_Bx >> 1
 let private MAXREGS = 255
-let private OFFSET_sC = (1 << 8) - 1 >> 1
-let private MAXINDEXRK = (1 << 8) - 1
-let private MAXARG_B = (1 << 8) - 1
+let private SIZE_Ax = SIZE_Bx + SIZE_A
+let private MAXARG_Ax = (1 << SIZE_Ax) - 1
+let private BLACKBIT = 5
+let private WHITE0BIT = 3
+let private WHITE1BIT = 4
+let private LUA_TTABLE = 5
+let private MAXARG_C = (1 << SIZE_C) - 1
+let private OFFSET_sC = MAXARG_C >> 1
+let private MAXINDEXRK = (1 << SIZE_B) - 1
+let private MAXARG_B = (1 << SIZE_B) - 1
+let private LUA_TSTRING = 4
 let private LUA_OPUNM = 12
 let private LUA_OPADD = 0
-let private MAXARG_C = (1 << 8) - 1
 let private LUA_MULTRET = -1
 
 // semantic error
@@ -61,26 +85,25 @@ def private tonumeral(var e : expdesc?; var v : TValue?) : int {
         if (v != null) {
             var io : TValue? = v
             io.value_.i = e.u.ival
-            io.tt_ = uint8(3 | 0 << 4)
+            io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
         }
         return 1
     } elif (_cond == expkind.VKFLT) {
         if (v != null) {
             var io : TValue? = v
             io.value_.n = e.u.nval
-            io.tt_ = uint8(3 | 1 << 4)
+            io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
         }
         return 1
     } else {
         return 0
     }
-    return 0
 }
 
 // Get the constant value from a constant expression
 [c_function]
 def private const2val(var fs : FuncState?; var e : expdesc?) : TValue? {
-    return addr(deref(fs.ls.dyd.actvar.arr + e.u.info).k)
+    return addr(fs.ls.dyd.actvar.arr[e.u.info].k)
 }
 
 // If expression is a constant, fills 'v' with its value
@@ -93,40 +116,35 @@ def luaK_exp2const(var fs : FuncState?; var e : expdesc?; var v : TValue?) : int
     }
     let _cond = e.k
     if (_cond == expkind.VFALSE) {
-        v.tt_ = uint8(1 | 0 << 4)
+        v.tt_ = uint8(LUA_TBOOLEAN | (0 << 4))
         return 1
     } elif (_cond == expkind.VTRUE) {
-        v.tt_ = uint8(1 | 1 << 4)
+        v.tt_ = uint8(LUA_TBOOLEAN | (1 << 4))
         return 1
     } elif (_cond == expkind.VNIL) {
-        v.tt_ = uint8(0 | 0 << 4)
+        v.tt_ = uint8(LUA_TNIL | (0 << 4))
         return 1
     } elif (_cond == expkind.VKSTR) {
         {
-            {
-                var io : TValue? = v
-                var x_ : TString? = e.u.strval
-                io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-                io.tt_ = uint8(int(x_.tt) | 1 << 6)
-                let _t0 = fs.ls.L
-            }
-            return 1
+            var io : TValue? = v
+            var x_ : TString? = e.u.strval
+            io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
+            io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
+            let _t0 = fs.ls.L
         }
+        return 1
     } elif (_cond == expkind.VCONST) {
         {
-            {
-                var io1 : TValue? = v
-                var io2 : TValue? = const2val(fs, e)
-                io1.value_ = io2.value_
-                io1.tt_ = io2.tt_
-                let _t1 = fs.ls.L
-            }
-            return 1
+            var io1 : TValue? = v
+            var io2 : TValue? = const2val(fs, e)
+            io1.value_ = io2.value_
+            io1.tt_ = io2.tt_
+            let _t1 = fs.ls.L
         }
+        return 1
     } else {
         return tonumeral(e, v)
     }
-    return 0
 }
 
 // Return the previous instruction of the current code. If there
@@ -137,7 +155,7 @@ def luaK_exp2const(var fs : FuncState?; var e : expdesc?; var v : TValue?) : int
 def private previousinstruction(var fs : FuncState?) : uint? {
     if (fs.pc > fs.lasttarget) {
         // previous instruction
-        return addr(deref(fs.f.code + (fs.pc - 1)))
+        return addr(fs.f.code[fs.pc - 1])
     } else {
         return addr(previousinstruction_invalidinstruction)
     }
@@ -153,11 +171,11 @@ def luaK_nil(var fs : FuncState?; var from : int; n : int) {
     var l : int = from + n - 1
     var previous : uint? = previousinstruction(fs)
     // previous is LOADNIL?
-    if (enum_from_int(type<OpCode>, int(deref(previous) >> 0u & ~(~uint(0) << 7u) << 0u)) == OpCode.OP_LOADNIL) {
+    if (enum_from_int(type<OpCode>, int((deref(previous) >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))) == OpCode.OP_LOADNIL) {
         // get previous range
-        var pfrom : int = int(deref(previous) >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
-        var pl : int = pfrom + int(deref(previous) >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
-        if (pfrom <= from && from <= pl + 1 || from <= pfrom && pfrom <= l + 1) {
+        var pfrom : int = int((deref(previous) >> uint(POS_A)) & (~(~0u << uint(SIZE_A)) << 0u))
+        var pl : int = pfrom + int((deref(previous) >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u))
+        if ((pfrom <= from && from <= pl + 1) || (from <= pfrom && pfrom <= l + 1)) {
             // can connect both?
             // from = min(from, pfrom)
             if (pfrom < from) {
@@ -167,8 +185,8 @@ def luaK_nil(var fs : FuncState?; var from : int; n : int) {
             if (pl > l) {
                 l = pl
             }
-            deref(previous) = deref(previous) & ~(~(~uint(0) << 8u) << uint(0 + 7)) | uint(from) << uint(0 + 7) & ~(~uint(0) << 8u) << uint(0 + 7)
-            deref(previous) = deref(previous) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1)) | uint(l - from) << uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1)
+            deref(previous) = (deref(previous) & ~(~(~0u << uint(SIZE_A)) << uint(POS_A))) | ((uint(from) << uint(POS_A)) & (~(~0u << uint(SIZE_A)) << uint(POS_A)))
+            deref(previous) = (deref(previous) & ~(~(~0u << uint(SIZE_B)) << uint(POS_B))) | ((uint(l - from) << uint(POS_B)) & (~(~0u << uint(SIZE_B)) << uint(POS_B)))
             return
         }
     }
@@ -181,14 +199,14 @@ def luaK_nil(var fs : FuncState?; var from : int; n : int) {
 // a list of jumps.
 [c_function]
 def private getjump(var fs : FuncState?; pc : int) : int {
-    var offset : int = int(deref(fs.f.code + pc) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1)
+    var offset : int = int((fs.f.code[pc] >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ
     // point to itself represents end of list
     if (offset == NO_JUMP) {
         // end of list
         return NO_JUMP
     } else {
         // turn offset into absolute position
-        return pc + 1 + offset
+        return (pc + 1) + offset
     }
 }
 
@@ -196,12 +214,12 @@ def private getjump(var fs : FuncState?; pc : int) : int {
 // (Jump addresses are relative in Lua)
 [c_function]
 def private fixjump(var fs : FuncState?; pc : int; dest : int) {
-    var jmp : uint? = addr(deref(fs.f.code + pc))
+    var jmp : uint? = addr(fs.f.code[pc])
     var offset : int = dest - (pc + 1)
     if (!(-OFFSET_sJ <= offset && offset <= MAXARG_sJ - OFFSET_sJ)) {
-        luaX_syntaxerror(fs.ls, reinterpret<uint8?>("control structure too long"))
+        luaX_syntaxerror(fs.ls, cstr("control structure too long"))
     }
-    deref(jmp) = deref(jmp) & ~(~(~uint(0) << uint(8 + 8 + 1 + 8)) << uint(0 + 7)) | uint(offset + ((1 << 8 + 8 + 1 + 8) - 1 >> 1)) << uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << uint(0 + 7)
+    deref(jmp) = (deref(jmp) & ~(~(~0u << uint(SIZE_sJ)) << uint(POS_A))) | ((uint(offset + OFFSET_sJ) << uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << uint(POS_A)))
 }
 
 // Concatenate jump-list 'l2' into jump-list 'l1'
@@ -269,8 +287,8 @@ def luaK_getlabel(var fs : FuncState?) : int {
 // unconditional.
 [c_function]
 def private getjumpcontrol(var fs : FuncState?; pc : int) : uint? {
-    var pi : uint? = addr(deref(fs.f.code + pc))
-    if (pc >= 1 && (int(luaP_opmodes[int(enum_from_int(type<OpCode>, int(deref(pi - 1) >> 0u & ~(~uint(0) << 7u) << 0u)))]) & 1 << 4) != 0) {
+    var pi : uint? = addr(fs.f.code[pc])
+    if (pc >= 1 && (int(luaP_opmodes[int(enum_from_int(type<OpCode>, int((deref(pi - 1) >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))))]) & (1 << 4)) != 0) {
         return pi - 1
     } else {
         return pi
@@ -285,27 +303,25 @@ def private getjumpcontrol(var fs : FuncState?; pc : int) : uint? {
 [c_function]
 def private patchtestreg(var fs : FuncState?; node : int; reg : int) : int {
     var i : uint? = getjumpcontrol(fs, node)
-    if (enum_from_int(type<OpCode>, int(deref(i) >> 0u & ~(~uint(0) << 7u) << 0u)) != OpCode.OP_TESTSET) {
+    if (enum_from_int(type<OpCode>, int((deref(i) >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))) != OpCode.OP_TESTSET) {
         // cannot patch other instructions
         return 0
     }
-    if (reg != NO_REG && reg != int(deref(i) >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)) {
-        deref(i) = deref(i) & ~(~(~uint(0) << 8u) << uint(0 + 7)) | uint(reg) << uint(0 + 7) & ~(~uint(0) << 8u) << uint(0 + 7)
+    if (reg != NO_REG && reg != int((deref(i) >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u))) {
+        deref(i) = (deref(i) & ~(~(~0u << uint(SIZE_A)) << uint(POS_A))) | ((uint(reg) << uint(POS_A)) & (~(~0u << uint(SIZE_A)) << uint(POS_A)))
     } else {
         // no register to put value or register already has the value;
         // change instruction to simple test
-        deref(i) = uint(int(OpCode.OP_TEST)) << 0u | uint(int(deref(i) >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)) << uint(0 + 7) | uint(0) << uint(0 + 7 + 8 + 1) | uint(0) << uint(0 + 7 + 8 + 1 + 8) | uint(int(deref(i) >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u)) << uint(0 + 7 + 8)
+        deref(i) = (uint(int(OpCode.OP_TEST)) << uint(POS_OP)) | (uint(int((deref(i) >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u))) << uint(POS_A)) | (0u << uint(POS_B)) | (0u << uint(POS_C)) | (uint(int((deref(i) >> uint(POS_k)) & (~(~0u << 1u) << 0u))) << uint(POS_k))
     }
     return 1
 }
 
 // Traverse a list of tests ensuring no one produces a value
 def private removevalues(var fs : FuncState?; var list : int) {
-    {
-        while (list != NO_JUMP) {
-            patchtestreg(fs, list, NO_REG)
-            list = getjump(fs, list)
-        }
+    while (list != NO_JUMP) {
+        patchtestreg(fs, list, NO_REG)
+        list = getjump(fs, list)
     }
 }
 
@@ -355,18 +371,18 @@ def private savelineinfo(var fs : FuncState?; var f : Proto?; line : int) {
         _t1 = int(_t0) >= MAXIWTHABS
     }
     if (_t1) {
-        f.abslineinfo = reinterpret<AbsLineInfo?>(luaM_growaux_(fs.ls.L, reinterpret<void?>(f.abslineinfo), fs.nabslineinfo, addr(f.sizeabslineinfo), int(uint64(typeinfo sizeof(type<AbsLineInfo>))), int(uint64(2147483647) <= ~uint64(0) / uint64(typeinfo sizeof(type<AbsLineInfo>)) ? uint(2147483647) : uint(~uint64(0) / uint64(typeinfo sizeof(type<AbsLineInfo>)))), reinterpret<uint8?>("lines")))
-        deref(f.abslineinfo + fs.nabslineinfo).pc = pc
+        f.abslineinfo = reinterpret<AbsLineInfo?>(luaM_growaux_(fs.ls.L, reinterpret<void?>(f.abslineinfo), fs.nabslineinfo, addr(f.sizeabslineinfo), int(uint64(typeinfo sizeof(type<AbsLineInfo>))), int(2147483647ul <= MAX_SIZET / uint64(typeinfo sizeof(type<AbsLineInfo>)) ? 2147483647u : uint(MAX_SIZET / uint64(typeinfo sizeof(type<AbsLineInfo>)))), cstr("lines")))
+        f.abslineinfo[fs.nabslineinfo].pc = pc
         let _t2 = fs.nabslineinfo
         fs.nabslineinfo++
-        deref(f.abslineinfo + _t2).line = line
+        f.abslineinfo[_t2].line = line
         // signal that there is absolute information
         linedif = ABSLINEINFO
         // restart counter
-        fs.iwthabs = uint8(1)
+        fs.iwthabs = 1u8
     }
-    f.lineinfo = reinterpret<int8?>(luaM_growaux_(fs.ls.L, reinterpret<void?>(f.lineinfo), pc, addr(f.sizelineinfo), int(uint64(typeinfo sizeof(type<int8>))), int(uint64(2147483647) <= ~uint64(0) / uint64(typeinfo sizeof(type<int8>)) ? uint(2147483647) : uint(~uint64(0) / uint64(typeinfo sizeof(type<int8>)))), reinterpret<uint8?>("opcodes")))
-    deref(f.lineinfo + pc) = int8(linedif)
+    f.lineinfo = reinterpret<int8?>(luaM_growaux_(fs.ls.L, reinterpret<void?>(f.lineinfo), pc, addr(f.sizelineinfo), int(uint64(typeinfo sizeof(type<int8>))), int(2147483647ul <= MAX_SIZET / uint64(typeinfo sizeof(type<int8>)) ? 2147483647u : uint(MAX_SIZET / uint64(typeinfo sizeof(type<int8>)))), cstr("opcodes")))
+    f.lineinfo[pc] = int8(linedif)
     // last line saved
     fs.previousline = line
 }
@@ -381,9 +397,9 @@ def private removelastlineinfo(var fs : FuncState?) {
     // last instruction coded
     var pc : int = fs.pc - 1
     // relative line info?
-    if (int(deref(f.lineinfo + pc)) != ABSLINEINFO) {
+    if (int(f.lineinfo[pc]) != ABSLINEINFO) {
         // correct last line saved
-        fs.previousline -= int(deref(f.lineinfo + pc))
+        fs.previousline -= int(f.lineinfo[pc])
         // undo previous increment
         fs.iwthabs = uint8(uint(fs.iwthabs) - 1)
     } else {
@@ -408,10 +424,10 @@ def private removelastinstruction(var fs : FuncState?) {
 def luaK_code(var fs : FuncState?; i : uint) : int {
     var f : Proto? = fs.f
     // put new instruction in code array
-    f.code = reinterpret<uint?>(luaM_growaux_(fs.ls.L, reinterpret<void?>(f.code), fs.pc, addr(f.sizecode), int(uint64(typeinfo sizeof(type<uint>))), int(uint64(2147483647) <= ~uint64(0) / uint64(typeinfo sizeof(type<uint>)) ? uint(2147483647) : uint(~uint64(0) / uint64(typeinfo sizeof(type<uint>)))), reinterpret<uint8?>("opcodes")))
+    f.code = reinterpret<uint?>(luaM_growaux_(fs.ls.L, reinterpret<void?>(f.code), fs.pc, addr(f.sizecode), int(uint64(typeinfo sizeof(type<uint>))), int(2147483647ul <= MAX_SIZET / uint64(typeinfo sizeof(type<uint>)) ? 2147483647u : uint(MAX_SIZET / uint64(typeinfo sizeof(type<uint>)))), cstr("opcodes")))
     let _t0 = fs.pc
     fs.pc++
-    deref(f.code + _t0) = i
+    f.code[_t0] = i
     savelineinfo(fs, f, fs.ls.lastline)
     // index of new instruction
     return fs.pc - 1
@@ -420,29 +436,29 @@ def luaK_code(var fs : FuncState?; i : uint) : int {
 // Format and emit an 'iABC' instruction. (Assertions check consistency
 // of parameters versus opcode.)
 def luaK_codeABCk(var fs : FuncState?; o : OpCode; a : int; b : int; c : int; k : int) : int {
-    return luaK_code(fs, uint(int(o)) << 0u | uint(a) << uint(0 + 7) | uint(b) << uint(0 + 7 + 8 + 1) | uint(c) << uint(0 + 7 + 8 + 1 + 8) | uint(k) << uint(0 + 7 + 8))
+    return luaK_code(fs, (uint(int(o)) << uint(POS_OP)) | (uint(a) << uint(POS_A)) | (uint(b) << uint(POS_B)) | (uint(c) << uint(POS_C)) | (uint(k) << uint(POS_k)))
 }
 
 // Format and emit an 'iABx' instruction.
 def luaK_codeABx(var fs : FuncState?; o : OpCode; a : int; bc : uint) : int {
-    return luaK_code(fs, uint(int(o)) << 0u | uint(a) << uint(0 + 7) | bc << uint(0 + 7 + 8))
+    return luaK_code(fs, (uint(int(o)) << uint(POS_OP)) | (uint(a) << uint(POS_A)) | (bc << uint(POS_k)))
 }
 
 // Format and emit an 'iAsBx' instruction.
 def private codeAsBx(var fs : FuncState?; o : OpCode; a : int; bc : int) : int {
     var b : uint = uint(bc + OFFSET_sBx)
-    return luaK_code(fs, uint(int(o)) << 0u | uint(a) << uint(0 + 7) | b << uint(0 + 7 + 8))
+    return luaK_code(fs, (uint(int(o)) << uint(POS_OP)) | (uint(a) << uint(POS_A)) | (b << uint(POS_k)))
 }
 
 // Format and emit an 'isJ' instruction.
 def private codesJ(var fs : FuncState?; o : OpCode; sj : int; k : int) : int {
     var j : uint = uint(sj + OFFSET_sJ)
-    return luaK_code(fs, uint(int(o)) << 0u | j << uint(0 + 7) | uint(k) << uint(0 + 7 + 8))
+    return luaK_code(fs, (uint(int(o)) << uint(POS_OP)) | (j << uint(POS_A)) | (uint(k) << uint(POS_k)))
 }
 
 // Emit an "extra argument" instruction (format 'iAx')
 def private codeextraarg(var fs : FuncState?; a : int) : int {
-    return luaK_code(fs, uint(int(OpCode.OP_EXTRAARG)) << 0u | uint(a) << uint(0 + 7))
+    return luaK_code(fs, (uint(int(OpCode.OP_EXTRAARG)) << uint(POS_OP)) | (uint(a) << uint(POS_A)))
 }
 
 // Emit a "load constant" instruction, using either 'OP_LOADK'
@@ -452,7 +468,7 @@ def private luaK_codek(var fs : FuncState?; reg : int; k : int) : int {
     if (k <= MAXARG_Bx) {
         return luaK_codeABx(fs, OpCode.OP_LOADK, reg, uint(k))
     } else {
-        var p : int = luaK_codeABx(fs, OpCode.OP_LOADKX, reg, uint(0))
+        var p : int = luaK_codeABx(fs, OpCode.OP_LOADKX, reg, 0u)
         codeextraarg(fs, k)
         return p
     }
@@ -460,12 +476,11 @@ def private luaK_codek(var fs : FuncState?; reg : int; k : int) : int {
 
 // Check register-stack level, keeping track of its maximum size
 // in field 'maxstacksize'
-[c_function]
 def luaK_checkstack(var fs : FuncState?; n : int) {
     var newstack : int = int(fs.freereg) + n
     if (newstack > int(fs.f.maxstacksize)) {
         if (newstack >= MAXREGS) {
-            luaX_syntaxerror(fs.ls, reinterpret<uint8?>("function or expression needs too many registers"))
+            luaX_syntaxerror(fs.ls, cstr("function or expression needs too many registers"))
         }
         fs.f.maxstacksize = uint8(newstack)
     }
@@ -507,8 +522,8 @@ def private freeexp(var fs : FuncState?; var e : expdesc?) {
 // Free registers used by expressions 'e1' and 'e2' (if any) in proper
 // order.
 def private freeexps(var fs : FuncState?; var e1 : expdesc?; var e2 : expdesc?) {
-    var r1 : int = e1.k == expkind.VNONRELOC ? e1.u.info : -1
-    var r2 : int = e2.k == expkind.VNONRELOC ? e2.u.info : -1
+    var r1 : int = (e1.k == expkind.VNONRELOC) ? e1.u.info : -1
+    var r2 : int = (e2.k == expkind.VNONRELOC) ? e2.u.info : -1
     freeregs(fs, r1, r2)
 }
 
@@ -529,10 +544,10 @@ def private addk(var fs : FuncState?; var key : TValue?; var v : TValue?) : int 
     var k : int
     var oldsize : int
     // is there an index there?
-    if (int(idx.tt_) == (3 | 0 << 4)) {
+    if (int(idx.tt_) == (LUA_TNUMBER | (0 << 4))) {
         k = int(idx.value_.i)
         // correct value? (warning: must distinguish floats from integers!)
-        if (k < fs.nk && (int(addr(deref(f.k + k)).tt_) & 63) == (int(v.tt_) & 63) && luaV_equalobj(null, addr(deref(f.k + k)), v) != 0) {
+        if (k < fs.nk && (int(addr(f.k[k]).tt_) & 63) == (int(v.tt_) & 63) && luaV_equalobj(null, addr(f.k[k]), v) != 0) {
             // reuse index
             return k
         }
@@ -545,24 +560,24 @@ def private addk(var fs : FuncState?; var key : TValue?; var v : TValue?) : int 
         // table has no metatable, so it does not need to invalidate cache
         var io : TValue? = addr(val)
         io.value_.i = int64(k)
-        io.tt_ = uint8(3 | 0 << 4)
+        io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
     }
     luaH_finishset(L, fs.ls.h, key, idx, addr(val))
-    f.k = reinterpret<TValue?>(luaM_growaux_(L, reinterpret<void?>(f.k), k, addr(f.sizek), int(uint64(typeinfo sizeof(type<TValue>))), int(uint64((1 << 8 + 8 + 1 + 8) - 1) <= ~uint64(0) / uint64(typeinfo sizeof(type<TValue>)) ? uint((1 << 8 + 8 + 1 + 8) - 1) : uint(~uint64(0) / uint64(typeinfo sizeof(type<TValue>)))), reinterpret<uint8?>("constants")))
+    f.k = reinterpret<TValue?>(luaM_growaux_(L, reinterpret<void?>(f.k), k, addr(f.sizek), int(uint64(typeinfo sizeof(type<TValue>))), int(uint64(MAXARG_Ax) <= MAX_SIZET / uint64(typeinfo sizeof(type<TValue>)) ? uint(MAXARG_Ax) : uint(MAX_SIZET / uint64(typeinfo sizeof(type<TValue>)))), cstr("constants")))
     while (oldsize < f.sizek) {
         let _t0 = oldsize
         oldsize++
-        addr(deref(f.k + _t0)).tt_ = uint8(0 | 0 << 4)
+        addr(f.k[_t0]).tt_ = uint8(LUA_TNIL | (0 << 4))
     }
     {
-        var io1 : TValue? = addr(deref(f.k + k))
+        var io1 : TValue? = addr(f.k[k])
         var io2 : TValue? = v
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
     fs.nk++
-    if ((int(v.tt_) & 1 << 6) != 0) {
-        if ((int(f.marked) & 1 << 5) != 0 && (int(v.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+    if ((int(v.tt_) & BIT_ISCOLLECTABLE) != 0) {
+        if ((int(f.marked) & (1 << BLACKBIT)) != 0 && (int(v.value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
             luaC_barrier_(L, addr(reinterpret<GCUnion?>(f).gc), addr(reinterpret<GCUnion?>(v.value_.gc).gc))
         }
     }
@@ -577,7 +592,7 @@ def private stringK(var fs : FuncState?; var s : TString?) : int {
         var io : TValue? = addr(o)
         var x_ : TString? = s
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8(int(x_.tt) | 1 << 6)
+        io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
         let _t0 = fs.ls.L
     }
     // use string itself as key
@@ -591,7 +606,7 @@ def private luaK_intK(var fs : FuncState?; n : int64) : int {
     {
         var io : TValue? = addr(o)
         io.value_.i = n
-        io.tt_ = uint8(3 | 0 << 4)
+        io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
     }
     // use integer itself as key
     return addk(fs, addr(o), addr(o))
@@ -613,7 +628,7 @@ def private luaK_numberK(var fs : FuncState?; r : double) : int {
     {
         var io : TValue? = addr(o)
         io.value_.n = r
-        io.tt_ = uint8(3 | 1 << 4)
+        io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
     }
     // not an integral value?
     if (!(lvm::luaV_flttointeger(r, addr(ik), F2Imod.F2Ieq) != 0)) {
@@ -624,12 +639,12 @@ def private luaK_numberK(var fs : FuncState?; r : double) : int {
         var nbm : int = 53
         var q : double = crt::ldexp(1.0lf, -nbm + 1)
         // new key
-        var k : double = ik == int64(0) ? q : r + r * q
+        var k : double = (ik == 0l) ? q : r + r * q
         var kv : TValue
         {
             var io : TValue? = addr(kv)
             io.value_.n = k
-            io.tt_ = uint8(3 | 1 << 4)
+            io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
         }
         // result is not an integral value, unless value is too large
         return addk(fs, addr(kv), addr(o))
@@ -640,7 +655,7 @@ def private luaK_numberK(var fs : FuncState?; r : double) : int {
 [c_function]
 def private boolF(var fs : FuncState?) : int {
     var o : TValue
-    addr(o).tt_ = uint8(1 | 0 << 4)
+    addr(o).tt_ = uint8(LUA_TBOOLEAN | (0 << 4))
     // use boolean itself as key
     return addk(fs, addr(o), addr(o))
 }
@@ -649,7 +664,7 @@ def private boolF(var fs : FuncState?) : int {
 [c_function]
 def private boolT(var fs : FuncState?) : int {
     var o : TValue
-    addr(o).tt_ = uint8(1 | 1 << 4)
+    addr(o).tt_ = uint8(LUA_TBOOLEAN | (1 << 4))
     // use boolean itself as key
     return addk(fs, addr(o), addr(o))
 }
@@ -659,13 +674,13 @@ def private boolT(var fs : FuncState?) : int {
 def private nilK(var fs : FuncState?) : int {
     var k : TValue
     var v : TValue
-    addr(v).tt_ = uint8(0 | 0 << 4)
+    addr(v).tt_ = uint8(LUA_TNIL | (0 << 4))
     {
         // cannot use nil as key; instead use table itself to represent nil
         var io : TValue? = addr(k)
         var x_ : Table? = fs.ls.h
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8(5 | 0 << 4 | 1 << 6)
+        io.tt_ = uint8((LUA_TTABLE | (0 << 4)) | BIT_ISCOLLECTABLE)
         let _t0 = fs.ls.L
     }
     return addk(fs, addr(k), addr(v))
@@ -675,12 +690,12 @@ def private nilK(var fs : FuncState?) : int {
 // (0 <= int2sC(i) && int2sC(i) <= MAXARG_C) but without risk of
 // overflows in the hidden addition inside 'int2sC'.
 def private fitsC(i : int64) : int {
-    return uint64(i) + uint64(OFFSET_sC) <= uint64(uint((1 << 8) - 1)) ? 1 : 0
+    return (uint64(i) + uint64(OFFSET_sC) <= uint64(uint(MAXARG_C))) ? 1 : 0
 }
 
 // Check whether 'i' can be stored in an 'sBx' operand.
 def private fitsBx(i : int64) : int {
-    return int64(-OFFSET_sBx) <= i && i <= int64(MAXARG_Bx - OFFSET_sBx) ? 1 : 0
+    return (int64(-OFFSET_sBx) <= i && i <= int64(MAXARG_Bx - OFFSET_sBx)) ? 1 : 0
 }
 
 def luaK_int(var fs : FuncState?; reg : int; i : int64) {
@@ -728,13 +743,13 @@ def private const2exp(var v : TValue?; var e : expdesc?) {
 // 'e' must be a multi-ret expression (function call or vararg).
 [c_function]
 def luaK_setreturns(var fs : FuncState?; var e : expdesc?; nresults : int) {
-    var pc : uint? = addr(deref(fs.f.code + e.u.info))
+    var pc : uint? = addr(fs.f.code[e.u.info])
     // expression is an open function call?
     if (e.k == expkind.VCALL) {
-        deref(pc) = deref(pc) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)) | uint(nresults + 1) << uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)
+        deref(pc) = (deref(pc) & ~(~(~0u << uint(SIZE_C)) << uint(POS_C))) | ((uint(nresults + 1) << uint(POS_C)) & (~(~0u << uint(SIZE_C)) << uint(POS_C)))
     } else {
-        deref(pc) = deref(pc) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)) | uint(nresults + 1) << uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)
-        deref(pc) = deref(pc) & ~(~(~uint(0) << 8u) << uint(0 + 7)) | uint(fs.freereg) << uint(0 + 7) & ~(~uint(0) << 8u) << uint(0 + 7)
+        deref(pc) = (deref(pc) & ~(~(~0u << uint(SIZE_C)) << uint(POS_C))) | ((uint(nresults + 1) << uint(POS_C)) & (~(~0u << uint(SIZE_C)) << uint(POS_C)))
+        deref(pc) = (deref(pc) & ~(~(~0u << uint(SIZE_A)) << uint(POS_A))) | ((uint(fs.freereg) << uint(POS_A)) & (~(~0u << uint(SIZE_A)) << uint(POS_A)))
         luaK_reserveregs(fs, 1)
     }
 }
@@ -760,9 +775,9 @@ def luaK_setoneret(var fs : FuncState?; var e : expdesc?) {
         // already returns 1 value
         // result has fixed position
         e.k = expkind.VNONRELOC
-        e.u.info = int(deref(fs.f.code + e.u.info) >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+        e.u.info = int((fs.f.code[e.u.info] >> uint(POS_A)) & (~(~0u << uint(SIZE_A)) << 0u))
     } elif (e.k == expkind.VVARARG) {
-        deref(fs.f.code + e.u.info) = deref(fs.f.code + e.u.info) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)) | uint(2) << uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)
+        fs.f.code[e.u.info] = (fs.f.code[e.u.info] & ~(~(~0u << uint(SIZE_C)) << uint(POS_C))) | ((2u << uint(POS_C)) & (~(~0u << uint(SIZE_C)) << uint(POS_C)))
         // can relocate its simple result
         e.k = expkind.VRELOC
     }
@@ -773,9 +788,7 @@ def luaK_setoneret(var fs : FuncState?; var e : expdesc?) {
 def luaK_dischargevars(var fs : FuncState?; var e : expdesc?) {
     let _cond = e.k
     if (_cond == expkind.VCONST) {
-        {
-            const2exp(const2val(fs, e), e)
-        }
+        const2exp(const2val(fs, e), e)
     } elif (_cond == expkind.VLOCAL) {
         {
             // already in a register
@@ -786,38 +799,26 @@ def luaK_dischargevars(var fs : FuncState?; var e : expdesc?) {
             e.k = expkind.VNONRELOC
         }
     } elif (_cond == expkind.VUPVAL) {
-        {
-            // move value to some (pending) register
-            e.u.info = luaK_codeABCk(fs, OpCode.OP_GETUPVAL, 0, e.u.info, 0, 0)
-            e.k = expkind.VRELOC
-        }
+        // move value to some (pending) register
+        e.u.info = luaK_codeABCk(fs, OpCode.OP_GETUPVAL, 0, e.u.info, 0, 0)
+        e.k = expkind.VRELOC
     } elif (_cond == expkind.VINDEXUP) {
-        {
-            e.u.info = luaK_codeABCk(fs, OpCode.OP_GETTABUP, 0, int(e.u.ind.t), int(e.u.ind.idx), 0)
-            e.k = expkind.VRELOC
-        }
+        e.u.info = luaK_codeABCk(fs, OpCode.OP_GETTABUP, 0, int(e.u.ind.t), int(e.u.ind.idx), 0)
+        e.k = expkind.VRELOC
     } elif (_cond == expkind.VINDEXI) {
-        {
-            freereg(fs, int(e.u.ind.t))
-            e.u.info = luaK_codeABCk(fs, OpCode.OP_GETI, 0, int(e.u.ind.t), int(e.u.ind.idx), 0)
-            e.k = expkind.VRELOC
-        }
+        freereg(fs, int(e.u.ind.t))
+        e.u.info = luaK_codeABCk(fs, OpCode.OP_GETI, 0, int(e.u.ind.t), int(e.u.ind.idx), 0)
+        e.k = expkind.VRELOC
     } elif (_cond == expkind.VINDEXSTR) {
-        {
-            freereg(fs, int(e.u.ind.t))
-            e.u.info = luaK_codeABCk(fs, OpCode.OP_GETFIELD, 0, int(e.u.ind.t), int(e.u.ind.idx), 0)
-            e.k = expkind.VRELOC
-        }
+        freereg(fs, int(e.u.ind.t))
+        e.u.info = luaK_codeABCk(fs, OpCode.OP_GETFIELD, 0, int(e.u.ind.t), int(e.u.ind.idx), 0)
+        e.k = expkind.VRELOC
     } elif (_cond == expkind.VINDEXED) {
-        {
-            freeregs(fs, int(e.u.ind.t), int(e.u.ind.idx))
-            e.u.info = luaK_codeABCk(fs, OpCode.OP_GETTABLE, 0, int(e.u.ind.t), int(e.u.ind.idx), 0)
-            e.k = expkind.VRELOC
-        }
+        freeregs(fs, int(e.u.ind.t), int(e.u.ind.idx))
+        e.u.info = luaK_codeABCk(fs, OpCode.OP_GETTABLE, 0, int(e.u.ind.t), int(e.u.ind.idx), 0)
+        e.k = expkind.VRELOC
     } elif (_cond == expkind.VVARARG || _cond == expkind.VCALL) {
-        {
-            luaK_setoneret(fs, e)
-        }
+        luaK_setoneret(fs, e)
     } else {
     }
 }
@@ -832,70 +833,52 @@ def private discharge2reg(var fs : FuncState?; var e : expdesc?; reg : int) {
     while (true) {
         var _flag = false
         if (_cond == expkind.VNIL) {
-            {
-                luaK_nil(fs, reg, 1)
-                break
-            }
+            luaK_nil(fs, reg, 1)
+            break
         }
         if (_cond == expkind.VFALSE) {
-            {
-                luaK_codeABCk(fs, OpCode.OP_LOADFALSE, reg, 0, 0, 0)
-                break
-            }
+            luaK_codeABCk(fs, OpCode.OP_LOADFALSE, reg, 0, 0, 0)
+            break
         }
         if (_cond == expkind.VTRUE) {
-            {
-                luaK_codeABCk(fs, OpCode.OP_LOADTRUE, reg, 0, 0, 0)
-                break
-            }
+            luaK_codeABCk(fs, OpCode.OP_LOADTRUE, reg, 0, 0, 0)
+            break
         }
         _flag ||= _cond == expkind.VKSTR
         if (_flag) {
-            {
-                str2K(fs, e)
-            }
+            str2K(fs, e)
         }
         _flag ||= _cond == expkind.VK
         if (_flag) {
-            {
-                // FALLTHROUGH
-                luaK_codek(fs, reg, e.u.info)
-                break
-            }
+            // FALLTHROUGH
+            luaK_codek(fs, reg, e.u.info)
+            break
         }
         if (_cond == expkind.VKFLT) {
-            {
-                luaK_float(fs, reg, e.u.nval)
-                break
-            }
+            luaK_float(fs, reg, e.u.nval)
+            break
         }
         if (_cond == expkind.VKINT) {
-            {
-                luaK_int(fs, reg, e.u.ival)
-                break
-            }
+            luaK_int(fs, reg, e.u.ival)
+            break
         }
         if (_cond == expkind.VRELOC) {
             {
-                var pc : uint? = addr(deref(fs.f.code + e.u.info))
+                var pc : uint? = addr(fs.f.code[e.u.info])
                 // instruction will put result in 'reg'
-                deref(pc) = deref(pc) & ~(~(~uint(0) << 8u) << uint(0 + 7)) | uint(reg) << uint(0 + 7) & ~(~uint(0) << 8u) << uint(0 + 7)
+                deref(pc) = (deref(pc) & ~(~(~0u << uint(SIZE_A)) << uint(POS_A))) | ((uint(reg) << uint(POS_A)) & (~(~0u << uint(SIZE_A)) << uint(POS_A)))
                 break
             }
         }
         if (_cond == expkind.VNONRELOC) {
-            {
-                if (reg != e.u.info) {
-                    luaK_codeABCk(fs, OpCode.OP_MOVE, reg, e.u.info, 0, 0)
-                }
-                break
+            if (reg != e.u.info) {
+                luaK_codeABCk(fs, OpCode.OP_MOVE, reg, e.u.info, 0, 0)
             }
+            break
         }
         if (!(_cond == expkind.VNIL || _cond == expkind.VFALSE || _cond == expkind.VTRUE || _cond == expkind.VKSTR || _cond == expkind.VK || _cond == expkind.VKFLT || _cond == expkind.VKINT || _cond == expkind.VRELOC || _cond == expkind.VNONRELOC)) {
-            {
-                // nothing to do...
-                return
-            }
+            // nothing to do...
+            return
         }
         break
     }
@@ -926,14 +909,12 @@ def private code_loadbool(var fs : FuncState?; A : int; op : OpCode) : int {
 // or produce an inverted value
 [c_function]
 def private need_value(var fs : FuncState?; var list : int) : int {
-    {
-        while (list != NO_JUMP) {
-            var i : uint = deref(getjumpcontrol(fs, list))
-            if (enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u)) != OpCode.OP_TESTSET) {
-                return 1
-            }
-            list = getjump(fs, list)
+    while (list != NO_JUMP) {
+        var i : uint = deref(getjumpcontrol(fs, list))
+        if (enum_from_int(type<OpCode>, int((i >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))) != OpCode.OP_TESTSET) {
+            return 1
         }
+        list = getjump(fs, list)
     }
     // not found
     return 0
@@ -960,7 +941,7 @@ def private exp2reg(var fs : FuncState?; var e : expdesc?; reg : int) {
         // position of an eventual LOAD true
         var p_t : int = NO_JUMP
         if (need_value(fs, e.t) != 0 || need_value(fs, e.f) != 0) {
-            var fj : int = e.k == expkind.VJMP ? NO_JUMP : luaK_jump(fs)
+            var fj : int = (e.k == expkind.VJMP) ? NO_JUMP : luaK_jump(fs)
             // skip next inst.
             p_f = code_loadbool(fs, reg, OpCode.OP_LFALSESKIP)
             p_t = code_loadbool(fs, reg, OpCode.OP_LOADTRUE)
@@ -1089,33 +1070,23 @@ def private codeABRK(var fs : FuncState?; o : OpCode; a : int; b : int; var ec :
 def luaK_storevar(var fs : FuncState?; var _c_var : expdesc?; var ex : expdesc?) {
     let _cond = _c_var.k
     if (_cond == expkind.VLOCAL) {
-        {
-            freeexp(fs, ex)
-            // compute 'ex' into proper place
-            exp2reg(fs, ex, int(_c_var.u._c_var.ridx))
-            return
-        }
+        freeexp(fs, ex)
+        // compute 'ex' into proper place
+        exp2reg(fs, ex, int(_c_var.u._c_var.ridx))
+        return
     } elif (_cond == expkind.VUPVAL) {
         {
             var e : int = luaK_exp2anyreg(fs, ex)
             luaK_codeABCk(fs, OpCode.OP_SETUPVAL, e, _c_var.u.info, 0, 0)
         }
     } elif (_cond == expkind.VINDEXUP) {
-        {
-            codeABRK(fs, OpCode.OP_SETTABUP, int(_c_var.u.ind.t), int(_c_var.u.ind.idx), ex)
-        }
+        codeABRK(fs, OpCode.OP_SETTABUP, int(_c_var.u.ind.t), int(_c_var.u.ind.idx), ex)
     } elif (_cond == expkind.VINDEXI) {
-        {
-            codeABRK(fs, OpCode.OP_SETI, int(_c_var.u.ind.t), int(_c_var.u.ind.idx), ex)
-        }
+        codeABRK(fs, OpCode.OP_SETI, int(_c_var.u.ind.t), int(_c_var.u.ind.idx), ex)
     } elif (_cond == expkind.VINDEXSTR) {
-        {
-            codeABRK(fs, OpCode.OP_SETFIELD, int(_c_var.u.ind.t), int(_c_var.u.ind.idx), ex)
-        }
+        codeABRK(fs, OpCode.OP_SETFIELD, int(_c_var.u.ind.t), int(_c_var.u.ind.idx), ex)
     } elif (_cond == expkind.VINDEXED) {
-        {
-            codeABRK(fs, OpCode.OP_SETTABLE, int(_c_var.u.ind.t), int(_c_var.u.ind.idx), ex)
-        }
+        codeABRK(fs, OpCode.OP_SETTABLE, int(_c_var.u.ind.t), int(_c_var.u.ind.idx), ex)
     } else {
         // invalid var kind to store
     }
@@ -1143,7 +1114,7 @@ def luaK_self(var fs : FuncState?; var e : expdesc?; var key : expdesc?) {
 [c_function]
 def private negatecondition(var fs : FuncState?; var e : expdesc?) {
     var pc : uint? = getjumpcontrol(fs, e.u.info)
-    deref(pc) = deref(pc) & ~(~(~uint(0) << 1u) << uint(0 + 7 + 8)) | uint(int(deref(pc) >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u) ^ 1) << uint(0 + 7 + 8) & ~(~uint(0) << 1u) << uint(0 + 7 + 8)
+    deref(pc) = (deref(pc) & ~(~(~0u << 1u) << uint(POS_k))) | ((uint(int((deref(pc) >> uint(POS_k)) & (~(~0u << 1u) << 0u)) ^ 1) << uint(POS_k)) & (~(~0u << 1u) << uint(POS_k)))
 }
 
 // Emit instruction to jump if 'e' is 'cond' (that is, if 'cond'
@@ -1153,11 +1124,11 @@ def private negatecondition(var fs : FuncState?; var e : expdesc?) {
 [c_function]
 def private jumponcond(var fs : FuncState?; var e : expdesc?; cond : int) : int {
     if (e.k == expkind.VRELOC) {
-        var ie : uint = deref(fs.f.code + e.u.info)
-        if (enum_from_int(type<OpCode>, int(ie >> 0u & ~(~uint(0) << 7u) << 0u)) == OpCode.OP_NOT) {
+        var ie : uint = fs.f.code[e.u.info]
+        if (enum_from_int(type<OpCode>, int((ie >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))) == OpCode.OP_NOT) {
             // remove previous OP_NOT
             removelastinstruction(fs)
-            return condjump(fs, OpCode.OP_TEST, int(ie >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u), 0, 0, !(cond != 0) ? 1 : 0)
+            return condjump(fs, OpCode.OP_TEST, int((ie >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u)), 0, 0, !(cond != 0) ? 1 : 0)
         }
     }
     // else go through
@@ -1174,23 +1145,17 @@ def luaK_goiftrue(var fs : FuncState?; var e : expdesc?) {
     luaK_dischargevars(fs, e)
     let _cond = e.k
     if (_cond == expkind.VJMP) {
-        {
-            // condition?
-            // jump when it is false
-            negatecondition(fs, e)
-            // save jump position
-            pc = e.u.info
-        }
+        // condition?
+        // jump when it is false
+        negatecondition(fs, e)
+        // save jump position
+        pc = e.u.info
     } elif (_cond == expkind.VK || _cond == expkind.VKFLT || _cond == expkind.VKINT || _cond == expkind.VKSTR || _cond == expkind.VTRUE) {
-        {
-            // always true; do nothing
-            pc = NO_JUMP
-        }
+        // always true; do nothing
+        pc = NO_JUMP
     } else {
-        {
-            // jump when false
-            pc = jumponcond(fs, e, 0)
-        }
+        // jump when false
+        pc = jumponcond(fs, e, 0)
     }
     // insert new jump in false list
     luaK_concat(fs, addr(e.f), pc)
@@ -1207,20 +1172,14 @@ def luaK_goiffalse(var fs : FuncState?; var e : expdesc?) {
     luaK_dischargevars(fs, e)
     let _cond = e.k
     if (_cond == expkind.VJMP) {
-        {
-            // already jump if true
-            pc = e.u.info
-        }
+        // already jump if true
+        pc = e.u.info
     } elif (_cond == expkind.VNIL || _cond == expkind.VFALSE) {
-        {
-            // always false; do nothing
-            pc = NO_JUMP
-        }
+        // always false; do nothing
+        pc = NO_JUMP
     } else {
-        {
-            // jump if true
-            pc = jumponcond(fs, e, 1)
-        }
+        // jump if true
+        pc = jumponcond(fs, e, 1)
     }
     // insert new jump in 't' list
     luaK_concat(fs, addr(e.t), pc)
@@ -1233,26 +1192,18 @@ def luaK_goiffalse(var fs : FuncState?; var e : expdesc?) {
 def private codenot(var fs : FuncState?; var e : expdesc?) {
     let _cond = e.k
     if (_cond == expkind.VNIL || _cond == expkind.VFALSE) {
-        {
-            // true == not nil == not false
-            e.k = expkind.VTRUE
-        }
+        // true == not nil == not false
+        e.k = expkind.VTRUE
     } elif (_cond == expkind.VK || _cond == expkind.VKFLT || _cond == expkind.VKINT || _cond == expkind.VKSTR || _cond == expkind.VTRUE) {
-        {
-            // false == not "x" == not 0.5 == not 1 == not true
-            e.k = expkind.VFALSE
-        }
+        // false == not "x" == not 0.5 == not 1 == not true
+        e.k = expkind.VFALSE
     } elif (_cond == expkind.VJMP) {
-        {
-            negatecondition(fs, e)
-        }
+        negatecondition(fs, e)
     } elif (_cond == expkind.VRELOC || _cond == expkind.VNONRELOC) {
-        {
-            discharge2anyreg(fs, e)
-            freeexp(fs, e)
-            e.u.info = luaK_codeABCk(fs, OpCode.OP_NOT, 0, e.u.info, 0, 0)
-            e.k = expkind.VRELOC
-        }
+        discharge2anyreg(fs, e)
+        freeexp(fs, e)
+        e.u.info = luaK_codeABCk(fs, OpCode.OP_NOT, 0, e.u.info, 0, 0)
+        e.k = expkind.VRELOC
     } else {
         // cannot happen
     }
@@ -1270,18 +1221,18 @@ def private codenot(var fs : FuncState?; var e : expdesc?) {
 // Check whether expression 'e' is a short literal string
 [c_function]
 def private isKstr(var fs : FuncState?; var e : expdesc?) : int {
-    return e.k == expkind.VK && !(e.t != e.f) && e.u.info <= MAXARG_B && int(addr(deref(fs.f.k + e.u.info)).tt_) == (4 | 0 << 4 | 1 << 6) ? 1 : 0
+    return (e.k == expkind.VK && !(e.t != e.f) && e.u.info <= MAXARG_B && int(addr(fs.f.k[e.u.info]).tt_) == ((LUA_TSTRING | (0 << 4)) | BIT_ISCOLLECTABLE)) ? 1 : 0
 }
 
 // Check whether expression 'e' is a literal integer.
 def private isKint(var e : expdesc?) : int {
-    return e.k == expkind.VKINT && !(e.t != e.f) ? 1 : 0
+    return (e.k == expkind.VKINT && !(e.t != e.f)) ? 1 : 0
 }
 
 // Check whether expression 'e' is a literal integer in
 // proper range to fit in register C
 def private isCint(var e : expdesc?) : int {
-    return isKint(e) != 0 && uint64(e.u.ival) <= uint64((1 << 8) - 1) ? 1 : 0
+    return isKint(e) != 0 && (uint64(e.u.ival) <= uint64(MAXARG_C)) ? 1 : 0
 }
 
 // Check whether expression 'e' is a literal integer in
@@ -1304,7 +1255,7 @@ def private isSCnumber(var e : expdesc?; var pi : int?; var isfloat : int?) : in
         return 0
     }
     if (!(e.t != e.f) && fitsC(i) != 0) {
-        deref(pi) = int(i) + ((1 << 8) - 1 >> 1)
+        deref(pi) = int(i) + OFFSET_sC
         return 1
     } else {
         return 0
@@ -1334,7 +1285,7 @@ def luaK_indexed(var fs : FuncState?; var t : expdesc?; var k : expdesc?) {
         t.k = expkind.VINDEXUP
     } else {
         // register index of the table
-        t.u.ind.t = uint8(t.k == expkind.VLOCAL ? int(t.u._c_var.ridx) : t.u.info)
+        t.u.ind.t = uint8((t.k == expkind.VLOCAL) ? int(t.u._c_var.ridx) : t.u.info)
         if (isKstr(fs, k) != 0) {
             // literal short string
             t.u.ind.idx = int16(k.u.info)
@@ -1361,16 +1312,15 @@ def private validop(op : int; var v1 : TValue?; var v2 : TValue?) : int {
         {
             // conversion errors
             var i : int64
-            return lvm::luaV_tointegerns(v1, addr(i), F2Imod.F2Ieq) != 0 && lvm::luaV_tointegerns(v2, addr(i), F2Imod.F2Ieq) != 0 ? 1 : 0
+            return (lvm::luaV_tointegerns(v1, addr(i), F2Imod.F2Ieq) != 0 && lvm::luaV_tointegerns(v2, addr(i), F2Imod.F2Ieq) != 0) ? 1 : 0
         }
     } elif (_cond == 5 || _cond == 6 || _cond == 3) {
         // division by 0
-        return (int(v2.tt_) == (3 | 0 << 4) ? double(v2.value_.i) : v2.value_.n) != double(0) ? 1 : 0
+        return ((int(v2.tt_) == (LUA_TNUMBER | (0 << 4)) ? double(v2.value_.i) : v2.value_.n) != 0.0lf) ? 1 : 0
     } else {
         // everything else is valid
         return 1
     }
-    return 0
 }
 
 // Try to "constant-fold" an operation; return 1 iff successful.
@@ -1386,13 +1336,13 @@ def private constfolding(var fs : FuncState?; op : int; var e1 : expdesc?; var e
     }
     // does operation
     luaO_rawarith(fs.ls.L, op, addr(v1), addr(v2), addr(res))
-    if (int(addr(res).tt_) == (3 | 0 << 4)) {
+    if (int(addr(res).tt_) == (LUA_TNUMBER | (0 << 4))) {
         e1.k = expkind.VKINT
         e1.u.ival = addr(res).value_.i
     } else {
         // folds neither NaN nor 0.0 (to avoid problems with -0.0)
         var n : double = addr(res).value_.n
-        if (!(n == n) || n == double(0)) {
+        if (!(n == n) || n == 0.0lf) {
             return 0
         }
         e1.k = expkind.VKFLT
@@ -1460,7 +1410,7 @@ def private codebinexpval(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; 
 // Code binary operators with immediate operands.
 def private codebini(var fs : FuncState?; op : OpCode; var e1 : expdesc?; var e2 : expdesc?; flip : int; line : int; event : TMS) {
     // immediate operand
-    var v2 : int = int(e2.u.ival) + ((1 << 8) - 1 >> 1)
+    var v2 : int = int(e2.u.ival) + OFFSET_sC
     finishbinexpval(fs, e1, e2, op, v2, flip, line, OpCode.OP_MMBINI, event)
 }
 
@@ -1488,9 +1438,9 @@ def private finishbinexpneg(var fs : FuncState?; var e1 : expdesc?; var e2 : exp
         } else {
             // operating a small integer constant
             var v2 : int = int(i2)
-            finishbinexpval(fs, e1, e2, op, -v2 + ((1 << 8) - 1 >> 1), 0, line, OpCode.OP_MMBINI, event)
+            finishbinexpval(fs, e1, e2, op, -v2 + OFFSET_sC, 0, line, OpCode.OP_MMBINI, event)
             // correct metamethod argument
-            deref(fs.f.code + (fs.pc - 1)) = deref(fs.f.code + (fs.pc - 1)) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1)) | uint(v2 + ((1 << 8) - 1 >> 1)) << uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1)
+            fs.f.code[fs.pc - 1] = (fs.f.code[fs.pc - 1] & ~(~(~0u << uint(SIZE_B)) << uint(POS_B))) | ((uint(v2 + OFFSET_sC) << uint(POS_B)) & (~(~0u << uint(SIZE_B)) << uint(POS_B)))
             // successfully coded
             return 1
         }
@@ -1624,7 +1574,7 @@ def private codeeq(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var e2 
         r2 = luaK_exp2anyreg(fs, e2)
     }
     freeexps(fs, e1, e2)
-    e1.u.info = condjump(fs, op, r1, r2, isfloat, opr == BinOpr.OPR_EQ ? 1 : 0)
+    e1.u.info = condjump(fs, op, r1, r2, isfloat, (opr == BinOpr.OPR_EQ) ? 1 : 0)
     e1.k = expkind.VJMP
 }
 
@@ -1666,33 +1616,23 @@ def luaK_infix(var fs : FuncState?; op : BinOpr; var v : expdesc?) {
     luaK_dischargevars(fs, v)
     let _cond = op
     if (_cond == BinOpr.OPR_AND) {
-        {
-            // go ahead only if 'v' is true
-            luaK_goiftrue(fs, v)
-        }
+        // go ahead only if 'v' is true
+        luaK_goiftrue(fs, v)
     } elif (_cond == BinOpr.OPR_OR) {
-        {
-            // go ahead only if 'v' is false
-            luaK_goiffalse(fs, v)
-        }
+        // go ahead only if 'v' is false
+        luaK_goiffalse(fs, v)
     } elif (_cond == BinOpr.OPR_CONCAT) {
-        {
-            // operand must be on the stack
-            luaK_exp2nextreg(fs, v)
-        }
+        // operand must be on the stack
+        luaK_exp2nextreg(fs, v)
     } elif (_cond == BinOpr.OPR_ADD || _cond == BinOpr.OPR_SUB || _cond == BinOpr.OPR_MUL || _cond == BinOpr.OPR_DIV || _cond == BinOpr.OPR_IDIV || _cond == BinOpr.OPR_MOD || _cond == BinOpr.OPR_POW || _cond == BinOpr.OPR_BAND || _cond == BinOpr.OPR_BOR || _cond == BinOpr.OPR_BXOR || _cond == BinOpr.OPR_SHL || _cond == BinOpr.OPR_SHR) {
-        {
-            if (!(tonumeral(v, null) != 0)) {
-                luaK_exp2anyreg(fs, v)
-            }
+        if (!(tonumeral(v, null) != 0)) {
+            luaK_exp2anyreg(fs, v)
         }
     } elif (_cond == BinOpr.OPR_EQ || _cond == BinOpr.OPR_NE) {
-        {
-            // else keep numeral, which may be folded or used as an immediate
-            // operand
-            if (!(tonumeral(v, null) != 0)) {
-                exp2RK(fs, v)
-            }
+        // else keep numeral, which may be folded or used as an immediate
+        // operand
+        if (!(tonumeral(v, null) != 0)) {
+            exp2RK(fs, v)
         }
     } elif (_cond == BinOpr.OPR_LT || _cond == BinOpr.OPR_LE || _cond == BinOpr.OPR_GT || _cond == BinOpr.OPR_GE) {
         {
@@ -1715,14 +1655,14 @@ def luaK_infix(var fs : FuncState?; op : BinOpr; var v : expdesc?) {
 def private codeconcat(var fs : FuncState?; var e1 : expdesc?; var e2 : expdesc?; line : int) {
     var ie2 : uint? = previousinstruction(fs)
     // is 'e2' a concatenation?
-    if (enum_from_int(type<OpCode>, int(deref(ie2) >> 0u & ~(~uint(0) << 7u) << 0u)) == OpCode.OP_CONCAT) {
+    if (enum_from_int(type<OpCode>, int((deref(ie2) >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))) == OpCode.OP_CONCAT) {
         // # of elements concatenated in 'e2'
-        var n : int = int(deref(ie2) >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
+        var n : int = int((deref(ie2) >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u))
         freeexp(fs, e2)
         // correct first element ('e1')
-        deref(ie2) = deref(ie2) & ~(~(~uint(0) << 8u) << uint(0 + 7)) | uint(e1.u.info) << uint(0 + 7) & ~(~uint(0) << 8u) << uint(0 + 7)
+        deref(ie2) = (deref(ie2) & ~(~(~0u << uint(SIZE_A)) << uint(POS_A))) | ((uint(e1.u.info) << uint(POS_A)) & (~(~0u << uint(SIZE_A)) << uint(POS_A)))
         // will concatenate one more element
-        deref(ie2) = deref(ie2) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1)) | uint(n + 1) << uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1)
+        deref(ie2) = (deref(ie2) & ~(~(~0u << uint(SIZE_B)) << uint(POS_B))) | ((uint(n + 1) << uint(POS_B)) & (~(~0u << uint(SIZE_B)) << uint(POS_B)))
     } else {
         // 'e2' is not a concatenation
         // new concat opcode
@@ -1744,42 +1684,32 @@ def luaK_posfix(var fs : FuncState?; var opr : BinOpr; var e1 : expdesc?; var e2
     while (true) {
         var _flag = false
         if (_cond == BinOpr.OPR_AND) {
-            {
-                // list closed by 'luaK_infix'
-                luaK_concat(fs, addr(e2.f), e1.f)
-                deref(e1) = deref(e2)
-                break
-            }
+            // list closed by 'luaK_infix'
+            luaK_concat(fs, addr(e2.f), e1.f)
+            deref(e1) = deref(e2)
+            break
         }
         if (_cond == BinOpr.OPR_OR) {
-            {
-                // list closed by 'luaK_infix'
-                luaK_concat(fs, addr(e2.t), e1.t)
-                deref(e1) = deref(e2)
-                break
-            }
+            // list closed by 'luaK_infix'
+            luaK_concat(fs, addr(e2.t), e1.t)
+            deref(e1) = deref(e2)
+            break
         }
         if (_cond == BinOpr.OPR_CONCAT) {
-            {
-                // e1 .. e2
-                luaK_exp2nextreg(fs, e2)
-                codeconcat(fs, e1, e2, line)
-                break
-            }
+            // e1 .. e2
+            luaK_exp2nextreg(fs, e2)
+            codeconcat(fs, e1, e2, line)
+            break
         }
         if (_cond == BinOpr.OPR_ADD || _cond == BinOpr.OPR_MUL) {
-            {
-                codecommutative(fs, opr, e1, e2, line)
-                break
-            }
+            codecommutative(fs, opr, e1, e2, line)
+            break
         }
         _flag ||= _cond == BinOpr.OPR_SUB
         if (_flag) {
-            {
-                if (finishbinexpneg(fs, e1, e2, OpCode.OP_ADDI, line, TMS.TM_SUB) != 0) {
-                    // coded as (r1 + -I)
-                    break
-                }
+            if (finishbinexpneg(fs, e1, e2, OpCode.OP_ADDI, line, TMS.TM_SUB) != 0) {
+                // coded as (r1 + -I)
+                break
             }
         }
         _flag ||= _cond == BinOpr.OPR_DIV
@@ -1787,69 +1717,55 @@ def luaK_posfix(var fs : FuncState?; var opr : BinOpr; var e1 : expdesc?; var e2
         _flag ||= _cond == BinOpr.OPR_MOD
         _flag ||= _cond == BinOpr.OPR_POW
         if (_flag) {
-            {
-                // ELSE
-                // FALLTHROUGH
-                codearith(fs, opr, e1, e2, 0, line)
-                break
-            }
+            // ELSE
+            // FALLTHROUGH
+            codearith(fs, opr, e1, e2, 0, line)
+            break
         }
         if (_cond == BinOpr.OPR_BAND || _cond == BinOpr.OPR_BOR || _cond == BinOpr.OPR_BXOR) {
-            {
-                codebitwise(fs, opr, e1, e2, line)
-                break
-            }
+            codebitwise(fs, opr, e1, e2, line)
+            break
         }
         if (_cond == BinOpr.OPR_SHL) {
-            {
-                if (isSCint(e1) != 0) {
-                    swapexps(e1, e2)
-                    // I << r2
-                    codebini(fs, OpCode.OP_SHLI, e1, e2, 1, line, TMS.TM_SHL)
-                } elif (finishbinexpneg(fs, e1, e2, OpCode.OP_SHRI, line, TMS.TM_SHL) != 0) {
-                    // coded as (r1 >> -I)
-                } else {
-                    // regular case (two registers)
-                    codebinexpval(fs, opr, e1, e2, line)
-                }
-                break
+            if (isSCint(e1) != 0) {
+                swapexps(e1, e2)
+                // I << r2
+                codebini(fs, OpCode.OP_SHLI, e1, e2, 1, line, TMS.TM_SHL)
+            } elif (finishbinexpneg(fs, e1, e2, OpCode.OP_SHRI, line, TMS.TM_SHL) != 0) {
+                // coded as (r1 >> -I)
+            } else {
+                // regular case (two registers)
+                codebinexpval(fs, opr, e1, e2, line)
             }
+            break
         }
         if (_cond == BinOpr.OPR_SHR) {
-            {
-                if (isSCint(e2) != 0) {
-                    // r1 >> I
-                    codebini(fs, OpCode.OP_SHRI, e1, e2, 0, line, TMS.TM_SHR)
-                } else {
-                    // regular case (two registers)
-                    codebinexpval(fs, opr, e1, e2, line)
-                }
-                break
+            if (isSCint(e2) != 0) {
+                // r1 >> I
+                codebini(fs, OpCode.OP_SHRI, e1, e2, 0, line, TMS.TM_SHR)
+            } else {
+                // regular case (two registers)
+                codebinexpval(fs, opr, e1, e2, line)
             }
+            break
         }
         if (_cond == BinOpr.OPR_EQ || _cond == BinOpr.OPR_NE) {
-            {
-                codeeq(fs, opr, e1, e2)
-                break
-            }
+            codeeq(fs, opr, e1, e2)
+            break
         }
         _flag ||= _cond == BinOpr.OPR_GT
         _flag ||= _cond == BinOpr.OPR_GE
         if (_flag) {
-            {
-                // '(a > b)' <=> '(b < a)'; '(a >= b)' <=> '(b <= a)'
-                swapexps(e1, e2)
-                opr = enum_from_int(type<BinOpr>, int(uint(int(opr)) - uint(int(BinOpr.OPR_GT)) + uint(int(BinOpr.OPR_LT))))
-            }
+            // '(a > b)' <=> '(b < a)'; '(a >= b)' <=> '(b <= a)'
+            swapexps(e1, e2)
+            opr = enum_from_int(type<BinOpr>, int(uint(int(opr)) - uint(int(BinOpr.OPR_GT)) + uint(int(BinOpr.OPR_LT))))
         }
         _flag ||= _cond == BinOpr.OPR_LT
         _flag ||= _cond == BinOpr.OPR_LE
         if (_flag) {
-            {
-                // FALLTHROUGH
-                codeorder(fs, opr, e1, e2)
-                break
-            }
+            // FALLTHROUGH
+            codeorder(fs, opr, e1, e2)
+            break
         }
         if (!(_cond == BinOpr.OPR_AND || _cond == BinOpr.OPR_OR || _cond == BinOpr.OPR_CONCAT || _cond == BinOpr.OPR_ADD || _cond == BinOpr.OPR_MUL || _cond == BinOpr.OPR_SUB || _cond == BinOpr.OPR_DIV || _cond == BinOpr.OPR_IDIV || _cond == BinOpr.OPR_MOD || _cond == BinOpr.OPR_POW || _cond == BinOpr.OPR_BAND || _cond == BinOpr.OPR_BOR || _cond == BinOpr.OPR_BXOR || _cond == BinOpr.OPR_SHL || _cond == BinOpr.OPR_SHR || _cond == BinOpr.OPR_EQ || _cond == BinOpr.OPR_NE || _cond == BinOpr.OPR_GT || _cond == BinOpr.OPR_GE || _cond == BinOpr.OPR_LT || _cond == BinOpr.OPR_LE)) {
         }
@@ -1866,17 +1782,17 @@ def luaK_fixline(var fs : FuncState?; line : int) {
 
 [c_function]
 def luaK_settablesize(var fs : FuncState?; pc : int; ra : int; asize : int; hsize : int) {
-    var inst : uint? = addr(deref(fs.f.code + pc))
+    var inst : uint? = addr(fs.f.code[pc])
     // hash size
-    var rb : int = hsize != 0 ? luaO_ceillog2(uint(hsize)) + 1 : 0
+    var rb : int = (hsize != 0) ? luaO_ceillog2(uint(hsize)) + 1 : 0
     // higher bits of array size
     var extra : int = asize / (MAXARG_C + 1)
     // lower bits of array size
     var rc : int = asize % (MAXARG_C + 1)
     // true iff needs extra argument
-    var k : int = extra > 0 ? 1 : 0
-    deref(inst) = uint(int(OpCode.OP_NEWTABLE)) << 0u | uint(ra) << uint(0 + 7) | uint(rb) << uint(0 + 7 + 8 + 1) | uint(rc) << uint(0 + 7 + 8 + 1 + 8) | uint(k) << uint(0 + 7 + 8)
-    deref(inst + 1) = uint(int(OpCode.OP_EXTRAARG)) << 0u | uint(extra) << uint(0 + 7)
+    var k : int = (extra > 0) ? 1 : 0
+    deref(inst) = (uint(int(OpCode.OP_NEWTABLE)) << uint(POS_OP)) | (uint(ra) << uint(POS_A)) | (uint(rb) << uint(POS_B)) | (uint(rc) << uint(POS_C)) | (uint(k) << uint(POS_k))
+    inst[1] = (uint(int(OpCode.OP_EXTRAARG)) << uint(POS_OP)) | (uint(extra) << uint(POS_A))
 }
 
 // Emit a SETLIST instruction.
@@ -1905,11 +1821,11 @@ def luaK_setlist(var fs : FuncState?; base : int; var nelems : int; var tostore 
 def private finaltarget(var code : uint?; var i : int) : int {
     // avoid infinite loops
     for (count in range(100)) {
-        var pc : uint = deref(code + i)
-        if (enum_from_int(type<OpCode>, int(pc >> 0u & ~(~uint(0) << 7u) << 0u)) != OpCode.OP_JMP) {
+        var pc : uint = code[i]
+        if (enum_from_int(type<OpCode>, int((pc >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))) != OpCode.OP_JMP) {
             break
         } else {
-            i += int(pc >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1) + 1
+            i += int((pc >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ + 1
         }
     }
     return i
@@ -1921,55 +1837,49 @@ def private finaltarget(var code : uint?; var i : int) : int {
 def luaK_finish(var fs : FuncState?) {
     var i : int
     var p : Proto? = fs.f
-    {
-        i = 0
-        while (i < fs.pc) {
-            var pc : uint? = addr(deref(p.code + i))
-            let _cond = enum_from_int(type<OpCode>, int(deref(pc) >> 0u & ~(~uint(0) << 7u) << 0u))
-            while (true) {
-                var _flag = false
-                _flag ||= _cond == OpCode.OP_RETURN0
-                _flag ||= _cond == OpCode.OP_RETURN1
-                if (_flag) {
-                    {
-                        if (!(fs.needclose != 0 || p.is_vararg != 0)) {
-                            // no extra work
-                            break
-                        }
-                        // else use OP_RETURN to do the extra work
-                        deref(pc) = deref(pc) & ~(~(~uint(0) << 7u) << 0u) | uint(int(OpCode.OP_RETURN)) << 0u & ~(~uint(0) << 7u) << 0u
-                    }
-                }
-                _flag ||= _cond == OpCode.OP_RETURN
-                _flag ||= _cond == OpCode.OP_TAILCALL
-                if (_flag) {
-                    {
-                        // FALLTHROUGH
-                        if (fs.needclose != 0) {
-                            // signal that it needs to close
-                            deref(pc) = deref(pc) & ~(~(~uint(0) << 1u) << uint(0 + 7 + 8)) | uint(1) << uint(0 + 7 + 8) & ~(~uint(0) << 1u) << uint(0 + 7 + 8)
-                        }
-                        if (p.is_vararg != 0) {
-                            // signal that it is vararg
-                            deref(pc) = deref(pc) & ~(~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)) | uint(int(p.numparams) + 1) << uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << uint(0 + 7 + 8 + 1 + 8)
-                        }
-                        break
-                    }
-                }
-                if (_cond == OpCode.OP_JMP) {
-                    {
-                        var target : int = finaltarget(p.code, i)
-                        fixjump(fs, i, target)
-                        break
-                    }
-                }
-                if (!(_cond == OpCode.OP_RETURN0 || _cond == OpCode.OP_RETURN1 || _cond == OpCode.OP_RETURN || _cond == OpCode.OP_TAILCALL || _cond == OpCode.OP_JMP)) {
+    i = 0
+    while (i < fs.pc) {
+        var pc : uint? = addr(p.code[i])
+        let _cond = enum_from_int(type<OpCode>, int((deref(pc) >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u)))
+        while (true) {
+            var _flag = false
+            _flag ||= _cond == OpCode.OP_RETURN0
+            _flag ||= _cond == OpCode.OP_RETURN1
+            if (_flag) {
+                if (!(fs.needclose != 0 || p.is_vararg != 0)) {
+                    // no extra work
                     break
+                }
+                // else use OP_RETURN to do the extra work
+                deref(pc) = (deref(pc) & ~(~(~0u << uint(SIZE_OP)) << uint(POS_OP))) | ((uint(int(OpCode.OP_RETURN)) << uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << uint(POS_OP)))
+            }
+            _flag ||= _cond == OpCode.OP_RETURN
+            _flag ||= _cond == OpCode.OP_TAILCALL
+            if (_flag) {
+                // FALLTHROUGH
+                if (fs.needclose != 0) {
+                    // signal that it needs to close
+                    deref(pc) = (deref(pc) & ~(~(~0u << 1u) << uint(POS_k))) | ((1u << uint(POS_k)) & (~(~0u << 1u) << uint(POS_k)))
+                }
+                if (p.is_vararg != 0) {
+                    // signal that it is vararg
+                    deref(pc) = (deref(pc) & ~(~(~0u << uint(SIZE_C)) << uint(POS_C))) | ((uint(int(p.numparams) + 1) << uint(POS_C)) & (~(~0u << uint(SIZE_C)) << uint(POS_C)))
                 }
                 break
             }
-            i++
+            if (_cond == OpCode.OP_JMP) {
+                {
+                    var target : int = finaltarget(p.code, i)
+                    fixjump(fs, i, target)
+                    break
+                }
+            }
+            if (!(_cond == OpCode.OP_RETURN0 || _cond == OpCode.OP_RETURN1 || _cond == OpCode.OP_RETURN || _cond == OpCode.OP_TAILCALL || _cond == OpCode.OP_JMP)) {
+                break
+            }
+            break
         }
+        i++
     }
 }
 

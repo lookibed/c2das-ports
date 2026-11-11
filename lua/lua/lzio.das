@@ -16,11 +16,11 @@ def luaZ_fill(var z : Zio?) : int {
     var L : lua_State? = z.L
     var buff : uint8?
     buff = invoke(z.reader, L, z.data, addr(size))
-    if (buff == null || size == uint64(0)) {
+    if (buff == null || size == 0ul) {
         return EOZ
     }
     // discount char being returned
-    z.n = size - uint64(1)
+    z.n = size - 1ul
     z.p = buff
     var _t0 = z.p
     z.p = z.p + 1
@@ -31,7 +31,7 @@ def luaZ_init(var L : lua_State?; var z : Zio?; reader : function<(var a0 : lua_
     z.L = L
     z.reader = reader
     z.data = data
-    z.n = uint64(0)
+    z.n = 0ul
     z.p = null
 }
 
@@ -41,7 +41,7 @@ def luaZ_read(var z : Zio?; var b : void?; var n : uint64) : uint64 {
     while (n != 0) {
         var m : uint64
         // no bytes in buffer?
-        if (z.n == uint64(0)) {
+        if (z.n == 0ul) {
             // try to read more
             if (luaZ_fill(z) == EOZ) {
                 // no more input; return number of missing bytes
@@ -53,13 +53,13 @@ def luaZ_read(var z : Zio?; var b : void?; var n : uint64) : uint64 {
             }
         }
         // min. between n and z->n
-        m = n <= z.n ? n : z.n
+        m = (n <= z.n) ? n : z.n
         crt::memcpy(b, reinterpret<void?>(z.p), m)
         z.n -= m
         z.p = z.p + m
         b = reinterpret<void?>(reinterpret<uint8?>(b) + m)
         n -= m
     }
-    return uint64(0)
+    return 0ul
 }
 

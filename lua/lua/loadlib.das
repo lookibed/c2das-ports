@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/cstr
 require c_runtime/variadic
 require c_types
 require crt
@@ -12,40 +13,43 @@ require lauxlib
 require lauxlib_h
 require lobject_h_cluster
 
-var private CLIBS : uint8? = unsafe(reinterpret<uint8?>("_CLIBS"))
-var private pk_funcs : luaL_Reg[8] = fixed_array(luaL_Reg(name = unsafe(reinterpret<uint8?>("loadlib")), func = @@ll_loadlib), luaL_Reg(name = unsafe(reinterpret<uint8?>("searchpath")), func = @@ll_searchpath), luaL_Reg(name = unsafe(reinterpret<uint8?>("preload")), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = unsafe(reinterpret<uint8?>("cpath")), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = unsafe(reinterpret<uint8?>("path")), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = unsafe(reinterpret<uint8?>("searchers")), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = unsafe(reinterpret<uint8?>("loaded")), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
-var private ll_funcs : luaL_Reg[2] = fixed_array(luaL_Reg(name = unsafe(reinterpret<uint8?>("require")), func = @@ll_require), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private CLIBS : uint8? = cstr("_CLIBS")
+var private pk_funcs : luaL_Reg[8] = fixed_array(luaL_Reg(name = cstr("loadlib"), func = @@ll_loadlib), luaL_Reg(name = cstr("searchpath"), func = @@ll_searchpath), luaL_Reg(name = cstr("preload"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("cpath"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("path"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("searchers"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("loaded"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private ll_funcs : luaL_Reg[2] = fixed_array(luaL_Reg(name = cstr("require"), func = @@ll_require), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 var private createsearcherstable_searchers : function<(var a0 : lua_State?) : int>[5] = fixed_array(@@searcher_preload, @@searcher_Lua, @@searcher_C, @@searcher_Croot, default<function<(var a0 : lua_State?) : int>>)
 
-let private LUA_REGISTRYINDEX = -1000000 - 1000
+let private LUAI_MAXSTACK = 1000000
+let private LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000
 let private ERRLIB = 1
 let private ERRFUNC = 2
 let private LUA_OK = 0
 let private LUA_TNIL = 0
+let private LUA_TTABLE = 5
+let private LUA_TFUNCTION = 6
+let private LUA_VERSION_NUM = 504
+let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64(typeinfo sizeof(type<double>))
+let private LUA_RIDX_GLOBALS = 2
 
 def private lsys_unloadlib(var lib : void?) {
     // not used
 }
 
-[c_function]
 def private lsys_load(var L : lua_State?; var path : uint8?; seeglb : int) : void? {
     // not used
-    lua_pushstring(L, reinterpret<uint8?>("dynamic libraries not enabled; check your Lua installation"))
+    lua_pushstring(L, cstr("dynamic libraries not enabled; check your Lua installation"))
     return null
 }
 
-[c_function]
 def private lsys_sym(var L : lua_State?; var lib : void?; var sym : uint8?) : function<(var a0 : lua_State?) : int> {
     // not used
-    lua_pushstring(L, reinterpret<uint8?>("dynamic libraries not enabled; check your Lua installation"))
+    lua_pushstring(L, cstr("dynamic libraries not enabled; check your Lua installation"))
     return default<function<(var a0 : lua_State?) : int>>
 }
 
 // return registry.LUA_NOENV as a boolean
-[c_function]
 def private noenv(var L : lua_State?) : int {
     var b : int
-    lua_getfield(L, LUA_REGISTRYINDEX, reinterpret<uint8?>("LUA_NOENV"))
+    lua_getfield(L, LUA_REGISTRYINDEX, cstr("LUA_NOENV"))
     b = lua_toboolean(L, -1)
     // remove value
     lua_settop(L, -1 - 1)
@@ -56,7 +60,7 @@ def private noenv(var L : lua_State?) : int {
 [c_function]
 def private setpath(var L : lua_State?; var fieldname : uint8?; var envname : uint8?; var dft : uint8?) {
     var dftmark : uint8?
-    var nver : uint8? = lua_pushfstring`va(L, reinterpret<uint8?>("%s%s"), (envname, reinterpret<uint8?>("_5_4")))
+    var nver : uint8? = lua_pushfstring`va(L, cstr("%s%s"), (envname, cstr("_5_4")))
     // try versioned name
     var path : uint8? = crt::getenv(nver)
     // no versioned environment variable?
@@ -69,7 +73,7 @@ def private setpath(var L : lua_State?; var fieldname : uint8?; var envname : ui
         // use default
         lua_pushstring(L, dft)
     } else {
-        dftmark = crt::strstr(path, reinterpret<uint8?>(";;"))
+        dftmark = crt::strstr(path, cstr(";;"))
         if (dftmark == null) {
             // nothing to change
             lua_pushstring(L, path)
@@ -82,20 +86,20 @@ def private setpath(var L : lua_State?; var fieldname : uint8?; var envname : ui
             if (intptr(path) < intptr(dftmark)) {
                 // add it
                 luaL_addlstring(addr(b), path, uint64(int64(dftmark - path)))
-                let _t0 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), uint64(1)) != null
+                let _t0 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), 1ul) != null
                 let _t1 = addr(b).n
                 addr(b).n++
-                deref(addr(b).b + _t1) = deref(reinterpret<uint8?>(";"))
+                addr(b).b[_t1] = deref(cstr(";"))
             }
             // add default
             luaL_addstring(addr(b), dft)
             // is there a suffix after ';;'?
             if (intptr(dftmark) < intptr(path + len + -(2))) {
-                let _t2 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), uint64(1)) != null
+                let _t2 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), 1ul) != null
                 let _t3 = addr(b).n
                 addr(b).n++
-                deref(addr(b).b + _t3) = deref(reinterpret<uint8?>(";"))
-                luaL_addlstring(addr(b), dftmark + 2, uint64(int64(path + len + -(2) - dftmark)))
+                addr(b).b[_t3] = deref(cstr(";"))
+                luaL_addlstring(addr(b), dftmark + 2, uint64(int64((path + len + -(2)) - dftmark)))
             }
             luaL_pushresult(addr(b))
         }
@@ -127,7 +131,7 @@ def private addtoclib(var L : lua_State?; var path : uint8?; var plib : void?) {
     // CLIBS[path] = plib
     lua_setfield(L, -3, path)
     // CLIBS[#CLIBS + 1] = plib
-    lua_rawseti(L, -2, luaL_len(L, -2) + int64(1))
+    lua_rawseti(L, -2, luaL_len(L, -2) + 1l)
     // pop CLIBS table
     lua_settop(L, -1 - 1)
 }
@@ -137,15 +141,13 @@ def private addtoclib(var L : lua_State?; var path : uint8?; var plib : void?) {
 def private gctm(var L : lua_State?) : int {
     var n : int64 = luaL_len(L, 1)
     // for each handle, in reverse order
-    {
-        while (n >= int64(1)) {
-            // get handle CLIBS[n]
-            lua_rawgeti(L, 1, n)
-            lsys_unloadlib(lua_touserdata(L, -1))
-            // pop handle
-            lua_settop(L, -1 - 1)
-            n--
-        }
+    while (n >= 1l) {
+        // get handle CLIBS[n]
+        lua_rawgeti(L, 1, n)
+        lsys_unloadlib(lua_touserdata(L, -1))
+        // pop handle
+        lua_settop(L, -1 - 1)
+        n--
     }
     return 0
 }
@@ -192,7 +194,6 @@ def private lookforfunc(var L : lua_State?; var path : uint8?; var sym : uint8?)
     }
 }
 
-[c_function]
 def private ll_loadlib(var L : lua_State?) : int {
     var path : uint8? = luaL_checklstring(L, 1, null)
     var init : uint8? = luaL_checklstring(L, 2, null)
@@ -205,7 +206,7 @@ def private ll_loadlib(var L : lua_State?) : int {
         // error; error message is on stack top
         lua_pushnil(L)
         lua_rotate(L, -2, 1)
-        lua_pushstring(L, stat == ERRLIB ? reinterpret<uint8?>("absent") : reinterpret<uint8?>("init"))
+        lua_pushstring(L, (stat == ERRLIB) ? cstr("absent") : cstr("init"))
         // return fail, error message, and where
         return 3
     }
@@ -214,7 +215,7 @@ def private ll_loadlib(var L : lua_State?) : int {
 [c_function]
 def private readable(var filename : uint8?) : int {
     // try to open file
-    var f : _IO_FILE? = reinterpret<_IO_FILE?>(crt::fopen(filename, reinterpret<uint8?>("r")))
+    var f : _IO_FILE? = reinterpret<_IO_FILE?>(crt::fopen(filename, cstr("r")))
     // open failed
     if (f == null) {
         return 0
@@ -236,12 +237,12 @@ def private getnextfilename(var path : uint8 ??; var end : uint8?) : uint8? {
     } elif (int(deref(name)) == '\0') {
         // from previous iteration?
         // restore separator
-        deref(name) = deref(reinterpret<uint8?>(";"))
+        deref(name) = deref(cstr(";"))
         // skip it
         name = name + 1
     }
     // find next separator
-    sep = crt::strchr(name, int(deref(reinterpret<uint8?>(";"))))
+    sep = crt::strchr(name, int(deref(cstr(";"))))
     // separator not found?
     if (sep == null) {
         // name goes until the end
@@ -261,9 +262,9 @@ def private getnextfilename(var path : uint8 ??; var end : uint8?) : uint8? {
 def private pusherrornotfound(var L : lua_State?; var path : uint8?) {
     var b : luaL_Buffer
     luaL_buffinit(L, addr(b))
-    luaL_addstring(addr(b), reinterpret<uint8?>("no file '"))
-    luaL_addgsub(addr(b), path, reinterpret<uint8?>(";"), reinterpret<uint8?>("'\n\tno file '"))
-    luaL_addstring(addr(b), reinterpret<uint8?>("'"))
+    luaL_addstring(addr(b), cstr("no file '"))
+    luaL_addgsub(addr(b), path, cstr(";"), cstr("'\n\tno file '"))
+    luaL_addstring(addr(b), cstr("'"))
     luaL_pushresult(addr(b))
 }
 
@@ -282,11 +283,11 @@ def private searchpath(var L : lua_State?; var name : uint8?; var path : uint8?;
     }
     luaL_buffinit(L, addr(buff))
     // add path to the buffer, replacing marks ('?') with the file name
-    luaL_addgsub(addr(buff), path, reinterpret<uint8?>("?"), name)
-    let _t0 = addr(buff).n < addr(buff).size || luaL_prepbuffsize(addr(buff), uint64(1)) != null
+    luaL_addgsub(addr(buff), path, cstr("?"), name)
+    let _t0 = addr(buff).n < addr(buff).size || luaL_prepbuffsize(addr(buff), 1ul) != null
     let _t1 = addr(buff).n
     addr(buff).n++
-    deref(addr(buff).b + _t1) = uint8('\0')
+    addr(buff).b[_t1] = uint8('\0')
     // writable list of file names
     pathname = addr(buff).b
     endpathname = pathname + addr(buff).n + -(1)
@@ -311,7 +312,7 @@ def private searchpath(var L : lua_State?; var name : uint8?; var path : uint8?;
 
 [c_function]
 def private ll_searchpath(var L : lua_State?) : int {
-    var f : uint8? = searchpath(L, luaL_checklstring(L, 1, null), luaL_checklstring(L, 2, null), luaL_optlstring(L, 3, reinterpret<uint8?>("."), null), luaL_optlstring(L, 4, reinterpret<uint8?>("/"), null))
+    var f : uint8? = searchpath(L, luaL_checklstring(L, 1, null), luaL_checklstring(L, 2, null), luaL_optlstring(L, 3, cstr("."), null), luaL_optlstring(L, 4, cstr("/"), null))
     if (f != null) {
         return 1
     } else {
@@ -326,15 +327,14 @@ def private ll_searchpath(var L : lua_State?) : int {
 [c_function]
 def private findfile(var L : lua_State?; var name : uint8?; var pname : uint8?; var dirsep : uint8?) : uint8? {
     var path : uint8?
-    lua_getfield(L, -1000000 - 1000 - 1, pname)
+    lua_getfield(L, LUA_REGISTRYINDEX - 1, pname)
     path = lua_tolstring(L, -1, null)
     if (path == null) {
-        luaL_error`va(L, reinterpret<uint8?>("'package.%s' must be a string"), (pname,))
+        luaL_error`va(L, cstr("'package.%s' must be a string"), (pname,))
     }
-    return searchpath(L, name, path, reinterpret<uint8?>("."), dirsep)
+    return searchpath(L, name, path, cstr("."), dirsep)
 }
 
-[c_function]
 def private checkload(var L : lua_State?; stat : int; var filename : uint8?) : int {
     // module loaded successfully?
     if (stat != 0) {
@@ -343,7 +343,7 @@ def private checkload(var L : lua_State?; stat : int; var filename : uint8?) : i
         // return open function and file name
         return 2
     } else {
-        return luaL_error`va(L, reinterpret<uint8?>("error loading module '%s' from file '%s':\n\t%s"), (lua_tolstring(L, 1, null), filename, lua_tolstring(L, -1, null)))
+        return luaL_error`va(L, cstr("error loading module '%s' from file '%s':\n\t%s"), (lua_tolstring(L, 1, null), filename, lua_tolstring(L, -1, null)))
     }
 }
 
@@ -351,12 +351,12 @@ def private checkload(var L : lua_State?; stat : int; var filename : uint8?) : i
 def private searcher_Lua(var L : lua_State?) : int {
     var filename : uint8?
     var name : uint8? = luaL_checklstring(L, 1, null)
-    filename = findfile(L, name, reinterpret<uint8?>("path"), reinterpret<uint8?>("/"))
+    filename = findfile(L, name, cstr("path"), cstr("/"))
     // module not found in this path
     if (filename == null) {
         return 1
     }
-    return checkload(L, luaL_loadfilex(L, filename, null) == LUA_OK ? 1 : 0, filename)
+    return checkload(L, (luaL_loadfilex(L, filename, null) == LUA_OK) ? 1 : 0, filename)
 }
 
 // Try to find a load function for module 'modname' at file 'filename'.
@@ -369,12 +369,12 @@ def private searcher_Lua(var L : lua_State?) : int {
 def private loadfunc(var L : lua_State?; var filename : uint8?; var modname : uint8?) : int {
     var openfunc : uint8?
     var mark : uint8?
-    modname = luaL_gsub(L, modname, reinterpret<uint8?>("."), reinterpret<uint8?>("_"))
-    mark = crt::strchr(modname, int(deref(reinterpret<uint8?>("-"))))
+    modname = luaL_gsub(L, modname, cstr("."), cstr("_"))
+    mark = crt::strchr(modname, int(deref(cstr("-"))))
     if (mark != null) {
         var stat : int
         openfunc = lua_pushlstring(L, modname, uint64(int64(mark - modname)))
-        openfunc = lua_pushfstring`va(L, reinterpret<uint8?>("luaopen_%s"), (openfunc,))
+        openfunc = lua_pushfstring`va(L, cstr("luaopen_%s"), (openfunc,))
         stat = lookforfunc(L, filename, openfunc)
         if (stat != ERRFUNC) {
             return stat
@@ -382,19 +382,19 @@ def private loadfunc(var L : lua_State?; var filename : uint8?; var modname : ui
         // else go ahead and try old-style name
         modname = mark + 1
     }
-    openfunc = lua_pushfstring`va(L, reinterpret<uint8?>("luaopen_%s"), (modname,))
+    openfunc = lua_pushfstring`va(L, cstr("luaopen_%s"), (modname,))
     return lookforfunc(L, filename, openfunc)
 }
 
 [c_function]
 def private searcher_C(var L : lua_State?) : int {
     var name : uint8? = luaL_checklstring(L, 1, null)
-    var filename : uint8? = findfile(L, name, reinterpret<uint8?>("cpath"), reinterpret<uint8?>("/"))
+    var filename : uint8? = findfile(L, name, cstr("cpath"), cstr("/"))
     // module not found in this path
     if (filename == null) {
         return 1
     }
-    return checkload(L, loadfunc(L, filename, name) == 0 ? 1 : 0, filename)
+    return checkload(L, (loadfunc(L, filename, name) == 0) ? 1 : 0, filename)
 }
 
 [c_function]
@@ -408,7 +408,7 @@ def private searcher_Croot(var L : lua_State?) : int {
         return 0
     }
     lua_pushlstring(L, name, uint64(int64(p - name)))
-    filename = findfile(L, lua_tolstring(L, -1, null), reinterpret<uint8?>("cpath"), reinterpret<uint8?>("/"))
+    filename = findfile(L, lua_tolstring(L, -1, null), cstr("cpath"), cstr("/"))
     // root not found
     if (filename == null) {
         return 1
@@ -420,7 +420,7 @@ def private searcher_Croot(var L : lua_State?) : int {
             return checkload(L, 0, filename)
         } else {
             // open function not found
-            lua_pushfstring`va(L, reinterpret<uint8?>("no module '%s' in file '%s'"), (name, filename))
+            lua_pushfstring`va(L, cstr("no module '%s' in file '%s'"), (name, filename))
             return 1
         }
     }
@@ -429,16 +429,15 @@ def private searcher_Croot(var L : lua_State?) : int {
     return 2
 }
 
-[c_function]
 def private searcher_preload(var L : lua_State?) : int {
     var name : uint8? = luaL_checklstring(L, 1, null)
-    lua_getfield(L, LUA_REGISTRYINDEX, reinterpret<uint8?>("_PRELOAD"))
+    lua_getfield(L, LUA_REGISTRYINDEX, cstr("_PRELOAD"))
     // not found?
     if (lua_getfield(L, -1, name) == LUA_TNIL) {
-        lua_pushfstring`va(L, reinterpret<uint8?>("no field package.preload['%s']"), (name,))
+        lua_pushfstring`va(L, cstr("no field package.preload['%s']"), (name,))
         return 1
     } else {
-        lua_pushstring(L, reinterpret<uint8?>(":preload:"))
+        lua_pushstring(L, cstr(":preload:"))
         return 2
     }
 }
@@ -449,57 +448,54 @@ def private findloader(var L : lua_State?; var name : uint8?) {
     // to build error message
     var msg : luaL_Buffer
     // push 'package.searchers' to index 3 in the stack
-    if (lua_getfield(L, -1000000 - 1000 - 1, reinterpret<uint8?>("searchers")) != 5) {
-        luaL_error`va(L, reinterpret<uint8?>("'package.searchers' must be a table"), VaNone())
+    if (lua_getfield(L, LUA_REGISTRYINDEX - 1, cstr("searchers")) != LUA_TTABLE) {
+        luaL_error`va(L, cstr("'package.searchers' must be a table"), VaNone())
     }
     luaL_buffinit(L, addr(msg))
     // iterate over available searchers to find a loader
-    {
-        i = 1
-        while (true) {
-            // error-message prefix
-            luaL_addstring(addr(msg), reinterpret<uint8?>("\n\t"))
-            // no more searchers?
-            if (lua_rawgeti(L, 3, int64(i)) == 0) {
-                // remove nil
-                lua_settop(L, -1 - 1)
-                // remove prefix
-                addr(msg).n -= uint64(2)
-                // create error message
-                luaL_pushresult(addr(msg))
-                luaL_error`va(L, reinterpret<uint8?>("module '%s' not found:%s"), (name, lua_tolstring(L, -1, null)))
-            }
-            lua_pushstring(L, name)
-            // call it
-            lua_callk(L, 1, 2, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
-            // did it find a loader?
-            if (lua_type(L, -2) == 6) {
-                // module loader found
-                return
-            } elif (lua_isstring(L, -2) != 0) {
-                // searcher returned error message?
-                // remove extra return
-                lua_settop(L, -1 - 1)
-                // concatenate error message
-                luaL_addvalue(addr(msg))
-            } else {
-                // no error message
-                // remove both returns
-                lua_settop(L, -2 - 1)
-                // remove prefix
-                addr(msg).n -= uint64(2)
-            }
-            i++
+    i = 1
+    while (true) {
+        // error-message prefix
+        luaL_addstring(addr(msg), cstr("\n\t"))
+        // no more searchers?
+        if (lua_rawgeti(L, 3, int64(i)) == LUA_TNIL) {
+            // remove nil
+            lua_settop(L, -1 - 1)
+            // remove prefix
+            addr(msg).n -= 2ul
+            // create error message
+            luaL_pushresult(addr(msg))
+            luaL_error`va(L, cstr("module '%s' not found:%s"), (name, lua_tolstring(L, -1, null)))
         }
+        lua_pushstring(L, name)
+        // call it
+        lua_callk(L, 1, 2, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+        // did it find a loader?
+        if (lua_type(L, -2) == LUA_TFUNCTION) {
+            // module loader found
+            return
+        } elif (lua_isstring(L, -2) != 0) {
+            // searcher returned error message?
+            // remove extra return
+            lua_settop(L, -1 - 1)
+            // concatenate error message
+            luaL_addvalue(addr(msg))
+        } else {
+            // no error message
+            // remove both returns
+            lua_settop(L, -2 - 1)
+            // remove prefix
+            addr(msg).n -= 2ul
+        }
+        i++
     }
 }
 
-[c_function]
 def private ll_require(var L : lua_State?) : int {
     var name : uint8? = luaL_checklstring(L, 1, null)
     // LOADED table will be at index 2
     lua_settop(L, 1)
-    lua_getfield(L, LUA_REGISTRYINDEX, reinterpret<uint8?>("_LOADED"))
+    lua_getfield(L, LUA_REGISTRYINDEX, cstr("_LOADED"))
     // LOADED[name]
     lua_getfield(L, 2, name)
     // is it there?
@@ -519,10 +515,10 @@ def private ll_require(var L : lua_State?) : int {
     lua_pushvalue(L, -3)
     // stack: ...; loader data; loader function; mod. name; loader data
     // run loader to load module
-    lua_callk(L, 2, 1, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+    lua_callk(L, 2, 1, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
     // stack: ...; loader data; result from loader
     // non-nil return?
-    if (!(lua_type(L, -1) == 0)) {
+    if (!(lua_type(L, -1) == LUA_TNIL)) {
         // LOADED[name] = returned value
         lua_setfield(L, 2, name)
     } else {
@@ -544,29 +540,25 @@ def private ll_require(var L : lua_State?) : int {
     return 2
 }
 
-[c_function]
 def private createsearcherstable(var L : lua_State?) {
     var i : int
     // create 'searchers' table
-    lua_createtable(L, int(uint64(typeinfo sizeof(type<function<(var a0 : lua_State?) : int>[5]>)) / uint64(typeinfo sizeof(type<function<(var a0 : lua_State?) : int>>)) - uint64(1)), 0)
+    lua_createtable(L, int(uint64(typeinfo sizeof(type<function<(var a0 : lua_State?) : int>[5]>)) / uint64(typeinfo sizeof(type<function<(var a0 : lua_State?) : int>>)) - 1ul), 0)
     // fill it with predefined searchers
-    {
-        i = 0
-        while (createsearcherstable_searchers[i] != null) {
-            // set 'package' as upvalue for all searchers
-            lua_pushvalue(L, -2)
-            lua_pushcclosure(L, createsearcherstable_searchers[i], 1)
-            lua_rawseti(L, -2, int64(i + 1))
-            i++
-        }
+    i = 0
+    while (createsearcherstable_searchers[i] != null) {
+        // set 'package' as upvalue for all searchers
+        lua_pushvalue(L, -2)
+        lua_pushcclosure(L, createsearcherstable_searchers[i], 1)
+        lua_rawseti(L, -2, int64(i + 1))
+        i++
     }
     // put it in field 'searchers'
-    lua_setfield(L, -2, reinterpret<uint8?>("searchers"))
+    lua_setfield(L, -2, cstr("searchers"))
 }
 
 // create table CLIBS to keep track of loaded C libraries,
 // setting a finalizer to close all libraries when closing state.
-[c_function]
 def private createclibstable(var L : lua_State?) {
     // create CLIBS table
     luaL_getsubtable(L, LUA_REGISTRYINDEX, CLIBS)
@@ -574,7 +566,7 @@ def private createclibstable(var L : lua_State?) {
     lua_createtable(L, 0, 1)
     lua_pushcclosure(L, @@gctm, 0)
     // set finalizer for CLIBS table
-    lua_setfield(L, -2, reinterpret<uint8?>("__gc"))
+    lua_setfield(L, -2, cstr("__gc"))
     lua_setmetatable(L, -2)
 }
 
@@ -582,23 +574,23 @@ def private createclibstable(var L : lua_State?) {
 def luaopen_package(var L : lua_State?) : int {
     createclibstable(L)
     // create 'package' table
-    luaL_checkversion_(L, double(504), uint64(typeinfo sizeof(type<int64>)) * uint64(16) + uint64(typeinfo sizeof(type<double>)))
-    lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[8]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - uint64(1)))
+    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+    lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[8]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - 1ul))
     luaL_setfuncs(L, addr(pk_funcs[0]), 0)
     createsearcherstable(L)
     // set paths
-    setpath(L, reinterpret<uint8?>("path"), reinterpret<uint8?>("LUA_PATH"), reinterpret<uint8?>("/usr/local/share/lua/5.4/?.lua;/usr/local/share/lua/5.4/?/init.lua;/usr/local/lib/lua/5.4/?.lua;/usr/local/lib/lua/5.4/?/init.lua;./?.lua;./?/init.lua"))
-    setpath(L, reinterpret<uint8?>("cpath"), reinterpret<uint8?>("LUA_CPATH"), reinterpret<uint8?>("/usr/local/lib/lua/5.4/?.so;/usr/local/lib/lua/5.4/loadall.so;./?.so"))
+    setpath(L, cstr("path"), cstr("LUA_PATH"), cstr("/usr/local/share/lua/5.4/?.lua;/usr/local/share/lua/5.4/?/init.lua;/usr/local/lib/lua/5.4/?.lua;/usr/local/lib/lua/5.4/?/init.lua;./?.lua;./?/init.lua"))
+    setpath(L, cstr("cpath"), cstr("LUA_CPATH"), cstr("/usr/local/lib/lua/5.4/?.so;/usr/local/lib/lua/5.4/loadall.so;./?.so"))
     // store config information
-    lua_pushstring(L, reinterpret<uint8?>("/\n;\n?\n!\n-\n"))
-    lua_setfield(L, -2, reinterpret<uint8?>("config"))
+    lua_pushstring(L, cstr("/\n;\n?\n!\n-\n"))
+    lua_setfield(L, -2, cstr("config"))
     // set field 'loaded'
-    luaL_getsubtable(L, LUA_REGISTRYINDEX, reinterpret<uint8?>("_LOADED"))
-    lua_setfield(L, -2, reinterpret<uint8?>("loaded"))
+    luaL_getsubtable(L, LUA_REGISTRYINDEX, cstr("_LOADED"))
+    lua_setfield(L, -2, cstr("loaded"))
     // set field 'preload'
-    luaL_getsubtable(L, LUA_REGISTRYINDEX, reinterpret<uint8?>("_PRELOAD"))
-    lua_setfield(L, -2, reinterpret<uint8?>("preload"))
-    lua_rawgeti(L, -1000000 - 1000, int64(2))
+    luaL_getsubtable(L, LUA_REGISTRYINDEX, cstr("_PRELOAD"))
+    lua_setfield(L, -2, cstr("preload"))
+    lua_rawgeti(L, LUA_REGISTRYINDEX, int64(LUA_RIDX_GLOBALS))
     // set 'package' as upvalue for next lib
     lua_pushvalue(L, -2)
     // open lib into global table

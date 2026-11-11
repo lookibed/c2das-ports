@@ -4,11 +4,14 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/cstr
 require c_runtime/variadic
 require lobject_h_cluster
 require lua_link
 
 let private MINSIZEARRAY = 4
+let private LUA_TNIL = 0
+let private LUA_ERRMEM = 4
 
 [c_function]
 def luaM_growaux_(var L : lua_State?; var _c_block : void?; nelems : int; var psize : int?; size_elems : int; limit : int; var what : uint8?) : void? {
@@ -23,7 +26,7 @@ def luaM_growaux_(var L : lua_State?; var _c_block : void?; nelems : int; var ps
     if (size >= limit / 2) {
         // cannot grow even a little?
         if (size >= limit) {
-            luaG_runerror`va(L, reinterpret<uint8?>("too many %s (limit is %d)"), (what, limit))
+            luaG_runerror`va(L, cstr("too many %s (limit is %d)"), (what, limit))
         }
         // still have at least one free place
         size = limit
@@ -55,15 +58,14 @@ def luaM_shrinkvector_(var L : lua_State?; var _c_block : void?; var size : int?
     return newblock
 }
 
-[c_function]
 def luaM_toobig(var L : lua_State?) {
-    luaG_runerror`va(L, reinterpret<uint8?>("memory allocation error: block too big"), VaNone())
+    luaG_runerror`va(L, cstr("memory allocation error: block too big"), VaNone())
 }
 
 // Free memory
 def luaM_free_(var L : lua_State?; var _c_block : void?; osize : uint64) {
     var g : global_State? = L.l_G
-    invoke(g.frealloc, g.ud, _c_block, osize, uint64(0))
+    invoke(g.frealloc, g.ud, _c_block, osize, 0ul)
     g.GCdebt = int64(uint64(g.GCdebt) - osize)
 }
 
@@ -72,7 +74,7 @@ def luaM_free_(var L : lua_State?; var _c_block : void?; osize : uint64) {
 [c_function]
 def private tryagain(var L : lua_State?; var _c_block : void?; osize : uint64; nsize : uint64) : void? {
     var g : global_State? = L.l_G
-    if ((int(addr(g.nilvalue).tt_) & 15) == 0 && !(g.gcstopem != 0)) {
+    if ((int(addr(g.nilvalue).tt_) & 15) == LUA_TNIL && !(g.gcstopem != 0)) {
         // try to free some memory...
         luaC_fullgc(L, 1)
         // try again
@@ -88,7 +90,7 @@ def luaM_realloc_(var L : lua_State?; var _c_block : void?; osize : uint64; nsiz
     var newblock : void?
     var g : global_State? = L.l_G
     newblock = invoke(g.frealloc, g.ud, _c_block, osize, nsize)
-    if (newblock == null && nsize > uint64(0)) {
+    if (newblock == null && nsize > 0ul) {
         newblock = tryagain(L, _c_block, osize, nsize)
         // still no memory?
         if (newblock == null) {
@@ -96,21 +98,21 @@ def luaM_realloc_(var L : lua_State?; var _c_block : void?; osize : uint64; nsiz
             return null
         }
     }
-    g.GCdebt = int64(uint64(g.GCdebt) + nsize - osize)
+    g.GCdebt = int64((uint64(g.GCdebt) + nsize) - osize)
     return newblock
 }
 
 def luaM_saferealloc_(var L : lua_State?; var _c_block : void?; osize : uint64; nsize : uint64) : void? {
     var newblock : void? = luaM_realloc_(L, _c_block, osize, nsize)
     // allocation failed?
-    if (newblock == null && nsize > uint64(0)) {
-        luaD_throw(L, 4)
+    if (newblock == null && nsize > 0ul) {
+        luaD_throw(L, LUA_ERRMEM)
     }
     return newblock
 }
 
 def luaM_malloc_(var L : lua_State?; size : uint64; tag : int) : void? {
-    if (size == uint64(0)) {
+    if (size == 0ul) {
         // that's all
         return null
     } else {
@@ -119,7 +121,7 @@ def luaM_malloc_(var L : lua_State?; size : uint64; tag : int) : void? {
         if (newblock == null) {
             newblock = tryagain(L, null, uint64(tag), size)
             if (newblock == null) {
-                luaD_throw(L, 4)
+                luaD_throw(L, LUA_ERRMEM)
             }
         }
         g.GCdebt = int64(uint64(g.GCdebt) + size)

@@ -5,6 +5,7 @@ options solid_context
 options stack = 8388608
 require c_runtime/c_exit
 require c_runtime/c_function
+require c_runtime/cstr
 require c_runtime/variadic
 require crt
 require lapi
@@ -19,29 +20,18 @@ struct tm {
     _c___tm_zone : uint8?
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<tm>) == 56 && typeinfo alignof(type<tm>) == 8, "tm: clang lays it out as size 56, align 8")
-    static_assert(typeinfo offsetof < tm_sec > (type<tm>) == 0, "tm.tm_sec: clang puts it at 0")
-    static_assert(typeinfo offsetof < tm_min > (type<tm>) == 4, "tm.tm_min: clang puts it at 4")
-    static_assert(typeinfo offsetof < tm_hour > (type<tm>) == 8, "tm.tm_hour: clang puts it at 8")
-    static_assert(typeinfo offsetof < tm_mday > (type<tm>) == 12, "tm.tm_mday: clang puts it at 12")
-    static_assert(typeinfo offsetof < tm_mon > (type<tm>) == 16, "tm.tm_mon: clang puts it at 16")
-    static_assert(typeinfo offsetof < tm_year > (type<tm>) == 20, "tm.tm_year: clang puts it at 20")
-    static_assert(typeinfo offsetof < tm_wday > (type<tm>) == 24, "tm.tm_wday: clang puts it at 24")
-    static_assert(typeinfo offsetof < tm_yday > (type<tm>) == 28, "tm.tm_yday: clang puts it at 28")
-    static_assert(typeinfo offsetof < tm_isdst > (type<tm>) == 32, "tm.tm_isdst: clang puts it at 32")
-    static_assert(typeinfo offsetof < _c___tm_gmtoff > (type<tm>) == 40, "tm._c___tm_gmtoff: clang puts it at 40")
-    static_assert(typeinfo offsetof < _c___tm_zone > (type<tm>) == 48, "tm._c___tm_zone: clang puts it at 48")
-}
+include loslib.layout.das.inc
 
 var private os_setlocale_cat : int[6] = fixed_array(6, 3, 0, 4, 1, 2)
-var private os_setlocale_catnames : uint8? [7] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("all")), unsafe(reinterpret<uint8?>("collate")), unsafe(reinterpret<uint8?>("ctype")), unsafe(reinterpret<uint8?>("monetary")), unsafe(reinterpret<uint8?>("numeric")), unsafe(reinterpret<uint8?>("time")), null)
-var private syslib : luaL_Reg[12] = fixed_array(luaL_Reg(name = unsafe(reinterpret<uint8?>("clock")), func = @@os_clock), luaL_Reg(name = unsafe(reinterpret<uint8?>("date")), func = @@os_date), luaL_Reg(name = unsafe(reinterpret<uint8?>("difftime")), func = @@os_difftime), luaL_Reg(name = unsafe(reinterpret<uint8?>("execute")), func = @@os_execute), luaL_Reg(name = unsafe(reinterpret<uint8?>("exit")), func = @@os_exit), luaL_Reg(name = unsafe(reinterpret<uint8?>("getenv")), func = @@os_getenv), luaL_Reg(name = unsafe(reinterpret<uint8?>("remove")), func = @@os_remove), luaL_Reg(name = unsafe(reinterpret<uint8?>("rename")), func = @@os_rename), luaL_Reg(name = unsafe(reinterpret<uint8?>("setlocale")), func = @@os_setlocale), luaL_Reg(name = unsafe(reinterpret<uint8?>("time")), func = @@os_time), luaL_Reg(name = unsafe(reinterpret<uint8?>("tmpname")), func = @@os_tmpname), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private os_setlocale_catnames : uint8? [7] = fixed_array<uint8?>(cstr("all"), cstr("collate"), cstr("ctype"), cstr("monetary"), cstr("numeric"), cstr("time"), null)
+var private syslib : luaL_Reg[12] = fixed_array(luaL_Reg(name = cstr("clock"), func = @@os_clock), luaL_Reg(name = cstr("date"), func = @@os_date), luaL_Reg(name = cstr("difftime"), func = @@os_difftime), luaL_Reg(name = cstr("execute"), func = @@os_execute), luaL_Reg(name = cstr("exit"), func = @@os_exit), luaL_Reg(name = cstr("getenv"), func = @@os_getenv), luaL_Reg(name = cstr("remove"), func = @@os_remove), luaL_Reg(name = cstr("rename"), func = @@os_rename), luaL_Reg(name = cstr("setlocale"), func = @@os_setlocale), luaL_Reg(name = cstr("time"), func = @@os_time), luaL_Reg(name = cstr("tmpname"), func = @@os_tmpname), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
 let private LUA_TNIL = 0
 let private SIZETIMEFMT = 250
 let private LUA_TTABLE = 5
+let private LUA_TBOOLEAN = 1
+let private LUA_VERSION_NUM = 504
+let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64(typeinfo sizeof(type<double>))
 
 [c_function]
 def private os_execute(var L : lua_State?) : int {
@@ -77,11 +67,9 @@ def private os_rename(var L : lua_State?) : int {
 def private os_tmpname(var L : lua_State?) : int {
     var buff : uint8[20]
     var err : int
-    {
-        err = crt::tmpnam(addr(buff[0])) == null ? 1 : 0
-    }
+    err = crt::tmpnam(addr(buff[0])) == null ? 1 : 0
     if (err != 0) {
-        return luaL_error`va(L, reinterpret<uint8?>("unable to generate a unique filename"), VaNone())
+        return luaL_error`va(L, cstr("unable to generate a unique filename"), VaNone())
     }
     lua_pushstring(L, addr(buff[0]))
     return 1
@@ -96,7 +84,7 @@ def private os_getenv(var L : lua_State?) : int {
 
 [c_function]
 def private os_clock(var L : lua_State?) : int {
-    lua_pushnumber(L, double(crt::clock()) / double(int64(1000000)))
+    lua_pushnumber(L, double(crt::clock()) / double(1000000l))
     return 1
 }
 
@@ -123,22 +111,21 @@ def private setboolfield(var L : lua_State?; var key : uint8?; value : int) {
 }
 
 // Set all fields from structure 'tm' in the table on top of the stack
-[c_function]
 def private setallfields(var L : lua_State?; var stm : tm?) {
-    setfield(L, reinterpret<uint8?>("year"), stm.tm_year, 1900)
-    setfield(L, reinterpret<uint8?>("month"), stm.tm_mon, 1)
-    setfield(L, reinterpret<uint8?>("day"), stm.tm_mday, 0)
-    setfield(L, reinterpret<uint8?>("hour"), stm.tm_hour, 0)
-    setfield(L, reinterpret<uint8?>("min"), stm.tm_min, 0)
-    setfield(L, reinterpret<uint8?>("sec"), stm.tm_sec, 0)
-    setfield(L, reinterpret<uint8?>("yday"), stm.tm_yday, 1)
-    setfield(L, reinterpret<uint8?>("wday"), stm.tm_wday, 1)
-    setboolfield(L, reinterpret<uint8?>("isdst"), stm.tm_isdst)
+    setfield(L, cstr("year"), stm.tm_year, 1900)
+    setfield(L, cstr("month"), stm.tm_mon, 1)
+    setfield(L, cstr("day"), stm.tm_mday, 0)
+    setfield(L, cstr("hour"), stm.tm_hour, 0)
+    setfield(L, cstr("min"), stm.tm_min, 0)
+    setfield(L, cstr("sec"), stm.tm_sec, 0)
+    setfield(L, cstr("yday"), stm.tm_yday, 1)
+    setfield(L, cstr("wday"), stm.tm_wday, 1)
+    setboolfield(L, cstr("isdst"), stm.tm_isdst)
 }
 
 def private getboolfield(var L : lua_State?; var key : uint8?) : int {
     var res : int
-    res = lua_getfield(L, -1, key) == LUA_TNIL ? -1 : lua_toboolean(L, -1)
+    res = (lua_getfield(L, -1, key) == LUA_TNIL) ? -1 : lua_toboolean(L, -1)
     lua_settop(L, -1 - 1)
     return res
 }
@@ -152,16 +139,16 @@ def private getfield(var L : lua_State?; var key : uint8?; d : int; delta : int)
     // field is not an integer?
     if (!(isnum != 0)) {
         // some other value?
-        if (t != 0) {
-            return luaL_error`va(L, reinterpret<uint8?>("field '%s' is not an integer"), (key,))
+        if (t != LUA_TNIL) {
+            return luaL_error`va(L, cstr("field '%s' is not an integer"), (key,))
         } elif (d < 0) {
             // absent field; no default?
-            return luaL_error`va(L, reinterpret<uint8?>("field '%s' missing in date table"), (key,))
+            return luaL_error`va(L, cstr("field '%s' missing in date table"), (key,))
         }
         res = int64(d)
     } else {
-        if (!(res >= int64(0) ? res - int64(delta) <= int64(2147483647) : int64(-2147483647 - 1 + delta) <= res)) {
-            return luaL_error`va(L, reinterpret<uint8?>("field '%s' is out-of-bound"), (key,))
+        if (!(res >= 0l ? res - int64(delta) <= 2147483647l : int64(-2147483647 - 1 + delta) <= res)) {
+            return luaL_error`va(L, cstr("field '%s' is out-of-bound"), (key,))
         }
         res -= int64(delta)
     }
@@ -171,42 +158,39 @@ def private getfield(var L : lua_State?; var key : uint8?; d : int; delta : int)
 
 [c_function]
 def private checkoption(var L : lua_State?; var conv : uint8?; convlen : int64; var buff : uint8?) : uint8? {
-    var option : uint8? = reinterpret<uint8?>("aAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%||EcECExEXEyEYOdOeOHOIOmOMOSOuOUOVOwOWOy")
+    var option : uint8? = cstr("aAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%||EcECExEXEyEYOdOeOHOIOmOMOSOuOUOVOwOWOy")
     // length of options being checked
     var oplen : int = 1
-    {
-        while (int(deref(option)) != '\0' && int64(oplen) <= convlen) {
-            // next block?
-            if (int(deref(option)) == '|') {
-                // will check options with next length (+1)
-                oplen++
-            } elif (crt::memcmp(reinterpret<void?>(conv), reinterpret<void?>(option), uint64(oplen)) == 0) {
-                // match?
-                // copy valid option to buffer
-                crt::memcpy(reinterpret<void?>(buff), reinterpret<void?>(conv), uint64(oplen))
-                deref(buff + oplen) = uint8('\0')
-                // return next item
-                return conv + oplen
-            }
-            option = option + oplen
+    while (int(deref(option)) != '\0' && int64(oplen) <= convlen) {
+        // next block?
+        if (int(deref(option)) == '|') {
+            // will check options with next length (+1)
+            oplen++
+        } elif (crt::memcmp(reinterpret<void?>(conv), reinterpret<void?>(option), uint64(oplen)) == 0) {
+            // match?
+            // copy valid option to buffer
+            crt::memcpy(reinterpret<void?>(buff), reinterpret<void?>(conv), uint64(oplen))
+            buff[oplen] = uint8('\0')
+            // return next item
+            return conv + oplen
         }
+        option = option + oplen
     }
-    luaL_argerror(L, 1, lua_pushfstring`va(L, reinterpret<uint8?>("invalid conversion specifier '%%%s'"), (conv,)))
+    luaL_argerror(L, 1, lua_pushfstring`va(L, cstr("invalid conversion specifier '%%%s'"), (conv,)))
     // to avoid warnings
     return conv
 }
 
-[c_function]
 def private l_checktime(var L : lua_State?; arg : int) : int64 {
     var t : int64 = luaL_checkinteger(L, arg)
-    let _t0 = int64(int64(t)) == t || luaL_argerror(L, arg, reinterpret<uint8?>("time out-of-bounds")) != 0
+    let _t0 = int64(int64(t)) == t || luaL_argerror(L, arg, cstr("time out-of-bounds")) != 0
     return int64(t)
 }
 
 [c_function]
 def private os_date(var L : lua_State?) : int {
     var slen : uint64
-    var s : uint8? = luaL_optlstring(L, 1, reinterpret<uint8?>("%c"), addr(slen))
+    var s : uint8? = luaL_optlstring(L, 1, cstr("%c"), addr(slen))
     var t : int64 = lua_type(L, 2) <= 0 ? crt::time(null) : l_checktime(L, 2)
     // 's' end
     var se : uint8? = s + slen
@@ -224,9 +208,9 @@ def private os_date(var L : lua_State?) : int {
     }
     // invalid date?
     if (stm == null) {
-        return luaL_error`va(L, reinterpret<uint8?>("date result cannot be represented in this installation"), VaNone())
+        return luaL_error`va(L, cstr("date result cannot be represented in this installation"), VaNone())
     }
-    if (crt::strcmp(s, reinterpret<uint8?>("*t")) == 0) {
+    if (crt::strcmp(s, cstr("*t")) == 0) {
         // 9 = number of fields
         lua_createtable(L, 0, 9)
         setallfields(L, stm)
@@ -239,12 +223,12 @@ def private os_date(var L : lua_State?) : int {
         while (intptr(s) < intptr(se)) {
             // not a conversion specifier?
             if (int(deref(s)) != '%') {
-                let _t2 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), uint64(1)) != null
+                let _t2 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), 1ul) != null
                 let _t3 = addr(b).n
                 addr(b).n++
                 var _t4 = s
                 s = s + 1
-                deref(addr(b).b + _t3) = deref(_t4)
+                addr(b).b[_t3] = deref(_t4)
             } else {
                 var reslen : uint64
                 var buff : uint8? = luaL_prepbuffsize(addr(b), uint64(SIZETIMEFMT))
@@ -273,19 +257,19 @@ def private os_time(var L : lua_State?) : int {
         luaL_checktype(L, 1, LUA_TTABLE)
         // make sure table is at the top
         lua_settop(L, 1)
-        ts.tm_year = getfield(L, reinterpret<uint8?>("year"), -1, 1900)
-        ts.tm_mon = getfield(L, reinterpret<uint8?>("month"), -1, 1)
-        ts.tm_mday = getfield(L, reinterpret<uint8?>("day"), -1, 0)
-        ts.tm_hour = getfield(L, reinterpret<uint8?>("hour"), 12, 0)
-        ts.tm_min = getfield(L, reinterpret<uint8?>("min"), 0, 0)
-        ts.tm_sec = getfield(L, reinterpret<uint8?>("sec"), 0, 0)
-        ts.tm_isdst = getboolfield(L, reinterpret<uint8?>("isdst"))
+        ts.tm_year = getfield(L, cstr("year"), -1, 1900)
+        ts.tm_mon = getfield(L, cstr("month"), -1, 1)
+        ts.tm_mday = getfield(L, cstr("day"), -1, 0)
+        ts.tm_hour = getfield(L, cstr("hour"), 12, 0)
+        ts.tm_min = getfield(L, cstr("min"), 0, 0)
+        ts.tm_sec = getfield(L, cstr("sec"), 0, 0)
+        ts.tm_isdst = getboolfield(L, cstr("isdst"))
         t = crt::mktime(reinterpret<void?>(addr(ts)))
         // update fields with normalized values
         setallfields(L, addr(ts))
     }
-    if (t != int64(int64(t)) || t == int64(-1)) {
-        return luaL_error`va(L, reinterpret<uint8?>("time result cannot be represented in this installation"), VaNone())
+    if (t != int64(int64(t)) || t == -1l) {
+        return luaL_error`va(L, cstr("time result cannot be represented in this installation"), VaNone())
     }
     lua_pushinteger(L, int64(t))
     return 1
@@ -302,17 +286,17 @@ def private os_difftime(var L : lua_State?) : int {
 [c_function]
 def private os_setlocale(var L : lua_State?) : int {
     var l : uint8? = luaL_optlstring(L, 1, null, null)
-    var op : int = luaL_checkoption(L, 2, reinterpret<uint8?>("all"), addr(os_setlocale_catnames[0]))
+    var op : int = luaL_checkoption(L, 2, cstr("all"), addr(os_setlocale_catnames[0]))
     lua_pushstring(L, crt::setlocale(os_setlocale_cat[op], l))
     return 1
 }
 
 def private os_exit(var L : lua_State?) : int {
     var status : int
-    if (lua_type(L, 1) == 1) {
+    if (lua_type(L, 1) == LUA_TBOOLEAN) {
         status = lua_toboolean(L, 1) != 0 ? 0 : 1
     } else {
-        status = int(luaL_optinteger(L, 1, int64(0)))
+        status = int(luaL_optinteger(L, 1, 0l))
     }
     if (lua_toboolean(L, 2) != 0) {
         lua_close(L)
@@ -326,8 +310,8 @@ def private os_exit(var L : lua_State?) : int {
 
 [c_function]
 def luaopen_os(var L : lua_State?) : int {
-    luaL_checkversion_(L, double(504), uint64(typeinfo sizeof(type<int64>)) * uint64(16) + uint64(typeinfo sizeof(type<double>)))
-    lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[12]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - uint64(1)))
+    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+    lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[12]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - 1ul))
     luaL_setfuncs(L, addr(syslib[0]), 0)
     return 1
 }

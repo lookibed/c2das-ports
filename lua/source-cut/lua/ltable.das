@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/cstr
 require c_runtime/variadic
 require crt
 require lmem
@@ -15,17 +16,31 @@ require lua_link
 require lvm_h
 
 var private dummynode_ : Node
-var private absentkey : TValue = TValue(tt_ = uint8(0 | 2 << 4))
+var private absentkey : TValue = TValue(tt_ = uint8(0 | (2 << 4)))
 
 [init]
 def private c2das_init_globals {
-    dummynode_.u = NodeKey(tt_ = uint8(0 | 1 << 4), key_tt = uint8(0 | 0 << 4), next = 0)
+    dummynode_.u = NodeKey(tt_ = uint8(0 | (1 << 4)), key_tt = uint8(0 | (0 << 4)), next = 0)
 }
 
-let private MAXABITS = int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1))
-let private MAXHBITS = int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)) - 1
-let private LUA_VTABLE = 5 | 0 << 4
-let private LUA_VSHRSTR = 4 | 0 << 4
+let private LUA_NUMTYPES = 9
+let private LUA_TDEADKEY = LUA_NUMTYPES + 2
+let private BIT_ISCOLLECTABLE = 1 << 6
+let private BITRAS = 1 << 7
+let private MAX_SIZET = ~0ul
+let private LUA_TNIL = 0
+let private LUA_TNUMBER = 3
+let private MAXABITS = int(uint64(typeinfo sizeof(type<int>)) * 8ul - 1ul)
+let private MAXHBITS = int(uint64(typeinfo sizeof(type<int>)) * 8ul - 1ul) - 1
+let private LUA_ERRMEM = 4
+let private LUA_TTABLE = 5
+let private LUA_VTABLE = LUA_TTABLE | (0 << 4)
+let private maskflags = ~(~0u << uint(int(TMS.TM_EQ) + 1))
+let private BLACKBIT = 5
+let private WHITE0BIT = 3
+let private WHITE1BIT = 4
+let private LUA_TSTRING = 4
+let private LUA_VSHRSTR = LUA_TSTRING | (0 << 4)
 
 // Hash for integers. To allow a good hash, use the remainder operator
 // ('%'). If integer fits as a non-negative int, compute an int
@@ -34,10 +49,10 @@ let private LUA_VSHRSTR = 4 | 0 << 4
 [c_function]
 def private hashint(var t : Table?; i : int64) : Node? {
     var ui : uint64 = uint64(i)
-    if (ui <= uint64(uint(2147483647))) {
-        return addr(deref(t.node + int(ui) % ((1 << int(t.lsizenode)) - 1 | 1)))
+    if (ui <= uint64(2147483647u)) {
+        return addr(t.node[int(ui) % ((1 << int(t.lsizenode)) - 1 | 1)])
     } else {
-        return addr(deref(t.node + ui % uint64((1 << int(t.lsizenode)) - 1 | 1)))
+        return addr(t.node[ui % uint64((1 << int(t.lsizenode)) - 1 | 1)])
     }
 }
 
@@ -57,7 +72,7 @@ def private l_hashfloat(var n : double) : int {
     } else {
         // normal case
         var u : uint = uint(i) + uint(ni)
-        return int(u <= uint(2147483647) ? u : ~u)
+        return int(u <= 2147483647u ? u : ~u)
     }
 }
 
@@ -74,39 +89,38 @@ def private mainpositionTV(var t : Table?; var key : TValue?) : Node? {
     } elif (_cond == 19) {
         {
             var n : double = key.value_.n
-            return addr(deref(t.node + l_hashfloat(n) % ((1 << int(t.lsizenode)) - 1 | 1)))
+            return addr(t.node[l_hashfloat(n) % ((1 << int(t.lsizenode)) - 1 | 1)])
         }
     } elif (_cond == 4) {
         {
             var ts : TString? = addr(reinterpret<GCUnion?>(key.value_.gc).ts)
-            return addr(deref(t.node + int(ts.hash & uint((1 << int(t.lsizenode)) - 1))))
+            return addr(t.node[int(ts.hash & uint((1 << int(t.lsizenode)) - 1))])
         }
     } elif (_cond == 20) {
         {
             var ts : TString? = addr(reinterpret<GCUnion?>(key.value_.gc).ts)
-            return addr(deref(t.node + int(luaS_hashlongstr(ts) & uint((1 << int(t.lsizenode)) - 1))))
+            return addr(t.node[int(luaS_hashlongstr(ts) & uint((1 << int(t.lsizenode)) - 1))])
         }
     } elif (_cond == 1) {
-        return addr(deref(t.node + (0 & (1 << int(t.lsizenode)) - 1)))
+        return addr(t.node[0 & (1 << int(t.lsizenode)) - 1])
     } elif (_cond == 17) {
-        return addr(deref(t.node + (1 & (1 << int(t.lsizenode)) - 1)))
+        return addr(t.node[1 & (1 << int(t.lsizenode)) - 1])
     } elif (_cond == 2) {
         {
             var p : void? = key.value_.p
-            return addr(deref(t.node + uint(uint64(intptr(p)) & uint64(uint(2147483647) * 2u + 1u)) % uint((1 << int(t.lsizenode)) - 1 | 1)))
+            return addr(t.node[uint(uint64(intptr(p)) & uint64(2147483647u * 2u + 1u)) % uint((1 << int(t.lsizenode)) - 1 | 1)])
         }
     } elif (_cond == 22) {
         {
             var f : function<(var a0 : lua_State?) : int> = key.value_.f
-            return addr(deref(t.node + uint(uint64(intptr(f)) & uint64(uint(2147483647) * 2u + 1u)) % uint((1 << int(t.lsizenode)) - 1 | 1)))
+            return addr(t.node[uint(uint64(intptr(f)) & uint64(2147483647u * 2u + 1u)) % uint((1 << int(t.lsizenode)) - 1 | 1)])
         }
     } else {
         {
             var o : GCObject? = key.value_.gc
-            return addr(deref(t.node + uint(uint64(intptr(o)) & uint64(uint(2147483647) * 2u + 1u)) % uint((1 << int(t.lsizenode)) - 1 | 1)))
+            return addr(t.node[uint(uint64(intptr(o)) & uint64(2147483647u * 2u + 1u)) % uint((1 << int(t.lsizenode)) - 1 | 1)])
         }
     }
-    return null
 }
 
 [c_function]
@@ -143,7 +157,7 @@ def private mainpositionfromnode(var t : Table?; var nd : Node?) : Node? {
 [c_function]
 def private equalkey(var k1 : TValue?; var n2 : Node?; deadok : int) : int {
     // not the same variants?
-    if (int(k1.tt_) != int(n2.u.key_tt) && !(deadok != 0 && int(n2.u.key_tt) == 9 + 2 && (int(k1.tt_) & 1 << 6) != 0)) {
+    if ((int(k1.tt_) != int(n2.u.key_tt)) && !(deadok != 0 && int(n2.u.key_tt) == LUA_TDEADKEY && (int(k1.tt_) & BIT_ISCOLLECTABLE) != 0)) {
         // cannot be same key
         return 0
     }
@@ -151,7 +165,7 @@ def private equalkey(var k1 : TValue?; var n2 : Node?; deadok : int) : int {
     if (_cond == 0 || _cond == 1 || _cond == 17) {
         return 1
     } elif (_cond == 3) {
-        return k1.value_.i == n2.u.key_val.i ? 1 : 0
+        return (k1.value_.i == n2.u.key_val.i) ? 1 : 0
     } elif (_cond == 19) {
         return k1.value_.n == n2.u.key_val.n ? 1 : 0
     } elif (_cond == 2) {
@@ -163,12 +177,11 @@ def private equalkey(var k1 : TValue?; var n2 : Node?; deadok : int) : int {
     } else {
         return intptr(k1.value_.gc) == intptr(n2.u.key_val.gc) ? 1 : 0
     }
-    return 0
 }
 
 // Returns the real size of the 'array' array
 def luaH_realasize(var t : Table?) : uint {
-    if (!((int(t.flags) & 1 << 7) != 0) || (t.alimit & t.alimit - uint(1)) == uint(0)) {
+    if (!((int(t.flags) & BITRAS) != 0) || (t.alimit & t.alimit - 1u) == 0u) {
         // this is the size
         return t.alimit
     } else {
@@ -190,12 +203,12 @@ def luaH_realasize(var t : Table?) : uint {
 // (If it is not, 'alimit' cannot be changed to any other value
 // without changing the real size.)
 def private ispow2realasize(var t : Table?) : int {
-    return !!((int(t.flags) & 1 << 7) != 0) || (t.alimit & t.alimit - uint(1)) == uint(0) ? 1 : 0
+    return (!!((int(t.flags) & BITRAS) != 0) || (t.alimit & t.alimit - 1u) == 0u) ? 1 : 0
 }
 
 def private setlimittosize(var t : Table?) : uint {
     t.alimit = luaH_realasize(t)
-    t.flags = uint8(int(t.flags) & int(uint8(~(1 << 7))))
+    t.flags = uint8(int(t.flags) & int(uint8(~BITRAS)))
     return t.alimit
 }
 
@@ -206,19 +219,17 @@ def private setlimittosize(var t : Table?) : uint {
 def private getgeneric(var t : Table?; var key : TValue?; deadok : int) : TValue? {
     var n : Node? = mainpositionTV(t, key)
     // check whether 'key' is somewhere in the chain
-    {
-        while (true) {
-            if (equalkey(key, n, deadok) != 0) {
-                // that's it
-                return addr(n.i_val)
-            } else {
-                var nx : int = n.u.next
-                if (nx == 0) {
-                    // not found
-                    return addr(absentkey)
-                }
-                n = n + nx
+    while (true) {
+        if (equalkey(key, n, deadok) != 0) {
+            // that's it
+            return addr(n.i_val)
+        } else {
+            var nx : int = n.u.next
+            if (nx == 0) {
+                // not found
+                return addr(absentkey)
             }
+            n = n + nx
         }
     }
     return null
@@ -228,11 +239,11 @@ def private getgeneric(var t : Table?; var key : TValue?; deadok : int) : TValue
 // the array part of a table, 0 otherwise.
 def private arrayindex(k : int64) : uint {
     // 'k' in [1, MAXASIZE]?
-    if (uint64(k) - uint64(1u) < uint64(uint64(1u << uint(int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)))) <= ~uint64(0) / uint64(typeinfo sizeof(type<TValue>)) ? 1u << uint(int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1))) : uint(~uint64(0) / uint64(typeinfo sizeof(type<TValue>))))) {
+    if (uint64(k) - uint64(1u) < uint64(uint64(1u << uint(int(uint64(typeinfo sizeof(type<int>)) * 8ul - 1ul))) <= MAX_SIZET / uint64(typeinfo sizeof(type<TValue>)) ? (1u << uint(int(uint64(typeinfo sizeof(type<int>)) * 8ul - 1ul))) : uint(MAX_SIZET / uint64(typeinfo sizeof(type<TValue>))))) {
         // 'key' is an appropriate array index
         return uint(k)
     } else {
-        return uint(0)
+        return 0u
     }
 }
 
@@ -243,24 +254,24 @@ def private arrayindex(k : int64) : uint {
 def private findindex(var L : lua_State?; var t : Table?; var key : TValue?; asize : uint) : uint {
     var i : uint
     // first iteration
-    if ((int(key.tt_) & 15) == 0) {
-        return uint(0)
+    if ((int(key.tt_) & 15) == LUA_TNIL) {
+        return 0u
     }
-    i = int(key.tt_) == (3 | 0 << 4) ? arrayindex(key.value_.i) : uint(0)
+    i = int(key.tt_) == (LUA_TNUMBER | (0 << 4)) ? arrayindex(key.value_.i) : 0u
     // is 'key' inside array part?
     if (i - 1u < asize) {
         // yes; that's the index
         return i
     } else {
         var n : TValue? = getgeneric(t, key, 1)
-        if (int(n.tt_) == (0 | 2 << 4)) {
+        if (int(n.tt_) == (LUA_TNIL | (2 << 4))) {
             // key not found
-            luaG_runerror`va(L, reinterpret<uint8?>("invalid key to 'next'"), VaNone())
+            luaG_runerror`va(L, cstr("invalid key to 'next'"), VaNone())
         }
         // key index in hash table
-        i = uint(int(int64(reinterpret<Node?>(n) - addr(deref(t.node + 0)))))
+        i = uint(int(int64(reinterpret<Node?>(n) - addr(t.node[0]))))
         // hash elements are numbered after array ones
-        return i + uint(1) + asize
+        return (i + 1u) + asize
     }
 }
 
@@ -270,49 +281,45 @@ def luaH_next(var L : lua_State?; var t : Table?; var key : StackValue?) : int {
     // find original key
     var i : uint = findindex(L, t, addr(key.val), asize)
     // try first array part
-    {
-        while (i < asize) {
-            // a non-empty entry?
-            if (!((int(addr(deref(t._c_array + i)).tt_) & 15) == 0)) {
-                {
-                    var io : TValue? = addr(key.val)
-                    io.value_.i = int64(i + uint(1))
-                    io.tt_ = uint8(3 | 0 << 4)
-                }
-                {
-                    var io1 : TValue? = addr((key + 1).val)
-                    var io2 : TValue? = addr(deref(t._c_array + i))
-                    io1.value_ = io2.value_
-                    io1.tt_ = io2.tt_
-                }
-                return 1
+    while (i < asize) {
+        // a non-empty entry?
+        if (!((int(addr(t._c_array[i]).tt_) & 15) == LUA_TNIL)) {
+            {
+                var io : TValue? = addr(key.val)
+                io.value_.i = int64(i + 1u)
+                io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
             }
-            i++
+            {
+                var io1 : TValue? = addr((key + 1).val)
+                var io2 : TValue? = addr(t._c_array[i])
+                io1.value_ = io2.value_
+                io1.tt_ = io2.tt_
+            }
+            return 1
         }
+        i++
     }
     // hash part
-    {
-        i -= asize
-        while (int(i) < 1 << int(t.lsizenode)) {
-            // a non-empty entry?
-            if (!((int(addr(addr(deref(t.node + i)).i_val).tt_) & 15) == 0)) {
-                var n : Node? = addr(deref(t.node + i))
-                {
-                    var io_ : TValue? = addr(key.val)
-                    var n_ : Node? = n
-                    io_.value_ = n_.u.key_val
-                    io_.tt_ = n_.u.key_tt
-                }
-                {
-                    var io1 : TValue? = addr((key + 1).val)
-                    var io2 : TValue? = addr(n.i_val)
-                    io1.value_ = io2.value_
-                    io1.tt_ = io2.tt_
-                }
-                return 1
+    i -= asize
+    while (int(i) < (1 << int(t.lsizenode))) {
+        // a non-empty entry?
+        if (!((int(addr(addr(t.node[i]).i_val).tt_) & 15) == LUA_TNIL)) {
+            var n : Node? = addr(t.node[i])
+            {
+                var io_ : TValue? = addr(key.val)
+                var n_ : Node? = n
+                io_.value_ = n_.u.key_val
+                io_.tt_ = n_.u.key_tt
             }
-            i++
+            {
+                var io1 : TValue? = addr((key + 1).val)
+                var io2 : TValue? = addr(n.i_val)
+                io1.value_ = io2.value_
+                io1.tt_ = io2.tt_
+            }
+            return 1
         }
+        i++
     }
     // no more elements
     return 0
@@ -337,27 +344,25 @@ def private computesizes(var nums : uint?; var pna : uint?) : uint {
     // 2^i (candidate for optimal size)
     var twotoi : uint
     // number of elements smaller than 2^i
-    var a : uint = uint(0)
+    var a : uint = 0u
     // number of elements to go to array part
-    var na : uint = uint(0)
+    var na : uint = 0u
     // optimal size for array part
-    var optimal : uint = uint(0)
+    var optimal : uint = 0u
     // loop while keys can fill more than half of total size
-    {
-        i = 0
-        twotoi = uint(1)
-        while (twotoi > uint(0) && deref(pna) > twotoi / uint(2)) {
-            a += deref(nums + i)
-            // more than half elements present?
-            if (a > twotoi / uint(2)) {
-                // optimal size (till now)
-                optimal = twotoi
-                // all elements up to 'optimal' will go to array part
-                na = a
-            }
-            i++
-            twotoi *= uint(2)
+    i = 0
+    twotoi = 1u
+    while (twotoi > 0u && deref(pna) > twotoi / 2u) {
+        a += nums[i]
+        // more than half elements present?
+        if (a > twotoi / 2u) {
+            // optimal size (till now)
+            optimal = twotoi
+            // all elements up to 'optimal' will go to array part
+            na = a
         }
+        i++
+        twotoi *= 2u
     }
     deref(pna) = na
     return optimal
@@ -367,10 +372,10 @@ def private computesizes(var nums : uint?; var pna : uint?) : uint {
 def private countint(key : int64; var nums : uint?) : int {
     var k : uint = arrayindex(key)
     // is 'key' an appropriate array index?
-    if (k != uint(0)) {
+    if (k != 0u) {
         // count as such
         let _t0 = luaO_ceillog2(k)
-        deref(nums + _t0)++
+        nums[_t0]++
         return 1
     } else {
         return 0
@@ -386,41 +391,37 @@ def private numusearray(var t : Table?; var nums : uint?) : uint {
     // 2^lg
     var ttlg : uint
     // summation of 'nums'
-    var ause : uint = uint(0)
+    var ause : uint = 0u
     // count to traverse all array keys
-    var i : uint = uint(1)
+    var i : uint = 1u
     // real array size
     var asize : uint = t.alimit
     // traverse each slice
-    {
-        lg = 0
-        ttlg = uint(1)
-        while (lg <= MAXABITS) {
-            // counter
-            var lc : uint = uint(0)
-            var lim : uint = ttlg
-            if (lim > asize) {
-                // adjust upper limit
-                lim = asize
-                if (i > lim) {
-                    // no more elements to count
-                    break
-                }
+    lg = 0
+    ttlg = 1u
+    while (lg <= MAXABITS) {
+        // counter
+        var lc : uint = 0u
+        var lim : uint = ttlg
+        if (lim > asize) {
+            // adjust upper limit
+            lim = asize
+            if (i > lim) {
+                // no more elements to count
+                break
             }
-            // count elements in range (2^(lg - 1), 2^lg]
-            {
-                while (i <= lim) {
-                    if (!((int(addr(deref(t._c_array + (i - uint(1)))).tt_) & 15) == 0)) {
-                        lc++
-                    }
-                    i++
-                }
-            }
-            deref(nums + lg) += lc
-            ause += lc
-            lg++
-            ttlg *= uint(2)
         }
+        // count elements in range (2^(lg - 1), 2^lg]
+        while (i <= lim) {
+            if (!((int(addr(t._c_array[i - 1u]).tt_) & 15) == LUA_TNIL)) {
+                lc++
+            }
+            i++
+        }
+        nums[lg] += lc
+        ause += lc
+        lg++
+        ttlg *= 2u
     }
     return ause
 }
@@ -438,9 +439,9 @@ def private numusehash(var t : Table?; var nums : uint?; var pna : uint?) : int 
         if (!(_t0 != 0)) {
             break
         }
-        var n : Node? = addr(deref(t.node + i))
-        if (!((int(addr(n.i_val).tt_) & 15) == 0)) {
-            if (int(n.u.key_tt) == (3 | 0 << 4)) {
+        var n : Node? = addr(t.node[i])
+        if (!((int(addr(n.i_val).tt_) & 15) == LUA_TNIL)) {
+            if (int(n.u.key_tt) == (LUA_TNUMBER | (0 << 4))) {
                 ause += countint(n.u.key_val.i, nums)
             }
             totaluse++
@@ -458,28 +459,28 @@ def private numusehash(var t : Table?; var nums : uint?; var pna : uint?) : int 
 [c_function]
 def private setnodevector(var L : lua_State?; var t : Table?; var size : uint) {
     // no elements to hash part?
-    if (size == uint(0)) {
+    if (size == 0u) {
         // use common 'dummynode'
         t.node = addr(dummynode_)
-        t.lsizenode = uint8(0)
+        t.lsizenode = 0u8
         // signal that it is using dummy node
         t.lastfree = null
     } else {
         var lsize : int = luaO_ceillog2(size)
-        if (lsize > MAXHBITS || 1u << uint(lsize) > (uint64(1u << uint(int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)) - 1)) <= ~uint64(0) / uint64(typeinfo sizeof(type<Node>)) ? 1u << uint(int(uint64(typeinfo sizeof(type<int>)) * uint64(8) - uint64(1)) - 1) : uint(~uint64(0) / uint64(typeinfo sizeof(type<Node>))))) {
-            luaG_runerror`va(L, reinterpret<uint8?>("table overflow"), VaNone())
+        if (lsize > MAXHBITS || (1u << uint(lsize)) > (uint64(1u << uint(MAXHBITS)) <= MAX_SIZET / uint64(typeinfo sizeof(type<Node>)) ? (1u << uint(MAXHBITS)) : uint(MAX_SIZET / uint64(typeinfo sizeof(type<Node>))))) {
+            luaG_runerror`va(L, cstr("table overflow"), VaNone())
         }
         size = uint(1 << lsize)
         t.node = reinterpret<Node?>(luaM_malloc_(L, uint64(size) * uint64(typeinfo sizeof(type<Node>)), 0))
         for (i in range(int(size))) {
-            var n : Node? = addr(deref(t.node + i))
+            var n : Node? = addr(t.node[i])
             n.u.next = 0
-            n.u.key_tt = uint8(0)
-            addr(n.i_val).tt_ = uint8(0 | 1 << 4)
+            n.u.key_tt = uint8(LUA_TNIL)
+            addr(n.i_val).tt_ = uint8(LUA_TNIL | (1 << 4))
         }
         t.lsizenode = uint8(lsize)
         // all positions are free
-        t.lastfree = addr(deref(t.node + size))
+        t.lastfree = addr(t.node[size])
     }
 }
 
@@ -488,8 +489,8 @@ def private setnodevector(var L : lua_State?; var t : Table?; var size : uint) {
 def private reinsert(var L : lua_State?; var ot : Table?; var t : Table?) {
     var size : int = 1 << int(ot.lsizenode)
     for (j in range(size)) {
-        var old : Node? = addr(deref(ot.node + j))
-        if (!((int(addr(old.i_val).tt_) & 15) == 0)) {
+        var old : Node? = addr(ot.node[j])
+        if (!((int(addr(old.i_val).tt_) & 15) == LUA_TNIL)) {
             // doesn't need barrier/invalidate cache, as entry was
             // already present in the table
             var k : TValue
@@ -544,8 +545,8 @@ def luaH_resize(var L : lua_State?; var t : Table?; newasize : uint; nhsize : ui
         exchangehashpart(t, addr(newt))
         // re-insert into the new hash the elements from vanishing slice
         for (i in urange(newasize, oldasize)) {
-            if (!((int(addr(deref(t._c_array + i)).tt_) & 15) == 0)) {
-                luaH_setint(L, t, int64(i + uint(1)), addr(deref(t._c_array + i)))
+            if (!((int(addr(t._c_array[i]).tt_) & 15) == LUA_TNIL)) {
+                luaH_setint(L, t, int64(i + 1u), addr(t._c_array[i]))
             }
         }
         // restore current size...
@@ -556,11 +557,11 @@ def luaH_resize(var L : lua_State?; var t : Table?; newasize : uint; nhsize : ui
     // allocate new array
     newarray = reinterpret<TValue?>(luaM_realloc_(L, reinterpret<void?>(t._c_array), uint64(oldasize) * uint64(typeinfo sizeof(type<TValue>)), uint64(newasize) * uint64(typeinfo sizeof(type<TValue>))))
     // allocation failed?
-    if (newarray == null && newasize > uint(0)) {
+    if (newarray == null && newasize > 0u) {
         // release new hash part
         freehash(L, addr(newt))
         // raise error (with array unchanged)
-        luaD_throw(L, 4)
+        luaD_throw(L, LUA_ERRMEM)
     }
     // allocation ok; initialize new part of the array
     // 't' has the new hash ('newt' has the old)
@@ -570,7 +571,7 @@ def luaH_resize(var L : lua_State?; var t : Table?; newasize : uint; nhsize : ui
     t.alimit = newasize
     // clear new slice of the array
     for (i in urange(oldasize, newasize)) {
-        addr(deref(t._c_array + i)).tt_ = uint8(0 | 1 << 4)
+        addr(t._c_array[i]).tt_ = uint8(LUA_TNIL | (1 << 4))
     }
     // re-insert elements from old hash part into new parts
     // 'newt' now has the old hash
@@ -581,7 +582,7 @@ def luaH_resize(var L : lua_State?; var t : Table?; newasize : uint; nhsize : ui
 
 [c_function]
 def luaH_resizearray(var L : lua_State?; var t : Table?; nasize : uint) {
-    var nsize : int = t.lastfree == null ? 0 : 1 << int(t.lsizenode)
+    var nsize : int = t.lastfree == null ? 0 : (1 << int(t.lsizenode))
     luaH_resize(L, t, nasize, uint(nsize))
 }
 
@@ -596,12 +597,10 @@ def private rehash(var L : lua_State?; var t : Table?; var ek : TValue?) {
     var i : int
     var totaluse : int
     // reset counts
-    {
-        i = 0
-        while (i <= MAXABITS) {
-            nums[i] = uint(0)
-            i++
-        }
+    i = 0
+    while (i <= MAXABITS) {
+        nums[i] = 0u
+        i++
     }
     setlimittosize(t)
     // count keys in array part
@@ -611,7 +610,7 @@ def private rehash(var L : lua_State?; var t : Table?; var ek : TValue?) {
     // count keys in hash part
     totaluse += numusehash(t, addr(nums[0]), addr(na))
     // count extra key
-    if (int(ek.tt_) == (3 | 0 << 4)) {
+    if (int(ek.tt_) == (LUA_TNUMBER | (0 << 4))) {
         na += uint(countint(ek.value_.i, addr(nums[0])))
     }
     totaluse++
@@ -627,10 +626,10 @@ def luaH_new(var L : lua_State?) : Table? {
     var t : Table? = addr(reinterpret<GCUnion?>(o).h)
     t.metatable = null
     // table has no metamethod fields
-    t.flags = uint8(~(~0u << uint(int(TMS.TM_EQ) + 1)))
+    t.flags = uint8(maskflags)
     t._c_array = null
-    t.alimit = uint(0)
-    setnodevector(L, t, uint(0))
+    t.alimit = 0u
+    setnodevector(L, t, 0u)
     return t
 }
 
@@ -646,7 +645,7 @@ def private getfreepos(var t : Table?) : Node? {
     if (!(t.lastfree == null)) {
         while (intptr(t.lastfree) > intptr(t.node)) {
             t.lastfree = t.lastfree - 1
-            if (int(t.lastfree.u.key_tt) == 0) {
+            if (int(t.lastfree.u.key_tt) == LUA_TNIL) {
                 return t.lastfree
             }
         }
@@ -664,9 +663,9 @@ def private getfreepos(var t : Table?) : Node? {
 def private luaH_newkey(var L : lua_State?; var t : Table?; var key : TValue?; var value : TValue?) {
     var mp : Node?
     var aux : TValue
-    if ((int(key.tt_) & 15) == 0) {
-        luaG_runerror`va(L, reinterpret<uint8?>("table index is nil"), VaNone())
-    } elif (int(key.tt_) == (3 | 1 << 4)) {
+    if ((int(key.tt_) & 15) == LUA_TNIL) {
+        luaG_runerror`va(L, cstr("table index is nil"), VaNone())
+    } elif (int(key.tt_) == (LUA_TNUMBER | (1 << 4))) {
         var f : double = key.value_.n
         var k : int64
         // does key fit in an integer?
@@ -674,21 +673,21 @@ def private luaH_newkey(var L : lua_State?; var t : Table?; var key : TValue?; v
             {
                 var io : TValue? = addr(aux)
                 io.value_.i = k
-                io.tt_ = uint8(3 | 0 << 4)
+                io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
             }
             // insert it as an integer
             key = addr(aux)
         } elif (!(f == f)) {
-            luaG_runerror`va(L, reinterpret<uint8?>("table index is NaN"), VaNone())
+            luaG_runerror`va(L, cstr("table index is NaN"), VaNone())
         }
     }
-    if ((int(value.tt_) & 15) == 0) {
+    if ((int(value.tt_) & 15) == LUA_TNIL) {
         // do not insert nil values
         return
     }
     mp = mainpositionTV(t, key)
     // main position is taken?
-    if (!((int(addr(mp.i_val).tt_) & 15) == 0) || t.lastfree == null) {
+    if (!((int(addr(mp.i_val).tt_) & 15) == LUA_TNIL) || t.lastfree == null) {
         var othern : Node?
         // get a free place
         var f : Node? = getfreepos(t)
@@ -719,7 +718,7 @@ def private luaH_newkey(var L : lua_State?; var t : Table?; var key : TValue?; v
                 // now 'mp' is free
                 mp.u.next = 0
             }
-            addr(mp.i_val).tt_ = uint8(0 | 1 << 4)
+            addr(mp.i_val).tt_ = uint8(LUA_TNIL | (1 << 4))
         } else {
             // colliding node is in its own main position
             // new node will go into free position
@@ -738,8 +737,8 @@ def private luaH_newkey(var L : lua_State?; var t : Table?; var key : TValue?; v
         n_.u.key_val = io_.value_
         n_.u.key_tt = io_.tt_
     }
-    if ((int(key.tt_) & 1 << 6) != 0) {
-        if ((int(addr(reinterpret<GCUnion?>(t).gc).marked) & 1 << 5) != 0 && (int(key.value_.gc.marked) & (1 << 3 | 1 << 4)) != 0) {
+    if ((int(key.tt_) & BIT_ISCOLLECTABLE) != 0) {
+        if ((int(addr(reinterpret<GCUnion?>(t).gc).marked) & (1 << BLACKBIT)) != 0 && (int(key.value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
             luaC_barrierback_(L, addr(reinterpret<GCUnion?>(t).gc))
         }
     }
@@ -776,28 +775,26 @@ def luaH_getint(var t : Table?; key : int64) : TValue? {
     var alimit : uint64 = uint64(t.alimit)
     // 'key' in [1, t->alimit]?
     if (uint64(key) - uint64(1u) < alimit) {
-        return addr(deref(t._c_array + (key - int64(1))))
-    } elif (!!((int(t.flags) & 1 << 7) != 0) && (uint64(key) - uint64(1u) & ~(alimit - uint64(1u))) < alimit) {
+        return addr(t._c_array[key - 1l])
+    } elif (!!((int(t.flags) & BITRAS) != 0) && (((uint64(key) - uint64(1u)) & ~(alimit - uint64(1u))) < alimit)) {
         // key still may be in the array part?
         // probably '#t' is here now
         t.alimit = uint(key)
-        return addr(deref(t._c_array + (key - int64(1))))
+        return addr(t._c_array[key - 1l])
     } else {
         // key is not in the array part; check the hash
         var n : Node? = hashint(t, key)
         // check whether 'key' is somewhere in the chain
-        {
-            while (true) {
-                if (int(n.u.key_tt) == (3 | 0 << 4) && n.u.key_val.i == key) {
-                    // that's it
-                    return addr(n.i_val)
-                } else {
-                    var nx : int = n.u.next
-                    if (nx == 0) {
-                        break
-                    }
-                    n = n + nx
+        while (true) {
+            if (int(n.u.key_tt) == (LUA_TNUMBER | (0 << 4)) && n.u.key_val.i == key) {
+                // that's it
+                return addr(n.i_val)
+            } else {
+                var nx : int = n.u.next
+                if (nx == 0) {
+                    break
                 }
+                n = n + nx
             }
         }
         return addr(absentkey)
@@ -807,21 +804,19 @@ def luaH_getint(var t : Table?; key : int64) : TValue? {
 // search function for short strings
 [c_function]
 def luaH_getshortstr(var t : Table?; var key : TString?) : TValue? {
-    var n : Node? = addr(deref(t.node + int(key.hash & uint((1 << int(t.lsizenode)) - 1))))
+    var n : Node? = addr(t.node[int(key.hash & uint((1 << int(t.lsizenode)) - 1))])
     // check whether 'key' is somewhere in the chain
-    {
-        while (true) {
-            if (int(n.u.key_tt) == (4 | 0 << 4 | 1 << 6) && intptr(addr(reinterpret<GCUnion?>(n.u.key_val.gc).ts)) == intptr(key)) {
-                // that's it
-                return addr(n.i_val)
-            } else {
-                var nx : int = n.u.next
-                if (nx == 0) {
-                    // not found
-                    return addr(absentkey)
-                }
-                n = n + nx
+    while (true) {
+        if (int(n.u.key_tt) == ((LUA_TSTRING | (0 << 4)) | BIT_ISCOLLECTABLE) && intptr(addr(reinterpret<GCUnion?>(n.u.key_val.gc).ts)) == intptr(key)) {
+            // that's it
+            return addr(n.i_val)
+        } else {
+            var nx : int = n.u.next
+            if (nx == 0) {
+                // not found
+                return addr(absentkey)
             }
+            n = n + nx
         }
     }
     return null
@@ -838,7 +833,7 @@ def luaH_getstr(var t : Table?; var key : TString?) : TValue? {
             var io : TValue? = addr(ko)
             var x_ : TString? = key
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-            io.tt_ = uint8(int(x_.tt) | 1 << 6)
+            io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
             let _t0 = reinterpret<lua_State?>(null)
         }
         return getgeneric(t, addr(ko), 0)
@@ -887,7 +882,7 @@ def luaH_get(var t : Table?; var key : TValue?) : TValue? {
 // Beware: when using this function you probably need to check a GC
 // barrier and invalidate the TM cache.
 def luaH_finishset(var L : lua_State?; var t : Table?; var key : TValue?; var slot : TValue?; var value : TValue?) {
-    if (int(slot.tt_) == (0 | 2 << 4)) {
+    if (int(slot.tt_) == (LUA_TNIL | (2 << 4))) {
         luaH_newkey(L, t, key, value)
     } else {
         var io1 : TValue? = slot
@@ -907,12 +902,12 @@ def luaH_set(var L : lua_State?; var t : Table?; var key : TValue?; var value : 
 [c_function]
 def luaH_setint(var L : lua_State?; var t : Table?; key : int64; var value : TValue?) {
     var p : TValue? = luaH_getint(t, key)
-    if (int(p.tt_) == (0 | 2 << 4)) {
+    if (int(p.tt_) == (LUA_TNIL | (2 << 4))) {
         var k : TValue
         {
             var io : TValue? = addr(k)
             io.value_.i = key
-            io.tt_ = uint8(3 | 0 << 4)
+            io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
         }
         luaH_newkey(L, t, addr(k), value)
     } else {
@@ -937,18 +932,18 @@ def luaH_setint(var L : lua_State?; var t : Table?; key : int64; var value : TVa
 def private hash_search(var t : Table?; var j : uint64) : uint64 {
     var i : uint64
     // the caller ensures 'j + 1' is present
-    if (j == uint64(0)) {
+    if (j == 0ul) {
         j++
     }
     while (true) {
         // 'i' is a present index
         i = j
-        if (j <= uint64(9223372036854775807l) / uint64(2)) {
-            j *= uint64(2)
+        if (j <= uint64(9223372036854775807l) / 2ul) {
+            j *= 2ul
         } else {
             j = uint64(9223372036854775807l)
             // t[j] not present?
-            if ((int(luaH_getint(t, int64(j)).tt_) & 15) == 0) {
+            if ((int(luaH_getint(t, int64(j)).tt_) & 15) == LUA_TNIL) {
                 // 'j' now is an absent index
                 break
             } else {
@@ -957,7 +952,7 @@ def private hash_search(var t : Table?; var j : uint64) : uint64 {
                 return j
             }
         }
-        if (!(!((int(luaH_getint(t, int64(j)).tt_) & 15) == 0))) {
+        if (!(!((int(luaH_getint(t, int64(j)).tt_) & 15) == LUA_TNIL))) {
             break
         }
     }
@@ -965,8 +960,8 @@ def private hash_search(var t : Table?; var j : uint64) : uint64 {
     // i < j && t[i] present && t[j] absent
     // do a binary search between them
     while (j - i > uint64(1u)) {
-        var m : uint64 = (i + j) / uint64(2)
-        if ((int(luaH_getint(t, int64(m)).tt_) & 15) == 0) {
+        var m : uint64 = (i + j) / 2ul
+        if ((int(luaH_getint(t, int64(m)).tt_) & 15) == LUA_TNIL) {
             j = m
         } else {
             i = m
@@ -979,8 +974,8 @@ def private hash_search(var t : Table?; var j : uint64) : uint64 {
 def private binsearch(var _c_array : TValue?; var i : uint; var j : uint) : uint {
     // binary search
     while (j - i > 1u) {
-        var m : uint = (i + j) / uint(2)
-        if ((int(addr(deref(_c_array + (m - uint(1)))).tt_) & 15) == 0) {
+        var m : uint = (i + j) / 2u
+        if ((int(addr(_c_array[m - 1u]).tt_) & 15) == LUA_TNIL) {
             j = m
         } else {
             i = m
@@ -1020,41 +1015,41 @@ def private binsearch(var _c_array : TValue?; var i : uint; var j : uint) : uint
 def luaH_getn(var t : Table?) : uint64 {
     var limit : uint = t.alimit
     // (1)?
-    if (limit > uint(0) && (int(addr(deref(t._c_array + (limit - uint(1)))).tt_) & 15) == 0) {
+    if (limit > 0u && (int(addr(t._c_array[limit - 1u]).tt_) & 15) == LUA_TNIL) {
         // there must be a boundary before 'limit'
-        if (limit >= uint(2) && !((int(addr(deref(t._c_array + (limit - uint(2)))).tt_) & 15) == 0)) {
+        if (limit >= 2u && !((int(addr(t._c_array[limit - 2u]).tt_) & 15) == LUA_TNIL)) {
             // 'limit - 1' is a boundary; can it be a new limit?
-            if (ispow2realasize(t) != 0 && !((limit - uint(1) & limit - uint(1) - uint(1)) == uint(0))) {
-                t.alimit = limit - uint(1)
+            if (ispow2realasize(t) != 0 && !((limit - 1u & limit - 1u - 1u) == 0u)) {
+                t.alimit = limit - 1u
                 // now 'alimit' is not the real size
-                t.flags = uint8(int(t.flags) | 1 << 7)
+                t.flags = uint8(int(t.flags) | BITRAS)
             }
-            return uint64(limit - uint(1))
+            return uint64(limit - 1u)
         } else {
             // must search for a boundary in [0, limit]
-            var boundary : uint = binsearch(t._c_array, uint(0), limit)
+            var boundary : uint = binsearch(t._c_array, 0u, limit)
             // can this boundary represent the real size of the array?
-            if (ispow2realasize(t) != 0 && boundary > luaH_realasize(t) / uint(2)) {
+            if (ispow2realasize(t) != 0 && boundary > luaH_realasize(t) / 2u) {
                 // use it as the new limit
                 t.alimit = boundary
-                t.flags = uint8(int(t.flags) | 1 << 7)
+                t.flags = uint8(int(t.flags) | BITRAS)
             }
             return uint64(boundary)
         }
     }
     // 'limit' is zero or present in table
     // (2)?
-    if (!(!((int(t.flags) & 1 << 7) != 0) || (t.alimit & t.alimit - uint(1)) == uint(0))) {
+    if (!(!((int(t.flags) & BITRAS) != 0) || (t.alimit & t.alimit - 1u) == 0u)) {
         // 'limit' > 0 and array has more elements after 'limit'
         // 'limit + 1' is empty?
-        if ((int(addr(deref(t._c_array + limit)).tt_) & 15) == 0) {
+        if ((int(addr(t._c_array[limit]).tt_) & 15) == LUA_TNIL) {
             // this is the boundary
             return uint64(limit)
         }
         // else, try last element in the array
         limit = luaH_realasize(t)
         // empty?
-        if ((int(addr(deref(t._c_array + (limit - uint(1)))).tt_) & 15) == 0) {
+        if ((int(addr(t._c_array[limit - 1u]).tt_) & 15) == LUA_TNIL) {
             // there must be a boundary in the array after old limit,
             // and it must be a valid new limit
             var boundary : uint = binsearch(t._c_array, t.alimit, limit)
@@ -1064,7 +1059,7 @@ def luaH_getn(var t : Table?) : uint64 {
     }
     // else, new limit is present in the table; check the hash part
     // (3) 'limit' is the last element and either is zero or present in table
-    if (t.lastfree == null || (int(luaH_getint(t, int64(limit + uint(1))).tt_) & 15) == 0) {
+    if (t.lastfree == null || (int(luaH_getint(t, int64(limit + 1u)).tt_) & 15) == LUA_TNIL) {
         // 'limit + 1' is absent
         return uint64(limit)
     } else {

@@ -1,0 +1,1081 @@
+{
+	"command" : "scripts/publish_ports.sh --program lua --no-convert --perf --samples 3 --lanes interp,jit,exe,jit-goto,interp-source-cut,jit-source-cut,interp-single,jit-single --timeout 1800",
+	"program" : "lua",
+	"workloads" : [
+		{
+			"name" : "startup",
+			"args" : "-e \"print(1)\"",
+			"startup" : true
+		},
+		{
+			"name" : "fib",
+			"args" : "bench/timed.lua bench/fib.lua",
+			"startup" : false
+		},
+		{
+			"name" : "binary_trees",
+			"args" : "bench/timed.lua bench/binary_trees.lua",
+			"startup" : false
+		},
+		{
+			"name" : "nbody",
+			"args" : "bench/timed.lua bench/nbody.lua",
+			"startup" : false
+		},
+		{
+			"name" : "spectral_norm",
+			"args" : "bench/timed.lua bench/spectral_norm.lua",
+			"startup" : false
+		},
+		{
+			"name" : "test suite",
+			"args" : "-e \"_port=true\" bench/timed.lua all.lua",
+			"startup" : false
+		}
+	],
+	"lanes" : [
+		{
+			"name" : "native",
+			"command" : "/root/libclang/bin/clang -O3 -w -funsigned-char -o lua_native lapi.c lcode.c lctype.c ldebug.c ldo.c ldump.c lfunc.c lgc.c llex.c lmem.c lobject.c lopcodes.c lparser.c lstate.c lstring.c ltable.c ltm.c lundump.c lvm.c lzio.c lauxlib.c lbaselib.c lcorolib.c ldblib.c liolib.c lmathlib.c loadlib.c loslib.c lstrlib.c ltablib.c lutf8lib.c linit.c lua.c -lm",
+			"error" : ""
+		},
+		{
+			"name" : "interp",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "exe",
+			"command" : "daslang -exe lua/lua.das, the binary run",
+			"error" : ""
+		},
+		{
+			"name" : "jit-goto",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit lua/lua.das --, lua/ converted by c2das-re's lua/run.das -- --filter lua --layout source --switch-dispatch goto",
+			"error" : ""
+		},
+		{
+			"name" : "interp-source-cut",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime source-cut/lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit-source-cut",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit source-cut/lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "interp-single",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime single/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit-single",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit single/lua.das --",
+			"error" : ""
+		}
+	],
+	"machine" : {
+		"arch" : "x86_64",
+		"cpu" : "AMD Ryzen 7 7435HS",
+		"box" : "PC",
+		"clang" : "clang version 22.1.8 (https://github.com/llvm/llvm-project ca7933e47d3a3451d81e72ac174dcb5aa28b59d1)",
+		"clang_path" : "/root/libclang/bin/clang",
+		"daslang" : "0.6.5"
+	},
+	"cells" : [
+		{
+			"work_time" : 0,
+			"spread" : 0.06240218795107498,
+			"work_samples" : [],
+			"time" : 0.0065815,
+			"error" : "",
+			"samples" : [
+				0.0061602,
+				0.0069816,
+				0.0065815
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.023812632140087765,
+			"work_samples" : [],
+			"time" : 1.491200103,
+			"error" : "",
+			"samples" : [
+				1.531501901,
+				1.491200103,
+				1.460483102
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.010195918934126316,
+			"work_samples" : [],
+			"time" : 1.919949553,
+			"error" : "",
+			"samples" : [
+				1.910228104,
+				1.949379404,
+				1.919949553
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.015376397063442815,
+			"work_samples" : [],
+			"time" : 0.037216098,
+			"error" : "",
+			"samples" : [
+				0.036859099,
+				0.037216098,
+				0.038003598
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.010931457966020965,
+			"work_samples" : [],
+			"time" : 1.882328923,
+			"error" : "",
+			"samples" : [
+				1.882328923,
+				1.875812322,
+				1.916965521
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "jit-goto"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.01029574438521466,
+			"work_samples" : [],
+			"time" : 0.546660522,
+			"error" : "",
+			"samples" : [
+				0.547834777,
+				0.546660522,
+				0.536578223
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "interp-source-cut"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.0033002206518712484,
+			"work_samples" : [],
+			"time" : 0.841231479,
+			"error" : "",
+			"samples" : [
+				0.841239079,
+				0.841231479,
+				0.83568658
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "jit-source-cut"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.007793038013153073,
+			"work_samples" : [],
+			"time" : 2.484768067,
+			"error" : "",
+			"samples" : [
+				2.514360938,
+				2.484768067,
+				2.475633154
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "interp-single"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.009864649003622293,
+			"work_samples" : [],
+			"time" : 2.835549647,
+			"error" : "",
+			"samples" : [
+				2.835549647,
+				2.887249042,
+				2.831305638
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "jit-single"
+		},
+		{
+			"work_time" : 0.249119,
+			"spread" : 0.008120960411588364,
+			"work_samples" : [
+				0.24906,
+				0.249119,
+				0.253369
+			],
+			"time" : 0.256619894,
+			"error" : "",
+			"samples" : [
+				0.255767294,
+				0.256619894,
+				0.259935294
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.008648477233771826,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 54.223604,
+			"spread" : 0.006164708487134863,
+			"work_samples" : [
+				54.223604,
+				53.966317,
+				54.68293
+			],
+			"time" : 55.732193293,
+			"error" : "",
+			"samples" : [
+				55.732193293,
+				55.513600463,
+				56.200745913
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.006607943286101034,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 0.495745,
+			"spread" : 0.014106000767235914,
+			"work_samples" : [
+				0.495745,
+				0.491283,
+				0.502619
+			],
+			"time" : 2.426356702,
+			"error" : "",
+			"samples" : [
+				2.463151403,
+				2.394699024,
+				2.426356702
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.011433297360538193,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0.456903,
+			"spread" : 0.0006890464133239271,
+			"work_samples" : [
+				0.456551,
+				0.456903,
+				0.457219
+			],
+			"time" : 0.494959401,
+			"error" : "",
+			"samples" : [
+				0.4944462,
+				0.494959401,
+				0.4951283
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.0007310085510491307,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0.364025,
+			"spread" : 0.002715158516037772,
+			"work_samples" : [
+				0.362769,
+				0.364025,
+				0.36656
+			],
+			"time" : 2.269811307,
+			"error" : "",
+			"samples" : [
+				2.279240302,
+				2.269811307,
+				2.266914507
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.005207059954673428,
+			"lane" : "jit-goto"
+		},
+		{
+			"work_time" : 54.059813,
+			"spread" : 0.006579666518418133,
+			"work_samples" : [
+				53.851047,
+				54.059813,
+				54.566136
+			],
+			"time" : 54.611511616,
+			"error" : "",
+			"samples" : [
+				54.397585673,
+				54.611511616,
+				55.116236742
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.006613868605131866,
+			"lane" : "interp-source-cut"
+		},
+		{
+			"work_time" : 0.476978,
+			"spread" : 0.003249399544706179,
+			"work_samples" : [
+				0.476978,
+				0.471571,
+				0.480311
+			],
+			"time" : 1.320905583,
+			"error" : "",
+			"samples" : [
+				1.320905583,
+				1.316780383,
+				1.325364683
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.00916184813555339,
+			"lane" : "jit-source-cut"
+		},
+		{
+			"work_time" : 54.566412,
+			"spread" : 0.018182267905440686,
+			"work_samples" : [
+				54.085999,
+				56.146212,
+				54.566412
+			],
+			"time" : 57.133938566,
+			"error" : "",
+			"samples" : [
+				56.57294383,
+				58.650592985,
+				57.133938566
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.018878032515680133,
+			"lane" : "interp-single"
+		},
+		{
+			"work_time" : 0.494049,
+			"spread" : 0.005403322070657701,
+			"work_samples" : [
+				0.493962,
+				0.494049,
+				0.494873
+			],
+			"time" : 3.347061079,
+			"error" : "",
+			"samples" : [
+				3.325658314,
+				3.361828812,
+				3.347061079
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.0009219733265323836,
+			"lane" : "jit-single"
+		},
+		{
+			"work_time" : 0.327733,
+			"spread" : 0.013490253703082456,
+			"work_samples" : [
+				0.334163,
+				0.327733,
+				0.324594
+			],
+			"time" : 0.338188599,
+			"error" : "",
+			"samples" : [
+				0.3443278,
+				0.338188599,
+				0.3352033
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.014598774002007724,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 29.481791,
+			"spread" : 0.003449556714898223,
+			"work_samples" : [
+				29.427263,
+				29.671301,
+				29.481791
+			],
+			"time" : 31.031603579,
+			"error" : "",
+			"samples" : [
+				31.001744078,
+				31.215834631,
+				31.031603579
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.004138791975019424,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 0.465747,
+			"spread" : 0.010368525701898624,
+			"work_samples" : [
+				0.465747,
+				0.465224,
+				0.490612
+			],
+			"time" : 2.425166482,
+			"error" : "",
+			"samples" : [
+				2.436327351,
+				2.386036549,
+				2.425166482
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.027255140666499155,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0.426321,
+			"spread" : 0.002611656939638932,
+			"work_samples" : [
+				0.425524,
+				0.428271,
+				0.426321
+			],
+			"time" : 0.470180628,
+			"error" : "",
+			"samples" : [
+				0.470036027,
+				0.472491928,
+				0.470180628
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.003221750746503221,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0.414455,
+			"spread" : 0.005432356046117937,
+			"work_samples" : [
+				0.425847,
+				0.414455,
+				0.409634
+			],
+			"time" : 2.366115437,
+			"error" : "",
+			"samples" : [
+				2.371392438,
+				2.366115437,
+				2.345685275
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.019559421408838085,
+			"lane" : "jit-goto"
+		},
+		{
+			"work_time" : 29.65973,
+			"spread" : 0.002251796744626565,
+			"work_samples" : [
+				29.632851,
+				29.65973,
+				29.774661
+			],
+			"time" : 30.234227473,
+			"error" : "",
+			"samples" : [
+				30.207657827,
+				30.234227473,
+				30.343820497
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.0023906151539477864,
+			"lane" : "interp-source-cut"
+		},
+		{
+			"work_time" : 0.452518,
+			"spread" : 0.011873435081663405,
+			"work_samples" : [
+				0.460338,
+				0.446214,
+				0.452518
+			],
+			"time" : 1.309398198,
+			"error" : "",
+			"samples" : [
+				1.325321892,
+				1.294227783,
+				1.309398198
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.01560600904273424,
+			"lane" : "jit-source-cut"
+		},
+		{
+			"work_time" : 30.03963,
+			"spread" : 0.0033179495691040744,
+			"work_samples" : [
+				30.069595,
+				29.818803,
+				30.03963
+			],
+			"time" : 32.598570969,
+			"error" : "",
+			"samples" : [
+				32.600112367,
+				32.383791538,
+				32.598570969
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.004174352347216004,
+			"lane" : "interp-single"
+		},
+		{
+			"work_time" : 0.643133,
+			"spread" : 0.011116009634582884,
+			"work_samples" : [
+				0.618815,
+				0.643133,
+				0.655919
+			],
+			"time" : 3.482949752,
+			"error" : "",
+			"samples" : [
+				3.459261583,
+				3.482949752,
+				3.536694589
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.028846288403798305,
+			"lane" : "jit-single"
+		},
+		{
+			"work_time" : 0.343472,
+			"spread" : 0.006070888733223203,
+			"work_samples" : [
+				0.348336,
+				0.343472,
+				0.341406
+			],
+			"time" : 0.351324179,
+			"error" : "",
+			"samples" : [
+				0.354524379,
+				0.350258679,
+				0.351324179
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.010088158568966308,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 58.199053,
+			"spread" : 0.009429192364360208,
+			"work_samples" : [
+				58.199053,
+				57.364728,
+				58.490123
+			],
+			"time" : 59.687439205,
+			"error" : "",
+			"samples" : [
+				59.687439205,
+				58.85364134,
+				59.979250032
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.009668499245168109,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 0.430449,
+			"spread" : 0.020357844369825125,
+			"work_samples" : [
+				0.43755,
+				0.430449,
+				0.424979
+			],
+			"time" : 2.345668315,
+			"error" : "",
+			"samples" : [
+				2.396571916,
+				2.345668315,
+				2.301066415
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.014602194452769083,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0.430837,
+			"spread" : 0.038251825599381443,
+			"work_samples" : [
+				0.430837,
+				0.457041,
+				0.420699
+			],
+			"time" : 0.468920103,
+			"error" : "",
+			"samples" : [
+				0.468920103,
+				0.494553702,
+				0.458679602
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.042176043376033145,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0.32574,
+			"spread" : 0.004238377223141255,
+			"work_samples" : [
+				0.32398,
+				0.32574,
+				0.329026
+			],
+			"time" : 2.253834309,
+			"error" : "",
+			"samples" : [
+				2.238206508,
+				2.253834309,
+				2.257311708
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.007745441149382936,
+			"lane" : "jit-goto"
+		},
+		{
+			"work_time" : 56.747706,
+			"spread" : 0.01232245439785247,
+			"work_samples" : [
+				56.747706,
+				56.66842,
+				58.077473
+			],
+			"time" : 57.3035019,
+			"error" : "",
+			"samples" : [
+				57.3035019,
+				57.216320735,
+				58.628560313
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.012415065729705445,
+			"lane" : "interp-source-cut"
+		},
+		{
+			"work_time" : 0.420349,
+			"spread" : 0.000811727329770178,
+			"work_samples" : [
+				0.420349,
+				0.420466,
+				0.419403
+			],
+			"time" : 1.270993303,
+			"error" : "",
+			"samples" : [
+				1.268952303,
+				1.271015703,
+				1.270993303
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.0012644255130855322,
+			"lane" : "jit-source-cut"
+		},
+		{
+			"work_time" : 57.119163,
+			"spread" : 0.0023031589413576867,
+			"work_samples" : [
+				57.00837,
+				57.119163,
+				57.203864
+			],
+			"time" : 59.653171795,
+			"error" : "",
+			"samples" : [
+				59.504328754,
+				59.653171795,
+				59.779110226
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.0017112820788358156,
+			"lane" : "interp-single"
+		},
+		{
+			"work_time" : 0.427917,
+			"spread" : 0.008010945781575463,
+			"work_samples" : [
+				0.421643,
+				0.444688,
+				0.427917
+			],
+			"time" : 3.257516492,
+			"error" : "",
+			"samples" : [
+				3.279705075,
+				3.257516492,
+				3.227513499
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.02692695078718541,
+			"lane" : "jit-single"
+		},
+		{
+			"work_time" : 0.354056,
+			"spread" : 0.009932351210071624,
+			"work_samples" : [
+				0.349188,
+				0.355673,
+				0.354056
+			],
+			"time" : 0.3608712,
+			"error" : "",
+			"samples" : [
+				0.3554723,
+				0.362640899,
+				0.3608712
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.009158155771968303,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 72.29354,
+			"spread" : 0.01429794079457831,
+			"work_samples" : [
+				73.827278,
+				71.749861,
+				72.29354
+			],
+			"time" : 73.827752588,
+			"error" : "",
+			"samples" : [
+				75.359248046,
+				73.248078375,
+				73.827752588
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.014367929693303243,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 0.584712,
+			"spread" : 0.00935121818050727,
+			"work_samples" : [
+				0.585672,
+				0.584712,
+				0.584513
+			],
+			"time" : 2.528125004,
+			"error" : "",
+			"samples" : [
+				2.536568101,
+				2.489286004,
+				2.528125004
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.0009910862099632137,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0.575939,
+			"spread" : 0.013557727521524782,
+			"work_samples" : [
+				0.575939,
+				0.572345,
+				0.586554
+			],
+			"time" : 0.613447201,
+			"error" : "",
+			"samples" : [
+				0.613447201,
+				0.610583001,
+				0.627216901
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.0123355077534253,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0.450186,
+			"spread" : 0.016447572629365907,
+			"work_samples" : [
+				0.450186,
+				0.450645,
+				0.448739
+			],
+			"time" : 2.377442002,
+			"error" : "",
+			"samples" : [
+				2.377442002,
+				2.4362606,
+				2.3580543
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.002116902791290732,
+			"lane" : "jit-goto"
+		},
+		{
+			"work_time" : 72.244093,
+			"spread" : 0.006106937245438303,
+			"work_samples" : [
+				72.244093,
+				72.91703,
+				72.030635
+			],
+			"time" : 72.795990958,
+			"error" : "",
+			"samples" : [
+				72.795990958,
+				73.478682299,
+				72.589561202
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.006134723014655282,
+			"lane" : "interp-source-cut"
+		},
+		{
+			"work_time" : 0.592506,
+			"spread" : 0.0021631388673142783,
+			"work_samples" : [
+				0.591945,
+				0.592506,
+				0.593971
+			],
+			"time" : 1.4630131,
+			"error" : "",
+			"samples" : [
+				1.464593101,
+				1.4630131,
+				1.4582637
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.0017096873280607896,
+			"lane" : "jit-source-cut"
+		},
+		{
+			"work_time" : 72.273838,
+			"spread" : 0.004989141669150987,
+			"work_samples" : [
+				72.179058,
+				72.94598,
+				72.273838
+			],
+			"time" : 74.879728874,
+			"error" : "",
+			"samples" : [
+				74.70225895,
+				75.449430101,
+				74.879728874
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.0053056681450901234,
+			"lane" : "interp-single"
+		},
+		{
+			"work_time" : 0.587113,
+			"spread" : 0.011521993014284509,
+			"work_samples" : [
+				0.585494,
+				0.593545,
+				0.587113
+			],
+			"time" : 3.476920308,
+			"error" : "",
+			"samples" : [
+				3.436353408,
+				3.516475511,
+				3.476920308
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.006856431385440308,
+			"lane" : "jit-single"
+		},
+		{
+			"work_time" : 5.397722,
+			"spread" : 0.00968555834216902,
+			"work_samples" : [
+				5.360906,
+				5.397722,
+				5.480609
+			],
+			"time" : 5.421050098,
+			"error" : "",
+			"samples" : [
+				5.399432299,
+				5.421050098,
+				5.504444093
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.011088288726244176,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 145.904272,
+			"spread" : 0.004727015671020153,
+			"work_samples" : [
+				145.904272,
+				146.341678,
+				145.028791
+			],
+			"time" : 147.491749345,
+			"error" : "",
+			"samples" : [
+				147.491749345,
+				147.995288061,
+				146.60089644
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.004499138311728081,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 6.218562,
+			"spread" : 0.0025578834703272697,
+			"work_samples" : [
+				6.218562,
+				6.218359,
+				6.271505
+			],
+			"time" : 8.218883989,
+			"error" : "",
+			"samples" : [
+				8.218883989,
+				8.194844081,
+				8.236889976
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.004273174409131879,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0,
+			"work_samples" : [],
+			"time" : 0,
+			"error" : "exited 255 where the native build exits 0: dynamic module `Module_CRT` failed to load: dasCRuntime/dasModuleCRuntime.shared_module (dasCRuntime/dasModuleCRun...",
+			"samples" : [
+				0.0327828
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 6.230227,
+			"spread" : 0.0013267134935332052,
+			"work_samples" : [
+				6.206376,
+				6.230227,
+				6.252185
+			],
+			"time" : 8.196816082,
+			"error" : "",
+			"samples" : [
+				8.192298984,
+				8.196816082,
+				8.214048637
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.003676350797491023,
+			"lane" : "jit-goto"
+		},
+		{
+			"work_time" : 145.770386,
+			"spread" : 0.0027108147671801273,
+			"work_samples" : [
+				145.599489,
+				146.38392,
+				145.770386
+			],
+			"time" : 146.348210067,
+			"error" : "",
+			"samples" : [
+				146.179032469,
+				146.972478247,
+				146.348210067
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.0026906390986711926,
+			"lane" : "interp-source-cut"
+		},
+		{
+			"work_time" : 5.727934,
+			"spread" : 0.0011889046030412022,
+			"work_samples" : [
+				5.726482,
+				5.727934,
+				5.739788
+			],
+			"time" : 6.616807589,
+			"error" : "",
+			"samples" : [
+				6.616807589,
+				6.616699081,
+				6.632432587
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.0011615008133822806,
+			"lane" : "jit-source-cut"
+		},
+		{
+			"work_time" : 146.520793,
+			"spread" : 0.005912916436447684,
+			"work_samples" : [
+				146.806986,
+				146.520793,
+				144.994387
+			],
+			"time" : 149.222532059,
+			"error" : "",
+			"samples" : [
+				149.4892235,
+				149.222532059,
+				147.724542775
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.006185466795828787,
+			"lane" : "interp-single"
+		},
+		{
+			"work_time" : 7.845412,
+			"spread" : 0.0023276663922477737,
+			"work_samples" : [
+				7.796828,
+				7.845412,
+				7.851467
+			],
+			"time" : 10.860437769,
+			"error" : "",
+			"samples" : [
+				10.834077812,
+				10.860437769,
+				10.884636764
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.0034822262999062875,
+			"lane" : "jit-single"
+		}
+	],
+	"commit" : "c3070b256ebe3ea32dc2546ab38c15c71c801e37",
+	"samples" : 3,
+	"timeout" : 1800,
+	"timestamp" : "2026-11-11 03:42 UTC"
+}

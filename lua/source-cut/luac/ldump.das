@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/cstr
 require lobject_h_cluster
 
 struct DumpState {
@@ -13,24 +14,17 @@ struct DumpState {
     strip, status : int
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<DumpState>) == 32 && typeinfo alignof(type<DumpState>) == 8, "DumpState: clang lays it out as size 32, align 8")
-    static_assert(typeinfo offsetof < L > (type<DumpState>) == 0, "DumpState.L: clang puts it at 0")
-    static_assert(typeinfo offsetof < writer > (type<DumpState>) == 8, "DumpState.writer: clang puts it at 8")
-    static_assert(typeinfo offsetof < data > (type<DumpState>) == 16, "DumpState.data: clang puts it at 16")
-    static_assert(typeinfo offsetof < strip > (type<DumpState>) == 24, "DumpState.strip: clang puts it at 24")
-    static_assert(typeinfo offsetof < status > (type<DumpState>) == 28, "DumpState.status: clang puts it at 28")
-}
+include ldump.layout.das.inc
 
-let private DIBS = (uint64(typeinfo sizeof(type<uint64>)) * uint64(8) + uint64(6)) / uint64(7)
-let private LUAC_VERSION = 504 / 100 * 16 + 504 % 100
+let private DIBS = (uint64(typeinfo sizeof(type<uint64>)) * 8ul + 6ul) / 7ul
+let private LUA_VERSION_NUM = 504
+let private LUAC_VERSION = LUA_VERSION_NUM / 100 * 16 + LUA_VERSION_NUM % 100
 let private LUAC_FORMAT = 0
 let private LUAC_INT = 22136
 let private LUAC_NUM = 370.5lf
 
 def private dumpBlock(var D : DumpState?; var b : void?; size : uint64) {
-    if (D.status == 0 && size > uint64(0)) {
+    if (D.status == 0 && size > 0ul) {
         D.status = invoke(D.writer, D.L, b, size, D.data)
     }
 }
@@ -38,7 +32,7 @@ def private dumpBlock(var D : DumpState?; var b : void?; size : uint64) {
 [c_function]
 def private dumpByte(var D : DumpState?; y : int) {
     var x : uint8 = uint8(y)
-    dumpBlock(D, reinterpret<void?>(addr(x)), uint64(1) * uint64(typeinfo sizeof(type<uint8>)))
+    dumpBlock(D, reinterpret<void?>(addr(x)), 1ul * uint64(typeinfo sizeof(type<uint8>)))
 }
 
 [c_function]
@@ -48,15 +42,15 @@ def private dumpSize(var D : DumpState?; var x : uint64) {
     while (true) {
         // fill buffer in reverse order
         n++
-        buff[DIBS - uint64(n)] = uint8(x & uint64(127))
+        buff[DIBS - uint64(n)] = uint8(x & 127ul)
         x >>= 7ul
-        if (!(x != uint64(0))) {
+        if (!(x != 0ul)) {
             break
         }
     }
     // mark last byte
-    buff[DIBS - uint64(1)] = uint8(int(buff[DIBS - uint64(1)]) | 128)
-    dumpBlock(D, reinterpret<void?>(addr(buff[0]) + (uint64(typeinfo sizeof(type<uint64>)) * uint64(8) + uint64(6)) / uint64(7) + -(n)), uint64(n) * uint64(typeinfo sizeof(type<uint8>)))
+    buff[DIBS - 1ul] = uint8(int(buff[DIBS - 1ul]) | 128)
+    dumpBlock(D, reinterpret<void?>(addr(buff[0]) + DIBS + -(n)), uint64(n) * uint64(typeinfo sizeof(type<uint8>)))
 }
 
 def private dumpInt(var D : DumpState?; x : int) {
@@ -65,22 +59,22 @@ def private dumpInt(var D : DumpState?; x : int) {
 
 [c_function]
 def private dumpNumber(var D : DumpState?; var x : double) {
-    dumpBlock(D, reinterpret<void?>(addr(x)), uint64(1) * uint64(typeinfo sizeof(type<double>)))
+    dumpBlock(D, reinterpret<void?>(addr(x)), 1ul * uint64(typeinfo sizeof(type<double>)))
 }
 
 [c_function]
 def private dumpInteger(var D : DumpState?; var x : int64) {
-    dumpBlock(D, reinterpret<void?>(addr(x)), uint64(1) * uint64(typeinfo sizeof(type<int64>)))
+    dumpBlock(D, reinterpret<void?>(addr(x)), 1ul * uint64(typeinfo sizeof(type<int64>)))
 }
 
 [c_function]
 def private dumpString(var D : DumpState?; var s : TString?) {
     if (s == null) {
-        dumpSize(D, uint64(0))
+        dumpSize(D, 0ul)
     } else {
         var size : uint64 = int(s.shrlen) != 255 ? uint64(s.shrlen) : s.u.lnglen
         var str : uint8? = addr(s.contents[0])
-        dumpSize(D, size + uint64(1))
+        dumpSize(D, size + 1ul)
         dumpBlock(D, reinterpret<void?>(str), size * uint64(typeinfo sizeof(type<uint8>)))
     }
 }
@@ -96,7 +90,7 @@ def private dumpConstants(var D : DumpState?; var f : Proto?) {
     var n : int = f.sizek
     dumpInt(D, n)
     for (i in range(n)) {
-        var o : TValue? = addr(deref(f.k + i))
+        var o : TValue? = addr(f.k[i])
         var tt : int = int(o.tt_) & 63
         dumpByte(D, tt)
         let _cond = tt
@@ -116,7 +110,7 @@ def private dumpProtos(var D : DumpState?; var f : Proto?) {
     var n : int = f.sizep
     dumpInt(D, n)
     for (i in range(n)) {
-        dumpFunction(D, deref(f.p + i), f.source)
+        dumpFunction(D, f.p[i], f.source)
     }
 }
 
@@ -125,9 +119,9 @@ def private dumpUpvalues(var D : DumpState?; var f : Proto?) {
     var n : int = f.sizeupvalues
     dumpInt(D, n)
     for (i in range(n)) {
-        dumpByte(D, int(deref(f.upvalues + i).instack))
-        dumpByte(D, int(deref(f.upvalues + i).idx))
-        dumpByte(D, int(deref(f.upvalues + i).kind))
+        dumpByte(D, int(f.upvalues[i].instack))
+        dumpByte(D, int(f.upvalues[i].idx))
+        dumpByte(D, int(f.upvalues[i].kind))
     }
 }
 
@@ -140,20 +134,20 @@ def private dumpDebug(var D : DumpState?; var f : Proto?) {
     n = D.strip != 0 ? 0 : f.sizeabslineinfo
     dumpInt(D, n)
     for (i in range(n)) {
-        dumpInt(D, deref(f.abslineinfo + i).pc)
-        dumpInt(D, deref(f.abslineinfo + i).line)
+        dumpInt(D, f.abslineinfo[i].pc)
+        dumpInt(D, f.abslineinfo[i].line)
     }
     n = D.strip != 0 ? 0 : f.sizelocvars
     dumpInt(D, n)
     for (i in range(n)) {
-        dumpString(D, deref(f.locvars + i).varname)
-        dumpInt(D, deref(f.locvars + i).startpc)
-        dumpInt(D, deref(f.locvars + i).endpc)
+        dumpString(D, f.locvars[i].varname)
+        dumpInt(D, f.locvars[i].startpc)
+        dumpInt(D, f.locvars[i].endpc)
     }
     n = D.strip != 0 ? 0 : f.sizeupvalues
     dumpInt(D, n)
     for (i in range(n)) {
-        dumpString(D, deref(f.upvalues + i).name)
+        dumpString(D, f.upvalues[i].name)
     }
 }
 
@@ -178,10 +172,10 @@ def private dumpFunction(var D : DumpState?; var f : Proto?; var psource : TStri
 
 [c_function]
 def private dumpHeader(var D : DumpState?) {
-    dumpBlock(D, reinterpret<void?>(reinterpret<uint8?>("\x1bLua")), uint64(typeinfo sizeof(type<uint8[5]>)) - uint64(typeinfo sizeof(type<uint8>)))
+    dumpBlock(D, reinterpret<void?>(cstr("\x1bLua")), uint64(typeinfo sizeof(type<uint8[5]>)) - uint64(typeinfo sizeof(type<uint8>)))
     dumpByte(D, LUAC_VERSION)
     dumpByte(D, LUAC_FORMAT)
-    dumpBlock(D, reinterpret<void?>(reinterpret<uint8?>("\x19\x93\r\n\x1a\n")), uint64(typeinfo sizeof(type<uint8[7]>)) - uint64(typeinfo sizeof(type<uint8>)))
+    dumpBlock(D, reinterpret<void?>(cstr("\x19\x93\r\n\x1a\n")), uint64(typeinfo sizeof(type<uint8[7]>)) - uint64(typeinfo sizeof(type<uint8>)))
     dumpByte(D, int(uint64(typeinfo sizeof(type<uint>))))
     dumpByte(D, int(uint64(typeinfo sizeof(type<int64>))))
     dumpByte(D, int(uint64(typeinfo sizeof(type<double>))))

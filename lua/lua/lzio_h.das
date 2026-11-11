@@ -18,17 +18,5 @@ struct Zio {
     L : lua_State?
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<Mbuffer>) == 24 && typeinfo alignof(type<Mbuffer>) == 8, "Mbuffer: clang lays it out as size 24, align 8")
-    static_assert(typeinfo offsetof < buffer > (type<Mbuffer>) == 0, "Mbuffer.buffer: clang puts it at 0")
-    static_assert(typeinfo offsetof < n > (type<Mbuffer>) == 8, "Mbuffer.n: clang puts it at 8")
-    static_assert(typeinfo offsetof < buffsize > (type<Mbuffer>) == 16, "Mbuffer.buffsize: clang puts it at 16")
-    static_assert(typeinfo sizeof(type<Zio>) == 40 && typeinfo alignof(type<Zio>) == 8, "Zio: clang lays it out as size 40, align 8")
-    static_assert(typeinfo offsetof < n > (type<Zio>) == 0, "Zio.n: clang puts it at 0")
-    static_assert(typeinfo offsetof < p > (type<Zio>) == 8, "Zio.p: clang puts it at 8")
-    static_assert(typeinfo offsetof < reader > (type<Zio>) == 16, "Zio.reader: clang puts it at 16")
-    static_assert(typeinfo offsetof < data > (type<Zio>) == 24, "Zio.data: clang puts it at 24")
-    static_assert(typeinfo offsetof < L > (type<Zio>) == 32, "Zio.L: clang puts it at 32")
-}
+include lzio_h.layout.das.inc
 

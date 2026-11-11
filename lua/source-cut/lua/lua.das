@@ -9,6 +9,7 @@ require c_runtime/c_args
 require c_runtime/c_function
 require c_runtime/c_jit_build
 require c_runtime/c_signal
+require c_runtime/cstr
 require c_runtime/printf
 require c_runtime/variadic
 require c_types
@@ -31,12 +32,16 @@ def private c2das_dialect {
 }
 
 var private globalL : lua_State? = null
-var private progname : uint8? = unsafe(reinterpret<uint8?>("lua"))
+var private progname : uint8? = cstr("lua")
 
-let private LUA_MASKCALL = 1 << 0
-let private LUA_MASKRET = 1 << 1
-let private LUA_MASKLINE = 1 << 2
-let private LUA_MASKCOUNT = 1 << 3
+let private LUA_HOOKCALL = 0
+let private LUA_MASKCALL = 1 << LUA_HOOKCALL
+let private LUA_HOOKRET = 1
+let private LUA_MASKRET = 1 << LUA_HOOKRET
+let private LUA_HOOKLINE = 2
+let private LUA_MASKLINE = 1 << LUA_HOOKLINE
+let private LUA_HOOKCOUNT = 3
+let private LUA_MASKCOUNT = 1 << LUA_HOOKCOUNT
 let private LUA_OK = 0
 let private LUA_TSTRING = 4
 let private LUA_TTABLE = 5
@@ -48,20 +53,23 @@ let private has_v = 4
 let private has_e = 8
 let private LUA_TNIL = 0
 let private LUA_ERRSYNTAX = 3
-let private marklen = uint64(typeinfo sizeof(type<uint8[6]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)
+let private marklen = uint64(typeinfo sizeof(type<uint8[6]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul
+let private LUA_MAXINPUT = 512
 let private LUA_MINSTACK = 20
-let private LUA_REGISTRYINDEX = -1000000 - 1000
+let private LUA_VERSION_NUM = 504
+let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64(typeinfo sizeof(type<double>))
+let private LUAI_MAXSTACK = 1000000
+let private LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000
 let private LUA_GCRESTART = 1
 let private LUA_GCGEN = 10
 let private LUA_GCSTOP = 0
 
 // Hook set by signal function to stop the interpreter.
-[c_function]
 def private lstop(var L : lua_State?; var ar : lua_Debug?) {
     // unused arg.
     // reset hook
     lua_sethook(L, default<function<(var a0 : lua_State?; var a1 : lua_Debug?) : void>>, 0, 0)
-    luaL_error`va(L, reinterpret<uint8?>("interrupted!"), VaNone())
+    luaL_error`va(L, cstr("interrupted!"), VaNone())
 }
 
 // Function to be called at a C signal. Because a C signal cannot
@@ -77,16 +85,16 @@ def private laction(i : int) {
 
 [c_function]
 def private print_usage(var badoption : uint8?) {
-    fprintf(crt::c_stderr(), reinterpret<uint8?>("%s: "), progname)
+    fprintf(crt::c_stderr(), cstr("%s: "), progname)
     crt::fflush(crt::c_stderr())
-    if (int(deref(badoption + 1)) == 'e' || int(deref(badoption + 1)) == 'l') {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("'%s' needs argument\n"), badoption)
+    if (int(badoption[1]) == 'e' || int(badoption[1]) == 'l') {
+        fprintf(crt::c_stderr(), cstr("'%s' needs argument\n"), badoption)
         crt::fflush(crt::c_stderr())
     } else {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("unrecognized option '%s'\n"), badoption)
+        fprintf(crt::c_stderr(), cstr("unrecognized option '%s'\n"), badoption)
         crt::fflush(crt::c_stderr())
     }
-    fprintf(crt::c_stderr(), reinterpret<uint8?>("usage: %s [options] [script [args]]\nAvailable options are:\n  -e stat   execute string 'stat'\n  -i        enter interactive mode after executing 'script'\n  -l mod    require library 'mod' into global 'mod'\n  -l g=mod  require library 'mod' into global 'g'\n  -v        show version information\n  -E        ignore environment variables\n  -W        turn warnings on\n  --        stop handling options\n  -         stop handling options and execute stdin\n"), progname)
+    fprintf(crt::c_stderr(), cstr("usage: %s [options] [script [args]]\nAvailable options are:\n  -e stat   execute string 'stat'\n  -i        enter interactive mode after executing 'script'\n  -l mod    require library 'mod' into global 'mod'\n  -l g=mod  require library 'mod' into global 'g'\n  -v        show version information\n  -E        ignore environment variables\n  -W        turn warnings on\n  --        stop handling options\n  -         stop handling options and execute stdin\n"), progname)
     crt::fflush(crt::c_stderr())
 }
 
@@ -95,10 +103,10 @@ def private print_usage(var badoption : uint8?) {
 [c_function]
 def private l_message(var pname : uint8?; var msg : uint8?) {
     if (pname != null) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s: "), pname)
+        fprintf(crt::c_stderr(), cstr("%s: "), pname)
         crt::fflush(crt::c_stderr())
     }
-    fprintf(crt::c_stderr(), reinterpret<uint8?>("%s\n"), msg)
+    fprintf(crt::c_stderr(), cstr("%s\n"), msg)
     crt::fflush(crt::c_stderr())
 }
 
@@ -109,7 +117,7 @@ def private report(var L : lua_State?; status : int) : int {
     if (status != LUA_OK) {
         var msg : uint8? = lua_tolstring(L, -1, null)
         if (msg == null) {
-            msg = reinterpret<uint8?>("(error message not a string)")
+            msg = cstr("(error message not a string)")
         }
         l_message(progname, msg)
         // remove message
@@ -125,12 +133,12 @@ def private msghandler(var L : lua_State?) : int {
     // is error object not a string?
     if (msg == null) {
         // does it have a metamethod
-        if (luaL_callmeta(L, 1, reinterpret<uint8?>("__tostring")) != 0 && lua_type(L, -1) == LUA_TSTRING) {
+        if (luaL_callmeta(L, 1, cstr("__tostring")) != 0 && lua_type(L, -1) == LUA_TSTRING) {
             // that produces a string?
             // that is the message
             return 1
         } else {
-            msg = lua_pushfstring`va(L, reinterpret<uint8?>("(error object is a %s value)"), (lua_typename(L, lua_type(L, 1)),))
+            msg = lua_pushfstring`va(L, cstr("(error object is a %s value)"), (lua_typename(L, lua_type(L, 1)),))
         }
     }
     // append a standard traceback
@@ -153,7 +161,7 @@ def private docall(var L : lua_State?; narg : int; nres : int) : int {
     globalL = L
     // set C-signal handler
     c_signal(2, @@laction)
-    status = lua_pcallk(L, narg, nres, base, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+    status = lua_pcallk(L, narg, nres, base, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
     // reset C-signal handler
     c_signal(2, default<function<(a0 : int) : void>>)
     // remove message handler from the stack
@@ -164,8 +172,8 @@ def private docall(var L : lua_State?; narg : int; nres : int) : int {
 
 [c_function]
 def private print_version {
-    crt::fwrite(reinterpret<void?>(reinterpret<uint8?>("Lua 5.4.8  Copyright (C) 1994-2025 Lua.org, PUC-Rio")), uint64(typeinfo sizeof(type<uint8>)), crt::strlen(reinterpret<uint8?>("Lua 5.4.8  Copyright (C) 1994-2025 Lua.org, PUC-Rio")), crt::c_stdout())
-    crt::fwrite(reinterpret<void?>(reinterpret<uint8?>("\n")), uint64(typeinfo sizeof(type<uint8>)), uint64(1), crt::c_stdout())
+    crt::fwrite(reinterpret<void?>(cstr("Lua 5.4.8  Copyright (C) 1994-2025 Lua.org, PUC-Rio")), uint64(typeinfo sizeof(type<uint8>)), crt::strlen(cstr("Lua 5.4.8  Copyright (C) 1994-2025 Lua.org, PUC-Rio")), crt::c_stdout())
+    crt::fwrite(reinterpret<void?>(cstr("\n")), uint64(typeinfo sizeof(type<uint8>)), 1ul, crt::c_stdout())
     crt::fflush(crt::c_stdout())
 }
 
@@ -184,10 +192,10 @@ def private createargtable(var L : lua_State?; var argv : uint8 ??; argc : int; 
     narg = argc - (script + 1)
     lua_createtable(L, narg, script + 1)
     for (i in range(argc)) {
-        lua_pushstring(L, deref(argv + i))
+        lua_pushstring(L, argv[i])
         lua_rawseti(L, -2, int64(i - script))
     }
-    lua_setglobal(L, reinterpret<uint8?>("arg"))
+    lua_setglobal(L, cstr("arg"))
 }
 
 def private dochunk(var L : lua_State?; var status : int) : int {
@@ -219,14 +227,14 @@ def private dolibrary(var L : lua_State?; var globname : uint8?) : int {
         // module name is equal to global name
         modname = globname
         // look for a suffix mark
-        suffix = crt::strchr(modname, int(deref(reinterpret<uint8?>("-"))))
+        suffix = crt::strchr(modname, int(deref(cstr("-"))))
     } else {
         // global name ends here
         deref(modname) = uint8('\0')
         // module name starts after the '='
         modname = modname + 1
     }
-    lua_getglobal(L, reinterpret<uint8?>("require"))
+    lua_getglobal(L, cstr("require"))
     lua_pushstring(L, modname)
     // call 'require(modname)'
     status = docall(L, 1, 1)
@@ -243,21 +251,18 @@ def private dolibrary(var L : lua_State?; var globname : uint8?) : int {
 }
 
 // Push on the stack the contents of table 'arg' from 1 to #arg
-[c_function]
 def private pushargs(var L : lua_State?) : int {
     var i : int
     var n : int
-    if (lua_getglobal(L, reinterpret<uint8?>("arg")) != LUA_TTABLE) {
-        luaL_error`va(L, reinterpret<uint8?>("'arg' is not a table"), VaNone())
+    if (lua_getglobal(L, cstr("arg")) != LUA_TTABLE) {
+        luaL_error`va(L, cstr("'arg' is not a table"), VaNone())
     }
     n = int(luaL_len(L, -1))
-    luaL_checkstack(L, n + 3, reinterpret<uint8?>("too many arguments to script"))
-    {
-        i = 1
-        while (i <= n) {
-            lua_rawgeti(L, -i, int64(i))
-            i++
-        }
+    luaL_checkstack(L, n + 3, cstr("too many arguments to script"))
+    i = 1
+    while (i <= n) {
+        lua_rawgeti(L, -i, int64(i))
+        i++
     }
     // remove table from the stack
     lua_rotate(L, -i, -1)
@@ -268,8 +273,8 @@ def private pushargs(var L : lua_State?) : int {
 [c_function]
 def private handle_script(var L : lua_State?; var argv : uint8 ??) : int {
     var status : int
-    var fname : uint8? = deref(argv + 0)
-    if (crt::strcmp(fname, reinterpret<uint8?>("-")) == 0 && crt::strcmp(deref(argv + -1), reinterpret<uint8?>("--")) != 0) {
+    var fname : uint8? = argv[0]
+    if (crt::strcmp(fname, cstr("-")) == 0 && crt::strcmp(argv[-1], cstr("--")) != 0) {
         // stdin
         fname = null
     }
@@ -292,11 +297,11 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
     var args : int = 0
     var i : int
     // is there a program name?
-    if (deref(argv + 0) != null) {
+    if (argv[0] != null) {
         // not empty?
-        if (deref(deref(argv + 0) + 0) != 0) {
+        if (argv[0][0] != 0) {
             // save it
-            progname = deref(argv + 0)
+            progname = argv[0]
         }
     } else {
         // no program name
@@ -304,93 +309,91 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
         return 0
     }
     // handle arguments
-    {
-        i = 1
-        while (deref(argv + i) != null) {
-            deref(first) = i
-            // not an option?
-            if (int(deref(deref(argv + i) + 0)) != '-') {
-                // stop handling options
+    i = 1
+    while (argv[i] != null) {
+        deref(first) = i
+        // not an option?
+        if (int(argv[i][0]) != '-') {
+            // stop handling options
+            return args
+        }
+        // else check option
+        let _cond = int(argv[i][1])
+        while (true) {
+            var _flag = false
+            if (_cond == '-') {
+                // '--'
+                // extra characters after '--'?
+                if (int(argv[i][2]) != '\0') {
+                    // invalid option
+                    return has_error
+                }
+                deref(first) = i + 1
                 return args
             }
-            // else check option
-            let _cond = int(deref(deref(argv + i) + 1))
-            while (true) {
-                var _flag = false
-                if (_cond == '-') {
-                    // '--'
-                    // extra characters after '--'?
-                    if (int(deref(deref(argv + i) + 2)) != '\0') {
-                        // invalid option
-                        return has_error
-                    }
-                    deref(first) = i + 1
-                    return args
+            if (_cond == '\0') {
+                // '-'
+                // script "name" is '-'
+                return args
+            }
+            if (_cond == 'E') {
+                // extra characters?
+                if (int(argv[i][2]) != '\0') {
+                    // invalid option
+                    return has_error
                 }
-                if (_cond == '\0') {
-                    // '-'
-                    // script "name" is '-'
-                    return args
-                }
-                if (_cond == 'E') {
-                    // extra characters?
-                    if (int(deref(deref(argv + i) + 2)) != '\0') {
-                        // invalid option
-                        return has_error
-                    }
-                    args |= has_E
-                    break
-                }
-                if (_cond == 'W') {
-                    // extra characters?
-                    if (int(deref(deref(argv + i) + 2)) != '\0') {
-                        // invalid option
-                        return has_error
-                    }
-                    break
-                }
-                _flag ||= _cond == 'i'
-                if (_flag) {
-                    // (-i implies -v) FALLTHROUGH
-                    args |= has_i
-                }
-                _flag ||= _cond == 'v'
-                if (_flag) {
-                    // extra characters?
-                    if (int(deref(deref(argv + i) + 2)) != '\0') {
-                        // invalid option
-                        return has_error
-                    }
-                    args |= has_v
-                    break
-                }
-                _flag ||= _cond == 'e'
-                if (_flag) {
-                    // FALLTHROUGH
-                    args |= has_e
-                }
-                _flag ||= _cond == 'l'
-                if (_flag) {
-                    // both options need an argument
-                    // no concatenated argument?
-                    if (int(deref(deref(argv + i) + 2)) == '\0') {
-                        // try next 'argv'
-                        i++
-                        if (deref(argv + i) == null || int(deref(deref(argv + i) + 0)) == '-') {
-                            // no next argument or it is another option
-                            return has_error
-                        }
-                    }
-                    break
-                }
-                if (!(_cond == '-' || _cond == '\0' || _cond == 'E' || _cond == 'W' || _cond == 'i' || _cond == 'v' || _cond == 'e' || _cond == 'l')) {
+                args |= has_E
+                break
+            }
+            if (_cond == 'W') {
+                // extra characters?
+                if (int(argv[i][2]) != '\0') {
                     // invalid option
                     return has_error
                 }
                 break
             }
-            i++
+            _flag ||= _cond == 'i'
+            if (_flag) {
+                // (-i implies -v) FALLTHROUGH
+                args |= has_i
+            }
+            _flag ||= _cond == 'v'
+            if (_flag) {
+                // extra characters?
+                if (int(argv[i][2]) != '\0') {
+                    // invalid option
+                    return has_error
+                }
+                args |= has_v
+                break
+            }
+            _flag ||= _cond == 'e'
+            if (_flag) {
+                // FALLTHROUGH
+                args |= has_e
+            }
+            _flag ||= _cond == 'l'
+            if (_flag) {
+                // both options need an argument
+                // no concatenated argument?
+                if (int(argv[i][2]) == '\0') {
+                    // try next 'argv'
+                    i++
+                    if (argv[i] == null || int(argv[i][0]) == '-') {
+                        // no next argument or it is another option
+                        return has_error
+                    }
+                }
+                break
+            }
+            if (!(_cond == '-' || _cond == '\0' || _cond == 'E' || _cond == 'W' || _cond == 'i' || _cond == 'v' || _cond == 'e' || _cond == 'l')) {
+                // invalid option
+                return has_error
+            }
+            break
         }
+        i++
     }
     // no script name
     deref(first) = 0
@@ -403,48 +406,46 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
 [c_function]
 def private runargs(var L : lua_State?; var argv : uint8 ??; n : int) : int {
     var i : int
-    {
-        i = 1
-        while (i < n) {
-            var option : int = int(deref(deref(argv + i) + 1))
-            // already checked
-            let _cond = option
-            if (_cond == 'e' || _cond == 'l') {
-                {
-                    var status : int
-                    // both options need an argument
-                    var extra : uint8? = deref(argv + i) + 2
-                    if (int(deref(extra)) == '\0') {
-                        i++
-                        extra = deref(argv + i)
-                    }
-                    status = option == 'e' ? dostring(L, extra, reinterpret<uint8?>("=(command line)")) : dolibrary(L, extra)
-                    if (status != LUA_OK) {
-                        return 0
-                    }
+    i = 1
+    while (i < n) {
+        var option : int = int(argv[i][1])
+        // already checked
+        let _cond = option
+        if (_cond == 'e' || _cond == 'l') {
+            {
+                var status : int
+                // both options need an argument
+                var extra : uint8? = argv[i] + 2
+                if (int(deref(extra)) == '\0') {
+                    i++
+                    extra = argv[i]
                 }
-            } elif (_cond == 'W') {
-                // warnings on
-                lua_warning(L, reinterpret<uint8?>("@on"), 0)
+                status = (option == 'e') ? dostring(L, extra, cstr("=(command line)")) : dolibrary(L, extra)
+                if (status != LUA_OK) {
+                    return 0
+                }
             }
-            i++
+        } elif (_cond == 'W') {
+            // warnings on
+            lua_warning(L, cstr("@on"), 0)
         }
+        i++
     }
     return 1
 }
 
 [c_function]
 def private handle_luainit(var L : lua_State?) : int {
-    var name : uint8? = reinterpret<uint8?>("=LUA_INIT_5_4")
+    var name : uint8? = cstr("=LUA_INIT_5_4")
     var init : uint8? = crt::getenv(name + 1)
     if (init == null) {
-        name = reinterpret<uint8?>("=LUA_INIT")
+        name = cstr("=LUA_INIT")
         // try alternative name
         init = crt::getenv(name + 1)
     }
     if (init == null) {
         return LUA_OK
-    } elif (int(deref(init + 0)) == '@') {
+    } elif (int(init[0]) == '@') {
         return dofile(L, init + 1)
     } else {
         return dostring(L, init, name)
@@ -454,11 +455,10 @@ def private handle_luainit(var L : lua_State?) : int {
 // Return the string to be used as a prompt by the interpreter. Leave
 // the string (or nil, if using the default value) on the stack, to keep
 // it anchored.
-[c_function]
 def private get_prompt(var L : lua_State?; firstline : int) : uint8? {
-    if (lua_getglobal(L, firstline != 0 ? reinterpret<uint8?>("_PROMPT") : reinterpret<uint8?>("_PROMPT2")) == LUA_TNIL) {
+    if (lua_getglobal(L, firstline != 0 ? cstr("_PROMPT") : cstr("_PROMPT2")) == LUA_TNIL) {
         // use the default
-        return firstline != 0 ? reinterpret<uint8?>("> ") : reinterpret<uint8?>(">> ")
+        return firstline != 0 ? cstr("> ") : cstr(">> ")
     } else {
         // apply 'tostring' over the value
         var p : uint8? = luaL_tolstring(L, -1, null)
@@ -477,7 +477,7 @@ def private incomplete(var L : lua_State?; status : int) : int {
     if (status == LUA_ERRSYNTAX) {
         var lmsg : uint64
         var msg : uint8? = lua_tolstring(L, -1, addr(lmsg))
-        if (lmsg >= marklen && crt::strcmp(msg + lmsg + -int64(marklen), reinterpret<uint8?>("<eof>")) == 0) {
+        if (lmsg >= marklen && crt::strcmp(msg + lmsg + -int64(marklen), cstr("<eof>")) == 0) {
             return 1
         }
     }
@@ -494,7 +494,7 @@ def private pushline(var L : lua_State?; firstline : int) : int {
     var prmt : uint8? = get_prompt(L, firstline)
     crt::fputs(prmt, crt::c_stdout())
     crt::fflush(crt::c_stdout())
-    var readstatus : int = crt::fgets(b, 512, crt::c_stdin()) != null ? 1 : 0
+    var readstatus : int = crt::fgets(b, LUA_MAXINPUT, crt::c_stdin()) != null ? 1 : 0
     // remove prompt
     lua_settop(L, -1 - 1)
     if (readstatus == 0) {
@@ -503,19 +503,17 @@ def private pushline(var L : lua_State?; firstline : int) : int {
     }
     l = crt::strlen(b)
     // line ends with newline?
-    if (l > uint64(0) && int(deref(b + (l - uint64(1)))) == '\n') {
+    if (l > 0ul && int(b[l - 1ul]) == '\n') {
         // remove it
         l--
-        deref(b + l) = uint8('\0')
+        b[l] = uint8('\0')
     }
     // for compatibility with 5.2, ...
-    if (firstline != 0 && int(deref(b + 0)) == '=') {
+    if (firstline != 0 && int(b[0]) == '=') {
         // change '=' to 'return'
-        lua_pushfstring`va(L, reinterpret<uint8?>("return %s"), (b + 1,))
+        lua_pushfstring`va(L, cstr("return %s"), (b + 1,))
     } else {
         lua_pushlstring(L, b, l)
-    }
-    {
     }
     return 1
 }
@@ -526,14 +524,14 @@ def private pushline(var L : lua_State?; firstline : int) : int {
 def private addreturn(var L : lua_State?) : int {
     // original line
     var line : uint8? = lua_tolstring(L, -1, null)
-    var retline : uint8? = lua_pushfstring`va(L, reinterpret<uint8?>("return %s;"), (line,))
-    var status : int = luaL_loadbufferx(L, retline, crt::strlen(retline), reinterpret<uint8?>("=stdin"), null)
+    var retline : uint8? = lua_pushfstring`va(L, cstr("return %s;"), (line,))
+    var status : int = luaL_loadbufferx(L, retline, crt::strlen(retline), cstr("=stdin"), null)
     if (status == LUA_OK) {
         // remove modified line
         lua_rotate(L, -2, -1)
         lua_settop(L, -1 - 1)
         // non empty?
-        if (int(deref(line + 0)) != '\0') {
+        if (int(line[0]) != '\0') {
             // keep history
         }
     } else {
@@ -547,30 +545,26 @@ def private addreturn(var L : lua_State?) : int {
 [c_function]
 def private multiline(var L : lua_State?) : int {
     // repeat until gets a complete statement
-    {
-        while (true) {
-            var len : uint64
-            // get what it has
-            var line : uint8? = lua_tolstring(L, 1, addr(len))
-            // try it
-            var status : int = luaL_loadbufferx(L, line, len, reinterpret<uint8?>("=stdin"), null)
-            if (!(incomplete(L, status) != 0) || !(pushline(L, 0) != 0)) {
-                {
-                    // keep history
-                }
-                // should not or cannot try to add continuation line
-                return status
-            }
-            // remove error message (from incomplete line)
-            lua_rotate(L, -2, -1)
-            lua_settop(L, -1 - 1)
-            // add newline...
-            lua_pushstring(L, reinterpret<uint8?>("\n"))
-            // ...between the two lines
-            lua_rotate(L, -2, 1)
-            // join them
-            lua_concat(L, 3)
+    while (true) {
+        var len : uint64
+        // get what it has
+        var line : uint8? = lua_tolstring(L, 1, addr(len))
+        // try it
+        var status : int = luaL_loadbufferx(L, line, len, cstr("=stdin"), null)
+        if (!(incomplete(L, status) != 0) || !(pushline(L, 0) != 0)) {
+            // keep history
+            // should not or cannot try to add continuation line
+            return status
         }
+        // remove error message (from incomplete line)
+        lua_rotate(L, -2, -1)
+        lua_settop(L, -1 - 1)
+        // add newline...
+        lua_pushstring(L, cstr("\n"))
+        // ...between the two lines
+        lua_rotate(L, -2, 1)
+        // join them
+        lua_concat(L, 3)
     }
     return 0
 }
@@ -599,16 +593,15 @@ def private loadline(var L : lua_State?) : int {
 }
 
 // Prints (calling the Lua 'print' function) any values on the stack
-[c_function]
 def private l_print(var L : lua_State?) {
     var n : int = lua_gettop(L)
     // any result to be printed?
     if (n > 0) {
-        luaL_checkstack(L, LUA_MINSTACK, reinterpret<uint8?>("too many results to print"))
-        lua_getglobal(L, reinterpret<uint8?>("print"))
+        luaL_checkstack(L, LUA_MINSTACK, cstr("too many results to print"))
+        lua_getglobal(L, cstr("print"))
         lua_rotate(L, 1, 1)
-        if (lua_pcallk(L, n, 0, 0, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>) != LUA_OK) {
-            l_message(progname, lua_pushfstring`va(L, reinterpret<uint8?>("error calling 'print' (%s)"), (lua_tolstring(L, -1, null),)))
+        if (lua_pcallk(L, n, 0, 0, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>) != LUA_OK) {
+            l_message(progname, lua_pushfstring`va(L, cstr("error calling 'print' (%s)"), (lua_tolstring(L, -1, null),)))
         }
     }
 }
@@ -637,7 +630,7 @@ def private doREPL(var L : lua_State?) {
     }
     // clear stack
     lua_settop(L, 0)
-    crt::fwrite(reinterpret<void?>(reinterpret<uint8?>("\n")), uint64(typeinfo sizeof(type<uint8>)), uint64(1), crt::c_stdout())
+    crt::fwrite(reinterpret<void?>(cstr("\n")), uint64(typeinfo sizeof(type<uint8>)), 1ul, crt::c_stdout())
     crt::fflush(crt::c_stdout())
     progname = oldprogname
 }
@@ -651,13 +644,13 @@ def private pmain(var L : lua_State?) : int {
     var script : int
     var args : int = collectargs(argv, addr(script))
     // first argv not an option
-    var optlim : int = script > 0 ? script : argc
+    var optlim : int = (script > 0) ? script : argc
     // check that interpreter has correct version
-    luaL_checkversion_(L, double(504), uint64(typeinfo sizeof(type<int64>)) * uint64(16) + uint64(typeinfo sizeof(type<double>)))
+    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
     // bad arg?
     if (args == has_error) {
         // 'script' has index of bad arg.
-        print_usage(deref(argv + script))
+        print_usage(argv[script])
         return 0
     }
     // option '-v'?
@@ -668,7 +661,7 @@ def private pmain(var L : lua_State?) : int {
     if ((args & has_E) != 0) {
         // signal for libraries to ignore env. vars.
         lua_pushboolean(L, 1)
-        lua_setfield(L, LUA_REGISTRYINDEX, reinterpret<uint8?>("LUA_NOENV"))
+        lua_setfield(L, LUA_REGISTRYINDEX, cstr("LUA_NOENV"))
     }
     // open standard libraries
     luaL_openlibs(L)
@@ -726,7 +719,7 @@ def c_main(argc : int; var argv : uint8 ??) : int {
     // create state
     var L : lua_State? = luaL_newstate()
     if (L == null) {
-        l_message(deref(argv + 0), reinterpret<uint8?>("cannot create state: not enough memory"))
+        l_message(argv[0], cstr("cannot create state: not enough memory"))
         return 1
     }
     // stop GC while building state
@@ -738,12 +731,12 @@ def c_main(argc : int; var argv : uint8 ??) : int {
     // 2nd argument
     lua_pushlightuserdata(L, reinterpret<void?>(argv))
     // do the call
-    status = lua_pcallk(L, 2, 1, 0, int64(0), default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+    status = lua_pcallk(L, 2, 1, 0, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
     // get result
     result = lua_toboolean(L, -1)
     report(L, status)
     lua_close(L)
-    return result != 0 && status == LUA_OK ? 0 : 1
+    return (result != 0 && status == LUA_OK) ? 0 : 1
 }
 
 [export]

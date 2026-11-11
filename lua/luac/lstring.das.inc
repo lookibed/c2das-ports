@@ -4,17 +4,15 @@
 def luaS_eqlngstr(var a : TString?; var b : TString?) : int {
     var len : uint64 = a.u.lnglen
     // same instance or...
-    return intptr(a) == intptr(b) || len == b.u.lnglen && crt::memcmp(reinterpret<void?>(addr(a.contents[0])), reinterpret<void?>(addr(b.contents[0])), len) == 0 ? 1 : 0
+    return (intptr(a) == intptr(b)) || ((len == b.u.lnglen) && (crt::memcmp(reinterpret<void?>(addr(a.contents[0])), reinterpret<void?>(addr(b.contents[0])), len) == 0)) ? 1 : 0
 }
 
 [c_function]
 def luaS_hash(var str : uint8?; var l : uint64; seed : uint) : uint {
     var h : uint = seed ^ uint(l)
-    {
-        while (l > uint64(0)) {
-            h ^= (h << 5u) + (h >> 2u) + uint(uint8(deref(str + (l - uint64(1)))))
-            l--
-        }
+    while (l > 0ul) {
+        h ^= (h << 5u) + (h >> 2u) + uint(uint8(str[l - 1ul]))
+        l--
     }
     return h
 }
@@ -26,7 +24,7 @@ def luaS_hashlongstr(var ts : TString?) : uint {
         var len : uint64 = ts.u.lnglen
         ts.hash = luaS_hash(addr(ts.contents[0]), len, ts.hash)
         // now it has its hash
-        ts.extra = uint8(1)
+        ts.extra = 1u8
     }
     return ts.hash
 }
@@ -35,12 +33,12 @@ def luaS_hashlongstr(var ts : TString?) : uint {
 def private tablerehash(var vect : TString ??; osize : int; nsize : int) {
     // clear new elements
     for (i in range(osize, nsize)) {
-        deref(vect + i) = null
+        vect[i] = null
     }
     // rehash old part of the array
     for (i in range(osize)) {
-        var p : TString? = deref(vect + i)
-        deref(vect + i) = null
+        var p : TString? = vect[i]
+        vect[i] = null
         // for each string in the list
         while (p != null) {
             // save next
@@ -48,8 +46,8 @@ def private tablerehash(var vect : TString ??; osize : int; nsize : int) {
             // new position
             var h : uint = uint(int(p.hash & uint(nsize - 1)))
             // chain it into array
-            p.u.hnext = deref(vect + h)
-            deref(vect + h) = p
+            p.u.hnext = vect[h]
+            vect[h] = p
             p = hnext
         }
     }
@@ -94,7 +92,7 @@ def luaS_clearcache(var g : global_State?) {
     for (i in range(STRCACHE_N)) {
         for (j in range(STRCACHE_M)) {
             // will entry be collected?
-            if ((int(g.strcache[i][j].marked) & (1 << 3 | 1 << 4)) != 0) {
+            if ((int(g.strcache[i][j].marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
                 // replace it with something fixed
                 g.strcache[i][j] = g.memerrmsg
             }
@@ -107,12 +105,12 @@ def luaS_clearcache(var g : global_State?) {
 def luaS_init(var L : lua_State?) {
     var g : global_State? = L.l_G
     var tb : stringtable? = addr(L.l_G.strt)
-    tb.hash = reinterpret<TString ??>(luaM_malloc_(L, uint64(128) * uint64(typeinfo sizeof(type<TString?>)), 0))
+    tb.hash = reinterpret<TString ??>(luaM_malloc_(L, uint64(MINSTRTABSIZE) * uint64(typeinfo sizeof(type<TString?>)), 0))
     // clear array
     tablerehash(tb.hash, 0, MINSTRTABSIZE)
     tb.size = MINSTRTABSIZE
     // pre-create memory-error message
-    g.memerrmsg = luaS_newlstr(L, reinterpret<uint8?>("not enough memory"), uint64(typeinfo sizeof(type<uint8[18]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1))
+    g.memerrmsg = luaS_newlstr(L, cstr("not enough memory"), uint64(typeinfo sizeof(type<uint8[18]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul)
     // it should never be collected
     luaC_fix(L, addr(reinterpret<GCUnion?>(g.memerrmsg).gc))
     // fill cache with valid strings
@@ -130,13 +128,13 @@ def private createstrobj(var L : lua_State?; l : uint64; tag : int; h : uint) : 
     var o : GCObject?
     // total size of TString object
     var totalsize : uint64
-    totalsize = uint64(typeinfo offsetof < contents > (type<TString>)) + (l + uint64(1)) * uint64(typeinfo sizeof(type<uint8>))
+    totalsize = uint64(typeinfo offsetof < contents > (type<TString>)) + (l + 1ul) * uint64(typeinfo sizeof(type<uint8>))
     o = luaC_newobj(L, tag, totalsize)
     ts = addr(reinterpret<GCUnion?>(o).ts)
     ts.hash = h
-    ts.extra = uint8(0)
+    ts.extra = 0u8
     // ending 0
-    deref(addr(ts.contents[0]) + l) = uint8('\0')
+    addr(ts.contents[0])[l] = uint8('\0')
     return ts
 }
 
@@ -144,14 +142,14 @@ def luaS_createlngstrobj(var L : lua_State?; l : uint64) : TString? {
     var ts : TString? = createstrobj(L, l, LUA_VLNGSTR, L.l_G.seed)
     ts.u.lnglen = l
     // signals that it is a long string
-    ts.shrlen = uint8(255)
+    ts.shrlen = 255u8
     return ts
 }
 
 [c_function]
 def luaS_remove(var L : lua_State?; var ts : TString?) {
     var tb : stringtable? = addr(L.l_G.strt)
-    var p : TString ?? = addr(deref(tb.hash + int(ts.hash & uint(tb.size - 1))))
+    var p : TString ?? = addr(tb.hash[int(ts.hash & uint(tb.size - 1))])
     // find previous element
     while (intptr(deref(p)) != intptr(ts)) {
         p = addr(deref(p).u.hnext)
@@ -169,11 +167,11 @@ def private growstrtab(var L : lua_State?; var tb : stringtable?) {
         // still too many?
         if (tb.nuse == 2147483647) {
             // cannot even create a message...
-            luaD_throw(L, 4)
+            luaD_throw(L, LUA_ERRMEM)
         }
     }
     // can grow string table?
-    if (tb.size <= int(uint64(2147483647) <= ~uint64(0) / uint64(typeinfo sizeof(type<TString?>)) ? uint(2147483647) : uint(~uint64(0) / uint64(typeinfo sizeof(type<TString?>)))) / 2) {
+    if (tb.size <= int(2147483647ul <= MAX_SIZET / uint64(typeinfo sizeof(type<TString?>)) ? 2147483647u : uint(MAX_SIZET / uint64(typeinfo sizeof(type<TString?>)))) / 2) {
         luaS_resize(L, tb.size * 2)
     }
 }
@@ -185,29 +183,27 @@ def private internshrstr(var L : lua_State?; var str : uint8?; l : uint64) : TSt
     var g : global_State? = L.l_G
     var tb : stringtable? = addr(g.strt)
     var h : uint = luaS_hash(str, l, g.seed)
-    var list : TString ?? = addr(deref(tb.hash + int(h & uint(tb.size - 1))))
+    var list : TString ?? = addr(tb.hash[int(h & uint(tb.size - 1))])
     // otherwise 'memcmp'/'memcpy' are undefined
-    {
-        ts = deref(list)
-        while (ts != null) {
-            if (l == uint64(ts.shrlen) && crt::memcmp(reinterpret<void?>(str), reinterpret<void?>(addr(ts.contents[0])), l * uint64(typeinfo sizeof(type<uint8>))) == 0) {
-                // found!
-                // dead (but not collected yet)?
-                if ((int(ts.marked) & (int(g.currentwhite) ^ (1 << 3 | 1 << 4))) != 0) {
-                    // resurrect it
-                    ts.marked = uint8(int(ts.marked) ^ (1 << 3 | 1 << 4))
-                }
-                return ts
+    ts = deref(list)
+    while (ts != null) {
+        if (l == uint64(ts.shrlen) && (crt::memcmp(reinterpret<void?>(str), reinterpret<void?>(addr(ts.contents[0])), l * uint64(typeinfo sizeof(type<uint8>))) == 0)) {
+            // found!
+            // dead (but not collected yet)?
+            if ((int(ts.marked) & (int(g.currentwhite) ^ ((1 << WHITE0BIT) | (1 << WHITE1BIT)))) != 0) {
+                // resurrect it
+                ts.marked = uint8(int(ts.marked) ^ ((1 << WHITE0BIT) | (1 << WHITE1BIT)))
             }
-            ts = ts.u.hnext
+            return ts
         }
+        ts = ts.u.hnext
     }
     // else must create a new string
     // need to grow string table?
     if (tb.nuse >= tb.size) {
         growstrtab(L, tb)
         // rehash with new size
-        list = addr(deref(tb.hash + int(h & uint(tb.size - 1))))
+        list = addr(tb.hash[int(h & uint(tb.size - 1))])
     }
     ts = createstrobj(L, l, LUA_VSHRSTR, h)
     ts.shrlen = uint8(l)
@@ -226,7 +222,7 @@ def luaS_newlstr(var L : lua_State?; var str : uint8?; l : uint64) : TString? {
         return internshrstr(L, str, l)
     } else {
         var ts : TString?
-        if (l * uint64(typeinfo sizeof(type<uint8>)) >= (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? ~uint64(0) : uint64(9223372036854775807l)) - uint64(typeinfo sizeof(type<TString>))) {
+        if (l * uint64(typeinfo sizeof(type<uint8>)) >= (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? MAX_SIZET : uint64(9223372036854775807l)) - uint64(typeinfo sizeof(type<TString>))) {
             luaM_toobig(L)
         }
         ts = luaS_createlngstrobj(L, l)
@@ -242,35 +238,33 @@ def luaS_newlstr(var L : lua_State?; var str : uint8?; l : uint64) : TString? {
 [c_function]
 def luaS_new(var L : lua_State?; var str : uint8?) : TString? {
     // hash
-    var i : uint = uint(uint64(intptr(str)) & uint64(uint(2147483647) * 2u + 1u)) % uint(STRCACHE_N)
+    var i : uint = uint(uint64(intptr(str)) & uint64(2147483647u * 2u + 1u)) % uint(STRCACHE_N)
     var j : int
     var p : TString ?? = addr(L.l_G.strcache[i][0])
     for (j1 in range(STRCACHE_M)) {
         // hit?
-        if (crt::strcmp(str, addr(deref(p + j1).contents[0])) == 0) {
+        if (crt::strcmp(str, addr(p[j1].contents[0])) == 0) {
             // that is it
-            return deref(p + j1)
+            return p[j1]
         }
     }
     // normal route
-    {
-        j = STRCACHE_M - 1
-        while (j > 0) {
-            // move out last element
-            deref(p + j) = deref(p + (j - 1))
-            j--
-        }
+    j = STRCACHE_M - 1
+    while (j > 0) {
+        // move out last element
+        p[j] = p[j - 1]
+        j--
     }
     // new element is first in the list
-    deref(p + 0) = luaS_newlstr(L, str, crt::strlen(str))
-    return deref(p + 0)
+    p[0] = luaS_newlstr(L, str, crt::strlen(str))
+    return p[0]
 }
 
 [c_function]
 def luaS_newudata(var L : lua_State?; s : uint64; nuvalue : int) : Udata? {
     var u : Udata?
     var o : GCObject?
-    if (s > (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? ~uint64(0) : uint64(9223372036854775807l)) - (nuvalue == 0 ? uint64(typeinfo offsetof < bindata > (type<Udata0>)) : uint64(typeinfo offsetof < uv > (type<Udata>)) + uint64(typeinfo sizeof(type<UValue>)) * uint64(nuvalue))) {
+    if (s > (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int64>)) ? MAX_SIZET : uint64(9223372036854775807l)) - (nuvalue == 0 ? uint64(typeinfo offsetof < bindata > (type<Udata0>)) : uint64(typeinfo offsetof < uv > (type<Udata>)) + uint64(typeinfo sizeof(type<UValue>)) * uint64(nuvalue))) {
         luaM_toobig(L)
     }
     o = luaC_newobj(L, LUA_VUSERDATA, (nuvalue == 0 ? uint64(typeinfo offsetof < bindata > (type<Udata0>)) : uint64(typeinfo offsetof < uv > (type<Udata>)) + uint64(typeinfo sizeof(type<UValue>)) * uint64(nuvalue)) + s)
@@ -279,7 +273,7 @@ def luaS_newudata(var L : lua_State?; s : uint64; nuvalue : int) : Udata? {
     u.nuvalue = uint16(nuvalue)
     u.metatable = null
     for (i in range(nuvalue)) {
-        addr(deref(addr(u.uv[0]) + i).uv).tt_ = uint8(0 | 0 << 4)
+        addr(addr(u.uv[0])[i].uv).tt_ = uint8(LUA_TNIL | (0 << 4))
     }
     return u
 }

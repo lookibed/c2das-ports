@@ -121,11 +121,10 @@ def luaE_shrinkCI(var L : lua_State?) {
 // LUAI_MAXCCALLS (which means it is handling an overflow) but
 // not much larger, does not report an error (to allow overflow
 // handling to work).
-[c_function]
 def luaE_checkcstack(var L : lua_State?) {
-    if ((L.nCcalls & uint(65535)) == uint(LUAI_MAXCCALLS)) {
-        luaG_runerror`va(L, reinterpret<uint8?>("C stack overflow"), VaNone())
-    } elif ((L.nCcalls & uint(65535)) >= uint(LUAI_MAXCCALLS / 10 * 11)) {
+    if ((L.nCcalls & 65535u) == uint(LUAI_MAXCCALLS)) {
+        luaG_runerror`va(L, cstr("C stack overflow"), VaNone())
+    } elif ((L.nCcalls & 65535u) >= uint(LUAI_MAXCCALLS / 10 * 11)) {
         // error while handling stack error
         luaD_errerr(L)
     }
@@ -133,7 +132,7 @@ def luaE_checkcstack(var L : lua_State?) {
 
 def luaE_incCstack(var L : lua_State?) {
     L.nCcalls++
-    if ((L.nCcalls & uint(65535)) >= uint(200)) {
+    if ((L.nCcalls & 65535u) >= uint(LUAI_MAXCCALLS)) {
         luaE_checkcstack(L)
     }
 }
@@ -142,11 +141,11 @@ def luaE_incCstack(var L : lua_State?) {
 def private stack_init(var L1 : lua_State?; var L : lua_State?) {
     var ci : CallInfo?
     // initialize stack array
-    L1.stack.p = reinterpret<StackValue?>(luaM_malloc_(L, uint64(2 * 20 + 5) * uint64(typeinfo sizeof(type<StackValue>)), 0))
+    L1.stack.p = reinterpret<StackValue?>(luaM_malloc_(L, uint64(BASIC_STACK_SIZE + EXTRA_STACK) * uint64(typeinfo sizeof(type<StackValue>)), 0))
     L1.tbclist.p = L1.stack.p
     for (i in range(BASIC_STACK_SIZE + EXTRA_STACK)) {
         // erase new stack
-        addr((L1.stack.p + i).val).tt_ = uint8(0 | 0 << 4)
+        addr((L1.stack.p + i).val).tt_ = uint8(LUA_TNIL | (0 << 4))
     }
     L1.top.p = L1.stack.p
     L1.stack_last.p = L1.stack.p + BASIC_STACK_SIZE
@@ -159,7 +158,7 @@ def private stack_init(var L1 : lua_State?; var L : lua_State?) {
     ci.u.c.k = default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>
     ci.nresults = int16(0)
     // 'function' entry for this 'ci'
-    addr(L1.top.p.val).tt_ = uint8(0 | 0 << 4)
+    addr(L1.top.p.val).tt_ = uint8(LUA_TNIL | (0 << 4))
     L1.top.p = L1.top.p + 1
     ci.top.p = L1.top.p + LUA_MINSTACK
     L1.ci = ci
@@ -175,7 +174,7 @@ def private freestack(var L : lua_State?) {
     L.ci = addr(L.base_ci)
     freeCI(L)
     // free stack
-    luaM_free_(L, reinterpret<void?>(L.stack.p), uint64(int(int64(L.stack_last.p - L.stack.p)) + 5) * uint64(typeinfo sizeof(type<StackValue>)))
+    luaM_free_(L, reinterpret<void?>(L.stack.p), uint64(int(int64(L.stack_last.p - L.stack.p)) + EXTRA_STACK) * uint64(typeinfo sizeof(type<StackValue>)))
 }
 
 // Create registry table and its predefined values
@@ -187,22 +186,22 @@ def private init_registry(var L : lua_State?; var g : global_State?) {
         var io : TValue? = addr(g.l_registry)
         var x_ : Table? = registry
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8(5 | 0 << 4 | 1 << 6)
+        io.tt_ = uint8((LUA_TTABLE | (0 << 4)) | BIT_ISCOLLECTABLE)
     }
-    luaH_resize(L, registry, uint(LUA_RIDX_LAST), uint(0))
+    luaH_resize(L, registry, uint(LUA_RIDX_LAST), 0u)
     {
         // registry[LUA_RIDX_MAINTHREAD] = L
-        var io : TValue? = addr(deref(registry._c_array + (1 - 1)))
+        var io : TValue? = addr(registry._c_array[LUA_RIDX_MAINTHREAD - 1])
         var x_ : lua_State? = L
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8(8 | 0 << 4 | 1 << 6)
+        io.tt_ = uint8((LUA_TTHREAD | (0 << 4)) | BIT_ISCOLLECTABLE)
     }
     {
         // registry[LUA_RIDX_GLOBALS] = new table (table of globals)
-        var io : TValue? = addr(deref(registry._c_array + (2 - 1)))
+        var io : TValue? = addr(registry._c_array[LUA_RIDX_GLOBALS - 1])
         var x_ : Table? = luaH_new(L)
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8(5 | 0 << 4 | 1 << 6)
+        io.tt_ = uint8((LUA_TTABLE | (0 << 4)) | BIT_ISCOLLECTABLE)
     }
 }
 
@@ -217,9 +216,9 @@ def private f_luaopen(var L : lua_State?; var ud : void?) {
     luaT_init(L)
     luaX_init(L)
     // allow gc
-    g.gcstp = uint8(0)
+    g.gcstp = 0u8
     // now state is complete
-    addr(g.nilvalue).tt_ = uint8(0 | 0 << 4)
+    addr(g.nilvalue).tt_ = uint8(LUA_TNIL | (0 << 4))
 }
 
 // preinitialize a thread with consistent values without allocating
@@ -231,16 +230,16 @@ def private preinit_thread(var L : lua_State?; var g : global_State?) {
     L.nci = uint16(0)
     // thread has no upvalues
     L.twups = L
-    L.nCcalls = uint(0)
+    L.nCcalls = 0u
     L.errorJmp = null
     c_volatile_store(L.hook, default<function<(var a0 : lua_State?; var a1 : lua_Debug?) : void>>)
     c_volatile_store(L.hookmask, 0)
     L.basehookcount = 0
-    L.allowhook = uint8(1)
+    L.allowhook = 1u8
     L.hookcount = L.basehookcount
     L.openupval = null
     L.status = uint8(LUA_OK)
-    L.errfunc = int64(0)
+    L.errfunc = 0l
     L.oldpc = 0
 }
 
@@ -248,7 +247,7 @@ def private preinit_thread(var L : lua_State?; var g : global_State?) {
 def private close_state(var L : lua_State?) {
     var g : global_State? = L.l_G
     // closing a partially built state?
-    if (!((int(addr(g.nilvalue).tt_) & 15) == 0)) {
+    if (!((int(addr(g.nilvalue).tt_) & 15) == LUA_TNIL)) {
         // just collect its objects
         luaC_freeallobjects(L)
     } else {
@@ -256,9 +255,9 @@ def private close_state(var L : lua_State?) {
         // unwind CallInfo list
         L.ci = addr(L.base_ci)
         // stack unwind can "throw away" the error function
-        L.errfunc = int64(0)
+        L.errfunc = 0l
         // close all upvalues
-        luaD_closeprotected(L, int64(1), LUA_OK)
+        luaD_closeprotected(L, 1l, LUA_OK)
         // empty the stack to run finalizers
         L.top.p = L.stack.p + 1
         // collect all objects
@@ -267,7 +266,7 @@ def private close_state(var L : lua_State?) {
     luaM_free_(L, reinterpret<void?>(L.l_G.strt.hash), uint64(L.l_G.strt.size) * uint64(typeinfo sizeof(type<TString?>)))
     freestack(L)
     // free main block
-    invoke(g.frealloc, g.ud, reinterpret<void?>(reinterpret<LX?>(reinterpret<uint8?>(L) + -int64(uint64(typeinfo offsetof < l > (type<LX>))))), uint64(typeinfo sizeof(type<LG>)), uint64(0))
+    invoke(g.frealloc, g.ud, reinterpret<void?>(reinterpret<LX?>(reinterpret<uint8?>(L) + -int64(uint64(typeinfo offsetof < l > (type<LX>))))), uint64(typeinfo sizeof(type<LG>)), 0ul)
 }
 
 [c_function]
@@ -275,10 +274,8 @@ def lua_newthread(var L : lua_State?) : lua_State? {
     var g : global_State? = L.l_G
     var o : GCObject?
     var L1 : lua_State?
-    {
-        if (L.l_G.GCdebt > int64(0)) {
-            luaC_step(L)
-        }
+    if (L.l_G.GCdebt > 0l) {
+        luaC_step(L)
     }
     // create new thread
     o = luaC_newobjdt(L, LUA_TTHREAD, uint64(typeinfo sizeof(type<LX>)), uint64(typeinfo offsetof < l > (type<LX>)))
@@ -288,18 +285,16 @@ def lua_newthread(var L : lua_State?) : lua_State? {
         var io : TValue? = addr(L.top.p.val)
         var x_ : lua_State? = L1
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8(8 | 0 << 4 | 1 << 6)
+        io.tt_ = uint8((LUA_TTHREAD | (0 << 4)) | BIT_ISCOLLECTABLE)
     }
-    {
-        L.top.p = L.top.p + 1
-    }
+    L.top.p = L.top.p + 1
     preinit_thread(L1, g)
     c_volatile_store(L1.hookmask, c_volatile_load(L.hookmask))
     L1.basehookcount = L.basehookcount
     c_volatile_store(L1.hook, c_volatile_load(L.hook))
     L1.hookcount = L1.basehookcount
     // initialize L1 extra space
-    crt::memcpy(reinterpret<void?>(reinterpret<uint8?>(L1) + -int64(uint64(typeinfo sizeof(type<void?>)))), reinterpret<void?>(reinterpret<uint8?>(g.mainthread) + -int64(uint64(typeinfo sizeof(type<void?>)))), LUA_EXTRASPACE)
+    crt::memcpy(reinterpret<void?>(reinterpret<uint8?>(L1) + -int64(LUA_EXTRASPACE)), reinterpret<void?>(reinterpret<uint8?>(g.mainthread) + -int64(LUA_EXTRASPACE)), LUA_EXTRASPACE)
     // init stack
     stack_init(L1, L)
     return L1
@@ -320,7 +315,7 @@ def luaE_resetthread(var L : lua_State?; var status : int) : int {
     L.ci = addr(L.base_ci)
     var ci : CallInfo? = L.ci
     // 'function' entry for basic 'ci'
-    addr(L.stack.p.val).tt_ = uint8(0 | 0 << 4)
+    addr(L.stack.p.val).tt_ = uint8(LUA_TNIL | (0 << 4))
     ci.func.p = L.stack.p
     ci.callstatus = uint16(CIST_C)
     if (status == LUA_YIELD) {
@@ -329,8 +324,8 @@ def luaE_resetthread(var L : lua_State?; var status : int) : int {
     // so it can run __close metamethods
     L.status = uint8(LUA_OK)
     // stack unwind can "throw away" the error function
-    L.errfunc = int64(0)
-    status = luaD_closeprotected(L, int64(1), status)
+    L.errfunc = 0l
+    status = luaD_closeprotected(L, 1l, status)
     // errors?
     if (status != LUA_OK) {
         luaD_seterrorobj(L, status, L.stack.p + 1)
@@ -344,7 +339,7 @@ def luaE_resetthread(var L : lua_State?; var status : int) : int {
 
 def lua_closethread(var L : lua_State?; var from : lua_State?) : int {
     var status : int
-    L.nCcalls = from != null ? from.nCcalls & uint(65535) : uint(0)
+    L.nCcalls = from != null ? (from.nCcalls & 65535u) : 0u
     status = luaE_resetthread(L, int(L.status))
     return status
 }
@@ -358,21 +353,21 @@ def lua_resetthread(var L : lua_State?) : int {
 def lua_newstate(f : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 : uint64) : void?>; var ud : void?) : lua_State? {
     var L : lua_State?
     var g : global_State?
-    var l : LG? = reinterpret<LG?>(invoke(f, ud, null, uint64(8), uint64(typeinfo sizeof(type<LG>))))
+    var l : LG? = reinterpret<LG?>(invoke(f, ud, null, uint64(LUA_TTHREAD), uint64(typeinfo sizeof(type<LG>))))
     if (l == null) {
         return null
     }
     L = addr(l.l.l)
     g = addr(l.g)
     L.tt = uint8(LUA_VTHREAD)
-    g.currentwhite = uint8(1 << 3)
-    L.marked = uint8(int(g.currentwhite) & (1 << 3 | 1 << 4))
+    g.currentwhite = uint8(1 << WHITE0BIT)
+    L.marked = uint8(int(g.currentwhite) & ((1 << WHITE0BIT) | (1 << WHITE1BIT)))
     preinit_thread(L, g)
     // by now, only object is the main thread
     g.allgc = addr(reinterpret<GCUnion?>(L).gc)
     L.next = null
     // main thread is always non yieldable
-    L.nCcalls += uint(65536)
+    L.nCcalls += 65536u
     g.frealloc = f
     g.ud = ud
     g.warnf = default<function<(var a0 : void?; var a1 : uint8?; a2 : int) : void>>
@@ -384,12 +379,12 @@ def lua_newstate(f : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 :
     g.strt.nuse = 0
     g.strt.size = g.strt.nuse
     g.strt.hash = null
-    addr(g.l_registry).tt_ = uint8(0 | 0 << 4)
+    addr(g.l_registry).tt_ = uint8(LUA_TNIL | (0 << 4))
     g._c_panic = default<function<(var a0 : lua_State?) : int>>
     g.gcstate = uint8(GCSpause)
     g.gckind = uint8(KGC_INC)
-    g.gcstopem = uint8(0)
-    g.gcemergency = uint8(0)
+    g.gcstopem = 0u8
+    g.gcemergency = 0u8
     g.fixedgc = null
     g.tobefnz = g.fixedgc
     g.finobj = g.tobefnz
@@ -408,18 +403,18 @@ def lua_newstate(f : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 :
     g.weak = g.ephemeron
     g.twups = null
     g.totalbytes = int64(uint64(typeinfo sizeof(type<LG>)))
-    g.GCdebt = int64(0)
-    g.lastatomic = uint64(0)
+    g.GCdebt = 0l
+    g.lastatomic = 0ul
     {
         // to signal that state is not yet built
         var io : TValue? = addr(g.nilvalue)
-        io.value_.i = int64(0)
-        io.tt_ = uint8(3 | 0 << 4)
+        io.value_.i = 0l
+        io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
     }
-    g.gcpause = uint8(200 / 4)
-    g.gcstepmul = uint8(100 / 4)
+    g.gcpause = uint8(LUAI_GCPAUSE / 4)
+    g.gcstepmul = uint8(LUAI_GCMUL / 4)
     g.gcstepsize = uint8(LUAI_GCSTEPSIZE)
-    g.genmajormul = uint8(100 / 4)
+    g.genmajormul = uint8(LUAI_GENMAJORMUL / 4)
     g.genminormul = uint8(LUAI_GENMINORMUL)
     for (i in range(LUA_NUMTAGS)) {
         g.mt[i] = null
@@ -450,12 +445,12 @@ def luaE_warning(var L : lua_State?; var msg : uint8?; tocont : int) {
 def luaE_warnerror(var L : lua_State?; var _c_where : uint8?) {
     // error object
     var errobj : TValue? = addr((L.top.p - 1).val)
-    var msg : uint8? = (int(errobj.tt_) & 15) == 4 ? addr(addr(reinterpret<GCUnion?>(errobj.value_.gc).ts).contents[0]) : reinterpret<uint8?>("error object is not a string")
+    var msg : uint8? = ((int(errobj.tt_) & 15) == LUA_TSTRING) ? addr(addr(reinterpret<GCUnion?>(errobj.value_.gc).ts).contents[0]) : cstr("error object is not a string")
     // produce warning "error in %s (%s)" (where, msg)
-    luaE_warning(L, reinterpret<uint8?>("error in "), 1)
+    luaE_warning(L, cstr("error in "), 1)
     luaE_warning(L, _c_where, 1)
-    luaE_warning(L, reinterpret<uint8?>(" ("), 1)
+    luaE_warning(L, cstr(" ("), 1)
     luaE_warning(L, msg, 1)
-    luaE_warning(L, reinterpret<uint8?>(")"), 0)
+    luaE_warning(L, cstr(")"), 0)
 }
 

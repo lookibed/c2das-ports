@@ -5,6 +5,7 @@ options solid_context
 options stack = 8388608
 require c_runtime/c_function
 require c_runtime/c_volatile
+require c_runtime/cstr
 require c_runtime/cstr_array
 require c_runtime/enum_from_int
 require c_runtime/variadic
@@ -28,17 +29,39 @@ var private strlocal : uint8[6] = cstr_array("local", 6)
 var private strupval : uint8[8] = cstr_array("upvalue", 8)
 
 let private MAXIWTHABS = 128
+let private CIST_C = 1 << 1
+let private LUA_TFUNCTION = 6
+let private BIT_ISCOLLECTABLE = 1 << 6
 let private ABSLINEINFO = -128
+let private LUA_TNIL = 0
+let private LUA_TTABLE = 5
+let private LUA_TBOOLEAN = 1
 let private CIST_TAIL = 1 << 5
 let private CIST_TRAN = 1 << 8
+let private POS_OP = 0
+let private SIZE_OP = 7
+let private POS_A = POS_OP + SIZE_OP
+let private SIZE_A = 8
+let private POS_k = POS_A + SIZE_A
+let private POS_B = POS_k + 1
+let private SIZE_B = 8
+let private SIZE_C = 8
+let private SIZE_Bx = SIZE_C + SIZE_B + 1
+let private SIZE_sJ = SIZE_Bx + SIZE_A
+let private MAXARG_sJ = (1 << SIZE_sJ) - 1
+let private OFFSET_sJ = MAXARG_sJ >> 1
+let private LUA_TSTRING = 4
+let private SIZE_Ax = SIZE_Bx + SIZE_A
+let private POS_C = POS_B + SIZE_B
 let private CIST_HOOKED = 1 << 3
 let private CIST_FIN = 1 << 7
+let private LUA_TNUMBER = 3
 let private LUA_ERRRUN = 2
 let private CIST_HOOKYIELD = 1 << 6
-let private LUA_MASKLINE = 1 << 2
-let private LUA_MASKCOUNT = 1 << 3
-let private LUA_HOOKCOUNT = 3
 let private LUA_HOOKLINE = 2
+let private LUA_MASKLINE = 1 << LUA_HOOKLINE
+let private LUA_HOOKCOUNT = 3
+let private LUA_MASKCOUNT = 1 << LUA_HOOKCOUNT
 let private LUA_YIELD = 1
 
 [c_function]
@@ -59,20 +82,20 @@ def private currentpc(var ci : CallInfo?) : int {
 // smaller value.)
 [c_function]
 def private getbaseline(var f : Proto?; pc : int; var basepc : int?) : int {
-    if (f.sizeabslineinfo == 0 || pc < deref(f.abslineinfo + 0).pc) {
+    if (f.sizeabslineinfo == 0 || pc < f.abslineinfo[0].pc) {
         // start from the beginning
         deref(basepc) = -1
         return f.linedefined
     } else {
         // get an estimate
-        var i : int = int(uint(pc) / uint(MAXIWTHABS) - uint(1))
+        var i : int = int(uint(pc) / uint(MAXIWTHABS) - 1u)
         // estimate must be a lower bound of the correct base
-        while (i + 1 < f.sizeabslineinfo && pc >= deref(f.abslineinfo + (i + 1)).pc) {
+        while (i + 1 < f.sizeabslineinfo && pc >= f.abslineinfo[i + 1].pc) {
             // low estimate; adjust it
             i++
         }
-        deref(basepc) = deref(f.abslineinfo + i).pc
-        return deref(f.abslineinfo + i).line
+        deref(basepc) = f.abslineinfo[i].pc
+        return f.abslineinfo[i].line
     }
 }
 
@@ -95,7 +118,7 @@ def luaG_getfuncline(var f : Proto?; pc : int) : int {
                 break
             }
             // correct line
-            baseline += int(deref(f.lineinfo + basepc))
+            baseline += int(f.lineinfo[basepc])
         }
         return baseline
     }
@@ -117,13 +140,11 @@ def private getcurrentline(var ci : CallInfo?) : int {
 // has no good reasons to do that.)
 [c_function]
 def private settraps(var ci : CallInfo?) {
-    {
-        while (ci != null) {
-            if (!((int(ci.callstatus) & 1 << 1) != 0)) {
-                c_volatile_store(ci.u.l.trap, 1)
-            }
-            ci = ci.previous
+    while (ci != null) {
+        if (!((int(ci.callstatus) & CIST_C) != 0)) {
+            c_volatile_store(ci.u.l.trap, 1)
         }
+        ci = ci.previous
     }
 }
 
@@ -171,12 +192,10 @@ def lua_getstack(var L : lua_State?; var level : int; var ar : lua_Debug?) : int
     if (level < 0) {
         return 0
     }
-    {
-        ci = L.ci
-        while (level > 0 && intptr(ci) != intptr(addr(L.base_ci))) {
-            level--
-            ci = ci.previous
-        }
+    ci = L.ci
+    while (level > 0 && intptr(ci) != intptr(addr(L.base_ci))) {
+        level--
+        ci = ci.previous
     }
     // level found?
     if (level == 0 && intptr(ci) != intptr(addr(L.base_ci))) {
@@ -191,9 +210,9 @@ def lua_getstack(var L : lua_State?; var level : int; var ar : lua_Debug?) : int
 
 [c_function]
 def private upvalname(var p : Proto?; uv : int) : uint8? {
-    var s : TString? = deref(p.upvalues + uv).name
+    var s : TString? = p.upvalues[uv].name
     if (s == null) {
-        return reinterpret<uint8?>("?")
+        return cstr("?")
     } else {
         return addr(s.contents[0])
     }
@@ -207,7 +226,7 @@ def private findvararg(var ci : CallInfo?; n : int; var pos : StackValue ??) : u
         if (n >= -nextra) {
             deref(pos) = ci.func.p - nextra + -(n + 1)
             // generic name for any vararg
-            return reinterpret<uint8?>("(vararg)")
+            return cstr("(vararg)")
         }
     }
     // no such vararg
@@ -218,7 +237,7 @@ def private findvararg(var ci : CallInfo?; n : int; var pos : StackValue ??) : u
 def luaG_findlocal(var L : lua_State?; var ci : CallInfo?; n : int; var pos : StackValue ??) : uint8? {
     var base : StackValue? = ci.func.p + 1
     var name : uint8? = null
-    if (!((int(ci.callstatus) & 1 << 1) != 0)) {
+    if (!((int(ci.callstatus) & CIST_C) != 0)) {
         // access to vararg values?
         if (n < 0) {
             return findvararg(ci, n, pos)
@@ -228,11 +247,11 @@ def luaG_findlocal(var L : lua_State?; var ci : CallInfo?; n : int; var pos : St
     }
     // no 'standard' name?
     if (name == null) {
-        var limit : StackValue? = intptr(ci) == intptr(L.ci) ? L.top.p : ci.next.func.p
+        var limit : StackValue? = (intptr(ci) == intptr(L.ci)) ? L.top.p : ci.next.func.p
         // is 'n' inside 'ci' stack?
         if (int64(limit - base) >= int64(n) && n > 0) {
             // generic name for any valid slot
-            name = !((int(ci.callstatus) & 1 << 1) != 0) ? reinterpret<uint8?>("(temporary)") : reinterpret<uint8?>("(C temporary)")
+            name = !((int(ci.callstatus) & CIST_C) != 0) ? cstr("(temporary)") : cstr("(C temporary)")
         } else {
             // no name
             return null
@@ -250,7 +269,7 @@ def lua_getlocal(var L : lua_State?; var ar : lua_Debug?; n : int) : uint8? {
     // information about non-active function?
     if (ar == null) {
         // not a Lua function?
-        if (!(int(addr((L.top.p - 1).val).tt_) == (6 | 0 << 4 | 1 << 6))) {
+        if (!(int(addr((L.top.p - 1).val).tt_) == ((LUA_TFUNCTION | (0 << 4)) | BIT_ISCOLLECTABLE))) {
             name = null
         } else {
             // consider live variables at function start (parameters)
@@ -268,9 +287,7 @@ def lua_getlocal(var L : lua_State?; var ar : lua_Debug?; n : int) : uint8? {
                 io1.value_ = io2.value_
                 io1.tt_ = io2.tt_
             }
-            {
-                L.top.p = L.top.p + 1
-            }
+            L.top.p = L.top.p + 1
         }
     }
     return name
@@ -297,32 +314,32 @@ def lua_setlocal(var L : lua_State?; var ar : lua_Debug?; n : int) : uint8? {
 
 [c_function]
 def private funcinfo(var ar : lua_Debug?; var cl : Closure?) {
-    if (!(cl != null && int(cl.c.tt) == (6 | 0 << 4))) {
-        ar.source = reinterpret<uint8?>("=[C]")
-        ar.srclen = uint64(typeinfo sizeof(type<uint8[5]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)
+    if (!(cl != null && int(cl.c.tt) == (LUA_TFUNCTION | (0 << 4)))) {
+        ar.source = cstr("=[C]")
+        ar.srclen = uint64(typeinfo sizeof(type<uint8[5]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul
         ar.linedefined = -1
         ar.lastlinedefined = -1
-        ar.what = reinterpret<uint8?>("C")
+        ar.what = cstr("C")
     } else {
         var p : Proto? = cl.l.p
         if (p.source != null) {
             ar.source = addr(p.source.contents[0])
             ar.srclen = int(p.source.shrlen) != 255 ? uint64(p.source.shrlen) : p.source.u.lnglen
         } else {
-            ar.source = reinterpret<uint8?>("=?")
-            ar.srclen = uint64(typeinfo sizeof(type<uint8[3]>)) / uint64(typeinfo sizeof(type<uint8>)) - uint64(1)
+            ar.source = cstr("=?")
+            ar.srclen = uint64(typeinfo sizeof(type<uint8[3]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul
         }
         ar.linedefined = p.linedefined
         ar.lastlinedefined = p.lastlinedefined
-        ar.what = ar.linedefined == 0 ? reinterpret<uint8?>("main") : reinterpret<uint8?>("Lua")
+        ar.what = (ar.linedefined == 0) ? cstr("main") : cstr("Lua")
     }
     luaO_chunkid(addr(ar.short_src[0]), ar.source, ar.srclen)
 }
 
 [c_function]
 def private nextline(var p : Proto?; currentline : int; pc : int) : int {
-    if (int(deref(p.lineinfo + pc)) != ABSLINEINFO) {
-        return currentline + int(deref(p.lineinfo + pc))
+    if (int(p.lineinfo[pc]) != ABSLINEINFO) {
+        return currentline + int(p.lineinfo[pc])
     } else {
         return luaG_getfuncline(p, pc)
     }
@@ -330,11 +347,9 @@ def private nextline(var p : Proto?; currentline : int; pc : int) : int {
 
 [c_function]
 def private collectvalidlines(var L : lua_State?; var f : Closure?) {
-    if (!(f != null && int(f.c.tt) == (6 | 0 << 4))) {
-        addr(L.top.p.val).tt_ = uint8(0 | 0 << 4)
-        {
-            L.top.p = L.top.p + 1
-        }
+    if (!(f != null && int(f.c.tt) == (LUA_TFUNCTION | (0 << 4)))) {
+        addr(L.top.p.val).tt_ = uint8(LUA_TNIL | (0 << 4))
+        L.top.p = L.top.p + 1
     } else {
         var p : Proto? = f.l.p
         var currentline : int = p.linedefined
@@ -345,17 +360,15 @@ def private collectvalidlines(var L : lua_State?; var f : Closure?) {
             var io : TValue? = addr(L.top.p.val)
             var x_ : Table? = t
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-            io.tt_ = uint8(5 | 0 << 4 | 1 << 6)
+            io.tt_ = uint8((LUA_TTABLE | (0 << 4)) | BIT_ISCOLLECTABLE)
         }
-        {
-            L.top.p = L.top.p + 1
-        }
+        L.top.p = L.top.p + 1
         // proto with debug information?
         if (p.lineinfo != null) {
             var i : int
             var v : TValue
             // boolean 'true' to be the value of all indices
-            addr(v).tt_ = uint8(1 | 1 << 4)
+            addr(v).tt_ = uint8(LUA_TBOOLEAN | (1 << 4))
             // regular function?
             if (!(p.is_vararg != 0)) {
                 // consider all instructions
@@ -367,14 +380,12 @@ def private collectvalidlines(var L : lua_State?; var f : Closure?) {
                 i = 1
             }
             // for each instruction
-            {
-                while (i < p.sizelineinfo) {
-                    // get its line
-                    currentline = nextline(p, currentline, i)
-                    // table[line] = true
-                    luaH_setint(L, t, int64(currentline), addr(v))
-                    i++
-                }
+            while (i < p.sizelineinfo) {
+                // get its line
+                currentline = nextline(p, currentline, i)
+                // table[line] = true
+                luaH_setint(L, t, int64(currentline), addr(v))
+                i++
             }
         }
     }
@@ -394,59 +405,45 @@ def private getfuncname(var L : lua_State?; var ci : CallInfo?; var name : uint8
 [c_function]
 def private auxgetinfo(var L : lua_State?; var what : uint8?; var ar : lua_Debug?; var f : Closure?; var ci : CallInfo?) : int {
     var status : int = 1
-    {
-        while (deref(what) != 0) {
-            let _cond = int(deref(what))
-            if (_cond == 'S') {
-                {
-                    funcinfo(ar, f)
-                }
-            } elif (_cond == 'l') {
-                {
-                    ar.currentline = ci != null && !((int(ci.callstatus) & 1 << 1) != 0) ? getcurrentline(ci) : -1
-                }
-            } elif (_cond == 'u') {
-                {
-                    ar.nups = uint8(f == null ? 0 : int(f.c.nupvalues))
-                    if (!(f != null && int(f.c.tt) == (6 | 0 << 4))) {
-                        ar.isvararg = uint8(1)
-                        ar.nparams = uint8(0)
-                    } else {
-                        ar.isvararg = uint8(f.l.p.is_vararg)
-                        ar.nparams = f.l.p.numparams
-                    }
-                }
-            } elif (_cond == 't') {
-                {
-                    ar.istailcall = uint8(ci != null ? int(ci.callstatus) & CIST_TAIL : 0)
-                }
-            } elif (_cond == 'n') {
-                {
-                    ar.namewhat = getfuncname(L, ci, addr(ar.name))
-                    if (ar.namewhat == null) {
-                        // not found
-                        ar.namewhat = addr(c2das_empty[0])
-                        ar.name = null
-                    }
-                }
-            } elif (_cond == 'r') {
-                {
-                    if (ci == null || !((int(ci.callstatus) & CIST_TRAN) != 0)) {
-                        ar.ntransfer = uint16(0)
-                        ar.ftransfer = ar.ntransfer
-                    } else {
-                        ar.ftransfer = ci.u2.transferinfo.ftransfer
-                        ar.ntransfer = ci.u2.transferinfo.ntransfer
-                    }
-                }
-            } elif (_cond == 'L' || _cond == 'f') {
+    while (deref(what) != 0) {
+        let _cond = int(deref(what))
+        if (_cond == 'S') {
+            funcinfo(ar, f)
+        } elif (_cond == 'l') {
+            ar.currentline = (ci != null && !((int(ci.callstatus) & CIST_C) != 0)) ? getcurrentline(ci) : -1
+        } elif (_cond == 'u') {
+            ar.nups = uint8((f == null) ? 0 : int(f.c.nupvalues))
+            if (!(f != null && int(f.c.tt) == (LUA_TFUNCTION | (0 << 4)))) {
+                ar.isvararg = 1u8
+                ar.nparams = 0u8
             } else {
-                // handled by lua_getinfo
-                // invalid option
-                status = 0
+                ar.isvararg = uint8(f.l.p.is_vararg)
+                ar.nparams = f.l.p.numparams
             }
-            what = what + 1
+        } elif (_cond == 't') {
+            ar.istailcall = uint8(ci != null ? int(ci.callstatus) & CIST_TAIL : 0)
+        } elif (_cond == 'n') {
+            ar.namewhat = getfuncname(L, ci, addr(ar.name))
+            if (ar.namewhat == null) {
+                // not found
+                ar.namewhat = addr(c2das_empty[0])
+                ar.name = null
+            }
+        } elif (_cond == 'r') {
+            if (ci == null || !((int(ci.callstatus) & CIST_TRAN) != 0)) {
+                ar.ntransfer = uint16(0)
+                ar.ftransfer = ar.ntransfer
+            } else {
+                ar.ftransfer = ci.u2.transferinfo.ftransfer
+                ar.ntransfer = ci.u2.transferinfo.ntransfer
+            }
+        } elif (_cond == 'L' || _cond == 'f') {
+        } else {
+            // handled by lua_getinfo
+            // invalid option
+            status = 0
         }
+        what = what + 1
     }
     return status
 }
@@ -468,7 +465,7 @@ def lua_getinfo(var L : lua_State?; var what : uint8?; var ar : lua_Debug?) : in
         ci = ar.i_ci
         func = addr(ci.func.p.val)
     }
-    cl = int(func.tt_) == (6 | 0 << 4 | 1 << 6) || int(func.tt_) == (6 | 2 << 4 | 1 << 6) ? addr(reinterpret<GCUnion?>(func.value_.gc).cl) : null
+    cl = int(func.tt_) == ((LUA_TFUNCTION | (0 << 4)) | BIT_ISCOLLECTABLE) || int(func.tt_) == ((LUA_TFUNCTION | (2 << 4)) | BIT_ISCOLLECTABLE) ? addr(reinterpret<GCUnion?>(func.value_.gc).cl) : null
     status = auxgetinfo(L, what, ar, cl, ci)
     if (crt::strchr(what, 'f') != null) {
         {
@@ -477,9 +474,7 @@ def lua_getinfo(var L : lua_State?; var what : uint8?; var ar : lua_Debug?) : in
             io1.value_ = io2.value_
             io1.tt_ = io2.tt_
         }
-        {
-            L.top.p = L.top.p + 1
-        }
+        L.top.p = L.top.p + 1
     }
     if (crt::strchr(what, 'L') != null) {
         collectvalidlines(L, cl)
@@ -505,37 +500,33 @@ def private findsetreg(var p : Proto?; var lastpc : int; reg : int) : int {
     var setreg : int = -1
     // any code before this address is conditional
     var jmptarget : int = 0
-    if ((int(luaP_opmodes[int(enum_from_int(type<OpCode>, int(deref(p.code + lastpc) >> 0u & ~(~uint(0) << 7u) << 0u)))]) & 1 << 7) != 0) {
+    if ((int(luaP_opmodes[int(enum_from_int(type<OpCode>, int((p.code[lastpc] >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))))]) & (1 << 7)) != 0) {
         // previous instruction was not actually executed
         lastpc--
     }
     for (pc in range(lastpc)) {
-        var i : uint = deref(p.code + pc)
-        var op : OpCode = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
-        var a : int = int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)
+        var i : uint = p.code[pc]
+        var op : OpCode = enum_from_int(type<OpCode>, int((i >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u)))
+        var a : int = int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_A)) << 0u))
         // true if current instruction changed 'reg'
         var change : int
         let _cond = op
         if (_cond == OpCode.OP_LOADNIL) {
             {
                 // set registers from 'a' to 'a+b'
-                var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
-                change = a <= reg && reg <= a + b ? 1 : 0
+                var b : int = int((i >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u))
+                change = (a <= reg && reg <= a + b) ? 1 : 0
             }
         } elif (_cond == OpCode.OP_TFORCALL) {
-            {
-                // affect all regs above its base
-                change = reg >= a + 2 ? 1 : 0
-            }
+            // affect all regs above its base
+            change = (reg >= a + 2) ? 1 : 0
         } elif (_cond == OpCode.OP_CALL || _cond == OpCode.OP_TAILCALL) {
-            {
-                // affect all registers above base
-                change = reg >= a ? 1 : 0
-            }
+            // affect all registers above base
+            change = (reg >= a) ? 1 : 0
         } elif (_cond == OpCode.OP_JMP) {
             {
                 // doesn't change registers, but changes 'jmptarget'
-                var b : int = int(i >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u) - ((1 << 8 + 8 + 1 + 8) - 1 >> 1)
+                var b : int = int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ
                 var dest : int = pc + 1 + b
                 // jump does not skip 'lastpc' and is larger than current one?
                 if (dest <= lastpc && dest > jmptarget) {
@@ -546,7 +537,7 @@ def private findsetreg(var p : Proto?; var lastpc : int; reg : int) : int {
             }
         } else {
             // any instruction that sets A
-            change = (int(luaP_opmodes[int(op)]) & 1 << 3) != 0 && reg == a ? 1 : 0
+            change = ((int(luaP_opmodes[int(op)]) & (1 << 3)) != 0 && reg == a) ? 1 : 0
         }
         if (change != 0) {
             setreg = filterpc(pc, jmptarget)
@@ -558,12 +549,12 @@ def private findsetreg(var p : Proto?; var lastpc : int; reg : int) : int {
 // Find a "name" for the constant 'c'.
 [c_function]
 def private kname(var p : Proto?; index : int; var name : uint8 ??) : uint8? {
-    var kvalue : TValue? = addr(deref(p.k + index))
-    if ((int(kvalue.tt_) & 15) == 4) {
+    var kvalue : TValue? = addr(p.k[index])
+    if ((int(kvalue.tt_) & 15) == LUA_TSTRING) {
         deref(name) = addr(addr(reinterpret<GCUnion?>(kvalue.value_.gc).ts).contents[0])
-        return reinterpret<uint8?>("constant")
+        return cstr("constant")
     } else {
-        deref(name) = reinterpret<uint8?>("?")
+        deref(name) = cstr("?")
         return null
     }
 }
@@ -581,27 +572,25 @@ def private basicgetobjname(var p : Proto?; var ppc : int?; reg : int; var name 
     deref(ppc) = pc
     // could find instruction?
     if (pc != -1) {
-        var i : uint = deref(p.code + pc)
-        var op : OpCode = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
+        var i : uint = p.code[pc]
+        var op : OpCode = enum_from_int(type<OpCode>, int((i >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u)))
         let _cond = op
         if (_cond == OpCode.OP_MOVE) {
             {
                 // move from 'b' to 'a'
-                var b : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
-                if (b < int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u)) {
+                var b : int = int((i >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u))
+                if (b < int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_A)) << 0u))) {
                     // get name for 'b'
                     return basicgetobjname(p, ppc, b, name)
                 }
             }
         } elif (_cond == OpCode.OP_GETUPVAL) {
-            {
-                deref(name) = upvalname(p, int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u))
-                return addr(strupval[0])
-            }
+            deref(name) = upvalname(p, int((i >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u)))
+            return addr(strupval[0])
         } elif (_cond == OpCode.OP_LOADK) {
-            return kname(p, int(i >> uint(0 + 7 + 8) & ~(~uint(0) << uint(8 + 8 + 1)) << 0u), name)
+            return kname(p, int((i >> uint(POS_k)) & (~(~0u << uint(SIZE_Bx)) << 0u)), name)
         } elif (_cond == OpCode.OP_LOADKX) {
-            return kname(p, int(deref(p.code + (pc + 1)) >> uint(0 + 7) & ~(~uint(0) << uint(8 + 8 + 1 + 8)) << 0u), name)
+            return kname(p, int((p.code[pc + 1] >> uint(POS_A)) & (~(~0u << uint(SIZE_Ax)) << 0u)), name)
         } else {
         }
     }
@@ -616,16 +605,16 @@ def private rname(var p : Proto?; var pc : int; c : int; var name : uint8 ??) {
     var what : uint8? = basicgetobjname(p, addr(pc), c, name)
     // did not find a constant name?
     if (!(what != null && int(deref(what)) == 'c')) {
-        deref(name) = reinterpret<uint8?>("?")
+        deref(name) = cstr("?")
     }
 }
 
 // Find a "name" for a 'C' value in an RK instruction.
 def private rkname(var p : Proto?; pc : int; i : uint; var name : uint8 ??) {
     // key index
-    var c : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
+    var c : int = int((i >> uint(POS_C)) & (~(~0u << uint(SIZE_C)) << 0u))
     // is 'c' a constant?
-    if ((i >> uint(0 + 7 + 8) & ~(~uint(0) << 1u) << 0u) != 0) {
+    if (((i >> uint(POS_k)) & (~(~0u << 1u) << 0u)) != 0) {
         kname(p, c, name)
     } else {
         // 'c' is a register
@@ -641,7 +630,7 @@ def private rkname(var p : Proto?; pc : int; i : uint; var name : uint8 ??) {
 [c_function]
 def private isEnv(var p : Proto?; var pc : int; i : uint; isup : int) : uint8? {
     // table index
-    var t : int = int(i >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u)
+    var t : int = int((i >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u))
     // name of indexed variable
     var name : uint8?
     // is 't' an upvalue?
@@ -655,7 +644,7 @@ def private isEnv(var p : Proto?; var pc : int; i : uint; isup : int) : uint8? {
             name = null
         }
     }
-    return name != null && crt::strcmp(name, reinterpret<uint8?>("_ENV")) == 0 ? reinterpret<uint8?>("global") : reinterpret<uint8?>("field")
+    return (name != null && crt::strcmp(name, cstr("_ENV")) == 0) ? cstr("global") : cstr("field")
 }
 
 // Extend 'basicgetobjname' to handle table accesses
@@ -666,40 +655,36 @@ def private getobjname(var p : Proto?; var lastpc : int; reg : int; var name : u
         return kind
     } elif (lastpc != -1) {
         // could find instruction?
-        var i : uint = deref(p.code + lastpc)
-        var op : OpCode = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
+        var i : uint = p.code[lastpc]
+        var op : OpCode = enum_from_int(type<OpCode>, int((i >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u)))
         let _cond = op
         if (_cond == OpCode.OP_GETTABUP) {
             {
                 // key index
-                var k : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
+                var k : int = int((i >> uint(POS_C)) & (~(~0u << uint(SIZE_C)) << 0u))
                 kname(p, k, name)
                 return isEnv(p, lastpc, i, 1)
             }
         } elif (_cond == OpCode.OP_GETTABLE) {
             {
                 // key index
-                var k : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
+                var k : int = int((i >> uint(POS_C)) & (~(~0u << uint(SIZE_C)) << 0u))
                 rname(p, lastpc, k, name)
                 return isEnv(p, lastpc, i, 0)
             }
         } elif (_cond == OpCode.OP_GETI) {
-            {
-                deref(name) = reinterpret<uint8?>("integer index")
-                return reinterpret<uint8?>("field")
-            }
+            deref(name) = cstr("integer index")
+            return cstr("field")
         } elif (_cond == OpCode.OP_GETFIELD) {
             {
                 // key index
-                var k : int = int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u)
+                var k : int = int((i >> uint(POS_C)) & (~(~0u << uint(SIZE_C)) << 0u))
                 kname(p, k, name)
                 return isEnv(p, lastpc, i, 0)
             }
         } elif (_cond == OpCode.OP_SELF) {
-            {
-                rkname(p, lastpc, i, name)
-                return reinterpret<uint8?>("method")
-            }
+            rkname(p, lastpc, i, name)
+            return cstr("method")
         } else {
         }
     }
@@ -717,26 +702,22 @@ def private funcnamefromcode(var L : lua_State?; var p : Proto?; pc : int; var n
     // (initial value avoids warnings)
     var tm : TMS = TMS.TM_INDEX
     // calling instruction
-    var i : uint = deref(p.code + pc)
-    let _cond = enum_from_int(type<OpCode>, int(i >> 0u & ~(~uint(0) << 7u) << 0u))
+    var i : uint = p.code[pc]
+    let _cond = enum_from_int(type<OpCode>, int((i >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u)))
     if (_cond == OpCode.OP_CALL || _cond == OpCode.OP_TAILCALL) {
         // get function name
-        return getobjname(p, pc, int(i >> uint(0 + 7) & ~(~uint(0) << 8u) << 0u), name)
+        return getobjname(p, pc, int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_A)) << 0u)), name)
     } elif (_cond == OpCode.OP_TFORCALL) {
-        {
-            // for iterator
-            deref(name) = reinterpret<uint8?>("for iterator")
-            return reinterpret<uint8?>("for iterator")
-        }
+        // for iterator
+        deref(name) = cstr("for iterator")
+        return cstr("for iterator")
     } elif (_cond == OpCode.OP_SELF || _cond == OpCode.OP_GETTABUP || _cond == OpCode.OP_GETTABLE || _cond == OpCode.OP_GETI || _cond == OpCode.OP_GETFIELD) {
         // other instructions can do calls through metamethods
         tm = TMS.TM_INDEX
     } elif (_cond == OpCode.OP_SETTABUP || _cond == OpCode.OP_SETTABLE || _cond == OpCode.OP_SETI || _cond == OpCode.OP_SETFIELD) {
         tm = TMS.TM_NEWINDEX
     } elif (_cond == OpCode.OP_MMBIN || _cond == OpCode.OP_MMBINI || _cond == OpCode.OP_MMBINK) {
-        {
-            tm = enum_from_int(type<TMS>, int(i >> uint(0 + 7 + 8 + 1 + 8) & ~(~uint(0) << 8u) << 0u))
-        }
+        tm = enum_from_int(type<TMS>, int((i >> uint(POS_C)) & (~(~0u << uint(SIZE_C)) << 0u)))
     } elif (_cond == OpCode.OP_UNM) {
         tm = TMS.TM_UNM
     } elif (_cond == OpCode.OP_BNOT) {
@@ -759,7 +740,7 @@ def private funcnamefromcode(var L : lua_State?; var p : Proto?; pc : int; var n
         return null
     }
     deref(name) = addr(L.l_G.tmname[int(tm)].contents[0]) + 2
-    return reinterpret<uint8?>("metamethod")
+    return cstr("metamethod")
 }
 
 // Try to find a name for a function based on how it was called.
@@ -767,14 +748,14 @@ def private funcnamefromcode(var L : lua_State?; var p : Proto?; pc : int; var n
 def private funcnamefromcall(var L : lua_State?; var ci : CallInfo?; var name : uint8 ??) : uint8? {
     // was it called inside a hook?
     if ((int(ci.callstatus) & CIST_HOOKED) != 0) {
-        deref(name) = reinterpret<uint8?>("?")
-        return reinterpret<uint8?>("hook")
+        deref(name) = cstr("?")
+        return cstr("hook")
     } elif ((int(ci.callstatus) & CIST_FIN) != 0) {
         // was it called as a finalizer?
-        deref(name) = reinterpret<uint8?>("__gc")
+        deref(name) = cstr("__gc")
         // report it as such
-        return reinterpret<uint8?>("metamethod")
-    } elif (!((int(ci.callstatus) & 1 << 1) != 0)) {
+        return cstr("metamethod")
+    } elif (!((int(ci.callstatus) & CIST_C) != 0)) {
         return funcnamefromcode(L, addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p, currentpc(ci), name)
     } else {
         return null
@@ -789,14 +770,12 @@ def private funcnamefromcall(var L : lua_State?; var ci : CallInfo?; var name : 
 def private instack(var ci : CallInfo?; var o : TValue?) : int {
     var pos : int
     var base : StackValue? = ci.func.p + 1
-    {
-        pos = 0
-        while (intptr(base + pos) < intptr(ci.top.p)) {
-            if (intptr(o) == intptr(reinterpret<TValue?>(addr((base + pos).val)))) {
-                return pos
-            }
-            pos++
+    pos = 0
+    while (intptr(base + pos) < intptr(ci.top.p)) {
+        if (intptr(o) == intptr(reinterpret<TValue?>(addr((base + pos).val)))) {
+            return pos
         }
+        pos++
     }
     // not found
     return -1
@@ -809,15 +788,13 @@ def private instack(var ci : CallInfo?; var o : TValue?) : int {
 def private getupvalname(var ci : CallInfo?; var o : TValue?; var name : uint8 ??) : uint8? {
     var c : LClosure? = addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l)
     var i : int
-    {
-        i = 0
-        while (i < int(c.nupvalues)) {
-            if (intptr(deref(addr(c.upvals[0]) + i).v.p) == intptr(reinterpret<TValue?>(o))) {
-                deref(name) = upvalname(c.p, i)
-                return addr(strupval[0])
-            }
-            i++
+    i = 0
+    while (i < int(c.nupvalues)) {
+        if (intptr(addr(c.upvals[0])[i].v.p) == intptr(reinterpret<TValue?>(o))) {
+            deref(name) = upvalname(c.p, i)
+            return addr(strupval[0])
         }
+        i++
     }
     return null
 }
@@ -828,7 +805,7 @@ def private formatvarinfo(var L : lua_State?; var kind : uint8?; var name : uint
         // no information
         return addr(c2das_empty[0])
     } else {
-        return luaO_pushfstring`va(L, reinterpret<uint8?>(" (%s '%s')"), (kind, name))
+        return luaO_pushfstring`va(L, cstr(" (%s '%s')"), (kind, name))
     }
 }
 
@@ -840,7 +817,7 @@ def private varinfo(var L : lua_State?; var o : TValue?) : uint8? {
     // to avoid warnings
     var name : uint8? = null
     var kind : uint8? = null
-    if (!((int(ci.callstatus) & 1 << 1) != 0)) {
+    if (!((int(ci.callstatus) & CIST_C) != 0)) {
         // check whether 'o' is an upvalue
         kind = getupvalname(ci, o, addr(name))
         // not an upvalue?
@@ -857,10 +834,9 @@ def private varinfo(var L : lua_State?; var o : TValue?) : uint8? {
 }
 
 // Raise a type error
-[c_function]
 def private typeerror(var L : lua_State?; var o : TValue?; var op : uint8?; var extra : uint8?) {
     var t : uint8? = luaT_objtypename(L, o)
-    __::luaG_runerror`va(L, reinterpret<uint8?>("attempt to %s a %s value%s"), (op, t, extra))
+    __::luaG_runerror`va(L, cstr("attempt to %s a %s value%s"), (op, t, extra))
 }
 
 // Raise a type error with "standard" information about the faulty
@@ -879,25 +855,23 @@ def luaG_callerror(var L : lua_State?; var o : TValue?) {
     var name : uint8? = null
     var kind : uint8? = funcnamefromcall(L, ci, addr(name))
     var extra : uint8? = kind != null ? formatvarinfo(L, kind, name) : varinfo(L, o)
-    typeerror(L, o, reinterpret<uint8?>("call"), extra)
+    typeerror(L, o, cstr("call"), extra)
 }
 
-[c_function]
 def luaG_forerror(var L : lua_State?; var o : TValue?; var what : uint8?) {
-    __::luaG_runerror`va(L, reinterpret<uint8?>("bad 'for' %s (number expected, got %s)"), (what, luaT_objtypename(L, o)))
+    __::luaG_runerror`va(L, cstr("bad 'for' %s (number expected, got %s)"), (what, luaT_objtypename(L, o)))
 }
 
-[c_function]
 def luaG_concaterror(var L : lua_State?; var p1 : TValue?; var p2 : TValue?) {
-    if ((int(p1.tt_) & 15) == 4 || (int(p1.tt_) & 15) == 3) {
+    if ((int(p1.tt_) & 15) == LUA_TSTRING || (int(p1.tt_) & 15) == LUA_TNUMBER) {
         p1 = p2
     }
-    luaG_typeerror(L, p1, reinterpret<uint8?>("concatenate"))
+    luaG_typeerror(L, p1, cstr("concatenate"))
 }
 
 def luaG_opinterror(var L : lua_State?; var p1 : TValue?; var p2 : TValue?; var msg : uint8?) {
     // first operand is wrong?
-    if (!((int(p1.tt_) & 15) == 3)) {
+    if (!((int(p1.tt_) & 15) == LUA_TNUMBER)) {
         // now second is wrong
         p2 = p1
     }
@@ -911,7 +885,7 @@ def luaG_tointerror(var L : lua_State?; var p1 : TValue?; var p2 : TValue?) {
     if (!(luaV_tointegerns(p1, addr(temp), F2Imod.F2Ieq) != 0)) {
         p2 = p1
     }
-    __::luaG_runerror`va(L, reinterpret<uint8?>("number%s has no integer representation"), (varinfo(L, p2),))
+    __::luaG_runerror`va(L, cstr("number%s has no integer representation"), (varinfo(L, p2),))
 }
 
 [c_function]
@@ -919,9 +893,9 @@ def luaG_ordererror(var L : lua_State?; var p1 : TValue?; var p2 : TValue?) {
     var t1 : uint8? = luaT_objtypename(L, p1)
     var t2 : uint8? = luaT_objtypename(L, p2)
     if (crt::strcmp(t1, t2) == 0) {
-        __::luaG_runerror`va(L, reinterpret<uint8?>("attempt to compare two %s values"), (t1,))
+        __::luaG_runerror`va(L, cstr("attempt to compare two %s values"), (t1,))
     } else {
-        __::luaG_runerror`va(L, reinterpret<uint8?>("attempt to compare %s with %s"), (t1, t2))
+        __::luaG_runerror`va(L, cstr("attempt to compare %s with %s"), (t1, t2))
     }
 }
 
@@ -936,13 +910,13 @@ def luaG_addinfo(var L : lua_State?; var msg : uint8?; var src : TString?; line 
         buff[0] = uint8('?')
         buff[1] = uint8('\0')
     }
-    return luaO_pushfstring`va(L, reinterpret<uint8?>("%s:%d: %s"), (addr(buff[0]), line, msg))
+    return luaO_pushfstring`va(L, cstr("%s:%d: %s"), (addr(buff[0]), line, msg))
 }
 
 [c_function]
 def luaG_errormsg(var L : lua_State?) {
     // is there an error handling function?
-    if (L.errfunc != int64(0)) {
+    if (L.errfunc != 0l) {
         var errfunc : StackValue? = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + L.errfunc)
         {
             // move argument
@@ -971,17 +945,15 @@ def luaG_runerror(var L : lua_State?; var fmt : uint8?; va : va_args) {
     var ci : CallInfo? = L.ci
     var msg : uint8?
     var argp : CVaCursor
-    {
-        // error message uses memory
-        if (L.l_G.GCdebt > int64(0)) {
-            lgc::luaC_step(L)
-        }
+    // error message uses memory
+    if (L.l_G.GCdebt > 0l) {
+        lgc::luaC_step(L)
     }
     argp = va_begin(va)
     // format message
     msg = luaO_pushvfstring(L, fmt, argp)
     // if Lua function, add source:line information
-    if (!((int(ci.callstatus) & 1 << 1) != 0)) {
+    if (!((int(ci.callstatus) & CIST_C) != 0)) {
         luaG_addinfo(L, msg, addr(reinterpret<GCUnion?>(addr(ci.func.p.val).value_.gc).cl.l).p.source, getcurrentline(ci))
         {
             // remove 'msg'
@@ -1012,25 +984,23 @@ def private changedline(var p : Proto?; oldpc : int; newpc : int) : int {
         // line difference
         var delta : int = 0
         var pc : int = oldpc
-        {
-            while (true) {
-                pc++
-                var lineinfo : int = int(deref(p.lineinfo + pc))
-                if (lineinfo == ABSLINEINFO) {
-                    // cannot compute delta; fall through
-                    break
-                }
-                delta += lineinfo
-                if (pc == newpc) {
-                    // delta computed successfully
-                    return delta != 0 ? 1 : 0
-                }
+        while (true) {
+            pc++
+            var lineinfo : int = int(p.lineinfo[pc])
+            if (lineinfo == ABSLINEINFO) {
+                // cannot compute delta; fall through
+                break
+            }
+            delta += lineinfo
+            if (pc == newpc) {
+                // delta computed successfully
+                return (delta != 0) ? 1 : 0
             }
         }
     }
     // either instructions are too far apart or there is an absolute line
     // info in the way; compute line difference explicitly
-    return luaG_getfuncline(p, oldpc) != luaG_getfuncline(p, newpc) ? 1 : 0
+    return (luaG_getfuncline(p, oldpc) != luaG_getfuncline(p, newpc)) ? 1 : 0
 }
 
 // Traces Lua calls. If code is running the first instruction of a function,
@@ -1108,7 +1078,7 @@ def luaG_traceexec(var L : lua_State?; var pc : uint?) : int {
         return 1
     }
     // top not being used?
-    if (!((int(luaP_opmodes[int(enum_from_int(type<OpCode>, int(deref(ci.u.l.savedpc - 1) >> 0u & ~(~uint(0) << 7u) << 0u)))]) & 1 << 5) != 0 && int(deref(ci.u.l.savedpc - 1) >> uint(0 + 7 + 8 + 1) & ~(~uint(0) << 8u) << 0u) == 0)) {
+    if (!((int(luaP_opmodes[int(enum_from_int(type<OpCode>, int((deref(ci.u.l.savedpc - 1) >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))))]) & (1 << 5)) != 0 && int((deref(ci.u.l.savedpc - 1) >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u)) == 0)) {
         // correct top
         L.top.p = ci.top.p
     }
@@ -1118,7 +1088,7 @@ def luaG_traceexec(var L : lua_State?; var pc : uint?) : int {
     }
     if ((int(mask) & LUA_MASKLINE) != 0) {
         // 'L->oldpc' may be invalid; use zero in this case
-        var oldpc : int = L.oldpc < p.sizecode ? L.oldpc : 0
+        var oldpc : int = (L.oldpc < p.sizecode) ? L.oldpc : 0
         var npci : int = int(int64(pc - p.code)) - 1
         // call hook when jump back (loop),
         if (npci <= oldpc || changedline(p, oldpc, npci) != 0) {
