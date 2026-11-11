@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_union
+require c_runtime/cstr
 
 enum qboolean {
     _c_false
@@ -1922,8 +1923,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < memsize > (type<quakeparms_t>) == 40, "quakeparms_t.memsize: clang puts it at 40")
 }
 
-var bgmvolume : cvar_s = cvar_s(name = unsafe(reinterpret<uint8?>("bgmvolume")), _c_string = unsafe(reinterpret<uint8?>("1")), archive = qboolean._c_true)
-var volume : cvar_s = cvar_s(name = unsafe(reinterpret<uint8?>("volume")), _c_string = unsafe(reinterpret<uint8?>("0.7")), archive = qboolean._c_true)
+var bgmvolume : cvar_s = cvar_s(name = cstr("bgmvolume"), _c_string = cstr("1"), archive = qboolean._c_true)
+var volume : cvar_s = cvar_s(name = cstr("volume"), _c_string = cstr("0.7"), archive = qboolean._c_true)
 
 def S_Init {
 }

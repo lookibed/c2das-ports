@@ -1935,7 +1935,7 @@ def CRC_Init(var crcvalue : uint16?) {
 
 [c_function]
 def CRC_ProcessByte(var crcvalue : uint16?; data : uint8) {
-    deref(crcvalue) = uint16(int(deref(crcvalue)) << 8 ^ int(crc__crctable[int(deref(crcvalue)) >> 8 ^ int(data)]))
+    deref(crcvalue) = uint16((int(deref(crcvalue)) << 8) ^ int(crc__crctable[(int(deref(crcvalue)) >> 8) ^ int(data)]))
 }
 
 def CRC_Value(crcvalue : uint16) : uint16 {

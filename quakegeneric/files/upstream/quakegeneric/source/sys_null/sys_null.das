@@ -6,6 +6,7 @@ options stack = 8388608
 require c_runtime/c_exit
 require c_runtime/c_function
 require c_runtime/c_union
+require c_runtime/cstr
 require c_runtime/printf
 require c_runtime/variadic
 require crt
@@ -1938,14 +1939,13 @@ var private Sys_FloatTime_t : double
 
 let private MAX_HANDLES = 10
 
-[c_function]
 def findhandle : int {
     for (i in range(1, MAX_HANDLES)) {
         if (!(sys_handles[i] != null)) {
             return i
         }
     }
-    Sys_Error`va(reinterpret<uint8?>("out of handles"), VaNone())
+    Sys_Error`va(cstr("out of handles"), VaNone())
     return -1
 }
 
@@ -1957,7 +1957,7 @@ def filelength(var f : _IO_FILE?) : int {
     var pos : int
     var end : int
     pos = int(crt::ftell(reinterpret<void?>(f)))
-    crt::fseek(reinterpret<void?>(f), int64(0), 2)
+    crt::fseek(reinterpret<void?>(f), 0l, 2)
     end = int(crt::ftell(reinterpret<void?>(f)))
     crt::fseek(reinterpret<void?>(f), int64(pos), 0)
     return end
@@ -1968,7 +1968,7 @@ def Sys_FileOpenRead(var path : uint8?; var hndl : int?) : int {
     var f : _IO_FILE?
     var i : int
     i = findhandle()
-    f = reinterpret<_IO_FILE?>(crt::fopen(path, reinterpret<uint8?>("rb")))
+    f = reinterpret<_IO_FILE?>(crt::fopen(path, cstr("rb")))
     if (!(f != null)) {
         deref(hndl) = -1
         return -1
@@ -1983,9 +1983,9 @@ def Sys_FileOpenWrite(var path : uint8?) : int {
     var f : _IO_FILE?
     var i : int
     i = findhandle()
-    f = reinterpret<_IO_FILE?>(crt::fopen(path, reinterpret<uint8?>("wb")))
+    f = reinterpret<_IO_FILE?>(crt::fopen(path, cstr("wb")))
     if (!(f != null)) {
-        Sys_Error`va(reinterpret<uint8?>("Error opening %s: %s"), (path, crt::strerror(deref(crt::c_errno_location()))))
+        Sys_Error`va(cstr("Error opening %s: %s"), (path, crt::strerror(deref(crt::c_errno_location()))))
     }
     sys_handles[i] = f
     return i
@@ -2004,18 +2004,18 @@ def Sys_FileSeek(handle : int; position : int) {
 
 [c_function]
 def Sys_FileRead(handle : int; var dest : void?; count : int) : int {
-    return int(crt::fread(dest, uint64(1), uint64(count), reinterpret<void?>(sys_handles[handle])))
+    return int(crt::fread(dest, 1ul, uint64(count), reinterpret<void?>(sys_handles[handle])))
 }
 
 [c_function]
 def Sys_FileWrite(handle : int; var data : void?; count : int) : int {
-    return int(crt::fwrite(data, uint64(1), uint64(count), reinterpret<void?>(sys_handles[handle])))
+    return int(crt::fwrite(data, 1ul, uint64(count), reinterpret<void?>(sys_handles[handle])))
 }
 
 [c_function]
 def Sys_FileTime(var path : uint8?) : int {
     var f : _IO_FILE?
-    f = reinterpret<_IO_FILE?>(crt::fopen(path, reinterpret<uint8?>("rb")))
+    f = reinterpret<_IO_FILE?>(crt::fopen(path, cstr("rb")))
     if (f != null) {
         crt::fclose(reinterpret<void?>(f))
         return 1
@@ -2032,10 +2032,10 @@ def Sys_MakeCodeWriteable(startaddr : uint64; length : uint64) {
 [c_function, variadic]
 def Sys_Error(var error : uint8?; va : va_args) {
     var argptr : CVaCursor
-    fprintf(crt::c_stderr(), reinterpret<uint8?>("Sys_Error: "))
+    fprintf(crt::c_stderr(), cstr("Sys_Error: "))
     argptr = va_begin(va)
     c_vfprintf(crt::c_stderr(), error, va_rest(argptr))
-    fprintf(crt::c_stderr(), reinterpret<uint8?>("\n"))
+    fprintf(crt::c_stderr(), cstr("\n"))
     c_exit(1)
 }
 
