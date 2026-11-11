@@ -9,6 +9,7 @@ require c_runtime/c_bounds
 require c_runtime/c_exit
 require c_runtime/c_function
 require c_runtime/c_union
+require c_runtime/cstr
 require c_runtime/enum_from_int
 require c_runtime/printf
 require crt
@@ -1238,96 +1239,96 @@ def private c2das_layout_check {
 
 var s_emulator_state_size : uint64 = uint64(typeinfo sizeof(type<EmulatorState>))
 var private get_cgb_flag_string_s_strings : uint8? [193]
-var private get_sgb_flag_string_s_strings : uint8? [4] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("SGB_FLAG_NONE")), null, null, unsafe(reinterpret<uint8?>("SGB_FLAG_SUPPORTED")))
+var private get_sgb_flag_string_s_strings : uint8? [4] = fixed_array<uint8?>(cstr("SGB_FLAG_NONE"), null, null, cstr("SGB_FLAG_SUPPORTED"))
 var private get_cart_type_string_s_strings : uint8? [256]
-var private get_rom_size_string_s_strings : uint8? [9] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("ROM_SIZE_32K")), unsafe(reinterpret<uint8?>("ROM_SIZE_64K")), unsafe(reinterpret<uint8?>("ROM_SIZE_128K")), unsafe(reinterpret<uint8?>("ROM_SIZE_256K")), unsafe(reinterpret<uint8?>("ROM_SIZE_512K")), unsafe(reinterpret<uint8?>("ROM_SIZE_1M")), unsafe(reinterpret<uint8?>("ROM_SIZE_2M")), unsafe(reinterpret<uint8?>("ROM_SIZE_4M")), unsafe(reinterpret<uint8?>("ROM_SIZE_8M")))
-var private get_ext_ram_size_string_s_strings : uint8? [6] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("EXT_RAM_SIZE_NONE")), unsafe(reinterpret<uint8?>("EXT_RAM_SIZE_2K")), unsafe(reinterpret<uint8?>("EXT_RAM_SIZE_8K")), unsafe(reinterpret<uint8?>("EXT_RAM_SIZE_32K")), unsafe(reinterpret<uint8?>("EXT_RAM_SIZE_128K")), unsafe(reinterpret<uint8?>("EXT_RAM_SIZE_64K")))
+var private get_rom_size_string_s_strings : uint8? [9] = fixed_array<uint8?>(cstr("ROM_SIZE_32K"), cstr("ROM_SIZE_64K"), cstr("ROM_SIZE_128K"), cstr("ROM_SIZE_256K"), cstr("ROM_SIZE_512K"), cstr("ROM_SIZE_1M"), cstr("ROM_SIZE_2M"), cstr("ROM_SIZE_4M"), cstr("ROM_SIZE_8M"))
+var private get_ext_ram_size_string_s_strings : uint8? [6] = fixed_array<uint8?>(cstr("EXT_RAM_SIZE_NONE"), cstr("EXT_RAM_SIZE_2K"), cstr("EXT_RAM_SIZE_8K"), cstr("EXT_RAM_SIZE_32K"), cstr("EXT_RAM_SIZE_128K"), cstr("EXT_RAM_SIZE_64K"))
 var private get_io_reg_string_s_strings : uint8? [256]
-var private get_apu_reg_string_s_strings : uint8? [23] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("NR10")), unsafe(reinterpret<uint8?>("NR11")), unsafe(reinterpret<uint8?>("NR12")), unsafe(reinterpret<uint8?>("NR13")), unsafe(reinterpret<uint8?>("NR14")), null, unsafe(reinterpret<uint8?>("NR21")), unsafe(reinterpret<uint8?>("NR22")), unsafe(reinterpret<uint8?>("NR23")), unsafe(reinterpret<uint8?>("NR24")), unsafe(reinterpret<uint8?>("NR30")), unsafe(reinterpret<uint8?>("NR31")), unsafe(reinterpret<uint8?>("NR32")), unsafe(reinterpret<uint8?>("NR33")), unsafe(reinterpret<uint8?>("NR34")), null, unsafe(reinterpret<uint8?>("NR41")), unsafe(reinterpret<uint8?>("NR42")), unsafe(reinterpret<uint8?>("NR43")), unsafe(reinterpret<uint8?>("NR44")), unsafe(reinterpret<uint8?>("NR50")), unsafe(reinterpret<uint8?>("NR51")), unsafe(reinterpret<uint8?>("NR52")))
-var private get_ppu_mode_string_s_strings : uint8? [4] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("PPU_MODE_HBLANK")), unsafe(reinterpret<uint8?>("PPU_MODE_VBLANK")), unsafe(reinterpret<uint8?>("PPU_MODE_MODE2")), unsafe(reinterpret<uint8?>("PPU_MODE_MODE3")))
-var private get_ppu_state_string_s_strings : uint8? [12] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("PPU_STATE_HBLANK")), unsafe(reinterpret<uint8?>("PPU_STATE_HBLANK_PLUS_4")), unsafe(reinterpret<uint8?>("PPU_STATE_VBLANK")), unsafe(reinterpret<uint8?>("PPU_STATE_VBLANK_PLUS_4")), unsafe(reinterpret<uint8?>("PPU_STATE_VBLANK_LY_0")), unsafe(reinterpret<uint8?>("PPU_STATE_VBLANK_LY_0_PLUS_4")), unsafe(reinterpret<uint8?>("PPU_STATE_VBLANK_LINE_Y_0")), unsafe(reinterpret<uint8?>("PPU_STATE_LCD_ON_MODE2")), unsafe(reinterpret<uint8?>("PPU_STATE_MODE2")), unsafe(reinterpret<uint8?>("PPU_STATE_MODE3_EARLY_TRIGGER")), unsafe(reinterpret<uint8?>("PPU_STATE_MODE3")), unsafe(reinterpret<uint8?>("PPU_STATE_MODE3_COMMON")))
-var private binjgb_all__s_rom_bank_count : uint[9] = fixed_array(uint(2), uint(4), uint(8), uint(16), uint(32), uint(64), uint(128), uint(256), uint(512))
-var private binjgb_all__s_ext_ram_byte_size : uint[6] = fixed_array(uint(0), uint(uint64(2) * uint64(1024)), uint(uint64(8) * uint64(1024)), uint(uint64(32) * uint64(1024)), uint(uint64(128) * uint64(1024)), uint(uint64(64) * uint64(1024)))
+var private get_apu_reg_string_s_strings : uint8? [23] = fixed_array<uint8?>(cstr("NR10"), cstr("NR11"), cstr("NR12"), cstr("NR13"), cstr("NR14"), null, cstr("NR21"), cstr("NR22"), cstr("NR23"), cstr("NR24"), cstr("NR30"), cstr("NR31"), cstr("NR32"), cstr("NR33"), cstr("NR34"), null, cstr("NR41"), cstr("NR42"), cstr("NR43"), cstr("NR44"), cstr("NR50"), cstr("NR51"), cstr("NR52"))
+var private get_ppu_mode_string_s_strings : uint8? [4] = fixed_array<uint8?>(cstr("PPU_MODE_HBLANK"), cstr("PPU_MODE_VBLANK"), cstr("PPU_MODE_MODE2"), cstr("PPU_MODE_MODE3"))
+var private get_ppu_state_string_s_strings : uint8? [12] = fixed_array<uint8?>(cstr("PPU_STATE_HBLANK"), cstr("PPU_STATE_HBLANK_PLUS_4"), cstr("PPU_STATE_VBLANK"), cstr("PPU_STATE_VBLANK_PLUS_4"), cstr("PPU_STATE_VBLANK_LY_0"), cstr("PPU_STATE_VBLANK_LY_0_PLUS_4"), cstr("PPU_STATE_VBLANK_LINE_Y_0"), cstr("PPU_STATE_LCD_ON_MODE2"), cstr("PPU_STATE_MODE2"), cstr("PPU_STATE_MODE3_EARLY_TRIGGER"), cstr("PPU_STATE_MODE3"), cstr("PPU_STATE_MODE3_COMMON"))
+var private binjgb_all__s_rom_bank_count : uint[9] = fixed_array(2u, 4u, 8u, 16u, 32u, 64u, 128u, 256u, 512u)
+var private binjgb_all__s_ext_ram_byte_size : uint[6] = fixed_array(0u, uint(2ul * 1024ul), uint(8ul * 1024ul), uint(32ul * 1024ul), uint(128ul * 1024ul), uint(64ul * 1024ul))
 var private binjgb_all__s_cart_type_info : CartTypeInfo[256]
 var private binjgb_all__s_tima_mask : uint16[4] = fixed_array(uint16(1 << 9), uint16(1 << 3), uint16(1 << 5), uint16(1 << 7))
-var private binjgb_all__s_wave_volume_shift : uint8[int(WaveVolume.WAVE_VOLUME_COUNT)] = fixed_array(uint8(4), uint8(0), uint8(1), uint8(2))
-var private binjgb_all__s_obj_size_to_height : uint8[2] = fixed_array(uint8(8), uint8(16))
-var private unpack_cgb_color_curve : uint8[32] = fixed_array(uint8(0), uint8(6), uint8(12), uint8(20), uint8(28), uint8(36), uint8(45), uint8(56), uint8(66), uint8(76), uint8(88), uint8(100), uint8(113), uint8(125), uint8(137), uint8(149), uint8(161), uint8(172), uint8(182), uint8(192), uint8(202), uint8(210), uint8(218), uint8(225), uint8(232), uint8(238), uint8(243), uint8(247), uint8(250), uint8(252), uint8(254), uint8(255))
+var private binjgb_all__s_wave_volume_shift : uint8[int(WaveVolume.WAVE_VOLUME_COUNT)] = fixed_array(4u8, 0u8, 1u8, 2u8)
+var private binjgb_all__s_obj_size_to_height : uint8[2] = fixed_array(8u8, 16u8)
+var private unpack_cgb_color_curve : uint8[32] = fixed_array(0u8, 6u8, 12u8, 20u8, 28u8, 36u8, 45u8, 56u8, 66u8, 76u8, 88u8, 100u8, 113u8, 125u8, 137u8, 149u8, 161u8, 172u8, 182u8, 192u8, 202u8, 210u8, 218u8, 225u8, 232u8, 238u8, 243u8, 247u8, 250u8, 252u8, 254u8, 255u8)
 var private do_sgb_s_temp_xfer_buffer : uint8[4096]
 var private do_sgb_s_pals : anon_466[4] = fixed_array(anon_466(pal0 = 0, pal1 = 1), anon_466(pal0 = 2, pal1 = 3), anon_466(pal0 = 0, pal1 = 3), anon_466(pal0 = 1, pal1 = 2))
-var private write_noise_period_s_divisors : uint8[8] = fixed_array(uint8(8), uint8(16), uint8(32), uint8(48), uint8(64), uint8(80), uint8(96), uint8(112))
+var private write_noise_period_s_divisors : uint8[8] = fixed_array(8u8, 16u8, 32u8, 48u8, 64u8, 80u8, 96u8, 112u8)
 var private ppu_mode3_synchronize_s_dummy_frame_buffer_line : uint[160]
-var private update_square_wave_duty : uint8[int(WaveDuty.WAVE_DUTY_COUNT)][8] = fixed_array(fixed_array(uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(1)), fixed_array(uint8(1), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(1)), fixed_array(uint8(1), uint8(0), uint8(0), uint8(0), uint8(0), uint8(1), uint8(1), uint8(1)), fixed_array(uint8(0), uint8(1), uint8(1), uint8(1), uint8(1), uint8(1), uint8(1), uint8(0)))
-var private get_result_string_s_strings : uint8? [2] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("OK")), unsafe(reinterpret<uint8?>("ERROR")))
-var private init_emulator_s_initial_wave_ram : uint8[16] = fixed_array(uint8(96), uint8(13), uint8(218), uint8(221), uint8(80), uint8(15), uint8(173), uint8(237), uint8(192), uint8(222), uint8(240), uint8(13), uint8(190), uint8(239), uint8(254), uint8(237))
+var private update_square_wave_duty : uint8[int(WaveDuty.WAVE_DUTY_COUNT)][8] = fixed_array(fixed_array(0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8), fixed_array(1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8), fixed_array(1u8, 0u8, 0u8, 0u8, 0u8, 1u8, 1u8, 1u8), fixed_array(0u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 0u8))
+var private get_result_string_s_strings : uint8? [2] = fixed_array<uint8?>(cstr("OK"), cstr("ERROR"))
+var private init_emulator_s_initial_wave_ram : uint8[16] = fixed_array(96u8, 13u8, 218u8, 221u8, 80u8, 15u8, 173u8, 237u8, 192u8, 222u8, 240u8, 13u8, 190u8, 239u8, 254u8, 237u8)
 var private emulator_set_builtin_palette_pals : PaletteRGBA[84][3] = fixed_array(fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4289374890u, 4283782485u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4289374890u, 4283782485u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4289374890u, 4283782485u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4278255442u, 4278207231u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278255442u, 4278207231u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278255442u, 4278207231u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4278255615u, 4278190335u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278255615u, 4278190335u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278255615u, 4278190335u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4278190080u, 4286874624u, 4278247167u, 4294967295u)), PaletteRGBA(color = fixed_array(4278190080u, 4286874624u, 4278247167u, 4294967295u)), PaletteRGBA(color = fixed_array(4278190080u, 4286874624u, 4278247167u, 4294967295u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4289045925u, 4283585106u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4289045925u, 4283585106u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4289045925u, 4283585106u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4289069055u, 4287927551u, 4294939796u, 4278190080u)), PaletteRGBA(color = fixed_array(4289069055u, 4287927551u, 4294939796u, 4278190080u)), PaletteRGBA(color = fixed_array(4289069055u, 4287927551u, 4294939796u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4291159807u, 4286880974u, 4280904580u, 4278727002u)), PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4291126016u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4292775052u, 4287386194u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4278223872u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4278223872u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4278255615u, 4278209147u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4278223872u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4278230271u, 4278190335u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278230271u, 4278190335u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278230271u, 4278190335u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4278255615u, 4278190335u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278255615u, 4278190335u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278255615u, 4278190335u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294941861u, 4278255615u, 4278215424u, 4278190080u)), PaletteRGBA(color = fixed_array(4294941861u, 4278255615u, 4278215424u, 4278190080u)), PaletteRGBA(color = fixed_array(4294941861u, 4278255615u, 4278215424u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4278190080u, 4286874624u, 4278247167u, 4294967295u)), PaletteRGBA(color = fixed_array(4278190080u, 4286874624u, 4278247167u, 4294967295u)), PaletteRGBA(color = fixed_array(4278190080u, 4286874624u, 4278247167u, 4294967295u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4289045925u, 4283585106u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4289045925u, 4283585106u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4289045925u, 4283585106u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4278243071u, 4278215580u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278243071u, 4278215580u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278243071u, 4278215580u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4286885293u, 4286280514u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278219775u, 4278207124u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286885293u, 4286280514u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4292775052u, 4287386194u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4292775052u, 4287386194u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4278223872u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4291126016u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4291126016u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4292775052u, 4287386194u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4292775052u, 4287386194u, 4278190080u)), PaletteRGBA(color = fixed_array(4282566143u, 4278245119u, 4278205076u, 4278190154u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4286885293u, 4286280514u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278219775u, 4278207124u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278219775u, 4278207124u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4278255483u, 4278219701u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4278255442u, 4278207231u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4278230271u, 4278190335u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294941861u, 4278255615u, 4278215424u, 4278190080u)), PaletteRGBA(color = fixed_array(4283589631u, 4278190294u, 4278190179u, 4278190080u)), PaletteRGBA(color = fixed_array(4283589631u, 4278190294u, 4278190179u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294948277u, 4287954943u, 4282538669u, 4278190080u)), PaletteRGBA(color = fixed_array(4278190080u, 4294967295u, 4286874879u, 4282006164u)), PaletteRGBA(color = fixed_array(4278190080u, 4294967295u, 4286874879u, 4282006164u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4292775052u, 4287386194u, 4278190080u)), PaletteRGBA(color = fixed_array(4282566143u, 4278245119u, 4278205076u, 4278190154u)), PaletteRGBA(color = fixed_array(4282566143u, 4278245119u, 4278205076u, 4278190154u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4292775052u, 4287386194u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4278223872u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4278223872u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4278223872u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4291126016u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4291126016u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4278255442u, 4278207231u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278255442u, 4278207231u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294950234u, 4278190335u, 4294901760u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4278230271u, 4278190335u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278230271u, 4278190335u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294950234u, 4278190335u, 4294901760u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4278255615u, 4278190335u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278255615u, 4278190335u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294950234u, 4278190335u, 4294901760u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4286885293u, 4286280514u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278219775u, 4278207124u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294950234u, 4278190335u, 4294901760u))), fixed_array(PaletteRGBA(color = fixed_array(4288479231u, 4294948244u, 4285764707u, 4282006016u)), PaletteRGBA(color = fixed_array(4282566143u, 4278245119u, 4278205076u, 4278190154u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4278255467u, 4294967295u, 4283060991u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294967295u, 4294944099u, 4294901760u)), PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4278246994u, 4278224127u, 4278255615u, 4294967295u)), PaletteRGBA(color = fixed_array(4294967295u, 4294967295u, 4294944099u, 4294901760u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294941861u, 4278255615u, 4278215424u, 4278190080u)), PaletteRGBA(color = fixed_array(4283589631u, 4278190294u, 4278190179u, 4278190080u)), PaletteRGBA(color = fixed_array(4294901760u, 4294967295u, 4286316543u, 4294935552u))), fixed_array(PaletteRGBA(color = fixed_array(4291756031u, 4293914467u, 4281435292u, 4284111450u)), PaletteRGBA(color = fixed_array(4294967295u, 4278219775u, 4278207124u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286316543u, 4294935552u, 4278190335u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4292775052u, 4287386194u, 4278190080u)), PaletteRGBA(color = fixed_array(4282566143u, 4278245119u, 4278205076u, 4278190154u)), PaletteRGBA(color = fixed_array(4294967295u, 4294950234u, 4278190335u, 4294901760u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4292775052u, 4287386194u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4278223872u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4278223872u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4278255360u, 4278223921u, 4278209024u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4278223872u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u)), PaletteRGBA(color = fixed_array(4278255615u, 4278190335u, 4278190179u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4278223872u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4286885293u, 4286280514u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4284722687u, 4278202756u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294967295u, 4281466747u, 4291126016u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4286874879u, 4282006164u, 4278190080u)), PaletteRGBA(color = fixed_array(4294967295u, 4294944099u, 4294901760u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4293194722u, 4282704788u, 4287596358u, 4283444275u)), PaletteRGBA(color = fixed_array(4293194722u, 4282704788u, 4287596358u, 4283444275u)), PaletteRGBA(color = fixed_array(4293194722u, 4282704788u, 4287596358u, 4283444275u))), fixed_array(PaletteRGBA(color = fixed_array(4290117631u, 4286301819u, 4282551403u, 4280367450u)), PaletteRGBA(color = fixed_array(4290117631u, 4286301819u, 4282551403u, 4280367450u)), PaletteRGBA(color = fixed_array(4290117631u, 4286301819u, 4282551403u, 4280367450u))), fixed_array(PaletteRGBA(color = fixed_array(4291225591u, 4283010774u, 4280629158u, 4283440691u)), PaletteRGBA(color = fixed_array(4291225591u, 4283010774u, 4280629158u, 4283440691u)), PaletteRGBA(color = fixed_array(4291225591u, 4283010774u, 4280629158u, 4283440691u))), fixed_array(PaletteRGBA(color = fixed_array(4291885280u, 4285579400u, 4283852852u, 4280293384u)), PaletteRGBA(color = fixed_array(4291885280u, 4285579400u, 4283852852u, 4280293384u)), PaletteRGBA(color = fixed_array(4291885280u, 4285579400u, 4283852852u, 4280293384u))), fixed_array(PaletteRGBA(color = fixed_array(4294963199u, 4287411703u, 4288443268u, 4279242776u)), PaletteRGBA(color = fixed_array(4294963199u, 4287411703u, 4288443268u, 4279242776u)), PaletteRGBA(color = fixed_array(4294963199u, 4287411703u, 4288443268u, 4279242776u))), fixed_array(PaletteRGBA(color = fixed_array(4290962687u, 4283868380u, 4283195561u, 4281739586u)), PaletteRGBA(color = fixed_array(4290962687u, 4283868380u, 4283195561u, 4281739586u)), PaletteRGBA(color = fixed_array(4290962687u, 4283868380u, 4283195561u, 4281739586u))), fixed_array(PaletteRGBA(color = fixed_array(4291743438u, 4292845167u, 4287522626u, 4281541904u)), PaletteRGBA(color = fixed_array(4291743438u, 4292845167u, 4287522626u, 4281541904u)), PaletteRGBA(color = fixed_array(4291743438u, 4292845167u, 4287522626u, 4281541904u))), fixed_array(PaletteRGBA(color = fixed_array(4292081407u, 4285901049u, 4285492203u, 4283973500u)), PaletteRGBA(color = fixed_array(4292081407u, 4285901049u, 4285492203u, 4283973500u)), PaletteRGBA(color = fixed_array(4292081407u, 4285901049u, 4285492203u, 4283973500u))), fixed_array(PaletteRGBA(color = fixed_array(4290965700u, 4289247578u, 4285423646u, 4278197037u)), PaletteRGBA(color = fixed_array(4290965700u, 4289247578u, 4285423646u, 4278197037u)), PaletteRGBA(color = fixed_array(4290965700u, 4289247578u, 4285423646u, 4278197037u))), fixed_array(PaletteRGBA(color = fixed_array(4285248940u, 4282942582u, 4282339391u, 4281807140u)), PaletteRGBA(color = fixed_array(4285248940u, 4282942582u, 4282339391u, 4281807140u)), PaletteRGBA(color = fixed_array(4285248940u, 4282942582u, 4282339391u, 4281807140u))), fixed_array(PaletteRGBA(color = fixed_array(4288787693u, 4285032617u, 4284630134u, 4281803052u)), PaletteRGBA(color = fixed_array(4288787693u, 4285032617u, 4284630134u, 4281803052u)), PaletteRGBA(color = fixed_array(4288787693u, 4285032617u, 4284630134u, 4281803052u))), fixed_array(PaletteRGBA(color = fixed_array(4292736511u, 4285248244u, 4287718839u, 4285278565u)), PaletteRGBA(color = fixed_array(4292736511u, 4285248244u, 4287718839u, 4285278565u)), PaletteRGBA(color = fixed_array(4292736511u, 4285248244u, 4287718839u, 4285278565u))), fixed_array(PaletteRGBA(color = fixed_array(4294426359u, 4287006439u, 4293342071u, 4288031788u)), PaletteRGBA(color = fixed_array(4294426359u, 4287006439u, 4293342071u, 4288031788u)), PaletteRGBA(color = fixed_array(4294426359u, 4287006439u, 4293342071u, 4288031788u))), fixed_array(PaletteRGBA(color = fixed_array(4279665790u, 4282809175u, 4282998072u, 4282205742u)), PaletteRGBA(color = fixed_array(4279665790u, 4282809175u, 4282998072u, 4282205742u)), PaletteRGBA(color = fixed_array(4279665790u, 4282809175u, 4282998072u, 4282205742u))), fixed_array(PaletteRGBA(color = fixed_array(4290834147u, 4287216302u, 4282738526u, 4280295456u)), PaletteRGBA(color = fixed_array(4290834147u, 4287216302u, 4282738526u, 4280295456u)), PaletteRGBA(color = fixed_array(4290834147u, 4287216302u, 4282738526u, 4280295456u))), fixed_array(PaletteRGBA(color = fixed_array(4290049243u, 4288070571u, 4286091899u, 4284113484u)), PaletteRGBA(color = fixed_array(4290049243u, 4288070571u, 4286091899u, 4284113484u)), PaletteRGBA(color = fixed_array(4290049243u, 4288070571u, 4286091899u, 4284113484u))), fixed_array(PaletteRGBA(color = fixed_array(4288794564u, 4285371787u, 4282143565u, 4280229663u)), PaletteRGBA(color = fixed_array(4288794564u, 4285371787u, 4282143565u, 4280229663u)), PaletteRGBA(color = fixed_array(4288794564u, 4285371787u, 4282143565u, 4280229663u))), fixed_array(PaletteRGBA(color = fixed_array(4280213422u, 4283966902u, 4284513796u, 4278196012u)), PaletteRGBA(color = fixed_array(4280213422u, 4283966902u, 4284513796u, 4278196012u)), PaletteRGBA(color = fixed_array(4280213422u, 4283966902u, 4284513796u, 4278196012u))), fixed_array(PaletteRGBA(color = fixed_array(4287426465u, 4287999039u, 4285948228u, 4281803052u)), PaletteRGBA(color = fixed_array(4287426465u, 4287999039u, 4285948228u, 4281803052u)), PaletteRGBA(color = fixed_array(4287426465u, 4287999039u, 4285948228u, 4281803052u))), fixed_array(PaletteRGBA(color = fixed_array(4294174951u, 4291003276u, 4287581539u, 4279831314u)), PaletteRGBA(color = fixed_array(4294174951u, 4291003276u, 4287581539u, 4279831314u)), PaletteRGBA(color = fixed_array(4294174951u, 4291003276u, 4287581539u, 4279831314u))), fixed_array(PaletteRGBA(color = fixed_array(4294440910u, 4283469559u, 4278190238u, 4278190110u)), PaletteRGBA(color = fixed_array(4294440910u, 4283469559u, 4278190238u, 4278190110u)), PaletteRGBA(color = fixed_array(4294440910u, 4283469559u, 4278190238u, 4278190110u))), fixed_array(PaletteRGBA(color = fixed_array(4286045675u, 4278238369u, 4281567245u, 4281549568u)), PaletteRGBA(color = fixed_array(4286045675u, 4278238369u, 4281567245u, 4281549568u)), PaletteRGBA(color = fixed_array(4286045675u, 4278238369u, 4281567245u, 4281549568u))), fixed_array(PaletteRGBA(color = fixed_array(4290181103u, 4286031583u, 4278240785u, 4278190080u)), PaletteRGBA(color = fixed_array(4290181103u, 4286031583u, 4278240785u, 4278190080u)), PaletteRGBA(color = fixed_array(4290181103u, 4286031583u, 4278240785u, 4278190080u))), fixed_array(PaletteRGBA(color = fixed_array(4294960523u, 4291792736u, 4293415029u, 4283182690u)), PaletteRGBA(color = fixed_array(4294960523u, 4291792736u, 4293415029u, 4283182690u)), PaletteRGBA(color = fixed_array(4294960523u, 4291792736u, 4293415029u, 4283182690u))), fixed_array(PaletteRGBA(color = fixed_array(4292804591u, 4287944621u, 4285764178u, 4282528792u)), PaletteRGBA(color = fixed_array(4292804591u, 4287944621u, 4285764178u, 4282528792u)), PaletteRGBA(color = fixed_array(4292804591u, 4287944621u, 4285764178u, 4282528792u))))
 var private binjgb_all__gb_live_buttons : JoypadButtons
 
 [init]
 def private c2das_init_globals {
-    get_cgb_flag_string_s_strings[0] = unsafe(reinterpret<uint8?>("CGB_FLAG_NONE"))
-    get_cgb_flag_string_s_strings[128] = unsafe(reinterpret<uint8?>("CGB_FLAG_SUPPORTED"))
-    get_cgb_flag_string_s_strings[192] = unsafe(reinterpret<uint8?>("CGB_FLAG_REQUIRED"))
-    get_cart_type_string_s_strings[0] = unsafe(reinterpret<uint8?>("CART_TYPE_ROM_ONLY"))
-    get_cart_type_string_s_strings[1] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC1"))
-    get_cart_type_string_s_strings[2] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC1_RAM"))
-    get_cart_type_string_s_strings[3] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC1_RAM_BATTERY"))
-    get_cart_type_string_s_strings[5] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC2"))
-    get_cart_type_string_s_strings[6] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC2_BATTERY"))
-    get_cart_type_string_s_strings[8] = unsafe(reinterpret<uint8?>("CART_TYPE_ROM_RAM"))
-    get_cart_type_string_s_strings[9] = unsafe(reinterpret<uint8?>("CART_TYPE_ROM_RAM_BATTERY"))
-    get_cart_type_string_s_strings[11] = unsafe(reinterpret<uint8?>("CART_TYPE_MMM01"))
-    get_cart_type_string_s_strings[12] = unsafe(reinterpret<uint8?>("CART_TYPE_MMM01_RAM"))
-    get_cart_type_string_s_strings[13] = unsafe(reinterpret<uint8?>("CART_TYPE_MMM01_RAM_BATTERY"))
-    get_cart_type_string_s_strings[15] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC3_TIMER_BATTERY"))
-    get_cart_type_string_s_strings[16] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC3_TIMER_RAM_BATTERY"))
-    get_cart_type_string_s_strings[17] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC3"))
-    get_cart_type_string_s_strings[18] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC3_RAM"))
-    get_cart_type_string_s_strings[19] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC3_RAM_BATTERY"))
-    get_cart_type_string_s_strings[25] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC5"))
-    get_cart_type_string_s_strings[26] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC5_RAM"))
-    get_cart_type_string_s_strings[27] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC5_RAM_BATTERY"))
-    get_cart_type_string_s_strings[28] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC5_RUMBLE"))
-    get_cart_type_string_s_strings[29] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC5_RUMBLE_RAM"))
-    get_cart_type_string_s_strings[30] = unsafe(reinterpret<uint8?>("CART_TYPE_MBC5_RUMBLE_RAM_BATTERY"))
-    get_cart_type_string_s_strings[252] = unsafe(reinterpret<uint8?>("CART_TYPE_POCKET_CAMERA"))
-    get_cart_type_string_s_strings[253] = unsafe(reinterpret<uint8?>("CART_TYPE_BANDAI_TAMA5"))
-    get_cart_type_string_s_strings[254] = unsafe(reinterpret<uint8?>("CART_TYPE_HUC3"))
-    get_cart_type_string_s_strings[255] = unsafe(reinterpret<uint8?>("CART_TYPE_HUC1_RAM_BATTERY"))
-    get_io_reg_string_s_strings[0] = unsafe(reinterpret<uint8?>("JOYP"))
-    get_io_reg_string_s_strings[1] = unsafe(reinterpret<uint8?>("SB"))
-    get_io_reg_string_s_strings[2] = unsafe(reinterpret<uint8?>("SC"))
-    get_io_reg_string_s_strings[4] = unsafe(reinterpret<uint8?>("DIV"))
-    get_io_reg_string_s_strings[5] = unsafe(reinterpret<uint8?>("TIMA"))
-    get_io_reg_string_s_strings[6] = unsafe(reinterpret<uint8?>("TMA"))
-    get_io_reg_string_s_strings[7] = unsafe(reinterpret<uint8?>("TAC"))
-    get_io_reg_string_s_strings[15] = unsafe(reinterpret<uint8?>("IF"))
-    get_io_reg_string_s_strings[64] = unsafe(reinterpret<uint8?>("LCDC"))
-    get_io_reg_string_s_strings[65] = unsafe(reinterpret<uint8?>("STAT"))
-    get_io_reg_string_s_strings[66] = unsafe(reinterpret<uint8?>("SCY"))
-    get_io_reg_string_s_strings[67] = unsafe(reinterpret<uint8?>("SCX"))
-    get_io_reg_string_s_strings[68] = unsafe(reinterpret<uint8?>("LY"))
-    get_io_reg_string_s_strings[69] = unsafe(reinterpret<uint8?>("LYC"))
-    get_io_reg_string_s_strings[70] = unsafe(reinterpret<uint8?>("DMA"))
-    get_io_reg_string_s_strings[71] = unsafe(reinterpret<uint8?>("BGP"))
-    get_io_reg_string_s_strings[72] = unsafe(reinterpret<uint8?>("OBP0"))
-    get_io_reg_string_s_strings[73] = unsafe(reinterpret<uint8?>("OBP1"))
-    get_io_reg_string_s_strings[74] = unsafe(reinterpret<uint8?>("WY"))
-    get_io_reg_string_s_strings[75] = unsafe(reinterpret<uint8?>("WX"))
-    get_io_reg_string_s_strings[77] = unsafe(reinterpret<uint8?>("KEY1"))
-    get_io_reg_string_s_strings[79] = unsafe(reinterpret<uint8?>("VBK"))
-    get_io_reg_string_s_strings[81] = unsafe(reinterpret<uint8?>("HDMA1"))
-    get_io_reg_string_s_strings[82] = unsafe(reinterpret<uint8?>("HDMA2"))
-    get_io_reg_string_s_strings[83] = unsafe(reinterpret<uint8?>("HDMA3"))
-    get_io_reg_string_s_strings[84] = unsafe(reinterpret<uint8?>("HDMA4"))
-    get_io_reg_string_s_strings[85] = unsafe(reinterpret<uint8?>("HDMA5"))
-    get_io_reg_string_s_strings[86] = unsafe(reinterpret<uint8?>("RP"))
-    get_io_reg_string_s_strings[104] = unsafe(reinterpret<uint8?>("BCPS"))
-    get_io_reg_string_s_strings[105] = unsafe(reinterpret<uint8?>("BCPD"))
-    get_io_reg_string_s_strings[106] = unsafe(reinterpret<uint8?>("OCPS"))
-    get_io_reg_string_s_strings[107] = unsafe(reinterpret<uint8?>("OCPD"))
-    get_io_reg_string_s_strings[112] = unsafe(reinterpret<uint8?>("SVBK"))
-    get_io_reg_string_s_strings[255] = unsafe(reinterpret<uint8?>("IE"))
+    get_cgb_flag_string_s_strings[0] = cstr("CGB_FLAG_NONE")
+    get_cgb_flag_string_s_strings[128] = cstr("CGB_FLAG_SUPPORTED")
+    get_cgb_flag_string_s_strings[192] = cstr("CGB_FLAG_REQUIRED")
+    get_cart_type_string_s_strings[0] = cstr("CART_TYPE_ROM_ONLY")
+    get_cart_type_string_s_strings[1] = cstr("CART_TYPE_MBC1")
+    get_cart_type_string_s_strings[2] = cstr("CART_TYPE_MBC1_RAM")
+    get_cart_type_string_s_strings[3] = cstr("CART_TYPE_MBC1_RAM_BATTERY")
+    get_cart_type_string_s_strings[5] = cstr("CART_TYPE_MBC2")
+    get_cart_type_string_s_strings[6] = cstr("CART_TYPE_MBC2_BATTERY")
+    get_cart_type_string_s_strings[8] = cstr("CART_TYPE_ROM_RAM")
+    get_cart_type_string_s_strings[9] = cstr("CART_TYPE_ROM_RAM_BATTERY")
+    get_cart_type_string_s_strings[11] = cstr("CART_TYPE_MMM01")
+    get_cart_type_string_s_strings[12] = cstr("CART_TYPE_MMM01_RAM")
+    get_cart_type_string_s_strings[13] = cstr("CART_TYPE_MMM01_RAM_BATTERY")
+    get_cart_type_string_s_strings[15] = cstr("CART_TYPE_MBC3_TIMER_BATTERY")
+    get_cart_type_string_s_strings[16] = cstr("CART_TYPE_MBC3_TIMER_RAM_BATTERY")
+    get_cart_type_string_s_strings[17] = cstr("CART_TYPE_MBC3")
+    get_cart_type_string_s_strings[18] = cstr("CART_TYPE_MBC3_RAM")
+    get_cart_type_string_s_strings[19] = cstr("CART_TYPE_MBC3_RAM_BATTERY")
+    get_cart_type_string_s_strings[25] = cstr("CART_TYPE_MBC5")
+    get_cart_type_string_s_strings[26] = cstr("CART_TYPE_MBC5_RAM")
+    get_cart_type_string_s_strings[27] = cstr("CART_TYPE_MBC5_RAM_BATTERY")
+    get_cart_type_string_s_strings[28] = cstr("CART_TYPE_MBC5_RUMBLE")
+    get_cart_type_string_s_strings[29] = cstr("CART_TYPE_MBC5_RUMBLE_RAM")
+    get_cart_type_string_s_strings[30] = cstr("CART_TYPE_MBC5_RUMBLE_RAM_BATTERY")
+    get_cart_type_string_s_strings[252] = cstr("CART_TYPE_POCKET_CAMERA")
+    get_cart_type_string_s_strings[253] = cstr("CART_TYPE_BANDAI_TAMA5")
+    get_cart_type_string_s_strings[254] = cstr("CART_TYPE_HUC3")
+    get_cart_type_string_s_strings[255] = cstr("CART_TYPE_HUC1_RAM_BATTERY")
+    get_io_reg_string_s_strings[0] = cstr("JOYP")
+    get_io_reg_string_s_strings[1] = cstr("SB")
+    get_io_reg_string_s_strings[2] = cstr("SC")
+    get_io_reg_string_s_strings[4] = cstr("DIV")
+    get_io_reg_string_s_strings[5] = cstr("TIMA")
+    get_io_reg_string_s_strings[6] = cstr("TMA")
+    get_io_reg_string_s_strings[7] = cstr("TAC")
+    get_io_reg_string_s_strings[15] = cstr("IF")
+    get_io_reg_string_s_strings[64] = cstr("LCDC")
+    get_io_reg_string_s_strings[65] = cstr("STAT")
+    get_io_reg_string_s_strings[66] = cstr("SCY")
+    get_io_reg_string_s_strings[67] = cstr("SCX")
+    get_io_reg_string_s_strings[68] = cstr("LY")
+    get_io_reg_string_s_strings[69] = cstr("LYC")
+    get_io_reg_string_s_strings[70] = cstr("DMA")
+    get_io_reg_string_s_strings[71] = cstr("BGP")
+    get_io_reg_string_s_strings[72] = cstr("OBP0")
+    get_io_reg_string_s_strings[73] = cstr("OBP1")
+    get_io_reg_string_s_strings[74] = cstr("WY")
+    get_io_reg_string_s_strings[75] = cstr("WX")
+    get_io_reg_string_s_strings[77] = cstr("KEY1")
+    get_io_reg_string_s_strings[79] = cstr("VBK")
+    get_io_reg_string_s_strings[81] = cstr("HDMA1")
+    get_io_reg_string_s_strings[82] = cstr("HDMA2")
+    get_io_reg_string_s_strings[83] = cstr("HDMA3")
+    get_io_reg_string_s_strings[84] = cstr("HDMA4")
+    get_io_reg_string_s_strings[85] = cstr("HDMA5")
+    get_io_reg_string_s_strings[86] = cstr("RP")
+    get_io_reg_string_s_strings[104] = cstr("BCPS")
+    get_io_reg_string_s_strings[105] = cstr("BCPD")
+    get_io_reg_string_s_strings[106] = cstr("OCPS")
+    get_io_reg_string_s_strings[107] = cstr("OCPD")
+    get_io_reg_string_s_strings[112] = cstr("SVBK")
+    get_io_reg_string_s_strings[255] = cstr("IE")
     binjgb_all__s_cart_type_info[0] = CartTypeInfo(mbc_type = MbcType.MBC_TYPE_NO_MBC, ext_ram_type = ExtRamType.EXT_RAM_TYPE_NO_RAM, battery_type = BatteryType.BATTERY_TYPE_NO_BATTERY, timer_type = TimerType.TIMER_TYPE_NO_TIMER)
     binjgb_all__s_cart_type_info[1] = CartTypeInfo(mbc_type = MbcType.MBC_TYPE_MBC1, ext_ram_type = ExtRamType.EXT_RAM_TYPE_NO_RAM, battery_type = BatteryType.BATTERY_TYPE_NO_BATTERY, timer_type = TimerType.TIMER_TYPE_NO_TIMER)
     binjgb_all__s_cart_type_info[2] = CartTypeInfo(mbc_type = MbcType.MBC_TYPE_MBC1, ext_ram_type = ExtRamType.EXT_RAM_TYPE_WITH_RAM, battery_type = BatteryType.BATTERY_TYPE_NO_BATTERY, timer_type = TimerType.TIMER_TYPE_NO_TIMER)
@@ -1356,6 +1357,8 @@ def private c2das_init_globals {
     binjgb_all__s_cart_type_info[255] = CartTypeInfo(mbc_type = MbcType.MBC_TYPE_HUC1, ext_ram_type = ExtRamType.EXT_RAM_TYPE_WITH_RAM, battery_type = BatteryType.BATTERY_TYPE_WITH_BATTERY, timer_type = TimerType.TIMER_TYPE_NO_TIMER)
 }
 
+let private SEEK_END = 2
+let private SEEK_SET = 0
 let private ADDR_MASK_16K = 16383
 let private ADDR_MASK_8K = 8191
 let private ADDR_MASK_4K = 4095
@@ -1374,7 +1377,7 @@ let private SGB_FLAG_ADDR = 326
 let private CART_TYPE_ADDR = 327
 let private EXT_RAM_SIZE_ADDR = 329
 let private ROM_BANK_SHIFT = 14
-let private MAX_CART_INFOS = uint64(8) * uint64(1024) * uint64(1024) / (uint64(32) * uint64(1024))
+let private MAX_CART_INFOS = 8ul * 1024ul * 1024ul / (32ul * 1024ul)
 let private CART_INFO_SHIFT = 15
 let private INVALID_READ_BYTE = 255
 let private EXT_RAM_BANK_SHIFT = 13
@@ -1434,32 +1437,35 @@ let private RGBA_WHITE = 4294967295u
 let private NRX1_MAX_LENGTH = 64
 let private ENVELOPE_MAX_VOLUME = 15
 let private ENVELOPE_MAX_PERIOD = 8
+let private FRAME_SEQUENCER_UPDATE_ENVELOPE_FRAME = 7
 let private SWEEP_MAX_PERIOD = 8
 let private SOUND_MAX_FREQUENCY = 2047
 let private MAX_APU_LOG_FRAME_WRITES = 1024
 let private NR31_MAX_LENGTH = 256
 let private WAVE_TRIGGER_CORRUPTION_OFFSET_TICKS = 2
-let private WAVE_TRIGGER_DELAY_TICKS = 3 * 2
+let private APU_TICKS = 2
+let private WAVE_TRIGGER_DELAY_TICKS = 3 * APU_TICKS
 let private OBJ_COUNT = 40
 let private OBJ_PER_LINE_COUNT = 10
 let private PPU_MODE3_MIN_TICKS = 172
 let private WINDOW_MAX_X = 166
-let private TILE_MAP_WIDTH = 32
 let private WINDOW_X_OFFSET = 7
+let private TILE_MAP_WIDTH = 32
 let private TILE_HEIGHT = 8
 let private TILE_ROW_BYTES = 2
 let private IF_VBLANK = 1
 let private PPU_LINE_TICKS = 456
-let private APU_TICKS = 2
 let private DUTY_CYCLE_COUNT = 8
 let private WAVE_SAMPLE_COUNT = 32
 let private NOISE_MAX_CLOCK_SHIFT = 13
+let private APU_TICKS_PER_SECOND = 2097152
 let private SOUND_OUTPUT_COUNT = 2
 let private SOUND_OUTPUT_MAX_VOLUME = 7
 let private FRAME_SEQUENCER_TICKS = 8192
 let private FRAME_SEQUENCER_COUNT = 8
 let private DMA_DELAY_TICKS = 8
-let private SERIAL_TICKS = 4194304 / 8192
+let private DMA_TICKS = 648
+let private SERIAL_TICKS = CPU_TICKS_PER_SECOND / 8192
 let private IF_SERIAL = 8
 let private CPU_2X_TICK = 2
 let private HEADER_CHECKSUM_RANGE_START = 308
@@ -1469,46 +1475,48 @@ let private TITLE_START_ADDR = 308
 let private TITLE_MAX_LENGTH = 16
 let private AUDIO_BUFFER_EXTRA_FRAMES = 256
 let private WAVE_RAM_SIZE = 16
-let private EXT_RAM_MAX_SIZE = uint64(128) * uint64(1024)
-let private WORK_RAM_SIZE = uint64(32) * uint64(1024)
+let private EXT_RAM_MAX_SIZE = 128ul * 1024ul
+let private WORK_RAM_SIZE = 32ul * 1024ul
 let private HIGH_RAM_SIZE = 127
+let private SAVE_STATE_VERSION = 2
+let private SAVE_STATE_HEADER = uint(1800906720 + SAVE_STATE_VERSION)
 let private JOYPAD_CHUNK_DEFAULT_CAPACITY = 4096
 let private GB_PRESS_A_FIRST = 8
 let private GB_PRESS_A_LAST = 9
-let private PPU_FRAME_TICKS = 456 * 154
+let private PPU_FRAME_TICKS = PPU_LINE_TICKS * SCREEN_HEIGHT_WITH_VBLANK
 let private _IONBF = 2
 let private GB_FRAMES = 60
 
 [c_function]
 def replace_extension(var filename : uint8?; var extension : uint8?) : uint8? {
     // +1 for \0.
-    var length : uint64 = crt::strlen(filename) + crt::strlen(extension) + uint64(1)
+    var length : uint64 = crt::strlen(filename) + crt::strlen(extension) + 1ul
     var result : uint8? = reinterpret<uint8?>(crt::malloc(length))
     var last_dot : uint8? = crt::strrchr(filename, '.')
     if (last_dot == null) {
-        snprintf(result, length, reinterpret<uint8?>("%s%s"), filename, extension)
+        snprintf(result, length, cstr("%s%s"), filename, extension)
     } else {
-        snprintf(result, length, reinterpret<uint8?>("%.*s%s"), int(int64(last_dot - filename)), filename, extension)
+        snprintf(result, length, cstr("%.*s%s"), int(int64(last_dot - filename)), filename, extension)
     }
     return result
 }
 
 [c_function]
 def private binjgb_all__get_file_size(var f : FILE?; var out_size : int64?) : Result {
-    if (!(crt::fseek(reinterpret<void?>(f), int64(0), 2) >= 0)) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 27)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("fseek to end failed.\n"))
+    if (!(crt::fseek(reinterpret<void?>(f), 0l, SEEK_END) >= 0)) {
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 27)
+        fprintf(crt::c_stderr(), cstr("fseek to end failed.\n"))
         goto label 1
     }
     var size : int64 = crt::ftell(reinterpret<void?>(f))
-    if (!(size >= int64(0))) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 29)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("ftell failed."))
+    if (!(size >= 0l)) {
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 29)
+        fprintf(crt::c_stderr(), cstr("ftell failed."))
         goto label 1
     }
-    if (!(crt::fseek(reinterpret<void?>(f), int64(0), 0) >= 0)) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 30)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("fseek to beginning failed.\n"))
+    if (!(crt::fseek(reinterpret<void?>(f), 0l, SEEK_SET) >= 0)) {
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 30)
+        fprintf(crt::c_stderr(), cstr("fseek to beginning failed.\n"))
         goto label 1
     }
     deref(out_size) = size
@@ -1518,15 +1526,15 @@ def private binjgb_all__get_file_size(var f : FILE?; var out_size : int64?) : Re
 }
 
 def file_read(var filename : uint8?; var out_file_data : FileData?) : Result {
-    return file_read_aligned(filename, uint64(1), out_file_data)
+    return file_read_aligned(filename, 1ul, out_file_data)
 }
 
 [c_function]
 def file_read_aligned(var filename : uint8?; align : uint64; var out_file_data : FileData?) : Result {
-    var f : FILE? = reinterpret<FILE?>(crt::fopen(filename, reinterpret<uint8?>("rb")))
+    var f : FILE? = reinterpret<FILE?>(crt::fopen(filename, cstr("rb")))
     if (!(f != null)) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 44)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("unable to open file \"%s\".\n"), filename)
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 44)
+        fprintf(crt::c_stderr(), cstr("unable to open file \"%s\".\n"), filename)
         goto label 1
     }
     var size : int64
@@ -1536,16 +1544,16 @@ def file_read_aligned(var filename : uint8?; align : uint64; var out_file_data :
         }
         break
     }
-    var aligned_size : int64 = int64(uint64(size) + align - uint64(1) & ~(align - uint64(1)))
-    var data : uint8? = reinterpret<uint8?>(crt::calloc(uint64(1), uint64(aligned_size)))
+    var aligned_size : int64 = int64(uint64(size) + align - 1ul & ~(align - 1ul))
+    var data : uint8? = reinterpret<uint8?>(crt::calloc(1ul, uint64(aligned_size)))
     if (!(data != null)) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 49)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("allocation failed.\n"))
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 49)
+        fprintf(crt::c_stderr(), cstr("allocation failed.\n"))
         goto label 1
     }
-    if (!(crt::fread(reinterpret<void?>(data), uint64(size), uint64(1), reinterpret<void?>(f)) == uint64(1))) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 50)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("fread failed.\n"))
+    if (!(crt::fread(reinterpret<void?>(data), uint64(size), 1ul, reinterpret<void?>(f)) == 1ul)) {
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 50)
+        fprintf(crt::c_stderr(), cstr("fread failed.\n"))
         goto label 1
     }
     crt::fclose(reinterpret<void?>(f))
@@ -1561,15 +1569,15 @@ def file_read_aligned(var filename : uint8?; align : uint64; var out_file_data :
 
 [c_function]
 def file_write(var filename : uint8?; var file_data : FileData?) : Result {
-    var f : FILE? = reinterpret<FILE?>(crt::fopen(filename, reinterpret<uint8?>("wb")))
+    var f : FILE? = reinterpret<FILE?>(crt::fopen(filename, cstr("wb")))
     if (!(f != null)) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 60)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("unable to open file \"%s\".\n"), filename)
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 60)
+        fprintf(crt::c_stderr(), cstr("unable to open file \"%s\".\n"), filename)
         goto label 1
     }
-    if (!(crt::fwrite(reinterpret<void?>(file_data.data), file_data.size, uint64(1), reinterpret<void?>(f)) == uint64(1))) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 62)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("fwrite failed.\n"))
+    if (!(crt::fwrite(reinterpret<void?>(file_data.data), file_data.size, 1ul, reinterpret<void?>(f)) == 1ul)) {
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 62)
+        fprintf(crt::c_stderr(), cstr("fwrite failed.\n"))
         goto label 1
     }
     crt::fclose(reinterpret<void?>(f))
@@ -1594,14 +1602,14 @@ def file_data_resize(var file_data : FileData?; new_size : uint64) {
 [c_function]
 def file_data_delete(var file_data : FileData?) {
     crt::free(reinterpret<void?>(file_data.data))
-    file_data.size = uint64(0)
+    file_data.size = 0ul
     file_data.data = null
 }
 
 [c_function]
 def private binjgb_all__get_enum_string(var strings : uint8 ??; string_count : uint64; value : uint64) : uint8? {
-    var result : uint8? = value < string_count ? deref(strings + value) : reinterpret<uint8?>(reinterpret<uint8?>("unknown"))
-    return result != null ? result : reinterpret<uint8?>(reinterpret<uint8?>("unknown"))
+    var result : uint8? = value < string_count ? strings[value] : reinterpret<uint8?>(cstr("unknown"))
+    return result != null ? result : reinterpret<uint8?>(cstr("unknown"))
 }
 
 def private binjgb_all__is_cgb_flag_valid(value : CgbFlag) : Bool {
@@ -1708,7 +1716,7 @@ def private binjgb_all__map_address(_c_addr : uint16) : MemoryTypeAddressPair {
     } elif (_cond == 13) {
         return binjgb_all__make_pair(MemoryMapType.MEMORY_MAP_WORK_RAM1, uint16(int(_c_addr) & ADDR_MASK_4K))
     } else {
-        let _cond2 = int(_c_addr) >> 8 & 15
+        let _cond2 = (int(_c_addr) >> 8) & 15
         if (_cond2 == 14) {
             // 0xf000 - 0xfdff: mirror of 0xd000-0xddff
             // 0xfe00 - 0xfe9f
@@ -1719,7 +1727,7 @@ def private binjgb_all__map_address(_c_addr : uint16) : MemoryTypeAddressPair {
                 return binjgb_all__make_pair(MemoryMapType.MEMORY_MAP_UNUSED, _c_addr)
             }
         } elif (_cond2 == 15) {
-            let _cond3 = int(_c_addr) >> 4 & 15
+            let _cond3 = (int(_c_addr) >> 4) & 15
             while (true) {
                 var _flag3 = false
                 if (_cond3 == 0 || _cond3 == 4 || _cond3 == 5 || _cond3 == 6 || _cond3 == 7) {
@@ -1770,7 +1778,6 @@ def private binjgb_all__map_hdma_source_address(_c_addr : uint16) : MemoryTypeAd
     } else {
         return binjgb_all__make_pair(MemoryMapType.MEMORY_MAP_EXT_RAM, uint16(int(_c_addr) & ADDR_MASK_8K))
     }
-    return MemoryTypeAddressPair()
 }
 
 [c_function]
@@ -1778,7 +1785,7 @@ def private binjgb_all__set_cart_info(var e : Emulator?; index : uint8) {
     e.state.cart_info_index = index
     e.cart_info = addr(e.cart_infos[0]) + end_index(int(index), 256)
     if (!(e.cart_info.data != null && binjgb_all__init_memory_map(e) == Result.OK)) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("Unable to switch cart (%d).\n"), int(index))
+        fprintf(crt::c_stderr(), cstr("Unable to switch cart (%d).\n"), int(index))
         c_exit(1)
     }
 }
@@ -1788,13 +1795,11 @@ def private binjgb_all__get_cart_info(var file_data : FileData?; offset : uint64
     // Simple checksum on logo data so we don't have to include it here. :)
     var data : uint8? = file_data.data + offset
     var i : uint64
-    var logo_checksum : uint = uint(0)
-    {
-        i = uint64(LOGO_START_ADDR)
-        while (i <= uint64(LOGO_END_ADDR)) {
-            logo_checksum = logo_checksum << 1u ^ uint(deref(data + i))
-            i++
-        }
+    var logo_checksum : uint = 0u
+    i = uint64(LOGO_START_ADDR)
+    while (i <= uint64(LOGO_END_ADDR)) {
+        logo_checksum = (logo_checksum << 1u) ^ uint(data[i])
+        i++
     }
     while (true) {
         if (!(!(int(require_logo_checksum) != 0) || logo_checksum == 3765209140u)) {
@@ -1804,7 +1809,7 @@ def private binjgb_all__get_cart_info(var file_data : FileData?; offset : uint64
     }
     cart_info.offset = offset
     cart_info.data = data
-    cart_info.rom_size = enum_from_int(type<RomSize>, int(deref(data + ROM_SIZE_ADDR)))
+    cart_info.rom_size = enum_from_int(type<RomSize>, int(data[ROM_SIZE_ADDR]))
     // HACK(binji): The mooneye-gb multicart test doesn't set any of the header
     // bits, even though multicart games all seem to. Just force the values in
     // reasonable defaults in that case.
@@ -1816,26 +1821,26 @@ def private binjgb_all__get_cart_info(var file_data : FileData?; offset : uint64
         cart_info.ext_ram_size = ExtRamSize.EXT_RAM_SIZE_NONE
     } else {
         if (!(int(binjgb_all__is_rom_size_valid(cart_info.rom_size)) != 0)) {
-            fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 1150)
-            fprintf(crt::c_stderr(), reinterpret<uint8?>("Invalid ROM size code: %u\n"), uint(int(cart_info.rom_size)))
+            fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 1150)
+            fprintf(crt::c_stderr(), cstr("Invalid ROM size code: %u\n"), uint(int(cart_info.rom_size)))
             goto label 1
         }
-        cart_info.cgb_flag = enum_from_int(type<CgbFlag>, int(deref(data + CGB_FLAG_ADDR)))
-        cart_info.sgb_flag = enum_from_int(type<SgbFlag>, int(deref(data + SGB_FLAG_ADDR)))
-        cart_info.cart_type = enum_from_int(type<CartType>, int(deref(data + CART_TYPE_ADDR)))
+        cart_info.cgb_flag = enum_from_int(type<CgbFlag>, int(data[CGB_FLAG_ADDR]))
+        cart_info.sgb_flag = enum_from_int(type<SgbFlag>, int(data[SGB_FLAG_ADDR]))
+        cart_info.cart_type = enum_from_int(type<CartType>, int(data[CART_TYPE_ADDR]))
         if (!(int(binjgb_all__is_cart_type_valid(cart_info.cart_type)) != 0)) {
-            fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 1156)
-            fprintf(crt::c_stderr(), reinterpret<uint8?>("Invalid cart type: %u\n"), uint(int(cart_info.cart_type)))
+            fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 1156)
+            fprintf(crt::c_stderr(), cstr("Invalid cart type: %u\n"), uint(int(cart_info.cart_type)))
             goto label 1
         }
-        cart_info.ext_ram_size = enum_from_int(type<ExtRamSize>, int(deref(data + EXT_RAM_SIZE_ADDR)))
+        cart_info.ext_ram_size = enum_from_int(type<ExtRamSize>, int(data[EXT_RAM_SIZE_ADDR]))
         if (!(int(binjgb_all__is_ext_ram_size_valid(cart_info.ext_ram_size)) != 0)) {
-            fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 1159)
-            fprintf(crt::c_stderr(), reinterpret<uint8?>("Invalid ext ram size: %u\n"), uint(int(cart_info.ext_ram_size)))
+            fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 1159)
+            fprintf(crt::c_stderr(), cstr("Invalid ext ram size: %u\n"), uint(int(cart_info.ext_ram_size)))
             goto label 1
         }
     }
-    var rom_byte_size : uint = binjgb_all__s_rom_bank_count[int(cart_info.rom_size)] << 14u
+    var rom_byte_size : uint = binjgb_all__s_rom_bank_count[int(cart_info.rom_size)] << uint(ROM_BANK_SHIFT)
     deref(max_file_size) = deref(max_file_size) > offset + uint64(rom_byte_size) ? deref(max_file_size) : offset + uint64(rom_byte_size)
     cart_info.size = deref(max_file_size)
     return Result.OK
@@ -1848,39 +1853,37 @@ def private binjgb_all__get_cart_infos(var e : Emulator?) : Result {
     var file_size : uint64 = e.file_data.size
     var max_file_size : uint64 = file_size
     var i : uint
-    {
-        i = uint(0)
-        while (uint64(i) < MAX_CART_INFOS) {
-            var offset : uint64 = uint64(i << 15u)
-            if (offset + uint64(32) * uint64(1024) > e.file_data.size) {
-                break
-            }
-            if (binjgb_all__get_cart_info(addr(e.file_data), offset, addr(e.cart_infos[0]) + end_index(i, 256), Bool.TRUE, addr(max_file_size)) == Result.OK) {
-                if (binjgb_all__s_cart_type_info[int(e.cart_infos[i].cart_type)].mbc_type == MbcType.MBC_TYPE_MMM01) {
-                    // MMM01 has the cart header at the end.
-                    goto label 1
-                }
-                e.cart_info_count++
-            }
-            i++
+    i = 0u
+    while (uint64(i) < MAX_CART_INFOS) {
+        var offset : uint64 = uint64(i << uint(CART_INFO_SHIFT))
+        if (offset + 32ul * 1024ul > e.file_data.size) {
+            break
         }
+        if (binjgb_all__get_cart_info(addr(e.file_data), offset, addr(e.cart_infos[0]) + end_index(i, 256), Bool.TRUE, addr(max_file_size)) == Result.OK) {
+            if (binjgb_all__s_cart_type_info[int(e.cart_infos[i].cart_type)].mbc_type == MbcType.MBC_TYPE_MMM01) {
+                // MMM01 has the cart header at the end.
+                goto label 1
+            }
+            e.cart_info_count++
+        }
+        i++
     }
     // Maybe the logo checksum failed; try again without it required.
-    if (e.cart_info_count == uint(0) && binjgb_all__get_cart_info(addr(e.file_data), uint64(0), addr(e.cart_infos[0]), Bool.FALSE, addr(max_file_size)) == Result.OK) {
+    if (e.cart_info_count == 0u && binjgb_all__get_cart_info(addr(e.file_data), 0ul, addr(e.cart_infos[0]), Bool.FALSE, addr(max_file_size)) == Result.OK) {
         e.cart_info_count++
     }
-    if (!(e.cart_info_count != uint(0))) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 1193)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("Invalid ROM.\n"))
+    if (!(e.cart_info_count != 0u)) {
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 1193)
+        fprintf(crt::c_stderr(), cstr("Invalid ROM.\n"))
         goto label 2
     }
-    i = uint(0)
+    i = 0u
     label 1:  // done
     if (max_file_size > file_size) {
         file_data_resize(addr(e.file_data), max_file_size)
         // Fix cart_info data pointers.
         {
-            var j : uint = uint(0)
+            var j : uint = 0u
             while (j < e.cart_info_count) {
                 e.cart_infos[j].data = e.file_data.data + e.cart_infos[j].offset
                 j++
@@ -1902,7 +1905,7 @@ def private binjgb_all__dummy_read(var e : Emulator?; _c_addr : uint16) : uint8 
 
 [c_function]
 def private binjgb_all__set_rom_bank(var e : Emulator?; index : int; bank : uint16) {
-    var new_base : uint = (uint(bank) & binjgb_all__s_rom_bank_count[int(e.cart_info.rom_size)] - uint(1)) << 14u
+    var new_base : uint = (uint(bank) & binjgb_all__s_rom_bank_count[int(e.cart_info.rom_size)] - 1u) << uint(ROM_BANK_SHIFT)
     var base : uint? = addr(e.state.memory_map_state.rom_base[0]) + end_index(index, 2)
     if (new_base != deref(base)) {
     }
@@ -1911,7 +1914,7 @@ def private binjgb_all__set_rom_bank(var e : Emulator?; index : int; bank : uint
 
 [c_function]
 def private binjgb_all__set_ext_ram_bank(var e : Emulator?; bank : uint8) {
-    var new_base : uint = uint(int(bank) << EXT_RAM_BANK_SHIFT) & binjgb_all__s_ext_ram_byte_size[int(e.cart_info.ext_ram_size)] - uint(1)
+    var new_base : uint = uint(int(bank) << EXT_RAM_BANK_SHIFT) & binjgb_all__s_ext_ram_byte_size[int(e.cart_info.ext_ram_size)] - 1u
     var base : uint? = addr(e.state.memory_map_state.ext_ram_base)
     if (new_base != deref(base)) {
     }
@@ -1956,9 +1959,9 @@ def private binjgb_all__mbc1_write_rom_shared(var e : Emulator?; bank_lo_mask : 
     if (int(rom1_bank) == 0) {
         rom1_bank = uint16(uint(rom1_bank) + 1)
     }
-    rom1_bank = uint16(int(rom1_bank) & int(bank_lo_mask) | int(hi_bank))
+    rom1_bank = uint16((int(rom1_bank) & int(bank_lo_mask)) | int(hi_bank))
     var rom0_bank : uint16 = uint16(0)
-    var ext_ram_bank : uint8 = uint8(0)
+    var ext_ram_bank : uint8 = 0u8
     if (mbc1.bank_mode == BankMode.BANK_MODE_RAM) {
         rom0_bank = uint16(int(rom0_bank) | int(hi_bank))
         ext_ram_bank = mbc1.byte_4000_5fff
@@ -1979,7 +1982,7 @@ def private binjgb_all__mbc1m_write_rom(var e : Emulator?; _c_addr : uint16; val
 def private binjgb_all__mbc2_write_rom(var e : Emulator?; _c_addr : uint16; value : uint8) {
     if (int(_c_addr) < 16384) {
         if ((int(_c_addr) & MBC2_ADDR_SELECT_BIT_MASK) != 0) {
-            var rom1_bank : uint16 = uint16(uint(int(value) & MBC2_ROM_BANK_SELECT_MASK) & binjgb_all__s_rom_bank_count[int(e.cart_info.rom_size)] - uint(1))
+            var rom1_bank : uint16 = uint16(uint(int(value) & MBC2_ROM_BANK_SELECT_MASK) & binjgb_all__s_rom_bank_count[int(e.cart_info.rom_size)] - 1u)
             if (int(rom1_bank) == 0) {
                 rom1_bank = uint16(uint(rom1_bank) + 1)
             }
@@ -2014,7 +2017,7 @@ def private binjgb_all__mbc3_write_rom(var e : Emulator?; _c_addr : uint16; valu
     } elif (_cond == 1) {
         {
             // 2000-3fff
-            var rom1_bank : uint16 = uint16(uint(int(value) & MBC3_ROM_BANK_SELECT_MASK) & binjgb_all__s_rom_bank_count[int(e.cart_info.rom_size)] - uint(1))
+            var rom1_bank : uint16 = uint16(uint(int(value) & MBC3_ROM_BANK_SELECT_MASK) & binjgb_all__s_rom_bank_count[int(e.cart_info.rom_size)] - 1u)
             if (int(rom1_bank) == 0) {
                 rom1_bank = uint16(uint(rom1_bank) + 1)
             }
@@ -2065,7 +2068,7 @@ def private binjgb_all__mbc3_write_rom(var e : Emulator?; _c_addr : uint16; valu
                         }
                     }
                     var minovf : Bool = Bool.FALSE
-                    if (min > uint(0) || uint(int(secovf)) != 0) {
+                    if (min > 0u || uint(int(secovf)) != 0) {
                         if (int(mbc3.min) >= 60) {
                             mbc3.min = uint8(uint(mbc3.min) + min)
                             if (int(mbc3.min) >= 64) {
@@ -2086,7 +2089,7 @@ def private binjgb_all__mbc3_write_rom(var e : Emulator?; _c_addr : uint16; valu
                         }
                     }
                     var hourovf : Bool = Bool.FALSE
-                    if (hour > uint(0) || uint(int(minovf)) != 0) {
+                    if (hour > 0u || uint(int(minovf)) != 0) {
                         if (int(mbc3.hour) >= 24) {
                             mbc3.hour = uint8(uint(mbc3.hour) + hour)
                             if (int(mbc3.hour) >= 32) {
@@ -2106,7 +2109,7 @@ def private binjgb_all__mbc3_write_rom(var e : Emulator?; _c_addr : uint16; valu
                             }
                         }
                     }
-                    if (day > uint(0) || uint(int(hourovf)) != 0) {
+                    if (day > 0u || uint(int(hourovf)) != 0) {
                         mbc3.day = uint16(uint(mbc3.day) + day)
                         if (int(mbc3.day) >= 512) {
                             mbc3.day_carry = Bool.TRUE
@@ -2144,7 +2147,7 @@ def private binjgb_all__mbc3_read_ext_ram(var e : Emulator?; _c_addr : uint16) :
     } elif (_cond == 11) {
         result = uint8(mbc3.day)
     } elif (_cond == 12) {
-        result = uint8((uint(int(mbc3.day_carry)) & uint((1 << 7 - 7 + 1) - 1)) << 7u | (uint(int(mbc3.rtc_halt)) & uint((1 << 6 - 6 + 1) - 1)) << 6u | uint((int(mbc3.day) >> 8 & 1 & (1 << 0 - 0 + 1) - 1) << 0))
+        result = uint8(((uint(int(mbc3.day_carry)) & uint((1 << 7 - 7 + 1) - 1)) << 7u) | ((uint(int(mbc3.rtc_halt)) & uint((1 << 6 - 6 + 1) - 1)) << 6u) | uint((((int(mbc3.day) >> 8) & 1) & (1 << 0 - 0 + 1) - 1) << 0))
     }
     return result
 }
@@ -2169,19 +2172,19 @@ def private binjgb_all__mbc3_write_ext_ram(var e : Emulator?; _c_addr : uint16; 
         // latch_ticks is a previously stored delta, not an absolute tick timer.
         // Once the timer is restarted then latch_ticks is an absolute timer
         // again.
-        mbc3.latch_ticks = uint(int(mbc3.rtc_halt)) != 0 ? uint64(0) : e.state.ticks
+        mbc3.latch_ticks = uint(int(mbc3.rtc_halt)) != 0 ? 0ul : e.state.ticks
     } elif (_cond == 9) {
         mbc3.min = uint8(int(value) & 63)
     } elif (_cond == 10) {
         mbc3.hour = uint8(int(value) & 31)
     } elif (_cond == 11) {
-        mbc3.day = uint16(int(mbc3.day) & 256 | int(value))
+        mbc3.day = uint16((int(mbc3.day) & 256) | int(value))
     } elif (_cond == 12) {
         {
-            mbc3.day = uint16((int(value) >> 0 & (1 << 0 - 0 + 1) - 1) << 8 | int(mbc3.day) & 255)
-            mbc3.day_carry = enum_from_int(type<Bool>, int(value) >> 7 & (1 << 7 - 7 + 1) - 1)
+            mbc3.day = uint16((((int(value) >> 0) & (1 << 0 - 0 + 1) - 1) << 8) | (int(mbc3.day) & 255))
+            mbc3.day_carry = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
             var old_rtc_halt : Bool = mbc3.rtc_halt
-            mbc3.rtc_halt = enum_from_int(type<Bool>, int(value) >> 6 & (1 << 6 - 6 + 1) - 1)
+            mbc3.rtc_halt = enum_from_int(type<Bool>, (int(value) >> 6) & (1 << 6 - 6 + 1) - 1)
             if (mbc3.rtc_halt != old_rtc_halt) {
                 // Update the tick timer; if the clock is halted, then store the
                 // previous delta before the clock was stopped. If the clock is
@@ -2211,7 +2214,7 @@ def private binjgb_all__mbc5_write_rom(var e : Emulator?; _c_addr : uint16; valu
         binjgb_all__set_ext_ram_bank(e, uint8(int(value) & MBC5_RAM_BANK_SELECT_MASK))
     } else {
     }
-    binjgb_all__set_rom_bank(e, 1, uint16((int(e.state.memory_map_state._anon3.mbc5.byte_3000_3fff) & 1) << 8 | int(e.state.memory_map_state._anon3.mbc5.byte_2000_2fff)))
+    binjgb_all__set_rom_bank(e, 1, uint16(((int(e.state.memory_map_state._anon3.mbc5.byte_3000_3fff) & 1) << 8) | int(e.state.memory_map_state._anon3.mbc5.byte_2000_2fff)))
 }
 
 [c_function]
@@ -2238,7 +2241,7 @@ def private binjgb_all__huc1_write_rom(var e : Emulator?; _c_addr : uint16; valu
     var ext_ram_bank : uint8
     if (huc1.bank_mode == BankMode.BANK_MODE_ROM) {
         rom1_bank = uint16(int(rom1_bank) | (int(huc1.byte_4000_5fff) & HUC1_BANK_HI_SELECT_MASK) << HUC1_BANK_HI_SHIFT)
-        ext_ram_bank = uint8(0)
+        ext_ram_bank = 0u8
     } else {
         ext_ram_bank = uint8(int(huc1.byte_4000_5fff) & HUC1_BANK_HI_SELECT_MASK)
     }
@@ -2254,8 +2257,8 @@ def private binjgb_all__mmm01_write_rom(var e : Emulator?; _c_addr : uint16; val
         {
             // 0000-1fff
             // ROM size should be power-of-two.
-            var rom_offset : uint = uint(uint64(int(mmm01.byte_2000_3fff) << ROM_BANK_SHIFT) & e.cart_info.size - uint64(1))
-            binjgb_all__set_cart_info(e, uint8(rom_offset >> 15u))
+            var rom_offset : uint = uint(uint64(int(mmm01.byte_2000_3fff) << ROM_BANK_SHIFT) & (e.cart_info.size - 1ul))
+            binjgb_all__set_cart_info(e, uint8(rom_offset >> uint(CART_INFO_SHIFT)))
         }
     } elif (_cond == 1) {
         // 2000-3fff
@@ -2275,14 +2278,14 @@ def private binjgb_all__init_memory_map(var e : Emulator?) : Result {
     } else {
         memory_map.read_ext_ram = @@binjgb_all__dummy_read
         memory_map.write_ext_ram = @@binjgb_all__dummy_write
-        e.state.ext_ram.size = uint64(0)
+        e.state.ext_ram.size = 0ul
     }
     let _cond2 = cart_type_info.mbc_type
     if (_cond2 == MbcType.MBC_TYPE_NO_MBC) {
         memory_map.write_rom = @@binjgb_all__dummy_write
     } elif (_cond2 == MbcType.MBC_TYPE_MBC1) {
         {
-            var is_mbc1m : Bool = enum_from_int(type<Bool>, e.cart_info_count > uint(1) ? 1 : 0)
+            var is_mbc1m : Bool = enum_from_int(type<Bool>, e.cart_info_count > 1u ? 1 : 0)
             memory_map.write_rom = uint(int(is_mbc1m)) != 0 ? @@binjgb_all__mbc1m_write_rom : @@binjgb_all__mbc1_write_rom
         }
     } elif (_cond2 == MbcType.MBC_TYPE_MBC2) {
@@ -2293,20 +2296,18 @@ def private binjgb_all__init_memory_map(var e : Emulator?) : Result {
     } elif (_cond2 == MbcType.MBC_TYPE_MMM01) {
         memory_map.write_rom = @@binjgb_all__mmm01_write_rom
     } elif (_cond2 == MbcType.MBC_TYPE_MBC3) {
-        {
-            memory_map.write_rom = @@binjgb_all__mbc3_write_rom
-            if (cart_type_info.timer_type == TimerType.TIMER_TYPE_WITH_TIMER) {
-                memory_map.read_ext_ram = @@binjgb_all__mbc3_read_ext_ram
-                memory_map.write_ext_ram = @@binjgb_all__mbc3_write_ext_ram
-            }
+        memory_map.write_rom = @@binjgb_all__mbc3_write_rom
+        if (cart_type_info.timer_type == TimerType.TIMER_TYPE_WITH_TIMER) {
+            memory_map.read_ext_ram = @@binjgb_all__mbc3_read_ext_ram
+            memory_map.write_ext_ram = @@binjgb_all__mbc3_write_ext_ram
         }
     } elif (_cond2 == MbcType.MBC_TYPE_MBC5) {
         memory_map.write_rom = @@binjgb_all__mbc5_write_rom
-        e.state.memory_map_state._anon3.mbc5.byte_2000_2fff = uint8(1)
+        e.state.memory_map_state._anon3.mbc5.byte_2000_2fff = 1u8
     } elif (_cond2 == MbcType.MBC_TYPE_HUC1) {
         memory_map.write_rom = @@binjgb_all__huc1_write_rom
     } else {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("memory map for %s not implemented.\n"), binjgb_all__get_cart_type_string(e.cart_info.cart_type))
+        fprintf(crt::c_stderr(), cstr("memory map for %s not implemented.\n"), binjgb_all__get_cart_type_string(e.cart_info.cart_type))
         return Result.ERROR
     }
     e.state.ext_ram.battery_type = cart_type_info.battery_type
@@ -2327,7 +2328,7 @@ def private binjgb_all__is_using_vram(var e : Emulator?; write : Bool) : Bool {
 
 def private binjgb_all__is_using_oam(var e : Emulator?; write : Bool) : Bool {
     if (int(write) != 0) {
-        return enum_from_int(type<Bool>, e.state.ppu.stat.mode == PPUMode.PPU_MODE_MODE2 && !(int(binjgb_all__is_almost_mode3(e)) != 0) || e.state.ppu.stat.mode == PPUMode.PPU_MODE_MODE3 ? 1 : 0)
+        return enum_from_int(type<Bool>, (e.state.ppu.stat.mode == PPUMode.PPU_MODE_MODE2 && !(int(binjgb_all__is_almost_mode3(e)) != 0)) || e.state.ppu.stat.mode == PPUMode.PPU_MODE_MODE3 ? 1 : 0)
     } else {
         return enum_from_int(type<Bool>, uint(int(e.state.ppu.stat.mode2.trigger)) != 0 || e.state.ppu.stat.mode == PPUMode.PPU_MODE_MODE2 || e.state.ppu.stat.mode == PPUMode.PPU_MODE_MODE3 ? 1 : 0)
     }
@@ -2360,7 +2361,7 @@ def private binjgb_all__read_oam(var e : Emulator?; _c_addr : uint16) : uint8 {
     } elif (_cond == 3) {
         return obj._c_byte3
     }
-    fprintf(crt::c_stderr(), reinterpret<uint8?>("invalid OAM address: 0x%04x\n"), int(_c_addr))
+    fprintf(crt::c_stderr(), cstr("invalid OAM address: 0x%04x\n"), int(_c_addr))
     c_exit(1)
     return uint8(0)
 }
@@ -2373,9 +2374,9 @@ def private binjgb_all__read_joyp_p10_p13(var e : Emulator?) : uint8 {
     if (int(e.state.sgb.current_player) != 0) {
         return uint8(~0)
     }
-    var result : uint8 = uint8(0)
+    var result : uint8 = 0u8
     if (e.state.joyp.joypad_select == JoypadSelect.JOYPAD_SELECT_BUTTONS || e.state.joyp.joypad_select == JoypadSelect.JOYPAD_SELECT_BOTH) {
-        result = uint8(uint(result) | ((uint(int(e.state.joyp.buttons.start)) & uint((1 << 3 - 3 + 1) - 1)) << 3u | (uint(int(e.state.joyp.buttons.select)) & uint((1 << 2 - 2 + 1) - 1)) << 2u | (uint(int(e.state.joyp.buttons.B)) & uint((1 << 1 - 1 + 1) - 1)) << 1u | (uint(int(e.state.joyp.buttons.A)) & uint((1 << 0 - 0 + 1) - 1)) << 0u))
+        result = uint8(uint(result) | (((uint(int(e.state.joyp.buttons.start)) & uint((1 << 3 - 3 + 1) - 1)) << 3u) | ((uint(int(e.state.joyp.buttons.select)) & uint((1 << 2 - 2 + 1) - 1)) << 2u) | ((uint(int(e.state.joyp.buttons.B)) & uint((1 << 1 - 1 + 1) - 1)) << 1u) | ((uint(int(e.state.joyp.buttons.A)) & uint((1 << 0 - 0 + 1) - 1)) << 0u)))
     }
     var left : Bool = e.state.joyp.buttons.left
     var right : Bool = e.state.joyp.buttons.right
@@ -2389,7 +2390,7 @@ def private binjgb_all__read_joyp_p10_p13(var e : Emulator?) : uint8 {
         }
     }
     if (e.state.joyp.joypad_select == JoypadSelect.JOYPAD_SELECT_DPAD || e.state.joyp.joypad_select == JoypadSelect.JOYPAD_SELECT_BOTH) {
-        result = uint8(uint(result) | ((uint(int(down)) & uint((1 << 3 - 3 + 1) - 1)) << 3u | (uint(int(up)) & uint((1 << 2 - 2 + 1) - 1)) << 2u | (uint(int(left)) & uint((1 << 1 - 1 + 1) - 1)) << 1u | (uint(int(right)) & uint((1 << 0 - 0 + 1) - 1)) << 0u))
+        result = uint8(uint(result) | (((uint(int(down)) & uint((1 << 3 - 3 + 1) - 1)) << 3u) | ((uint(int(up)) & uint((1 << 2 - 2 + 1) - 1)) << 2u) | ((uint(int(left)) & uint((1 << 1 - 1 + 1) - 1)) << 1u) | ((uint(int(right)) & uint((1 << 0 - 0 + 1) - 1)) << 0u)))
     }
     // The bits are low when the buttons are pressed.
     return uint8(~int(result))
@@ -2410,7 +2411,7 @@ def private binjgb_all__read_io(var e : Emulator?; _c_addr : uint16) : uint8 {
         var _flag = false
         if (_cond == 0) {
             binjgb_all__call_joyp_callback(e, Bool.FALSE)
-            return uint8(uint(JOYP_UNUSED) | (uint(int(e.state.joyp.joypad_select)) & uint((1 << 5 - 4 + 1) - 1)) << 4u | uint(int(binjgb_all__read_joyp_p10_p13(e)) & JOYP_RESULT_MASK))
+            return uint8(uint(JOYP_UNUSED) | ((uint(int(e.state.joyp.joypad_select)) & uint((1 << 5 - 4 + 1) - 1)) << 4u) | uint(int(binjgb_all__read_joyp_p10_p13(e)) & JOYP_RESULT_MASK))
         }
         if (_cond == 1) {
             binjgb_all__serial_synchronize(e)
@@ -2418,7 +2419,7 @@ def private binjgb_all__read_io(var e : Emulator?; _c_addr : uint16) : uint8 {
         }
         if (_cond == 2) {
             binjgb_all__serial_synchronize(e)
-            return uint8(uint(SC_UNUSED) | (uint(int(e.state.serial.transferring)) & uint((1 << 7 - 7 + 1) - 1)) << 7u | (uint(int(e.state.serial.clock)) & uint((1 << 0 - 0 + 1) - 1)) << 0u)
+            return uint8(uint(SC_UNUSED) | ((uint(int(e.state.serial.transferring)) & uint((1 << 7 - 7 + 1) - 1)) << 7u) | ((uint(int(e.state.serial.clock)) & uint((1 << 0 - 0 + 1) - 1)) << 0u))
         }
         if (_cond == 4) {
             binjgb_all__timer_synchronize(e)
@@ -2433,18 +2434,18 @@ def private binjgb_all__read_io(var e : Emulator?; _c_addr : uint16) : uint8 {
             return e.state.timer.tma
         }
         if (_cond == 7) {
-            return uint8(uint(TAC_UNUSED) | (uint(int(e.state.timer.on)) & uint((1 << 2 - 2 + 1) - 1)) << 2u | (uint(int(e.state.timer.clock_select)) & uint((1 << 1 - 0 + 1) - 1)) << 0u)
+            return uint8(uint(TAC_UNUSED) | ((uint(int(e.state.timer.on)) & uint((1 << 2 - 2 + 1) - 1)) << 2u) | ((uint(int(e.state.timer.clock_select)) & uint((1 << 1 - 0 + 1) - 1)) << 0u))
         }
         if (_cond == 15) {
             binjgb_all__intr_synchronize(e)
             return uint8(IF_UNUSED | int(e.state.interrupt.if_))
         }
         if (_cond == 64) {
-            return uint8((uint(int(e.state.ppu.lcdc.display)) & uint((1 << 7 - 7 + 1) - 1)) << 7u | (uint(int(e.state.ppu.lcdc.window_tile_map_select)) & uint((1 << 6 - 6 + 1) - 1)) << 6u | (uint(int(e.state.ppu.lcdc.window_display)) & uint((1 << 5 - 5 + 1) - 1)) << 5u | (uint(int(e.state.ppu.lcdc.bg_tile_data_select)) & uint((1 << 4 - 4 + 1) - 1)) << 4u | (uint(int(e.state.ppu.lcdc.bg_tile_map_select)) & uint((1 << 3 - 3 + 1) - 1)) << 3u | (uint(int(e.state.ppu.lcdc.obj_size)) & uint((1 << 2 - 2 + 1) - 1)) << 2u | (uint(int(e.state.ppu.lcdc.obj_display)) & uint((1 << 1 - 1 + 1) - 1)) << 1u | (uint(int(e.state.ppu.lcdc.bg_display)) & uint((1 << 0 - 0 + 1) - 1)) << 0u)
+            return uint8(((uint(int(e.state.ppu.lcdc.display)) & uint((1 << 7 - 7 + 1) - 1)) << 7u) | ((uint(int(e.state.ppu.lcdc.window_tile_map_select)) & uint((1 << 6 - 6 + 1) - 1)) << 6u) | ((uint(int(e.state.ppu.lcdc.window_display)) & uint((1 << 5 - 5 + 1) - 1)) << 5u) | ((uint(int(e.state.ppu.lcdc.bg_tile_data_select)) & uint((1 << 4 - 4 + 1) - 1)) << 4u) | ((uint(int(e.state.ppu.lcdc.bg_tile_map_select)) & uint((1 << 3 - 3 + 1) - 1)) << 3u) | ((uint(int(e.state.ppu.lcdc.obj_size)) & uint((1 << 2 - 2 + 1) - 1)) << 2u) | ((uint(int(e.state.ppu.lcdc.obj_display)) & uint((1 << 1 - 1 + 1) - 1)) << 1u) | ((uint(int(e.state.ppu.lcdc.bg_display)) & uint((1 << 0 - 0 + 1) - 1)) << 0u))
         }
         if (_cond == 65) {
             binjgb_all__ppu_synchronize(e)
-            return uint8(uint(STAT_UNUSED) | (uint(int(e.state.ppu.stat.y_compare.irq)) & uint((1 << 6 - 6 + 1) - 1)) << 6u | (uint(int(e.state.ppu.stat.mode2.irq)) & uint((1 << 5 - 5 + 1) - 1)) << 5u | (uint(int(e.state.ppu.stat.vblank.irq)) & uint((1 << 4 - 4 + 1) - 1)) << 4u | (uint(int(e.state.ppu.stat.hblank.irq)) & uint((1 << 3 - 3 + 1) - 1)) << 3u | (uint(int(e.state.ppu.stat.ly_eq_lyc)) & uint((1 << 2 - 2 + 1) - 1)) << 2u | (uint(int(e.state.ppu.stat.mode)) & uint((1 << 1 - 0 + 1) - 1)) << 0u)
+            return uint8(uint(STAT_UNUSED) | ((uint(int(e.state.ppu.stat.y_compare.irq)) & uint((1 << 6 - 6 + 1) - 1)) << 6u) | ((uint(int(e.state.ppu.stat.mode2.irq)) & uint((1 << 5 - 5 + 1) - 1)) << 5u) | ((uint(int(e.state.ppu.stat.vblank.irq)) & uint((1 << 4 - 4 + 1) - 1)) << 4u) | ((uint(int(e.state.ppu.stat.hblank.irq)) & uint((1 << 3 - 3 + 1) - 1)) << 3u) | ((uint(int(e.state.ppu.stat.ly_eq_lyc)) & uint((1 << 2 - 2 + 1) - 1)) << 2u) | ((uint(int(e.state.ppu.stat.mode)) & uint((1 << 1 - 0 + 1) - 1)) << 0u))
         }
         if (_cond == 66) {
             return e.state.ppu.scy
@@ -2466,7 +2467,7 @@ def private binjgb_all__read_io(var e : Emulator?; _c_addr : uint16) : uint8 {
         if (_cond == 71 || _cond == 72 || _cond == 73) {
             {
                 var pal : Palette? = addr(e.state.ppu.pal[0]) + end_index(int(_c_addr) - int(IOReg.IO_BGP_ADDR), 3)
-                return uint8((uint(int(pal.color[3])) & uint((1 << 7 - 6 + 1) - 1)) << 6u | (uint(int(pal.color[2])) & uint((1 << 5 - 4 + 1) - 1)) << 4u | (uint(int(pal.color[1])) & uint((1 << 3 - 2 + 1) - 1)) << 2u | (uint(int(pal.color[0])) & uint((1 << 1 - 0 + 1) - 1)) << 0u)
+                return uint8(((uint(int(pal.color[3])) & uint((1 << 7 - 6 + 1) - 1)) << 6u) | ((uint(int(pal.color[2])) & uint((1 << 5 - 4 + 1) - 1)) << 4u) | ((uint(int(pal.color[1])) & uint((1 << 3 - 2 + 1) - 1)) << 2u) | ((uint(int(pal.color[0])) & uint((1 << 1 - 0 + 1) - 1)) << 0u))
             }
         }
         if (_cond == 74) {
@@ -2476,23 +2477,23 @@ def private binjgb_all__read_io(var e : Emulator?; _c_addr : uint16) : uint8 {
             return e.state.ppu.wx
         }
         if (_cond == 77) {
-            return uint8(uint(int(e.state.is_cgb)) != 0 ? uint(KEY1_UNUSED) | (uint(int(e.state.cpu_speed.speed)) & uint((1 << 7 - 7 + 1) - 1)) << 7u | (uint(int(e.state.cpu_speed.switching)) & uint((1 << 0 - 0 + 1) - 1)) << 0u : uint(INVALID_READ_BYTE))
+            return uint8(uint(int(e.state.is_cgb)) != 0 ? (uint(KEY1_UNUSED) | ((uint(int(e.state.cpu_speed.speed)) & uint((1 << 7 - 7 + 1) - 1)) << 7u) | ((uint(int(e.state.cpu_speed.switching)) & uint((1 << 0 - 0 + 1) - 1)) << 0u)) : uint(INVALID_READ_BYTE))
         }
         if (_cond == 79) {
-            return uint8(uint(int(e.state.is_cgb)) != 0 ? VBK_UNUSED | (int(e.state.vram.bank) & (1 << 0 - 0 + 1) - 1) << 0 : INVALID_READ_BYTE)
+            return uint8(uint(int(e.state.is_cgb)) != 0 ? (VBK_UNUSED | ((int(e.state.vram.bank) & (1 << 0 - 0 + 1) - 1) << 0)) : INVALID_READ_BYTE)
         }
         if (_cond == 85) {
             return uint8(uint(int(e.state.is_cgb)) != 0 ? int(e.state.hdma.blocks) : INVALID_READ_BYTE)
         }
         if (_cond == 86) {
-            return uint8(uint(int(e.state.is_cgb)) != 0 ? uint(RP_UNUSED) | (uint(int(e.state.infrared.enabled)) & uint((1 << 7 - 6 + 1) - 1)) << 6u | (uint(int(e.state.infrared.read)) & uint((1 << 1 - 1 + 1) - 1)) << 1u | (uint(int(e.state.infrared.write)) & uint((1 << 0 - 0 + 1) - 1)) << 0u : uint(INVALID_READ_BYTE))
+            return uint8(uint(int(e.state.is_cgb)) != 0 ? (uint(RP_UNUSED) | ((uint(int(e.state.infrared.enabled)) & uint((1 << 7 - 6 + 1) - 1)) << 6u) | ((uint(int(e.state.infrared.read)) & uint((1 << 1 - 1 + 1) - 1)) << 1u) | ((uint(int(e.state.infrared.write)) & uint((1 << 0 - 0 + 1) - 1)) << 0u)) : uint(INVALID_READ_BYTE))
         }
         _flag ||= _cond == 104
         _flag ||= _cond == 106
         if (_flag) {
             if (int(e.state.is_cgb) != 0) {
                 var cp : ColorPalettes? = int(_c_addr) == int(IOReg.IO_BCPS_ADDR) ? addr(e.state.ppu.bgcp) : addr(e.state.ppu.obcp)
-                return uint8(uint(XCPS_UNUSED | (int(cp.index) & (1 << 5 - 0 + 1) - 1) << 0) | (uint(int(cp.auto_increment)) & uint((1 << 7 - 7 + 1) - 1)) << 7u)
+                return uint8(uint(XCPS_UNUSED | ((int(cp.index) & (1 << 5 - 0 + 1) - 1) << 0)) | ((uint(int(cp.auto_increment)) & uint((1 << 7 - 7 + 1) - 1)) << 7u))
             } else {
                 return uint8(INVALID_READ_BYTE)
             }
@@ -2509,7 +2510,7 @@ def private binjgb_all__read_io(var e : Emulator?; _c_addr : uint16) : uint8 {
         }
         _flag ||= _cond == 112
         if (_flag) {
-            return uint8(uint(int(e.state.is_cgb)) != 0 ? SVBK_UNUSED | (int(e.state.wram.bank) & (1 << 2 - 0 + 1) - 1) << 0 : INVALID_READ_BYTE)
+            return uint8(uint(int(e.state.is_cgb)) != 0 ? (SVBK_UNUSED | ((int(e.state.wram.bank) & (1 << 2 - 0 + 1) - 1) << 0)) : INVALID_READ_BYTE)
         }
         if (_cond == 255) {
             return e.state.interrupt.ie
@@ -2527,7 +2528,7 @@ def private binjgb_all__read_nrx1_reg(var channel : Channel?) : uint8 {
 }
 
 def private binjgb_all__read_nrx2_reg(var channel : Channel?) : uint8 {
-    return uint8(uint((int(channel.envelope.initial_volume) & (1 << 7 - 4 + 1) - 1) << 4) | (uint(int(channel.envelope.direction)) & uint((1 << 3 - 3 + 1) - 1)) << 3u | uint((int(channel.envelope.period) & (1 << 2 - 0 + 1) - 1) << 0))
+    return uint8(uint((int(channel.envelope.initial_volume) & (1 << 7 - 4 + 1) - 1) << 4) | ((uint(int(channel.envelope.direction)) & uint((1 << 3 - 3 + 1) - 1)) << 3u) | uint((int(channel.envelope.period) & (1 << 2 - 0 + 1) - 1) << 0))
 }
 
 def private binjgb_all__read_nrx4_reg(var channel : Channel?) : uint8 {
@@ -2539,7 +2540,7 @@ def private binjgb_all__read_apu(var e : Emulator?; _c_addr : uint16) : uint8 {
     binjgb_all__apu_synchronize(e)
     let _cond = int(_c_addr)
     if (_cond == 0) {
-        return uint8(uint(NR10_UNUSED | (int(e.state.apu.sweep.period) & (1 << 6 - 4 + 1) - 1) << 4) | (uint(int(e.state.apu.sweep.direction)) & uint((1 << 3 - 3 + 1) - 1)) << 3u | uint((int(e.state.apu.sweep.shift) & (1 << 2 - 0 + 1) - 1) << 0))
+        return uint8(uint(NR10_UNUSED | ((int(e.state.apu.sweep.period) & (1 << 6 - 4 + 1) - 1) << 4)) | ((uint(int(e.state.apu.sweep.direction)) & uint((1 << 3 - 3 + 1) - 1)) << 3u) | uint((int(e.state.apu.sweep.shift) & (1 << 2 - 0 + 1) - 1) << 0))
     } elif (_cond == 1) {
         return uint8(NRX1_UNUSED | int(binjgb_all__read_nrx1_reg(addr(e.state.apu.channel[int(anon_96.APU_CHANNEL1)]))))
     } elif (_cond == 2) {
@@ -2553,27 +2554,26 @@ def private binjgb_all__read_apu(var e : Emulator?; _c_addr : uint16) : uint8 {
     } elif (_cond == 9) {
         return uint8(NRX4_UNUSED | int(binjgb_all__read_nrx4_reg(addr(e.state.apu.channel[int(anon_96.APU_CHANNEL2)]))))
     } elif (_cond == 10) {
-        return uint8(uint(NR30_UNUSED) | (uint(int(e.state.apu.channel[int(anon_96.APU_CHANNEL3)].dac_enabled)) & uint((1 << 7 - 7 + 1) - 1)) << 7u)
+        return uint8(uint(NR30_UNUSED) | ((uint(int(e.state.apu.channel[int(anon_96.APU_CHANNEL3)].dac_enabled)) & uint((1 << 7 - 7 + 1) - 1)) << 7u))
     } elif (_cond == 12) {
-        return uint8(uint(NR32_UNUSED) | (uint(int(e.state.apu.wave.volume)) & uint((1 << 6 - 5 + 1) - 1)) << 5u)
+        return uint8(uint(NR32_UNUSED) | ((uint(int(e.state.apu.wave.volume)) & uint((1 << 6 - 5 + 1) - 1)) << 5u))
     } elif (_cond == 14) {
         return uint8(NRX4_UNUSED | int(binjgb_all__read_nrx4_reg(addr(e.state.apu.channel[int(anon_96.APU_CHANNEL3)]))))
     } elif (_cond == 17) {
         return binjgb_all__read_nrx2_reg(addr(e.state.apu.channel[int(anon_96.APU_CHANNEL4)]))
     } elif (_cond == 18) {
-        return uint8(uint((int(e.state.apu.noise.clock_shift) & (1 << 7 - 4 + 1) - 1) << 4) | (uint(int(e.state.apu.noise.lfsr_width)) & uint((1 << 3 - 3 + 1) - 1)) << 3u | uint((int(e.state.apu.noise.divisor) & (1 << 2 - 0 + 1) - 1) << 0))
+        return uint8(uint((int(e.state.apu.noise.clock_shift) & (1 << 7 - 4 + 1) - 1) << 4) | ((uint(int(e.state.apu.noise.lfsr_width)) & uint((1 << 3 - 3 + 1) - 1)) << 3u) | uint((int(e.state.apu.noise.divisor) & (1 << 2 - 0 + 1) - 1) << 0))
     } elif (_cond == 19) {
         return uint8(NRX4_UNUSED | int(binjgb_all__read_nrx4_reg(addr(e.state.apu.channel[int(anon_96.APU_CHANNEL4)]))))
     } elif (_cond == 20) {
-        return uint8((uint(int(e.state.apu.so_output[int(anon_165.VIN)][1])) & uint((1 << 7 - 7 + 1) - 1)) << 7u | uint((int(e.state.apu.so_volume[1]) & (1 << 6 - 4 + 1) - 1) << 4) | (uint(int(e.state.apu.so_output[int(anon_165.VIN)][0])) & uint((1 << 3 - 3 + 1) - 1)) << 3u | uint((int(e.state.apu.so_volume[0]) & (1 << 2 - 0 + 1) - 1) << 0))
+        return uint8(((uint(int(e.state.apu.so_output[int(anon_165.VIN)][1])) & uint((1 << 7 - 7 + 1) - 1)) << 7u) | uint((int(e.state.apu.so_volume[1]) & (1 << 6 - 4 + 1) - 1) << 4) | ((uint(int(e.state.apu.so_output[int(anon_165.VIN)][0])) & uint((1 << 3 - 3 + 1) - 1)) << 3u) | uint((int(e.state.apu.so_volume[0]) & (1 << 2 - 0 + 1) - 1) << 0))
     } elif (_cond == 21) {
-        return uint8((uint(int(e.state.apu.so_output[int(anon_165.SOUND4)][1])) & uint((1 << 7 - 7 + 1) - 1)) << 7u | (uint(int(e.state.apu.so_output[int(anon_165.SOUND3)][1])) & uint((1 << 6 - 6 + 1) - 1)) << 6u | (uint(int(e.state.apu.so_output[int(anon_165.SOUND2)][1])) & uint((1 << 5 - 5 + 1) - 1)) << 5u | (uint(int(e.state.apu.so_output[int(anon_165.SOUND1)][1])) & uint((1 << 4 - 4 + 1) - 1)) << 4u | (uint(int(e.state.apu.so_output[int(anon_165.SOUND4)][0])) & uint((1 << 3 - 3 + 1) - 1)) << 3u | (uint(int(e.state.apu.so_output[int(anon_165.SOUND3)][0])) & uint((1 << 2 - 2 + 1) - 1)) << 2u | (uint(int(e.state.apu.so_output[int(anon_165.SOUND2)][0])) & uint((1 << 1 - 1 + 1) - 1)) << 1u | (uint(int(e.state.apu.so_output[int(anon_165.SOUND1)][0])) & uint((1 << 0 - 0 + 1) - 1)) << 0u)
+        return uint8(((uint(int(e.state.apu.so_output[int(anon_165.SOUND4)][1])) & uint((1 << 7 - 7 + 1) - 1)) << 7u) | ((uint(int(e.state.apu.so_output[int(anon_165.SOUND3)][1])) & uint((1 << 6 - 6 + 1) - 1)) << 6u) | ((uint(int(e.state.apu.so_output[int(anon_165.SOUND2)][1])) & uint((1 << 5 - 5 + 1) - 1)) << 5u) | ((uint(int(e.state.apu.so_output[int(anon_165.SOUND1)][1])) & uint((1 << 4 - 4 + 1) - 1)) << 4u) | ((uint(int(e.state.apu.so_output[int(anon_165.SOUND4)][0])) & uint((1 << 3 - 3 + 1) - 1)) << 3u) | ((uint(int(e.state.apu.so_output[int(anon_165.SOUND3)][0])) & uint((1 << 2 - 2 + 1) - 1)) << 2u) | ((uint(int(e.state.apu.so_output[int(anon_165.SOUND2)][0])) & uint((1 << 1 - 1 + 1) - 1)) << 1u) | ((uint(int(e.state.apu.so_output[int(anon_165.SOUND1)][0])) & uint((1 << 0 - 0 + 1) - 1)) << 0u))
     } elif (_cond == 22) {
-        return uint8(uint(NR52_UNUSED) | (uint(int(e.state.apu.enabled)) & uint((1 << 7 - 7 + 1) - 1)) << 7u | (uint(int(e.state.apu.channel[int(anon_96.APU_CHANNEL4)].status)) & uint((1 << 3 - 3 + 1) - 1)) << 3u | (uint(int(e.state.apu.channel[int(anon_96.APU_CHANNEL3)].status)) & uint((1 << 2 - 2 + 1) - 1)) << 2u | (uint(int(e.state.apu.channel[int(anon_96.APU_CHANNEL2)].status)) & uint((1 << 1 - 1 + 1) - 1)) << 1u | (uint(int(e.state.apu.channel[int(anon_96.APU_CHANNEL1)].status)) & uint((1 << 0 - 0 + 1) - 1)) << 0u)
+        return uint8(uint(NR52_UNUSED) | ((uint(int(e.state.apu.enabled)) & uint((1 << 7 - 7 + 1) - 1)) << 7u) | ((uint(int(e.state.apu.channel[int(anon_96.APU_CHANNEL4)].status)) & uint((1 << 3 - 3 + 1) - 1)) << 3u) | ((uint(int(e.state.apu.channel[int(anon_96.APU_CHANNEL3)].status)) & uint((1 << 2 - 2 + 1) - 1)) << 2u) | ((uint(int(e.state.apu.channel[int(anon_96.APU_CHANNEL2)].status)) & uint((1 << 1 - 1 + 1) - 1)) << 1u) | ((uint(int(e.state.apu.channel[int(anon_96.APU_CHANNEL1)].status)) & uint((1 << 0 - 0 + 1) - 1)) << 0u))
     } else {
         return uint8(INVALID_READ_BYTE)
     }
-    return uint8(0)
 }
 
 def private binjgb_all__read_wave_ram(var e : Emulator?; _c_addr : uint16) : uint8 {
@@ -2608,7 +2608,7 @@ def private binjgb_all__read_u8_pair(var e : Emulator?; pair_in : MemoryTypeAddr
             // Take advantage of the fact that MEMORY_MAP_ROM9 is 0, and ROM1 is 1 when
             // indexing into rom_base.
             var rom_addr : uint = e.state.memory_map_state.rom_base[int(pair._c_type)] | uint(pair._c_addr)
-            var value : uint8 = deref(e.cart_info.data + rom_addr)
+            var value : uint8 = e.cart_info.data[rom_addr]
             if (!(int(raw) != 0)) {
             }
             return value
@@ -2637,7 +2637,7 @@ def private binjgb_all__read_u8_pair(var e : Emulator?; pair_in : MemoryTypeAddr
     } elif (_cond == MemoryMapType.MEMORY_MAP_HIGH_RAM) {
         return e.state.hram[int(pair._c_addr)]
     } else {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("invalid address: %u 0x%04x.\n"), uint(int(pair._c_type)), int(pair._c_addr))
+        fprintf(crt::c_stderr(), cstr("invalid address: %u 0x%04x.\n"), uint(int(pair._c_type)), int(pair._c_addr))
         c_exit(1)
     }
     return uint8(0)
@@ -2656,7 +2656,7 @@ def private binjgb_all__read_u8(var e : Emulator?; _c_addr : uint16) : uint8 {
     if (!!(int(_c_addr) < 32768)) {
         var bank : uint = uint(int(_c_addr) >> ROM_BANK_SHIFT)
         var rom_addr : uint = e.state.memory_map_state.rom_base[bank] | uint(int(_c_addr) & ADDR_MASK_16K)
-        var value : uint8 = deref(e.cart_info.data + rom_addr)
+        var value : uint8 = e.cart_info.data[rom_addr]
         return value
     } else {
         return binjgb_all__read_u8_pair(e, binjgb_all__map_address(_c_addr), Bool.FALSE)
@@ -2683,12 +2683,12 @@ def private binjgb_all__write_oam_no_mode_check(var e : Emulator?; _c_addr : uin
         obj.tile = value
     } elif (_cond == 3) {
         obj._c_byte3 = value
-        obj.priority = enum_from_int(type<ObjPriority>, int(value) >> 7 & (1 << 7 - 7 + 1) - 1)
-        obj.yflip = enum_from_int(type<Bool>, int(value) >> 6 & (1 << 6 - 6 + 1) - 1)
-        obj.xflip = enum_from_int(type<Bool>, int(value) >> 5 & (1 << 5 - 5 + 1) - 1)
-        obj.palette = uint8(int(value) >> 4 & (1 << 4 - 4 + 1) - 1)
-        obj.bank = uint8(int(value) >> 3 & (1 << 3 - 3 + 1) - 1)
-        obj.cgb_palette = uint8(int(value) >> 0 & (1 << 2 - 0 + 1) - 1)
+        obj.priority = enum_from_int(type<ObjPriority>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
+        obj.yflip = enum_from_int(type<Bool>, (int(value) >> 6) & (1 << 6 - 6 + 1) - 1)
+        obj.xflip = enum_from_int(type<Bool>, (int(value) >> 5) & (1 << 5 - 5 + 1) - 1)
+        obj.palette = uint8((int(value) >> 4) & (1 << 4 - 4 + 1) - 1)
+        obj.bank = uint8((int(value) >> 3) & (1 << 3 - 3 + 1) - 1)
+        obj.cgb_palette = uint8((int(value) >> 0) & (1 << 2 - 0 + 1) - 1)
     }
 }
 
@@ -2715,22 +2715,20 @@ def private binjgb_all__timer_synchronize(var e : Emulator?) {
         e.state.timer.sync_ticks = e.state.ticks
         if (int(e.state.timer.on) != 0) {
             var cpu_tick : uint64 = e.state.cpu_tick
-            {
-                while (delta_ticks > uint64(0)) {
-                    if (e.state.timer.tima_state == TimaState.TIMA_STATE_OVERFLOW) {
-                        e.state.interrupt.if_ = uint8(int(e.state.interrupt.if_) | int(e.state.interrupt.new_if) & IF_TIMER)
-                        e.state.timer.tima = e.state.timer.tma
-                        e.state.timer.tima_state = TimaState.TIMA_STATE_RESET
-                    } elif (e.state.timer.tima_state == TimaState.TIMA_STATE_RESET) {
-                        e.state.timer.tima_state = TimaState.TIMA_STATE_NORMAL
-                    }
-                    var old_div_counter : uint16 = e.state.timer.div_counter
-                    e.state.timer.div_counter = uint16(int(e.state.timer.div_counter) + CPU_TICK)
-                    if (int(binjgb_all__is_div_falling_edge(e, old_div_counter, e.state.timer.div_counter)) != 0) {
-                        binjgb_all__increment_tima(e)
-                    }
-                    delta_ticks -= cpu_tick
+            while (delta_ticks > 0ul) {
+                if (e.state.timer.tima_state == TimaState.TIMA_STATE_OVERFLOW) {
+                    e.state.interrupt.if_ = uint8(int(e.state.interrupt.if_) | (int(e.state.interrupt.new_if) & IF_TIMER))
+                    e.state.timer.tima = e.state.timer.tma
+                    e.state.timer.tima_state = TimaState.TIMA_STATE_RESET
+                } elif (e.state.timer.tima_state == TimaState.TIMA_STATE_RESET) {
+                    e.state.timer.tima_state = TimaState.TIMA_STATE_NORMAL
                 }
+                var old_div_counter : uint16 = e.state.timer.div_counter
+                e.state.timer.div_counter = uint16(int(e.state.timer.div_counter) + CPU_TICK)
+                if (int(binjgb_all__is_div_falling_edge(e, old_div_counter, e.state.timer.div_counter)) != 0) {
+                    binjgb_all__increment_tima(e)
+                }
+                delta_ticks -= cpu_tick
             }
         } else {
             e.state.timer.div_counter = uint16(uint64(e.state.timer.div_counter) + delta_ticks)
@@ -2774,7 +2772,7 @@ def private binjgb_all__do_timer_interrupt(var e : Emulator?) {
     e.state.timer.tima_state = TimaState.TIMA_STATE_OVERFLOW
     e.state.timer.div_counter = uint16(uint64(e.state.timer.div_counter) + (e.state.ticks + uint64(CPU_TICK) - e.state.timer.sync_ticks))
     e.state.timer.sync_ticks = e.state.ticks + cpu_tick
-    e.state.timer.tima = uint8(0)
+    e.state.timer.tima = 0u8
     e.state.interrupt.new_if = uint8(int(e.state.interrupt.new_if) | IF_TIMER)
     binjgb_all__calculate_next_timer_intr(e)
 }
@@ -2806,7 +2804,7 @@ def private binjgb_all__check_stat(var e : Emulator?) {
 }
 
 def private binjgb_all__check_ly_eq_lyc(var e : Emulator?; write : Bool) {
-    if (int(e.state.ppu.ly) == int(e.state.ppu.lyc) || uint(int(write)) != 0 && int(e.state.ppu.last_ly) == SCREEN_HEIGHT_WITH_VBLANK - 1 && int(e.state.ppu.last_ly) == int(e.state.ppu.lyc)) {
+    if (int(e.state.ppu.ly) == int(e.state.ppu.lyc) || (uint(int(write)) != 0 && int(e.state.ppu.last_ly) == SCREEN_HEIGHT_WITH_VBLANK - 1 && int(e.state.ppu.last_ly) == int(e.state.ppu.lyc))) {
         e.state.ppu.stat.y_compare.trigger = Bool.TRUE
         e.state.ppu.stat.new_ly_eq_lyc = Bool.TRUE
     } else {
@@ -2850,32 +2848,29 @@ def private binjgb_all__update_bw_palette_rgba(var e : Emulator?; _c_type : Pale
 }
 
 def private binjgb_all__unpack_cgb_color(var e : Emulator?; color : uint16) : uint {
-    var r : uint8 = uint8(int(color) >> 0 & (1 << 4 - 0 + 1) - 1)
-    var g : uint8 = uint8(int(color) >> 5 & (1 << 9 - 5 + 1) - 1)
-    var b : uint8 = uint8(int(color) >> 10 & (1 << 14 - 10 + 1) - 1)
+    var r : uint8 = uint8((int(color) >> 0) & (1 << 4 - 0 + 1) - 1)
+    var g : uint8 = uint8((int(color) >> 5) & (1 << 9 - 5 + 1) - 1)
+    var b : uint8 = uint8((int(color) >> 10) & (1 << 14 - 10 + 1) - 1)
     let _cond = e.cgb_color_curve
     if (_cond == CgbColorCurve.CGB_COLOR_CURVE_SAMEBOY_EMULATE_HARDWARE) {
-        {
-            // Using Sameboy's color curves, see
-            // https://github.com/LIJI32/SameBoy/blob/345e51647f2a7ce1ea39f21497f5a6dc75a587c8/Core/display.c#L239
-            r = unpack_cgb_color_curve[int(r)]
-            g = unpack_cgb_color_curve[int(g)]
-            b = unpack_cgb_color_curve[int(b)]
-            g = uint8((int(g) * 3 + int(b)) / 4)
-            return uint(uint8(255)) << 24u | uint(b) << 16u | uint(g) << 8u | uint(r)
-        }
+        // Using Sameboy's color curves, see
+        // https://github.com/LIJI32/SameBoy/blob/345e51647f2a7ce1ea39f21497f5a6dc75a587c8/Core/display.c#L239
+        r = unpack_cgb_color_curve[int(r)]
+        g = unpack_cgb_color_curve[int(g)]
+        b = unpack_cgb_color_curve[int(b)]
+        g = uint8((int(g) * 3 + int(b)) / 4)
+        return (uint(255u8) << 24u) | (uint(b) << 16u) | (uint(g) << 8u) | uint(r)
     } elif (_cond == CgbColorCurve.CGB_COLOR_CURVE_GAMBATTE) {
         // Using gambatte's color curves, according to Gameboy Online, see
         // https://github.com/taisel/GameBoy-Online/blob/47f9f638a8a9445aaa75050f634e437baa34aae0/js/GameBoyCore.js#L6453
-        return uint(uint8(255)) << 24u | uint(uint8(int(r) * 3 + int(g) * 2 + int(b) * 11 >> 1)) << 16u | uint(uint8(int(g) * 3 + int(b) << 1)) << 8u | uint(uint8(int(r) * 13 + int(g) * 2 + int(b) >> 1))
+        return (uint(255u8) << 24u) | (uint(uint8(int(r) * 3 + int(g) * 2 + int(b) * 11 >> 1)) << 16u) | (uint(uint8(int(g) * 3 + int(b) << 1)) << 8u) | uint(uint8(int(r) * 13 + int(g) * 2 + int(b) >> 1))
     } else {
-        return uint(uint8(255)) << 24u | uint(uint8(int(b) << 3)) << 16u | uint(uint8(int(g) << 3)) << 8u | uint(uint8(int(r) << 3))
+        return (uint(255u8) << 24u) | (uint(uint8(int(b) << 3)) << 16u) | (uint(uint8(int(g) << 3)) << 8u) | uint(uint8(int(r) << 3))
     }
-    return uint(0)
 }
 
 def private binjgb_all__unpack_cgb_color8(var e : Emulator?; lo : uint8; hi : uint8) : uint {
-    return binjgb_all__unpack_cgb_color(e, uint16(int(hi) << 8 | int(lo)))
+    return binjgb_all__unpack_cgb_color(e, uint16((int(hi) << 8) | int(lo)))
 }
 
 [c_function]
@@ -2895,9 +2890,9 @@ def private binjgb_all__set_sgb_palette(var e : Emulator?; pal : int; lo0 : uint
 
 [c_function]
 def private binjgb_all__unpack_sgb_palette_ram(var e : Emulator?; pal : int; idx_lo : uint8; idx_hi : uint8) {
-    var idx : uint16 = uint16(int(idx_hi) << 8 | int(idx_lo))
+    var idx : uint16 = uint16((int(idx_hi) << 8) | int(idx_lo))
     var data : uint8? = addr(e.state.sgb.pal_ram[0]) + 8 * (int(idx) & 511)
-    binjgb_all__set_sgb_palette(e, pal, deref(data + 0), deref(data + 1), deref(data + 2), deref(data + 3), deref(data + 4), deref(data + 5), deref(data + 6), deref(data + 7))
+    binjgb_all__set_sgb_palette(e, pal, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7])
 }
 
 def private binjgb_all__clear_frame_buffer(var e : Emulator?; color : uint) {
@@ -2946,8 +2941,8 @@ def private binjgb_all__set_sgb_attr_block(var e : Emulator?; x0 : int; y0 : int
                 while (x <= x1) {
                     var index : int = y * 20 + x
                     var byte : uint8? = addr(e.state.sgb.attr_map[0]) + end_index(index >> 2, 90)
-                    var mask : uint8 = uint8(~(192 >> 2 * (x & 3)))
-                    deref(byte) = uint8(int(deref(byte)) & int(mask) | int(pal) << 2 * (3 - (x & 3)))
+                    var mask : uint8 = uint8(~(192 >> (2 * (x & 3))))
+                    deref(byte) = uint8((int(deref(byte)) & int(mask)) | (int(pal) << (2 * (3 - (x & 3)))))
                     x++
                 }
             }
@@ -2957,9 +2952,9 @@ def private binjgb_all__set_sgb_attr_block(var e : Emulator?; x0 : int; y0 : int
 }
 
 def private binjgb_all__reverse_bits_u8(var x : uint8) : uint8 {
-    x = uint8(int(x) << 4 & 240 | int(x) >> 4 & 15)
-    x = uint8(int(x) << 2 & 204 | int(x) >> 2 & 51)
-    x = uint8(int(x) << 1 & 170 | int(x) >> 1 & 85)
+    x = uint8(((int(x) << 4) & 240) | ((int(x) >> 4) & 15))
+    x = uint8(((int(x) << 2) & 204) | ((int(x) >> 2) & 51))
+    x = uint8(((int(x) << 1) & 170) | ((int(x) >> 1) & 85))
     return x
 }
 
@@ -2976,11 +2971,11 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
     let _cond = e.state.sgb.state
     if (_cond == SgbState.SGB_STATE_IDLE) {
         if (e.state.joyp.joypad_select == JoypadSelect.JOYPAD_SGB_BOTH_LOW) {
-            e.state.sgb.bits_read = uint8(0)
+            e.state.sgb.bits_read = 0u8
             e.state.sgb.current_packet = uint8(uint(e.state.sgb.current_packet) + 1)
             if (int(e.state.sgb.current_packet) >= int(e.state.sgb.packet_count)) {
-                e.state.sgb.current_packet = uint8(0)
-                e.state.sgb.packet_count = uint8(0)
+                e.state.sgb.current_packet = 0u8
+                e.state.sgb.packet_count = 0u8
                 crt::memset(reinterpret<void?>(addr(e.state.sgb.data)), 0, uint64(typeinfo sizeof(type<uint8[112]>)))
             }
             e.state.sgb.state = SgbState.SGB_STATE_WAIT_BIT
@@ -2993,7 +2988,7 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
         }
     } elif (_cond == SgbState.SGB_STATE_READ_BIT) {
         if (e.state.joyp.joypad_select == JoypadSelect.JOYPAD_SGB_P15_LOW) {
-            var curbyte : int = int(e.state.sgb.current_packet) << 4 | int(e.state.sgb.bits_read) >> 3
+            var curbyte : int = (int(e.state.sgb.current_packet) << 4) | (int(e.state.sgb.bits_read) >> 3)
             var curbit : uint8 = uint8(int(e.state.sgb.bits_read) & 7)
             e.state.sgb.data[curbyte] = uint8(int(e.state.sgb.data[curbyte]) | 1 << int(curbit))
             e.state.sgb.bits_read = uint8(uint(e.state.sgb.bits_read) + 1)
@@ -3018,7 +3013,7 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
         e.state.sgb.player_incremented = Bool.TRUE
     } elif (e.state.joyp.joypad_select == JoypadSelect.JOYPAD_SGB_BOTH_HIGH) {
         if (int(e.state.sgb.player_incremented) != 0) {
-            e.state.sgb.current_player = uint8(int(e.state.sgb.current_player) + 1 & int(e.state.sgb.player_mask))
+            e.state.sgb.current_player = uint8((int(e.state.sgb.current_player) + 1) & int(e.state.sgb.player_mask))
         }
         e.state.sgb.player_incremented = Bool.FALSE
     }
@@ -3049,14 +3044,12 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
             }
             let _cond2 = code
             if (_cond2 == 0 || _cond2 == 1 || _cond2 == 2 || _cond2 == 3) {
-                {
-                    // PAL01
-                    // PAL23
-                    // PAL03
-                    // PAL12
-                    binjgb_all__set_sgb_palette(e, do_sgb_s_pals[code].pal0, e.state.sgb.data[1], e.state.sgb.data[2], e.state.sgb.data[3], e.state.sgb.data[4], e.state.sgb.data[5], e.state.sgb.data[6], e.state.sgb.data[7], e.state.sgb.data[8])
-                    binjgb_all__set_sgb_palette(e, do_sgb_s_pals[code].pal1, e.state.sgb.data[1], e.state.sgb.data[2], e.state.sgb.data[9], e.state.sgb.data[10], e.state.sgb.data[11], e.state.sgb.data[12], e.state.sgb.data[13], e.state.sgb.data[14])
-                }
+                // PAL01
+                // PAL23
+                // PAL03
+                // PAL12
+                binjgb_all__set_sgb_palette(e, do_sgb_s_pals[code].pal0, e.state.sgb.data[1], e.state.sgb.data[2], e.state.sgb.data[3], e.state.sgb.data[4], e.state.sgb.data[5], e.state.sgb.data[6], e.state.sgb.data[7], e.state.sgb.data[8])
+                binjgb_all__set_sgb_palette(e, do_sgb_s_pals[code].pal1, e.state.sgb.data[1], e.state.sgb.data[2], e.state.sgb.data[9], e.state.sgb.data[10], e.state.sgb.data[11], e.state.sgb.data[12], e.state.sgb.data[13], e.state.sgb.data[14])
             } elif (_cond2 == 4) {
                 {
                     // ATTR_BLK
@@ -3065,8 +3058,8 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                         var info : uint8 = e.state.sgb.data[2 + i * 6]
                         var pal : uint8 = e.state.sgb.data[3 + i * 6]
                         var palin : uint8 = uint8(int(pal) & 3)
-                        var palon : uint8 = uint8(int(pal) >> 2 & 3)
-                        var palout : uint8 = uint8(int(pal) >> 4 & 3)
+                        var palon : uint8 = uint8((int(pal) >> 2) & 3)
+                        var palout : uint8 = uint8((int(pal) >> 4) & 3)
                         var l : uint8 = e.state.sgb.data[4 + i * 6]
                         var t : uint8 = e.state.sgb.data[5 + i * 6]
                         var r : uint8 = e.state.sgb.data[6 + i * 6]
@@ -3106,7 +3099,7 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                     for (i in range(datasets)) {
                         var info : uint8 = e.state.sgb.data[2 + i]
                         var line : uint8 = uint8(int(info) & 31)
-                        var pal : uint8 = uint8(int(info) >> 5 & 3)
+                        var pal : uint8 = uint8((int(info) >> 5) & 3)
                         // horizontal
                         if ((int(info) & 128) != 0) {
                             binjgb_all__set_sgb_attr_block(e, 0, int(line), 19, int(line), pal)
@@ -3121,8 +3114,8 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                     // ATTR_DIV
                     var pal : uint8 = e.state.sgb.data[1]
                     var pallo : uint8 = uint8(int(pal) & 3)
-                    var palon : uint8 = uint8(int(pal) >> 2 & 3)
-                    var palhi : uint8 = uint8(int(pal) >> 4 & 3)
+                    var palon : uint8 = uint8((int(pal) >> 2) & 3)
+                    var palhi : uint8 = uint8((int(pal) >> 4) & 3)
                     var line : uint8 = e.state.sgb.data[2]
                     // above/below
                     if ((int(pal) & 64) != 0) {
@@ -3147,14 +3140,14 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                     // ATTR_CHR
                     var x : uint8 = e.state.sgb.data[1]
                     var y : uint8 = e.state.sgb.data[2]
-                    var dx : uint8 = uint8(0)
-                    var dy : uint8 = uint8(0)
+                    var dx : uint8 = 0u8
+                    var dy : uint8 = 0u8
                     if (int(e.state.sgb.data[5]) == 0) {
-                        dx = uint8(1)
+                        dx = 1u8
                     } else {
-                        dy = uint8(1)
+                        dy = 1u8
                     }
-                    var datasets : int = ((int(e.state.sgb.data[4]) << 8 | int(e.state.sgb.data[3])) < (int(e.state.sgb.packet_count) * 16 - 6) * 4 ? int(e.state.sgb.data[4]) << 8 | int(e.state.sgb.data[3]) : (int(e.state.sgb.packet_count) * 16 - 6) * 4) < 360 ? ((int(e.state.sgb.data[4]) << 8 | int(e.state.sgb.data[3])) < (int(e.state.sgb.packet_count) * 16 - 6) * 4 ? int(e.state.sgb.data[4]) << 8 | int(e.state.sgb.data[3]) : (int(e.state.sgb.packet_count) * 16 - 6) * 4) : 360
+                    var datasets : int = (((int(e.state.sgb.data[4]) << 8) | int(e.state.sgb.data[3])) < (int(e.state.sgb.packet_count) * 16 - 6) * 4 ? ((int(e.state.sgb.data[4]) << 8) | int(e.state.sgb.data[3])) : (int(e.state.sgb.packet_count) * 16 - 6) * 4) < 360 ? (((int(e.state.sgb.data[4]) << 8) | int(e.state.sgb.data[3])) < (int(e.state.sgb.packet_count) * 16 - 6) * 4 ? ((int(e.state.sgb.data[4]) << 8) | int(e.state.sgb.data[3])) : (int(e.state.sgb.packet_count) * 16 - 6) * 4) : 360
                     {
                         var i : int = 0
                         while (i < datasets) {
@@ -3162,18 +3155,18 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                             {
                                 var j : int = 0
                                 while (j < (datasets < 4 ? datasets : 4)) {
-                                    binjgb_all__set_sgb_attr_block(e, int(x), int(y), int(x), int(y), uint8(int(byte) >> (3 - j) * 2))
+                                    binjgb_all__set_sgb_attr_block(e, int(x), int(y), int(x), int(y), uint8(int(byte) >> ((3 - j) * 2)))
                                     x = uint8(int(x) + int(dx))
                                     y = uint8(int(y) + int(dy))
                                     if (int(x) >= 20) {
-                                        x = uint8(0)
+                                        x = 0u8
                                         y = uint8(uint(y) + 1)
                                     }
                                     if (int(y) >= 18) {
-                                        y = uint8(0)
+                                        y = 0u8
                                         x = uint8(uint(x) + 1)
                                         if (int(x) >= 20) {
-                                            x = uint8(0)
+                                            x = 0u8
                                         }
                                     }
                                     j++
@@ -3201,15 +3194,15 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                 e.state.sgb.player_mask = uint8(int(e.state.sgb.data[1]) & 3)
             } elif (_cond2 == 19) {
                 // CHR_TRN
-                crt::memcpy(reinterpret<void?>(addr(e.state.sgb.chr_ram[0]) + ((int(e.state.sgb.data[1]) & 1) << 12)), reinterpret<void?>(xfer_src), uint64(4096))
+                crt::memcpy(reinterpret<void?>(addr(e.state.sgb.chr_ram[0]) + ((int(e.state.sgb.data[1]) & 1) << 12)), reinterpret<void?>(xfer_src), 4096ul)
             } elif (_cond2 == 20) {
                 // PCT_TRN
                 for (pal in range(4)) {
-                    e.state.sgb.border_pal[pal][0] = uint(0)
+                    e.state.sgb.border_pal[pal][0] = 0u
                     for (col in range(1, 16)) {
                         var idx : int = 2048 + (pal * 16 + col) * 2
-                        var lo : uint8 = deref(xfer_src + idx)
-                        var hi : uint8 = deref(xfer_src + (idx + 1))
+                        var lo : uint8 = xfer_src[idx]
+                        var hi : uint8 = xfer_src[idx + 1]
                         e.state.sgb.border_pal[pal][col] = binjgb_all__unpack_cgb_color8(e, lo, hi)
                     }
                 }
@@ -3217,9 +3210,9 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                 for (col in range(28)) {
                     for (row in range(32)) {
                         var idx : int = (col * 32 + row) * 2
-                        var tile : uint8 = deref(xfer_src + idx)
-                        var info : uint8 = deref(xfer_src + (idx + 1))
-                        var pal : uint8 = uint8(int(info) >> 2 & 3)
+                        var tile : uint8 = xfer_src[idx]
+                        var info : uint8 = xfer_src[idx + 1]
+                        var pal : uint8 = uint8((int(info) >> 2) & 3)
                         var src : uint8? = addr(e.state.sgb.chr_ram[0]) + int(tile) * 32
                         var dsrc : int = 2
                         if ((int(info) & 128) != 0) {
@@ -3229,10 +3222,10 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                         {
                             var y : int = 0
                             while (y < 8) {
-                                var p0 : uint8 = deref(src + 0)
-                                var p1 : uint8 = deref(src + 1)
-                                var p2 : uint8 = deref(src + 16)
-                                var p3 : uint8 = deref(src + 17)
+                                var p0 : uint8 = src[0]
+                                var p1 : uint8 = src[1]
+                                var p2 : uint8 = src[16]
+                                var p3 : uint8 = src[17]
                                 if (!((int(info) & 64) != 0)) {
                                     p0 = binjgb_all__reverse_bits_u8(p0)
                                     p1 = binjgb_all__reverse_bits_u8(p1)
@@ -3240,8 +3233,8 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                                     p3 = binjgb_all__reverse_bits_u8(p3)
                                 }
                                 for (x in range(8)) {
-                                    var palidx : int = (int(p3) & 1) << 3 | (int(p2) & 1) << 2 | (int(p1) & 1) << 1 | int(p0) & 1
-                                    deref(dst + ((col * 8 + y) * SGB_SCREEN_WIDTH + (row * 8 + x))) = e.state.sgb.border_pal[int(pal)][palidx]
+                                    var palidx : int = ((int(p3) & 1) << 3) | ((int(p2) & 1) << 2) | ((int(p1) & 1) << 1) | (int(p0) & 1)
+                                    dst[(col * 8 + y) * SGB_SCREEN_WIDTH + (row * 8 + x)] = e.state.sgb.border_pal[int(pal)][palidx]
                                     p0 = uint8(uint(p0) >> 1u)
                                     p1 = uint8(uint(p1) >> 1u)
                                     p2 = uint8(uint(p2) >> 1u)
@@ -3279,7 +3272,7 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
 def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : uint8) {
     let _cond = int(_c_addr)
     if (_cond == 0) {
-        e.state.joyp.joypad_select = enum_from_int(type<JoypadSelect>, int(value) >> 4 & (1 << 5 - 4 + 1) - 1)
+        e.state.joyp.joypad_select = enum_from_int(type<JoypadSelect>, (int(value) >> 4) & (1 << 5 - 4 + 1) - 1)
         binjgb_all__do_sgb(e)
         binjgb_all__check_joyp_intr(e)
     } elif (_cond == 1) {
@@ -3287,11 +3280,11 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
         e.state.serial.sb = value
     } elif (_cond == 2) {
         binjgb_all__serial_synchronize(e)
-        e.state.serial.transferring = enum_from_int(type<Bool>, int(value) >> 7 & (1 << 7 - 7 + 1) - 1)
-        e.state.serial.clock = enum_from_int(type<SerialClock>, int(value) >> 0 & (1 << 0 - 0 + 1) - 1)
+        e.state.serial.transferring = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
+        e.state.serial.clock = enum_from_int(type<SerialClock>, (int(value) >> 0) & (1 << 0 - 0 + 1) - 1)
         if (int(e.state.serial.transferring) != 0) {
-            e.state.serial.tick_count = uint64(0)
-            e.state.serial.transferred_bits = uint8(0)
+            e.state.serial.tick_count = 0ul
+            e.state.serial.transferred_bits = 0u8
         }
         binjgb_all__calculate_next_serial_intr(e)
     } elif (_cond == 4) {
@@ -3326,8 +3319,8 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
             binjgb_all__timer_synchronize(e)
             var old_timer_on : Bool = e.state.timer.on
             var old_tima_mask : uint16 = binjgb_all__s_tima_mask[int(e.state.timer.clock_select)]
-            e.state.timer.clock_select = enum_from_int(type<TimerClock>, int(value) >> 0 & (1 << 1 - 0 + 1) - 1)
-            e.state.timer.on = enum_from_int(type<Bool>, int(value) >> 2 & (1 << 2 - 2 + 1) - 1)
+            e.state.timer.clock_select = enum_from_int(type<TimerClock>, (int(value) >> 0) & (1 << 1 - 0 + 1) - 1)
+            e.state.timer.on = enum_from_int(type<Bool>, (int(value) >> 2) & (1 << 2 - 2 + 1) - 1)
             // tima is incremented when a specific bit of div_counter transitions
             // from 1 to 0. This can happen as a result of writing to DIV, or in this
             // case modifying which bit we're looking at.
@@ -3354,23 +3347,23 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
             binjgb_all__ppu_synchronize(e)
             binjgb_all__ppu_mode3_synchronize(e)
             var was_enabled : Bool = e.state.ppu.lcdc.display
-            e.state.ppu.lcdc.display = enum_from_int(type<Bool>, int(value) >> 7 & (1 << 7 - 7 + 1) - 1)
-            e.state.ppu.lcdc.window_tile_map_select = enum_from_int(type<TileMapSelect>, int(value) >> 6 & (1 << 6 - 6 + 1) - 1)
-            e.state.ppu.lcdc.window_display = enum_from_int(type<Bool>, int(value) >> 5 & (1 << 5 - 5 + 1) - 1)
-            e.state.ppu.lcdc.bg_tile_data_select = enum_from_int(type<TileDataSelect>, int(value) >> 4 & (1 << 4 - 4 + 1) - 1)
-            e.state.ppu.lcdc.bg_tile_map_select = enum_from_int(type<TileMapSelect>, int(value) >> 3 & (1 << 3 - 3 + 1) - 1)
-            e.state.ppu.lcdc.obj_size = enum_from_int(type<ObjSize>, int(value) >> 2 & (1 << 2 - 2 + 1) - 1)
-            e.state.ppu.lcdc.obj_display = enum_from_int(type<Bool>, int(value) >> 1 & (1 << 1 - 1 + 1) - 1)
-            e.state.ppu.lcdc.bg_display = enum_from_int(type<Bool>, int(value) >> 0 & (1 << 0 - 0 + 1) - 1)
+            e.state.ppu.lcdc.display = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
+            e.state.ppu.lcdc.window_tile_map_select = enum_from_int(type<TileMapSelect>, (int(value) >> 6) & (1 << 6 - 6 + 1) - 1)
+            e.state.ppu.lcdc.window_display = enum_from_int(type<Bool>, (int(value) >> 5) & (1 << 5 - 5 + 1) - 1)
+            e.state.ppu.lcdc.bg_tile_data_select = enum_from_int(type<TileDataSelect>, (int(value) >> 4) & (1 << 4 - 4 + 1) - 1)
+            e.state.ppu.lcdc.bg_tile_map_select = enum_from_int(type<TileMapSelect>, (int(value) >> 3) & (1 << 3 - 3 + 1) - 1)
+            e.state.ppu.lcdc.obj_size = enum_from_int(type<ObjSize>, (int(value) >> 2) & (1 << 2 - 2 + 1) - 1)
+            e.state.ppu.lcdc.obj_display = enum_from_int(type<Bool>, (int(value) >> 1) & (1 << 1 - 1 + 1) - 1)
+            e.state.ppu.lcdc.bg_display = enum_from_int(type<Bool>, (int(value) >> 0) & (1 << 0 - 0 + 1) - 1)
             if ((uint(int(was_enabled)) ^ uint(int(e.state.ppu.lcdc.display))) != 0) {
                 e.state.ppu.stat.mode = PPUMode.PPU_MODE_HBLANK
-                e.state.ppu.line_y = uint8(0)
+                e.state.ppu.line_y = 0u8
                 e.state.ppu.ly = e.state.ppu.line_y
                 if (int(e.state.ppu.lcdc.display) != 0) {
                     binjgb_all__check_ly_eq_lyc(e, Bool.FALSE)
                     e.state.ppu.state = PPUState.PPU_STATE_LCD_ON_MODE2
                     e.state.ppu.state_ticks = uint(PPU_MODE2_TICKS)
-                    e.state.ppu.line_start_ticks = e.state.ticks - uint64(4) - uint64(4) + uint64(4) - uint64(1) & uint64(~(4 - 1))
+                    e.state.ppu.line_start_ticks = e.state.ticks - uint64(CPU_TICK) - uint64(CPU_TICK) + uint64(CPU_TICK) - 1ul & uint64(~(CPU_TICK - 1))
                     e.state.ppu.display_delay_frames = uint8(PPU_ENABLE_DISPLAY_DELAY_FRAMES)
                     e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_MODE2
                 } else {
@@ -3388,8 +3381,8 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
     } elif (_cond == 65) {
         {
             binjgb_all__ppu_synchronize(e)
-            var new_vblank_irq : Bool = enum_from_int(type<Bool>, int(value) >> 4 & (1 << 4 - 4 + 1) - 1)
-            var new_hblank_irq : Bool = enum_from_int(type<Bool>, int(value) >> 3 & (1 << 3 - 3 + 1) - 1)
+            var new_vblank_irq : Bool = enum_from_int(type<Bool>, (int(value) >> 4) & (1 << 4 - 4 + 1) - 1)
+            var new_hblank_irq : Bool = enum_from_int(type<Bool>, (int(value) >> 3) & (1 << 3 - 3 + 1) - 1)
             if (int(e.state.ppu.lcdc.display) != 0) {
                 var hblank : Bool = enum_from_int(type<Bool>, e.state.ppu.stat.trigger_mode == PPUMode.PPU_MODE_HBLANK && !(int(e.state.ppu.stat.hblank.irq) != 0) ? 1 : 0)
                 var vblank : Bool = enum_from_int(type<Bool>, e.state.ppu.stat.trigger_mode == PPUMode.PPU_MODE_VBLANK && !(int(e.state.ppu.stat.vblank.irq) != 0) ? 1 : 0)
@@ -3406,8 +3399,8 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
                     e.state.ppu.stat.if_ = Bool.TRUE
                 }
             }
-            e.state.ppu.stat.y_compare.irq = enum_from_int(type<Bool>, int(value) >> 6 & (1 << 6 - 6 + 1) - 1)
-            e.state.ppu.stat.mode2.irq = enum_from_int(type<Bool>, int(value) >> 5 & (1 << 5 - 5 + 1) - 1)
+            e.state.ppu.stat.y_compare.irq = enum_from_int(type<Bool>, (int(value) >> 6) & (1 << 6 - 6 + 1) - 1)
+            e.state.ppu.stat.mode2.irq = enum_from_int(type<Bool>, (int(value) >> 5) & (1 << 5 - 5 + 1) - 1)
             e.state.ppu.stat.vblank.irq = new_vblank_irq
             e.state.ppu.stat.hblank.irq = new_hblank_irq
             binjgb_all__calculate_next_ppu_intr(e)
@@ -3432,7 +3425,7 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
         // DMA can be restarted.
         binjgb_all__dma_synchronize(e)
         e.state.dma.sync_ticks = e.state.ticks
-        e.state.dma.tick_count = uint64(0)
+        e.state.dma.tick_count = 0ul
         e.state.dma.state = e.state.dma.state != DmaState.DMA_INACTIVE ? e.state.dma.state : DmaState.DMA_TRIGGERED
         e.state.dma.source = uint16(int(value) << 8)
     } elif (_cond == 71 || _cond == 72 || _cond == 73) {
@@ -3440,10 +3433,10 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
             var _c_type : PaletteType = enum_from_int(type<PaletteType>, int(_c_addr) - int(IOReg.IO_BGP_ADDR))
             var pal : Palette? = addr(e.state.ppu.pal[0]) + end_index(int(_c_type), 3)
             binjgb_all__ppu_mode3_synchronize(e)
-            pal.color[3] = enum_from_int(type<Color>, int(value) >> 6 & (1 << 7 - 6 + 1) - 1)
-            pal.color[2] = enum_from_int(type<Color>, int(value) >> 4 & (1 << 5 - 4 + 1) - 1)
-            pal.color[1] = enum_from_int(type<Color>, int(value) >> 2 & (1 << 3 - 2 + 1) - 1)
-            pal.color[0] = enum_from_int(type<Color>, int(value) >> 0 & (1 << 1 - 0 + 1) - 1)
+            pal.color[3] = enum_from_int(type<Color>, (int(value) >> 6) & (1 << 7 - 6 + 1) - 1)
+            pal.color[2] = enum_from_int(type<Color>, (int(value) >> 4) & (1 << 5 - 4 + 1) - 1)
+            pal.color[1] = enum_from_int(type<Color>, (int(value) >> 2) & (1 << 3 - 2 + 1) - 1)
+            pal.color[0] = enum_from_int(type<Color>, (int(value) >> 0) & (1 << 1 - 0 + 1) - 1)
             binjgb_all__update_bw_palette_rgba(e, _c_type)
         }
     } elif (_cond == 74) {
@@ -3455,33 +3448,33 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
         e.state.ppu.wx = value
     } elif (_cond == 77) {
         if (int(e.state.is_cgb) != 0) {
-            e.state.cpu_speed.switching = enum_from_int(type<Bool>, int(value) >> 0 & (1 << 0 - 0 + 1) - 1)
+            e.state.cpu_speed.switching = enum_from_int(type<Bool>, (int(value) >> 0) & (1 << 0 - 0 + 1) - 1)
         }
     } elif (_cond == 79) {
         if (int(e.state.is_cgb) != 0) {
-            e.state.vram.bank = uint8(int(value) >> 0 & (1 << 0 - 0 + 1) - 1)
+            e.state.vram.bank = uint8((int(value) >> 0) & (1 << 0 - 0 + 1) - 1)
             e.state.vram.offset = uint16(int(e.state.vram.bank) << 13)
         }
     } elif (_cond == 81) {
         if (int(e.state.is_cgb) != 0) {
-            e.state.hdma.source = uint16(int(e.state.hdma.source) & 255 | int(value) << 8)
+            e.state.hdma.source = uint16((int(e.state.hdma.source) & 255) | (int(value) << 8))
         }
     } elif (_cond == 82) {
         if (int(e.state.is_cgb) != 0) {
-            e.state.hdma.source = uint16(int(e.state.hdma.source) & 65280 | int(value) & 240)
+            e.state.hdma.source = uint16((int(e.state.hdma.source) & 65280) | (int(value) & 240))
         }
     } elif (_cond == 83) {
         if (int(e.state.is_cgb) != 0) {
-            e.state.hdma.dest = uint16(int(e.state.hdma.dest) & 255 | int(value) << 8)
+            e.state.hdma.dest = uint16((int(e.state.hdma.dest) & 255) | (int(value) << 8))
         }
     } elif (_cond == 84) {
         if (int(e.state.is_cgb) != 0) {
-            e.state.hdma.dest = uint16(int(e.state.hdma.dest) & 65280 | int(value) & 240)
+            e.state.hdma.dest = uint16((int(e.state.hdma.dest) & 65280) | (int(value) & 240))
         }
     } elif (_cond == 85) {
         if (int(e.state.is_cgb) != 0) {
-            var new_mode : HdmaTransferMode = enum_from_int(type<HdmaTransferMode>, int(value) >> 7 & (1 << 7 - 7 + 1) - 1)
-            var new_blocks : uint8 = uint8(int(value) >> 0 & (1 << 6 - 0 + 1) - 1)
+            var new_mode : HdmaTransferMode = enum_from_int(type<HdmaTransferMode>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
+            var new_blocks : uint8 = uint8((int(value) >> 0) & (1 << 6 - 0 + 1) - 1)
             if (e.state.hdma.mode == HdmaTransferMode.HDMA_TRANSFER_MODE_HDMA && (int(e.state.hdma.blocks) & 128) == 0) {
                 // HDMA Active
                 if (new_mode == HdmaTransferMode.HDMA_TRANSFER_MODE_GDMA) {
@@ -3501,34 +3494,34 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
         }
     } elif (_cond == 86) {
         if (int(e.state.is_cgb) != 0) {
-            e.state.infrared.write = enum_from_int(type<Bool>, int(value) >> 0 & (1 << 0 - 0 + 1) - 1)
-            e.state.infrared.enabled = enum_from_int(type<DataReadEnable>, int(value) >> 6 & (1 << 7 - 6 + 1) - 1)
+            e.state.infrared.write = enum_from_int(type<Bool>, (int(value) >> 0) & (1 << 0 - 0 + 1) - 1)
+            e.state.infrared.enabled = enum_from_int(type<DataReadEnable>, (int(value) >> 6) & (1 << 7 - 6 + 1) - 1)
         }
     } elif (_cond == 104 || _cond == 106) {
         if (int(e.state.is_cgb) != 0) {
             binjgb_all__ppu_mode3_synchronize(e)
             var cp : ColorPalettes? = int(_c_addr) == int(IOReg.IO_BCPS_ADDR) ? addr(e.state.ppu.bgcp) : addr(e.state.ppu.obcp)
-            cp.index = uint8(int(value) >> 0 & (1 << 5 - 0 + 1) - 1)
-            cp.auto_increment = enum_from_int(type<Bool>, int(value) >> 7 & (1 << 7 - 7 + 1) - 1)
+            cp.index = uint8((int(value) >> 0) & (1 << 5 - 0 + 1) - 1)
+            cp.auto_increment = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
         }
     } elif (_cond == 105 || _cond == 107) {
         if (int(e.state.is_cgb) != 0) {
             binjgb_all__ppu_mode3_synchronize(e)
             var cp : ColorPalettes? = int(_c_addr) == int(IOReg.IO_BCPD_ADDR) ? addr(e.state.ppu.bgcp) : addr(e.state.ppu.obcp)
             cp.data[int(cp.index)] = value
-            var palette_index : uint8 = uint8(int(cp.index) >> 3 & 7)
-            var color_index : uint8 = uint8(int(cp.index) >> 1 & 3)
-            var color16 : uint16 = uint16(int(cp.data[int(cp.index) | 1]) << 8 | int(cp.data[int(cp.index) & ~1]))
+            var palette_index : uint8 = uint8((int(cp.index) >> 3) & 7)
+            var color_index : uint8 = uint8((int(cp.index) >> 1) & 3)
+            var color16 : uint16 = uint16((int(cp.data[int(cp.index) | 1]) << 8) | int(cp.data[int(cp.index) & ~1]))
             var color : uint = binjgb_all__unpack_cgb_color(e, color16)
             cp.palettes[int(palette_index)].color[int(color_index)] = color
             if (int(cp.auto_increment) != 0) {
-                cp.index = uint8(int(cp.index) + 1 & 63)
+                cp.index = uint8((int(cp.index) + 1) & 63)
             }
         }
     } elif (_cond == 112) {
         if (int(e.state.is_cgb) != 0) {
-            e.state.wram.bank = uint8(int(value) >> 0 & (1 << 2 - 0 + 1) - 1)
-            e.state.wram.offset = uint16(int(e.state.wram.bank) == 0 ? 4096 : int(e.state.wram.bank) << 12)
+            e.state.wram.bank = uint8((int(value) >> 0) & (1 << 2 - 0 + 1) - 1)
+            e.state.wram.offset = uint16(int(e.state.wram.bank) == 0 ? 4096 : (int(e.state.wram.bank) << 12))
         }
     } elif (_cond == 255) {
         e.state.interrupt.ie = value
@@ -3538,20 +3531,20 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
 
 def private binjgb_all__write_nrx1_reg(var e : Emulator?; var channel : Channel?; _c_addr : uint16; value : uint8) {
     if (int(e.state.apu.enabled) != 0) {
-        channel.square_wave.duty = enum_from_int(type<WaveDuty>, int(value) >> 6 & (1 << 7 - 6 + 1) - 1)
+        channel.square_wave.duty = enum_from_int(type<WaveDuty>, (int(value) >> 6) & (1 << 7 - 6 + 1) - 1)
     }
-    channel.length = uint16(NRX1_MAX_LENGTH - (int(value) >> 0 & (1 << 5 - 0 + 1) - 1))
+    channel.length = uint16(NRX1_MAX_LENGTH - ((int(value) >> 0) & (1 << 5 - 0 + 1) - 1))
 }
 
 def private binjgb_all__write_nrx2_reg(var e : Emulator?; var channel : Channel?; _c_addr : uint16; value : uint8) {
-    channel.envelope.initial_volume = uint8(int(value) >> 4 & (1 << 7 - 4 + 1) - 1)
-    channel.dac_enabled = enum_from_int(type<Bool>, (int(value) >> 3 & (1 << 7 - 3 + 1) - 1) != 0 ? 1 : 0)
+    channel.envelope.initial_volume = uint8((int(value) >> 4) & (1 << 7 - 4 + 1) - 1)
+    channel.dac_enabled = enum_from_int(type<Bool>, ((int(value) >> 3) & (1 << 7 - 3 + 1) - 1) != 0 ? 1 : 0)
     if (!(int(channel.dac_enabled) != 0)) {
         channel.status = Bool.FALSE
     }
     if (int(channel.status) != 0) {
         if (!!(int(channel.envelope.period) == 0 && uint(int(channel.envelope.automatic)) != 0)) {
-            var new_volume : uint8 = uint8(int(channel.envelope.volume) + 1 & ENVELOPE_MAX_VOLUME)
+            var new_volume : uint8 = uint8((int(channel.envelope.volume) + 1) & ENVELOPE_MAX_VOLUME)
             channel.envelope.volume = new_volume
             // Super ugly hack to support decreasing volume in zombie mode.
             channel.envelope.zombie_step = uint8(int(value) == 9 ? 1 : 0)
@@ -3562,28 +3555,28 @@ def private binjgb_all__write_nrx2_reg(var e : Emulator?; var channel : Channel?
                 channel.envelope.zombie_step = uint8(uint(channel.envelope.zombie_step) + 1)
             } elif (int(channel.envelope.zombie_step) == 2 && int(value) == 24) {
                 channel.envelope.zombie_step = uint8(uint(channel.envelope.zombie_step) + 1)
-                var new_volume : uint8 = uint8(int(channel.envelope.volume) + ENVELOPE_MAX_VOLUME - 1 & ENVELOPE_MAX_VOLUME)
+                var new_volume : uint8 = uint8((int(channel.envelope.volume) + ENVELOPE_MAX_VOLUME - 1) & ENVELOPE_MAX_VOLUME)
                 channel.envelope.volume = new_volume
             } else {
-                channel.envelope.zombie_step = uint8(0)
+                channel.envelope.zombie_step = 0u8
             }
         }
     }
-    channel.envelope.direction = enum_from_int(type<EnvelopeDirection>, int(value) >> 3 & (1 << 3 - 3 + 1) - 1)
-    channel.envelope.period = uint8(int(value) >> 0 & (1 << 2 - 0 + 1) - 1)
+    channel.envelope.direction = enum_from_int(type<EnvelopeDirection>, (int(value) >> 3) & (1 << 3 - 3 + 1) - 1)
+    channel.envelope.period = uint8((int(value) >> 0) & (1 << 2 - 0 + 1) - 1)
 }
 
 def private binjgb_all__write_nrx3_reg(var e : Emulator?; var channel : Channel?; value : uint8) {
-    channel.frequency = uint16(int(channel.frequency) & ~255 | int(value))
+    channel.frequency = uint16((int(channel.frequency) & ~255) | int(value))
 }
 
 // Returns TRUE if this channel was triggered.
 def private binjgb_all__write_nrx4_reg(var e : Emulator?; var channel : Channel?; _c_addr : uint16; value : uint8; max_length : uint16) : Bool {
-    var trigger : Bool = enum_from_int(type<Bool>, int(value) >> 7 & (1 << 7 - 7 + 1) - 1)
+    var trigger : Bool = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
     var was_length_enabled : Bool = channel.length_enabled
-    channel.length_enabled = enum_from_int(type<Bool>, int(value) >> 6 & (1 << 6 - 6 + 1) - 1)
+    channel.length_enabled = enum_from_int(type<Bool>, (int(value) >> 6) & (1 << 6 - 6 + 1) - 1)
     channel.frequency = uint16(int(channel.frequency) & 255)
-    channel.frequency = uint16(int(channel.frequency) | (int(value) >> 0 & (1 << 2 - 0 + 1) - 1) << 8)
+    channel.frequency = uint16(int(channel.frequency) | ((int(value) >> 0) & (1 << 2 - 0 + 1) - 1) << 8)
     // Extra length clocking occurs on NRX4 writes if the next APU frame isn't a
     // length counter frame. This only occurs on transition from disabled to
     // enabled.
@@ -3613,7 +3606,7 @@ def private binjgb_all__trigger_nrx4_envelope(var e : Emulator?; var envelope : 
     envelope.timer = uint(envelope.period != 0 ? int(envelope.period) : ENVELOPE_MAX_PERIOD)
     envelope.automatic = Bool.TRUE
     // If the next APU frame will update the envelope, increment the timer.
-    if (!!(int(e.state.apu.frame) + 1 == 7)) {
+    if (!!(int(e.state.apu.frame) + 1 == FRAME_SEQUENCER_UPDATE_ENVELOPE_FRAME)) {
         envelope.timer++
     }
 }
@@ -3633,18 +3626,18 @@ def private binjgb_all__trigger_nr14_reg(var e : Emulator?; var channel : Channe
     e.state.apu.sweep.frequency = channel.frequency
     e.state.apu.sweep.timer = uint8(e.state.apu.sweep.period != 0 ? int(e.state.apu.sweep.period) : SWEEP_MAX_PERIOD)
     e.state.apu.sweep.calculated_subtract = Bool.FALSE
-    if (!!(e.state.apu.sweep.shift != 0 && int(binjgb_all__calculate_sweep_frequency(e)) > 2047)) {
+    if (!!(e.state.apu.sweep.shift != 0 && int(binjgb_all__calculate_sweep_frequency(e)) > SOUND_MAX_FREQUENCY)) {
         channel.status = Bool.FALSE
     } else {
     }
 }
 
 def private binjgb_all__write_wave_period(var e : Emulator?; var channel : Channel?) {
-    e.state.apu.wave.period = uint((SOUND_MAX_FREQUENCY + 1 - int(channel.frequency)) * 2)
+    e.state.apu.wave.period = uint(((SOUND_MAX_FREQUENCY + 1) - int(channel.frequency)) * 2)
 }
 
 def private binjgb_all__write_square_wave_period(var e : Emulator?; var channel : Channel?; var square : SquareWave?) {
-    square.period = uint((SOUND_MAX_FREQUENCY + 1 - int(channel.frequency)) * 4)
+    square.period = uint(((SOUND_MAX_FREQUENCY + 1) - int(channel.frequency)) * 4)
 }
 
 def private binjgb_all__write_noise_period(var e : Emulator?) {
@@ -3680,9 +3673,9 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
     if (_cond == 0) {
         {
             var old_direction : SweepDirection = e.state.apu.sweep.direction
-            e.state.apu.sweep.period = uint8(int(value) >> 4 & (1 << 6 - 4 + 1) - 1)
-            e.state.apu.sweep.direction = enum_from_int(type<SweepDirection>, int(value) >> 3 & (1 << 3 - 3 + 1) - 1)
-            e.state.apu.sweep.shift = uint8(int(value) >> 0 & (1 << 2 - 0 + 1) - 1)
+            e.state.apu.sweep.period = uint8((int(value) >> 4) & (1 << 6 - 4 + 1) - 1)
+            e.state.apu.sweep.direction = enum_from_int(type<SweepDirection>, (int(value) >> 3) & (1 << 3 - 3 + 1) - 1)
+            e.state.apu.sweep.shift = uint8((int(value) >> 0) & (1 << 2 - 0 + 1) - 1)
             if (old_direction == SweepDirection.SWEEP_DIRECTION_SUBTRACTION && e.state.apu.sweep.direction == SweepDirection.SWEEP_DIRECTION_ADDITION && uint(int(e.state.apu.sweep.calculated_subtract)) != 0) {
                 e.state.apu.channel[int(anon_96.APU_CHANNEL1)].status = Bool.FALSE
             }
@@ -3721,7 +3714,7 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
             }
         }
     } elif (_cond == 10) {
-        e.state.apu.channel[int(anon_96.APU_CHANNEL3)].dac_enabled = enum_from_int(type<Bool>, int(value) >> 7 & (1 << 7 - 7 + 1) - 1)
+        e.state.apu.channel[int(anon_96.APU_CHANNEL3)].dac_enabled = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
         if (!(int(e.state.apu.channel[int(anon_96.APU_CHANNEL3)].dac_enabled) != 0)) {
             e.state.apu.channel[int(anon_96.APU_CHANNEL3)].status = Bool.FALSE
             e.state.apu.wave.playing = Bool.FALSE
@@ -3729,7 +3722,7 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
     } elif (_cond == 11) {
         e.state.apu.channel[int(anon_96.APU_CHANNEL3)].length = uint16(NR31_MAX_LENGTH - int(value))
     } elif (_cond == 12) {
-        e.state.apu.wave.volume = enum_from_int(type<WaveVolume>, int(value) >> 5 & (1 << 6 - 5 + 1) - 1)
+        e.state.apu.wave.volume = enum_from_int(type<WaveVolume>, (int(value) >> 5) & (1 << 6 - 5 + 1) - 1)
         e.state.apu.wave.volume_shift = binjgb_all__s_wave_volume_shift[int(e.state.apu.wave.volume)]
     } elif (_cond == 13) {
         binjgb_all__write_nrx3_reg(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL3)]), value)
@@ -3743,17 +3736,17 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
                     // Triggering the wave channel while it is already playing will
                     // corrupt the wave RAM on DMG.
                     if (e.state.apu.wave.ticks == uint(WAVE_TRIGGER_CORRUPTION_OFFSET_TICKS)) {
-                        var position : uint8 = uint8(int(e.state.apu.wave.position) + 1 & 31)
+                        var position : uint8 = uint8((int(e.state.apu.wave.position) + 1) & 31)
                         var byte : uint8 = e.state.apu.wave.ram[int(position) >> 1]
                         let _cond2 = int(position) >> 3
                         if (_cond2 == 0) {
                             e.state.apu.wave.ram[0] = byte
                         } elif (_cond2 == 1 || _cond2 == 2 || _cond2 == 3) {
-                            crt::memcpy(reinterpret<void?>(addr(e.state.apu.wave.ram[0])), reinterpret<void?>(addr(e.state.apu.wave.ram[0]) + end_index(int(position) >> 1 & 12, 16)), uint64(4))
+                            crt::memcpy(reinterpret<void?>(addr(e.state.apu.wave.ram[0])), reinterpret<void?>(addr(e.state.apu.wave.ram[0]) + end_index((int(position) >> 1) & 12, 16)), 4ul)
                         }
                     }
                 }
-                e.state.apu.wave.position = uint8(0)
+                e.state.apu.wave.position = 0u8
                 e.state.apu.wave.ticks = e.state.apu.wave.period + uint(WAVE_TRIGGER_DELAY_TICKS)
                 e.state.apu.wave.playing = Bool.TRUE
             }
@@ -3763,12 +3756,10 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
     } elif (_cond == 17) {
         binjgb_all__write_nrx2_reg(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL4)]), _c_addr, value)
     } elif (_cond == 18) {
-        {
-            e.state.apu.noise.clock_shift = uint8(int(value) >> 4 & (1 << 7 - 4 + 1) - 1)
-            e.state.apu.noise.lfsr_width = enum_from_int(type<LfsrWidth>, int(value) >> 3 & (1 << 3 - 3 + 1) - 1)
-            e.state.apu.noise.divisor = uint8(int(value) >> 0 & (1 << 2 - 0 + 1) - 1)
-            binjgb_all__write_noise_period(e)
-        }
+        e.state.apu.noise.clock_shift = uint8((int(value) >> 4) & (1 << 7 - 4 + 1) - 1)
+        e.state.apu.noise.lfsr_width = enum_from_int(type<LfsrWidth>, (int(value) >> 3) & (1 << 3 - 3 + 1) - 1)
+        e.state.apu.noise.divisor = uint8((int(value) >> 0) & (1 << 2 - 0 + 1) - 1)
+        binjgb_all__write_noise_period(e)
     } elif (_cond == 19) {
         {
             var trigger : Bool = binjgb_all__write_nrx4_reg(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL4)]), _c_addr, value, uint16(NRX1_MAX_LENGTH))
@@ -3776,41 +3767,39 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
                 binjgb_all__write_noise_period(e)
                 binjgb_all__trigger_nrx4_envelope(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL4)].envelope), _c_addr)
                 e.state.apu.noise.lfsr = uint16(32767)
-                e.state.apu.noise.sample = uint8(1)
+                e.state.apu.noise.sample = 1u8
                 e.state.apu.noise.ticks = e.state.apu.noise.period
             }
         }
     } elif (_cond == 20) {
-        e.state.apu.so_output[int(anon_165.VIN)][1] = enum_from_int(type<Bool>, int(value) >> 7 & (1 << 7 - 7 + 1) - 1)
-        e.state.apu.so_volume[1] = uint8(int(value) >> 4 & (1 << 6 - 4 + 1) - 1)
-        e.state.apu.so_output[int(anon_165.VIN)][0] = enum_from_int(type<Bool>, int(value) >> 3 & (1 << 3 - 3 + 1) - 1)
-        e.state.apu.so_volume[0] = uint8(int(value) >> 0 & (1 << 2 - 0 + 1) - 1)
+        e.state.apu.so_output[int(anon_165.VIN)][1] = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
+        e.state.apu.so_volume[1] = uint8((int(value) >> 4) & (1 << 6 - 4 + 1) - 1)
+        e.state.apu.so_output[int(anon_165.VIN)][0] = enum_from_int(type<Bool>, (int(value) >> 3) & (1 << 3 - 3 + 1) - 1)
+        e.state.apu.so_volume[0] = uint8((int(value) >> 0) & (1 << 2 - 0 + 1) - 1)
     } elif (_cond == 21) {
-        e.state.apu.so_output[int(anon_165.SOUND4)][1] = enum_from_int(type<Bool>, int(value) >> 7 & (1 << 7 - 7 + 1) - 1)
-        e.state.apu.so_output[int(anon_165.SOUND3)][1] = enum_from_int(type<Bool>, int(value) >> 6 & (1 << 6 - 6 + 1) - 1)
-        e.state.apu.so_output[int(anon_165.SOUND2)][1] = enum_from_int(type<Bool>, int(value) >> 5 & (1 << 5 - 5 + 1) - 1)
-        e.state.apu.so_output[int(anon_165.SOUND1)][1] = enum_from_int(type<Bool>, int(value) >> 4 & (1 << 4 - 4 + 1) - 1)
-        e.state.apu.so_output[int(anon_165.SOUND4)][0] = enum_from_int(type<Bool>, int(value) >> 3 & (1 << 3 - 3 + 1) - 1)
-        e.state.apu.so_output[int(anon_165.SOUND3)][0] = enum_from_int(type<Bool>, int(value) >> 2 & (1 << 2 - 2 + 1) - 1)
-        e.state.apu.so_output[int(anon_165.SOUND2)][0] = enum_from_int(type<Bool>, int(value) >> 1 & (1 << 1 - 1 + 1) - 1)
-        e.state.apu.so_output[int(anon_165.SOUND1)][0] = enum_from_int(type<Bool>, int(value) >> 0 & (1 << 0 - 0 + 1) - 1)
+        e.state.apu.so_output[int(anon_165.SOUND4)][1] = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
+        e.state.apu.so_output[int(anon_165.SOUND3)][1] = enum_from_int(type<Bool>, (int(value) >> 6) & (1 << 6 - 6 + 1) - 1)
+        e.state.apu.so_output[int(anon_165.SOUND2)][1] = enum_from_int(type<Bool>, (int(value) >> 5) & (1 << 5 - 5 + 1) - 1)
+        e.state.apu.so_output[int(anon_165.SOUND1)][1] = enum_from_int(type<Bool>, (int(value) >> 4) & (1 << 4 - 4 + 1) - 1)
+        e.state.apu.so_output[int(anon_165.SOUND4)][0] = enum_from_int(type<Bool>, (int(value) >> 3) & (1 << 3 - 3 + 1) - 1)
+        e.state.apu.so_output[int(anon_165.SOUND3)][0] = enum_from_int(type<Bool>, (int(value) >> 2) & (1 << 2 - 2 + 1) - 1)
+        e.state.apu.so_output[int(anon_165.SOUND2)][0] = enum_from_int(type<Bool>, (int(value) >> 1) & (1 << 1 - 1 + 1) - 1)
+        e.state.apu.so_output[int(anon_165.SOUND1)][0] = enum_from_int(type<Bool>, (int(value) >> 0) & (1 << 0 - 0 + 1) - 1)
     } elif (_cond == 22) {
         {
             var was_enabled : Bool = e.state.apu.enabled
-            var is_enabled : Bool = enum_from_int(type<Bool>, int(value) >> 7 & (1 << 7 - 7 + 1) - 1)
+            var is_enabled : Bool = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
             if (uint(int(was_enabled)) != 0 && !(int(is_enabled) != 0)) {
                 var i : int
-                {
-                    i = 0
-                    while (i < int(APUReg.APU_REG_COUNT)) {
-                        if (i != int(APUReg.APU_NR52_ADDR)) {
-                            binjgb_all__write_apu(e, uint16(i), uint8(0))
-                        }
-                        i++
+                i = 0
+                while (i < int(APUReg.APU_REG_COUNT)) {
+                    if (i != int(APUReg.APU_NR52_ADDR)) {
+                        binjgb_all__write_apu(e, uint16(i), 0u8)
                     }
+                    i++
                 }
             } elif (!(int(was_enabled) != 0) && uint(int(is_enabled)) != 0) {
-                e.state.apu.frame = uint8(7)
+                e.state.apu.frame = 7u8
             }
             e.state.apu.enabled = is_enabled
         }
@@ -3913,34 +3902,30 @@ def private binjgb_all__mode3_tick_count(var e : Emulator?) : uint {
     var ticks : uint = uint(PPU_MODE3_MIN_TICKS + int(scx_fine))
     var has_zero : Bool = Bool.FALSE
     var i : int
-    {
-        i = 0
-        while (i < int(e.state.ppu.line_obj_count)) {
-            {
-                var o : Obj? = addr(e.state.ppu.line_obj[0]) + end_index(i, 10)
-                var x : uint8 = uint8(int(o.x) + OBJ_X_OFFSET)
-                if (int(x) >= SCREEN_WIDTH + OBJ_X_OFFSET) {
-                    continue
-                }
-                if (!(int(has_zero) != 0) && int(x) == 0) {
-                    has_zero = Bool.TRUE
-                    ticks += uint(scx_fine)
-                }
-                x = uint8(int(x) + int(scx_fine))
-                var bucket : int = int(x) >> 3
-                buckets[bucket] = buckets[bucket] > 5 - (int(x) & 7) ? buckets[bucket] : 5 - (int(x) & 7)
-                ticks += uint(6)
-            } finally {
-                i++
+    i = 0
+    while (i < int(e.state.ppu.line_obj_count)) {
+        {
+            var o : Obj? = addr(e.state.ppu.line_obj[0]) + end_index(i, 10)
+            var x : uint8 = uint8(int(o.x) + OBJ_X_OFFSET)
+            if (int(x) >= SCREEN_WIDTH + OBJ_X_OFFSET) {
+                continue
             }
-        }
-    }
-    {
-        i = 0
-        while (i < int(uint64(typeinfo sizeof(type<int[22]>)) / uint64(typeinfo sizeof(type<int>)))) {
-            ticks += uint(buckets[i])
+            if (!(int(has_zero) != 0) && int(x) == 0) {
+                has_zero = Bool.TRUE
+                ticks += uint(scx_fine)
+            }
+            x = uint8(int(x) + int(scx_fine))
+            var bucket : int = int(x) >> 3
+            buckets[bucket] = buckets[bucket] > 5 - (int(x) & 7) ? buckets[bucket] : 5 - (int(x) & 7)
+            ticks += 6u
+        } finally {
             i++
         }
+    }
+    i = 0
+    while (i < int(uint64(typeinfo sizeof(type<int[22]>)) / uint64(typeinfo sizeof(type<int>)))) {
+        ticks += uint(buckets[i])
+        i++
     }
     return ticks
 }
@@ -3957,12 +3942,12 @@ def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
     var rendering_window : Bool = e.state.ppu.rendering_window
     var window_counter : int = uint(int(rendering_window)) != 0 ? 0 : 255
     if (!(int(rendering_window) != 0) && uint(int(e.state.ppu.lcdc.window_display)) != 0 && !(int(e.config.disable_window) != 0) && int(e.state.ppu.wx) <= WINDOW_MAX_X && int(y) >= int(e.state.ppu.wy)) {
-        window_counter = 0 > int(e.state.ppu.wx) - (int(x) + 7) ? 0 : int(e.state.ppu.wx) - (int(x) + 7)
+        window_counter = 0 > int(e.state.ppu.wx) - (int(x) + WINDOW_X_OFFSET) ? 0 : int(e.state.ppu.wx) - (int(x) + WINDOW_X_OFFSET)
     }
     var data_select : TileDataSelect = e.state.ppu.lcdc.bg_tile_data_select
     var mx : uint8 = uint8(int(e.state.ppu.scx) + int(x))
     var my : uint8 = uint8(int(e.state.ppu.scy) + int(y))
-    var map_base : uint16 = uint16(int(binjgb_all__map_select_to_address(e.state.ppu.lcdc.bg_tile_map_select)) | (int(my) >> 3) * TILE_MAP_WIDTH)
+    var map_base : uint16 = uint16(int(binjgb_all__map_select_to_address(e.state.ppu.lcdc.bg_tile_map_select)) | ((int(my) >> 3) * TILE_MAP_WIDTH))
     var pixel : uint?
     if (e.state.sgb.mask != SgbMask.SGB_MASK_CANCEL) {
         pixel = addr(ppu_mode3_synchronize_s_dummy_frame_buffer_line[0])
@@ -3972,322 +3957,312 @@ def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
     // Cache map_addr info.
     var map_addr : uint16 = uint16(0)
     var pal : PaletteRGBA? = null
-    var lo : uint8 = uint8(0)
-    var hi : uint8 = uint8(0)
+    var lo : uint8 = 0u8
+    var hi : uint8 = 0u8
     var priority : Bool = Bool.FALSE
     var i : int
-    {
-        while (e.state.ppu.mode3_render_ticks < e.state.ticks && int(x) < SCREEN_WIDTH) {
-            var bg_is_zero : Bool[4] = fixed_array(Bool.TRUE, Bool.TRUE, Bool.TRUE, Bool.TRUE)
-            var bg_priority : Bool[4] = fixed_array(Bool.FALSE, Bool.FALSE, Bool.FALSE, Bool.FALSE)
-            {
-                i = 0
-                while (i < 4) {
-                    let _t0 = window_counter
-                    window_counter--
-                    if (!!(_t0 == 0)) {
-                        display_bg = Bool.TRUE
-                        rendering_window = display_bg
-                        e.state.ppu.rendering_window = rendering_window
-                        mx = uint8(int(x) + i + WINDOW_X_OFFSET - int(e.state.ppu.wx))
-                        my = e.state.ppu.win_y
-                        map_base = uint16(int(binjgb_all__map_select_to_address(e.state.ppu.lcdc.window_tile_map_select)) | (int(my) >> 3) * TILE_MAP_WIDTH)
-                        map_addr = uint16(0)
+    while (e.state.ppu.mode3_render_ticks < e.state.ticks && int(x) < SCREEN_WIDTH) {
+        var bg_is_zero : Bool[4] = fixed_array(Bool.TRUE, Bool.TRUE, Bool.TRUE, Bool.TRUE)
+        var bg_priority : Bool[4] = fixed_array(Bool.FALSE, Bool.FALSE, Bool.FALSE, Bool.FALSE)
+        i = 0
+        while (i < 4) {
+            let _t0 = window_counter
+            window_counter--
+            if (!!(_t0 == 0)) {
+                display_bg = Bool.TRUE
+                rendering_window = display_bg
+                e.state.ppu.rendering_window = rendering_window
+                mx = uint8(int(x) + i + WINDOW_X_OFFSET - int(e.state.ppu.wx))
+                my = e.state.ppu.win_y
+                map_base = uint16(int(binjgb_all__map_select_to_address(e.state.ppu.lcdc.window_tile_map_select)) | ((int(my) >> 3) * TILE_MAP_WIDTH))
+                map_addr = uint16(0)
+            }
+            if (int(display_bg) != 0) {
+                var new_map_addr : uint16 = uint16(int(map_base) | (int(mx) >> 3))
+                if (int(map_addr) == int(new_map_addr)) {
+                    lo = uint8(uint(lo) << 1u)
+                    hi = uint8(uint(hi) << 1u)
+                } else {
+                    map_addr = new_map_addr
+                    var tile_index : uint16 = uint16(e.state.vram.data[int(map_addr)])
+                    var my7 : uint8 = uint8(int(my) & 7)
+                    if (data_select == TileDataSelect.TILE_DATA_8800_97FF) {
+                        tile_index = uint16(256 + int(int8(tile_index)))
                     }
-                    if (int(display_bg) != 0) {
-                        var new_map_addr : uint16 = uint16(int(map_base) | int(mx) >> 3)
-                        if (int(map_addr) == int(new_map_addr)) {
-                            lo = uint8(uint(lo) << 1u)
-                            hi = uint8(uint(hi) << 1u)
-                        } else {
-                            map_addr = new_map_addr
-                            var tile_index : uint16 = uint16(e.state.vram.data[int(map_addr)])
-                            var my7 : uint8 = uint8(int(my) & 7)
-                            if (data_select == TileDataSelect.TILE_DATA_8800_97FF) {
-                                tile_index = uint16(256 + int(int8(tile_index)))
-                            }
-                            if (int(e.state.is_cgb) != 0) {
-                                var attr : uint8 = e.state.vram.data[8192 + int(map_addr)]
-                                pal = addr(e.state.ppu.bgcp.palettes[0]) + end_index(int(attr) & 7, 8)
-                                if ((int(attr) & 8) != 0) {
-                                    tile_index = uint16(int(tile_index) + 512)
-                                }
-                                if ((int(attr) & 64) != 0) {
-                                    my7 = uint8(7 - int(my7))
-                                }
-                                priority = enum_from_int(type<Bool>, (int(attr) & 128) != 0 ? 1 : 0)
-                                var tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + int(my7)) * TILE_ROW_BYTES)
-                                lo = e.state.vram.data[int(tile_addr)]
-                                hi = e.state.vram.data[int(tile_addr) + 1]
-                                if ((int(attr) & 32) != 0) {
-                                    lo = binjgb_all__reverse_bits_u8(lo)
-                                    hi = binjgb_all__reverse_bits_u8(hi)
-                                }
-                            } else {
-                                if (int(e.state.is_sgb) != 0) {
-                                    var idx : int = (int(y) >> 3) * (SCREEN_WIDTH >> 3) + (int(x) >> 3)
-                                    var palidx : uint8 = uint8(int(e.state.sgb.attr_map[idx >> 2]) >> 2 * (3 - (idx & 3)) & 3)
-                                    pal = addr(e.sgb_pal[0]) + end_index(int(palidx), 4)
-                                } else {
-                                    pal = addr(e.pal[int(PaletteType.PALETTE_TYPE_BGP)])
-                                }
-                                priority = Bool.FALSE
-                                var tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + int(my7)) * TILE_ROW_BYTES)
-                                lo = e.state.vram.data[int(tile_addr)]
-                                hi = e.state.vram.data[int(tile_addr) + 1]
-                            }
-                            var shift : uint8 = uint8(int(mx) & 7)
-                            lo = uint8(uint(lo) << uint(int(shift)))
-                            hi = uint8(uint(hi) << uint(int(shift)))
+                    if (int(e.state.is_cgb) != 0) {
+                        var attr : uint8 = e.state.vram.data[8192 + int(map_addr)]
+                        pal = addr(e.state.ppu.bgcp.palettes[0]) + end_index(int(attr) & 7, 8)
+                        if ((int(attr) & 8) != 0) {
+                            tile_index = uint16(int(tile_index) + 512)
                         }
-                        var palette_index : uint8 = uint8(int(hi) >> 6 & 2 | int(lo) >> 7)
-                        deref(pixel + i) = pal.color[int(palette_index)]
-                        bg_is_zero[i] = enum_from_int(type<Bool>, int(palette_index) == 0 ? 1 : 0)
-                        bg_priority[i] = priority
+                        if ((int(attr) & 64) != 0) {
+                            my7 = uint8(7 - int(my7))
+                        }
+                        priority = enum_from_int(type<Bool>, (int(attr) & 128) != 0 ? 1 : 0)
+                        var tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + int(my7)) * TILE_ROW_BYTES)
+                        lo = e.state.vram.data[int(tile_addr)]
+                        hi = e.state.vram.data[int(tile_addr) + 1]
+                        if ((int(attr) & 32) != 0) {
+                            lo = binjgb_all__reverse_bits_u8(lo)
+                            hi = binjgb_all__reverse_bits_u8(hi)
+                        }
                     } else {
-                        if (int(e.state.is_cgb) != 0) {
-                            deref(pixel + i) = e.state.ppu.bgcp.palettes[0].color[0]
-                        } elif (int(e.state.is_sgb) != 0) {
-                            deref(pixel + i) = e.sgb_pal[0].color[0]
+                        if (int(e.state.is_sgb) != 0) {
+                            var idx : int = (int(y) >> 3) * (SCREEN_WIDTH >> 3) + (int(x) >> 3)
+                            var palidx : uint8 = uint8((int(e.state.sgb.attr_map[idx >> 2]) >> (2 * (3 - (idx & 3)))) & 3)
+                            pal = addr(e.sgb_pal[0]) + end_index(int(palidx), 4)
                         } else {
-                            deref(pixel + i) = e.color_to_rgba[0].color[0]
+                            pal = addr(e.pal[int(PaletteType.PALETTE_TYPE_BGP)])
                         }
+                        priority = Bool.FALSE
+                        var tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + int(my7)) * TILE_ROW_BYTES)
+                        lo = e.state.vram.data[int(tile_addr)]
+                        hi = e.state.vram.data[int(tile_addr) + 1]
                     }
-                    i++
-                    mx = uint8(uint(mx) + 1)
+                    var shift : uint8 = uint8(int(mx) & 7)
+                    lo = uint8(uint(lo) << uint(int(shift)))
+                    hi = uint8(uint(hi) << uint(int(shift)))
+                }
+                var palette_index : uint8 = uint8(((int(hi) >> 6) & 2) | (int(lo) >> 7))
+                pixel[i] = pal.color[int(palette_index)]
+                bg_is_zero[i] = enum_from_int(type<Bool>, int(palette_index) == 0 ? 1 : 0)
+                bg_priority[i] = priority
+            } else {
+                if (int(e.state.is_cgb) != 0) {
+                    pixel[i] = e.state.ppu.bgcp.palettes[0].color[0]
+                } elif (int(e.state.is_sgb) != 0) {
+                    pixel[i] = e.sgb_pal[0].color[0]
+                } else {
+                    pixel[i] = e.color_to_rgba[0].color[0]
                 }
             }
-            // LCDC bit 0 works differently on cgb; when it's cleared OBJ will always
-            // have priority over bg and window.
-            if (uint(int(e.state.is_cgb)) != 0 && !(int(e.state.ppu.lcdc.bg_display) != 0)) {
-                crt::memset(reinterpret<void?>(addr(bg_is_zero)), int(Bool.TRUE), uint64(typeinfo sizeof(type<Bool[4]>)))
-                crt::memset(reinterpret<void?>(addr(bg_priority)), int(Bool.FALSE), uint64(typeinfo sizeof(type<Bool[4]>)))
-            }
-            if (int(display_obj) != 0) {
-                var obj_height : uint8 = binjgb_all__s_obj_size_to_height[int(e.state.ppu.lcdc.obj_size)]
-                var n : int
-                {
-                    n = int(e.state.ppu.line_obj_count) - 1
-                    while (n >= 0) {
-                        {
-                            var o : Obj? = addr(e.state.ppu.line_obj[0]) + end_index(n, 10)
-                            // Does [x, x + 4) intersect [o->x, o->x + 8)? Note that the sums must
-                            // wrap at 256 (i.e. arithmetic is 8-bit).
-                            var ox_start : int8 = int8(int(o.x) - int(x))
-                            // ox_end is inclusive.
-                            var ox_end : int8 = int8(int(ox_start) + 7)
-                            var oy : uint8 = uint8(int(y) - int(o.y))
-                            if (int(uint8(ox_start)) >= 4 && int(uint8(ox_end)) >= 8 || int(oy) >= int(obj_height)) {
-                                continue
-                            }
-                            if (int(o.yflip) != 0) {
-                                oy = uint8(int(obj_height) - 1 - int(oy))
-                            }
-                            var tile_index : uint16 = uint16(o.tile)
-                            if (int(obj_height) == 16) {
-                                if (int(oy) < 8) {
-                                    // Top tile of 8x16 sprite.
-                                    tile_index = uint16(int(tile_index) & 254)
-                                } else {
-                                    // Bottom tile of 8x16 sprite.
-                                    tile_index = uint16(int(tile_index) | 1)
-                                    oy = uint8(int(oy) - 8)
-                                }
-                            }
-                            var pal1 : PaletteRGBA? = null
-                            if (int(e.state.is_cgb) != 0) {
-                                pal1 = addr(e.state.ppu.obcp.palettes[0]) + end_index(int(o.cgb_palette) & 7, 8)
-                                if (o.bank != 0) {
-                                    tile_index = uint16(int(tile_index) + 512)
-                                }
-                            } else {
-                                pal1 = addr(e.pal[0]) + end_index(int(o.palette) + 1, 3)
-                            }
-                            var tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + (int(oy) & 7)) * TILE_ROW_BYTES)
-                            var lo1 : uint8 = e.state.vram.data[int(tile_addr)]
-                            var hi1 : uint8 = e.state.vram.data[int(tile_addr) + 1]
-                            if (!(int(o.xflip) != 0)) {
-                                lo1 = binjgb_all__reverse_bits_u8(lo1)
-                                hi1 = binjgb_all__reverse_bits_u8(hi1)
-                            }
-                            var tile_data_offset : int = 0 > -int(ox_start) ? 0 : -int(ox_start)
-                            lo1 = uint8(uint(lo1) >> uint(tile_data_offset))
-                            hi1 = uint8(uint(hi1) >> uint(tile_data_offset))
-                            var start : int = 0 > int(ox_start) ? 0 : int(ox_start)
-                            // end is inclusive.
-                            var end : int = 3 < int(ox_end) ? 3 : int(ox_end)
-                            {
-                                i = start
-                                while (i <= end) {
-                                    var palette_index : uint8 = uint8((int(hi1) & 1) << 1 | int(lo1) & 1)
-                                    if (int(palette_index) != 0 && (!(int(bg_priority[i]) != 0) || uint(int(bg_is_zero[i])) != 0) && (o.priority == ObjPriority.OBJ_PRIORITY_ABOVE_BG || uint(int(bg_is_zero[i])) != 0)) {
-                                        deref(pixel + i) = pal1.color[int(palette_index)]
-                                    }
-                                    i++
-                                    lo1 = uint8(uint(lo1) >> 1u)
-                                    hi1 = uint8(uint(hi1) >> 1u)
-                                }
-                            }
-                        } finally {
-                            n--
-                        }
-                    }
-                }
-            }
-            e.state.ppu.mode3_render_ticks += uint64(CPU_TICK)
-            pixel = pixel + 4
-            x = uint8(int(x) + 4)
+            i++
+            mx = uint8(uint(mx) + 1)
         }
+        // LCDC bit 0 works differently on cgb; when it's cleared OBJ will always
+        // have priority over bg and window.
+        if (uint(int(e.state.is_cgb)) != 0 && !(int(e.state.ppu.lcdc.bg_display) != 0)) {
+            crt::memset(reinterpret<void?>(addr(bg_is_zero)), int(Bool.TRUE), uint64(typeinfo sizeof(type<Bool[4]>)))
+            crt::memset(reinterpret<void?>(addr(bg_priority)), int(Bool.FALSE), uint64(typeinfo sizeof(type<Bool[4]>)))
+        }
+        if (int(display_obj) != 0) {
+            var obj_height : uint8 = binjgb_all__s_obj_size_to_height[int(e.state.ppu.lcdc.obj_size)]
+            var n : int
+            n = int(e.state.ppu.line_obj_count) - 1
+            while (n >= 0) {
+                {
+                    var o : Obj? = addr(e.state.ppu.line_obj[0]) + end_index(n, 10)
+                    // Does [x, x + 4) intersect [o->x, o->x + 8)? Note that the sums must
+                    // wrap at 256 (i.e. arithmetic is 8-bit).
+                    var ox_start : int8 = int8(int(o.x) - int(x))
+                    // ox_end is inclusive.
+                    var ox_end : int8 = int8(int(ox_start) + 7)
+                    var oy : uint8 = uint8(int(y) - int(o.y))
+                    if ((int(uint8(ox_start)) >= 4 && int(uint8(ox_end)) >= 8) || int(oy) >= int(obj_height)) {
+                        continue
+                    }
+                    if (int(o.yflip) != 0) {
+                        oy = uint8(int(obj_height) - 1 - int(oy))
+                    }
+                    var tile_index : uint16 = uint16(o.tile)
+                    if (int(obj_height) == 16) {
+                        if (int(oy) < 8) {
+                            // Top tile of 8x16 sprite.
+                            tile_index = uint16(int(tile_index) & 254)
+                        } else {
+                            // Bottom tile of 8x16 sprite.
+                            tile_index = uint16(int(tile_index) | 1)
+                            oy = uint8(int(oy) - 8)
+                        }
+                    }
+                    var pal1 : PaletteRGBA? = null
+                    if (int(e.state.is_cgb) != 0) {
+                        pal1 = addr(e.state.ppu.obcp.palettes[0]) + end_index(int(o.cgb_palette) & 7, 8)
+                        if (o.bank != 0) {
+                            tile_index = uint16(int(tile_index) + 512)
+                        }
+                    } else {
+                        pal1 = addr(e.pal[0]) + end_index(int(o.palette) + 1, 3)
+                    }
+                    var tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + (int(oy) & 7)) * TILE_ROW_BYTES)
+                    var lo1 : uint8 = e.state.vram.data[int(tile_addr)]
+                    var hi1 : uint8 = e.state.vram.data[int(tile_addr) + 1]
+                    if (!(int(o.xflip) != 0)) {
+                        lo1 = binjgb_all__reverse_bits_u8(lo1)
+                        hi1 = binjgb_all__reverse_bits_u8(hi1)
+                    }
+                    var tile_data_offset : int = 0 > -int(ox_start) ? 0 : -int(ox_start)
+                    lo1 = uint8(uint(lo1) >> uint(tile_data_offset))
+                    hi1 = uint8(uint(hi1) >> uint(tile_data_offset))
+                    var start : int = 0 > int(ox_start) ? 0 : int(ox_start)
+                    // end is inclusive.
+                    var end : int = 3 < int(ox_end) ? 3 : int(ox_end)
+                    i = start
+                    while (i <= end) {
+                        var palette_index : uint8 = uint8(((int(hi1) & 1) << 1) | (int(lo1) & 1))
+                        if (int(palette_index) != 0 && (!(int(bg_priority[i]) != 0) || uint(int(bg_is_zero[i])) != 0) && (o.priority == ObjPriority.OBJ_PRIORITY_ABOVE_BG || uint(int(bg_is_zero[i])) != 0)) {
+                            pixel[i] = pal1.color[int(palette_index)]
+                        }
+                        i++
+                        lo1 = uint8(uint(lo1) >> 1u)
+                        hi1 = uint8(uint(hi1) >> 1u)
+                    }
+                } finally {
+                    n--
+                }
+            }
+        }
+        e.state.ppu.mode3_render_ticks += uint64(CPU_TICK)
+        pixel = pixel + 4
+        x = uint8(int(x) + 4)
     }
     e.state.ppu.render_x = x
 }
 
 def private binjgb_all__ppu_synchronize(var e : Emulator?) {
-    var aligned_ticks : uint64 = e.state.ticks & uint64(~(4 - 1))
+    var aligned_ticks : uint64 = e.state.ticks & uint64(~(CPU_TICK - 1))
     if (aligned_ticks > e.state.ppu.sync_ticks) {
         var delta_ticks : uint64 = aligned_ticks - e.state.ppu.sync_ticks
         if (int(e.state.ppu.lcdc.display) != 0) {
-            {
-                while (delta_ticks > uint64(0)) {
-                    {
-                        e.state.interrupt.if_ = uint8(int(e.state.interrupt.if_) | int(e.state.interrupt.new_if) & (IF_VBLANK | IF_STAT))
-                        e.state.ppu.stat.mode2.trigger = Bool.FALSE
-                        e.state.ppu.stat.y_compare.trigger = Bool.FALSE
-                        e.state.ppu.stat.ly_eq_lyc = e.state.ppu.stat.new_ly_eq_lyc
-                        e.state.ppu.last_ly = e.state.ppu.ly
-                        e.state.ppu.state_ticks -= uint(CPU_TICK)
-                        if (!!(e.state.ppu.state_ticks != uint(0))) {
-                            continue
-                        }
-                        var ticks : uint64 = aligned_ticks - delta_ticks
-                        let _cond = e.state.ppu.state
-                        while (true) {
-                            var _flag = false
-                            if (_cond == PPUState.PPU_STATE_HBLANK || _cond == PPUState.PPU_STATE_VBLANK_PLUS_4) {
-                                e.state.ppu.line_y = uint8(uint(e.state.ppu.line_y) + 1)
-                                e.state.ppu.ly = uint8(uint(e.state.ppu.ly) + 1)
-                                e.state.ppu.line_start_ticks = ticks
-                                binjgb_all__check_ly_eq_lyc(e, Bool.FALSE)
-                                e.state.ppu.state_ticks = uint(CPU_TICK)
-                                if (e.state.ppu.state == PPUState.PPU_STATE_HBLANK) {
-                                    e.state.ppu.stat.mode2.trigger = Bool.TRUE
-                                    if (int(e.state.ppu.ly) == SCREEN_HEIGHT) {
-                                        e.state.ppu.state = PPUState.PPU_STATE_VBLANK
-                                        e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_VBLANK
-                                        e.state.ppu.frame++
-                                        e.state.interrupt.new_if = uint8(int(e.state.interrupt.new_if) | IF_VBLANK)
-                                        if (!!(int(e.state.ppu.display_delay_frames) == 0)) {
-                                            e.state.event |= uint(int(anon_240.EMULATOR_EVENT_NEW_FRAME))
-                                        } else {
-                                            e.state.ppu.display_delay_frames = uint8(uint(e.state.ppu.display_delay_frames) - 1)
-                                        }
-                                    } else {
-                                        e.state.ppu.state = PPUState.PPU_STATE_HBLANK_PLUS_4
-                                        e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_MODE2
-                                        if (int(e.state.ppu.rendering_window) != 0) {
-                                            e.state.ppu.win_y = uint8(uint(e.state.ppu.win_y) + 1)
-                                        }
-                                        if (!!(e.state.hdma.mode == HdmaTransferMode.HDMA_TRANSFER_MODE_HDMA && (int(e.state.hdma.blocks) & 128) == 0)) {
-                                            e.state.hdma.state = DmaState.DMA_ACTIVE
-                                        }
-                                    }
-                                } else {
-                                    if (int(e.state.ppu.ly) == SCREEN_HEIGHT_WITH_VBLANK - 1) {
-                                        e.state.ppu.state = PPUState.PPU_STATE_VBLANK_LY_0
-                                    } else {
-                                        e.state.ppu.state_ticks = uint(PPU_LINE_TICKS)
-                                    }
-                                }
-                                binjgb_all__check_stat(e)
-                                break
-                            }
-                            if (_cond == PPUState.PPU_STATE_HBLANK_PLUS_4) {
-                                e.state.ppu.state = PPUState.PPU_STATE_MODE2
-                                e.state.ppu.state_ticks = uint(PPU_MODE2_TICKS)
-                                e.state.ppu.stat.mode = PPUMode.PPU_MODE_MODE2
-                                binjgb_all__do_ppu_mode2(e)
-                                break
-                            }
-                            if (_cond == PPUState.PPU_STATE_VBLANK) {
-                                e.state.ppu.state = PPUState.PPU_STATE_VBLANK_PLUS_4
-                                e.state.ppu.state_ticks = uint(PPU_LINE_TICKS - CPU_TICK)
-                                e.state.ppu.stat.mode = PPUMode.PPU_MODE_VBLANK
-                                binjgb_all__check_stat(e)
-                                break
-                            }
-                            if (_cond == PPUState.PPU_STATE_VBLANK_LY_0) {
-                                e.state.ppu.state = PPUState.PPU_STATE_VBLANK_LY_0_PLUS_4
-                                e.state.ppu.state_ticks = uint(CPU_TICK)
-                                e.state.ppu.ly = uint8(0)
-                                break
-                            }
-                            if (_cond == PPUState.PPU_STATE_VBLANK_LY_0_PLUS_4) {
-                                e.state.ppu.state = PPUState.PPU_STATE_VBLANK_LINE_Y_0
-                                e.state.ppu.state_ticks = uint(PPU_LINE_TICKS - CPU_TICK - CPU_TICK)
-                                binjgb_all__check_ly_eq_lyc(e, Bool.FALSE)
-                                binjgb_all__check_stat(e)
-                                break
-                            }
-                            if (_cond == PPUState.PPU_STATE_VBLANK_LINE_Y_0) {
-                                e.state.ppu.state = PPUState.PPU_STATE_HBLANK_PLUS_4
-                                e.state.ppu.state_ticks = uint(CPU_TICK)
-                                e.state.ppu.line_start_ticks = ticks
-                                e.state.ppu.line_y = uint8(0)
-                                e.state.ppu.win_y = uint8(0)
+            while (delta_ticks > 0ul) {
+                {
+                    e.state.interrupt.if_ = uint8(int(e.state.interrupt.if_) | (int(e.state.interrupt.new_if) & (IF_VBLANK | IF_STAT)))
+                    e.state.ppu.stat.mode2.trigger = Bool.FALSE
+                    e.state.ppu.stat.y_compare.trigger = Bool.FALSE
+                    e.state.ppu.stat.ly_eq_lyc = e.state.ppu.stat.new_ly_eq_lyc
+                    e.state.ppu.last_ly = e.state.ppu.ly
+                    e.state.ppu.state_ticks -= uint(CPU_TICK)
+                    if (!!(e.state.ppu.state_ticks != 0u)) {
+                        continue
+                    }
+                    var ticks : uint64 = aligned_ticks - delta_ticks
+                    let _cond = e.state.ppu.state
+                    while (true) {
+                        var _flag = false
+                        if (_cond == PPUState.PPU_STATE_HBLANK || _cond == PPUState.PPU_STATE_VBLANK_PLUS_4) {
+                            e.state.ppu.line_y = uint8(uint(e.state.ppu.line_y) + 1)
+                            e.state.ppu.ly = uint8(uint(e.state.ppu.ly) + 1)
+                            e.state.ppu.line_start_ticks = ticks
+                            binjgb_all__check_ly_eq_lyc(e, Bool.FALSE)
+                            e.state.ppu.state_ticks = uint(CPU_TICK)
+                            if (e.state.ppu.state == PPUState.PPU_STATE_HBLANK) {
                                 e.state.ppu.stat.mode2.trigger = Bool.TRUE
-                                e.state.ppu.stat.mode = PPUMode.PPU_MODE_HBLANK
-                                e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_MODE2
-                                binjgb_all__check_stat(e)
-                                break
-                            }
-                            if (_cond == PPUState.PPU_STATE_LCD_ON_MODE2 || _cond == PPUState.PPU_STATE_MODE2) {
-                                e.state.ppu.state_ticks = binjgb_all__mode3_tick_count(e)
-                                if (e.state.ppu.state == PPUState.PPU_STATE_LCD_ON_MODE2 || (e.state.ppu.state_ticks & uint(3)) != uint(0)) {
-                                    e.state.ppu.state = PPUState.PPU_STATE_MODE3
+                                if (int(e.state.ppu.ly) == SCREEN_HEIGHT) {
+                                    e.state.ppu.state = PPUState.PPU_STATE_VBLANK
+                                    e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_VBLANK
+                                    e.state.ppu.frame++
+                                    e.state.interrupt.new_if = uint8(int(e.state.interrupt.new_if) | IF_VBLANK)
+                                    if (!!(int(e.state.ppu.display_delay_frames) == 0)) {
+                                        e.state.event |= uint(int(anon_240.EMULATOR_EVENT_NEW_FRAME))
+                                    } else {
+                                        e.state.ppu.display_delay_frames = uint8(uint(e.state.ppu.display_delay_frames) - 1)
+                                    }
                                 } else {
-                                    e.state.ppu.state = PPUState.PPU_STATE_MODE3_EARLY_TRIGGER
-                                    e.state.ppu.state_ticks--
+                                    e.state.ppu.state = PPUState.PPU_STATE_HBLANK_PLUS_4
+                                    e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_MODE2
+                                    if (int(e.state.ppu.rendering_window) != 0) {
+                                        e.state.ppu.win_y = uint8(uint(e.state.ppu.win_y) + 1)
+                                    }
+                                    if (!!(e.state.hdma.mode == HdmaTransferMode.HDMA_TRANSFER_MODE_HDMA && (int(e.state.hdma.blocks) & 128) == 0)) {
+                                        e.state.hdma.state = DmaState.DMA_ACTIVE
+                                    }
                                 }
-                                e.state.ppu.state_ticks &= uint(~3)
-                                e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_MODE3
-                                e.state.ppu.stat.mode = e.state.ppu.stat.trigger_mode
-                                e.state.ppu.mode3_render_ticks = ticks
-                                e.state.ppu.render_x = uint8(0)
-                                e.state.ppu.rendering_window = Bool.FALSE
-                                binjgb_all__check_stat(e)
-                                break
+                            } else {
+                                if (int(e.state.ppu.ly) == SCREEN_HEIGHT_WITH_VBLANK - 1) {
+                                    e.state.ppu.state = PPUState.PPU_STATE_VBLANK_LY_0
+                                } else {
+                                    e.state.ppu.state_ticks = uint(PPU_LINE_TICKS)
+                                }
                             }
-                            if (_cond == PPUState.PPU_STATE_MODE3_EARLY_TRIGGER) {
-                                e.state.ppu.state = PPUState.PPU_STATE_MODE3_COMMON
-                                e.state.ppu.state_ticks = uint(CPU_TICK)
-                                e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_HBLANK
-                                binjgb_all__check_stat(e)
-                                break
-                            }
-                            _flag ||= _cond == PPUState.PPU_STATE_MODE3
-                            if (_flag) {
-                                e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_HBLANK
-                            }
-                            _flag ||= _cond == PPUState.PPU_STATE_MODE3_COMMON
-                            if (_flag) {
-                                // fallthrough
-                                binjgb_all__ppu_mode3_synchronize(e)
-                                e.state.ppu.state = PPUState.PPU_STATE_HBLANK
-                                e.state.ppu.state_ticks = uint(uint64(PPU_LINE_TICKS) + e.state.ppu.line_start_ticks - ticks)
-                                e.state.ppu.stat.mode = PPUMode.PPU_MODE_HBLANK
-                                binjgb_all__check_stat(e)
-                                break
-                            }
-                            if (_cond == PPUState.PPU_STATE_COUNT) {
-                                break
-                            }
+                            binjgb_all__check_stat(e)
                             break
                         }
-                        e.state.ppu.sync_ticks = ticks + uint64(CPU_TICK)
-                        binjgb_all__calculate_next_ppu_intr(e)
-                    } finally {
-                        delta_ticks -= uint64(CPU_TICK)
+                        if (_cond == PPUState.PPU_STATE_HBLANK_PLUS_4) {
+                            e.state.ppu.state = PPUState.PPU_STATE_MODE2
+                            e.state.ppu.state_ticks = uint(PPU_MODE2_TICKS)
+                            e.state.ppu.stat.mode = PPUMode.PPU_MODE_MODE2
+                            binjgb_all__do_ppu_mode2(e)
+                            break
+                        }
+                        if (_cond == PPUState.PPU_STATE_VBLANK) {
+                            e.state.ppu.state = PPUState.PPU_STATE_VBLANK_PLUS_4
+                            e.state.ppu.state_ticks = uint(PPU_LINE_TICKS - CPU_TICK)
+                            e.state.ppu.stat.mode = PPUMode.PPU_MODE_VBLANK
+                            binjgb_all__check_stat(e)
+                            break
+                        }
+                        if (_cond == PPUState.PPU_STATE_VBLANK_LY_0) {
+                            e.state.ppu.state = PPUState.PPU_STATE_VBLANK_LY_0_PLUS_4
+                            e.state.ppu.state_ticks = uint(CPU_TICK)
+                            e.state.ppu.ly = 0u8
+                            break
+                        }
+                        if (_cond == PPUState.PPU_STATE_VBLANK_LY_0_PLUS_4) {
+                            e.state.ppu.state = PPUState.PPU_STATE_VBLANK_LINE_Y_0
+                            e.state.ppu.state_ticks = uint(PPU_LINE_TICKS - CPU_TICK - CPU_TICK)
+                            binjgb_all__check_ly_eq_lyc(e, Bool.FALSE)
+                            binjgb_all__check_stat(e)
+                            break
+                        }
+                        if (_cond == PPUState.PPU_STATE_VBLANK_LINE_Y_0) {
+                            e.state.ppu.state = PPUState.PPU_STATE_HBLANK_PLUS_4
+                            e.state.ppu.state_ticks = uint(CPU_TICK)
+                            e.state.ppu.line_start_ticks = ticks
+                            e.state.ppu.line_y = 0u8
+                            e.state.ppu.win_y = 0u8
+                            e.state.ppu.stat.mode2.trigger = Bool.TRUE
+                            e.state.ppu.stat.mode = PPUMode.PPU_MODE_HBLANK
+                            e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_MODE2
+                            binjgb_all__check_stat(e)
+                            break
+                        }
+                        if (_cond == PPUState.PPU_STATE_LCD_ON_MODE2 || _cond == PPUState.PPU_STATE_MODE2) {
+                            e.state.ppu.state_ticks = binjgb_all__mode3_tick_count(e)
+                            if (e.state.ppu.state == PPUState.PPU_STATE_LCD_ON_MODE2 || (e.state.ppu.state_ticks & 3u) != 0u) {
+                                e.state.ppu.state = PPUState.PPU_STATE_MODE3
+                            } else {
+                                e.state.ppu.state = PPUState.PPU_STATE_MODE3_EARLY_TRIGGER
+                                e.state.ppu.state_ticks--
+                            }
+                            e.state.ppu.state_ticks &= uint(~3)
+                            e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_MODE3
+                            e.state.ppu.stat.mode = e.state.ppu.stat.trigger_mode
+                            e.state.ppu.mode3_render_ticks = ticks
+                            e.state.ppu.render_x = 0u8
+                            e.state.ppu.rendering_window = Bool.FALSE
+                            binjgb_all__check_stat(e)
+                            break
+                        }
+                        if (_cond == PPUState.PPU_STATE_MODE3_EARLY_TRIGGER) {
+                            e.state.ppu.state = PPUState.PPU_STATE_MODE3_COMMON
+                            e.state.ppu.state_ticks = uint(CPU_TICK)
+                            e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_HBLANK
+                            binjgb_all__check_stat(e)
+                            break
+                        }
+                        _flag ||= _cond == PPUState.PPU_STATE_MODE3
+                        if (_flag) {
+                            e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_HBLANK
+                        }
+                        _flag ||= _cond == PPUState.PPU_STATE_MODE3_COMMON
+                        if (_flag) {
+                            // fallthrough
+                            binjgb_all__ppu_mode3_synchronize(e)
+                            e.state.ppu.state = PPUState.PPU_STATE_HBLANK
+                            e.state.ppu.state_ticks = uint(uint64(PPU_LINE_TICKS) + e.state.ppu.line_start_ticks - ticks)
+                            e.state.ppu.stat.mode = PPUMode.PPU_MODE_HBLANK
+                            binjgb_all__check_stat(e)
+                            break
+                        }
+                        if (_cond == PPUState.PPU_STATE_COUNT) {
+                            break
+                        }
+                        break
                     }
+                    e.state.ppu.sync_ticks = ticks + uint64(CPU_TICK)
+                    binjgb_all__calculate_next_ppu_intr(e)
+                } finally {
+                    delta_ticks -= uint64(CPU_TICK)
                 }
             }
         }
@@ -4326,7 +4301,7 @@ def private binjgb_all__update_sweep(var e : Emulator?) {
                     binjgb_all__write_square_wave_period(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL1)]), addr(e.state.apu.channel[int(anon_96.APU_CHANNEL1)].square_wave))
                 }
                 // Perform another overflow check.
-                if (!!(int(binjgb_all__calculate_sweep_frequency(e)) > 2047)) {
+                if (!!(int(binjgb_all__calculate_sweep_frequency(e)) > SOUND_MAX_FREQUENCY)) {
                     e.state.apu.channel[int(anon_96.APU_CHANNEL1)].status = Bool.FALSE
                 }
             }
@@ -4357,7 +4332,7 @@ def private binjgb_all__update_envelopes(var e : Emulator?) {
             var _t0 = uint(int(envelope.automatic)) != 0
             if (_t0) {
                 envelope.timer--
-                _t0 = envelope.timer == uint(0)
+                _t0 = envelope.timer == 0u
             }
             if (_t0) {
                 envelope.timer = uint(envelope.period)
@@ -4433,11 +4408,11 @@ def private binjgb_all__update_noise(var e : Emulator?; var total_frames : uint)
             var sample : uint8 = uint8(-int(e.state.apu.noise.sample) & int(addr(e.state.apu.channel[int(anon_96.APU_CHANNEL4)]).envelope.volume))
             if (int(e.state.apu.noise.clock_shift) <= NOISE_MAX_CLOCK_SHIFT) {
                 if (frames <= total_frames) {
-                    var bit : uint16 = uint16((int(e.state.apu.noise.lfsr) ^ int(e.state.apu.noise.lfsr) >> 1) & 1)
+                    var bit : uint16 = uint16((int(e.state.apu.noise.lfsr) ^ (int(e.state.apu.noise.lfsr) >> 1)) & 1)
                     if (e.state.apu.noise.lfsr_width == LfsrWidth.LFSR_WIDTH_7) {
-                        e.state.apu.noise.lfsr = uint16(int(e.state.apu.noise.lfsr) >> 1 & ~64 | int(bit) << 6)
+                        e.state.apu.noise.lfsr = uint16(((int(e.state.apu.noise.lfsr) >> 1) & ~64) | (int(bit) << 6))
                     } else {
-                        e.state.apu.noise.lfsr = uint16(int(e.state.apu.noise.lfsr) >> 1 & ~16384 | int(bit) << 14)
+                        e.state.apu.noise.lfsr = uint16(((int(e.state.apu.noise.lfsr) >> 1) & ~16384) | (int(bit) << 14))
                     }
                     e.state.apu.noise.sample = uint8(~int(e.state.apu.noise.lfsr) & 1)
                     e.state.apu.noise.ticks = e.state.apu.noise.period
@@ -4455,12 +4430,12 @@ def private binjgb_all__update_noise(var e : Emulator?; var total_frames : uint)
 }
 
 def private binjgb_all__get_gb_frames_until_next_resampled_frame(var e : Emulator?) : uint {
-    var result : uint = uint(0)
+    var result : uint = 0u
     var counter : uint = e.audio_buffer.freq_counter
     while (true) {
         var _t0 : int
-        if (counter >= uint(2097152)) {
-            counter -= uint(2097152)
+        if (counter >= uint(APU_TICKS_PER_SECOND)) {
+            counter -= uint(APU_TICKS_PER_SECOND)
             _t0 = int(Bool.TRUE)
         } else {
             _t0 = int(Bool.FALSE)
@@ -4480,15 +4455,15 @@ def private binjgb_all__write_audio_frame(var e : Emulator?; gb_frames : uint) {
     buffer.divisor += gb_frames
     buffer.freq_counter += buffer.frequency * gb_frames
     var _t0 : int
-    if (buffer.freq_counter >= uint(2097152)) {
-        buffer.freq_counter -= uint(2097152)
+    if (buffer.freq_counter >= uint(APU_TICKS_PER_SECOND)) {
+        buffer.freq_counter -= uint(APU_TICKS_PER_SECOND)
         _t0 = int(Bool.TRUE)
     } else {
         _t0 = int(Bool.FALSE)
     }
     if (!!(_t0 != 0)) {
         for (i in range(SOUND_OUTPUT_COUNT)) {
-            var accumulator : uint = uint(0)
+            var accumulator : uint = 0u
             for (j in range(int(anon_96.APU_CHANNEL_COUNT))) {
                 if (!(int(e.config.disable_sound[j]) != 0)) {
                     accumulator += e.state.apu.channel[j].accumulator * uint(int(e.state.apu.so_output[j][i]))
@@ -4502,9 +4477,9 @@ def private binjgb_all__write_audio_frame(var e : Emulator?; gb_frames : uint) {
             deref(_t1) = uint8(accumulator / buffer.divisor)
         }
         for (j in range(int(anon_96.APU_CHANNEL_COUNT))) {
-            e.state.apu.channel[j].accumulator = uint(0)
+            e.state.apu.channel[j].accumulator = 0u
         }
-        buffer.divisor = uint(0)
+        buffer.divisor = 0u
     }
 }
 
@@ -4525,7 +4500,7 @@ def private binjgb_all__apu_update_channels(var e : Emulator?; var total_frames 
 
 def private binjgb_all__apu_update(var e : Emulator?; var total_ticks : uint) {
     while (total_ticks != 0) {
-        var next_seq_ticks : uint64 = uint64(8192) - e.state.apu.sync_ticks % uint64(8192)
+        var next_seq_ticks : uint64 = uint64(FRAME_SEQUENCER_TICKS) - e.state.apu.sync_ticks % uint64(FRAME_SEQUENCER_TICKS)
         if (next_seq_ticks == uint64(FRAME_SEQUENCER_TICKS)) {
             e.state.apu.frame = uint8((int(e.state.apu.frame) + 1) % FRAME_SEQUENCER_COUNT)
             let _cond = int(e.state.apu.frame)
@@ -4569,11 +4544,9 @@ def private binjgb_all__apu_synchronize(var e : Emulator?) {
         if (int(e.state.apu.enabled) != 0) {
             binjgb_all__apu_update(e, ticks)
         } else {
-            {
-                while (ticks != 0) {
-                    binjgb_all__write_audio_frame(e, uint(1))
-                    ticks -= uint(APU_TICKS)
-                }
+            while (ticks != 0) {
+                binjgb_all__write_audio_frame(e, 1u)
+                ticks -= uint(APU_TICKS)
             }
             e.state.apu.sync_ticks = e.state.ticks
         }
@@ -4593,7 +4566,7 @@ def private binjgb_all__dma_synchronize(var e : Emulator?) {
                         delta_ticks -= cpu_tick
                     }
                     _f = true
-                    if (!(delta_ticks > uint64(0))) {
+                    if (!(delta_ticks > 0ul)) {
                         break
                     }
                     if (e.state.dma.tick_count < uint64(DMA_DELAY_TICKS)) {
@@ -4604,13 +4577,13 @@ def private binjgb_all__dma_synchronize(var e : Emulator?) {
                         }
                         continue
                     }
-                    var addr_offset : uint8 = uint8(e.state.dma.tick_count - uint64(DMA_DELAY_TICKS) >> 2ul)
+                    var addr_offset : uint8 = uint8((e.state.dma.tick_count - uint64(DMA_DELAY_TICKS)) >> 2ul)
                     var value : uint8 = binjgb_all__read_u8_pair(e, binjgb_all__map_address(uint16(int(e.state.dma.source) + int(addr_offset))), Bool.FALSE)
                     binjgb_all__write_oam_no_mode_check(e, uint16(addr_offset), value)
                     e.state.dma.tick_count += uint64(CPU_TICK)
                     var _t0 : int
-                    if (e.state.dma.tick_count >= uint64(648)) {
-                        e.state.dma.tick_count -= uint64(648)
+                    if (e.state.dma.tick_count >= uint64(DMA_TICKS)) {
+                        e.state.dma.tick_count -= uint64(DMA_TICKS)
                         _t0 = int(Bool.TRUE)
                     } else {
                         _t0 = int(Bool.FALSE)
@@ -4676,39 +4649,37 @@ def private binjgb_all__serial_synchronize(var e : Emulator?) {
         var delta_ticks : uint64 = e.state.ticks - e.state.serial.sync_ticks
         if (!!(uint(int(e.state.serial.transferring)) != 0 && e.state.serial.clock == SerialClock.SERIAL_CLOCK_INTERNAL)) {
             var cpu_tick : uint64 = e.state.cpu_tick
-            {
-                while (delta_ticks > uint64(0)) {
-                    e.state.serial.tick_count += cpu_tick
-                    var _t0 : int
-                    if (e.state.serial.tick_count >= uint64(4194304 / 8192)) {
-                        e.state.serial.tick_count -= uint64(4194304 / 8192)
-                        _t0 = int(Bool.TRUE)
-                    } else {
-                        _t0 = int(Bool.FALSE)
-                    }
-                    if (!!(_t0 != 0)) {
-                        // Since we're never connected to another device, always shift in
-                        // 0xff.
-                        e.state.serial.sb = uint8(int(e.state.serial.sb) << 1 | 1)
-                        e.state.serial.transferred_bits = uint8(uint(e.state.serial.transferred_bits) + 1)
-                        var _t1 : int
-                        if (int(e.state.serial.transferred_bits) >= 8) {
-                            e.state.serial.transferred_bits = uint8(int(e.state.serial.transferred_bits) - 8)
-                            _t1 = int(Bool.TRUE)
-                        } else {
-                            _t1 = int(Bool.FALSE)
-                        }
-                        if (!!(_t1 != 0)) {
-                            e.state.serial.transferring = Bool.FALSE
-                            e.state.interrupt.new_if = uint8(int(e.state.interrupt.new_if) | IF_SERIAL)
-                            e.state.serial.sync_ticks = e.state.ticks - delta_ticks
-                            binjgb_all__calculate_next_serial_intr(e)
-                        }
-                    } elif (!!(e.state.serial.tick_count == uint64(0) && int(e.state.serial.transferred_bits) == 0)) {
-                        e.state.interrupt.if_ = uint8(int(e.state.interrupt.if_) | int(e.state.interrupt.new_if) & IF_SERIAL)
-                    }
-                    delta_ticks -= cpu_tick
+            while (delta_ticks > 0ul) {
+                e.state.serial.tick_count += cpu_tick
+                var _t0 : int
+                if (e.state.serial.tick_count >= uint64(SERIAL_TICKS)) {
+                    e.state.serial.tick_count -= uint64(SERIAL_TICKS)
+                    _t0 = int(Bool.TRUE)
+                } else {
+                    _t0 = int(Bool.FALSE)
                 }
+                if (!!(_t0 != 0)) {
+                    // Since we're never connected to another device, always shift in
+                    // 0xff.
+                    e.state.serial.sb = uint8((int(e.state.serial.sb) << 1) | 1)
+                    e.state.serial.transferred_bits = uint8(uint(e.state.serial.transferred_bits) + 1)
+                    var _t1 : int
+                    if (int(e.state.serial.transferred_bits) >= 8) {
+                        e.state.serial.transferred_bits = uint8(int(e.state.serial.transferred_bits) - 8)
+                        _t1 = int(Bool.TRUE)
+                    } else {
+                        _t1 = int(Bool.FALSE)
+                    }
+                    if (!!(_t1 != 0)) {
+                        e.state.serial.transferring = Bool.FALSE
+                        e.state.interrupt.new_if = uint8(int(e.state.interrupt.new_if) | IF_SERIAL)
+                        e.state.serial.sync_ticks = e.state.ticks - delta_ticks
+                        binjgb_all__calculate_next_serial_intr(e)
+                    }
+                } elif (!!(e.state.serial.tick_count == 0ul && int(e.state.serial.transferred_bits) == 0)) {
+                    e.state.interrupt.if_ = uint8(int(e.state.interrupt.if_) | (int(e.state.interrupt.new_if) & IF_SERIAL))
+                }
+                delta_ticks -= cpu_tick
             }
         }
         e.state.serial.sync_ticks = e.state.ticks
@@ -4728,7 +4699,7 @@ def private binjgb_all__read_u8_tick(var e : Emulator?; _c_addr : uint16) : uint
 def private binjgb_all__read_u16_tick(var e : Emulator?; _c_addr : uint16) : uint16 {
     var lo : uint8 = binjgb_all__read_u8_tick(e, _c_addr)
     var hi : uint8 = binjgb_all__read_u8_tick(e, uint16(int(_c_addr) + 1))
-    return uint16(int(hi) << 8 | int(lo))
+    return uint16((int(hi) << 8) | int(lo))
 }
 
 def private binjgb_all__write_u8_tick(var e : Emulator?; _c_addr : uint16; value : uint8) {
@@ -4742,15 +4713,15 @@ def private binjgb_all__write_u16_tick(var e : Emulator?; _c_addr : uint16; valu
 }
 
 def private binjgb_all__get_af_reg(var e : Emulator?) : uint16 {
-    return uint16(uint(int(e.state.reg.A) << 8) | (uint(int(e.state.reg.F.Z)) & uint((1 << 7 - 7 + 1) - 1)) << 7u | (uint(int(e.state.reg.F.N)) & uint((1 << 6 - 6 + 1) - 1)) << 6u | (uint(int(e.state.reg.F.H)) & uint((1 << 5 - 5 + 1) - 1)) << 5u | (uint(int(e.state.reg.F.C)) & uint((1 << 4 - 4 + 1) - 1)) << 4u)
+    return uint16(uint(int(e.state.reg.A) << 8) | ((uint(int(e.state.reg.F.Z)) & uint((1 << 7 - 7 + 1) - 1)) << 7u) | ((uint(int(e.state.reg.F.N)) & uint((1 << 6 - 6 + 1) - 1)) << 6u) | ((uint(int(e.state.reg.F.H)) & uint((1 << 5 - 5 + 1) - 1)) << 5u) | ((uint(int(e.state.reg.F.C)) & uint((1 << 4 - 4 + 1) - 1)) << 4u))
 }
 
 def private binjgb_all__set_af_reg(var e : Emulator?; af : uint16) {
     e.state.reg.A = uint8(int(af) >> 8)
-    e.state.reg.F.Z = enum_from_int(type<Bool>, int(af) >> 7 & (1 << 7 - 7 + 1) - 1)
-    e.state.reg.F.N = enum_from_int(type<Bool>, int(af) >> 6 & (1 << 6 - 6 + 1) - 1)
-    e.state.reg.F.H = enum_from_int(type<Bool>, int(af) >> 5 & (1 << 5 - 5 + 1) - 1)
-    e.state.reg.F.C = enum_from_int(type<Bool>, int(af) >> 4 & (1 << 4 - 4 + 1) - 1)
+    e.state.reg.F.Z = enum_from_int(type<Bool>, (int(af) >> 7) & (1 << 7 - 7 + 1) - 1)
+    e.state.reg.F.N = enum_from_int(type<Bool>, (int(af) >> 6) & (1 << 6 - 6 + 1) - 1)
+    e.state.reg.F.H = enum_from_int(type<Bool>, (int(af) >> 5) & (1 << 5 - 5 + 1) - 1)
+    e.state.reg.F.C = enum_from_int(type<Bool>, (int(af) >> 4) & (1 << 4 - 4 + 1) - 1)
 }
 
 def private binjgb_all__dispatch_interrupt(var e : Emulator?) {
@@ -4767,7 +4738,7 @@ def private binjgb_all__dispatch_interrupt(var e : Emulator?) {
     // This behavior is needed to pass the ie_push mooneye-gb test.
     var interrupt : uint8 = uint8(int(e.state.interrupt.new_if) & int(e.state.interrupt.ie))
     var delay : Bool = Bool.FALSE
-    var mask : uint8 = uint8(0)
+    var mask : uint8 = 0u8
     var vector : uint16 = uint16(0)
     if ((int(interrupt) & IF_VBLANK) != 0) {
         vector = uint16(64)
@@ -4788,7 +4759,7 @@ def private binjgb_all__dispatch_interrupt(var e : Emulator?) {
     } else {
         // Interrupt was canceled.
         vector = uint16(0)
-        mask = uint8(0)
+        mask = 0u8
     }
     e.state.interrupt.new_if = uint8(int(e.state.interrupt.new_if) & ~int(mask))
     // Now write the LSB of PC.
@@ -4803,7 +4774,7 @@ def private binjgb_all__dispatch_interrupt(var e : Emulator?) {
 }
 
 def private binjgb_all__execute_instruction(var e : Emulator?) {
-    var opcode : uint8 = uint8(0)
+    var opcode : uint8 = 0u8
     var s : int8
     var u : uint8
     var c : uint8
@@ -4834,7 +4805,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                     if (int(e.state.cpu_speed.switching) != 0) {
                         binjgb_all__intr_synchronize(e)
                         e.state.cpu_speed.switching = Bool.FALSE
-                        e.state.cpu_speed.speed = enum_from_int(type<Speed>, int(uint(int(e.state.cpu_speed.speed)) ^ uint(1)))
+                        e.state.cpu_speed.speed = enum_from_int(type<Speed>, int(uint(int(e.state.cpu_speed.speed)) ^ 1u))
                         e.state.interrupt.state = CpuState.CPU_STATE_NORMAL
                         if (e.state.cpu_speed.speed == Speed.SPEED_NORMAL) {
                             e.state.cpu_tick = uint64(CPU_TICK)
@@ -4923,8 +4894,8 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
         e.state.reg._anon1._anon0.B = binjgb_all__read_u8_tick(e, e.state.reg.PC)
     } elif (_cond2 == 7) {
         u = e.state.reg.A
-        c = uint8(int(u) >> 7 & 1)
-        u = uint8(int(u) << 1 | int(c))
+        c = uint8((int(u) >> 7) & 1)
+        u = uint8((int(u) << 1) | int(c))
         e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
         e.state.reg.A = u
         e.state.reg.F.H = Bool.FALSE
@@ -4965,7 +4936,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
     } elif (_cond2 == 15) {
         u = e.state.reg.A
         c = uint8(int(u) & 1)
-        u = uint8(int(c) << 7 | int(u) >> 1)
+        u = uint8((int(c) << 7) | (int(u) >> 1))
         e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
         e.state.reg.A = u
         e.state.reg.F.H = Bool.FALSE
@@ -5000,7 +4971,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
         e.state.reg._anon2._anon0.D = binjgb_all__read_u8_tick(e, e.state.reg.PC)
     } elif (_cond2 == 23) {
         u = e.state.reg.A
-        c = uint8(int(u) >> 7 & 1)
+        c = uint8((int(u) >> 7) & 1)
         u = uint8(uint(int(u) << 1) | uint(int(e.state.reg.F.C)))
         e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
         e.state.reg.A = u
@@ -5043,7 +5014,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
     } elif (_cond2 == 31) {
         u = e.state.reg.A
         c = uint8(int(u) & 1)
-        u = uint8(uint(int(e.state.reg.F.C)) << 7u | uint(int(u) >> 1))
+        u = uint8((uint(int(e.state.reg.F.C)) << 7u) | uint(int(u) >> 1))
         e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
         e.state.reg.A = u
         e.state.reg.F.H = Bool.FALSE
@@ -5084,9 +5055,9 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
         e.state.reg._anon3._anon0.H = binjgb_all__read_u8_tick(e, e.state.reg.PC)
     } elif (_cond2 == 39) {
         {
-            u = uint8(0)
+            u = 0u8
             if (uint(int(e.state.reg.F.H)) != 0 || !(int(e.state.reg.F.N) != 0) && (int(e.state.reg.A) & 15) > 9) {
-                u = uint8(6)
+                u = 6u8
             }
             if (uint(int(e.state.reg.F.C)) != 0 || !(int(e.state.reg.F.N) != 0) && int(e.state.reg.A) > 153) {
                 u = uint8(int(u) | 96)
@@ -5210,7 +5181,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
         new_pc = uint16(int(new_pc) + 1)
         e.state.reg.A = binjgb_all__read_u8_tick(e, e.state.reg.PC)
     } elif (_cond2 == 63) {
-        e.state.reg.F.C = enum_from_int(type<Bool>, int(uint(int(e.state.reg.F.C)) ^ uint(1)))
+        e.state.reg.F.C = enum_from_int(type<Bool>, int(uint(int(e.state.reg.F.C)) ^ 1u))
         e.state.reg.F.H = Bool.FALSE
         e.state.reg.F.N = e.state.reg.F.H
     } elif (_cond2 == 64) {
@@ -5324,7 +5295,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
     } elif (_cond2 == 118) {
         if (int(e.state.interrupt.ime) != 0) {
             e.state.interrupt.state = CpuState.CPU_STATE_HALT
-        } elif ((int(e.state.interrupt.ie) & int(e.state.interrupt.new_if) & 31) != 0) {
+        } elif ((int(e.state.interrupt.ie) & int(e.state.interrupt.new_if) & IF_ALL) != 0) {
             e.state.interrupt.state = CpuState.CPU_STATE_HALT_BUG
         } else {
             e.state.interrupt.state = CpuState.CPU_STATE_HALT_DI
@@ -5830,8 +5801,8 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             let _cond3 = int(cb)
             if (_cond3 == 0) {
                 u = e.state.reg._anon1._anon0.B
-                c = uint8(int(u) >> 7 & 1)
-                u = uint8(int(u) << 1 | int(c))
+                c = uint8((int(u) >> 7) & 1)
+                u = uint8((int(u) << 1) | int(c))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon1._anon0.B = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5839,8 +5810,8 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 1) {
                 u = e.state.reg._anon1._anon0.C
-                c = uint8(int(u) >> 7 & 1)
-                u = uint8(int(u) << 1 | int(c))
+                c = uint8((int(u) >> 7) & 1)
+                u = uint8((int(u) << 1) | int(c))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon1._anon0.C = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5848,8 +5819,8 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 2) {
                 u = e.state.reg._anon2._anon0.D
-                c = uint8(int(u) >> 7 & 1)
-                u = uint8(int(u) << 1 | int(c))
+                c = uint8((int(u) >> 7) & 1)
+                u = uint8((int(u) << 1) | int(c))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon2._anon0.D = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5857,8 +5828,8 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 3) {
                 u = e.state.reg._anon2._anon0.E
-                c = uint8(int(u) >> 7 & 1)
-                u = uint8(int(u) << 1 | int(c))
+                c = uint8((int(u) >> 7) & 1)
+                u = uint8((int(u) << 1) | int(c))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon2._anon0.E = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5866,8 +5837,8 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 4) {
                 u = e.state.reg._anon3._anon0.H
-                c = uint8(int(u) >> 7 & 1)
-                u = uint8(int(u) << 1 | int(c))
+                c = uint8((int(u) >> 7) & 1)
+                u = uint8((int(u) << 1) | int(c))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon3._anon0.H = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5875,8 +5846,8 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 5) {
                 u = e.state.reg._anon3._anon0.L
-                c = uint8(int(u) >> 7 & 1)
-                u = uint8(int(u) << 1 | int(c))
+                c = uint8((int(u) >> 7) & 1)
+                u = uint8((int(u) << 1) | int(c))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon3._anon0.L = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5884,8 +5855,8 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 6) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                c = uint8(int(u) >> 7 & 1)
-                u = uint8(int(u) << 1 | int(c))
+                c = uint8((int(u) >> 7) & 1)
+                u = uint8((int(u) << 1) | int(c))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5893,8 +5864,8 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 7) {
                 u = e.state.reg.A
-                c = uint8(int(u) >> 7 & 1)
-                u = uint8(int(u) << 1 | int(c))
+                c = uint8((int(u) >> 7) & 1)
+                u = uint8((int(u) << 1) | int(c))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg.A = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5903,7 +5874,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 8) {
                 u = e.state.reg._anon1._anon0.B
                 c = uint8(int(u) & 1)
-                u = uint8(int(c) << 7 | int(u) >> 1)
+                u = uint8((int(c) << 7) | (int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon1._anon0.B = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5912,7 +5883,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 9) {
                 u = e.state.reg._anon1._anon0.C
                 c = uint8(int(u) & 1)
-                u = uint8(int(c) << 7 | int(u) >> 1)
+                u = uint8((int(c) << 7) | (int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon1._anon0.C = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5921,7 +5892,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 10) {
                 u = e.state.reg._anon2._anon0.D
                 c = uint8(int(u) & 1)
-                u = uint8(int(c) << 7 | int(u) >> 1)
+                u = uint8((int(c) << 7) | (int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon2._anon0.D = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5930,7 +5901,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 11) {
                 u = e.state.reg._anon2._anon0.E
                 c = uint8(int(u) & 1)
-                u = uint8(int(c) << 7 | int(u) >> 1)
+                u = uint8((int(c) << 7) | (int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon2._anon0.E = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5939,7 +5910,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 12) {
                 u = e.state.reg._anon3._anon0.H
                 c = uint8(int(u) & 1)
-                u = uint8(int(c) << 7 | int(u) >> 1)
+                u = uint8((int(c) << 7) | (int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon3._anon0.H = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5948,7 +5919,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 13) {
                 u = e.state.reg._anon3._anon0.L
                 c = uint8(int(u) & 1)
-                u = uint8(int(c) << 7 | int(u) >> 1)
+                u = uint8((int(c) << 7) | (int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon3._anon0.L = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5957,7 +5928,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 14) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
                 c = uint8(int(u) & 1)
-                u = uint8(int(c) << 7 | int(u) >> 1)
+                u = uint8((int(c) << 7) | (int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5966,7 +5937,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 15) {
                 u = e.state.reg.A
                 c = uint8(int(u) & 1)
-                u = uint8(int(c) << 7 | int(u) >> 1)
+                u = uint8((int(c) << 7) | (int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg.A = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -5974,7 +5945,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 16) {
                 u = e.state.reg._anon1._anon0.B
-                c = uint8(int(u) >> 7 & 1)
+                c = uint8((int(u) >> 7) & 1)
                 u = uint8(uint(int(u) << 1) | uint(int(e.state.reg.F.C)))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon1._anon0.B = u
@@ -5983,7 +5954,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 17) {
                 u = e.state.reg._anon1._anon0.C
-                c = uint8(int(u) >> 7 & 1)
+                c = uint8((int(u) >> 7) & 1)
                 u = uint8(uint(int(u) << 1) | uint(int(e.state.reg.F.C)))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon1._anon0.C = u
@@ -5992,7 +5963,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 18) {
                 u = e.state.reg._anon2._anon0.D
-                c = uint8(int(u) >> 7 & 1)
+                c = uint8((int(u) >> 7) & 1)
                 u = uint8(uint(int(u) << 1) | uint(int(e.state.reg.F.C)))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon2._anon0.D = u
@@ -6001,7 +5972,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 19) {
                 u = e.state.reg._anon2._anon0.E
-                c = uint8(int(u) >> 7 & 1)
+                c = uint8((int(u) >> 7) & 1)
                 u = uint8(uint(int(u) << 1) | uint(int(e.state.reg.F.C)))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon2._anon0.E = u
@@ -6010,7 +5981,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 20) {
                 u = e.state.reg._anon3._anon0.H
-                c = uint8(int(u) >> 7 & 1)
+                c = uint8((int(u) >> 7) & 1)
                 u = uint8(uint(int(u) << 1) | uint(int(e.state.reg.F.C)))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon3._anon0.H = u
@@ -6019,7 +5990,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 21) {
                 u = e.state.reg._anon3._anon0.L
-                c = uint8(int(u) >> 7 & 1)
+                c = uint8((int(u) >> 7) & 1)
                 u = uint8(uint(int(u) << 1) | uint(int(e.state.reg.F.C)))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon3._anon0.L = u
@@ -6028,7 +5999,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 22) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                c = uint8(int(u) >> 7 & 1)
+                c = uint8((int(u) >> 7) & 1)
                 u = uint8(uint(int(u) << 1) | uint(int(e.state.reg.F.C)))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
@@ -6037,7 +6008,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 23) {
                 u = e.state.reg.A
-                c = uint8(int(u) >> 7 & 1)
+                c = uint8((int(u) >> 7) & 1)
                 u = uint8(uint(int(u) << 1) | uint(int(e.state.reg.F.C)))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg.A = u
@@ -6047,7 +6018,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 24) {
                 u = e.state.reg._anon1._anon0.B
                 c = uint8(int(u) & 1)
-                u = uint8(uint(int(e.state.reg.F.C)) << 7u | uint(int(u) >> 1))
+                u = uint8((uint(int(e.state.reg.F.C)) << 7u) | uint(int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon1._anon0.B = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6056,7 +6027,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 25) {
                 u = e.state.reg._anon1._anon0.C
                 c = uint8(int(u) & 1)
-                u = uint8(uint(int(e.state.reg.F.C)) << 7u | uint(int(u) >> 1))
+                u = uint8((uint(int(e.state.reg.F.C)) << 7u) | uint(int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon1._anon0.C = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6065,7 +6036,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 26) {
                 u = e.state.reg._anon2._anon0.D
                 c = uint8(int(u) & 1)
-                u = uint8(uint(int(e.state.reg.F.C)) << 7u | uint(int(u) >> 1))
+                u = uint8((uint(int(e.state.reg.F.C)) << 7u) | uint(int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon2._anon0.D = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6074,7 +6045,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 27) {
                 u = e.state.reg._anon2._anon0.E
                 c = uint8(int(u) & 1)
-                u = uint8(uint(int(e.state.reg.F.C)) << 7u | uint(int(u) >> 1))
+                u = uint8((uint(int(e.state.reg.F.C)) << 7u) | uint(int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon2._anon0.E = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6083,7 +6054,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 28) {
                 u = e.state.reg._anon3._anon0.H
                 c = uint8(int(u) & 1)
-                u = uint8(uint(int(e.state.reg.F.C)) << 7u | uint(int(u) >> 1))
+                u = uint8((uint(int(e.state.reg.F.C)) << 7u) | uint(int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon3._anon0.H = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6092,7 +6063,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 29) {
                 u = e.state.reg._anon3._anon0.L
                 c = uint8(int(u) & 1)
-                u = uint8(uint(int(e.state.reg.F.C)) << 7u | uint(int(u) >> 1))
+                u = uint8((uint(int(e.state.reg.F.C)) << 7u) | uint(int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg._anon3._anon0.L = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6101,7 +6072,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 30) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
                 c = uint8(int(u) & 1)
-                u = uint8(uint(int(e.state.reg.F.C)) << 7u | uint(int(u) >> 1))
+                u = uint8((uint(int(e.state.reg.F.C)) << 7u) | uint(int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6110,7 +6081,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
             } elif (_cond3 == 31) {
                 u = e.state.reg.A
                 c = uint8(int(u) & 1)
-                u = uint8(uint(int(e.state.reg.F.C)) << 7u | uint(int(u) >> 1))
+                u = uint8((uint(int(e.state.reg.F.C)) << 7u) | uint(int(u) >> 1))
                 e.state.reg.F.C = enum_from_int(type<Bool>, int(c))
                 e.state.reg.A = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6118,7 +6089,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 32) {
                 u = e.state.reg._anon1._anon0.B
-                e.state.reg.F.C = enum_from_int(type<Bool>, int(u) >> 7 & 1)
+                e.state.reg.F.C = enum_from_int(type<Bool>, (int(u) >> 7) & 1)
                 u = uint8(uint(u) << 1u)
                 e.state.reg._anon1._anon0.B = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6126,7 +6097,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 33) {
                 u = e.state.reg._anon1._anon0.C
-                e.state.reg.F.C = enum_from_int(type<Bool>, int(u) >> 7 & 1)
+                e.state.reg.F.C = enum_from_int(type<Bool>, (int(u) >> 7) & 1)
                 u = uint8(uint(u) << 1u)
                 e.state.reg._anon1._anon0.C = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6134,7 +6105,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 34) {
                 u = e.state.reg._anon2._anon0.D
-                e.state.reg.F.C = enum_from_int(type<Bool>, int(u) >> 7 & 1)
+                e.state.reg.F.C = enum_from_int(type<Bool>, (int(u) >> 7) & 1)
                 u = uint8(uint(u) << 1u)
                 e.state.reg._anon2._anon0.D = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6142,7 +6113,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 35) {
                 u = e.state.reg._anon2._anon0.E
-                e.state.reg.F.C = enum_from_int(type<Bool>, int(u) >> 7 & 1)
+                e.state.reg.F.C = enum_from_int(type<Bool>, (int(u) >> 7) & 1)
                 u = uint8(uint(u) << 1u)
                 e.state.reg._anon2._anon0.E = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6150,7 +6121,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 36) {
                 u = e.state.reg._anon3._anon0.H
-                e.state.reg.F.C = enum_from_int(type<Bool>, int(u) >> 7 & 1)
+                e.state.reg.F.C = enum_from_int(type<Bool>, (int(u) >> 7) & 1)
                 u = uint8(uint(u) << 1u)
                 e.state.reg._anon3._anon0.H = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6158,7 +6129,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 37) {
                 u = e.state.reg._anon3._anon0.L
-                e.state.reg.F.C = enum_from_int(type<Bool>, int(u) >> 7 & 1)
+                e.state.reg.F.C = enum_from_int(type<Bool>, (int(u) >> 7) & 1)
                 u = uint8(uint(u) << 1u)
                 e.state.reg._anon3._anon0.L = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6166,7 +6137,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 38) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                e.state.reg.F.C = enum_from_int(type<Bool>, int(u) >> 7 & 1)
+                e.state.reg.F.C = enum_from_int(type<Bool>, (int(u) >> 7) & 1)
                 u = uint8(uint(u) << 1u)
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6174,7 +6145,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 39) {
                 u = e.state.reg.A
-                e.state.reg.F.C = enum_from_int(type<Bool>, int(u) >> 7 & 1)
+                e.state.reg.F.C = enum_from_int(type<Bool>, (int(u) >> 7) & 1)
                 u = uint8(uint(u) << 1u)
                 e.state.reg.A = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
@@ -6246,7 +6217,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 48) {
                 u = e.state.reg._anon1._anon0.B
-                u = uint8(int(u) << 4 | int(u) >> 4)
+                u = uint8((int(u) << 4) | (int(u) >> 4))
                 e.state.reg._anon1._anon0.B = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
                 e.state.reg.F.C = Bool.FALSE
@@ -6254,7 +6225,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 49) {
                 u = e.state.reg._anon1._anon0.C
-                u = uint8(int(u) << 4 | int(u) >> 4)
+                u = uint8((int(u) << 4) | (int(u) >> 4))
                 e.state.reg._anon1._anon0.C = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
                 e.state.reg.F.C = Bool.FALSE
@@ -6262,7 +6233,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 50) {
                 u = e.state.reg._anon2._anon0.D
-                u = uint8(int(u) << 4 | int(u) >> 4)
+                u = uint8((int(u) << 4) | (int(u) >> 4))
                 e.state.reg._anon2._anon0.D = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
                 e.state.reg.F.C = Bool.FALSE
@@ -6270,7 +6241,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 51) {
                 u = e.state.reg._anon2._anon0.E
-                u = uint8(int(u) << 4 | int(u) >> 4)
+                u = uint8((int(u) << 4) | (int(u) >> 4))
                 e.state.reg._anon2._anon0.E = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
                 e.state.reg.F.C = Bool.FALSE
@@ -6278,7 +6249,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 52) {
                 u = e.state.reg._anon3._anon0.H
-                u = uint8(int(u) << 4 | int(u) >> 4)
+                u = uint8((int(u) << 4) | (int(u) >> 4))
                 e.state.reg._anon3._anon0.H = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
                 e.state.reg.F.C = Bool.FALSE
@@ -6286,7 +6257,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 53) {
                 u = e.state.reg._anon3._anon0.L
-                u = uint8(int(u) << 4 | int(u) >> 4)
+                u = uint8((int(u) << 4) | (int(u) >> 4))
                 e.state.reg._anon3._anon0.L = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
                 e.state.reg.F.C = Bool.FALSE
@@ -6294,7 +6265,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 54) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                u = uint8(int(u) << 4 | int(u) >> 4)
+                u = uint8((int(u) << 4) | (int(u) >> 4))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
                 e.state.reg.F.C = Bool.FALSE
@@ -6302,7 +6273,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 55) {
                 u = e.state.reg.A
-                u = uint8(int(u) << 4 | int(u) >> 4)
+                u = uint8((int(u) << 4) | (int(u) >> 4))
                 e.state.reg.A = u
                 e.state.reg.F.Z = enum_from_int(type<Bool>, int(u) == 0 ? 1 : 0)
                 e.state.reg.F.C = Bool.FALSE
@@ -6374,322 +6345,322 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.F.N = e.state.reg.F.H
             } elif (_cond3 == 64) {
                 u = e.state.reg._anon1._anon0.B
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 0)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 0))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 65) {
                 u = e.state.reg._anon1._anon0.C
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 0)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 0))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 66) {
                 u = e.state.reg._anon2._anon0.D
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 0)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 0))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 67) {
                 u = e.state.reg._anon2._anon0.E
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 0)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 0))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 68) {
                 u = e.state.reg._anon3._anon0.H
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 0)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 0))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 69) {
                 u = e.state.reg._anon3._anon0.L
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 0)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 0))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 70) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 0)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 0))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 71) {
                 u = e.state.reg.A
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 0)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 0))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 72) {
                 u = e.state.reg._anon1._anon0.B
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 1)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 1))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 73) {
                 u = e.state.reg._anon1._anon0.C
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 1)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 1))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 74) {
                 u = e.state.reg._anon2._anon0.D
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 1)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 1))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 75) {
                 u = e.state.reg._anon2._anon0.E
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 1)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 1))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 76) {
                 u = e.state.reg._anon3._anon0.H
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 1)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 1))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 77) {
                 u = e.state.reg._anon3._anon0.L
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 1)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 1))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 78) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 1)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 1))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 79) {
                 u = e.state.reg.A
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 1)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 1))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 80) {
                 u = e.state.reg._anon1._anon0.B
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 2)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 2))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 81) {
                 u = e.state.reg._anon1._anon0.C
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 2)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 2))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 82) {
                 u = e.state.reg._anon2._anon0.D
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 2)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 2))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 83) {
                 u = e.state.reg._anon2._anon0.E
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 2)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 2))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 84) {
                 u = e.state.reg._anon3._anon0.H
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 2)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 2))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 85) {
                 u = e.state.reg._anon3._anon0.L
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 2)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 2))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 86) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 2)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 2))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 87) {
                 u = e.state.reg.A
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 2)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 2))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 88) {
                 u = e.state.reg._anon1._anon0.B
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 3)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 3))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 89) {
                 u = e.state.reg._anon1._anon0.C
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 3)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 3))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 90) {
                 u = e.state.reg._anon2._anon0.D
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 3)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 3))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 91) {
                 u = e.state.reg._anon2._anon0.E
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 3)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 3))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 92) {
                 u = e.state.reg._anon3._anon0.H
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 3)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 3))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 93) {
                 u = e.state.reg._anon3._anon0.L
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 3)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 3))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 94) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 3)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 3))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 95) {
                 u = e.state.reg.A
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 3)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 3))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 96) {
                 u = e.state.reg._anon1._anon0.B
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 4)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 4))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 97) {
                 u = e.state.reg._anon1._anon0.C
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 4)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 4))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 98) {
                 u = e.state.reg._anon2._anon0.D
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 4)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 4))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 99) {
                 u = e.state.reg._anon2._anon0.E
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 4)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 4))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 100) {
                 u = e.state.reg._anon3._anon0.H
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 4)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 4))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 101) {
                 u = e.state.reg._anon3._anon0.L
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 4)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 4))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 102) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 4)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 4))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 103) {
                 u = e.state.reg.A
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 4)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 4))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 104) {
                 u = e.state.reg._anon1._anon0.B
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 5)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 5))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 105) {
                 u = e.state.reg._anon1._anon0.C
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 5)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 5))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 106) {
                 u = e.state.reg._anon2._anon0.D
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 5)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 5))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 107) {
                 u = e.state.reg._anon2._anon0.E
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 5)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 5))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 108) {
                 u = e.state.reg._anon3._anon0.H
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 5)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 5))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 109) {
                 u = e.state.reg._anon3._anon0.L
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 5)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 5))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 110) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 5)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 5))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 111) {
                 u = e.state.reg.A
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 5)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 5))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 112) {
                 u = e.state.reg._anon1._anon0.B
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 6)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 6))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 113) {
                 u = e.state.reg._anon1._anon0.C
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 6)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 6))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 114) {
                 u = e.state.reg._anon2._anon0.D
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 6)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 6))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 115) {
                 u = e.state.reg._anon2._anon0.E
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 6)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 6))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 116) {
                 u = e.state.reg._anon3._anon0.H
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 6)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 6))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 117) {
                 u = e.state.reg._anon3._anon0.L
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 6)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 6))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 118) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 6)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 6))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 119) {
                 u = e.state.reg.A
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 6)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 6))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 120) {
                 u = e.state.reg._anon1._anon0.B
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 7)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 7))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 121) {
                 u = e.state.reg._anon1._anon0.C
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 7)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 7))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 122) {
                 u = e.state.reg._anon2._anon0.D
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 7)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 7))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 123) {
                 u = e.state.reg._anon2._anon0.E
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 7)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 7))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 124) {
                 u = e.state.reg._anon3._anon0.H
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 7)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 7))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 125) {
                 u = e.state.reg._anon3._anon0.L
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 7)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 7))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 126) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 7)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 7))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 127) {
                 u = e.state.reg.A
-                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & 1 << 7)) == 0 ? 1 : 0)
+                e.state.reg.F.Z = enum_from_int(type<Bool>, int(uint8(int(u) & (1 << 7))) == 0 ? 1 : 0)
                 e.state.reg.F.N = Bool.FALSE
                 e.state.reg.F.H = Bool.TRUE
             } elif (_cond3 == 128) {
@@ -6950,259 +6921,259 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
                 e.state.reg.A = u
             } elif (_cond3 == 192) {
                 u = e.state.reg._anon1._anon0.B
-                u = uint8(int(u) | 1 << 0)
+                u = uint8(int(u) | (1 << 0))
                 e.state.reg._anon1._anon0.B = u
             } elif (_cond3 == 193) {
                 u = e.state.reg._anon1._anon0.C
-                u = uint8(int(u) | 1 << 0)
+                u = uint8(int(u) | (1 << 0))
                 e.state.reg._anon1._anon0.C = u
             } elif (_cond3 == 194) {
                 u = e.state.reg._anon2._anon0.D
-                u = uint8(int(u) | 1 << 0)
+                u = uint8(int(u) | (1 << 0))
                 e.state.reg._anon2._anon0.D = u
             } elif (_cond3 == 195) {
                 u = e.state.reg._anon2._anon0.E
-                u = uint8(int(u) | 1 << 0)
+                u = uint8(int(u) | (1 << 0))
                 e.state.reg._anon2._anon0.E = u
             } elif (_cond3 == 196) {
                 u = e.state.reg._anon3._anon0.H
-                u = uint8(int(u) | 1 << 0)
+                u = uint8(int(u) | (1 << 0))
                 e.state.reg._anon3._anon0.H = u
             } elif (_cond3 == 197) {
                 u = e.state.reg._anon3._anon0.L
-                u = uint8(int(u) | 1 << 0)
+                u = uint8(int(u) | (1 << 0))
                 e.state.reg._anon3._anon0.L = u
             } elif (_cond3 == 198) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                u = uint8(int(u) | 1 << 0)
+                u = uint8(int(u) | (1 << 0))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
             } elif (_cond3 == 199) {
                 u = e.state.reg.A
-                u = uint8(int(u) | 1 << 0)
+                u = uint8(int(u) | (1 << 0))
                 e.state.reg.A = u
             } elif (_cond3 == 200) {
                 u = e.state.reg._anon1._anon0.B
-                u = uint8(int(u) | 1 << 1)
+                u = uint8(int(u) | (1 << 1))
                 e.state.reg._anon1._anon0.B = u
             } elif (_cond3 == 201) {
                 u = e.state.reg._anon1._anon0.C
-                u = uint8(int(u) | 1 << 1)
+                u = uint8(int(u) | (1 << 1))
                 e.state.reg._anon1._anon0.C = u
             } elif (_cond3 == 202) {
                 u = e.state.reg._anon2._anon0.D
-                u = uint8(int(u) | 1 << 1)
+                u = uint8(int(u) | (1 << 1))
                 e.state.reg._anon2._anon0.D = u
             } elif (_cond3 == 203) {
                 u = e.state.reg._anon2._anon0.E
-                u = uint8(int(u) | 1 << 1)
+                u = uint8(int(u) | (1 << 1))
                 e.state.reg._anon2._anon0.E = u
             } elif (_cond3 == 204) {
                 u = e.state.reg._anon3._anon0.H
-                u = uint8(int(u) | 1 << 1)
+                u = uint8(int(u) | (1 << 1))
                 e.state.reg._anon3._anon0.H = u
             } elif (_cond3 == 205) {
                 u = e.state.reg._anon3._anon0.L
-                u = uint8(int(u) | 1 << 1)
+                u = uint8(int(u) | (1 << 1))
                 e.state.reg._anon3._anon0.L = u
             } elif (_cond3 == 206) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                u = uint8(int(u) | 1 << 1)
+                u = uint8(int(u) | (1 << 1))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
             } elif (_cond3 == 207) {
                 u = e.state.reg.A
-                u = uint8(int(u) | 1 << 1)
+                u = uint8(int(u) | (1 << 1))
                 e.state.reg.A = u
             } elif (_cond3 == 208) {
                 u = e.state.reg._anon1._anon0.B
-                u = uint8(int(u) | 1 << 2)
+                u = uint8(int(u) | (1 << 2))
                 e.state.reg._anon1._anon0.B = u
             } elif (_cond3 == 209) {
                 u = e.state.reg._anon1._anon0.C
-                u = uint8(int(u) | 1 << 2)
+                u = uint8(int(u) | (1 << 2))
                 e.state.reg._anon1._anon0.C = u
             } elif (_cond3 == 210) {
                 u = e.state.reg._anon2._anon0.D
-                u = uint8(int(u) | 1 << 2)
+                u = uint8(int(u) | (1 << 2))
                 e.state.reg._anon2._anon0.D = u
             } elif (_cond3 == 211) {
                 u = e.state.reg._anon2._anon0.E
-                u = uint8(int(u) | 1 << 2)
+                u = uint8(int(u) | (1 << 2))
                 e.state.reg._anon2._anon0.E = u
             } elif (_cond3 == 212) {
                 u = e.state.reg._anon3._anon0.H
-                u = uint8(int(u) | 1 << 2)
+                u = uint8(int(u) | (1 << 2))
                 e.state.reg._anon3._anon0.H = u
             } elif (_cond3 == 213) {
                 u = e.state.reg._anon3._anon0.L
-                u = uint8(int(u) | 1 << 2)
+                u = uint8(int(u) | (1 << 2))
                 e.state.reg._anon3._anon0.L = u
             } elif (_cond3 == 214) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                u = uint8(int(u) | 1 << 2)
+                u = uint8(int(u) | (1 << 2))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
             } elif (_cond3 == 215) {
                 u = e.state.reg.A
-                u = uint8(int(u) | 1 << 2)
+                u = uint8(int(u) | (1 << 2))
                 e.state.reg.A = u
             } elif (_cond3 == 216) {
                 u = e.state.reg._anon1._anon0.B
-                u = uint8(int(u) | 1 << 3)
+                u = uint8(int(u) | (1 << 3))
                 e.state.reg._anon1._anon0.B = u
             } elif (_cond3 == 217) {
                 u = e.state.reg._anon1._anon0.C
-                u = uint8(int(u) | 1 << 3)
+                u = uint8(int(u) | (1 << 3))
                 e.state.reg._anon1._anon0.C = u
             } elif (_cond3 == 218) {
                 u = e.state.reg._anon2._anon0.D
-                u = uint8(int(u) | 1 << 3)
+                u = uint8(int(u) | (1 << 3))
                 e.state.reg._anon2._anon0.D = u
             } elif (_cond3 == 219) {
                 u = e.state.reg._anon2._anon0.E
-                u = uint8(int(u) | 1 << 3)
+                u = uint8(int(u) | (1 << 3))
                 e.state.reg._anon2._anon0.E = u
             } elif (_cond3 == 220) {
                 u = e.state.reg._anon3._anon0.H
-                u = uint8(int(u) | 1 << 3)
+                u = uint8(int(u) | (1 << 3))
                 e.state.reg._anon3._anon0.H = u
             } elif (_cond3 == 221) {
                 u = e.state.reg._anon3._anon0.L
-                u = uint8(int(u) | 1 << 3)
+                u = uint8(int(u) | (1 << 3))
                 e.state.reg._anon3._anon0.L = u
             } elif (_cond3 == 222) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                u = uint8(int(u) | 1 << 3)
+                u = uint8(int(u) | (1 << 3))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
             } elif (_cond3 == 223) {
                 u = e.state.reg.A
-                u = uint8(int(u) | 1 << 3)
+                u = uint8(int(u) | (1 << 3))
                 e.state.reg.A = u
             } elif (_cond3 == 224) {
                 u = e.state.reg._anon1._anon0.B
-                u = uint8(int(u) | 1 << 4)
+                u = uint8(int(u) | (1 << 4))
                 e.state.reg._anon1._anon0.B = u
             } elif (_cond3 == 225) {
                 u = e.state.reg._anon1._anon0.C
-                u = uint8(int(u) | 1 << 4)
+                u = uint8(int(u) | (1 << 4))
                 e.state.reg._anon1._anon0.C = u
             } elif (_cond3 == 226) {
                 u = e.state.reg._anon2._anon0.D
-                u = uint8(int(u) | 1 << 4)
+                u = uint8(int(u) | (1 << 4))
                 e.state.reg._anon2._anon0.D = u
             } elif (_cond3 == 227) {
                 u = e.state.reg._anon2._anon0.E
-                u = uint8(int(u) | 1 << 4)
+                u = uint8(int(u) | (1 << 4))
                 e.state.reg._anon2._anon0.E = u
             } elif (_cond3 == 228) {
                 u = e.state.reg._anon3._anon0.H
-                u = uint8(int(u) | 1 << 4)
+                u = uint8(int(u) | (1 << 4))
                 e.state.reg._anon3._anon0.H = u
             } elif (_cond3 == 229) {
                 u = e.state.reg._anon3._anon0.L
-                u = uint8(int(u) | 1 << 4)
+                u = uint8(int(u) | (1 << 4))
                 e.state.reg._anon3._anon0.L = u
             } elif (_cond3 == 230) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                u = uint8(int(u) | 1 << 4)
+                u = uint8(int(u) | (1 << 4))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
             } elif (_cond3 == 231) {
                 u = e.state.reg.A
-                u = uint8(int(u) | 1 << 4)
+                u = uint8(int(u) | (1 << 4))
                 e.state.reg.A = u
             } elif (_cond3 == 232) {
                 u = e.state.reg._anon1._anon0.B
-                u = uint8(int(u) | 1 << 5)
+                u = uint8(int(u) | (1 << 5))
                 e.state.reg._anon1._anon0.B = u
             } elif (_cond3 == 233) {
                 u = e.state.reg._anon1._anon0.C
-                u = uint8(int(u) | 1 << 5)
+                u = uint8(int(u) | (1 << 5))
                 e.state.reg._anon1._anon0.C = u
             } elif (_cond3 == 234) {
                 u = e.state.reg._anon2._anon0.D
-                u = uint8(int(u) | 1 << 5)
+                u = uint8(int(u) | (1 << 5))
                 e.state.reg._anon2._anon0.D = u
             } elif (_cond3 == 235) {
                 u = e.state.reg._anon2._anon0.E
-                u = uint8(int(u) | 1 << 5)
+                u = uint8(int(u) | (1 << 5))
                 e.state.reg._anon2._anon0.E = u
             } elif (_cond3 == 236) {
                 u = e.state.reg._anon3._anon0.H
-                u = uint8(int(u) | 1 << 5)
+                u = uint8(int(u) | (1 << 5))
                 e.state.reg._anon3._anon0.H = u
             } elif (_cond3 == 237) {
                 u = e.state.reg._anon3._anon0.L
-                u = uint8(int(u) | 1 << 5)
+                u = uint8(int(u) | (1 << 5))
                 e.state.reg._anon3._anon0.L = u
             } elif (_cond3 == 238) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                u = uint8(int(u) | 1 << 5)
+                u = uint8(int(u) | (1 << 5))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
             } elif (_cond3 == 239) {
                 u = e.state.reg.A
-                u = uint8(int(u) | 1 << 5)
+                u = uint8(int(u) | (1 << 5))
                 e.state.reg.A = u
             } elif (_cond3 == 240) {
                 u = e.state.reg._anon1._anon0.B
-                u = uint8(int(u) | 1 << 6)
+                u = uint8(int(u) | (1 << 6))
                 e.state.reg._anon1._anon0.B = u
             } elif (_cond3 == 241) {
                 u = e.state.reg._anon1._anon0.C
-                u = uint8(int(u) | 1 << 6)
+                u = uint8(int(u) | (1 << 6))
                 e.state.reg._anon1._anon0.C = u
             } elif (_cond3 == 242) {
                 u = e.state.reg._anon2._anon0.D
-                u = uint8(int(u) | 1 << 6)
+                u = uint8(int(u) | (1 << 6))
                 e.state.reg._anon2._anon0.D = u
             } elif (_cond3 == 243) {
                 u = e.state.reg._anon2._anon0.E
-                u = uint8(int(u) | 1 << 6)
+                u = uint8(int(u) | (1 << 6))
                 e.state.reg._anon2._anon0.E = u
             } elif (_cond3 == 244) {
                 u = e.state.reg._anon3._anon0.H
-                u = uint8(int(u) | 1 << 6)
+                u = uint8(int(u) | (1 << 6))
                 e.state.reg._anon3._anon0.H = u
             } elif (_cond3 == 245) {
                 u = e.state.reg._anon3._anon0.L
-                u = uint8(int(u) | 1 << 6)
+                u = uint8(int(u) | (1 << 6))
                 e.state.reg._anon3._anon0.L = u
             } elif (_cond3 == 246) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                u = uint8(int(u) | 1 << 6)
+                u = uint8(int(u) | (1 << 6))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
             } elif (_cond3 == 247) {
                 u = e.state.reg.A
-                u = uint8(int(u) | 1 << 6)
+                u = uint8(int(u) | (1 << 6))
                 e.state.reg.A = u
             } elif (_cond3 == 248) {
                 u = e.state.reg._anon1._anon0.B
-                u = uint8(int(u) | 1 << 7)
+                u = uint8(int(u) | (1 << 7))
                 e.state.reg._anon1._anon0.B = u
             } elif (_cond3 == 249) {
                 u = e.state.reg._anon1._anon0.C
-                u = uint8(int(u) | 1 << 7)
+                u = uint8(int(u) | (1 << 7))
                 e.state.reg._anon1._anon0.C = u
             } elif (_cond3 == 250) {
                 u = e.state.reg._anon2._anon0.D
-                u = uint8(int(u) | 1 << 7)
+                u = uint8(int(u) | (1 << 7))
                 e.state.reg._anon2._anon0.D = u
             } elif (_cond3 == 251) {
                 u = e.state.reg._anon2._anon0.E
-                u = uint8(int(u) | 1 << 7)
+                u = uint8(int(u) | (1 << 7))
                 e.state.reg._anon2._anon0.E = u
             } elif (_cond3 == 252) {
                 u = e.state.reg._anon3._anon0.H
-                u = uint8(int(u) | 1 << 7)
+                u = uint8(int(u) | (1 << 7))
                 e.state.reg._anon3._anon0.H = u
             } elif (_cond3 == 253) {
                 u = e.state.reg._anon3._anon0.L
-                u = uint8(int(u) | 1 << 7)
+                u = uint8(int(u) | (1 << 7))
                 e.state.reg._anon3._anon0.L = u
             } elif (_cond3 == 254) {
                 u = binjgb_all__read_u8_tick(e, e.state.reg._anon3.HL)
-                u = uint8(int(u) | 1 << 7)
+                u = uint8(int(u) | (1 << 7))
                 binjgb_all__write_u8_tick(e, e.state.reg._anon3.HL, u)
             } elif (_cond3 == 255) {
                 u = e.state.reg.A
-                u = uint8(int(u) | 1 << 7)
+                u = uint8(int(u) | (1 << 7))
                 e.state.reg.A = u
             }
         }
@@ -7455,11 +7426,11 @@ def emulator_run_until(var e : Emulator?; until_ticks : uint64) : uint {
         ab.position = ab.data
     }
     binjgb_all__check_joyp_intr(e)
-    e.state.event = uint(0)
+    e.state.event = 0u
     var frames_left : uint64 = uint64(ab.frames - audio_buffer_get_frames(ab))
-    var max_audio_ticks : uint64 = e.state.apu.sync_ticks + uint64(uint((frames_left * uint64(4194304) + uint64(ab.frequency) - uint64(1)) / uint64(ab.frequency)))
+    var max_audio_ticks : uint64 = e.state.apu.sync_ticks + uint64(uint((frames_left * uint64(CPU_TICKS_PER_SECOND) + uint64(ab.frequency) - 1ul) / uint64(ab.frequency)))
     var check_ticks : uint64 = until_ticks < max_audio_ticks ? until_ticks : max_audio_ticks
-    while (e.state.event == uint(0) && e.state.ticks < check_ticks) {
+    while (e.state.event == 0u && e.state.ticks < check_ticks) {
         binjgb_all__emulator_step_internal(e)
     }
     if (e.state.ticks >= max_audio_ticks) {
@@ -7473,21 +7444,19 @@ def emulator_run_until(var e : Emulator?; until_ticks : uint64) : uint {
 }
 
 def emulator_step(var e : Emulator?) : uint {
-    return emulator_run_until(e, e.state.ticks + uint64(1))
+    return emulator_run_until(e, e.state.ticks + 1ul)
 }
 
 [c_function]
 def private binjgb_all__validate_header_checksum(var cart_info : CartInfo?) : Result {
-    var checksum : uint8 = uint8(0)
-    var i : uint64 = uint64(0)
-    {
-        i = uint64(HEADER_CHECKSUM_RANGE_START)
-        while (i <= uint64(HEADER_CHECKSUM_RANGE_END)) {
-            checksum = uint8(int(checksum) - int(deref(cart_info.data + i)) - 1)
-            i++
-        }
+    var checksum : uint8 = 0u8
+    var i : uint64 = 0ul
+    i = uint64(HEADER_CHECKSUM_RANGE_START)
+    while (i <= uint64(HEADER_CHECKSUM_RANGE_END)) {
+        checksum = uint8(int(checksum) - int(cart_info.data[i]) - 1)
+        i++
     }
-    return int(checksum) == int(deref(cart_info.data + HEADER_CHECKSUM_ADDR)) ? Result.OK : Result.ERROR
+    return int(checksum) == int(cart_info.data[HEADER_CHECKSUM_ADDR]) ? Result.OK : Result.ERROR
 }
 
 [c_function]
@@ -7497,7 +7466,7 @@ def private binjgb_all__get_result_string(value : Result) : uint8? {
 
 [c_function]
 def private binjgb_all__log_cart_info(var cart_info : CartInfo?) {
-    var title : uint8[17] = fixed_array(uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0))
+    var title : uint8[17] = fixed_array(0u8, uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0), uint8(0))
     var title_start : uint8? = reinterpret<uint8?>(cart_info.data) + TITLE_START_ADDR
     var title_end : uint8? = reinterpret<uint8?>(crt::memchr(reinterpret<void?>(title_start), '\0', uint64(TITLE_MAX_LENGTH)))
     var title_length : int = int(title_end != null ? int64(title_end - title_start) : int64(TITLE_MAX_LENGTH))
@@ -7508,13 +7477,13 @@ def private binjgb_all__log_cart_info(var cart_info : CartInfo?) {
             title[i] = uint8(' ')
         }
     }
-    printf(reinterpret<uint8?>("title: \"%s\"\n"), addr(title[0]))
-    printf(reinterpret<uint8?>("cgb flag: %s\n"), binjgb_all__get_cgb_flag_string(cart_info.cgb_flag))
-    printf(reinterpret<uint8?>("sgb flag: %s\n"), binjgb_all__get_sgb_flag_string(cart_info.sgb_flag))
-    printf(reinterpret<uint8?>("cart type: %s\n"), binjgb_all__get_cart_type_string(cart_info.cart_type))
-    printf(reinterpret<uint8?>("rom size: %s\n"), binjgb_all__get_rom_size_string(cart_info.rom_size))
-    printf(reinterpret<uint8?>("ext ram size: %s\n"), binjgb_all__get_ext_ram_size_string(cart_info.ext_ram_size))
-    printf(reinterpret<uint8?>("header checksum: 0x%02x [%s]\n"), int(deref(cart_info.data + HEADER_CHECKSUM_ADDR)), binjgb_all__get_result_string(binjgb_all__validate_header_checksum(cart_info)))
+    printf(cstr("title: \"%s\"\n"), addr(title[0]))
+    printf(cstr("cgb flag: %s\n"), binjgb_all__get_cgb_flag_string(cart_info.cgb_flag))
+    printf(cstr("sgb flag: %s\n"), binjgb_all__get_sgb_flag_string(cart_info.sgb_flag))
+    printf(cstr("cart type: %s\n"), binjgb_all__get_cart_type_string(cart_info.cart_type))
+    printf(cstr("rom size: %s\n"), binjgb_all__get_rom_size_string(cart_info.rom_size))
+    printf(cstr("ext ram size: %s\n"), binjgb_all__get_ext_ram_size_string(cart_info.ext_ram_size))
+    printf(cstr("header checksum: 0x%02x [%s]\n"), int(cart_info.data[HEADER_CHECKSUM_ADDR]), binjgb_all__get_result_string(binjgb_all__validate_header_checksum(cart_info)))
 }
 
 [c_function]
@@ -7524,8 +7493,8 @@ def init_audio_buffer(var e : Emulator?; frequency : uint; frames : uint) : Resu
     var buffer_size : uint64 = uint64((frames + uint(AUDIO_BUFFER_EXTRA_FRAMES)) * uint(SOUND_OUTPUT_COUNT))
     audio_buffer.data = reinterpret<uint8?>(crt::malloc(buffer_size))
     if (!(audio_buffer.data != null)) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4732)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("Audio buffer allocation failed.\n"))
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4732)
+        fprintf(crt::c_stderr(), cstr("Audio buffer allocation failed.\n"))
         goto label 1
     }
     audio_buffer.end = audio_buffer.data + buffer_size
@@ -7555,23 +7524,23 @@ def private binjgb_all__randomize_buffer(var seed : uint?; var buffer : uint8?; 
         buffer = buffer + uint64(typeinfo sizeof(type<uint>))
         size = uint(uint64(size) - uint64(typeinfo sizeof(type<uint>)))
     }
-    if (size > uint(0)) {
+    if (size > 0u) {
         var x : uint = binjgb_all__random_u32(seed)
         let _cond = size
         if (_cond == 3u) {
             var _t0 = buffer
             buffer = buffer + 1
-            deref(_t0) = uint8(x & uint(255))
+            deref(_t0) = uint8(x & 255u)
             x >>= 8u
         } elif (_cond == 2u) {
             var _t1 = buffer
             buffer = buffer + 1
-            deref(_t1) = uint8(x & uint(255))
+            deref(_t1) = uint8(x & 255u)
             x >>= 8u
         } elif (_cond == 1u) {
             var _t2 = buffer
             buffer = buffer + 1
-            deref(_t2) = uint8(x & uint(255))
+            deref(_t2) = uint8(x & 255u)
             x >>= 8u
         }
     }
@@ -7586,7 +7555,7 @@ def init_emulator(var e : Emulator?; var init : EmulatorInit?) : Result {
         break
     }
     binjgb_all__log_cart_info(e.cart_info)
-    e.state.memory_map_state.rom_base[0] = uint(0)
+    e.state.memory_map_state.rom_base[0] = 0u
     e.state.memory_map_state.rom_base[1] = uint(1 << ROM_BANK_SHIFT)
     e.state.is_cgb = enum_from_int(type<Bool>, !(int(init.force_dmg) != 0) && (e.cart_info.cgb_flag == CgbFlag.CGB_FLAG_SUPPORTED || e.cart_info.cgb_flag == CgbFlag.CGB_FLAG_REQUIRED) ? 1 : 0)
     e.state.is_sgb = enum_from_int(type<Bool>, !(int(init.force_dmg) != 0) && !(int(e.state.is_cgb) != 0) && e.cart_info.sgb_flag == SgbFlag.SGB_FLAG_SUPPORTED ? 1 : 0)
@@ -7604,50 +7573,46 @@ def init_emulator(var e : Emulator?; var init : EmulatorInit?) : Result {
     e.state.timer.next_intr_ticks = e.state.serial.next_intr_ticks
     e.state.wram.offset = uint16(4096)
     // Enable apu first, so subsequent writes succeed.
-    binjgb_all__write_apu(e, uint16(int(APUReg.APU_NR52_ADDR)), uint8(241))
-    binjgb_all__write_apu(e, uint16(int(APUReg.APU_NR11_ADDR)), uint8(128))
-    binjgb_all__write_apu(e, uint16(int(APUReg.APU_NR12_ADDR)), uint8(243))
-    binjgb_all__write_apu(e, uint16(int(APUReg.APU_NR14_ADDR)), uint8(128))
-    binjgb_all__write_apu(e, uint16(int(APUReg.APU_NR50_ADDR)), uint8(119))
-    binjgb_all__write_apu(e, uint16(int(APUReg.APU_NR51_ADDR)), uint8(243))
+    binjgb_all__write_apu(e, uint16(int(APUReg.APU_NR52_ADDR)), 241u8)
+    binjgb_all__write_apu(e, uint16(int(APUReg.APU_NR11_ADDR)), 128u8)
+    binjgb_all__write_apu(e, uint16(int(APUReg.APU_NR12_ADDR)), 243u8)
+    binjgb_all__write_apu(e, uint16(int(APUReg.APU_NR14_ADDR)), 128u8)
+    binjgb_all__write_apu(e, uint16(int(APUReg.APU_NR50_ADDR)), 119u8)
+    binjgb_all__write_apu(e, uint16(int(APUReg.APU_NR51_ADDR)), 243u8)
     e.state.apu.initialized = Bool.TRUE
     crt::memcpy(reinterpret<void?>(addr(e.state.apu.wave.ram)), reinterpret<void?>(addr(init_emulator_s_initial_wave_ram[0])), uint64(WAVE_RAM_SIZE))
     // Turn down the volume on channel1, it is playing by default (because of the
     // GB startup sound), but we don't want to hear it when starting the
     // emulator.
-    e.state.apu.channel[int(anon_96.APU_CHANNEL1)].envelope.volume = uint8(0)
-    binjgb_all__write_io(e, uint16(int(IOReg.IO_LCDC_ADDR)), uint8(145))
-    binjgb_all__write_io(e, uint16(int(IOReg.IO_SCY_ADDR)), uint8(0))
-    binjgb_all__write_io(e, uint16(int(IOReg.IO_SCX_ADDR)), uint8(0))
-    binjgb_all__write_io(e, uint16(int(IOReg.IO_LYC_ADDR)), uint8(0))
-    binjgb_all__write_io(e, uint16(int(IOReg.IO_BGP_ADDR)), uint8(252))
-    binjgb_all__write_io(e, uint16(int(IOReg.IO_OBP0_ADDR)), uint8(255))
-    binjgb_all__write_io(e, uint16(int(IOReg.IO_OBP1_ADDR)), uint8(255))
-    binjgb_all__write_io(e, uint16(int(IOReg.IO_IF_ADDR)), uint8(1))
-    binjgb_all__write_io(e, uint16(int(IOReg.IO_IE_ADDR)), uint8(0))
-    e.state.hdma.blocks = uint8(255)
+    e.state.apu.channel[int(anon_96.APU_CHANNEL1)].envelope.volume = 0u8
+    binjgb_all__write_io(e, uint16(int(IOReg.IO_LCDC_ADDR)), 145u8)
+    binjgb_all__write_io(e, uint16(int(IOReg.IO_SCY_ADDR)), 0u8)
+    binjgb_all__write_io(e, uint16(int(IOReg.IO_SCX_ADDR)), 0u8)
+    binjgb_all__write_io(e, uint16(int(IOReg.IO_LYC_ADDR)), 0u8)
+    binjgb_all__write_io(e, uint16(int(IOReg.IO_BGP_ADDR)), 252u8)
+    binjgb_all__write_io(e, uint16(int(IOReg.IO_OBP0_ADDR)), 255u8)
+    binjgb_all__write_io(e, uint16(int(IOReg.IO_OBP1_ADDR)), 255u8)
+    binjgb_all__write_io(e, uint16(int(IOReg.IO_IF_ADDR)), 1u8)
+    binjgb_all__write_io(e, uint16(int(IOReg.IO_IE_ADDR)), 0u8)
+    e.state.hdma.blocks = 255u8
     // Set initial DMG/SGB palettes
     emulator_set_builtin_palette(e, init.builtin_palette)
     // Set up cgb color curve
     e.cgb_color_curve = init.cgb_color_curve
     // Set initial CGB palettes to white.
     var pal_index : int
-    {
-        pal_index = 0
-        while (pal_index < 2) {
-            var palette : ColorPalettes? = pal_index == 0 ? addr(e.state.ppu.bgcp) : addr(e.state.ppu.obcp)
-            var i : int
-            {
-                i = 0
-                while (i < 32) {
-                    palette.palettes[i >> 2].color[i & 3] = RGBA_WHITE
-                    palette.data[i * 2] = uint8(255)
-                    palette.data[i * 2 + 1] = uint8(127)
-                    i++
-                }
-            }
-            pal_index++
+    pal_index = 0
+    while (pal_index < 2) {
+        var palette : ColorPalettes? = pal_index == 0 ? addr(e.state.ppu.bgcp) : addr(e.state.ppu.obcp)
+        var i : int
+        i = 0
+        while (i < 32) {
+            palette.palettes[i >> 2].color[i & 3] = RGBA_WHITE
+            palette.data[i * 2] = 255u8
+            palette.data[i * 2 + 1] = 127u8
+            i++
         }
+        pal_index++
     }
     // Randomize RAM
     var random_seed : uint = init.random_seed
@@ -7728,14 +7693,14 @@ def emulator_set_all_bw_palettes(var e : Emulator?; var palette : PaletteRGBA?) 
 
 [c_function]
 def private binjgb_all__set_rom_file_data(var e : Emulator?; var file_data : FileData?) : Result {
-    if (!(file_data.size > uint64(0))) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4906)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("File is empty.\n"))
+    if (!(file_data.size > 0ul)) {
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4906)
+        fprintf(crt::c_stderr(), cstr("File is empty.\n"))
         goto label 1
     }
-    if (!((file_data.size & uint64(32) * uint64(1024) - uint64(1)) == uint64(0))) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4909)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("File size (%ld) should be a multiple of minimum rom size (%ld).\n"), int64(file_data.size), int64(32) * int64(1024))
+    if (!((file_data.size & 32ul * 1024ul - 1ul) == 0ul)) {
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4909)
+        fprintf(crt::c_stderr(), cstr("File size (%ld) should be a multiple of minimum rom size (%ld).\n"), int64(file_data.size), int64(32) * int64(1024))
         goto label 1
     }
     e.file_data = deref(file_data)
@@ -7765,14 +7730,14 @@ def emulator_init_ext_ram_file_data(var e : Emulator?; var file_data : FileData?
 [c_function]
 def emulator_read_state(var e : Emulator?; var file_data : FileData?) : Result {
     if (!(file_data.size == uint64(typeinfo sizeof(type<EmulatorState>)))) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4934)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("save state file is wrong size: %ld, expected %ld.\n"), int64(file_data.size), int64(uint64(typeinfo sizeof(type<EmulatorState>))))
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4934)
+        fprintf(crt::c_stderr(), cstr("save state file is wrong size: %ld, expected %ld.\n"), int64(file_data.size), int64(uint64(typeinfo sizeof(type<EmulatorState>))))
         goto label 1
     }
     var new_state : EmulatorState? = reinterpret<EmulatorState?>(file_data.data)
-    if (!(new_state.header == uint(1800906720 + 2))) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4938)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("header mismatch: %u, expected %u.\n"), new_state.header, uint(1800906720 + 2))
+    if (!(new_state.header == SAVE_STATE_HEADER)) {
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4938)
+        fprintf(crt::c_stderr(), cstr("header mismatch: %u, expected %u.\n"), new_state.header, SAVE_STATE_HEADER)
         goto label 1
     }
     crt::memcpy(reinterpret<void?>(addr(e.state)), reinterpret<void?>(new_state), uint64(typeinfo sizeof(type<EmulatorState>)))
@@ -7797,7 +7762,7 @@ def emulator_write_state(var e : Emulator?; var file_data : FileData?) : Result 
         }
         break
     }
-    e.state.header = uint(1800906720 + 2)
+    e.state.header = SAVE_STATE_HEADER
     crt::memcpy(reinterpret<void?>(file_data.data), reinterpret<void?>(addr(e.state)), file_data.size)
     return Result.OK
     label 1:  // error
@@ -7810,8 +7775,8 @@ def emulator_read_ext_ram(var e : Emulator?; var file_data : FileData?) : Result
         return Result.OK
     }
     if (!(file_data.size == e.state.ext_ram.size)) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4967)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("save file is wrong size: %ld, expected %ld.\n"), int64(file_data.size), int64(e.state.ext_ram.size))
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4967)
+        fprintf(crt::c_stderr(), cstr("save file is wrong size: %ld, expected %ld.\n"), int64(file_data.size), int64(e.state.ext_ram.size))
         goto label 1
     }
     crt::memcpy(reinterpret<void?>(addr(e.state.ext_ram.data[0])), reinterpret<void?>(file_data.data), file_data.size)
@@ -7938,7 +7903,7 @@ def emulator_write_state_to_file(var e : Emulator?; var filename : uint8?) : Res
 
 [c_function]
 def emulator_new(var init : EmulatorInit?) : Emulator? {
-    var e : Emulator? = reinterpret<Emulator?>(crt::calloc(uint64(1), uint64(typeinfo sizeof(type<Emulator>))))
+    var e : Emulator? = reinterpret<Emulator?>(crt::calloc(1ul, uint64(typeinfo sizeof(type<Emulator>))))
     while (true) {
         if (!(binjgb_all__set_rom_file_data(e, addr(init.rom)) == Result.OK)) {
             goto label 1
@@ -7975,10 +7940,10 @@ def emulator_delete(var e : Emulator?) {
 [c_function]
 def emulator_ticks_to_time(ticks : uint64; var day : uint?; var hr : uint?; var min : uint?; var sec : uint?; var ms : uint?) {
     var secs : uint64 = ticks / uint64(CPU_TICKS_PER_SECOND)
-    deref(ms) = uint(secs / uint64(1000) % uint64(1000))
-    deref(sec) = uint(secs % uint64(60))
-    deref(min) = uint(secs / uint64(60) % uint64(60))
-    deref(hr) = uint(secs / uint64(60 * 60) % uint64(24))
+    deref(ms) = uint((secs / 1000ul) % 1000ul)
+    deref(sec) = uint(secs % 60ul)
+    deref(min) = uint((secs / 60ul) % 60ul)
+    deref(hr) = uint((secs / uint64(60 * 60)) % 24ul)
     deref(day) = uint(secs / uint64(60 * 60 * 24))
 }
 
@@ -8003,7 +7968,7 @@ def emulator_get_apu_log(var e : Emulator?) : ApuLog? {
 }
 
 def emulator_reset_apu_log(var e : Emulator?) {
-    e.apu_log.write_count = uint64(0)
+    e.apu_log.write_count = 0ul
 }
 
 def emulator_get_PC(var e : Emulator?) : uint16 {
@@ -8027,7 +7992,7 @@ def emulator_get_HL(var e : Emulator?) : uint16 {
 }
 
 def emulator_get_F(var e : Emulator?) : uint8 {
-    return uint8((uint(int(e.state.reg.F.Z)) & uint((1 << 7 - 7 + 1) - 1)) << 7u | (uint(int(e.state.reg.F.N)) & uint((1 << 6 - 6 + 1) - 1)) << 6u | (uint(int(e.state.reg.F.H)) & uint((1 << 5 - 5 + 1) - 1)) << 5u | (uint(int(e.state.reg.F.C)) & uint((1 << 4 - 4 + 1) - 1)) << 4u)
+    return uint8(((uint(int(e.state.reg.F.Z)) & uint((1 << 7 - 7 + 1) - 1)) << 7u) | ((uint(int(e.state.reg.F.N)) & uint((1 << 6 - 6 + 1) - 1)) << 6u) | ((uint(int(e.state.reg.F.H)) & uint((1 << 5 - 5 + 1) - 1)) << 5u) | ((uint(int(e.state.reg.F.C)) & uint((1 << 4 - 4 + 1) - 1)) << 4u))
 }
 
 def emulator_get_SP(var e : Emulator?) : uint16 {
@@ -8078,7 +8043,7 @@ def joypad_new : JoypadBuffer? {
     crt::memset(reinterpret<void?>(addr(deref(buffer))), 0, uint64(typeinfo sizeof(type<JoypadBuffer>)))
     buffer.sentinel.prev = addr(buffer.sentinel)
     buffer.sentinel.next = buffer.sentinel.prev
-    joypad_append(buffer, addr(buffer.last_buttons), uint64(0))
+    joypad_append(buffer, addr(buffer.last_buttons), 0ul)
     return buffer
 }
 
@@ -8099,8 +8064,8 @@ def joypad_delete(var buffer : JoypadBuffer?) {
 
 [c_function]
 def private binjgb_all__alloc_joypad_chunk(capacity : uint64) : JoypadChunk? {
-    var chunk : JoypadChunk? = reinterpret<JoypadChunk?>(crt::calloc(uint64(1), uint64(typeinfo sizeof(type<JoypadChunk>))))
-    chunk.data = reinterpret<JoypadState?>(crt::calloc(uint64(1), capacity * uint64(typeinfo sizeof(type<JoypadState>))))
+    var chunk : JoypadChunk? = reinterpret<JoypadChunk?>(crt::calloc(1ul, uint64(typeinfo sizeof(type<JoypadChunk>))))
+    chunk.data = reinterpret<JoypadState?>(crt::calloc(1ul, capacity * uint64(typeinfo sizeof(type<JoypadState>))))
     chunk.capacity = capacity
     return chunk
 }
@@ -8118,7 +8083,7 @@ def private binjgb_all__alloc_joypad_state(var buffer : JoypadBuffer?) : JoypadS
     }
     let _t0 = tail.size
     tail.size++
-    return addr(deref(tail.data + _t0))
+    return addr(tail.data[_t0])
 }
 
 [c_function]
@@ -8133,10 +8098,9 @@ def private binjgb_all__buttons_are_equal(var lhs : JoypadButtons?; var rhs : Jo
     return enum_from_int(type<Bool>, lhs.down == rhs.down && lhs.up == rhs.up && lhs.left == rhs.left && lhs.right == rhs.right && lhs.start == rhs.start && lhs.select == rhs.select && lhs.B == rhs.B && lhs.A == rhs.A ? 1 : 0)
 }
 
-[c_function]
 def private binjgb_all__print_joypad_buttons(ticks : uint64; buttons_in : JoypadButtons) {
     var buttons = buttons_in
-    printf(reinterpret<uint8?>("joyp: %lu %c%c%c%c %c%c%c%c\n"), ticks, uint(int(buttons.down)) != 0 ? 'D' : '_', uint(int(buttons.up)) != 0 ? 'U' : '_', uint(int(buttons.left)) != 0 ? 'L' : '_', uint(int(buttons.right)) != 0 ? 'R' : '_', uint(int(buttons.start)) != 0 ? 'S' : '_', uint(int(buttons.select)) != 0 ? 's' : '_', uint(int(buttons.B)) != 0 ? 'B' : '_', uint(int(buttons.A)) != 0 ? 'A' : '_')
+    printf(cstr("joyp: %lu %c%c%c%c %c%c%c%c\n"), ticks, uint(int(buttons.down)) != 0 ? 'D' : '_', uint(int(buttons.up)) != 0 ? 'U' : '_', uint(int(buttons.left)) != 0 ? 'L' : '_', uint(int(buttons.right)) != 0 ? 'R' : '_', uint(int(buttons.start)) != 0 ? 'S' : '_', uint(int(buttons.select)) != 0 ? 's' : '_', uint(int(buttons.B)) != 0 ? 'B' : '_', uint(int(buttons.A)) != 0 ? 'A' : '_')
 }
 
 [c_function]
@@ -8152,29 +8116,29 @@ def joypad_find_state(var buffer : JoypadBuffer?; ticks : uint64) : JoypadStateI
     var result : JoypadStateIter
     var first_chunk : JoypadChunk? = buffer.sentinel.next
     var last_chunk : JoypadChunk? = buffer.sentinel.prev
-    var first_ticks : uint64 = deref(first_chunk.data + 0).ticks
-    var last_ticks : uint64 = deref(last_chunk.data + (last_chunk.size - uint64(1))).ticks
+    var first_ticks : uint64 = first_chunk.data[0].ticks
+    var last_ticks : uint64 = last_chunk.data[last_chunk.size - 1ul].ticks
     if (ticks <= first_ticks) {
         // At or past the beginning.
         result.chunk = first_chunk
-        result.state = addr(deref(first_chunk.data + 0))
+        result.state = addr(first_chunk.data[0])
         return result
     } elif (ticks >= last_ticks) {
         // At or past the end.
         result.chunk = last_chunk
-        result.state = addr(deref(last_chunk.data + (last_chunk.size - uint64(1))))
+        result.state = addr(last_chunk.data[last_chunk.size - 1ul])
         return result
     } elif (ticks - first_ticks < last_ticks - ticks) {
         // Closer to the beginning.
         var chunk : JoypadChunk? = first_chunk
-        while (ticks >= deref(chunk.data + (chunk.size - uint64(1))).ticks) {
+        while (ticks >= chunk.data[chunk.size - 1ul].ticks) {
             chunk = chunk.next
         }
         result.chunk = chunk
     } else {
         // Closer to the end.
         var chunk : JoypadChunk? = last_chunk
-        while (ticks < deref(chunk.data + 0).ticks) {
+        while (ticks < chunk.data[0].ticks) {
             chunk = chunk.prev
         }
         result.chunk = chunk
@@ -8182,11 +8146,11 @@ def joypad_find_state(var buffer : JoypadBuffer?; ticks : uint64) : JoypadStateI
     var begin : JoypadState? = result.chunk.data
     var end : JoypadState? = begin + result.chunk.size
     var lower_bound : JoypadState? = null
-    if (int64(end - begin) != int64(0)) {
+    if (int64(end - begin) != 0l) {
         var begin_ : JoypadState? = begin
         var end_ : JoypadState? = end
-        while (int64(end_ - begin_) > int64(1)) {
-            var mid_ : JoypadState? = begin_ + int64(end_ - begin_) / int64(2)
+        while (int64(end_ - begin_) > 1l) {
+            var mid_ : JoypadState? = begin_ + int64(end_ - begin_) / 2l
             if (ticks == mid_.ticks) {
                 begin_ = mid_
                 break
@@ -8207,7 +8171,7 @@ def joypad_find_state(var buffer : JoypadBuffer?; ticks : uint64) : JoypadStateI
 def joypad_truncate_to(var buffer : JoypadBuffer?; var iter_in : JoypadStateIter) {
     var iter = iter_in
     var index : uint64 = uint64(int64(iter.state - iter.chunk.data))
-    iter.chunk.size = index + uint64(1)
+    iter.chunk.size = index + 1ul
     var chunk : JoypadChunk? = iter.chunk.next
     var sentinel : JoypadChunk? = addr(buffer.sentinel)
     while (intptr(chunk) != intptr(sentinel)) {
@@ -8225,29 +8189,29 @@ def joypad_truncate_to(var buffer : JoypadBuffer?; var iter_in : JoypadStateIter
 def joypad_get_next_state(var iter_in : JoypadStateIter) : JoypadStateIter {
     var iter = iter_in
     var index : uint64 = uint64(int64(iter.state - iter.chunk.data))
-    if (index + uint64(1) < iter.chunk.size) {
+    if (index + 1ul < iter.chunk.size) {
         iter.state = iter.state + 1
         return iter
     }
     iter.chunk = iter.chunk.next
-    iter.state = iter.chunk.size != uint64(0) ? iter.chunk.data : null
+    iter.state = iter.chunk.size != 0ul ? iter.chunk.data : null
     return iter
 }
 
 def joypad_pack_buttons(var buttons : JoypadButtons?) : uint8 {
-    return uint8(uint(int(buttons.down)) << 7u | uint(int(buttons.up)) << 6u | uint(int(buttons.left)) << 5u | uint(int(buttons.right)) << 4u | uint(int(buttons.start)) << 3u | uint(int(buttons.select)) << 2u | uint(int(buttons.B)) << 1u | uint(int(buttons.A)) << 0u)
+    return uint8((uint(int(buttons.down)) << 7u) | (uint(int(buttons.up)) << 6u) | (uint(int(buttons.left)) << 5u) | (uint(int(buttons.right)) << 4u) | (uint(int(buttons.start)) << 3u) | (uint(int(buttons.select)) << 2u) | (uint(int(buttons.B)) << 1u) | (uint(int(buttons.A)) << 0u))
 }
 
 def joypad_unpack_buttons(packed : uint8) : JoypadButtons {
     var buttons : JoypadButtons
     buttons.A = enum_from_int(type<Bool>, int(packed) & 1)
-    buttons.B = enum_from_int(type<Bool>, int(packed) >> 1 & 1)
-    buttons.select = enum_from_int(type<Bool>, int(packed) >> 2 & 1)
-    buttons.start = enum_from_int(type<Bool>, int(packed) >> 3 & 1)
-    buttons.right = enum_from_int(type<Bool>, int(packed) >> 4 & 1)
-    buttons.left = enum_from_int(type<Bool>, int(packed) >> 5 & 1)
-    buttons.up = enum_from_int(type<Bool>, int(packed) >> 6 & 1)
-    buttons.down = enum_from_int(type<Bool>, int(packed) >> 7 & 1)
+    buttons.B = enum_from_int(type<Bool>, (int(packed) >> 1) & 1)
+    buttons.select = enum_from_int(type<Bool>, (int(packed) >> 2) & 1)
+    buttons.start = enum_from_int(type<Bool>, (int(packed) >> 3) & 1)
+    buttons.right = enum_from_int(type<Bool>, (int(packed) >> 4) & 1)
+    buttons.left = enum_from_int(type<Bool>, (int(packed) >> 5) & 1)
+    buttons.up = enum_from_int(type<Bool>, (int(packed) >> 6) & 1)
+    buttons.down = enum_from_int(type<Bool>, (int(packed) >> 7) & 1)
     return buttons
 }
 
@@ -8268,7 +8232,7 @@ def joypad_get_stats(var buffer : JoypadBuffer?) : JoypadStats {
 
 [c_function]
 def private binjgb_all__joypad_file_size(var buffer : JoypadBuffer?) : uint64 {
-    var size : uint64 = uint64(0)
+    var size : uint64 = 0ul
     var chunk : JoypadChunk? = buffer.sentinel.next
     while (intptr(chunk) != intptr(addr(buffer.sentinel))) {
         size += chunk.size * uint64(typeinfo sizeof(type<JoypadState>))
@@ -8298,41 +8262,37 @@ def joypad_write(var buffer : JoypadBuffer?; var file_data : FileData?) : Result
 
 [c_function]
 def joypad_read(var file_data : FileData?; var out_buffer : JoypadBuffer ??) : Result {
-    if (!(file_data.size % uint64(typeinfo sizeof(type<JoypadState>)) == uint64(0))) {
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/joypad.c"), 231)
-        fprintf(crt::c_stderr(), reinterpret<uint8?>("Expected joypad file size to be multiple of %zu\n"), uint64(typeinfo sizeof(type<JoypadState>)))
+    if (!(file_data.size % uint64(typeinfo sizeof(type<JoypadState>)) == 0ul)) {
+        fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/joypad.c"), 231)
+        fprintf(crt::c_stderr(), cstr("Expected joypad file size to be multiple of %zu\n"), uint64(typeinfo sizeof(type<JoypadState>)))
         goto label 1
     }
     var size : uint64 = file_data.size / uint64(typeinfo sizeof(type<JoypadState>))
     var i : uint64
-    var last_ticks : uint64 = uint64(0)
-    {
-        i = uint64(0)
-        while (i < size) {
-            var state : JoypadState? = reinterpret<JoypadState?>(file_data.data) + i
-            var ticks : uint64 = state.ticks
-            if (!(ticks >= last_ticks)) {
-                fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/joypad.c"), 240)
-                fprintf(crt::c_stderr(), reinterpret<uint8?>("Expected ticks to be sorted, got %lu then %lu\n"), last_ticks, ticks)
+    var last_ticks : uint64 = 0ul
+    i = 0ul
+    while (i < size) {
+        var state : JoypadState? = reinterpret<JoypadState?>(file_data.data) + i
+        var ticks : uint64 = state.ticks
+        if (!(ticks >= last_ticks)) {
+            fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/joypad.c"), 240)
+            fprintf(crt::c_stderr(), cstr("Expected ticks to be sorted, got %lu then %lu\n"), last_ticks, ticks)
+            goto label 1
+        }
+        var j : uint64
+        j = 0ul
+        while (j < uint64(typeinfo sizeof(type<uint8[7]>)) / uint64(typeinfo sizeof(type<uint8>))) {
+            if (!(int(state.padding[j]) == 0)) {
+                fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/joypad.c"), 244)
+                fprintf(crt::c_stderr(), cstr("Expected padding to be zero, got %u\n"), int(state.padding[i]))
                 goto label 1
             }
-            var j : uint64
-            {
-                j = uint64(0)
-                while (j < uint64(typeinfo sizeof(type<uint8[7]>)) / uint64(typeinfo sizeof(type<uint8>))) {
-                    if (!(int(state.padding[j]) == 0)) {
-                        fprintf(crt::c_stderr(), reinterpret<uint8?>("%s:%d: "), reinterpret<uint8?>("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/joypad.c"), 244)
-                        fprintf(crt::c_stderr(), reinterpret<uint8?>("Expected padding to be zero, got %u\n"), int(state.padding[i]))
-                        goto label 1
-                    }
-                    j++
-                }
-            }
-            last_ticks = ticks
-            i++
+            j++
         }
+        last_ticks = ticks
+        i++
     }
-    var buffer : JoypadBuffer? = reinterpret<JoypadBuffer?>(crt::calloc(uint64(1), uint64(typeinfo sizeof(type<JoypadBuffer>))))
+    var buffer : JoypadBuffer? = reinterpret<JoypadBuffer?>(crt::calloc(1ul, uint64(typeinfo sizeof(type<JoypadBuffer>))))
     var new_chunk : JoypadChunk? = binjgb_all__alloc_joypad_chunk(size)
     crt::memcpy(reinterpret<void?>(new_chunk.data), reinterpret<void?>(file_data.data), file_data.size)
     new_chunk.size = size
@@ -8395,11 +8355,11 @@ def private binjgb_all__gb_script_buttons(frame_index : int; var buttons : Joypa
 [c_function]
 def gb_load_rom(argc : int; var argv : uint8 ??; var out : FileData?) : int {
     out.data = null
-    out.size = uint64(0)
+    out.size = 0ul
     if (argc < 2) {
         return 0
     }
-    if (!(file_read_aligned(deref(argv + (argc - 1)), uint64(32) * uint64(1024), out) == Result.OK)) {
+    if (!(file_read_aligned(argv[argc - 1], 32ul * 1024ul, out) == Result.OK)) {
         return 0
     }
     return 1
@@ -8414,7 +8374,7 @@ def gb_create(var rom : FileData?) : Emulator? {
     init.audio_frequency = 44100
     init.audio_frames = 2048
     init.random_seed = 3401295589u
-    init.builtin_palette = uint(0)
+    init.builtin_palette = 0u
     init.force_dmg = Bool.FALSE
     init.cgb_color_curve = CgbColorCurve.CGB_COLOR_CURVE_NONE
     emulator = emulator_new(addr(init))
@@ -8431,18 +8391,16 @@ def gb_create(var rom : FileData?) : Emulator? {
 def gb_run_frame(var emulator : Emulator?; frame_index : int) : int {
     var until_ticks : uint64 = emulator_get_ticks(emulator) + uint64(PPU_FRAME_TICKS)
     binjgb_all__gb_script_buttons(frame_index, addr(binjgb_all__gb_live_buttons))
-    {
-        while (true) {
-            var event : uint = emulator_run_until(emulator, until_ticks)
-            if ((event & uint(int(anon_240.EMULATOR_EVENT_NEW_FRAME))) != 0) {
-                return 1
-            }
-            if ((event & uint(int(anon_240.EMULATOR_EVENT_INVALID_OPCODE))) != 0) {
-                return 0
-            }
-            if ((event & uint(int(anon_240.EMULATOR_EVENT_UNTIL_TICKS))) != 0) {
-                until_ticks += uint64(PPU_FRAME_TICKS)
-            }
+    while (true) {
+        var event : uint = emulator_run_until(emulator, until_ticks)
+        if ((event & uint(int(anon_240.EMULATOR_EVENT_NEW_FRAME))) != 0) {
+            return 1
+        }
+        if ((event & uint(int(anon_240.EMULATOR_EVENT_INVALID_OPCODE))) != 0) {
+            return 0
+        }
+        if ((event & uint(int(anon_240.EMULATOR_EVENT_UNTIL_TICKS))) != 0) {
+            until_ticks += uint64(PPU_FRAME_TICKS)
         }
     }
     return 0
@@ -8453,11 +8411,11 @@ def gb_frame_hash(var emulator : Emulator?) : int {
     var pixels : uint? = addr(deref(emulator_get_frame_buffer(emulator))[0])
     var hash : uint = 2166136261u
     for (i in range(SCREEN_WIDTH * SCREEN_HEIGHT)) {
-        var rgba : uint = deref(pixels + i)
-        var r : uint = (rgba >> 0u & 255u) >> 3u
-        var g : uint = (rgba >> 8u & 255u) >> 3u
-        var b : uint = (rgba >> 16u & 255u) >> 3u
-        var packed : uint = r << 10u | g << 5u | b
+        var rgba : uint = pixels[i]
+        var r : uint = ((rgba >> 0u) & 255u) >> 3u
+        var g : uint = ((rgba >> 8u) & 255u) >> 3u
+        var b : uint = ((rgba >> 16u) & 255u) >> 3u
+        var packed : uint = (r << 10u) | (g << 5u) | b
         hash ^= packed & 255u
         hash *= 16777619u
         hash ^= packed >> 8u
@@ -8471,30 +8429,30 @@ def c_main(argc : int; var argv : uint8 ??) : int {
     var rom : FileData
     var emulator : Emulator? = null
     var frames : int = 0
-    crt::setvbuf(crt::c_stdout(), null, _IONBF, uint64(0))
+    crt::setvbuf(crt::c_stdout(), null, _IONBF, 0ul)
     if (!(gb_load_rom(argc, argv, addr(rom)) != 0)) {
-        printf(reinterpret<uint8?>("error=load\n"))
+        printf(cstr("error=load\n"))
         return 2
     }
-    printf(reinterpret<uint8?>("rom_bytes=%d\n"), int(rom.size))
+    printf(cstr("rom_bytes=%d\n"), int(rom.size))
     emulator = gb_create(addr(rom))
     if (!(emulator != null)) {
-        printf(reinterpret<uint8?>("error=emulator\n"))
+        printf(cstr("error=emulator\n"))
         return 1
     }
-    printf(reinterpret<uint8?>("width=%d\n"), SCREEN_WIDTH)
-    printf(reinterpret<uint8?>("height=%d\n"), SCREEN_HEIGHT)
+    printf(cstr("width=%d\n"), SCREEN_WIDTH)
+    printf(cstr("height=%d\n"), SCREEN_HEIGHT)
     for (i in range(GB_FRAMES)) {
         if (!(gb_run_frame(emulator, i) != 0)) {
-            printf(reinterpret<uint8?>("error=invalid_opcode frame=%d\n"), i)
+            printf(cstr("error=invalid_opcode frame=%d\n"), i)
             emulator_delete(emulator)
             return 1
         }
-        printf(reinterpret<uint8?>("frame[%d]=%d\n"), i, gb_frame_hash(emulator))
+        printf(cstr("frame[%d]=%d\n"), i, gb_frame_hash(emulator))
         frames += 1
     }
-    printf(reinterpret<uint8?>("frames=%d\n"), frames)
-    printf(reinterpret<uint8?>("ticks=%lld\n"), int64(emulator_get_ticks(emulator)))
+    printf(cstr("frames=%d\n"), frames)
+    printf(cstr("ticks=%lld\n"), int64(emulator_get_ticks(emulator)))
     emulator_delete(emulator)
     return frames == GB_FRAMES ? 0 : 1
 }
