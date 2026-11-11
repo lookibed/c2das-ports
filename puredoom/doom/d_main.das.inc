@@ -38,7 +38,7 @@ var pagename : uint8?
 def D_PostEvent(var ev : event_t?) {
     events[eventhead] = deref(ev)
     eventhead++
-    eventhead &= MAXEVENTS - 1
+    eventhead &= (MAXEVENTS - 1)
 }
 
 // D_ProcessEvents
@@ -47,19 +47,17 @@ def D_PostEvent(var ev : event_t?) {
 def D_ProcessEvents {
     var ev : event_t?
     // IF STORE DEMO, DO NOT ACCEPT INPUT
-    if (gamemode == GameMode_t.commercial && W_CheckNumForName(reinterpret<uint8?>("map01")) < 0) {
+    if ((gamemode == GameMode_t.commercial) && (W_CheckNumForName(cstr("map01")) < 0)) {
         return
     }
-    {
-        while (eventtail != eventhead) {
-            ev = addr(events[0]) + end_index(eventtail, 4096)
-            if (!(int(M_Responder(ev)) != 0)) {
-                G_Responder(ev)
-            }
-            // else menu ate the event
-            eventtail++
-            eventtail &= MAXEVENTS - 1
+    while (eventtail != eventhead) {
+        ev = addr(events[0]) + end_index(eventtail, 4096)
+        if (!(int(M_Responder(ev)) != 0)) {
+            G_Responder(ev)
         }
+        // else menu ate the event
+        eventtail++
+        eventtail &= (MAXEVENTS - 1)
     }
 }
 
@@ -103,7 +101,7 @@ def D_Display {
             if (int(automapactive) != 0) {
                 AM_Drawer()
             }
-            if (uint(int(wipe)) != 0 || viewheight != 200 && uint(int(D_Display_fullscreen)) != 0) {
+            if (uint(int(wipe)) != 0 || (viewheight != 200 && uint(int(D_Display_fullscreen)) != 0)) {
                 redrawsbar = doom_boolean._c_true
             }
             if (uint(int(D_Display_inhelpscreensstate)) != 0 && !(int(inhelpscreens) != 0)) {
@@ -139,7 +137,7 @@ def D_Display {
     }
     // clean up border stuff
     if (gamestate != D_Display_oldgamestate && gamestate != gamestate_t.GS_LEVEL) {
-        I_SetPalette(reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("PLAYPAL"), PU_CACHE)))
+        I_SetPalette(reinterpret<uint8?>(W_CacheLumpName(cstr("PLAYPAL"), PU_CACHE)))
     }
     // see if the border needs to be initially drawn
     if (gamestate == gamestate_t.GS_LEVEL && D_Display_oldgamestate != gamestate_t.GS_LEVEL) {
@@ -171,7 +169,7 @@ def D_Display {
         } else {
             y = viewwindowy + 4
         }
-        V_DrawPatchDirect(viewwindowx + (scaledviewwidth - 68) / 2, y, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_PAUSE"), PU_CACHE)))
+        V_DrawPatchDirect(viewwindowx + (scaledviewwidth - 68) / 2, y, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_PAUSE"), PU_CACHE)))
     }
     // menus go directly to the screen
     // menu is drawn even on top of everything
@@ -202,9 +200,9 @@ def D_UpdateWipe {
 def private D_PrintHex(var key : uint8?; value : uint) {
     var digits : uint8[9]
     for (i in range(8)) {
-        digits[i] = D_PrintHex_hex[value >> uint(28 - 4 * i) & uint(15)]
+        digits[i] = D_PrintHex_hex[(value >> uint(28 - 4 * i)) & 15u]
     }
-    digits[8] = uint8(0)
+    digits[8] = 0u8
     invoke(doom_print, key)
     invoke(doom_print, addr(digits[0]))
 }
@@ -220,47 +218,45 @@ def private D_TicChecksums {
         return
     }
     for (i in range(SCREENWIDTH * SCREENHEIGHT)) {
-        fb ^= uint(deref(screens[0] + i))
+        fb ^= uint(screens[0][i])
         fb *= 16777619u
     }
-    invoke(doom_print, reinterpret<uint8?>("tic="))
+    invoke(doom_print, cstr("tic="))
     invoke(doom_print, doom_itoa(tic_checksum_tic, 10))
-    D_PrintHex(reinterpret<uint8?>(" cs="), tic_checksum_cs)
-    D_PrintHex(reinterpret<uint8?>(" fb="), fb)
-    invoke(doom_print, reinterpret<uint8?>("\n"))
+    D_PrintHex(cstr(" cs="), tic_checksum_cs)
+    D_PrintHex(cstr(" fb="), fb)
+    invoke(doom_print, cstr("\n"))
     tic_checksum_tic = -1
 }
 
 [c_function]
 def D_DoomLoop {
-    {
-        // [pd] Moved to D_DoomMain()
-        // doom_sprintf(filename, "debug%i.txt", consoleplayer);
-        // while (1)
-        // frame syncronous IO operations
-        I_StartFrame()
-        // process one or more tics
-        if (int(singletics) != 0) {
-            I_StartTic()
-            D_ProcessEvents()
-            G_BuildTiccmd(addr(netcmds[consoleplayer][0]) + end_index(maketic % BACKUPTICS, 12))
-            if (int(advancedemo) != 0) {
-                D_DoAdvanceDemo()
-            }
-            M_Ticker()
-            G_Ticker()
-            gametic++
-            maketic++
-        } else {
-            // will run at least one tic
-            TryRunTics()
+    // [pd] Moved to D_DoomMain()
+    // doom_sprintf(filename, "debug%i.txt", consoleplayer);
+    // while (1)
+    // frame syncronous IO operations
+    I_StartFrame()
+    // process one or more tics
+    if (int(singletics) != 0) {
+        I_StartTic()
+        D_ProcessEvents()
+        G_BuildTiccmd(addr(netcmds[consoleplayer][0]) + end_index(maketic % BACKUPTICS, 12))
+        if (int(advancedemo) != 0) {
+            D_DoAdvanceDemo()
         }
-        // move positional sounds
-        S_UpdateSounds(reinterpret<void?>(players[consoleplayer].mo))
-        // Update display, next frame, with current state.
-        D_Display()
-        D_TicChecksums()
+        M_Ticker()
+        G_Ticker()
+        gametic++
+        maketic++
+    } else {
+        // will run at least one tic
+        TryRunTics()
     }
+    // move positional sounds
+    S_UpdateSounds(reinterpret<void?>(players[consoleplayer].mo))
+    // Update display, next frame, with current state.
+    D_Display()
+    D_TicChecksums()
 }
 
 // D_PageTicker
@@ -286,7 +282,6 @@ def D_AdvanceDemo {
 
 // This cycles through the demo sequences.
 // FIXME - version dependend demo numbers?
-[c_function]
 def D_DoAdvanceDemo {
     // not reborn
     players[consoleplayer].playerstate = playerstate_t.PST_LIVE
@@ -308,39 +303,39 @@ def D_DoAdvanceDemo {
             pagetic = 170
         }
         gamestate = gamestate_t.GS_DEMOSCREEN
-        pagename = reinterpret<uint8?>("TITLEPIC")
+        pagename = cstr("TITLEPIC")
         if (gamemode == GameMode_t.commercial) {
             S_StartMusic(int(musicenum_t.mus_dm2ttl))
         } else {
             S_StartMusic(int(musicenum_t.mus_intro))
         }
     } elif (_cond == 1) {
-        G_DeferedPlayDemo(reinterpret<uint8?>("demo1"))
+        G_DeferedPlayDemo(cstr("demo1"))
     } elif (_cond == 2) {
         pagetic = 200
         gamestate = gamestate_t.GS_DEMOSCREEN
-        pagename = reinterpret<uint8?>("CREDIT")
+        pagename = cstr("CREDIT")
     } elif (_cond == 3) {
-        G_DeferedPlayDemo(reinterpret<uint8?>("demo2"))
+        G_DeferedPlayDemo(cstr("demo2"))
     } elif (_cond == 4) {
         gamestate = gamestate_t.GS_DEMOSCREEN
         if (gamemode == GameMode_t.commercial) {
             pagetic = 35 * 11
-            pagename = reinterpret<uint8?>("TITLEPIC")
+            pagename = cstr("TITLEPIC")
             S_StartMusic(int(musicenum_t.mus_dm2ttl))
         } else {
             pagetic = 200
             if (gamemode == GameMode_t.retail) {
-                pagename = reinterpret<uint8?>("CREDIT")
+                pagename = cstr("CREDIT")
             } else {
-                pagename = reinterpret<uint8?>("HELP2")
+                pagename = cstr("HELP2")
             }
         }
     } elif (_cond == 5) {
-        G_DeferedPlayDemo(reinterpret<uint8?>("demo3"))
+        G_DeferedPlayDemo(cstr("demo3"))
     } elif (_cond == 6) {
         // THE DEFINITIVE DOOM Special Edition demo
-        G_DeferedPlayDemo(reinterpret<uint8?>("demo4"))
+        G_DeferedPlayDemo(cstr("demo4"))
     }
 }
 
@@ -356,11 +351,9 @@ def D_StartTitle {
 def D_AddFile(var file : uint8?) {
     var numwadfiles : int
     var newfile : uint8?
-    {
-        numwadfiles = 0
-        while (wadfiles[numwadfiles] != null) {
-            numwadfiles++
-        }
+    numwadfiles = 0
+    while (wadfiles[numwadfiles] != null) {
+        numwadfiles++
     }
     newfile = reinterpret<uint8?>(invoke(doom_malloc, doom_strlen(file) + 1))
     doom_strcpy(newfile, file)
@@ -382,73 +375,73 @@ def IdentifyVersion {
     var tntwad : uint8?
     var home : uint8?
     var doomwaddir : uint8?
-    doomwaddir = invoke(doom_getenv, reinterpret<uint8?>("DOOMWADDIR"))
+    doomwaddir = invoke(doom_getenv, cstr("DOOMWADDIR"))
     if (!(doomwaddir != null)) {
-        doomwaddir = reinterpret<uint8?>(".")
+        doomwaddir = cstr(".")
     }
     // Commercial.
     doom2wad = reinterpret<uint8?>(invoke(doom_malloc, doom_strlen(doomwaddir) + 1 + 9 + 1))
     // doom_sprintf(doom2wad, "%s/doom2.wad", doomwaddir);
     doom_strcpy(doom2wad, doomwaddir)
-    doom_concat(doom2wad, reinterpret<uint8?>("/doom2.wad"))
+    doom_concat(doom2wad, cstr("/doom2.wad"))
     // Retail.
     doomuwad = reinterpret<uint8?>(invoke(doom_malloc, doom_strlen(doomwaddir) + 1 + 8 + 1))
     // doom_sprintf(doomuwad, "%s/doomu.wad", doomwaddir);
     doom_strcpy(doomuwad, doomwaddir)
-    doom_concat(doomuwad, reinterpret<uint8?>("/doomu.wad"))
+    doom_concat(doomuwad, cstr("/doomu.wad"))
     // Registered.
     doomwad = reinterpret<uint8?>(invoke(doom_malloc, doom_strlen(doomwaddir) + 1 + 8 + 1))
     // doom_sprintf(doomwad, "%s/doom.wad", doomwaddir);
     doom_strcpy(doomwad, doomwaddir)
-    doom_concat(doomwad, reinterpret<uint8?>("/doom.wad"))
+    doom_concat(doomwad, cstr("/doom.wad"))
     // Shareware.
     doom1wad = reinterpret<uint8?>(invoke(doom_malloc, doom_strlen(doomwaddir) + 1 + 9 + 1))
     // doom_sprintf(doom1wad, "%s/doom1.wad", doomwaddir);
     doom_strcpy(doom1wad, doomwaddir)
-    doom_concat(doom1wad, reinterpret<uint8?>("/doom1.wad"))
+    doom_concat(doom1wad, cstr("/doom1.wad"))
     // Bug, dear Shawn.
     // Insufficient malloc, caused spurious realloc errors.
     // 9
     plutoniawad = reinterpret<uint8?>(invoke(doom_malloc, doom_strlen(doomwaddir) + 1 + 12 + 1))
     // doom_sprintf(plutoniawad, "%s/plutonia.wad", doomwaddir);
     doom_strcpy(plutoniawad, doomwaddir)
-    doom_concat(plutoniawad, reinterpret<uint8?>("/plutonia.wad"))
+    doom_concat(plutoniawad, cstr("/plutonia.wad"))
     tntwad = reinterpret<uint8?>(invoke(doom_malloc, doom_strlen(doomwaddir) + 1 + 9 + 1))
     // doom_sprintf(tntwad, "%s/tnt.wad", doomwaddir);
     doom_strcpy(tntwad, doomwaddir)
-    doom_concat(tntwad, reinterpret<uint8?>("/tnt.wad"))
+    doom_concat(tntwad, cstr("/tnt.wad"))
     // French stuff.
     doom2fwad = reinterpret<uint8?>(invoke(doom_malloc, doom_strlen(doomwaddir) + 1 + 10 + 1))
     // doom_sprintf(doom2fwad, "%s/doom2f.wad", doomwaddir);
     doom_strcpy(doom2fwad, doomwaddir)
-    doom_concat(doom2fwad, reinterpret<uint8?>("/doom2f.wad"))
-    home = invoke(doom_getenv, reinterpret<uint8?>("HOME"))
+    doom_concat(doom2fwad, cstr("/doom2f.wad"))
+    home = invoke(doom_getenv, cstr("HOME"))
     if (!(home != null)) {
-        I_Error(reinterpret<uint8?>("Error: Please set $HOME to your home directory"))
+        I_Error(cstr("Error: Please set $HOME to your home directory"))
     }
     // doom_sprintf(basedefault, "%s/.doomrc", home);
     doom_strcpy(addr(basedefault[0]), home)
-    doom_concat(addr(basedefault[0]), reinterpret<uint8?>("/.doomrc"))
-    if (M_CheckParm(reinterpret<uint8?>("-shdev")) != 0) {
+    doom_concat(addr(basedefault[0]), cstr("/.doomrc"))
+    if (M_CheckParm(cstr("-shdev")) != 0) {
         gamemode = GameMode_t.shareware
         devparm = doom_boolean._c_true
-        D_AddFile(reinterpret<uint8?>("devdatadoom1.wad"))
-        D_AddFile(reinterpret<uint8?>("devmapsdata_se/texture1.lmp"))
-        D_AddFile(reinterpret<uint8?>("devmapsdata_se/pnames.lmp"))
-        doom_strcpy(addr(basedefault[0]), reinterpret<uint8?>("devdatadefault.cfg"))
+        D_AddFile(cstr("devdatadoom1.wad"))
+        D_AddFile(cstr("devmapsdata_se/texture1.lmp"))
+        D_AddFile(cstr("devmapsdata_se/pnames.lmp"))
+        doom_strcpy(addr(basedefault[0]), cstr("devdatadefault.cfg"))
         return
     }
-    if (M_CheckParm(reinterpret<uint8?>("-regdev")) != 0) {
+    if (M_CheckParm(cstr("-regdev")) != 0) {
         gamemode = GameMode_t.registered
         devparm = doom_boolean._c_true
-        D_AddFile(reinterpret<uint8?>("devdatadoom.wad"))
-        D_AddFile(reinterpret<uint8?>("devmapsdata_se/texture1.lmp"))
-        D_AddFile(reinterpret<uint8?>("devmapsdata_se/texture2.lmp"))
-        D_AddFile(reinterpret<uint8?>("devmapsdata_se/pnames.lmp"))
-        doom_strcpy(addr(basedefault[0]), reinterpret<uint8?>("devdatadefault.cfg"))
+        D_AddFile(cstr("devdatadoom.wad"))
+        D_AddFile(cstr("devmapsdata_se/texture1.lmp"))
+        D_AddFile(cstr("devmapsdata_se/texture2.lmp"))
+        D_AddFile(cstr("devmapsdata_se/pnames.lmp"))
+        doom_strcpy(addr(basedefault[0]), cstr("devdatadefault.cfg"))
         return
     }
-    if (M_CheckParm(reinterpret<uint8?>("-comdev")) != 0) {
+    if (M_CheckParm(cstr("-comdev")) != 0) {
         gamemode = GameMode_t.commercial
         devparm = doom_boolean._c_true
         // I don't bother
@@ -457,67 +450,67 @@ def IdentifyVersion {
         // else if(tnt)
         // D_AddFile (DEVDATA"tnt.wad");
         // else
-        D_AddFile(reinterpret<uint8?>("devdatadoom2.wad"))
-        D_AddFile(reinterpret<uint8?>("devmapscdata/texture1.lmp"))
-        D_AddFile(reinterpret<uint8?>("devmapscdata/pnames.lmp"))
-        doom_strcpy(addr(basedefault[0]), reinterpret<uint8?>("devdatadefault.cfg"))
+        D_AddFile(cstr("devdatadoom2.wad"))
+        D_AddFile(cstr("devmapscdata/texture1.lmp"))
+        D_AddFile(cstr("devmapscdata/pnames.lmp"))
+        doom_strcpy(addr(basedefault[0]), cstr("devdatadefault.cfg"))
         return
     }
     var f : void?
-    f = invoke(doom_open, doom2fwad, reinterpret<uint8?>("rb"))
+    f = invoke(doom_open, doom2fwad, cstr("rb"))
     if (f != null) {
         invoke(doom_close, f)
         gamemode = GameMode_t.commercial
         // C'est ridicule!
         // Let's handle languages in config files, okay?
         language = Language_t.french
-        invoke(doom_print, reinterpret<uint8?>("French version\n"))
+        invoke(doom_print, cstr("French version\n"))
         D_AddFile(doom2fwad)
         return
     }
-    f = invoke(doom_open, doom2wad, reinterpret<uint8?>("rb"))
+    f = invoke(doom_open, doom2wad, cstr("rb"))
     if (f != null) {
         invoke(doom_close, f)
         gamemode = GameMode_t.commercial
         D_AddFile(doom2wad)
         return
     }
-    f = invoke(doom_open, plutoniawad, reinterpret<uint8?>("rb"))
+    f = invoke(doom_open, plutoniawad, cstr("rb"))
     if (f != null) {
         invoke(doom_close, f)
         gamemode = GameMode_t.commercial
         D_AddFile(plutoniawad)
         return
     }
-    f = invoke(doom_open, tntwad, reinterpret<uint8?>("rb"))
+    f = invoke(doom_open, tntwad, cstr("rb"))
     if (f != null) {
         invoke(doom_close, f)
         gamemode = GameMode_t.commercial
         D_AddFile(tntwad)
         return
     }
-    f = invoke(doom_open, doomuwad, reinterpret<uint8?>("rb"))
+    f = invoke(doom_open, doomuwad, cstr("rb"))
     if (f != null) {
         invoke(doom_close, f)
         gamemode = GameMode_t.retail
         D_AddFile(doomuwad)
         return
     }
-    f = invoke(doom_open, doomwad, reinterpret<uint8?>("rb"))
+    f = invoke(doom_open, doomwad, cstr("rb"))
     if (f != null) {
         invoke(doom_close, f)
         gamemode = GameMode_t.registered
         D_AddFile(doomwad)
         return
     }
-    f = invoke(doom_open, doom1wad, reinterpret<uint8?>("rb"))
+    f = invoke(doom_open, doom1wad, cstr("rb"))
     if (f != null) {
         invoke(doom_close, f)
         gamemode = GameMode_t.shareware
         D_AddFile(doom1wad)
         return
     }
-    invoke(doom_print, reinterpret<uint8?>("Game mode indeterminate.\n"))
+    invoke(doom_print, cstr("Game mode indeterminate.\n"))
     gamemode = GameMode_t.indetermined
 }
 
@@ -525,91 +518,85 @@ def IdentifyVersion {
 [c_function]
 def FindResponseFile {
     var i : int
-    {
-        i = 1
-        while (i < myargc) {
-            if (int(deref(deref(myargv + i) + 0)) == '@') {
-                var handle : void? = null
-                var size : int
-                var k : int
-                var index : int
-                var indexinfile : int
-                var infile : uint8?
-                var file : uint8?
-                var moreargs : uint8? [20]
-                var firstargv : uint8?
-                // READ THE RESPONSE FILE INTO MEMORY
-                handle = invoke(doom_open, addr(deref(deref(myargv + i) + 1)), reinterpret<uint8?>("rb"))
-                if (!(handle != null)) {
-                    invoke(doom_print, reinterpret<uint8?>("\nNo such response file!"))
-                    invoke(doom_exit, 1)
-                }
-                invoke(doom_print, reinterpret<uint8?>("Found response file %s!\n"))
-                invoke(doom_print, addr(deref(deref(myargv + i) + 1)))
-                invoke(doom_print, reinterpret<uint8?>("!\n"))
-                invoke(doom_seek, handle, 0, doom_seek_t.DOOM_SEEK_END)
-                size = invoke(doom_tell, handle)
-                invoke(doom_seek, handle, 0, doom_seek_t.DOOM_SEEK_SET)
-                file = reinterpret<uint8?>(invoke(doom_malloc, size))
-                invoke(doom_read, handle, reinterpret<void?>(file), size * 1)
-                invoke(doom_close, handle)
-                // KEEP ALL CMDLINE ARGS FOLLOWING @RESPONSEFILE ARG
-                {
-                    index = 0
-                    k = i + 1
-                    while (k < myargc) {
-                        let _t0 = index
-                        index++
-                        moreargs[_t0] = deref(myargv + k)
-                        k++
-                    }
-                }
-                firstargv = deref(myargv + 0)
-                myargv = reinterpret<uint8 ??>(invoke(doom_malloc, int(uint64(typeinfo sizeof(type<uint8?>)) * uint64(MAXARGVS))))
-                doom_memset(reinterpret<void?>(myargv), 0, int(uint64(typeinfo sizeof(type<uint8?>)) * uint64(MAXARGVS)))
-                deref(myargv + 0) = firstargv
-                infile = file
-                k = 0
-                indexinfile = k
-                // SKIP PAST ARGV[0] (KEEP IT)
-                indexinfile++
-                while (true) {
-                    let _t1 = indexinfile
-                    indexinfile++
-                    deref(myargv + _t1) = infile + k
-                    while (k < size && (int(deref(infile + k)) >= ' ' + 1 && int(deref(infile + k)) <= 'z')) {
-                        k++
-                    }
-                    deref(infile + k) = uint8(0)
-                    while (k < size && (int(deref(infile + k)) <= ' ' || int(deref(infile + k)) > 'z')) {
-                        k++
-                    }
-                    if (!(k < size)) {
-                        break
-                    }
-                }
-                for (k1 in range(index)) {
-                    let _t2 = indexinfile
-                    indexinfile++
-                    deref(myargv + _t2) = moreargs[k1]
-                }
-                myargc = indexinfile
-                // DISPLAY ARGS
-                invoke(doom_print, doom_itoa(myargc, 10))
-                invoke(doom_print, reinterpret<uint8?>(" command-line args:\n"))
-                {
-                    k = 1
-                    while (k < myargc) {
-                        // doom_print("%s\n", myargv[k]);
-                        invoke(doom_print, deref(myargv + k))
-                        invoke(doom_print, reinterpret<uint8?>("\n"))
-                        k++
-                    }
-                }
-                break
+    i = 1
+    while (i < myargc) {
+        if (int(myargv[i][0]) == '@') {
+            var handle : void? = null
+            var size : int
+            var k : int
+            var index : int
+            var indexinfile : int
+            var infile : uint8?
+            var file : uint8?
+            var moreargs : uint8? [20]
+            var firstargv : uint8?
+            // READ THE RESPONSE FILE INTO MEMORY
+            handle = invoke(doom_open, addr(myargv[i][1]), cstr("rb"))
+            if (!(handle != null)) {
+                invoke(doom_print, cstr("\nNo such response file!"))
+                invoke(doom_exit, 1)
             }
-            i++
+            invoke(doom_print, cstr("Found response file %s!\n"))
+            invoke(doom_print, addr(myargv[i][1]))
+            invoke(doom_print, cstr("!\n"))
+            invoke(doom_seek, handle, 0, doom_seek_t.DOOM_SEEK_END)
+            size = invoke(doom_tell, handle)
+            invoke(doom_seek, handle, 0, doom_seek_t.DOOM_SEEK_SET)
+            file = reinterpret<uint8?>(invoke(doom_malloc, size))
+            invoke(doom_read, handle, reinterpret<void?>(file), size * 1)
+            invoke(doom_close, handle)
+            // KEEP ALL CMDLINE ARGS FOLLOWING @RESPONSEFILE ARG
+            index = 0
+            k = i + 1
+            while (k < myargc) {
+                let _t0 = index
+                index++
+                moreargs[_t0] = myargv[k]
+                k++
+            }
+            firstargv = myargv[0]
+            myargv = reinterpret<uint8 ??>(invoke(doom_malloc, int(uint64(typeinfo sizeof(type<uint8?>)) * uint64(MAXARGVS))))
+            doom_memset(reinterpret<void?>(myargv), 0, int(uint64(typeinfo sizeof(type<uint8?>)) * uint64(MAXARGVS)))
+            myargv[0] = firstargv
+            infile = file
+            k = 0
+            indexinfile = k
+            // SKIP PAST ARGV[0] (KEEP IT)
+            indexinfile++
+            while (true) {
+                let _t1 = indexinfile
+                indexinfile++
+                myargv[_t1] = infile + k
+                while (k < size && ((int(infile[k]) >= ' ' + 1) && (int(infile[k]) <= 'z'))) {
+                    k++
+                }
+                infile[k] = 0u8
+                while (k < size && ((int(infile[k]) <= ' ') || (int(infile[k]) > 'z'))) {
+                    k++
+                }
+                if (!(k < size)) {
+                    break
+                }
+            }
+            for (k1 in range(index)) {
+                let _t2 = indexinfile
+                indexinfile++
+                myargv[_t2] = moreargs[k1]
+            }
+            myargc = indexinfile
+            // DISPLAY ARGS
+            invoke(doom_print, doom_itoa(myargc, 10))
+            invoke(doom_print, cstr(" command-line args:\n"))
+            k = 1
+            while (k < myargc) {
+                // doom_print("%s\n", myargv[k]);
+                invoke(doom_print, myargv[k])
+                invoke(doom_print, cstr("\n"))
+                k++
+            }
+            break
         }
+        i++
     }
 }
 
@@ -621,13 +608,13 @@ def D_DoomMain {
     FindResponseFile()
     IdentifyVersion()
     modifiedgame = doom_boolean._c_false
-    nomonsters = enum_from_int(type<doom_boolean>, M_CheckParm(reinterpret<uint8?>("-nomonsters")))
-    respawnparm = enum_from_int(type<doom_boolean>, M_CheckParm(reinterpret<uint8?>("-respawn")))
-    fastparm = enum_from_int(type<doom_boolean>, M_CheckParm(reinterpret<uint8?>("-fast")))
-    devparm = enum_from_int(type<doom_boolean>, M_CheckParm(reinterpret<uint8?>("-devparm")))
-    if (M_CheckParm(reinterpret<uint8?>("-altdeath")) != 0) {
+    nomonsters = enum_from_int(type<doom_boolean>, M_CheckParm(cstr("-nomonsters")))
+    respawnparm = enum_from_int(type<doom_boolean>, M_CheckParm(cstr("-respawn")))
+    fastparm = enum_from_int(type<doom_boolean>, M_CheckParm(cstr("-fast")))
+    devparm = enum_from_int(type<doom_boolean>, M_CheckParm(cstr("-devparm")))
+    if (M_CheckParm(cstr("-altdeath")) != 0) {
         deathmatch = enum_from_int(type<doom_boolean>, 2)
-    } elif (M_CheckParm(reinterpret<uint8?>("-deathmatch")) != 0) {
+    } elif (M_CheckParm(cstr("-deathmatch")) != 0) {
         deathmatch = doom_boolean._c_true
     }
     let _cond = gamemode
@@ -637,44 +624,44 @@ def D_DoomMain {
         // "The Ultimate DOOM Startup v%i.%i"
         // " ",
         // VERSION / 100, VERSION % 100);
-        doom_strcpy(addr(title[0]), reinterpret<uint8?>("                         The Ultimate DOOM Startup v"))
+        doom_strcpy(addr(title[0]), cstr("                         The Ultimate DOOM Startup v"))
         doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
-        doom_concat(addr(title[0]), reinterpret<uint8?>("."))
+        doom_concat(addr(title[0]), cstr("."))
         doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
-        doom_concat(addr(title[0]), reinterpret<uint8?>("                           "))
+        doom_concat(addr(title[0]), cstr("                           "))
     } elif (_cond == GameMode_t.shareware) {
         // doom_sprintf(title,
         // " "
         // "DOOM Shareware Startup v%i.%i"
         // " ",
         // VERSION / 100, VERSION % 100);
-        doom_strcpy(addr(title[0]), reinterpret<uint8?>("                            DOOM Shareware Startup v"))
+        doom_strcpy(addr(title[0]), cstr("                            DOOM Shareware Startup v"))
         doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
-        doom_concat(addr(title[0]), reinterpret<uint8?>("."))
+        doom_concat(addr(title[0]), cstr("."))
         doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
-        doom_concat(addr(title[0]), reinterpret<uint8?>("                           "))
+        doom_concat(addr(title[0]), cstr("                           "))
     } elif (_cond == GameMode_t.registered) {
         // doom_sprintf(title,
         // " "
         // "DOOM Registered Startup v%i.%i"
         // " ",
         // VERSION / 100, VERSION % 100);
-        doom_strcpy(addr(title[0]), reinterpret<uint8?>("                            DOOM Registered Startup v"))
+        doom_strcpy(addr(title[0]), cstr("                            DOOM Registered Startup v"))
         doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
-        doom_concat(addr(title[0]), reinterpret<uint8?>("."))
+        doom_concat(addr(title[0]), cstr("."))
         doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
-        doom_concat(addr(title[0]), reinterpret<uint8?>("                           "))
+        doom_concat(addr(title[0]), cstr("                           "))
     } elif (_cond == GameMode_t.commercial) {
         // doom_sprintf(title,
         // " "
         // "DOOM 2: Hell on Earth v%i.%i"
         // " ",
         // VERSION / 100, VERSION % 100);
-        doom_strcpy(addr(title[0]), reinterpret<uint8?>("                         DOOM 2: Hell on Earth v"))
+        doom_strcpy(addr(title[0]), cstr("                         DOOM 2: Hell on Earth v"))
         doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
-        doom_concat(addr(title[0]), reinterpret<uint8?>("."))
+        doom_concat(addr(title[0]), cstr("."))
         doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
-        doom_concat(addr(title[0]), reinterpret<uint8?>("                           "))
+        doom_concat(addr(title[0]), cstr("                           "))
     } else {
         // FIXME
         // case pack_plut:
@@ -696,25 +683,25 @@ def D_DoomMain {
         // "Public DOOM - v%i.%i"
         // " ",
         // VERSION / 100, VERSION % 100);
-        doom_strcpy(addr(title[0]), reinterpret<uint8?>("                     Public DOOM - v"))
+        doom_strcpy(addr(title[0]), cstr("                     Public DOOM - v"))
         doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
-        doom_concat(addr(title[0]), reinterpret<uint8?>("."))
+        doom_concat(addr(title[0]), cstr("."))
         doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
-        doom_concat(addr(title[0]), reinterpret<uint8?>("                           "))
+        doom_concat(addr(title[0]), cstr("                           "))
     }
     // doom_print("%s\n", title);
     invoke(doom_print, addr(title[0]))
-    invoke(doom_print, reinterpret<uint8?>("\n"))
+    invoke(doom_print, cstr("\n"))
     if (int(devparm) != 0) {
-        invoke(doom_print, reinterpret<uint8?>("Development mode ON.\n"))
+        invoke(doom_print, cstr("Development mode ON.\n"))
     }
     // [pd] Ignore cdrom
     // turbo option
-    p = M_CheckParm(reinterpret<uint8?>("-turbo"))
+    p = M_CheckParm(cstr("-turbo"))
     if (p != 0) {
         var scale : int = 200
         if (p < myargc - 1) {
-            scale = doom_atoi(deref(myargv + (p + 1)))
+            scale = doom_atoi(myargv[p + 1])
         }
         if (scale < 10) {
             scale = 10
@@ -723,9 +710,9 @@ def D_DoomMain {
             scale = 400
         }
         // doom_print("turbo scale: %i%%\n", scale);
-        invoke(doom_print, reinterpret<uint8?>("turbo scale: "))
+        invoke(doom_print, cstr("turbo scale: "))
         invoke(doom_print, doom_itoa(scale, 10))
-        invoke(doom_print, reinterpret<uint8?>("%%\n"))
+        invoke(doom_print, cstr("%%\n"))
         forwardmove[0] = forwardmove[0] * scale / 100
         forwardmove[1] = forwardmove[1] * scale / 100
         sidemove[0] = sidemove[0] * scale / 100
@@ -735,42 +722,42 @@ def D_DoomMain {
     // to the wad list
     // convenience hack to allow -wart e m to add a wad file
     // prepend a tilde to the filename so wadfile will be reloadable
-    p = M_CheckParm(reinterpret<uint8?>("-wart"))
+    p = M_CheckParm(cstr("-wart"))
     if (p != 0) {
         // big hack, change to -warp
-        deref(deref(myargv + p) + 4) = uint8('p')
+        myargv[p][4] = uint8('p')
         // Map name handling.
         let _cond2 = gamemode
         if (_cond2 == GameMode_t.shareware || _cond2 == GameMode_t.retail || _cond2 == GameMode_t.registered) {
             // doom_sprintf(file, "~"DEVMAPS"E%cM%c.wad", myargv[p + 1][0], myargv[p + 2][0]);
-            doom_strcpy(addr(file[0]), reinterpret<uint8?>("~devmapsE"))
-            doom_concat(addr(file[0]), doom_ctoa(deref(deref(myargv + (p + 1)) + 0)))
-            doom_concat(addr(file[0]), reinterpret<uint8?>("M"))
-            doom_concat(addr(file[0]), doom_ctoa(deref(deref(myargv + (p + 2)) + 0)))
-            doom_concat(addr(file[0]), reinterpret<uint8?>(".wad"))
+            doom_strcpy(addr(file[0]), cstr("~devmapsE"))
+            doom_concat(addr(file[0]), doom_ctoa(myargv[p + 1][0]))
+            doom_concat(addr(file[0]), cstr("M"))
+            doom_concat(addr(file[0]), doom_ctoa(myargv[p + 2][0]))
+            doom_concat(addr(file[0]), cstr(".wad"))
             // doom_print("Warping to Episode %s, Map %s.\n", myargv[p + 1], myargv[p + 2]);
-            invoke(doom_print, reinterpret<uint8?>("Warping to Episode "))
-            invoke(doom_print, deref(myargv + (p + 1)))
-            invoke(doom_print, reinterpret<uint8?>(", Map "))
-            invoke(doom_print, deref(myargv + (p + 2)))
-            invoke(doom_print, reinterpret<uint8?>(".\n"))
+            invoke(doom_print, cstr("Warping to Episode "))
+            invoke(doom_print, myargv[p + 1])
+            invoke(doom_print, cstr(", Map "))
+            invoke(doom_print, myargv[p + 2])
+            invoke(doom_print, cstr(".\n"))
         } else {
-            p = doom_atoi(deref(myargv + (p + 1)))
+            p = doom_atoi(myargv[p + 1])
             if (p < 10) {
                 // doom_sprintf(file, "~"DEVMAPS"cdata/map0%i.wad", p);
-                doom_strcpy(addr(file[0]), reinterpret<uint8?>("~devmapscdata/map0"))
+                doom_strcpy(addr(file[0]), cstr("~devmapscdata/map0"))
                 doom_concat(addr(file[0]), doom_itoa(p, 10))
-                doom_concat(addr(file[0]), reinterpret<uint8?>(".wad"))
+                doom_concat(addr(file[0]), cstr(".wad"))
             } else {
                 // doom_sprintf(file, "~"DEVMAPS"cdata/map%i.wad", p);
-                doom_strcpy(addr(file[0]), reinterpret<uint8?>("~devmapscdata/map"))
+                doom_strcpy(addr(file[0]), cstr("~devmapscdata/map"))
                 doom_concat(addr(file[0]), doom_itoa(p, 10))
-                doom_concat(addr(file[0]), reinterpret<uint8?>(".wad"))
+                doom_concat(addr(file[0]), cstr(".wad"))
             }
         }
         D_AddFile(addr(file[0]))
     }
-    p = M_CheckParm(reinterpret<uint8?>("-file"))
+    p = M_CheckParm(cstr("-file"))
     if (p != 0) {
         // the parms after p are wadfile/lump names,
         // until end of parms or another - preceded parm
@@ -778,78 +765,78 @@ def D_DoomMain {
         modifiedgame = doom_boolean._c_true
         while (true) {
             p++
-            if (!(p != myargc && int(deref(deref(myargv + p) + 0)) != '-')) {
+            if (!(p != myargc && int(myargv[p][0]) != '-')) {
                 break
             }
-            D_AddFile(deref(myargv + p))
+            D_AddFile(myargv[p])
         }
     }
-    p = M_CheckParm(reinterpret<uint8?>("-playdemo"))
+    p = M_CheckParm(cstr("-playdemo"))
     if (!(p != 0)) {
-        p = M_CheckParm(reinterpret<uint8?>("-timedemo"))
+        p = M_CheckParm(cstr("-timedemo"))
     }
     if (p != 0 && p < myargc - 1) {
         // doom_sprintf(file, "%s.lmp", myargv[p + 1]);
-        doom_strcpy(addr(file[0]), deref(myargv + (p + 1)))
-        doom_concat(addr(file[0]), reinterpret<uint8?>(".lmp"))
+        doom_strcpy(addr(file[0]), myargv[p + 1])
+        doom_concat(addr(file[0]), cstr(".lmp"))
         D_AddFile(addr(file[0]))
         // doom_print("Playing demo %s.lmp.\n", myargv[p + 1]);
-        invoke(doom_print, reinterpret<uint8?>("Playing demo "))
-        invoke(doom_print, deref(myargv + (p + 1)))
-        invoke(doom_print, reinterpret<uint8?>(".lmp.\n"))
+        invoke(doom_print, cstr("Playing demo "))
+        invoke(doom_print, myargv[p + 1])
+        invoke(doom_print, cstr(".lmp.\n"))
     }
     // get skill / episode / map from parms
     startskill = skill_t.sk_medium
     startepisode = 1
     startmap = 1
     autostart = doom_boolean._c_false
-    p = M_CheckParm(reinterpret<uint8?>("-skill"))
+    p = M_CheckParm(cstr("-skill"))
     if (p != 0 && p < myargc - 1) {
-        startskill = enum_from_int(type<skill_t>, int(deref(deref(myargv + (p + 1)) + 0)) - '1')
+        startskill = enum_from_int(type<skill_t>, int(myargv[p + 1][0]) - '1')
         autostart = doom_boolean._c_true
     }
-    p = M_CheckParm(reinterpret<uint8?>("-episode"))
+    p = M_CheckParm(cstr("-episode"))
     if (p != 0 && p < myargc - 1) {
-        startepisode = int(deref(deref(myargv + (p + 1)) + 0)) - '0'
+        startepisode = int(myargv[p + 1][0]) - '0'
         startmap = 1
         autostart = doom_boolean._c_true
     }
-    p = M_CheckParm(reinterpret<uint8?>("-timer"))
+    p = M_CheckParm(cstr("-timer"))
     if (p != 0 && p < myargc - 1 && uint(int(deathmatch)) != 0) {
         var time : int
-        time = doom_atoi(deref(myargv + (p + 1)))
+        time = doom_atoi(myargv[p + 1])
         // doom_print("Levels will end after %d minute", time);
-        invoke(doom_print, reinterpret<uint8?>("Levels will end after "))
+        invoke(doom_print, cstr("Levels will end after "))
         invoke(doom_print, doom_itoa(time, 10))
-        invoke(doom_print, reinterpret<uint8?>(" minute"))
+        invoke(doom_print, cstr(" minute"))
         if (time > 1) {
-            invoke(doom_print, reinterpret<uint8?>("s"))
+            invoke(doom_print, cstr("s"))
         }
-        invoke(doom_print, reinterpret<uint8?>(".\n"))
+        invoke(doom_print, cstr(".\n"))
     }
-    p = M_CheckParm(reinterpret<uint8?>("-avg"))
+    p = M_CheckParm(cstr("-avg"))
     if (p != 0 && p < myargc - 1 && uint(int(deathmatch)) != 0) {
-        invoke(doom_print, reinterpret<uint8?>("Austin Virtual Gaming: Levels will end after 20 minutes\n"))
+        invoke(doom_print, cstr("Austin Virtual Gaming: Levels will end after 20 minutes\n"))
     }
-    p = M_CheckParm(reinterpret<uint8?>("-warp"))
+    p = M_CheckParm(cstr("-warp"))
     if (p != 0 && p < myargc - 1) {
         if (gamemode == GameMode_t.commercial) {
-            startmap = doom_atoi(deref(myargv + (p + 1)))
+            startmap = doom_atoi(myargv[p + 1])
         } else {
-            startepisode = int(deref(deref(myargv + (p + 1)) + 0)) - '0'
-            startmap = int(deref(deref(myargv + (p + 2)) + 0)) - '0'
+            startepisode = int(myargv[p + 1][0]) - '0'
+            startmap = int(myargv[p + 2][0]) - '0'
         }
         autostart = doom_boolean._c_true
     }
     // init subsystems
-    invoke(doom_print, reinterpret<uint8?>("V_Init: allocate screens.\n"))
+    invoke(doom_print, cstr("V_Init: allocate screens.\n"))
     V_Init()
-    invoke(doom_print, reinterpret<uint8?>("M_LoadDefaults: Load system defaults.\n"))
+    invoke(doom_print, cstr("M_LoadDefaults: Load system defaults.\n"))
     // load before initing other systems
     M_LoadDefaults()
-    invoke(doom_print, reinterpret<uint8?>("Z_Init: Init zone memory allocation daemon. \n"))
+    invoke(doom_print, cstr("Z_Init: Init zone memory allocation daemon. \n"))
     Z_Init()
-    invoke(doom_print, reinterpret<uint8?>("W_Init: Init WADfiles.\n"))
+    invoke(doom_print, cstr("W_Init: Init WADfiles.\n"))
     W_InitMultipleFiles(addr(wadfiles[0]))
     // Check for -file in shareware
     if (int(modifiedgame) != 0) {
@@ -857,14 +844,14 @@ def D_DoomMain {
         // if any one is not present, execution will be aborted.
         var name : uint8[23][8] = fixed_array(cstr_array("e2m1", 8), cstr_array("e2m2", 8), cstr_array("e2m3", 8), cstr_array("e2m4", 8), cstr_array("e2m5", 8), cstr_array("e2m6", 8), cstr_array("e2m7", 8), cstr_array("e2m8", 8), cstr_array("e2m9", 8), cstr_array("e3m1", 8), cstr_array("e3m3", 8), cstr_array("e3m3", 8), cstr_array("e3m4", 8), cstr_array("e3m5", 8), cstr_array("e3m6", 8), cstr_array("e3m7", 8), cstr_array("e3m8", 8), cstr_array("e3m9", 8), cstr_array("dphoof", 8), cstr_array("bfgga0", 8), cstr_array("heada1", 8), cstr_array("cybra1", 8), cstr_array("spida1d1", 8))
         if (gamemode == GameMode_t.shareware) {
-            I_Error(reinterpret<uint8?>("Error: \nYou cannot -file with the shareware version. Register!"))
+            I_Error(cstr("Error: \nYou cannot -file with the shareware version. Register!"))
         }
         // Check for fake IWAD with right name,
         // but w/o all the lumps of the registered version.
         if (gamemode == GameMode_t.registered) {
             for (i in range(23)) {
                 if (W_CheckNumForName(addr(name[i][0])) < 0) {
-                    I_Error(reinterpret<uint8?>("Error: \nThis is not the registered version."))
+                    I_Error(cstr("Error: \nThis is not the registered version."))
                 }
             }
         }
@@ -872,73 +859,71 @@ def D_DoomMain {
     // Iff additonal PWAD files are used, print modified banner
     if (int(modifiedgame) != 0) {
         // m
-        invoke(doom_print, reinterpret<uint8?>("===========================================================================\nATTENTION:  This version of DOOM has been modified.  If you would like to\nget a copy of the original game, call 1-800-IDGAMES or see the readme file.\n        You will not receive technical support for modified games.\n===========================================================================\n"))
+        invoke(doom_print, cstr("===========================================================================\nATTENTION:  This version of DOOM has been modified.  If you would like to\nget a copy of the original game, call 1-800-IDGAMES or see the readme file.\n        You will not receive technical support for modified games.\n===========================================================================\n"))
     }
     // " press enter to continue\n"
     // getchar();
     // Check and print which version is executed.
     let _cond3 = gamemode
     if (_cond3 == GameMode_t.shareware || _cond3 == GameMode_t.indetermined) {
-        invoke(doom_print, reinterpret<uint8?>("===========================================================================\n                                Shareware!\n===========================================================================\n"))
+        invoke(doom_print, cstr("===========================================================================\n                                Shareware!\n===========================================================================\n"))
     } elif (_cond3 == GameMode_t.registered || _cond3 == GameMode_t.retail || _cond3 == GameMode_t.commercial) {
-        invoke(doom_print, reinterpret<uint8?>("===========================================================================\n                 Commercial product - do not distribute!\n         Please report software piracy to the SPA: 1-800-388-PIR8\n===========================================================================\n"))
+        invoke(doom_print, cstr("===========================================================================\n                 Commercial product - do not distribute!\n         Please report software piracy to the SPA: 1-800-388-PIR8\n===========================================================================\n"))
     } else {
     }
     // Ouch.
-    invoke(doom_print, reinterpret<uint8?>("M_Init: Init miscellaneous info.\n"))
+    invoke(doom_print, cstr("M_Init: Init miscellaneous info.\n"))
     M_Init()
-    invoke(doom_print, reinterpret<uint8?>("R_Init: Init DOOM refresh daemon - "))
+    invoke(doom_print, cstr("R_Init: Init DOOM refresh daemon - "))
     R_Init()
-    invoke(doom_print, reinterpret<uint8?>("\nP_Init: Init Playloop state.\n"))
+    invoke(doom_print, cstr("\nP_Init: Init Playloop state.\n"))
     P_Init()
-    invoke(doom_print, reinterpret<uint8?>("I_Init: Setting up machine state.\n"))
+    invoke(doom_print, cstr("I_Init: Setting up machine state.\n"))
     I_Init()
-    invoke(doom_print, reinterpret<uint8?>("D_CheckNetGame: Checking network game status.\n"))
+    invoke(doom_print, cstr("D_CheckNetGame: Checking network game status.\n"))
     D_CheckNetGame()
-    invoke(doom_print, reinterpret<uint8?>("S_Init: Setting up sound.\n"))
+    invoke(doom_print, cstr("S_Init: Setting up sound.\n"))
     // 8 8
     S_Init(snd_SfxVolume, snd_MusicVolume)
-    invoke(doom_print, reinterpret<uint8?>("HU_Init: Setting up heads up display.\n"))
+    invoke(doom_print, cstr("HU_Init: Setting up heads up display.\n"))
     HU_Init()
-    invoke(doom_print, reinterpret<uint8?>("ST_Init: Init status bar.\n"))
+    invoke(doom_print, cstr("ST_Init: Init status bar.\n"))
     ST_Init()
     // check for a driver that wants intermission stats
     // [pd] Unsure how to test this
     // for statistics driver
     // start the apropriate game based on parms
-    p = M_CheckParm(reinterpret<uint8?>("-record"))
+    p = M_CheckParm(cstr("-record"))
     if (p != 0 && p < myargc - 1) {
-        G_RecordDemo(deref(myargv + (p + 1)))
+        G_RecordDemo(myargv[p + 1])
         autostart = doom_boolean._c_true
     }
-    p = M_CheckParm(reinterpret<uint8?>("-playdemo"))
+    p = M_CheckParm(cstr("-playdemo"))
     if (p != 0 && p < myargc - 1) {
         // quit after one demo
         singledemo = doom_boolean._c_true
-        G_DeferedPlayDemo(deref(myargv + (p + 1)))
+        G_DeferedPlayDemo(myargv[p + 1])
         // [c2das] D_DoomLoop runs one tic here and returns, so the title loop below would
         // replace the demo: the application's loop plays it from its first tic instead.
         I_InitGraphics()
         return
     }
-    p = M_CheckParm(reinterpret<uint8?>("-timedemo"))
+    p = M_CheckParm(cstr("-timedemo"))
     if (p != 0 && p < myargc - 1) {
-        G_TimeDemo(deref(myargv + (p + 1)))
+        G_TimeDemo(myargv[p + 1])
         // [c2das] D_DoomLoop runs one tic here and returns, so the title loop below would
         // replace the demo: the application's loop plays it from its first tic instead.
         I_InitGraphics()
         return
     }
-    p = M_CheckParm(reinterpret<uint8?>("-loadgame"))
+    p = M_CheckParm(cstr("-loadgame"))
     if (p != 0 && p < myargc - 1) {
-        {
-            // [pd] We don't support the cdrom flag
-            // doom_sprintf(file, "c:\\doomdata\\"SAVEGAMENAME"%c.dsg", myargv[p + 1][0]);
-            // doom_sprintf(file, SAVEGAMENAME"%c.dsg", myargv[p + 1][0]);
-            doom_strcpy(addr(file[0]), reinterpret<uint8?>("doomsav"))
-            doom_concat(addr(file[0]), doom_ctoa(deref(deref(myargv + (p + 1)) + 0)))
-            doom_concat(addr(file[0]), reinterpret<uint8?>(".dsg"))
-        }
+        // [pd] We don't support the cdrom flag
+        // doom_sprintf(file, "c:\\doomdata\\"SAVEGAMENAME"%c.dsg", myargv[p + 1][0]);
+        // doom_sprintf(file, SAVEGAMENAME"%c.dsg", myargv[p + 1][0]);
+        doom_strcpy(addr(file[0]), cstr("doomsav"))
+        doom_concat(addr(file[0]), doom_ctoa(myargv[p + 1][0]))
+        doom_concat(addr(file[0]), cstr(".dsg"))
         G_LoadGame(addr(file[0]))
     }
     if (gameaction != gameaction_t.ga_loadgame) {
@@ -953,17 +938,17 @@ def D_DoomMain {
     if (int(demorecording) != 0) {
         G_BeginRecording()
     }
-    if (M_CheckParm(reinterpret<uint8?>("-debugfile")) != 0) {
+    if (M_CheckParm(cstr("-debugfile")) != 0) {
         var filename : uint8[20]
         // doom_sprintf(filename, "debug%i.txt", consoleplayer);
-        doom_strcpy(addr(filename[0]), reinterpret<uint8?>("debug"))
+        doom_strcpy(addr(filename[0]), cstr("debug"))
         doom_concat(addr(filename[0]), doom_itoa(consoleplayer, 10))
-        doom_concat(addr(filename[0]), reinterpret<uint8?>(".txt"))
+        doom_concat(addr(filename[0]), cstr(".txt"))
         // doom_print("debug output to: %s\n", filename);
-        invoke(doom_print, reinterpret<uint8?>("debug output to: "))
+        invoke(doom_print, cstr("debug output to: "))
         invoke(doom_print, addr(filename[0]))
-        invoke(doom_print, reinterpret<uint8?>("\n"))
-        debugfile = invoke(doom_open, addr(filename[0]), reinterpret<uint8?>("w"))
+        invoke(doom_print, cstr("\n"))
+        debugfile = invoke(doom_open, addr(filename[0]), cstr("w"))
     }
     I_InitGraphics()
 }

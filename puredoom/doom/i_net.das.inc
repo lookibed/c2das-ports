@@ -29,9 +29,9 @@ def I_InitNetwork {
     doomcom = reinterpret<doomcom_t?>(invoke(doom_malloc, int(uint64(typeinfo sizeof(type<doomcom_t>)))))
     doom_memset(reinterpret<void?>(doomcom), 0, int(uint64(typeinfo sizeof(type<doomcom_t>))))
     // set up for network
-    i = M_CheckParm(reinterpret<uint8?>("-dup"))
+    i = M_CheckParm(cstr("-dup"))
     if (i != 0 && i < myargc - 1) {
-        doomcom.ticdup = int16(int(deref(deref(myargv + (i + 1)) + 0)) - '0')
+        doomcom.ticdup = int16(int(myargv[i + 1][0]) - '0')
         if (int(doomcom.ticdup) < 1) {
             doomcom.ticdup = int16(1)
         }
@@ -41,30 +41,30 @@ def I_InitNetwork {
     } else {
         doomcom.ticdup = int16(1)
     }
-    if (M_CheckParm(reinterpret<uint8?>("-extratic")) != 0) {
+    if (M_CheckParm(cstr("-extratic")) != 0) {
         doomcom.extratics = int16(1)
     } else {
         doomcom.extratics = int16(0)
     }
-    p = M_CheckParm(reinterpret<uint8?>("-port"))
+    p = M_CheckParm(cstr("-port"))
     if (p != 0 && p < myargc - 1) {
-        DOOMPORT = doom_atoi(deref(myargv + (p + 1)))
+        DOOMPORT = doom_atoi(myargv[p + 1])
         // doom_print("using alternate port %i\n", DOOMPORT);
-        invoke(doom_print, reinterpret<uint8?>("using alternate port "))
+        invoke(doom_print, cstr("using alternate port "))
         invoke(doom_print, doom_itoa(DOOMPORT, 10))
-        invoke(doom_print, reinterpret<uint8?>("\n"))
+        invoke(doom_print, cstr("\n"))
     }
-    p = M_CheckParm(reinterpret<uint8?>("-sendport"))
+    p = M_CheckParm(cstr("-sendport"))
     if (p != 0 && p < myargc - 1) {
-        DOOMPORT_SEND = doom_atoi(deref(myargv + (p + 1)))
+        DOOMPORT_SEND = doom_atoi(myargv[p + 1])
         // doom_print("using alternate send port %i\n", DOOMPORT_SEND);
-        invoke(doom_print, reinterpret<uint8?>("using alternate send port "))
+        invoke(doom_print, cstr("using alternate send port "))
         invoke(doom_print, doom_itoa(DOOMPORT_SEND, 10))
-        invoke(doom_print, reinterpret<uint8?>("\n"))
+        invoke(doom_print, cstr("\n"))
     }
     // parse network game options,
     // -net <consoleplayer> <host> <host> ...
-    i = M_CheckParm(reinterpret<uint8?>("-net"))
+    i = M_CheckParm(cstr("-net"))
     if (!(i != 0)) {
         // single player game
         netgame = doom_boolean._c_false

@@ -11,23 +11,23 @@ let private DOOM_MAXINT = 2147483647
 
 [c_function]
 def M_ClearBox(var box : int?) {
-    deref(box + int(anon_787.BOXRIGHT)) = DOOM_MININT
-    deref(box + int(anon_787.BOXTOP)) = deref(box + int(anon_787.BOXRIGHT))
-    deref(box + int(anon_787.BOXLEFT)) = DOOM_MAXINT
-    deref(box + int(anon_787.BOXBOTTOM)) = deref(box + int(anon_787.BOXLEFT))
+    box[int(anon_787.BOXRIGHT)] = DOOM_MININT
+    box[int(anon_787.BOXTOP)] = box[int(anon_787.BOXRIGHT)]
+    box[int(anon_787.BOXLEFT)] = DOOM_MAXINT
+    box[int(anon_787.BOXBOTTOM)] = box[int(anon_787.BOXLEFT)]
 }
 
 [c_function]
 def M_AddToBox(var box : int?; x : int; y : int) {
-    if (x < deref(box + int(anon_787.BOXLEFT))) {
-        deref(box + int(anon_787.BOXLEFT)) = x
-    } elif (x > deref(box + int(anon_787.BOXRIGHT))) {
-        deref(box + int(anon_787.BOXRIGHT)) = x
+    if (x < box[int(anon_787.BOXLEFT)]) {
+        box[int(anon_787.BOXLEFT)] = x
+    } elif (x > box[int(anon_787.BOXRIGHT)]) {
+        box[int(anon_787.BOXRIGHT)] = x
     }
-    if (y < deref(box + int(anon_787.BOXBOTTOM))) {
-        deref(box + int(anon_787.BOXBOTTOM)) = y
-    } elif (y > deref(box + int(anon_787.BOXTOP))) {
-        deref(box + int(anon_787.BOXTOP)) = y
+    if (y < box[int(anon_787.BOXBOTTOM)]) {
+        box[int(anon_787.BOXBOTTOM)] = y
+    } elif (y > box[int(anon_787.BOXTOP)]) {
+        box[int(anon_787.BOXTOP)] = y
     }
 }
 

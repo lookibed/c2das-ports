@@ -95,12 +95,10 @@ var private G_Ticker_turbomessage : uint8[80]
 def G_CmdChecksum(var cmd : ticcmd_t?) : int {
     var i : int
     var sum : int = 0
-    {
-        i = 0
-        while (uint64(i) < uint64(typeinfo sizeof(type<ticcmd_t>)) / uint64(4) - uint64(1)) {
-            sum += deref(reinterpret<int?>(cmd) + i)
-            i++
-        }
+    i = 0
+    while (uint64(i) < uint64(typeinfo sizeof(type<ticcmd_t>)) / 4ul - 1ul) {
+        sum += reinterpret<int?>(cmd)[i]
+        i++
     }
     return sum
 }
@@ -122,9 +120,9 @@ def G_BuildTiccmd(var cmd : ticcmd_t?) {
     base = I_BaseTiccmd()
     doom_memcpy(reinterpret<void?>(cmd), reinterpret<void?>(base), int(uint64(typeinfo sizeof(type<ticcmd_t>))))
     cmd.consistancy = consistancy[consoleplayer][maketic % BACKUPTICS]
-    strafe = enum_from_int(type<doom_boolean>, uint(int(gamekeydown[key_strafe])) != 0 || uint(int(deref(mousebuttons + mousebstrafe))) != 0 || uint(int(deref(joybuttons + joybstrafe))) != 0 ? 1 : 0)
+    strafe = enum_from_int(type<doom_boolean>, uint(int(gamekeydown[key_strafe])) != 0 || uint(int(mousebuttons[mousebstrafe])) != 0 || uint(int(joybuttons[joybstrafe])) != 0 ? 1 : 0)
     var running : doom_boolean = enum_from_int(type<doom_boolean>, always_run != 0 ? (uint(int(gamekeydown[key_speed])) != 0 ? int(doom_boolean._c_false) : int(doom_boolean._c_true)) : (uint(int(gamekeydown[key_speed])) != 0 ? int(doom_boolean._c_true) : int(doom_boolean._c_false)))
-    speed = uint(int(running)) != 0 || uint(int(deref(joybuttons + joybspeed))) != 0 ? 1 : 0
+    speed = uint(int(running)) != 0 || uint(int(joybuttons[joybspeed])) != 0 ? 1 : 0
     side = 0
     forward = side
     // use two stage accelerative turning
@@ -188,10 +186,10 @@ def G_BuildTiccmd(var cmd : ticcmd_t?) {
     }
     // buttons
     cmd.chatchar = uint8(HU_dequeueChatChar())
-    if (uint(int(gamekeydown[key_fire])) != 0 || uint(int(deref(mousebuttons + mousebfire))) != 0 || uint(int(deref(joybuttons + joybfire))) != 0) {
+    if (uint(int(gamekeydown[key_fire])) != 0 || uint(int(mousebuttons[mousebfire])) != 0 || uint(int(joybuttons[joybfire])) != 0) {
         cmd.buttons = uint8(int(cmd.buttons) | int(buttoncode_t.BT_ATTACK))
     }
-    if (uint(int(gamekeydown[key_use])) != 0 || uint(int(deref(joybuttons + joybuse))) != 0) {
+    if (uint(int(gamekeydown[key_use])) != 0 || uint(int(joybuttons[joybuse])) != 0) {
         cmd.buttons = uint8(int(cmd.buttons) | int(buttoncode_t.BT_USE))
         // clear double clicks if hit use button
         dclicks = 0
@@ -205,12 +203,12 @@ def G_BuildTiccmd(var cmd : ticcmd_t?) {
         }
     }
     // mouse
-    if (int(deref(mousebuttons + mousebforward)) != 0) {
+    if (int(mousebuttons[mousebforward]) != 0) {
         forward += forwardmove[speed]
     }
     // forward double click
-    if (uint(int(deref(mousebuttons + mousebforward))) != uint(dclickstate) && dclicktime > 1) {
-        dclickstate = int(deref(mousebuttons + mousebforward))
+    if (uint(int(mousebuttons[mousebforward])) != uint(dclickstate) && dclicktime > 1) {
+        dclickstate = int(mousebuttons[mousebforward])
         if (dclickstate != 0) {
             dclicks++
         }
@@ -228,7 +226,7 @@ def G_BuildTiccmd(var cmd : ticcmd_t?) {
         }
     }
     // strafe double click
-    bstrafe = enum_from_int(type<doom_boolean>, uint(int(deref(mousebuttons + mousebstrafe))) != 0 || uint(int(deref(joybuttons + joybstrafe))) != 0 ? 1 : 0)
+    bstrafe = enum_from_int(type<doom_boolean>, uint(int(mousebuttons[mousebstrafe])) != 0 || uint(int(joybuttons[joybstrafe])) != 0 ? 1 : 0)
     if (uint(int(bstrafe)) != uint(dclickstate2) && dclicktime2 > 1) {
         dclickstate2 = int(bstrafe)
         if (dclickstate2 != 0) {
@@ -276,7 +274,7 @@ def G_BuildTiccmd(var cmd : ticcmd_t?) {
     }
     if (int(sendsave) != 0) {
         sendsave = doom_boolean._c_false
-        cmd.buttons = uint8(int(buttoncode_t.BT_SPECIAL) | int(buttoncode_t.BTS_SAVEGAME) | savegameslot << int(buttoncode_t.BTS_SAVESHIFT))
+        cmd.buttons = uint8(int(buttoncode_t.BT_SPECIAL) | int(buttoncode_t.BTS_SAVEGAME) | (savegameslot << int(buttoncode_t.BTS_SAVESHIFT)))
     }
 }
 
@@ -288,15 +286,15 @@ def G_DoLoadLevel {
     // a flat. The data is in the WAD only because
     // we look for an actual index, instead of simply
     // setting one.
-    skyflatnum = R_FlatNumForName(reinterpret<uint8?>("F_SKY1"))
+    skyflatnum = R_FlatNumForName(cstr("F_SKY1"))
     // DOOM determines the sky texture to be used
     // depending on the current episode, and the game version.
-    if (gamemode == GameMode_t.commercial || uint(int(gamemode)) == uint(int(GameMission_t.pack_tnt)) || uint(int(gamemode)) == uint(int(GameMission_t.pack_plut))) {
-        skytexture = R_TextureNumForName(reinterpret<uint8?>("SKY3"))
+    if ((gamemode == GameMode_t.commercial) || (uint(int(gamemode)) == uint(int(GameMission_t.pack_tnt))) || (uint(int(gamemode)) == uint(int(GameMission_t.pack_plut)))) {
+        skytexture = R_TextureNumForName(cstr("SKY3"))
         if (gamemap < 12) {
-            skytexture = R_TextureNumForName(reinterpret<uint8?>("SKY1"))
+            skytexture = R_TextureNumForName(cstr("SKY1"))
         } elif (gamemap < 21) {
-            skytexture = R_TextureNumForName(reinterpret<uint8?>("SKY2"))
+            skytexture = R_TextureNumForName(cstr("SKY2"))
         }
     }
     // for time calculation
@@ -327,8 +325,8 @@ def G_DoLoadLevel {
     paused = doom_boolean._c_false
     sendsave = paused
     sendpause = sendsave
-    doom_memset(reinterpret<void?>(mousebuttons), 0, int(uint64(typeinfo sizeof(type<doom_boolean>)) * uint64(3)))
-    doom_memset(reinterpret<void?>(joybuttons), 0, int(uint64(typeinfo sizeof(type<doom_boolean>)) * uint64(4)))
+    doom_memset(reinterpret<void?>(mousebuttons), 0, int(uint64(typeinfo sizeof(type<doom_boolean>)) * 3ul))
+    doom_memset(reinterpret<void?>(joybuttons), 0, int(uint64(typeinfo sizeof(type<doom_boolean>)) * 4ul))
 }
 
 // G_Responder
@@ -351,7 +349,7 @@ def G_Responder(var ev : event_t?) : doom_boolean {
     }
     // any other key pops up menu if in demos
     if (gameaction == gameaction_t.ga_nothing && !(int(singledemo) != 0) && (uint(int(demoplayback)) != 0 || gamestate == gamestate_t.GS_DEMOSCREEN)) {
-        if (ev._c_type == evtype_t.ev_keydown || ev._c_type == evtype_t.ev_mouse && ev.data1 != 0 || ev._c_type == evtype_t.ev_joystick && ev.data1 != 0) {
+        if (ev._c_type == evtype_t.ev_keydown || (ev._c_type == evtype_t.ev_mouse && ev.data1 != 0) || (ev._c_type == evtype_t.ev_joystick && ev.data1 != 0)) {
             M_StartControlPanel()
             return doom_boolean._c_true
         }
@@ -395,18 +393,18 @@ def G_Responder(var ev : event_t?) : doom_boolean {
         // always let key up events filter down
         return doom_boolean._c_false
     } elif (_cond == evtype_t.ev_mouse) {
-        deref(mousebuttons + 0) = enum_from_int(type<doom_boolean>, ev.data1 & 1)
-        deref(mousebuttons + 1) = enum_from_int(type<doom_boolean>, ev.data1 & 2)
-        deref(mousebuttons + 2) = enum_from_int(type<doom_boolean>, ev.data1 & 4)
+        mousebuttons[0] = enum_from_int(type<doom_boolean>, ev.data1 & 1)
+        mousebuttons[1] = enum_from_int(type<doom_boolean>, ev.data1 & 2)
+        mousebuttons[2] = enum_from_int(type<doom_boolean>, ev.data1 & 4)
         mousex = ev.data2 * (mouseSensitivity + 5) / 10
         mousey = ev.data3 * (mouseSensitivity + 5) / 10
         // eat events
         return doom_boolean._c_true
     } elif (_cond == evtype_t.ev_joystick) {
-        deref(joybuttons + 0) = enum_from_int(type<doom_boolean>, ev.data1 & 1)
-        deref(joybuttons + 1) = enum_from_int(type<doom_boolean>, ev.data1 & 2)
-        deref(joybuttons + 2) = enum_from_int(type<doom_boolean>, ev.data1 & 4)
-        deref(joybuttons + 3) = enum_from_int(type<doom_boolean>, ev.data1 & 8)
+        joybuttons[0] = enum_from_int(type<doom_boolean>, ev.data1 & 1)
+        joybuttons[1] = enum_from_int(type<doom_boolean>, ev.data1 & 2)
+        joybuttons[2] = enum_from_int(type<doom_boolean>, ev.data1 & 4)
+        joybuttons[3] = enum_from_int(type<doom_boolean>, ev.data1 & 8)
         joyxmove = ev.data2
         joyymove = ev.data3
         // eat events
@@ -424,20 +422,18 @@ def private G_TicChecksum : uint {
     var values : uint[6]
     var cs : uint = 2166136261u
     var b : int
-    values[0] = mo != null ? uint(mo.x) : uint(0)
-    values[1] = mo != null ? uint(mo.y) : uint(0)
-    values[2] = mo != null ? uint(mo.z) : uint(0)
-    values[3] = mo != null ? mo.angle : uint(0)
+    values[0] = mo != null ? uint(mo.x) : 0u
+    values[1] = mo != null ? uint(mo.y) : 0u
+    values[2] = mo != null ? uint(mo.z) : 0u
+    values[3] = mo != null ? mo.angle : 0u
     values[4] = uint(players[0].health)
     values[5] = uint(prndindex)
     for (i in range(6)) {
-        {
-            b = 0
-            while (b < 32) {
-                cs ^= values[i] >> uint(b) & uint(255)
-                cs *= 16777619u
-                b += 8
-            }
+        b = 0
+        while (b < 32) {
+            cs ^= (values[i] >> uint(b)) & 255u
+            cs *= 16777619u
+            b += 8
         }
     }
     return cs
@@ -482,7 +478,7 @@ def G_Ticker {
     }
     // get commands, check consistancy,
     // and build new consistancy check
-    buf = gametic / ticdup % BACKUPTICS
+    buf = (gametic / ticdup) % BACKUPTICS
     for (i in range(MAXPLAYERS)) {
         if (int(playeringame[i]) != 0) {
             cmd = addr(players[i].cmd)
@@ -494,21 +490,21 @@ def G_Ticker {
                 G_WriteDemoTiccmd(cmd)
             }
             // check for turbo cheats
-            if (int(cmd.forwardmove) > TURBOTHRESHOLD && !((gametic & 31) != 0) && (gametic >> 5 & 3) == i) {
+            if (int(cmd.forwardmove) > TURBOTHRESHOLD && !((gametic & 31) != 0) && ((gametic >> 5) & 3) == i) {
                 // doom_sprintf(turbomessage, "%s is turbo!", player_names[i]);
                 doom_strcpy(addr(G_Ticker_turbomessage[0]), player_names[i])
-                doom_concat(addr(G_Ticker_turbomessage[0]), reinterpret<uint8?>(" is turbo!"))
+                doom_concat(addr(G_Ticker_turbomessage[0]), cstr(" is turbo!"))
                 players[consoleplayer].message = addr(G_Ticker_turbomessage[0])
             }
-            if (uint(int(netgame)) != 0 && !(int(netdemo) != 0) && !(gametic % ticdup != 0)) {
+            if (uint(int(netgame)) != 0 && !(int(netdemo) != 0) && !((gametic % ticdup) != 0)) {
                 if (gametic > BACKUPTICS && int(consistancy[i][buf]) != int(cmd.consistancy)) {
                     // I_Error("Error: consistency failure (%i should be %i)",
                     // cmd->consistancy, consistancy[i][buf]);
-                    doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: consistency failure ("))
+                    doom_strcpy(addr(error_buf[0]), cstr("Error: consistency failure ("))
                     doom_concat(addr(error_buf[0]), doom_itoa(int(cmd.consistancy), 10))
-                    doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" should be "))
+                    doom_concat(addr(error_buf[0]), cstr(" should be "))
                     doom_concat(addr(error_buf[0]), doom_itoa(int(consistancy[i][buf]), 10))
-                    doom_concat(addr(error_buf[0]), reinterpret<uint8?>(")"))
+                    doom_concat(addr(error_buf[0]), cstr(")"))
                     I_Error(addr(error_buf[0]))
                 }
                 if (players[i].mo != null) {
@@ -525,7 +521,7 @@ def G_Ticker {
             if ((int(players[i].cmd.buttons) & int(buttoncode_t.BT_SPECIAL)) != 0) {
                 let _cond2 = int(players[i].cmd.buttons) & int(buttoncode_t.BT_SPECIALMASK)
                 if (_cond2 == 1) {
-                    paused = enum_from_int(type<doom_boolean>, int(uint(int(paused)) ^ uint(1)))
+                    paused = enum_from_int(type<doom_boolean>, int(uint(int(paused)) ^ 1u))
                     if (int(paused) != 0) {
                         S_PauseSound()
                     } else {
@@ -533,7 +529,7 @@ def G_Ticker {
                     }
                 } elif (_cond2 == 2) {
                     if (!(savedescription[0] != 0)) {
-                        doom_strcpy(addr(savedescription[0]), reinterpret<uint8?>("NET GAME"))
+                        doom_strcpy(addr(savedescription[0]), cstr("NET GAME"))
                     }
                     savegameslot = (int(players[i].cmd.buttons) & int(buttoncode_t.BTS_SAVEMASK)) >> int(buttoncode_t.BTS_SAVESHIFT)
                     gameaction = gameaction_t.ga_savegame
@@ -654,8 +650,8 @@ def G_CheckSpot(playernum : int; var mthing : mapthing_t?) : doom_boolean {
     bodyqueslot++
     // spawn a teleport fog
     ss = R_PointInSubsector(x, y)
-    an = uint(ANG45 * (int(mthing.angle) / 45) >> ANGLETOFINESHIFT)
-    mo = P_SpawnMobj(x + 20 * deref(finecosine + an), y + 20 * finesine[an], ss.sector.floorheight, mobjtype_t.MT_TFOG)
+    an = uint((ANG45 * (int(mthing.angle) / 45)) >> ANGLETOFINESHIFT)
+    mo = P_SpawnMobj(x + 20 * finecosine[an], y + 20 * finesine[an], ss.sector.floorheight, mobjtype_t.MT_TFOG)
     if (players[consoleplayer].viewz != 1) {
         // don't start sound on first frame
         S_StartSound(reinterpret<void?>(mo), int(sfxenum_t.sfx_telept))
@@ -673,9 +669,9 @@ def G_DeathMatchSpawnPlayer(playernum : int) {
     selections = int(int64(deathmatch_p - addr(deathmatchstarts[0])))
     if (selections < 4) {
         // I_Error("Error: Only %i deathmatch spots, 4 required", selections);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: Only "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: Only "))
         doom_concat(addr(error_buf[0]), doom_itoa(selections, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" deathmatch spots, 4 required"))
+        doom_concat(addr(error_buf[0]), cstr(" deathmatch spots, 4 required"))
         I_Error(addr(error_buf[0]))
     }
     for (j in range(20)) {
@@ -736,10 +732,9 @@ def G_ExitLevel {
 }
 
 // Here's for the german edition.
-[c_function]
 def G_SecretExitLevel {
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!
-    if (gamemode == GameMode_t.commercial && W_CheckNumForName(reinterpret<uint8?>("map31")) < 0) {
+    if ((gamemode == GameMode_t.commercial) && (W_CheckNumForName(cstr("map31")) < 0)) {
         secretexit = doom_boolean._c_false
     } else {
         secretexit = doom_boolean._c_true
@@ -751,15 +746,13 @@ def G_SecretExitLevel {
 def G_DoCompleted {
     var i : int
     gameaction = gameaction_t.ga_nothing
-    {
-        i = 0
-        while (i < MAXPLAYERS) {
-            if (int(playeringame[i]) != 0) {
-                // take away cards and stuff
-                G_PlayerFinishLevel(i)
-            }
-            i++
+    i = 0
+    while (i < MAXPLAYERS) {
+        if (int(playeringame[i]) != 0) {
+            // take away cards and stuff
+            G_PlayerFinishLevel(i)
         }
+        i++
     }
     if (int(automapactive) != 0) {
         AM_Stop()
@@ -770,21 +763,19 @@ def G_DoCompleted {
             gameaction = gameaction_t.ga_victory
             return
         } elif (_cond == 9) {
-            {
-                i = 0
-                while (i < MAXPLAYERS) {
-                    players[i].didsecret = doom_boolean._c_true
-                    i++
-                }
+            i = 0
+            while (i < MAXPLAYERS) {
+                players[i].didsecret = doom_boolean._c_true
+                i++
             }
         }
     }
-    if (gamemap == 8 && gamemode != GameMode_t.commercial) {
+    if ((gamemap == 8) && (gamemode != GameMode_t.commercial)) {
         // victory
         gameaction = gameaction_t.ga_victory
         return
     }
-    if (gamemap == 9 && gamemode != GameMode_t.commercial) {
+    if ((gamemap == 9) && (gamemode != GameMode_t.commercial)) {
         // exit secret level
         for (i1 in range(MAXPLAYERS)) {
             players[i1].didsecret = doom_boolean._c_true
@@ -915,7 +906,7 @@ def G_DoLoadGame {
     // skip the description field
     doom_memset(reinterpret<void?>(addr(vcheck[0])), 0, int(uint64(typeinfo sizeof(type<uint8[16]>))))
     // doom_sprintf(vcheck, "version %i", VERSION);
-    doom_strcpy(addr(vcheck[0]), reinterpret<uint8?>("version "))
+    doom_strcpy(addr(vcheck[0]), cstr("version "))
     doom_concat(addr(vcheck[0]), doom_itoa(int(anon_82.VERSION), 10))
     if (doom_strcmp(reinterpret<uint8?>(save_p), addr(vcheck[0])) != 0) {
         // bad version
@@ -955,7 +946,7 @@ def G_DoLoadGame {
     P_UnArchiveThinkers()
     P_UnArchiveSpecials()
     if (int(deref(save_p)) != 29) {
-        I_Error(reinterpret<uint8?>("Error: Bad savegame"))
+        I_Error(cstr("Error: Bad savegame"))
     }
     // done
     Z_Free(reinterpret<void?>(savebuffer))
@@ -982,12 +973,10 @@ def G_DoSaveGame {
     var name2 : uint8[16]
     var description : uint8?
     var length : int
-    {
-        // doom_sprintf(name, SAVEGAMENAME"%d.dsg", savegameslot);
-        doom_strcpy(addr(name[0]), reinterpret<uint8?>("doomsav"))
-        doom_concat(addr(name[0]), doom_itoa(savegameslot, 10))
-        doom_concat(addr(name[0]), reinterpret<uint8?>(".dsg"))
-    }
+    // doom_sprintf(name, SAVEGAMENAME"%d.dsg", savegameslot);
+    doom_strcpy(addr(name[0]), cstr("doomsav"))
+    doom_concat(addr(name[0]), doom_itoa(savegameslot, 10))
+    doom_concat(addr(name[0]), cstr(".dsg"))
     description = addr(savedescription[0])
     savebuffer = screens[1] + 16384
     save_p = savebuffer
@@ -995,7 +984,7 @@ def G_DoSaveGame {
     save_p = save_p + SAVESTRINGSIZE
     doom_memset(reinterpret<void?>(addr(name2[0])), 0, int(uint64(typeinfo sizeof(type<uint8[16]>))))
     // doom_sprintf(name2, "version %i", VERSION);
-    doom_strcpy(addr(name2[0]), reinterpret<uint8?>("version "))
+    doom_strcpy(addr(name2[0]), cstr("version "))
     doom_concat(addr(name2[0]), doom_itoa(int(anon_82.VERSION), 10))
     doom_memcpy(reinterpret<void?>(save_p), reinterpret<void?>(addr(name2[0])), VERSIONSIZE)
     save_p = save_p + VERSIONSIZE
@@ -1029,15 +1018,15 @@ def G_DoSaveGame {
     // consistancy marker
     var _t7 = save_p
     save_p = save_p + 1
-    deref(_t7) = uint8(29)
+    deref(_t7) = 29u8
     length = int(int64(save_p - savebuffer))
     if (length > SAVEGAMESIZE) {
-        I_Error(reinterpret<uint8?>("Error: Savegame buffer overrun"))
+        I_Error(cstr("Error: Savegame buffer overrun"))
     }
     M_WriteFile(addr(name[0]), reinterpret<void?>(savebuffer), length)
     gameaction = gameaction_t.ga_nothing
-    savedescription[0] = uint8(0)
-    players[consoleplayer].message = reinterpret<uint8?>("game saved.")
+    savedescription[0] = 0u8
+    players[consoleplayer].message = cstr("game saved.")
     // draw the pattern into the back screen
     R_FillBackScreen()
 }
@@ -1065,7 +1054,6 @@ def G_DoNewGame {
     gameaction = gameaction_t.ga_nothing
 }
 
-[c_function]
 def G_InitNew(var skill : skill_t; var episode : int; var map : int) {
     var i : int
     if (int(paused) != 0) {
@@ -1098,7 +1086,7 @@ def G_InitNew(var skill : skill_t; var episode : int; var map : int) {
     if (map < 1) {
         map = 1
     }
-    if (map > 9 && gamemode != GameMode_t.commercial) {
+    if ((map > 9) && (gamemode != GameMode_t.commercial)) {
         map = 9
     }
     M_ClearRandom()
@@ -1107,24 +1095,20 @@ def G_InitNew(var skill : skill_t; var episode : int; var map : int) {
     } else {
         respawnmonsters = doom_boolean._c_false
     }
-    if (uint(int(fastparm)) != 0 || skill == skill_t.sk_nightmare && gameskill != skill_t.sk_nightmare) {
-        {
-            i = int(statenum_t.S_SARG_RUN1)
-            while (i <= int(statenum_t.S_SARG_PAIN2)) {
-                states[i].tics >>= 1l
-                i++
-            }
+    if (uint(int(fastparm)) != 0 || (skill == skill_t.sk_nightmare && gameskill != skill_t.sk_nightmare)) {
+        i = int(statenum_t.S_SARG_RUN1)
+        while (i <= int(statenum_t.S_SARG_PAIN2)) {
+            states[i].tics >>= 1l
+            i++
         }
         mobjinfo[int(mobjtype_t.MT_BRUISERSHOT)].speed = 20 * FRACUNIT
         mobjinfo[int(mobjtype_t.MT_HEADSHOT)].speed = 20 * FRACUNIT
         mobjinfo[int(mobjtype_t.MT_TROOPSHOT)].speed = 20 * FRACUNIT
     } elif (skill != skill_t.sk_nightmare && gameskill == skill_t.sk_nightmare) {
-        {
-            i = int(statenum_t.S_SARG_RUN1)
-            while (i <= int(statenum_t.S_SARG_PAIN2)) {
-                states[i].tics <<= 1l
-                i++
-            }
+        i = int(statenum_t.S_SARG_RUN1)
+        while (i <= int(statenum_t.S_SARG_PAIN2)) {
+            states[i].tics <<= 1l
+            i++
         }
         mobjinfo[int(mobjtype_t.MT_BRUISERSHOT)].speed = 15 * FRACUNIT
         mobjinfo[int(mobjtype_t.MT_HEADSHOT)].speed = 10 * FRACUNIT
@@ -1146,23 +1130,23 @@ def G_InitNew(var skill : skill_t; var episode : int; var map : int) {
     viewactive = doom_boolean._c_true
     // set the sky map for the episode
     if (gamemode == GameMode_t.commercial) {
-        skytexture = R_TextureNumForName(reinterpret<uint8?>("SKY3"))
+        skytexture = R_TextureNumForName(cstr("SKY3"))
         if (gamemap < 12) {
-            skytexture = R_TextureNumForName(reinterpret<uint8?>("SKY1"))
+            skytexture = R_TextureNumForName(cstr("SKY1"))
         } elif (gamemap < 21) {
-            skytexture = R_TextureNumForName(reinterpret<uint8?>("SKY2"))
+            skytexture = R_TextureNumForName(cstr("SKY2"))
         }
     } else {
         let _cond = episode
         if (_cond == 1) {
-            skytexture = R_TextureNumForName(reinterpret<uint8?>("SKY1"))
+            skytexture = R_TextureNumForName(cstr("SKY1"))
         } elif (_cond == 2) {
-            skytexture = R_TextureNumForName(reinterpret<uint8?>("SKY2"))
+            skytexture = R_TextureNumForName(cstr("SKY2"))
         } elif (_cond == 3) {
-            skytexture = R_TextureNumForName(reinterpret<uint8?>("SKY3"))
+            skytexture = R_TextureNumForName(cstr("SKY3"))
         } elif (_cond == 4) {
             // Special Edition sky
-            skytexture = R_TextureNumForName(reinterpret<uint8?>("SKY4"))
+            skytexture = R_TextureNumForName(cstr("SKY4"))
         }
     }
     G_DoLoadLevel()
@@ -1203,7 +1187,7 @@ def G_WriteDemoTiccmd(var cmd : ticcmd_t?) {
     deref(_t1) = uint8(cmd.sidemove)
     var _t2 = demo_p
     demo_p = demo_p + 1
-    deref(_t2) = uint8(int(cmd.angleturn) + 128 >> 8)
+    deref(_t2) = uint8((int(cmd.angleturn) + 128) >> 8)
     var _t3 = demo_p
     demo_p = demo_p + 1
     deref(_t3) = cmd.buttons
@@ -1224,11 +1208,11 @@ def G_RecordDemo(var name : uint8?) {
     var maxsize : int
     usergame = doom_boolean._c_false
     doom_strcpy(addr(demoname[0]), name)
-    doom_concat(addr(demoname[0]), reinterpret<uint8?>(".lmp"))
+    doom_concat(addr(demoname[0]), cstr(".lmp"))
     maxsize = 131072
-    i = M_CheckParm(reinterpret<uint8?>("-maxdemo"))
+    i = M_CheckParm(cstr("-maxdemo"))
     if (i != 0 && i < myargc - 1) {
-        maxsize = doom_atoi(deref(myargv + (i + 1))) * 1024
+        maxsize = doom_atoi(myargv[i + 1]) * 1024
     }
     demobuffer = reinterpret<uint8?>(Z_Malloc(maxsize, PU_STATIC, null))
     demoend = demobuffer + maxsize
@@ -1291,11 +1275,11 @@ def G_DoPlayDemo {
     if (int(demo_version) != int(anon_82.VERSION) && int(demo_version) != 109) {
         // Demos seem to run fine with version 109
         // doom_print("Demo is from a different game version! Demo Verson = %i, this version = %i\n", (int)demo_version, VERSION);
-        invoke(doom_print, reinterpret<uint8?>("Demo is from a different game version! Demo Verson = "))
+        invoke(doom_print, cstr("Demo is from a different game version! Demo Verson = "))
         invoke(doom_print, doom_itoa(int(demo_version), 10))
-        invoke(doom_print, reinterpret<uint8?>(", this version = "))
+        invoke(doom_print, cstr(", this version = "))
         invoke(doom_print, doom_itoa(int(anon_82.VERSION), 10))
-        invoke(doom_print, reinterpret<uint8?>("\n"))
+        invoke(doom_print, cstr("\n"))
         gameaction = gameaction_t.ga_nothing
         return
     }
@@ -1341,10 +1325,9 @@ def G_DoPlayDemo {
 }
 
 // G_TimeDemo
-[c_function]
 def G_TimeDemo(var name : uint8?) {
-    nodrawers = enum_from_int(type<doom_boolean>, M_CheckParm(reinterpret<uint8?>("-nodraw")))
-    noblit = enum_from_int(type<doom_boolean>, M_CheckParm(reinterpret<uint8?>("-noblit")))
+    nodrawers = enum_from_int(type<doom_boolean>, M_CheckParm(cstr("-nodraw")))
+    noblit = enum_from_int(type<doom_boolean>, M_CheckParm(cstr("-noblit")))
     timingdemo = doom_boolean._c_true
     singletics = doom_boolean._c_true
     defdemoname = name
@@ -1358,26 +1341,24 @@ def G_CheckDemoStatus : doom_boolean {
         endtime = I_GetTime()
         // I_Error("Error: timed %i gametics in %i realtics", gametic
         // , endtime - starttime);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: timed "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: timed "))
         doom_concat(addr(error_buf[0]), doom_itoa(gametic, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" gametics in "))
+        doom_concat(addr(error_buf[0]), cstr(" gametics in "))
         doom_concat(addr(error_buf[0]), doom_itoa(endtime - starttime, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" realtics"))
+        doom_concat(addr(error_buf[0]), cstr(" realtics"))
         I_Error(addr(error_buf[0]))
     }
     if (int(demoplayback) != 0) {
         if (int(singledemo) != 0) {
             I_Quit()
         }
-        {
-            if (reinterpret<memblock_s?>(demobuffer + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-                var buf : uint8[260]
-                doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/g_game.c:"))
-                doom_concat(addr(buf[0]), doom_itoa(1689, 10))
-                I_Error(addr(buf[0]))
-            }
-            Z_ChangeTag2(reinterpret<void?>(demobuffer), 101)
+        if (reinterpret<memblock_s?>(demobuffer + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+            var buf : uint8[260]
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/g_game.c:"))
+            doom_concat(addr(buf[0]), doom_itoa(1689, 10))
+            I_Error(addr(buf[0]))
         }
+        Z_ChangeTag2(reinterpret<void?>(demobuffer), PU_CACHE)
         demoplayback = doom_boolean._c_false
         netdemo = doom_boolean._c_false
         netgame = doom_boolean._c_false
@@ -1400,9 +1381,9 @@ def G_CheckDemoStatus : doom_boolean {
         Z_Free(reinterpret<void?>(demobuffer))
         demorecording = doom_boolean._c_false
         // I_Error("Error: Demo %s recorded", demoname);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: Demo "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: Demo "))
         doom_concat(addr(error_buf[0]), addr(demoname[0]))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" recorded"))
+        doom_concat(addr(error_buf[0]), cstr(" recorded"))
         I_Error(addr(error_buf[0]))
     }
     return doom_boolean._c_false

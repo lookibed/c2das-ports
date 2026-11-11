@@ -21,8 +21,8 @@ def P_SetPsprite(var player : player_s?; position : int; var stnum : statenum_t)
         psp.tics = int(state.tics)
         if (state.misc1 != 0) {
             // coordinate set
-            psp.sx = int(state.misc1 << 16l)
-            psp.sy = int(state.misc2 << 16l)
+            psp.sx = int(state.misc1 << int64(FRACBITS))
+            psp.sy = int(state.misc2 << int64(FRACBITS))
         }
         // Call action routine.
         // Modified handling.
@@ -83,9 +83,9 @@ def P_CheckAmmo(var player : player_s?) : doom_boolean {
     // Out of ammo, pick a weapon to change to.
     // Preferences are set here.
     while (true) {
-        if (uint(int(player.weaponowned[int(weapontype_t.wp_plasma)])) != 0 && player.ammo[int(ammotype_t.am_cell)] != 0 && gamemode != GameMode_t.shareware) {
+        if (uint(int(player.weaponowned[int(weapontype_t.wp_plasma)])) != 0 && player.ammo[int(ammotype_t.am_cell)] != 0 && (gamemode != GameMode_t.shareware)) {
             player.pendingweapon = weapontype_t.wp_plasma
-        } elif (uint(int(player.weaponowned[int(weapontype_t.wp_supershotgun)])) != 0 && player.ammo[int(ammotype_t.am_shell)] > 2 && gamemode == GameMode_t.commercial) {
+        } elif (uint(int(player.weaponowned[int(weapontype_t.wp_supershotgun)])) != 0 && player.ammo[int(ammotype_t.am_shell)] > 2 && (gamemode == GameMode_t.commercial)) {
             player.pendingweapon = weapontype_t.wp_supershotgun
         } elif (uint(int(player.weaponowned[int(weapontype_t.wp_chaingun)])) != 0 && player.ammo[int(ammotype_t.am_clip)] != 0) {
             player.pendingweapon = weapontype_t.wp_chaingun
@@ -97,7 +97,7 @@ def P_CheckAmmo(var player : player_s?) : doom_boolean {
             player.pendingweapon = weapontype_t.wp_chainsaw
         } elif (uint(int(player.weaponowned[int(weapontype_t.wp_missile)])) != 0 && player.ammo[int(ammotype_t.am_misl)] != 0) {
             player.pendingweapon = weapontype_t.wp_missile
-        } elif (uint(int(player.weaponowned[int(weapontype_t.wp_bfg)])) != 0 && player.ammo[int(ammotype_t.am_cell)] > 40 && gamemode != GameMode_t.shareware) {
+        } elif (uint(int(player.weaponowned[int(weapontype_t.wp_bfg)])) != 0 && player.ammo[int(ammotype_t.am_cell)] > 40 && (gamemode != GameMode_t.shareware)) {
             player.pendingweapon = weapontype_t.wp_bfg
         } else {
             // If everything fails.
@@ -164,7 +164,7 @@ def A_WeaponReady(var player : player_s?; var psp : pspdef_t?) {
     // check for fire
     // the missile launcher and bfg do not auto fire
     if ((int(player.cmd.buttons) & int(buttoncode_t.BT_ATTACK)) != 0) {
-        if (!(player.attackdown != 0) || player.readyweapon != weapontype_t.wp_missile && player.readyweapon != weapontype_t.wp_bfg) {
+        if (!(player.attackdown != 0) || (player.readyweapon != weapontype_t.wp_missile && player.readyweapon != weapontype_t.wp_bfg)) {
             player.attackdown = int(doom_boolean._c_true)
             P_FireWeapon(player)
             return
@@ -173,8 +173,8 @@ def A_WeaponReady(var player : player_s?; var psp : pspdef_t?) {
         player.attackdown = int(doom_boolean._c_false)
     }
     // bob the weapon based on movement speed
-    angle = 128 * leveltime & FINEMASK
-    psp.sx = FRACUNIT + FixedMul(player.bob, deref(finecosine + angle))
+    angle = (128 * leveltime) & FINEMASK
+    psp.sx = FRACUNIT + FixedMul(player.bob, finecosine[angle])
     angle &= FINEANGLES / 2 - 1
     psp.sy = WEAPONTOP + FixedMul(player.bob, finesine[angle])
 }
@@ -250,12 +250,12 @@ def A_Punch(var player : player_s?; var psp : pspdef_t?) {
     var angle : uint
     var damage : int
     var slope : int
-    damage = P_Random() % 10 + 1 << 1
+    damage = (P_Random() % 10 + 1) << 1
     if (player.powers[int(powertype_t.pw_strength)] != 0) {
         damage *= 10
     }
     angle = player.mo.angle
-    angle += uint(P_Random() - P_Random() << 18)
+    angle += uint((P_Random() - P_Random()) << 18)
     slope = P_AimLineAttack(player.mo, angle, MELEERANGE)
     P_LineAttack(player.mo, angle, MELEERANGE, slope, damage)
     // turn to face target
@@ -273,7 +273,7 @@ def A_Saw(var player : player_s?; var psp : pspdef_t?) {
     var slope : int
     damage = 2 * (P_Random() % 10 + 1)
     angle = player.mo.angle
-    angle += uint(P_Random() - P_Random() << 18)
+    angle += uint((P_Random() - P_Random()) << 18)
     // use meleerange + 1 se the puff doesn't skip the flash
     slope = P_AimLineAttack(player.mo, angle, MELEERANGE + 1)
     P_LineAttack(player.mo, angle, MELEERANGE + 1, slope, damage)
@@ -344,7 +344,7 @@ def P_GunShot(var mo : mobj_s?; accurate : doom_boolean) {
     damage = 5 * (P_Random() % 3 + 1)
     angle = mo.angle
     if (!(int(accurate) != 0)) {
-        angle += uint(P_Random() - P_Random() << 18)
+        angle += uint((P_Random() - P_Random()) << 18)
     }
     P_LineAttack(mo, angle, MISSILERANGE, bulletslope, damage)
 }
@@ -386,8 +386,8 @@ def A_FireShotgun2(var player : player_s?; var psp : pspdef_t?) {
     for (i in range(20)) {
         damage = 5 * (P_Random() % 3 + 1)
         angle = player.mo.angle
-        angle += uint(P_Random() - P_Random() << 19)
-        P_LineAttack(player.mo, angle, MISSILERANGE, bulletslope + (P_Random() - P_Random() << 5), damage)
+        angle += uint((P_Random() - P_Random()) << 19)
+        P_LineAttack(player.mo, angle, MISSILERANGE, bulletslope + ((P_Random() - P_Random()) << 5), damage)
     }
 }
 
@@ -435,12 +435,10 @@ def A_BFGSpray(var mo : mobj_s?) {
         }
         P_SpawnMobj(linetarget.x, linetarget.y, linetarget.z + (linetarget.height >> 2), mobjtype_t.MT_EXTRABFG)
         damage = 0
-        {
-            j = 0
-            while (j < 15) {
-                damage += (P_Random() & 7) + 1
-                j++
-            }
+        j = 0
+        while (j < 15) {
+            damage += (P_Random() & 7) + 1
+            j++
         }
         P_DamageMobj(linetarget, mo.target, mo.target, damage)
     }
@@ -472,24 +470,22 @@ def P_MovePsprites(var player : player_s?) {
     var psp : pspdef_t?
     var state : state_t?
     psp = addr(player.psprites[0])
-    {
-        i = 0
-        while (i < int(psprnum_t.NUMPSPRITES)) {
-            // a null state means not active
-            state = psp.state
-            if (state != null) {
-                // drop tic count and possibly change state
-                // a -1 tic count never changes
-                if (psp.tics != -1) {
-                    psp.tics--
-                    if (!(psp.tics != 0)) {
-                        P_SetPsprite(player, i, psp.state.nextstate)
-                    }
+    i = 0
+    while (i < int(psprnum_t.NUMPSPRITES)) {
+        // a null state means not active
+        state = psp.state
+        if (state != null) {
+            // drop tic count and possibly change state
+            // a -1 tic count never changes
+            if (psp.tics != -1) {
+                psp.tics--
+                if (!(psp.tics != 0)) {
+                    P_SetPsprite(player, i, psp.state.nextstate)
                 }
             }
-            i++
-            psp = psp + 1
         }
+        i++
+        psp = psp + 1
     }
     player.psprites[int(psprnum_t.ps_flash)].sx = player.psprites[int(psprnum_t.ps_weapon)].sx
     player.psprites[int(psprnum_t.ps_flash)].sy = player.psprites[int(psprnum_t.ps_weapon)].sy

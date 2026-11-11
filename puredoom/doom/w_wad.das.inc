@@ -38,9 +38,9 @@ def ExtractFileBase(var path : uint8?; var dest : uint8?) {
         length++
         if (length == 9) {
             // I_Error("Error: Filename base of %s >8 chars", path);
-            doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: Filename base of "))
+            doom_strcpy(addr(error_buf[0]), cstr("Error: Filename base of "))
             doom_concat(addr(error_buf[0]), path)
-            doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" >8 chars"))
+            doom_concat(addr(error_buf[0]), cstr(" >8 chars"))
             I_Error(addr(error_buf[0]))
         }
         var _t0 = dest
@@ -75,25 +75,25 @@ def W_AddFile(var filename : uint8?) {
     var allocated : void? = null
     // open the file and add to directory
     // handle reload indicator.
-    if (int(deref(filename + 0)) == '~') {
+    if (int(filename[0]) == '~') {
         filename = filename + 1
         reloadname = filename
         reloadlump = numlumps
     }
-    handle = invoke(doom_open, filename, reinterpret<uint8?>("rb"))
+    handle = invoke(doom_open, filename, cstr("rb"))
     if (handle == null) {
         // doom_print(" couldn't open %s\n", filename);
-        invoke(doom_print, reinterpret<uint8?>(" couldn't open "))
+        invoke(doom_print, cstr(" couldn't open "))
         invoke(doom_print, filename)
-        invoke(doom_print, reinterpret<uint8?>("\n"))
+        invoke(doom_print, cstr("\n"))
         return
     }
     // doom_print(" adding %s\n", filename);
-    invoke(doom_print, reinterpret<uint8?>(" adding "))
+    invoke(doom_print, cstr(" adding "))
     invoke(doom_print, filename)
-    invoke(doom_print, reinterpret<uint8?>("\n"))
+    invoke(doom_print, cstr("\n"))
     startlump = numlumps
-    if (doom_strcasecmp(filename + doom_strlen(filename) + -(3), reinterpret<uint8?>("wad")) != 0) {
+    if (doom_strcasecmp(filename + doom_strlen(filename) + -(3), cstr("wad")) != 0) {
         // single lump file
         fileinfo = addr(singleinfo)
         singleinfo.filepos = 0
@@ -106,14 +106,14 @@ def W_AddFile(var filename : uint8?) {
     } else {
         // WAD file
         invoke(doom_read, handle, reinterpret<void?>(addr(header)), int(uint64(typeinfo sizeof(type<wadinfo_t>))))
-        if (doom_strncmp(addr(header.identification[0]), reinterpret<uint8?>("IWAD"), 4) != 0) {
+        if (doom_strncmp(addr(header.identification[0]), cstr("IWAD"), 4) != 0) {
             // Homebrew levels?
-            if (doom_strncmp(addr(header.identification[0]), reinterpret<uint8?>("PWAD"), 4) != 0) {
+            if (doom_strncmp(addr(header.identification[0]), cstr("PWAD"), 4) != 0) {
                 // I_Error("Error: Wad file %s doesn't have IWAD "
                 // "or PWAD id\n", filename);
-                doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: Wad file "))
+                doom_strcpy(addr(error_buf[0]), cstr("Error: Wad file "))
                 doom_concat(addr(error_buf[0]), filename)
-                doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" doesn't have IWAD or PWAD id\n"))
+                doom_concat(addr(error_buf[0]), cstr(" doesn't have IWAD or PWAD id\n"))
                 I_Error(addr(error_buf[0]))
             }
         }
@@ -133,21 +133,19 @@ def W_AddFile(var filename : uint8?) {
     W_AddFile_previous_realloc_size = int(uint64(numlumps) * uint64(typeinfo sizeof(type<lumpinfo_t>)))
     lumpinfo = reinterpret<lumpinfo_t?>(new_lumpinfo)
     if (!(lumpinfo != null)) {
-        I_Error(reinterpret<uint8?>("Error: Couldn't realloc lumpinfo"))
+        I_Error(cstr("Error: Couldn't realloc lumpinfo"))
     }
-    lump_p = addr(deref(lumpinfo + startlump))
+    lump_p = addr(lumpinfo[startlump])
     storehandle = reloadname != null ? default<void?> : handle
-    {
-        i = uint(startlump)
-        while (i < uint(numlumps)) {
-            lump_p.handle = storehandle
-            lump_p.position = fileinfo.filepos
-            lump_p.size = fileinfo.size
-            doom_strncpy(addr(lump_p.name[0]), addr(fileinfo.name[0]), 8)
-            i++
-            lump_p = lump_p + 1
-            fileinfo = fileinfo + 1
-        }
+    i = uint(startlump)
+    while (i < uint(numlumps)) {
+        lump_p.handle = storehandle
+        lump_p.position = fileinfo.filepos
+        lump_p.size = fileinfo.size
+        doom_strncpy(addr(lump_p.name[0]), addr(fileinfo.name[0]), 8)
+        i++
+        lump_p = lump_p + 1
+        fileinfo = fileinfo + 1
     }
     if (reloadname != null) {
         invoke(doom_close, handle)
@@ -172,10 +170,10 @@ def W_Reload {
     if (!(reloadname != null)) {
         return
     }
-    handle = invoke(doom_open, reloadname, reinterpret<uint8?>("rb"))
+    handle = invoke(doom_open, reloadname, cstr("rb"))
     if (handle == null) {
         // I_Error("Error: W_Reload: couldn't open %s", reloadname);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: W_Reload: couldn't open "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: W_Reload: couldn't open "))
         doom_concat(addr(error_buf[0]), reloadname)
         I_Error(addr(error_buf[0]))
     }
@@ -187,19 +185,17 @@ def W_Reload {
     invoke(doom_seek, handle, header.infotableofs, doom_seek_t.DOOM_SEEK_SET)
     invoke(doom_read, handle, reinterpret<void?>(fileinfo), length)
     // Fill in lumpinfo
-    lump_p = addr(deref(lumpinfo + reloadlump))
-    {
-        i = uint(reloadlump)
-        while (i < uint(reloadlump + lumpcount)) {
-            if (deref(lumpcache + i) != null) {
-                Z_Free(deref(lumpcache + i))
-            }
-            lump_p.position = fileinfo.filepos
-            lump_p.size = fileinfo.size
-            i++
-            lump_p = lump_p + 1
-            fileinfo = fileinfo + 1
+    lump_p = addr(lumpinfo[reloadlump])
+    i = uint(reloadlump)
+    while (i < uint(reloadlump + lumpcount)) {
+        if (lumpcache[i] != null) {
+            Z_Free(lumpcache[i])
         }
+        lump_p.position = fileinfo.filepos
+        lump_p.size = fileinfo.size
+        i++
+        lump_p = lump_p + 1
+        fileinfo = fileinfo + 1
     }
     invoke(doom_close, handle)
     invoke(doom_free, reinterpret<void?>(fileinfo))
@@ -223,20 +219,18 @@ def W_InitMultipleFiles(var filenames : uint8 ??) {
     numlumps = 0
     // will be realloced as lumps are added
     lumpinfo = reinterpret<lumpinfo_t?>(invoke(doom_malloc, 1))
-    {
-        while (deref(filenames) != null) {
-            W_AddFile(deref(filenames))
-            filenames = filenames + 1
-        }
+    while (deref(filenames) != null) {
+        W_AddFile(deref(filenames))
+        filenames = filenames + 1
     }
     if (!(numlumps != 0)) {
-        I_Error(reinterpret<uint8?>("Error: W_InitFiles: no files found"))
+        I_Error(cstr("Error: W_InitFiles: no files found"))
     }
     // set up caching
     size = int(uint64(numlumps) * uint64(typeinfo sizeof(type<void?>)))
     lumpcache = reinterpret<void ??>(invoke(doom_malloc, size))
     if (!(lumpcache != null)) {
-        I_Error(reinterpret<uint8?>("Error: Couldn't allocate lumpcache"))
+        I_Error(cstr("Error: Couldn't allocate lumpcache"))
     }
     doom_memset(reinterpret<void?>(lumpcache), 0, size)
 }
@@ -267,7 +261,7 @@ def W_CheckNumForName(var name : uint8?) : int {
     // make the name into two integers for easy compares
     doom_strncpy(addr(name8.s[0]), name, 8)
     // in case the name was a fill 8 chars
-    name8.s[8] = uint8(0)
+    name8.s[8] = 0u8
     // case insensitive
     doom_strupr(addr(name8.s[0]))
     v1 = name8.x[0]
@@ -295,16 +289,16 @@ def W_GetNumForName(var name : uint8?) : int {
     var i : int
     i = W_CheckNumForName(name)
     if (i == -1) {
-        if (doom_strcmp(name, reinterpret<uint8?>("HELP2")) == 0) {
+        if (doom_strcmp(name, cstr("HELP2")) == 0) {
             // Ultimate Doom EXE was modified to use this instead
-            name = reinterpret<uint8?>("HELP1")
+            name = cstr("HELP1")
             i = W_CheckNumForName(name)
         }
         if (i == -1) {
             // I_Error("Error: W_GetNumForName, %s not found!", name);
-            doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: W_GetNumForName, "))
+            doom_strcpy(addr(error_buf[0]), cstr("Error: W_GetNumForName, "))
             doom_concat(addr(error_buf[0]), name)
-            doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" not found!"))
+            doom_concat(addr(error_buf[0]), cstr(" not found!"))
             I_Error(addr(error_buf[0]))
         }
     }
@@ -317,12 +311,12 @@ def W_GetNumForName(var name : uint8?) : int {
 def W_LumpLength(lump : int) : int {
     if (lump >= numlumps) {
         // I_Error("Error: W_LumpLength: %i >= numlumps", lump);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: W_LumpLength: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: W_LumpLength: "))
         doom_concat(addr(error_buf[0]), doom_itoa(lump, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" >= numlumps"))
+        doom_concat(addr(error_buf[0]), cstr(" >= numlumps"))
         I_Error(addr(error_buf[0]))
     }
-    return deref(lumpinfo + lump).size
+    return lumpinfo[lump].size
 }
 
 // W_ReadLump
@@ -335,19 +329,19 @@ def W_ReadLump(lump : int; var dest : void?) {
     var handle : void?
     if (lump >= numlumps) {
         // I_Error("Error: W_ReadLump: %i >= numlumps", lump);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: W_ReadLump: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: W_ReadLump: "))
         doom_concat(addr(error_buf[0]), doom_itoa(lump, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" >= numlump"))
+        doom_concat(addr(error_buf[0]), cstr(" >= numlump"))
         I_Error(addr(error_buf[0]))
     }
     l = lumpinfo + lump
     // ??? I_BeginRead ();
     if (l.handle == null) {
         // reloadable file, so use open / read / close
-        handle = invoke(doom_open, reloadname, reinterpret<uint8?>("rb"))
+        handle = invoke(doom_open, reloadname, cstr("rb"))
         if (handle == null) {
             // I_Error("Error: W_ReadLump: couldn't open %s", reloadname);
-            doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: W_ReadLump: couldn't open "))
+            doom_strcpy(addr(error_buf[0]), cstr("Error: W_ReadLump: couldn't open "))
             doom_concat(addr(error_buf[0]), reloadname)
             I_Error(addr(error_buf[0]))
         }
@@ -359,11 +353,11 @@ def W_ReadLump(lump : int; var dest : void?) {
     if (c < l.size) {
         // I_Error("Error: W_ReadLump: only read %i of %i on lump %i",
         // c, l->size, lump);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: W_ReadLump: only read "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: W_ReadLump: only read "))
         doom_concat(addr(error_buf[0]), doom_itoa(c, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" of "))
+        doom_concat(addr(error_buf[0]), cstr(" of "))
         doom_concat(addr(error_buf[0]), doom_itoa(l.size, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" on lump "))
+        doom_concat(addr(error_buf[0]), cstr(" on lump "))
         doom_concat(addr(error_buf[0]), doom_itoa(lump, 10))
         I_Error(addr(error_buf[0]))
     }
@@ -378,33 +372,31 @@ def W_CacheLumpNum(lump : int; tag : int) : void? {
     var ptr : uint8?
     if (uint(lump) >= uint(numlumps)) {
         // I_Error("Error: W_CacheLumpNum: %i >= numlumps", lump);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: W_CacheLumpNum: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: W_CacheLumpNum: "))
         doom_concat(addr(error_buf[0]), doom_itoa(lump, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" >= numlumps"))
+        doom_concat(addr(error_buf[0]), cstr(" >= numlumps"))
         I_Error(addr(error_buf[0]))
     }
-    if (!(deref(lumpcache + lump) != null)) {
+    if (!(lumpcache[lump] != null)) {
         // read the lump in
         // doom_print ("cache miss on lump %i\n",lump);
         // [c2das] 128 zero bytes past the lump: a column drawer reads up to 127 bytes past a
         // column's start (a wall taller than its texture, a post's row -1 wrapped to 127), which
         // past the lump's end read the zone's next block header, its pointers among them.
-        ptr = reinterpret<uint8?>(Z_Malloc(W_LumpLength(lump) + 128, tag, reinterpret<void?>(addr(deref(lumpcache + lump)))))
+        ptr = reinterpret<uint8?>(Z_Malloc(W_LumpLength(lump) + 128, tag, reinterpret<void?>(addr(lumpcache[lump]))))
         doom_memset(reinterpret<void?>(ptr + W_LumpLength(lump)), 0, 128)
-        W_ReadLump(lump, deref(lumpcache + lump))
+        W_ReadLump(lump, lumpcache[lump])
     } else {
-        {
-            // doom_print ("cache hit on lump %i\n",lump);
-            if (reinterpret<memblock_s?>(reinterpret<uint8?>(deref(lumpcache + lump)) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-                var buf : uint8[260]
-                doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/w_wad.c:"))
-                doom_concat(addr(buf[0]), doom_itoa(524, 10))
-                I_Error(addr(buf[0]))
-            }
-            Z_ChangeTag2(deref(lumpcache + lump), tag)
+        // doom_print ("cache hit on lump %i\n",lump);
+        if (reinterpret<memblock_s?>(reinterpret<uint8?>(lumpcache[lump]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+            var buf : uint8[260]
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/w_wad.c:"))
+            doom_concat(addr(buf[0]), doom_itoa(524, 10))
+            I_Error(addr(buf[0]))
         }
+        Z_ChangeTag2(lumpcache[lump], tag)
     }
-    return deref(lumpcache + lump)
+    return lumpcache[lump]
 }
 
 // W_CacheLumpName
@@ -422,64 +414,54 @@ def W_Profile {
     var f : void?
     var j : int
     var name : uint8[9]
-    {
-        i = 0
-        while (i < numlumps) {
-            {
-                ptr = deref(lumpcache + i)
-                if (!(ptr != null)) {
-                    ch = uint8(' ')
-                    continue
+    i = 0
+    while (i < numlumps) {
+        {
+            ptr = lumpcache[i]
+            if (!(ptr != null)) {
+                ch = uint8(' ')
+                continue
+            } else {
+                _c_block = reinterpret<memblock_s?>(reinterpret<uint8?>(ptr) + -int64(uint64(typeinfo sizeof(type<memblock_s>))))
+                if (_c_block.tag < PU_PURGELEVEL) {
+                    ch = uint8('S')
                 } else {
-                    _c_block = reinterpret<memblock_s?>(reinterpret<uint8?>(ptr) + -int64(uint64(typeinfo sizeof(type<memblock_s>))))
-                    if (_c_block.tag < PU_PURGELEVEL) {
-                        ch = uint8('S')
-                    } else {
-                        ch = uint8('P')
-                    }
+                    ch = uint8('P')
                 }
-                info[i][profilecount] = int(ch)
-            } finally {
-                i++
             }
+            info[i][profilecount] = int(ch)
+        } finally {
+            i++
         }
     }
     profilecount++
-    f = invoke(doom_open, reinterpret<uint8?>("waddump.txt"), reinterpret<uint8?>("w"))
-    name[8] = uint8(0)
-    {
-        i = 0
-        while (i < numlumps) {
-            doom_memcpy(reinterpret<void?>(addr(name[0])), reinterpret<void?>(addr(deref(lumpinfo + i).name[0])), 8)
-            {
-                j = 0
-                while (j < 8) {
-                    if (!(name[j] != 0)) {
-                        break
-                    }
-                    j++
-                }
+    f = invoke(doom_open, cstr("waddump.txt"), cstr("w"))
+    name[8] = 0u8
+    i = 0
+    while (i < numlumps) {
+        doom_memcpy(reinterpret<void?>(addr(name[0])), reinterpret<void?>(addr(lumpinfo[i].name[0])), 8)
+        j = 0
+        while (j < 8) {
+            if (!(name[j] != 0)) {
+                break
             }
-            {
-                while (j < 8) {
-                    name[j] = uint8(' ')
-                    j++
-                }
-            }
-            doom_fprint(f, addr(name[0]))
-            doom_fprint(f, reinterpret<uint8?>(" "))
-            {
-                j = 0
-                while (j < profilecount) {
-                    // fprintf(f, " %c", info[i][j]);
-                    doom_fprint(f, reinterpret<uint8?>("    "))
-                    doom_fprint(f, doom_ctoa(uint8(info[i][j])))
-                    j++
-                }
-            }
-            doom_fprint(f, reinterpret<uint8?>("\n"))
-            i++
+            j++
         }
+        while (j < 8) {
+            name[j] = uint8(' ')
+            j++
+        }
+        doom_fprint(f, addr(name[0]))
+        doom_fprint(f, cstr(" "))
+        j = 0
+        while (j < profilecount) {
+            // fprintf(f, " %c", info[i][j]);
+            doom_fprint(f, cstr("    "))
+            doom_fprint(f, doom_ctoa(uint8(info[i][j])))
+            j++
+        }
+        doom_fprint(f, cstr("\n"))
+        i++
     }
     invoke(doom_close, f)
 }

@@ -6,31 +6,31 @@ struct castinfo_t {
 
 var finalestage : int
 var finalecount : int
-var e1text : uint8? = unsafe(reinterpret<uint8?>("Once you beat the big badasses and\nclean out the moon base you're supposed\nto win, aren't you? Aren't you? Where's\nyour fat reward and ticket home? What\nthe hell is this? It's not supposed to\nend this way!\n\nIt stinks like rotten meat, but looks\nlike the lost Deimos base.  Looks like\nyou're stuck on The Shores of Hell.\nThe only way out is through.\n\nTo continue the DOOM experience, play\nThe Shores of Hell and its amazing\nsequel, Inferno!\n"))
-var e2text : uint8? = unsafe(reinterpret<uint8?>("You've done it! The hideous cyber-\ndemon lord that ruled the lost Deimos\nmoon base has been slain and you\nare triumphant! But ... where are\nyou? You clamber to the edge of the\nmoon and look down to see the awful\ntruth.\n\nDeimos floats above Hell itself!\nYou've never heard of anyone escaping\nfrom Hell, but you'll make the bastards\nsorry they ever heard of you! Quickly,\nyou rappel down to  the surface of\nHell.\n\nNow, it's on to the final chapter of\nDOOM! -- Inferno."))
-var e3text : uint8? = unsafe(reinterpret<uint8?>("The loathsome spiderdemon that\nmasterminded the invasion of the moon\nbases and caused so much death has had\nits ass kicked for all time.\n\nA hidden doorway opens and you enter.\nYou've proven too tough for Hell to\ncontain, and now Hell at last plays\nfair -- for you emerge from the door\nto see the green fields of Earth!\nHome at last.\n\nYou wonder what's been happening on\nEarth while you were battling evil\nunleashed. It's good that no Hell-\nspawn could have come through that\ndoor with you ..."))
-var e4text : uint8? = unsafe(reinterpret<uint8?>("the spider mastermind must have sent forth\nits legions of hellspawn before your\nfinal confrontation with that terrible\nbeast from hell.  but you stepped forward\nand brought forth eternal damnation and\nsuffering upon the horde as a true hero\nwould in the face of something so evil.\n\nbesides, someone was gonna pay for what\nhappened to daisy, your pet rabbit.\n\nbut now, you see spread before you more\npotential pain and gibbitude as a nation\nof demons run amok among our cities.\n\nnext stop, hell on earth!"))
-var c1text : uint8? = unsafe(reinterpret<uint8?>("YOU HAVE ENTERED DEEPLY INTO THE INFESTED\nSTARPORT. BUT SOMETHING IS WRONG. THE\nMONSTERS HAVE BROUGHT THEIR OWN REALITY\nWITH THEM, AND THE STARPORT'S TECHNOLOGY\nIS BEING SUBVERTED BY THEIR PRESENCE.\n\nAHEAD, YOU SEE AN OUTPOST OF HELL, A\nFORTIFIED ZONE. IF YOU CAN GET PAST IT,\nYOU CAN PENETRATE INTO THE HAUNTED HEART\nOF THE STARBASE AND FIND THE CONTROLLING\nSWITCH WHICH HOLDS EARTH'S POPULATION\nHOSTAGE."))
-var c2text : uint8? = unsafe(reinterpret<uint8?>("YOU HAVE WON! YOUR VICTORY HAS ENABLED\nHUMANKIND TO EVACUATE EARTH AND ESCAPE\nTHE NIGHTMARE.  NOW YOU ARE THE ONLY\nHUMAN LEFT ON THE FACE OF THE PLANET.\nCANNIBAL MUTATIONS, CARNIVOROUS ALIENS,\nAND EVIL SPIRITS ARE YOUR ONLY NEIGHBORS.\nYOU SIT BACK AND WAIT FOR DEATH, CONTENT\nTHAT YOU HAVE SAVED YOUR SPECIES.\n\nBUT THEN, EARTH CONTROL BEAMS DOWN A\nMESSAGE FROM SPACE: \"SENSORS HAVE LOCATED\nTHE SOURCE OF THE ALIEN INVASION. IF YOU\nGO THERE, YOU MAY BE ABLE TO BLOCK THEIR\nENTRY.  THE ALIEN BASE IS IN THE HEART OF\nYOUR OWN HOME CITY, NOT FAR FROM THE\nSTARPORT.\" SLOWLY AND PAINFULLY YOU GET\nUP AND RETURN TO THE FRAY."))
-var c3text : uint8? = unsafe(reinterpret<uint8?>("YOU ARE AT THE CORRUPT HEART OF THE CITY,\nSURROUNDED BY THE CORPSES OF YOUR ENEMIES.\nYOU SEE NO WAY TO DESTROY THE CREATURES'\nENTRYWAY ON THIS SIDE, SO YOU CLENCH YOUR\nTEETH AND PLUNGE THROUGH IT.\n\nTHERE MUST BE A WAY TO CLOSE IT ON THE\nOTHER SIDE. WHAT DO YOU CARE IF YOU'VE\nGOT TO GO THROUGH HELL TO GET TO IT?"))
-var c4text : uint8? = unsafe(reinterpret<uint8?>("THE HORRENDOUS VISAGE OF THE BIGGEST\nDEMON YOU'VE EVER SEEN CRUMBLES BEFORE\nYOU, AFTER YOU PUMP YOUR ROCKETS INTO\nHIS EXPOSED BRAIN. THE MONSTER SHRIVELS\nUP AND DIES, ITS THRASHING LIMBS\nDEVASTATING UNTOLD MILES OF HELL'S\nSURFACE.\n\nYOU'VE DONE IT. THE INVASION IS OVER.\nEARTH IS SAVED. HELL IS A WRECK. YOU\nWONDER WHERE BAD FOLKS WILL GO WHEN THEY\nDIE, NOW. WIPING THE SWEAT FROM YOUR\nFOREHEAD YOU BEGIN THE LONG TREK BACK\nHOME. REBUILDING EARTH OUGHT TO BE A\nLOT MORE FUN THAN RUINING IT WAS.\n"))
-var c5text : uint8? = unsafe(reinterpret<uint8?>("CONGRATULATIONS, YOU'VE FOUND THE SECRET\nLEVEL! LOOKS LIKE IT'S BEEN BUILT BY\nHUMANS, RATHER THAN DEMONS. YOU WONDER\nWHO THE INMATES OF THIS CORNER OF HELL\nWILL BE."))
-var c6text : uint8? = unsafe(reinterpret<uint8?>("CONGRATULATIONS, YOU'VE FOUND THE\nSUPER SECRET LEVEL!  YOU'D BETTER\nBLAZE THROUGH THIS ONE!\n"))
-var p1text : uint8? = unsafe(reinterpret<uint8?>("You gloat over the steaming carcass of the\nGuardian.  With its death, you've wrested\nthe Accelerator from the stinking claws\nof Hell.  You relax and glance around the\nroom.  Damn!  There was supposed to be at\nleast one working prototype, but you can't\nsee it. The demons must have taken it.\n\nYou must find the prototype, or all your\nstruggles will have been wasted. Keep\nmoving, keep fighting, keep killing.\nOh yes, keep living, too."))
-var p2text : uint8? = unsafe(reinterpret<uint8?>("Even the deadly Arch-Vile labyrinth could\nnot stop you, and you've gotten to the\nprototype Accelerator which is soon\nefficiently and permanently deactivated.\n\nYou're good at that kind of thing."))
-var p3text : uint8? = unsafe(reinterpret<uint8?>("You've bashed and battered your way into\nthe heart of the devil-hive.  Time for a\nSearch-and-Destroy mission, aimed at the\nGatekeeper, whose foul offspring is\ncascading to Earth.  Yeah, he's bad. But\nyou know who's worse!\n\nGrinning evilly, you check your gear, and\nget ready to give the bastard a little Hell\nof your own making!"))
-var p4text : uint8? = unsafe(reinterpret<uint8?>("The Gatekeeper's evil face is splattered\nall over the place.  As its tattered corpse\ncollapses, an inverted Gate forms and\nsucks down the shards of the last\nprototype Accelerator, not to mention the\nfew remaining demons.  You're done. Hell\nhas gone back to pounding bad dead folks \ninstead of good live ones.  Remember to\ntell your grandkids to put a rocket\nlauncher in your coffin. If you go to Hell\nwhen you die, you'll need it for some\nfinal cleaning-up ..."))
-var p5text : uint8? = unsafe(reinterpret<uint8?>("You've found the second-hardest level we\ngot. Hope you have a saved game a level or\ntwo previous.  If not, be prepared to die\naplenty. For master marines only."))
-var p6text : uint8? = unsafe(reinterpret<uint8?>("Betcha wondered just what WAS the hardest\nlevel we had ready for ya?  Now you know.\nNo one gets out alive."))
-var t1text : uint8? = unsafe(reinterpret<uint8?>("You've fought your way out of the infested\nexperimental labs.   It seems that UAC has\nonce again gulped it down.  With their\nhigh turnover, it must be hard for poor\nold UAC to buy corporate health insurance\nnowadays..\n\nAhead lies the military complex, now\nswarming with diseased horrors hot to get\ntheir teeth into you. With luck, the\ncomplex still has some warlike ordnance\nlaying around."))
-var t2text : uint8? = unsafe(reinterpret<uint8?>("You hear the grinding of heavy machinery\nahead.  You sure hope they're not stamping\nout new hellspawn, but you're ready to\nream out a whole herd if you have to.\nThey might be planning a blood feast, but\nyou feel about as mean as two thousand\nmaniacs packed into one mad killer.\n\nYou don't plan to go down easy."))
-var t3text : uint8? = unsafe(reinterpret<uint8?>("The vista opening ahead looks real damn\nfamiliar. Smells familiar, too -- like\nfried excrement. You didn't like this\nplace before, and you sure as hell ain't\nplanning to like it now. The more you\nbrood on it, the madder you get.\nHefting your gun, an evil grin trickles\nonto your face. Time to take some names."))
-var t4text : uint8? = unsafe(reinterpret<uint8?>("Suddenly, all is silent, from one horizon\nto the other. The agonizing echo of Hell\nfades away, the nightmare sky turns to\nblue, the heaps of monster corpses start \nto evaporate along with the evil stench \nthat filled the air. Jeeze, maybe you've\ndone it. Have you really won?\n\nSomething rumbles in the distance.\nA blue light begins to glow inside the\nruined skull of the demon-spitter."))
-var t5text : uint8? = unsafe(reinterpret<uint8?>("What now? Looks totally different. Kind\nof like King Tut's condo. Well,\nwhatever's here can't be any worse\nthan usual. Can it?  Or maybe it's best\nto let sleeping gods lie.."))
-var t6text : uint8? = unsafe(reinterpret<uint8?>("Time for a vacation. You've burst the\nbowels of hell and by golly you're ready\nfor a break. You mutter to yourself,\nMaybe someone else can kick Hell's ass\nnext time around. Ahead lies a quiet town,\nwith peaceful flowing water, quaint\nbuildings, and presumably no Hellspawn.\n\nAs you step off the transport, you hear\nthe stomp of a cyberdemon's iron shoe."))
+var e1text : uint8? = cstr("Once you beat the big badasses and\nclean out the moon base you're supposed\nto win, aren't you? Aren't you? Where's\nyour fat reward and ticket home? What\nthe hell is this? It's not supposed to\nend this way!\n\nIt stinks like rotten meat, but looks\nlike the lost Deimos base.  Looks like\nyou're stuck on The Shores of Hell.\nThe only way out is through.\n\nTo continue the DOOM experience, play\nThe Shores of Hell and its amazing\nsequel, Inferno!\n")
+var e2text : uint8? = cstr("You've done it! The hideous cyber-\ndemon lord that ruled the lost Deimos\nmoon base has been slain and you\nare triumphant! But ... where are\nyou? You clamber to the edge of the\nmoon and look down to see the awful\ntruth.\n\nDeimos floats above Hell itself!\nYou've never heard of anyone escaping\nfrom Hell, but you'll make the bastards\nsorry they ever heard of you! Quickly,\nyou rappel down to  the surface of\nHell.\n\nNow, it's on to the final chapter of\nDOOM! -- Inferno.")
+var e3text : uint8? = cstr("The loathsome spiderdemon that\nmasterminded the invasion of the moon\nbases and caused so much death has had\nits ass kicked for all time.\n\nA hidden doorway opens and you enter.\nYou've proven too tough for Hell to\ncontain, and now Hell at last plays\nfair -- for you emerge from the door\nto see the green fields of Earth!\nHome at last.\n\nYou wonder what's been happening on\nEarth while you were battling evil\nunleashed. It's good that no Hell-\nspawn could have come through that\ndoor with you ...")
+var e4text : uint8? = cstr("the spider mastermind must have sent forth\nits legions of hellspawn before your\nfinal confrontation with that terrible\nbeast from hell.  but you stepped forward\nand brought forth eternal damnation and\nsuffering upon the horde as a true hero\nwould in the face of something so evil.\n\nbesides, someone was gonna pay for what\nhappened to daisy, your pet rabbit.\n\nbut now, you see spread before you more\npotential pain and gibbitude as a nation\nof demons run amok among our cities.\n\nnext stop, hell on earth!")
+var c1text : uint8? = cstr("YOU HAVE ENTERED DEEPLY INTO THE INFESTED\nSTARPORT. BUT SOMETHING IS WRONG. THE\nMONSTERS HAVE BROUGHT THEIR OWN REALITY\nWITH THEM, AND THE STARPORT'S TECHNOLOGY\nIS BEING SUBVERTED BY THEIR PRESENCE.\n\nAHEAD, YOU SEE AN OUTPOST OF HELL, A\nFORTIFIED ZONE. IF YOU CAN GET PAST IT,\nYOU CAN PENETRATE INTO THE HAUNTED HEART\nOF THE STARBASE AND FIND THE CONTROLLING\nSWITCH WHICH HOLDS EARTH'S POPULATION\nHOSTAGE.")
+var c2text : uint8? = cstr("YOU HAVE WON! YOUR VICTORY HAS ENABLED\nHUMANKIND TO EVACUATE EARTH AND ESCAPE\nTHE NIGHTMARE.  NOW YOU ARE THE ONLY\nHUMAN LEFT ON THE FACE OF THE PLANET.\nCANNIBAL MUTATIONS, CARNIVOROUS ALIENS,\nAND EVIL SPIRITS ARE YOUR ONLY NEIGHBORS.\nYOU SIT BACK AND WAIT FOR DEATH, CONTENT\nTHAT YOU HAVE SAVED YOUR SPECIES.\n\nBUT THEN, EARTH CONTROL BEAMS DOWN A\nMESSAGE FROM SPACE: \"SENSORS HAVE LOCATED\nTHE SOURCE OF THE ALIEN INVASION. IF YOU\nGO THERE, YOU MAY BE ABLE TO BLOCK THEIR\nENTRY.  THE ALIEN BASE IS IN THE HEART OF\nYOUR OWN HOME CITY, NOT FAR FROM THE\nSTARPORT.\" SLOWLY AND PAINFULLY YOU GET\nUP AND RETURN TO THE FRAY.")
+var c3text : uint8? = cstr("YOU ARE AT THE CORRUPT HEART OF THE CITY,\nSURROUNDED BY THE CORPSES OF YOUR ENEMIES.\nYOU SEE NO WAY TO DESTROY THE CREATURES'\nENTRYWAY ON THIS SIDE, SO YOU CLENCH YOUR\nTEETH AND PLUNGE THROUGH IT.\n\nTHERE MUST BE A WAY TO CLOSE IT ON THE\nOTHER SIDE. WHAT DO YOU CARE IF YOU'VE\nGOT TO GO THROUGH HELL TO GET TO IT?")
+var c4text : uint8? = cstr("THE HORRENDOUS VISAGE OF THE BIGGEST\nDEMON YOU'VE EVER SEEN CRUMBLES BEFORE\nYOU, AFTER YOU PUMP YOUR ROCKETS INTO\nHIS EXPOSED BRAIN. THE MONSTER SHRIVELS\nUP AND DIES, ITS THRASHING LIMBS\nDEVASTATING UNTOLD MILES OF HELL'S\nSURFACE.\n\nYOU'VE DONE IT. THE INVASION IS OVER.\nEARTH IS SAVED. HELL IS A WRECK. YOU\nWONDER WHERE BAD FOLKS WILL GO WHEN THEY\nDIE, NOW. WIPING THE SWEAT FROM YOUR\nFOREHEAD YOU BEGIN THE LONG TREK BACK\nHOME. REBUILDING EARTH OUGHT TO BE A\nLOT MORE FUN THAN RUINING IT WAS.\n")
+var c5text : uint8? = cstr("CONGRATULATIONS, YOU'VE FOUND THE SECRET\nLEVEL! LOOKS LIKE IT'S BEEN BUILT BY\nHUMANS, RATHER THAN DEMONS. YOU WONDER\nWHO THE INMATES OF THIS CORNER OF HELL\nWILL BE.")
+var c6text : uint8? = cstr("CONGRATULATIONS, YOU'VE FOUND THE\nSUPER SECRET LEVEL!  YOU'D BETTER\nBLAZE THROUGH THIS ONE!\n")
+var p1text : uint8? = cstr("You gloat over the steaming carcass of the\nGuardian.  With its death, you've wrested\nthe Accelerator from the stinking claws\nof Hell.  You relax and glance around the\nroom.  Damn!  There was supposed to be at\nleast one working prototype, but you can't\nsee it. The demons must have taken it.\n\nYou must find the prototype, or all your\nstruggles will have been wasted. Keep\nmoving, keep fighting, keep killing.\nOh yes, keep living, too.")
+var p2text : uint8? = cstr("Even the deadly Arch-Vile labyrinth could\nnot stop you, and you've gotten to the\nprototype Accelerator which is soon\nefficiently and permanently deactivated.\n\nYou're good at that kind of thing.")
+var p3text : uint8? = cstr("You've bashed and battered your way into\nthe heart of the devil-hive.  Time for a\nSearch-and-Destroy mission, aimed at the\nGatekeeper, whose foul offspring is\ncascading to Earth.  Yeah, he's bad. But\nyou know who's worse!\n\nGrinning evilly, you check your gear, and\nget ready to give the bastard a little Hell\nof your own making!")
+var p4text : uint8? = cstr("The Gatekeeper's evil face is splattered\nall over the place.  As its tattered corpse\ncollapses, an inverted Gate forms and\nsucks down the shards of the last\nprototype Accelerator, not to mention the\nfew remaining demons.  You're done. Hell\nhas gone back to pounding bad dead folks \ninstead of good live ones.  Remember to\ntell your grandkids to put a rocket\nlauncher in your coffin. If you go to Hell\nwhen you die, you'll need it for some\nfinal cleaning-up ...")
+var p5text : uint8? = cstr("You've found the second-hardest level we\ngot. Hope you have a saved game a level or\ntwo previous.  If not, be prepared to die\naplenty. For master marines only.")
+var p6text : uint8? = cstr("Betcha wondered just what WAS the hardest\nlevel we had ready for ya?  Now you know.\nNo one gets out alive.")
+var t1text : uint8? = cstr("You've fought your way out of the infested\nexperimental labs.   It seems that UAC has\nonce again gulped it down.  With their\nhigh turnover, it must be hard for poor\nold UAC to buy corporate health insurance\nnowadays..\n\nAhead lies the military complex, now\nswarming with diseased horrors hot to get\ntheir teeth into you. With luck, the\ncomplex still has some warlike ordnance\nlaying around.")
+var t2text : uint8? = cstr("You hear the grinding of heavy machinery\nahead.  You sure hope they're not stamping\nout new hellspawn, but you're ready to\nream out a whole herd if you have to.\nThey might be planning a blood feast, but\nyou feel about as mean as two thousand\nmaniacs packed into one mad killer.\n\nYou don't plan to go down easy.")
+var t3text : uint8? = cstr("The vista opening ahead looks real damn\nfamiliar. Smells familiar, too -- like\nfried excrement. You didn't like this\nplace before, and you sure as hell ain't\nplanning to like it now. The more you\nbrood on it, the madder you get.\nHefting your gun, an evil grin trickles\nonto your face. Time to take some names.")
+var t4text : uint8? = cstr("Suddenly, all is silent, from one horizon\nto the other. The agonizing echo of Hell\nfades away, the nightmare sky turns to\nblue, the heaps of monster corpses start \nto evaporate along with the evil stench \nthat filled the air. Jeeze, maybe you've\ndone it. Have you really won?\n\nSomething rumbles in the distance.\nA blue light begins to glow inside the\nruined skull of the demon-spitter.")
+var t5text : uint8? = cstr("What now? Looks totally different. Kind\nof like King Tut's condo. Well,\nwhatever's here can't be any worse\nthan usual. Can it?  Or maybe it's best\nto let sleeping gods lie..")
+var t6text : uint8? = cstr("Time for a vacation. You've burst the\nbowels of hell and by golly you're ready\nfor a break. You mutter to yourself,\nMaybe someone else can kick Hell's ass\nnext time around. Ahead lies a quiet town,\nwith peaceful flowing water, quaint\nbuildings, and presumably no Hellspawn.\n\nAs you step off the transport, you hear\nthe stomp of a cyberdemon's iron shoe.")
 var finaletext : uint8?
 var finaleflat : uint8?
-var castorder : castinfo_t[18] = fixed_array(castinfo_t(name = unsafe(reinterpret<uint8?>("ZOMBIEMAN")), _c_type = mobjtype_t.MT_POSSESSED), castinfo_t(name = unsafe(reinterpret<uint8?>("SHOTGUN GUY")), _c_type = mobjtype_t.MT_SHOTGUY), castinfo_t(name = unsafe(reinterpret<uint8?>("HEAVY WEAPON DUDE")), _c_type = mobjtype_t.MT_CHAINGUY), castinfo_t(name = unsafe(reinterpret<uint8?>("IMP")), _c_type = mobjtype_t.MT_TROOP), castinfo_t(name = unsafe(reinterpret<uint8?>("DEMON")), _c_type = mobjtype_t.MT_SERGEANT), castinfo_t(name = unsafe(reinterpret<uint8?>("LOST SOUL")), _c_type = mobjtype_t.MT_SKULL), castinfo_t(name = unsafe(reinterpret<uint8?>("CACODEMON")), _c_type = mobjtype_t.MT_HEAD), castinfo_t(name = unsafe(reinterpret<uint8?>("HELL KNIGHT")), _c_type = mobjtype_t.MT_KNIGHT), castinfo_t(name = unsafe(reinterpret<uint8?>("BARON OF HELL")), _c_type = mobjtype_t.MT_BRUISER), castinfo_t(name = unsafe(reinterpret<uint8?>("ARACHNOTRON")), _c_type = mobjtype_t.MT_BABY), castinfo_t(name = unsafe(reinterpret<uint8?>("PAIN ELEMENTAL")), _c_type = mobjtype_t.MT_PAIN), castinfo_t(name = unsafe(reinterpret<uint8?>("REVENANT")), _c_type = mobjtype_t.MT_UNDEAD), castinfo_t(name = unsafe(reinterpret<uint8?>("MANCUBUS")), _c_type = mobjtype_t.MT_FATSO), castinfo_t(name = unsafe(reinterpret<uint8?>("ARCH-VILE")), _c_type = mobjtype_t.MT_VILE), castinfo_t(name = unsafe(reinterpret<uint8?>("THE SPIDER MASTERMIND")), _c_type = mobjtype_t.MT_SPIDER), castinfo_t(name = unsafe(reinterpret<uint8?>("THE CYBERDEMON")), _c_type = mobjtype_t.MT_CYBORG), castinfo_t(name = unsafe(reinterpret<uint8?>("OUR HERO")), _c_type = mobjtype_t.MT_PLAYER), castinfo_t(name = null, _c_type = mobjtype_t.MT_PLAYER))
+var castorder : castinfo_t[18] = fixed_array(castinfo_t(name = cstr("ZOMBIEMAN"), _c_type = mobjtype_t.MT_POSSESSED), castinfo_t(name = cstr("SHOTGUN GUY"), _c_type = mobjtype_t.MT_SHOTGUY), castinfo_t(name = cstr("HEAVY WEAPON DUDE"), _c_type = mobjtype_t.MT_CHAINGUY), castinfo_t(name = cstr("IMP"), _c_type = mobjtype_t.MT_TROOP), castinfo_t(name = cstr("DEMON"), _c_type = mobjtype_t.MT_SERGEANT), castinfo_t(name = cstr("LOST SOUL"), _c_type = mobjtype_t.MT_SKULL), castinfo_t(name = cstr("CACODEMON"), _c_type = mobjtype_t.MT_HEAD), castinfo_t(name = cstr("HELL KNIGHT"), _c_type = mobjtype_t.MT_KNIGHT), castinfo_t(name = cstr("BARON OF HELL"), _c_type = mobjtype_t.MT_BRUISER), castinfo_t(name = cstr("ARACHNOTRON"), _c_type = mobjtype_t.MT_BABY), castinfo_t(name = cstr("PAIN ELEMENTAL"), _c_type = mobjtype_t.MT_PAIN), castinfo_t(name = cstr("REVENANT"), _c_type = mobjtype_t.MT_UNDEAD), castinfo_t(name = cstr("MANCUBUS"), _c_type = mobjtype_t.MT_FATSO), castinfo_t(name = cstr("ARCH-VILE"), _c_type = mobjtype_t.MT_VILE), castinfo_t(name = cstr("THE SPIDER MASTERMIND"), _c_type = mobjtype_t.MT_SPIDER), castinfo_t(name = cstr("THE CYBERDEMON"), _c_type = mobjtype_t.MT_CYBORG), castinfo_t(name = cstr("OUR HERO"), _c_type = mobjtype_t.MT_PLAYER), castinfo_t(name = null, _c_type = mobjtype_t.MT_PLAYER))
 var castnum : int
 var casttics : int
 var caststate : state_t?
@@ -41,7 +41,6 @@ var castattacking : doom_boolean
 var private F_BunnyScroll_laststage : int
 
 // F_StartFinale
-[c_function]
 def F_StartFinale {
     gameaction = gameaction_t.ga_nothing
     gamestate = gamestate_t.GS_FINALE
@@ -57,16 +56,16 @@ def F_StartFinale {
             S_ChangeMusic(int(musicenum_t.mus_victor), int(doom_boolean._c_true))
             let _cond2 = gameepisode
             if (_cond2 == 1) {
-                finaleflat = reinterpret<uint8?>("FLOOR4_8")
+                finaleflat = cstr("FLOOR4_8")
                 finaletext = e1text
             } elif (_cond2 == 2) {
-                finaleflat = reinterpret<uint8?>("SFLR6_1")
+                finaleflat = cstr("SFLR6_1")
                 finaletext = e2text
             } elif (_cond2 == 3) {
-                finaleflat = reinterpret<uint8?>("MFLR8_4")
+                finaleflat = cstr("MFLR8_4")
                 finaletext = e3text
             } elif (_cond2 == 4) {
-                finaleflat = reinterpret<uint8?>("MFLR8_3")
+                finaleflat = cstr("MFLR8_3")
                 finaletext = e4text
             } else {
             }
@@ -78,22 +77,22 @@ def F_StartFinale {
             S_ChangeMusic(int(musicenum_t.mus_read_m), int(doom_boolean._c_true))
             let _cond3 = gamemap
             if (_cond3 == 6) {
-                finaleflat = reinterpret<uint8?>("SLIME16")
+                finaleflat = cstr("SLIME16")
                 finaletext = c1text
             } elif (_cond3 == 11) {
-                finaleflat = reinterpret<uint8?>("RROCK14")
+                finaleflat = cstr("RROCK14")
                 finaletext = c2text
             } elif (_cond3 == 20) {
-                finaleflat = reinterpret<uint8?>("RROCK07")
+                finaleflat = cstr("RROCK07")
                 finaletext = c3text
             } elif (_cond3 == 30) {
-                finaleflat = reinterpret<uint8?>("RROCK17")
+                finaleflat = cstr("RROCK17")
                 finaletext = c4text
             } elif (_cond3 == 15) {
-                finaleflat = reinterpret<uint8?>("RROCK13")
+                finaleflat = cstr("RROCK13")
                 finaletext = c5text
             } elif (_cond3 == 31) {
-                finaleflat = reinterpret<uint8?>("RROCK19")
+                finaleflat = cstr("RROCK19")
                 finaletext = c6text
             } else {
             }
@@ -103,7 +102,7 @@ def F_StartFinale {
         // Indeterminate.
         S_ChangeMusic(int(musicenum_t.mus_read_m), int(doom_boolean._c_true))
         // Not used anywhere else.
-        finaleflat = reinterpret<uint8?>("F_SKY1")
+        finaleflat = cstr("F_SKY1")
         // FIXME - other text, music?
         finaletext = c1text
     }
@@ -122,16 +121,14 @@ def F_Responder(var event : event_t?) : doom_boolean {
 def F_Ticker {
     var i : int
     // check for skipping
-    if (gamemode == GameMode_t.commercial && finalecount > 50) {
+    if ((gamemode == GameMode_t.commercial) && (finalecount > 50)) {
         // go on to the next level
-        {
-            i = 0
-            while (i < MAXPLAYERS) {
-                if (players[i].cmd.buttons != 0) {
-                    break
-                }
-                i++
+        i = 0
+        while (i < MAXPLAYERS) {
+            if (players[i].cmd.buttons != 0) {
+                break
             }
+            i++
         }
         if (i < MAXPLAYERS) {
             if (gamemap == 30) {
@@ -177,13 +174,11 @@ def F_TextWrite {
     src = reinterpret<uint8?>(W_CacheLumpName(finaleflat, PU_CACHE))
     dest = screens[0]
     for (y in range(SCREENHEIGHT)) {
-        {
-            x = 0
-            while (x < SCREENWIDTH / 64) {
-                doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(src + ((y & 63) << 6)), 64)
-                dest = dest + 64
-                x++
-            }
+        x = 0
+        while (x < SCREENWIDTH / 64) {
+            doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(src + ((y & 63) << 6)), 64)
+            dest = dest + 64
+            x++
         }
         if ((SCREENWIDTH & 63) != 0) {
             doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(src + ((y & 63) << 6)), SCREENWIDTH & 63)
@@ -220,7 +215,7 @@ def F_TextWrite {
                 cy += 11
                 continue
             }
-            c = doom_toupper(c) - '!'
+            c = doom_toupper(c) - HU_FONTSTART
             if (c < 0 || c > HU_FONTSIZE) {
                 cx += 4
                 continue
@@ -263,7 +258,7 @@ def F_CastTicker {
         // not time to change state yet
         return
     }
-    if (caststate.tics == int64(-1) || caststate.nextstate == statenum_t.S_NULL) {
+    if (caststate.tics == -1l || caststate.nextstate == statenum_t.S_NULL) {
         // switch from deathstate to next monster
         castnum++
         castdeath = doom_boolean._c_false
@@ -401,7 +396,7 @@ def F_CastPrint(var text : uint8?) {
         if (!(c != 0)) {
             break
         }
-        c = doom_toupper(c) - '!'
+        c = doom_toupper(c) - HU_FONTSTART
         if (c < 0 || c > HU_FONTSIZE) {
             width += 4
             continue
@@ -419,7 +414,7 @@ def F_CastPrint(var text : uint8?) {
         if (!(c != 0)) {
             break
         }
-        c = doom_toupper(c) - '!'
+        c = doom_toupper(c) - HU_FONTSTART
         if (c < 0 || c > HU_FONTSIZE) {
             cx += 4
             continue
@@ -439,11 +434,11 @@ def F_CastDrawer {
     var flip : doom_boolean
     var patch : uint8?
     // erase the entire screen to a background
-    V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("BOSSBACK"), PU_CACHE)))
+    V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("BOSSBACK"), PU_CACHE)))
     F_CastPrint(castorder[castnum].name)
     // draw the current frame in the middle of the screen
-    sprdef = addr(deref(sprites + int(caststate.sprite)))
-    sprframe = addr(deref(sprdef.spriteframes + (caststate.frame & int64(FF_FRAMEMASK))))
+    sprdef = addr(sprites[int(caststate.sprite)])
+    sprframe = addr(sprdef.spriteframes[caststate.frame & int64(FF_FRAMEMASK)])
     lump = int(sprframe.lump[0])
     flip = enum_from_int(type<doom_boolean>, int(sprframe.flip[0]))
     patch = reinterpret<uint8?>(W_CacheLumpNum(lump + firstspritelump, PU_CACHE))
@@ -462,7 +457,7 @@ def F_DrawPatchCol(x : int; var patch : uint8?; col : int) {
     var dest : uint8?
     var desttop : uint8?
     var count : int
-    column = reinterpret<uint8?>(reinterpret<uint8?>(patch) + deref(ptr_patch_t_columnofs(patch, 0) + col))
+    column = reinterpret<uint8?>(reinterpret<uint8?>(patch) + ptr_patch_t_columnofs(patch, 0)[col])
     desttop = screens[0] + x
     // step through the posts in a column
     while (int(read_post_t_topdelta(column, 0)) != 255) {
@@ -492,8 +487,8 @@ def F_BunnyScroll {
     var p2 : uint8?
     var name : uint8[10]
     var stage : int
-    p1 = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("PFUB2"), PU_LEVEL))
-    p2 = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("PFUB1"), PU_LEVEL))
+    p1 = reinterpret<uint8?>(W_CacheLumpName(cstr("PFUB2"), PU_LEVEL))
+    p2 = reinterpret<uint8?>(W_CacheLumpName(cstr("PFUB1"), PU_LEVEL))
     V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT)
     scrolled = 320 - (finalecount - 230) / 2
     if (scrolled > 320) {
@@ -513,7 +508,7 @@ def F_BunnyScroll {
         return
     }
     if (finalecount < 1180) {
-        V_DrawPatch((SCREENWIDTH - 13 * 8) / 2, (SCREENHEIGHT - 8 * 8) / 2, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("END0"), PU_CACHE)))
+        V_DrawPatch((SCREENWIDTH - 13 * 8) / 2, (SCREENHEIGHT - 8 * 8) / 2, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("END0"), PU_CACHE)))
         F_BunnyScroll_laststage = 0
         return
     }
@@ -526,7 +521,7 @@ def F_BunnyScroll {
         F_BunnyScroll_laststage = stage
     }
     // doom_sprintf(name, "END%i", stage);
-    doom_strcpy(addr(name[0]), reinterpret<uint8?>("END"))
+    doom_strcpy(addr(name[0]), cstr("END"))
     doom_concat(addr(name[0]), doom_itoa(stage, 10))
     V_DrawPatch((SCREENWIDTH - 13 * 8) / 2, (SCREENHEIGHT - 8 * 8) / 2, 0, reinterpret<uint8?>(W_CacheLumpName(addr(name[0]), PU_CACHE)))
 }
@@ -544,16 +539,16 @@ def F_Drawer {
         let _cond = gameepisode
         if (_cond == 1) {
             if (gamemode == GameMode_t.retail) {
-                V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("CREDIT"), PU_CACHE)))
+                V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("CREDIT"), PU_CACHE)))
             } else {
-                V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("HELP2"), PU_CACHE)))
+                V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("HELP2"), PU_CACHE)))
             }
         } elif (_cond == 2) {
-            V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("VICTORY2"), PU_CACHE)))
+            V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("VICTORY2"), PU_CACHE)))
         } elif (_cond == 3) {
             F_BunnyScroll()
         } elif (_cond == 4) {
-            V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("ENDPIC"), PU_CACHE)))
+            V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("ENDPIC"), PU_CACHE)))
         }
     }
 }

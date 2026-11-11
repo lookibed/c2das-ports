@@ -15,7 +15,7 @@ def T_PlatRaise(var plat : plat_t?) {
                     S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(plat.sector.soundorg))), int(sfxenum_t.sfx_stnmov))
                 }
             }
-            if (res == result_e.crushed && !(int(plat.crush) != 0)) {
+            if (res == result_e.crushed && (!(int(plat.crush) != 0))) {
                 plat.count = plat.wait
                 plat.status = plat_e.down
                 S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(plat.sector.soundorg))), int(sfxenum_t.sfx_pstart))
@@ -85,7 +85,7 @@ def EV_DoPlat(var line : line_s?; _c_type : plattype_e; amount : int) : int {
         if (!(secnum >= 0)) {
             break
         }
-        sec = addr(deref(sectors + secnum))
+        sec = addr(sectors[secnum])
         if (sec.specialdata != null) {
             continue
         }
@@ -101,8 +101,8 @@ def EV_DoPlat(var line : line_s?; _c_type : plattype_e; amount : int) : int {
         plat.tag = int(line.tag)
         let _cond2 = _c_type
         if (_cond2 == plattype_e.raiseToNearestAndChange) {
-            plat.speed = (1 << 16) / 2
-            sec.floorpic = deref(sides + int(line.sidenum[0])).sector.floorpic
+            plat.speed = FRACUNIT / 2
+            sec.floorpic = sides[int(line.sidenum[0])].sector.floorpic
             plat.high = P_FindNextHighestFloor(sec, sec.floorheight)
             plat.wait = 0
             plat.status = plat_e.up
@@ -110,14 +110,14 @@ def EV_DoPlat(var line : line_s?; _c_type : plattype_e; amount : int) : int {
             sec.special = int16(0)
             S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_stnmov))
         } elif (_cond2 == plattype_e.raiseAndChange) {
-            plat.speed = (1 << 16) / 2
-            sec.floorpic = deref(sides + int(line.sidenum[0])).sector.floorpic
+            plat.speed = FRACUNIT / 2
+            sec.floorpic = sides[int(line.sidenum[0])].sector.floorpic
             plat.high = sec.floorheight + amount * FRACUNIT
             plat.wait = 0
             plat.status = plat_e.up
             S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_stnmov))
         } elif (_cond2 == plattype_e.downWaitUpStay) {
-            plat.speed = (1 << 16) * 4
+            plat.speed = FRACUNIT * 4
             plat.low = P_FindLowestFloorSurrounding(sec)
             if (plat.low > sec.floorheight) {
                 plat.low = sec.floorheight
@@ -127,7 +127,7 @@ def EV_DoPlat(var line : line_s?; _c_type : plattype_e; amount : int) : int {
             plat.status = plat_e.down
             S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_pstart))
         } elif (_cond2 == plattype_e.blazeDWUS) {
-            plat.speed = (1 << 16) * 8
+            plat.speed = FRACUNIT * 8
             plat.low = P_FindLowestFloorSurrounding(sec)
             if (plat.low > sec.floorheight) {
                 plat.low = sec.floorheight
@@ -137,7 +137,7 @@ def EV_DoPlat(var line : line_s?; _c_type : plattype_e; amount : int) : int {
             plat.status = plat_e.down
             S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_pstart))
         } elif (_cond2 == plattype_e.perpetualRaise) {
-            plat.speed = 1 << 16
+            plat.speed = FRACUNIT
             plat.low = P_FindLowestFloorSurrounding(sec)
             if (plat.low > sec.floorheight) {
                 plat.low = sec.floorheight
@@ -167,7 +167,7 @@ def P_ActivateInStasis(tag : int) {
 
 def EV_StopPlat(var line : line_s?) {
     for (j in range(MAXPLATS)) {
-        if (activeplats[j] != null && activeplats[j].status != plat_e.in_stasis && activeplats[j].tag == int(line.tag)) {
+        if (activeplats[j] != null && (activeplats[j].status != plat_e.in_stasis) && (activeplats[j].tag == int(line.tag))) {
             activeplats[j].oldstatus = activeplats[j].status
             activeplats[j].status = plat_e.in_stasis
             activeplats[j].thinker._c_function.acv = default<function<() : void>>
@@ -175,7 +175,6 @@ def EV_StopPlat(var line : line_s?) {
     }
 }
 
-[c_function]
 def P_AddActivePlat(var plat : plat_t?) {
     for (i in range(MAXPLATS)) {
         if (activeplats[i] == null) {
@@ -183,7 +182,7 @@ def P_AddActivePlat(var plat : plat_t?) {
             return
         }
     }
-    I_Error(reinterpret<uint8?>("Error: P_AddActivePlat: no more plats!"))
+    I_Error(cstr("Error: P_AddActivePlat: no more plats!"))
 }
 
 [c_function]
@@ -196,6 +195,6 @@ def P_RemoveActivePlat(var plat : plat_t?) {
             return
         }
     }
-    I_Error(reinterpret<uint8?>("Error: P_RemoveActivePlat: can't find plat!"))
+    I_Error(cstr("Error: P_RemoveActivePlat: can't find plat!"))
 }
 

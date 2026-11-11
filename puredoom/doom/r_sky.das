@@ -8,7 +8,8 @@ var skytexture : int
 var skytexturemid : int
 var skyflatnum : int
 
-let private FRACUNIT = 1 << 16
+let private FRACBITS = 16
+let private FRACUNIT = 1 << FRACBITS
 
 // R_InitSkyMap
 // Called whenever the view size changes.

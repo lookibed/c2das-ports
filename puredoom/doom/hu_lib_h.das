@@ -28,26 +28,5 @@ struct hu_itext_t {
     laston : doom_boolean
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<hu_textline_t>) == 112 && typeinfo alignof(type<hu_textline_t>) == 8, "hu_textline_t: clang lays it out as size 112, align 8")
-    static_assert(typeinfo offsetof < x > (type<hu_textline_t>) == 0, "hu_textline_t.x: clang puts it at 0")
-    static_assert(typeinfo offsetof < y > (type<hu_textline_t>) == 4, "hu_textline_t.y: clang puts it at 4")
-    static_assert(typeinfo offsetof < f > (type<hu_textline_t>) == 8, "hu_textline_t.f: clang puts it at 8")
-    static_assert(typeinfo offsetof < sc > (type<hu_textline_t>) == 16, "hu_textline_t.sc: clang puts it at 16")
-    static_assert(typeinfo offsetof < l > (type<hu_textline_t>) == 20, "hu_textline_t.l: clang puts it at 20")
-    static_assert(typeinfo offsetof < len > (type<hu_textline_t>) == 104, "hu_textline_t.len: clang puts it at 104")
-    static_assert(typeinfo offsetof < needsupdate > (type<hu_textline_t>) == 108, "hu_textline_t.needsupdate: clang puts it at 108")
-    static_assert(typeinfo sizeof(type<hu_stext_t>) == 472 && typeinfo alignof(type<hu_stext_t>) == 8, "hu_stext_t: clang lays it out as size 472, align 8")
-    static_assert(typeinfo offsetof < l > (type<hu_stext_t>) == 0, "hu_stext_t.l: clang puts it at 0")
-    static_assert(typeinfo offsetof < h > (type<hu_stext_t>) == 448, "hu_stext_t.h: clang puts it at 448")
-    static_assert(typeinfo offsetof < cl > (type<hu_stext_t>) == 452, "hu_stext_t.cl: clang puts it at 452")
-    static_assert(typeinfo offsetof < on > (type<hu_stext_t>) == 456, "hu_stext_t.on: clang puts it at 456")
-    static_assert(typeinfo offsetof < laston > (type<hu_stext_t>) == 464, "hu_stext_t.laston: clang puts it at 464")
-    static_assert(typeinfo sizeof(type<hu_itext_t>) == 136 && typeinfo alignof(type<hu_itext_t>) == 8, "hu_itext_t: clang lays it out as size 136, align 8")
-    static_assert(typeinfo offsetof < l > (type<hu_itext_t>) == 0, "hu_itext_t.l: clang puts it at 0")
-    static_assert(typeinfo offsetof < lm > (type<hu_itext_t>) == 112, "hu_itext_t.lm: clang puts it at 112")
-    static_assert(typeinfo offsetof < on > (type<hu_itext_t>) == 120, "hu_itext_t.on: clang puts it at 120")
-    static_assert(typeinfo offsetof < laston > (type<hu_itext_t>) == 128, "hu_itext_t.laston: clang puts it at 128")
-}
+include hu_lib_h.layout.das.inc
 

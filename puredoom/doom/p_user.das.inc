@@ -5,8 +5,8 @@ var onground : doom_boolean
 // Moves the given origin along a given angle.
 [c_function]
 def P_Thrust(var player : player_s?; var angle : uint; move : int) {
-    angle >>= 19u
-    player.mo.momx += FixedMul(move, deref(finecosine + angle))
+    angle >>= uint(ANGLETOFINESHIFT)
+    player.mo.momx += FixedMul(move, finecosine[angle])
     player.mo.momy += FixedMul(move, finesine[angle])
 }
 
@@ -34,7 +34,7 @@ def P_CalcHeight(var player : player_s?) {
         player.viewz = player.mo.z + player.viewheight
         return
     }
-    angle = FINEANGLES / 20 * leveltime & FINEMASK
+    angle = (FINEANGLES / 20 * leveltime) & FINEMASK
     bob = FixedMul(player.bob / 2, finesine[angle])
     // move viewheight
     if (player.playerstate == playerstate_t.PST_LIVE) {
@@ -70,7 +70,7 @@ def P_MovePlayer(var player : player_s?) {
     player.mo.angle += uint(int(cmd.angleturn) << 16)
     // Do not let the player control movement
     // if not onground.
-    onground = enum_from_int(type<doom_boolean>, player.mo.z <= player.mo.floorz ? 1 : 0)
+    onground = enum_from_int(type<doom_boolean>, (player.mo.z <= player.mo.floorz) ? 1 : 0)
     if (cmd.forwardmove != 0 && uint(int(onground)) != 0) {
         P_Thrust(player, player.mo.angle, int(cmd.forwardmove) * 2048)
     }
@@ -97,7 +97,7 @@ def P_DeathThink(var player : player_s?) {
         player.viewheight = 6 * FRACUNIT
     }
     player.deltaviewheight = 0
-    onground = enum_from_int(type<doom_boolean>, player.mo.z <= player.mo.floorz ? 1 : 0)
+    onground = enum_from_int(type<doom_boolean>, (player.mo.z <= player.mo.floorz) ? 1 : 0)
     P_CalcHeight(player)
     if (player.attacker != null && intptr(player.attacker) != intptr(player.mo)) {
         angle = R_PointToAngle2(player.mo.x, player.mo.y, player.attacker.x, player.attacker.y)
@@ -160,7 +160,7 @@ def P_PlayerThink(var player : player_s?) {
     // Check for weapon change.
     // A special event has no other buttons.
     if ((int(cmd.buttons) & int(buttoncode_t.BT_SPECIAL)) != 0) {
-        cmd.buttons = uint8(0)
+        cmd.buttons = 0u8
     }
     if ((int(cmd.buttons) & int(buttoncode_t.BT_CHANGE)) != 0) {
         // The actual changing of the weapon is done
@@ -170,13 +170,13 @@ def P_PlayerThink(var player : player_s?) {
         if (newweapon == weapontype_t.wp_fist && uint(int(player.weaponowned[int(weapontype_t.wp_chainsaw)])) != 0 && !(player.readyweapon == weapontype_t.wp_chainsaw && player.powers[int(powertype_t.pw_strength)] != 0)) {
             newweapon = weapontype_t.wp_chainsaw
         }
-        if (gamemode == GameMode_t.commercial && newweapon == weapontype_t.wp_shotgun && uint(int(player.weaponowned[int(weapontype_t.wp_supershotgun)])) != 0 && player.readyweapon != weapontype_t.wp_supershotgun) {
+        if ((gamemode == GameMode_t.commercial) && newweapon == weapontype_t.wp_shotgun && uint(int(player.weaponowned[int(weapontype_t.wp_supershotgun)])) != 0 && player.readyweapon != weapontype_t.wp_supershotgun) {
             newweapon = weapontype_t.wp_supershotgun
         }
         if (uint(int(player.weaponowned[int(newweapon)])) != 0 && newweapon != player.readyweapon) {
             // Do not go to plasma or BFG in shareware,
             // even if cheated.
-            if (newweapon != weapontype_t.wp_plasma && newweapon != weapontype_t.wp_bfg || gamemode != GameMode_t.shareware) {
+            if ((newweapon != weapontype_t.wp_plasma && newweapon != weapontype_t.wp_bfg) || (gamemode != GameMode_t.shareware)) {
                 player.pendingweapon = newweapon
             }
         }

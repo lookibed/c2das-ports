@@ -60,25 +60,25 @@ def P_BoxOnLineSide(var tmbox : int?; var ld : line_s?) : int {
     var p2 : int
     let _cond = ld.slopetype
     if (_cond == slopetype_t.ST_HORIZONTAL) {
-        p1 = deref(tmbox + int(anon_787.BOXTOP)) > ld.v1.y ? 1 : 0
-        p2 = deref(tmbox + int(anon_787.BOXBOTTOM)) > ld.v1.y ? 1 : 0
+        p1 = tmbox[int(anon_787.BOXTOP)] > ld.v1.y ? 1 : 0
+        p2 = tmbox[int(anon_787.BOXBOTTOM)] > ld.v1.y ? 1 : 0
         if (ld.dx < 0) {
             p1 ^= 1
             p2 ^= 1
         }
     } elif (_cond == slopetype_t.ST_VERTICAL) {
-        p1 = deref(tmbox + int(anon_787.BOXRIGHT)) < ld.v1.x ? 1 : 0
-        p2 = deref(tmbox + int(anon_787.BOXLEFT)) < ld.v1.x ? 1 : 0
+        p1 = tmbox[int(anon_787.BOXRIGHT)] < ld.v1.x ? 1 : 0
+        p2 = tmbox[int(anon_787.BOXLEFT)] < ld.v1.x ? 1 : 0
         if (ld.dy < 0) {
             p1 ^= 1
             p2 ^= 1
         }
     } elif (_cond == slopetype_t.ST_POSITIVE) {
-        p1 = P_PointOnLineSide(deref(tmbox + int(anon_787.BOXLEFT)), deref(tmbox + int(anon_787.BOXTOP)), ld)
-        p2 = P_PointOnLineSide(deref(tmbox + int(anon_787.BOXRIGHT)), deref(tmbox + int(anon_787.BOXBOTTOM)), ld)
+        p1 = P_PointOnLineSide(tmbox[int(anon_787.BOXLEFT)], tmbox[int(anon_787.BOXTOP)], ld)
+        p2 = P_PointOnLineSide(tmbox[int(anon_787.BOXRIGHT)], tmbox[int(anon_787.BOXBOTTOM)], ld)
     } elif (_cond == slopetype_t.ST_NEGATIVE) {
-        p1 = P_PointOnLineSide(deref(tmbox + int(anon_787.BOXRIGHT)), deref(tmbox + int(anon_787.BOXTOP)), ld)
-        p2 = P_PointOnLineSide(deref(tmbox + int(anon_787.BOXLEFT)), deref(tmbox + int(anon_787.BOXBOTTOM)), ld)
+        p1 = P_PointOnLineSide(tmbox[int(anon_787.BOXRIGHT)], tmbox[int(anon_787.BOXTOP)], ld)
+        p2 = P_PointOnLineSide(tmbox[int(anon_787.BOXLEFT)], tmbox[int(anon_787.BOXBOTTOM)], ld)
     }
     if (p1 == p2) {
         return p1
@@ -147,7 +147,7 @@ def P_InterceptVector(var v2 : divline_t?; var v1 : divline_t?) : int {
         return 0
     }
     // I_Error ("P_InterceptVector: parallel");
-    num = FixedMul(v1.x - v2.x >> 8, v1.dy) + FixedMul(v2.y - v1.y >> 8, v1.dx)
+    num = FixedMul((v1.x - v2.x) >> 8, v1.dy) + FixedMul((v2.y - v1.y) >> 8, v1.dx)
     frac = FixedDiv(num, den)
     return frac
 }
@@ -211,10 +211,10 @@ def P_UnsetThingPosition(var thing : mobj_s?) {
         if (thing.bprev != null) {
             thing.bprev.bnext = thing.bnext
         } else {
-            blockx = thing.x - bmaporgx >> MAPBLOCKSHIFT
-            blocky = thing.y - bmaporgy >> MAPBLOCKSHIFT
+            blockx = (thing.x - bmaporgx) >> MAPBLOCKSHIFT
+            blocky = (thing.y - bmaporgy) >> MAPBLOCKSHIFT
             if (blockx >= 0 && blockx < bmapwidth && blocky >= 0 && blocky < bmapheight) {
-                deref(blocklinks + (blocky * bmapwidth + blockx)) = thing.bnext
+                blocklinks[blocky * bmapwidth + blockx] = thing.bnext
             }
         }
     }
@@ -247,10 +247,10 @@ def P_SetThingPosition(var thing : mobj_s?) {
     // link into blockmap
     if (!((thing.flags & int(mobjflag_t.MF_NOBLOCKMAP)) != 0)) {
         // inert things don't need to be in blockmap
-        blockx = thing.x - bmaporgx >> MAPBLOCKSHIFT
-        blocky = thing.y - bmaporgy >> MAPBLOCKSHIFT
+        blockx = (thing.x - bmaporgx) >> MAPBLOCKSHIFT
+        blocky = (thing.y - bmaporgy) >> MAPBLOCKSHIFT
         if (blockx >= 0 && blockx < bmapwidth && blocky >= 0 && blocky < bmapheight) {
-            link = addr(deref(blocklinks + (blocky * bmapwidth + blockx)))
+            link = addr(blocklinks[blocky * bmapwidth + blockx])
             thing.bprev = null
             thing.bnext = deref(link)
             if (deref(link) != null) {
@@ -280,7 +280,7 @@ def P_BlockLinesIterator(x : int; y : int; func : function<(var a0 : line_s?) : 
         return doom_boolean._c_true
     }
     offset = y * bmapwidth + x
-    offset = int(deref(blockmap + offset))
+    offset = int(blockmap[offset])
     {
         list = blockmaplump + offset
         var _f = false
@@ -292,7 +292,7 @@ def P_BlockLinesIterator(x : int; y : int; func : function<(var a0 : line_s?) : 
             if (!(int(deref(list)) != -1)) {
                 break
             }
-            ld = addr(deref(lines + int(deref(list))))
+            ld = addr(lines[int(deref(list))])
             if (ld.validcount == validcount) {
                 // line has already been checked
                 continue
@@ -314,14 +314,12 @@ def P_BlockThingsIterator(x : int; y : int; func : function<(var a0 : mobj_s?) :
     if (x < 0 || y < 0 || x >= bmapwidth || y >= bmapheight) {
         return doom_boolean._c_true
     }
-    {
-        mobj = deref(blocklinks + (y * bmapwidth + x))
-        while (mobj != null) {
-            if (!(int(invoke(func, mobj)) != 0)) {
-                return doom_boolean._c_false
-            }
-            mobj = mobj.bnext
+    mobj = blocklinks[y * bmapwidth + x]
+    while (mobj != null) {
+        if (!(int(invoke(func, mobj)) != 0)) {
+            return doom_boolean._c_false
         }
+        mobj = mobj.bnext
     }
     return doom_boolean._c_true
 }
@@ -438,15 +436,13 @@ def P_TraverseIntercepts(func : function<(var a0 : intercept_t?) : doom_boolean>
             break
         }
         dist = DOOM_MAXINT
-        {
-            scan = addr(intercepts[0])
-            while (intptr(scan) < intptr(intercept_p)) {
-                if (scan.frac < dist) {
-                    dist = scan.frac
-                    _c_in = scan
-                }
-                scan = scan + 1
+        scan = addr(intercepts[0])
+        while (intptr(scan) < intptr(intercept_p)) {
+            if (scan.frac < dist) {
+                dist = scan.frac
+                _c_in = scan
             }
+            scan = scan + 1
         }
         if (dist > maxfrac) {
             // checked everything in range
@@ -487,11 +483,11 @@ def P_PathTraverse(var x1 : int; var y1 : int; var x2 : int; var y2 : int; flags
     earlyout = enum_from_int(type<doom_boolean>, flags & PT_EARLYOUT)
     validcount++
     intercept_p = addr(intercepts[0])
-    if ((x1 - bmaporgx & MAPBLOCKSIZE - 1) == 0) {
+    if (((x1 - bmaporgx) & (MAPBLOCKSIZE - 1)) == 0) {
         // don't side exactly on a line
         x1 += FRACUNIT
     }
-    if ((y1 - bmaporgy & MAPBLOCKSIZE - 1) == 0) {
+    if (((y1 - bmaporgy) & (MAPBLOCKSIZE - 1)) == 0) {
         // don't side exactly on a line
         y1 += FRACUNIT
     }
@@ -509,11 +505,11 @@ def P_PathTraverse(var x1 : int; var y1 : int; var x2 : int; var y2 : int; flags
     yt2 = y2 >> MAPBLOCKSHIFT
     if (xt2 > xt1) {
         mapxstep = 1
-        partial = FRACUNIT - (x1 >> MAPBTOFRAC & FRACUNIT - 1)
+        partial = FRACUNIT - ((x1 >> MAPBTOFRAC) & (FRACUNIT - 1))
         ystep = FixedDiv(y2 - y1, x2 - x1 < 0 ? -(x2 - x1) : x2 - x1)
     } elif (xt2 < xt1) {
         mapxstep = -1
-        partial = x1 >> MAPBTOFRAC & FRACUNIT - 1
+        partial = (x1 >> MAPBTOFRAC) & (FRACUNIT - 1)
         ystep = FixedDiv(y2 - y1, x2 - x1 < 0 ? -(x2 - x1) : x2 - x1)
     } else {
         mapxstep = 0
@@ -523,11 +519,11 @@ def P_PathTraverse(var x1 : int; var y1 : int; var x2 : int; var y2 : int; flags
     yintercept = (y1 >> MAPBTOFRAC) + FixedMul(partial, ystep)
     if (yt2 > yt1) {
         mapystep = 1
-        partial = FRACUNIT - (y1 >> MAPBTOFRAC & FRACUNIT - 1)
+        partial = FRACUNIT - ((y1 >> MAPBTOFRAC) & (FRACUNIT - 1))
         xstep = FixedDiv(x2 - x1, y2 - y1 < 0 ? -(y2 - y1) : y2 - y1)
     } elif (yt2 < yt1) {
         mapystep = -1
-        partial = y1 >> MAPBTOFRAC & FRACUNIT - 1
+        partial = (y1 >> MAPBTOFRAC) & (FRACUNIT - 1)
         xstep = FixedDiv(x2 - x1, y2 - y1 < 0 ? -(y2 - y1) : y2 - y1)
     } else {
         mapystep = 0
@@ -556,10 +552,10 @@ def P_PathTraverse(var x1 : int; var y1 : int; var x2 : int; var y2 : int; flags
         if (mapx == xt2 && mapy == yt2) {
             break
         }
-        if (yintercept >> FRACBITS == mapy) {
+        if ((yintercept >> FRACBITS) == mapy) {
             yintercept += ystep
             mapx += mapxstep
-        } elif (xintercept >> FRACBITS == mapx) {
+        } elif ((xintercept >> FRACBITS) == mapx) {
             xintercept += xstep
             mapy += mapystep
         }

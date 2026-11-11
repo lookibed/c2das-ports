@@ -284,58 +284,52 @@ def R_GenerateComposite(texnum : int) {
     var patchcol : uint8?
     var collump : int16?
     var colofs : uint16?
-    texture = deref(textures + texnum)
+    texture = textures[texnum]
     // [c2das] zeroed, with W_CacheLumpNum's 128 bytes of slack past the last column
-    _c_block = reinterpret<uint8?>(Z_Malloc(deref(texturecompositesize + texnum) + 128, PU_STATIC, reinterpret<void?>(addr(deref(texturecomposite + texnum)))))
-    doom_memset(reinterpret<void?>(_c_block), 0, deref(texturecompositesize + texnum) + 128)
-    collump = deref(texturecolumnlump + texnum)
-    colofs = deref(texturecolumnofs + texnum)
+    _c_block = reinterpret<uint8?>(Z_Malloc(texturecompositesize[texnum] + 128, PU_STATIC, reinterpret<void?>(addr(texturecomposite[texnum]))))
+    doom_memset(reinterpret<void?>(_c_block), 0, texturecompositesize[texnum] + 128)
+    collump = texturecolumnlump[texnum]
+    colofs = texturecolumnofs[texnum]
     // Composite the columns together.
     patch = addr(texture.patches[0])
-    {
-        i = 0
-        patch = addr(texture.patches[0])
-        while (i < int(texture.patchcount)) {
-            realpatch = reinterpret<uint8?>(W_CacheLumpNum(patch.patch, PU_CACHE))
-            x1 = patch.originx
-            x2 = x1 + int(read_patch_t_width(realpatch, 0))
-            if (x1 < 0) {
-                x = 0
-            } else {
-                x = x1
-            }
-            if (x2 > int(texture.width)) {
-                x2 = int(texture.width)
-            }
+    i = 0
+    patch = addr(texture.patches[0])
+    while (i < int(texture.patchcount)) {
+        realpatch = reinterpret<uint8?>(W_CacheLumpNum(patch.patch, PU_CACHE))
+        x1 = patch.originx
+        x2 = x1 + int(read_patch_t_width(realpatch, 0))
+        if (x1 < 0) {
+            x = 0
+        } else {
+            x = x1
+        }
+        if (x2 > int(texture.width)) {
+            x2 = int(texture.width)
+        }
+        while (x < x2) {
             {
-                while (x < x2) {
-                    {
-                        // Column does not have multiple patches?
-                        if (int(deref(collump + x)) >= 0) {
-                            continue
-                        }
-                        patchcol = reinterpret<uint8?>(reinterpret<uint8?>(realpatch) + deref(ptr_patch_t_columnofs(realpatch, 0) + (x - x1)))
-                        R_DrawColumnInCache(patchcol, _c_block + int(deref(colofs + x)), patch.originy, int(texture.height))
-                    } finally {
-                        x++
-                    }
+                // Column does not have multiple patches?
+                if (int(collump[x]) >= 0) {
+                    continue
                 }
+                patchcol = reinterpret<uint8?>(reinterpret<uint8?>(realpatch) + ptr_patch_t_columnofs(realpatch, 0)[x - x1])
+                R_DrawColumnInCache(patchcol, _c_block + int(colofs[x]), patch.originy, int(texture.height))
+            } finally {
+                x++
             }
-            i++
-            patch = patch + 1
         }
+        i++
+        patch = patch + 1
     }
-    {
-        // Now that the texture has been built in column cache,
-        // it is purgable from zone memory.
-        if (reinterpret<memblock_s?>(_c_block + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/r_data.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(283, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(_c_block), 101)
+    // Now that the texture has been built in column cache,
+    // it is purgable from zone memory.
+    if (reinterpret<memblock_s?>(_c_block + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/r_data.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(283, 10))
+        I_Error(addr(buf[0]))
     }
+    Z_ChangeTag2(reinterpret<void?>(_c_block), PU_CACHE)
 }
 
 // R_GenerateLookup
@@ -352,12 +346,12 @@ def R_GenerateLookup(texnum : int) {
     var i : int
     var collump : int16?
     var colofs : uint16?
-    texture = deref(textures + texnum)
+    texture = textures[texnum]
     // Composited texture not created yet.
-    deref(texturecomposite + texnum) = null
-    deref(texturecompositesize + texnum) = 0
-    collump = deref(texturecolumnlump + texnum)
-    colofs = deref(texturecolumnofs + texnum)
+    texturecomposite[texnum] = null
+    texturecompositesize[texnum] = 0
+    collump = texturecolumnlump[texnum]
+    colofs = texturecolumnofs[texnum]
     // Now count the number of columns
     // that are covered by more than one patch.
     // Fill in the lump / offset, so columns
@@ -365,61 +359,55 @@ def R_GenerateLookup(texnum : int) {
     patchcount = reinterpret<uint8?>(invoke(doom_malloc, int(texture.width)))
     doom_memset(reinterpret<void?>(patchcount), 0, int(texture.width))
     patch = addr(texture.patches[0])
-    {
-        i = 0
-        patch = addr(texture.patches[0])
-        while (i < int(texture.patchcount)) {
-            realpatch = reinterpret<uint8?>(W_CacheLumpNum(patch.patch, PU_CACHE))
-            x1 = patch.originx
-            x2 = x1 + int(read_patch_t_width(realpatch, 0))
-            if (x1 < 0) {
-                x = 0
-            } else {
-                x = x1
-            }
-            if (x2 > int(texture.width)) {
-                x2 = int(texture.width)
-            }
-            {
-                while (x < x2) {
-                    deref(patchcount + x) = uint8(uint(deref(patchcount + x)) + 1)
-                    deref(collump + x) = int16(patch.patch)
-                    deref(colofs + x) = uint16(deref(ptr_patch_t_columnofs(realpatch, 0) + (x - x1)) + 3)
-                    x++
-                }
-            }
-            i++
-            patch = patch + 1
+    i = 0
+    patch = addr(texture.patches[0])
+    while (i < int(texture.patchcount)) {
+        realpatch = reinterpret<uint8?>(W_CacheLumpNum(patch.patch, PU_CACHE))
+        x1 = patch.originx
+        x2 = x1 + int(read_patch_t_width(realpatch, 0))
+        if (x1 < 0) {
+            x = 0
+        } else {
+            x = x1
         }
-    }
-    {
-        x = 0
-        while (x < int(texture.width)) {
-            if (!(deref(patchcount + x) != 0)) {
-                // doom_print("R_GenerateLookup: column without a patch (%s)\n",
-                // texture->name);
-                invoke(doom_print, reinterpret<uint8?>("R_GenerateLookup: column without a patch ("))
-                invoke(doom_print, addr(texture.name[0]))
-                invoke(doom_print, reinterpret<uint8?>(")\n"))
-                return
-            }
-            // I_Error ("R_GenerateLookup: column without a patch");
-            if (int(deref(patchcount + x)) > 1) {
-                // Use the cached block.
-                deref(collump + x) = int16(-1)
-                deref(colofs + x) = uint16(deref(texturecompositesize + texnum))
-                if (deref(texturecompositesize + texnum) > 65536 - int(texture.height)) {
-                    // I_Error("Error: R_GenerateLookup: texture %i is >64k",
-                    // texnum);
-                    doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_GenerateLookup: texture "))
-                    doom_concat(addr(error_buf[0]), doom_itoa(texnum, 10))
-                    doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" is >64k"))
-                    I_Error(addr(error_buf[0]))
-                }
-                deref(texturecompositesize + texnum) += int(texture.height)
-            }
+        if (x2 > int(texture.width)) {
+            x2 = int(texture.width)
+        }
+        while (x < x2) {
+            patchcount[x] = uint8(uint(patchcount[x]) + 1)
+            collump[x] = int16(patch.patch)
+            colofs[x] = uint16(ptr_patch_t_columnofs(realpatch, 0)[x - x1] + 3)
             x++
         }
+        i++
+        patch = patch + 1
+    }
+    x = 0
+    while (x < int(texture.width)) {
+        if (!(patchcount[x] != 0)) {
+            // doom_print("R_GenerateLookup: column without a patch (%s)\n",
+            // texture->name);
+            invoke(doom_print, cstr("R_GenerateLookup: column without a patch ("))
+            invoke(doom_print, addr(texture.name[0]))
+            invoke(doom_print, cstr(")\n"))
+            return
+        }
+        // I_Error ("R_GenerateLookup: column without a patch");
+        if (int(patchcount[x]) > 1) {
+            // Use the cached block.
+            collump[x] = int16(-1)
+            colofs[x] = uint16(texturecompositesize[texnum])
+            if (texturecompositesize[texnum] > 65536 - int(texture.height)) {
+                // I_Error("Error: R_GenerateLookup: texture %i is >64k",
+                // texnum);
+                doom_strcpy(addr(error_buf[0]), cstr("Error: R_GenerateLookup: texture "))
+                doom_concat(addr(error_buf[0]), doom_itoa(texnum, 10))
+                doom_concat(addr(error_buf[0]), cstr(" is >64k"))
+                I_Error(addr(error_buf[0]))
+            }
+            texturecompositesize[texnum] += int(texture.height)
+        }
+        x++
     }
     invoke(doom_free, reinterpret<void?>(patchcount))
 }
@@ -429,16 +417,16 @@ def R_GenerateLookup(texnum : int) {
 def R_GetColumn(tex : int; var col : int) : uint8? {
     var lump : int
     var ofs : int
-    col &= deref(texturewidthmask + tex)
-    lump = int(deref(deref(texturecolumnlump + tex) + col))
-    ofs = int(deref(deref(texturecolumnofs + tex) + col))
+    col &= texturewidthmask[tex]
+    lump = int(texturecolumnlump[tex][col])
+    ofs = int(texturecolumnofs[tex][col])
     if (lump > 0) {
         return reinterpret<uint8?>(W_CacheLumpNum(lump, PU_CACHE)) + ofs
     }
-    if (!(deref(texturecomposite + tex) != null)) {
+    if (!(texturecomposite[tex] != null)) {
         R_GenerateComposite(tex)
     }
-    return deref(texturecomposite + tex) + ofs
+    return texturecomposite[tex] + ofs
 }
 
 // R_InitTextures
@@ -471,28 +459,28 @@ def R_InitTextures {
     var temp2 : int
     var temp3 : int
     // Load the patch names from pnames.lmp.
-    name[8] = uint8(0)
-    names = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("PNAMES"), PU_STATIC))
+    name[8] = 0u8
+    names = reinterpret<uint8?>(W_CacheLumpName(cstr("PNAMES"), PU_STATIC))
     nummappatches = deref(reinterpret<int?>(names))
     name_p = names + 4
     patchlookup = reinterpret<int?>(invoke(doom_malloc, int(uint64(nummappatches) * uint64(typeinfo sizeof(type<int>)))))
     for (i1 in range(nummappatches)) {
         doom_strncpy(addr(name[0]), name_p + i1 * 8, 8)
-        deref(patchlookup + i1) = W_CheckNumForName(addr(name[0]))
+        patchlookup[i1] = W_CheckNumForName(addr(name[0]))
     }
     Z_Free(reinterpret<void?>(names))
     // Load the map texture definitions from textures.lmp.
     // The data is contained in one or two lumps,
     // TEXTURE1 for shareware, plus TEXTURE2 for commercial.
-    maptex1 = reinterpret<int?>(W_CacheLumpName(reinterpret<uint8?>("TEXTURE1"), PU_STATIC))
+    maptex1 = reinterpret<int?>(W_CacheLumpName(cstr("TEXTURE1"), PU_STATIC))
     maptex = maptex1
     numtextures1 = deref(maptex)
-    maxoff = W_LumpLength(W_GetNumForName(reinterpret<uint8?>("TEXTURE1")))
+    maxoff = W_LumpLength(W_GetNumForName(cstr("TEXTURE1")))
     directory = maptex + 1
-    if (W_CheckNumForName(reinterpret<uint8?>("TEXTURE2")) != -1) {
-        maptex2 = reinterpret<int?>(W_CacheLumpName(reinterpret<uint8?>("TEXTURE2"), PU_STATIC))
+    if (W_CheckNumForName(cstr("TEXTURE2")) != -1) {
+        maptex2 = reinterpret<int?>(W_CacheLumpName(cstr("TEXTURE2"), PU_STATIC))
         numtextures2 = deref(maptex2)
-        maxoff2 = W_LumpLength(W_GetNumForName(reinterpret<uint8?>("TEXTURE2")))
+        maxoff2 = W_LumpLength(W_GetNumForName(cstr("TEXTURE2")))
     } else {
         maptex2 = null
         numtextures2 = 0
@@ -509,94 +497,86 @@ def R_InitTextures {
     totalwidth = 0
     // Really complex printing shit...
     // P_???????
-    temp1 = W_GetNumForName(reinterpret<uint8?>("S_START"))
-    temp2 = W_GetNumForName(reinterpret<uint8?>("S_END")) - 1
-    temp3 = (temp2 - temp1 + 63) / 64 + (numtextures + 63) / 64
-    invoke(doom_print, reinterpret<uint8?>("["))
+    temp1 = W_GetNumForName(cstr("S_START"))
+    temp2 = W_GetNumForName(cstr("S_END")) - 1
+    temp3 = ((temp2 - temp1 + 63) / 64) + ((numtextures + 63) / 64)
+    invoke(doom_print, cstr("["))
     for (i1 in range(temp3)) {
-        invoke(doom_print, reinterpret<uint8?>(" "))
+        invoke(doom_print, cstr(" "))
     }
-    invoke(doom_print, reinterpret<uint8?>("         ]"))
+    invoke(doom_print, cstr("         ]"))
     for (i1 in range(temp3)) {
-        invoke(doom_print, reinterpret<uint8?>("\b"))
+        invoke(doom_print, cstr("\b"))
     }
-    invoke(doom_print, reinterpret<uint8?>("\b\b\b\b\b\b\b\b\b\b"))
-    {
-        i = 0
-        while (i < numtextures) {
-            if (!((i & 63) != 0)) {
-                invoke(doom_print, reinterpret<uint8?>("."))
-            }
-            if (i == numtextures1) {
-                // Start looking in second texture file.
-                maptex = maptex2
-                maxoff = maxoff2
-                directory = maptex + 1
-            }
-            offset = deref(directory)
-            if (offset > maxoff) {
-                I_Error(reinterpret<uint8?>("Error: R_InitTextures: bad texture directory"))
-            }
-            mtexture = reinterpret<uint8?>(reinterpret<uint8?>(maptex) + offset)
-            deref(textures + i) = reinterpret<texture_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<texture_t>)) + uint64(typeinfo sizeof(type<texpatch_t>)) * uint64(int(read_maptexture_t_patchcount(mtexture, 0)) - 1)), PU_STATIC, null))
-            texture = deref(textures + i)
-            texture.width = read_maptexture_t_width(mtexture, 0)
-            texture.height = read_maptexture_t_height(mtexture, 0)
-            texture.patchcount = read_maptexture_t_patchcount(mtexture, 0)
-            doom_memcpy(reinterpret<void?>(addr(texture.name[0])), reinterpret<void?>(ptr_maptexture_t_name(mtexture, 0)), int(uint64(typeinfo sizeof(type<uint8[8]>))))
-            mpatch = ptr_maptexture_t_patches(mtexture, 0) + 0 * 10
-            patch = addr(deref(addr(texture.patches[0]) + 0))
-            {
-                j = 0
-                while (j < int(texture.patchcount)) {
-                    patch.originx = int(read_mappatch_t_originx(mpatch, 0))
-                    patch.originy = int(read_mappatch_t_originy(mpatch, 0))
-                    patch.patch = deref(patchlookup + int(read_mappatch_t_patch(mpatch, 0)))
-                    if (patch.patch == -1) {
-                        // I_Error("Error: R_InitTextures: Missing patch in texture %s",
-                        // texture->name);
-                        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_InitTextures: Missing patch in texture "))
-                        doom_concat(addr(error_buf[0]), addr(texture.name[0]))
-                        I_Error(addr(error_buf[0]))
-                    }
-                    j++
-                    mpatch = mpatch + 10
-                    patch = patch + 1
-                }
-            }
-            deref(texturecolumnlump + i) = reinterpret<int16?>(Z_Malloc(int(uint64(texture.width) * uint64(typeinfo sizeof(type<int16>))), PU_STATIC, null))
-            deref(texturecolumnofs + i) = reinterpret<uint16?>(Z_Malloc(int(uint64(texture.width) * uint64(typeinfo sizeof(type<uint16>))), PU_STATIC, null))
-            j = 1
-            while (j * 2 <= int(texture.width)) {
-                j <<= 1
-            }
-            deref(texturewidthmask + i) = j - 1
-            deref(textureheight + i) = int(texture.height) << FRACBITS
-            totalwidth += int(texture.width)
-            i++
-            directory = directory + 1
+    invoke(doom_print, cstr("\b\b\b\b\b\b\b\b\b\b"))
+    i = 0
+    while (i < numtextures) {
+        if (!((i & 63) != 0)) {
+            invoke(doom_print, cstr("."))
         }
+        if (i == numtextures1) {
+            // Start looking in second texture file.
+            maptex = maptex2
+            maxoff = maxoff2
+            directory = maptex + 1
+        }
+        offset = deref(directory)
+        if (offset > maxoff) {
+            I_Error(cstr("Error: R_InitTextures: bad texture directory"))
+        }
+        mtexture = reinterpret<uint8?>(reinterpret<uint8?>(maptex) + offset)
+        textures[i] = reinterpret<texture_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<texture_t>)) + uint64(typeinfo sizeof(type<texpatch_t>)) * uint64(int(read_maptexture_t_patchcount(mtexture, 0)) - 1)), PU_STATIC, null))
+        texture = textures[i]
+        texture.width = read_maptexture_t_width(mtexture, 0)
+        texture.height = read_maptexture_t_height(mtexture, 0)
+        texture.patchcount = read_maptexture_t_patchcount(mtexture, 0)
+        doom_memcpy(reinterpret<void?>(addr(texture.name[0])), reinterpret<void?>(ptr_maptexture_t_name(mtexture, 0)), int(uint64(typeinfo sizeof(type<uint8[8]>))))
+        mpatch = ptr_maptexture_t_patches(mtexture, 0) + 0 * 10
+        patch = addr(addr(texture.patches[0])[0])
+        j = 0
+        while (j < int(texture.patchcount)) {
+            patch.originx = int(read_mappatch_t_originx(mpatch, 0))
+            patch.originy = int(read_mappatch_t_originy(mpatch, 0))
+            patch.patch = patchlookup[int(read_mappatch_t_patch(mpatch, 0))]
+            if (patch.patch == -1) {
+                // I_Error("Error: R_InitTextures: Missing patch in texture %s",
+                // texture->name);
+                doom_strcpy(addr(error_buf[0]), cstr("Error: R_InitTextures: Missing patch in texture "))
+                doom_concat(addr(error_buf[0]), addr(texture.name[0]))
+                I_Error(addr(error_buf[0]))
+            }
+            j++
+            mpatch = mpatch + 10
+            patch = patch + 1
+        }
+        texturecolumnlump[i] = reinterpret<int16?>(Z_Malloc(int(uint64(texture.width) * uint64(typeinfo sizeof(type<int16>))), PU_STATIC, null))
+        texturecolumnofs[i] = reinterpret<uint16?>(Z_Malloc(int(uint64(texture.width) * uint64(typeinfo sizeof(type<uint16>))), PU_STATIC, null))
+        j = 1
+        while (j * 2 <= int(texture.width)) {
+            j <<= 1
+        }
+        texturewidthmask[i] = j - 1
+        textureheight[i] = int(texture.height) << FRACBITS
+        totalwidth += int(texture.width)
+        i++
+        directory = directory + 1
     }
     Z_Free(reinterpret<void?>(maptex1))
     if (maptex2 != null) {
         Z_Free(reinterpret<void?>(maptex2))
     }
     // Precalculate whatever possible.
-    {
-        i = 0
-        while (i < numtextures) {
-            R_GenerateLookup(i)
-            i++
-        }
+    i = 0
+    while (i < numtextures) {
+        R_GenerateLookup(i)
+        i++
     }
     // Create translation table for global animation.
     texturetranslation = reinterpret<int?>(Z_Malloc(int(uint64(numtextures + 1) * uint64(typeinfo sizeof(type<int>))), PU_STATIC, null))
-    {
-        i = 0
-        while (i < numtextures) {
-            deref(texturetranslation + i) = i
-            i++
-        }
+    i = 0
+    while (i < numtextures) {
+        texturetranslation[i] = i
+        i++
     }
     invoke(doom_free, reinterpret<void?>(patchlookup))
 }
@@ -605,17 +585,15 @@ def R_InitTextures {
 [c_function]
 def R_InitFlats {
     var i : int
-    firstflat = W_GetNumForName(reinterpret<uint8?>("F_START")) + 1
-    lastflat = W_GetNumForName(reinterpret<uint8?>("F_END")) - 1
+    firstflat = W_GetNumForName(cstr("F_START")) + 1
+    lastflat = W_GetNumForName(cstr("F_END")) - 1
     numflats = lastflat - firstflat + 1
     // Create translation table for global animation.
     flattranslation = reinterpret<int?>(Z_Malloc(int(uint64(numflats + 1) * uint64(typeinfo sizeof(type<int>))), PU_STATIC, null))
-    {
-        i = 0
-        while (i < numflats) {
-            deref(flattranslation + i) = i
-            i++
-        }
+    i = 0
+    while (i < numflats) {
+        flattranslation[i] = i
+        i++
     }
 }
 
@@ -627,24 +605,22 @@ def R_InitFlats {
 def R_InitSpriteLumps {
     var i : int
     var patch : uint8?
-    firstspritelump = W_GetNumForName(reinterpret<uint8?>("S_START")) + 1
-    lastspritelump = W_GetNumForName(reinterpret<uint8?>("S_END")) - 1
+    firstspritelump = W_GetNumForName(cstr("S_START")) + 1
+    lastspritelump = W_GetNumForName(cstr("S_END")) - 1
     numspritelumps = lastspritelump - firstspritelump + 1
     spritewidth = reinterpret<int?>(Z_Malloc(int(uint64(numspritelumps) * uint64(typeinfo sizeof(type<int>))), PU_STATIC, null))
     spriteoffset = reinterpret<int?>(Z_Malloc(int(uint64(numspritelumps) * uint64(typeinfo sizeof(type<int>))), PU_STATIC, null))
     spritetopoffset = reinterpret<int?>(Z_Malloc(int(uint64(numspritelumps) * uint64(typeinfo sizeof(type<int>))), PU_STATIC, null))
-    {
-        i = 0
-        while (i < numspritelumps) {
-            if (!((i & 63) != 0)) {
-                invoke(doom_print, reinterpret<uint8?>("."))
-            }
-            patch = reinterpret<uint8?>(W_CacheLumpNum(firstspritelump + i, PU_CACHE))
-            deref(spritewidth + i) = int(read_patch_t_width(patch, 0)) << FRACBITS
-            deref(spriteoffset + i) = int(read_patch_t_leftoffset(patch, 0)) << FRACBITS
-            deref(spritetopoffset + i) = int(read_patch_t_topoffset(patch, 0)) << FRACBITS
-            i++
+    i = 0
+    while (i < numspritelumps) {
+        if (!((i & 63) != 0)) {
+            invoke(doom_print, cstr("."))
         }
+        patch = reinterpret<uint8?>(W_CacheLumpNum(firstspritelump + i, PU_CACHE))
+        spritewidth[i] = int(read_patch_t_width(patch, 0)) << FRACBITS
+        spriteoffset[i] = int(read_patch_t_leftoffset(patch, 0)) << FRACBITS
+        spritetopoffset[i] = int(read_patch_t_topoffset(patch, 0)) << FRACBITS
+        i++
     }
 }
 
@@ -655,10 +631,10 @@ def R_InitColormaps {
     var length : int
     // Load in the light tables,
     // 256 byte align tables.
-    lump = W_GetNumForName(reinterpret<uint8?>("COLORMAP"))
+    lump = W_GetNumForName(cstr("COLORMAP"))
     length = W_LumpLength(lump) + 255
     colormaps = reinterpret<uint8?>(Z_Malloc(length, PU_STATIC, null))
-    colormaps = reinterpret<uint8?>(uint64(uint64(intptr(colormaps)) + uint64(255) & uint64(~255)))
+    colormaps = reinterpret<uint8?>(uint64((uint64(intptr(colormaps)) + 255ul) & uint64(~255)))
     W_ReadLump(lump, reinterpret<void?>(colormaps))
 }
 
@@ -666,16 +642,15 @@ def R_InitColormaps {
 // Locates all the lumps
 // that will be used by all views
 // Must be called after W_Init.
-[c_function]
 def R_InitData {
     R_InitTextures()
-    invoke(doom_print, reinterpret<uint8?>("\nInitTextures"))
+    invoke(doom_print, cstr("\nInitTextures"))
     R_InitFlats()
-    invoke(doom_print, reinterpret<uint8?>("\nInitFlats"))
+    invoke(doom_print, cstr("\nInitFlats"))
     R_InitSpriteLumps()
-    invoke(doom_print, reinterpret<uint8?>("\nInitSprites"))
+    invoke(doom_print, cstr("\nInitSprites"))
     R_InitColormaps()
-    invoke(doom_print, reinterpret<uint8?>("\nInitColormaps"))
+    invoke(doom_print, cstr("\nInitColormaps"))
 }
 
 // R_FlatNumForName
@@ -686,12 +661,12 @@ def R_FlatNumForName(var name : uint8?) : int {
     var namet : uint8[9]
     i = W_CheckNumForName(name)
     if (i == -1) {
-        namet[8] = uint8(0)
+        namet[8] = 0u8
         doom_memcpy(reinterpret<void?>(addr(namet[0])), reinterpret<void?>(name), 8)
         // I_Error("Error: R_FlatNumForName: %s not found", namet);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_FlatNumForName: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_FlatNumForName: "))
         doom_concat(addr(error_buf[0]), addr(namet[0]))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" not found"))
+        doom_concat(addr(error_buf[0]), cstr(" not found"))
         I_Error(addr(error_buf[0]))
     }
     return i - firstflat
@@ -704,17 +679,15 @@ def R_FlatNumForName(var name : uint8?) : int {
 def R_CheckTextureNumForName(var name : uint8?) : int {
     var i : int
     // "NoTexture" marker.
-    if (int(deref(name + 0)) == '-') {
+    if (int(name[0]) == '-') {
         return 0
     }
-    {
-        i = 0
-        while (i < numtextures) {
-            if (!(doom_strncasecmp(addr(deref(textures + i).name[0]), name, 8) != 0)) {
-                return i
-            }
-            i++
+    i = 0
+    while (i < numtextures) {
+        if (!(doom_strncasecmp(addr(textures[i].name[0]), name, 8) != 0)) {
+            return i
         }
+        i++
     }
     return -1
 }
@@ -729,9 +702,9 @@ def R_TextureNumForName(var name : uint8?) : int {
     if (i == -1) {
         // I_Error("Error: R_TextureNumForName: %s not found",
         // name);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_TextureNumForName: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_TextureNumForName: "))
         doom_concat(addr(error_buf[0]), name)
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" not found"))
+        doom_concat(addr(error_buf[0]), cstr(" not found"))
         I_Error(addr(error_buf[0]))
     }
     return i
@@ -757,37 +730,31 @@ def R_PrecacheLevel {
     // Precache flats.
     flatpresent = reinterpret<uint8?>(invoke(doom_malloc, numflats))
     doom_memset(reinterpret<void?>(flatpresent), 0, numflats)
-    {
-        i = 0
-        while (i < numsectors) {
-            deref(flatpresent + int(deref(sectors + i).floorpic)) = uint8(1)
-            deref(flatpresent + int(deref(sectors + i).ceilingpic)) = uint8(1)
-            i++
-        }
+    i = 0
+    while (i < numsectors) {
+        flatpresent[int(sectors[i].floorpic)] = 1u8
+        flatpresent[int(sectors[i].ceilingpic)] = 1u8
+        i++
     }
     flatmemory = 0
-    {
-        i = 0
-        while (i < numflats) {
-            if (deref(flatpresent + i) != 0) {
-                lump = firstflat + i
-                flatmemory += deref(lumpinfo + lump).size
-                W_CacheLumpNum(lump, PU_CACHE)
-            }
-            i++
+    i = 0
+    while (i < numflats) {
+        if (flatpresent[i] != 0) {
+            lump = firstflat + i
+            flatmemory += lumpinfo[lump].size
+            W_CacheLumpNum(lump, PU_CACHE)
         }
+        i++
     }
     // Precache textures.
     texturepresent = reinterpret<uint8?>(invoke(doom_malloc, numtextures))
     doom_memset(reinterpret<void?>(texturepresent), 0, numtextures)
-    {
-        i = 0
-        while (i < numsides) {
-            deref(texturepresent + int(deref(sides + i).toptexture)) = uint8(1)
-            deref(texturepresent + int(deref(sides + i).midtexture)) = uint8(1)
-            deref(texturepresent + int(deref(sides + i).bottomtexture)) = uint8(1)
-            i++
-        }
+    i = 0
+    while (i < numsides) {
+        texturepresent[int(sides[i].toptexture)] = 1u8
+        texturepresent[int(sides[i].midtexture)] = 1u8
+        texturepresent[int(sides[i].bottomtexture)] = 1u8
+        i++
     }
     // Sky texture is always present.
     // Note that F_SKY1 is the name used to
@@ -795,69 +762,57 @@ def R_PrecacheLevel {
     // while the sky texture is stored like
     // a wall texture, with an episode dependend
     // name.
-    deref(texturepresent + skytexture) = uint8(1)
+    texturepresent[skytexture] = 1u8
     texturememory = 0
-    {
-        i = 0
-        while (i < numtextures) {
-            {
-                if (!(deref(texturepresent + i) != 0)) {
-                    continue
-                }
-                texture = deref(textures + i)
-                {
-                    j = 0
-                    while (j < int(texture.patchcount)) {
-                        lump = deref(addr(texture.patches[0]) + j).patch
-                        texturememory += deref(lumpinfo + lump).size
-                        W_CacheLumpNum(lump, PU_CACHE)
-                        j++
-                    }
-                }
-            } finally {
-                i++
+    i = 0
+    while (i < numtextures) {
+        {
+            if (!(texturepresent[i] != 0)) {
+                continue
             }
+            texture = textures[i]
+            j = 0
+            while (j < int(texture.patchcount)) {
+                lump = addr(texture.patches[0])[j].patch
+                texturememory += lumpinfo[lump].size
+                W_CacheLumpNum(lump, PU_CACHE)
+                j++
+            }
+        } finally {
+            i++
         }
     }
     // Precache sprites.
     spritepresent = reinterpret<uint8?>(invoke(doom_malloc, numsprites))
     doom_memset(reinterpret<void?>(spritepresent), 0, numsprites)
-    {
-        th = thinkercap.next
-        while (intptr(th) != intptr(addr(thinkercap))) {
-            if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
-                deref(spritepresent + int(reinterpret<mobj_s?>(th).sprite)) = uint8(1)
-            }
-            th = th.next
+    th = thinkercap.next
+    while (intptr(th) != intptr(addr(thinkercap))) {
+        if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
+            spritepresent[int(reinterpret<mobj_s?>(th).sprite)] = 1u8
         }
+        th = th.next
     }
     spritememory = 0
-    {
-        i = 0
-        while (i < numsprites) {
-            {
-                if (!(deref(spritepresent + i) != 0)) {
-                    continue
-                }
-                {
-                    j = 0
-                    while (j < deref(sprites + i).numframes) {
-                        sf = addr(deref(deref(sprites + i).spriteframes + j))
-                        {
-                            k = 0
-                            while (k < 8) {
-                                lump = firstspritelump + int(sf.lump[k])
-                                spritememory += deref(lumpinfo + lump).size
-                                W_CacheLumpNum(lump, PU_CACHE)
-                                k++
-                            }
-                        }
-                        j++
-                    }
-                }
-            } finally {
-                i++
+    i = 0
+    while (i < numsprites) {
+        {
+            if (!(spritepresent[i] != 0)) {
+                continue
             }
+            j = 0
+            while (j < sprites[i].numframes) {
+                sf = addr(sprites[i].spriteframes[j])
+                k = 0
+                while (k < 8) {
+                    lump = firstspritelump + int(sf.lump[k])
+                    spritememory += lumpinfo[lump].size
+                    W_CacheLumpNum(lump, PU_CACHE)
+                    k++
+                }
+                j++
+            }
+        } finally {
+            i++
         }
     }
     invoke(doom_free, reinterpret<void?>(texturepresent))

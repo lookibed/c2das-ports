@@ -169,8 +169,8 @@ def R_AddLine(var line : seg_t?) {
     angle1 -= viewangle
     angle2 -= viewangle
     tspan = angle1 + clipangle
-    if (tspan > uint(2) * clipangle) {
-        tspan -= uint(2) * clipangle
+    if (tspan > 2u * clipangle) {
+        tspan -= 2u * clipangle
         // Totally off the left edge?
         if (tspan >= span) {
             return
@@ -178,8 +178,8 @@ def R_AddLine(var line : seg_t?) {
         angle1 = clipangle
     }
     tspan = clipangle - angle2
-    if (tspan > uint(2) * clipangle) {
-        tspan -= uint(2) * clipangle
+    if (tspan > 2u * clipangle) {
+        tspan -= 2u * clipangle
         // Totally off the left edge?
         if (tspan >= span) {
             return
@@ -188,8 +188,8 @@ def R_AddLine(var line : seg_t?) {
     }
     // The seg is in the view range,
     // but not necessarily visible.
-    angle1 = angle1 + uint(ANG90) >> 19u
-    angle2 = angle2 + uint(ANG90) >> 19u
+    angle1 = (angle1 + uint(ANG90)) >> uint(ANGLETOFINESHIFT)
+    angle2 = (angle2 + uint(ANG90)) >> uint(ANGLETOFINESHIFT)
     x1 = viewangletox[angle1]
     x2 = viewangletox[angle2]
     // Does not cross a pixel?
@@ -246,16 +246,16 @@ def R_CheckBBox(var bspcoord : int?) : doom_boolean {
     var sx2 : int
     // Find the corners of the box
     // that define the edges from current viewpoint.
-    if (viewx <= deref(bspcoord + int(anon_787.BOXLEFT))) {
+    if (viewx <= bspcoord[int(anon_787.BOXLEFT)]) {
         boxx = 0
-    } elif (viewx < deref(bspcoord + int(anon_787.BOXRIGHT))) {
+    } elif (viewx < bspcoord[int(anon_787.BOXRIGHT)]) {
         boxx = 1
     } else {
         boxx = 2
     }
-    if (viewy >= deref(bspcoord + int(anon_787.BOXTOP))) {
+    if (viewy >= bspcoord[int(anon_787.BOXTOP)]) {
         boxy = 0
-    } elif (viewy > deref(bspcoord + int(anon_787.BOXBOTTOM))) {
+    } elif (viewy > bspcoord[int(anon_787.BOXBOTTOM)]) {
         boxy = 1
     } else {
         boxy = 2
@@ -264,10 +264,10 @@ def R_CheckBBox(var bspcoord : int?) : doom_boolean {
     if (boxpos == 5) {
         return doom_boolean._c_true
     }
-    x1 = deref(bspcoord + checkcoord[boxpos][0])
-    y1 = deref(bspcoord + checkcoord[boxpos][1])
-    x2 = deref(bspcoord + checkcoord[boxpos][2])
-    y2 = deref(bspcoord + checkcoord[boxpos][3])
+    x1 = bspcoord[checkcoord[boxpos][0]]
+    y1 = bspcoord[checkcoord[boxpos][1]]
+    x2 = bspcoord[checkcoord[boxpos][2]]
+    y2 = bspcoord[checkcoord[boxpos][3]]
     // check clip list for an open space
     angle1 = R_PointToAngle(x1, y1) - viewangle
     angle2 = R_PointToAngle(x2, y2) - viewangle
@@ -277,8 +277,8 @@ def R_CheckBBox(var bspcoord : int?) : doom_boolean {
         return doom_boolean._c_true
     }
     tspan = angle1 + clipangle
-    if (tspan > uint(2) * clipangle) {
-        tspan -= uint(2) * clipangle
+    if (tspan > 2u * clipangle) {
+        tspan -= 2u * clipangle
         // Totally off the left edge?
         if (tspan >= span) {
             return doom_boolean._c_false
@@ -286,8 +286,8 @@ def R_CheckBBox(var bspcoord : int?) : doom_boolean {
         angle1 = clipangle
     }
     tspan = clipangle - angle2
-    if (tspan > uint(2) * clipangle) {
-        tspan -= uint(2) * clipangle
+    if (tspan > 2u * clipangle) {
+        tspan -= 2u * clipangle
         // Totally off the left edge?
         if (tspan >= span) {
             return doom_boolean._c_false
@@ -297,8 +297,8 @@ def R_CheckBBox(var bspcoord : int?) : doom_boolean {
     // Find the first clippost
     // that touches the source post
     // (adjacent pixels are touching).
-    angle1 = angle1 + uint(ANG90) >> 19u
-    angle2 = angle2 + uint(ANG90) >> 19u
+    angle1 = (angle1 + uint(ANG90)) >> uint(ANGLETOFINESHIFT)
+    angle2 = (angle2 + uint(ANG90)) >> uint(ANGLETOFINESHIFT)
     sx1 = viewangletox[angle1]
     sx2 = viewangletox[angle2]
     // Does not cross a pixel.
@@ -330,17 +330,17 @@ def R_Subsector(num : int) {
         // I_Error("Error: R_Subsector: ss %i with numss = %i",
         // num,
         // numsubsectors);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_Subsector: ss "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_Subsector: ss "))
         doom_concat(addr(error_buf[0]), doom_itoa(num, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" with numss = "))
+        doom_concat(addr(error_buf[0]), cstr(" with numss = "))
         doom_concat(addr(error_buf[0]), doom_itoa(numsubsectors, 10))
         I_Error(addr(error_buf[0]))
     }
     sscount++
-    sub = addr(deref(subsectors + num))
+    sub = addr(subsectors[num])
     frontsector = sub.sector
     count = int(sub.numlines)
-    line = addr(deref(segs + int(sub.firstline)))
+    line = addr(segs[int(sub.firstline)])
     if (frontsector.floorheight < viewz) {
         floorplane = R_FindPlane(frontsector.floorheight, int(frontsector.floorpic), int(frontsector.lightlevel))
     } else {
@@ -376,11 +376,11 @@ def R_RenderBSPNode(bspnum : int) {
         if (bspnum == -1) {
             R_Subsector(0)
         } else {
-            R_Subsector(bspnum & ~NF_SUBSECTOR)
+            R_Subsector(bspnum & (~NF_SUBSECTOR))
         }
         return
     }
-    bsp = addr(deref(nodes + bspnum))
+    bsp = addr(nodes[bspnum])
     // Decide which side the view point is on.
     side = R_PointOnSide(viewx, viewy, bsp)
     // Recursively divide front space.

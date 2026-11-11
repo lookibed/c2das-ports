@@ -23,41 +23,39 @@ def P_InitPicAnims {
     var i : int
     // Init animation
     lastanim = addr(anims[0])
-    {
-        i = 0
-        while (animdefs[i].istexture != enum_from_int(type<doom_boolean>, -1)) {
-            {
-                if (int(animdefs[i].istexture) != 0) {
-                    // different episode ?
-                    if (R_CheckTextureNumForName(addr(animdefs[i].startname[0])) == -1) {
-                        continue
-                    }
-                    lastanim.picnum = R_TextureNumForName(addr(animdefs[i].endname[0]))
-                    lastanim.basepic = R_TextureNumForName(addr(animdefs[i].startname[0]))
-                } else {
-                    if (W_CheckNumForName(addr(animdefs[i].startname[0])) == -1) {
-                        continue
-                    }
-                    lastanim.picnum = R_FlatNumForName(addr(animdefs[i].endname[0]))
-                    lastanim.basepic = R_FlatNumForName(addr(animdefs[i].startname[0]))
+    i = 0
+    while (animdefs[i].istexture != enum_from_int(type<doom_boolean>, -1)) {
+        {
+            if (int(animdefs[i].istexture) != 0) {
+                // different episode ?
+                if (R_CheckTextureNumForName(addr(animdefs[i].startname[0])) == -1) {
+                    continue
                 }
-                lastanim.istexture = animdefs[i].istexture
-                lastanim.numpics = lastanim.picnum - lastanim.basepic + 1
-                if (lastanim.numpics < 2) {
-                    // I_Error("Error: P_InitPicAnims: bad cycle from %s to %s",
-                    // animdefs[i].startname,
-                    // animdefs[i].endname);
-                    doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: P_InitPicAnims: bad cycle from "))
-                    doom_concat(addr(error_buf[0]), addr(animdefs[i].startname[0]))
-                    doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" to "))
-                    doom_concat(addr(error_buf[0]), addr(animdefs[i].endname[0]))
-                    I_Error(addr(error_buf[0]))
+                lastanim.picnum = R_TextureNumForName(addr(animdefs[i].endname[0]))
+                lastanim.basepic = R_TextureNumForName(addr(animdefs[i].startname[0]))
+            } else {
+                if (W_CheckNumForName(addr(animdefs[i].startname[0])) == -1) {
+                    continue
                 }
-                lastanim.speed = animdefs[i].speed
-                lastanim = lastanim + 1
-            } finally {
-                i++
+                lastanim.picnum = R_FlatNumForName(addr(animdefs[i].endname[0]))
+                lastanim.basepic = R_FlatNumForName(addr(animdefs[i].startname[0]))
             }
+            lastanim.istexture = animdefs[i].istexture
+            lastanim.numpics = lastanim.picnum - lastanim.basepic + 1
+            if (lastanim.numpics < 2) {
+                // I_Error("Error: P_InitPicAnims: bad cycle from %s to %s",
+                // animdefs[i].startname,
+                // animdefs[i].endname);
+                doom_strcpy(addr(error_buf[0]), cstr("Error: P_InitPicAnims: bad cycle from "))
+                doom_concat(addr(error_buf[0]), addr(animdefs[i].startname[0]))
+                doom_concat(addr(error_buf[0]), cstr(" to "))
+                doom_concat(addr(error_buf[0]), addr(animdefs[i].endname[0]))
+                I_Error(addr(error_buf[0]))
+            }
+            lastanim.speed = animdefs[i].speed
+            lastanim = lastanim + 1
+        } finally {
+            i++
         }
     }
 }
@@ -68,7 +66,7 @@ def P_InitPicAnims {
 // the line number, and the side (0/1) that you want.
 [c_function]
 def getSide(currentSector : int; line : int; side : int) : side_t? {
-    return addr(deref(sides + int(deref(deref(sectors + currentSector).lines + line).sidenum[side])))
+    return addr(sides[int(sectors[currentSector].lines[line].sidenum[side])])
 }
 
 // getSector()
@@ -77,7 +75,7 @@ def getSide(currentSector : int; line : int; side : int) : side_t? {
 // the line number and the side (0/1) that you want.
 [c_function]
 def getSector(currentSector : int; line : int; side : int) : sector_t? {
-    return deref(sides + int(deref(deref(sectors + currentSector).lines + line).sidenum[side])).sector
+    return sides[int(sectors[currentSector].lines[line].sidenum[side])].sector
 }
 
 // twoSided()
@@ -85,7 +83,7 @@ def getSector(currentSector : int; line : int; side : int) : sector_t? {
 // it will tell you whether the line is two-sided or not.
 [c_function]
 def twoSided(sector : int; line : int) : int {
-    return int(deref(deref(sectors + sector).lines + line).flags) & ML_TWOSIDED
+    return int(sectors[sector].lines[line].flags) & ML_TWOSIDED
 }
 
 // getNextSector()
@@ -109,21 +107,19 @@ def P_FindLowestFloorSurrounding(var sec : sector_t?) : int {
     var check : line_s?
     var other : sector_t?
     var floor : int = sec.floorheight
-    {
-        i = 0
-        while (i < sec.linecount) {
-            {
-                check = deref(sec.lines + i)
-                other = getNextSector(check, sec)
-                if (!(other != null)) {
-                    continue
-                }
-                if (other.floorheight < floor) {
-                    floor = other.floorheight
-                }
-            } finally {
-                i++
+    i = 0
+    while (i < sec.linecount) {
+        {
+            check = sec.lines[i]
+            other = getNextSector(check, sec)
+            if (!(other != null)) {
+                continue
             }
+            if (other.floorheight < floor) {
+                floor = other.floorheight
+            }
+        } finally {
+            i++
         }
     }
     return floor
@@ -137,21 +133,19 @@ def P_FindHighestFloorSurrounding(var sec : sector_t?) : int {
     var check : line_s?
     var other : sector_t?
     var floor : int = -500 * FRACUNIT
-    {
-        i = 0
-        while (i < sec.linecount) {
-            {
-                check = deref(sec.lines + i)
-                other = getNextSector(check, sec)
-                if (!(other != null)) {
-                    continue
-                }
-                if (other.floorheight > floor) {
-                    floor = other.floorheight
-                }
-            } finally {
-                i++
+    i = 0
+    while (i < sec.linecount) {
+        {
+            check = sec.lines[i]
+            other = getNextSector(check, sec)
+            if (!(other != null)) {
+                continue
             }
+            if (other.floorheight > floor) {
+                floor = other.floorheight
+            }
+        } finally {
+            i++
         }
     }
     return floor
@@ -181,7 +175,7 @@ def P_FindNextHighestFloor(var sec : sector_t?; currentheight : int) : int {
             if (!(i < sec.linecount)) {
                 break
             }
-            check = deref(sec.lines + i)
+            check = sec.lines[i]
             other = getNextSector(check, sec)
             if (!(other != null)) {
                 continue
@@ -193,7 +187,7 @@ def P_FindNextHighestFloor(var sec : sector_t?; currentheight : int) : int {
             }
             // Check for overflow. Exit.
             if (h >= MAX_ADJOINING_SECTORS) {
-                invoke(doom_print, reinterpret<uint8?>("Sector with more than 20 adjoining sectors\n"))
+                invoke(doom_print, cstr("Sector with more than 20 adjoining sectors\n"))
                 break
             }
         }
@@ -219,21 +213,19 @@ def P_FindLowestCeilingSurrounding(var sec : sector_t?) : int {
     var check : line_s?
     var other : sector_t?
     var height : int = DOOM_MAXINT
-    {
-        i = 0
-        while (i < sec.linecount) {
-            {
-                check = deref(sec.lines + i)
-                other = getNextSector(check, sec)
-                if (!(other != null)) {
-                    continue
-                }
-                if (other.ceilingheight < height) {
-                    height = other.ceilingheight
-                }
-            } finally {
-                i++
+    i = 0
+    while (i < sec.linecount) {
+        {
+            check = sec.lines[i]
+            other = getNextSector(check, sec)
+            if (!(other != null)) {
+                continue
             }
+            if (other.ceilingheight < height) {
+                height = other.ceilingheight
+            }
+        } finally {
+            i++
         }
     }
     return height
@@ -246,21 +238,19 @@ def P_FindHighestCeilingSurrounding(var sec : sector_t?) : int {
     var check : line_s?
     var other : sector_t?
     var height : int = 0
-    {
-        i = 0
-        while (i < sec.linecount) {
-            {
-                check = deref(sec.lines + i)
-                other = getNextSector(check, sec)
-                if (!(other != null)) {
-                    continue
-                }
-                if (other.ceilingheight > height) {
-                    height = other.ceilingheight
-                }
-            } finally {
-                i++
+    i = 0
+    while (i < sec.linecount) {
+        {
+            check = sec.lines[i]
+            other = getNextSector(check, sec)
+            if (!(other != null)) {
+                continue
             }
+            if (other.ceilingheight > height) {
+                height = other.ceilingheight
+            }
+        } finally {
+            i++
         }
     }
     return height
@@ -270,14 +260,12 @@ def P_FindHighestCeilingSurrounding(var sec : sector_t?) : int {
 [c_function]
 def P_FindSectorFromLineTag(var line : line_s?; start : int) : int {
     var i : int
-    {
-        i = start + 1
-        while (i < numsectors) {
-            if (int(deref(sectors + i).tag) == int(line.tag)) {
-                return i
-            }
-            i++
+    i = start + 1
+    while (i < numsectors) {
+        if (int(sectors[i].tag) == int(line.tag)) {
+            return i
         }
+        i++
     }
     return -1
 }
@@ -290,21 +278,19 @@ def P_FindMinSurroundingLight(var sector : sector_t?; max : int) : int {
     var line : line_s?
     var check : sector_t?
     min = max
-    {
-        i = 0
-        while (i < sector.linecount) {
-            {
-                line = deref(sector.lines + i)
-                check = getNextSector(line, sector)
-                if (!(check != null)) {
-                    continue
-                }
-                if (int(check.lightlevel) < min) {
-                    min = int(check.lightlevel)
-                }
-            } finally {
-                i++
+    i = 0
+    while (i < sector.linecount) {
+        {
+            line = sector.lines[i]
+            check = getNextSector(line, sector)
+            if (!(check != null)) {
+                continue
             }
+            if (int(check.lightlevel) < min) {
+                min = int(check.lightlevel)
+            }
+        } finally {
+            i++
         }
     }
     return min
@@ -317,7 +303,7 @@ def P_FindMinSurroundingLight(var sector : sector_t?; max : int) : int {
 def P_CrossSpecialLine(linenum : int; side : int; var thing : mobj_s?) {
     var line : line_s?
     var ok : int
-    line = addr(deref(lines + linenum))
+    line = addr(lines[linenum])
     // Triggers that other things can activate
     if (!(thing.player != null)) {
         // Things that should NOT trigger specials...
@@ -674,7 +660,7 @@ def P_PlayerInSpecialSector(var player : player_s?) {
     } elif (_cond == 16 || _cond == 4) {
         // SUPER HELLSLIME DAMAGE
         // STROBE HURT
-        if (!(player.powers[int(powertype_t.pw_ironfeet)] != 0) || P_Random() < 5) {
+        if (!(player.powers[int(powertype_t.pw_ironfeet)] != 0) || (P_Random() < 5)) {
             if (!((leveltime & 31) != 0)) {
                 P_DamageMobj(player.mo, null, null, 20)
             }
@@ -682,7 +668,7 @@ def P_PlayerInSpecialSector(var player : player_s?) {
     } elif (_cond == 9) {
         // SECRET SECTOR
         player.secretcount++
-        player.message = reinterpret<uint8?>("A secret is revealed!")
+        player.message = cstr("A secret is revealed!")
         S_StartSound(null, int(sfxenum_t.sfx_getpow))
         sector.special = int16(0)
     } elif (_cond == 11) {
@@ -695,14 +681,12 @@ def P_PlayerInSpecialSector(var player : player_s?) {
             G_ExitLevel()
         }
     } else {
-        {
-            // I_Error("Error: P_PlayerInSpecialSector: "
-            // "unknown special %i",
-            // sector->special);
-            doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: P_PlayerInSpecialSector: unknown special "))
-            doom_concat(addr(error_buf[0]), doom_itoa(int(sector.special), 10))
-            I_Error(addr(error_buf[0]))
-        }
+        // I_Error("Error: P_PlayerInSpecialSector: "
+        // "unknown special %i",
+        // sector->special);
+        doom_strcpy(addr(error_buf[0]), cstr("Error: P_PlayerInSpecialSector: unknown special "))
+        doom_concat(addr(error_buf[0]), doom_itoa(int(sector.special), 10))
+        I_Error(addr(error_buf[0]))
     }
 }
 
@@ -722,36 +706,30 @@ def P_UpdateSpecials {
         }
     }
     // ANIMATE FLATS AND TEXTURES GLOBALLY
-    {
-        anim = addr(anims[0])
-        while (intptr(anim) < intptr(lastanim)) {
-            {
-                i = anim.basepic
-                while (i < anim.basepic + anim.numpics) {
-                    pic = anim.basepic + (leveltime / anim.speed + i) % anim.numpics
-                    if (int(anim.istexture) != 0) {
-                        deref(texturetranslation + i) = pic
-                    } else {
-                        deref(flattranslation + i) = pic
-                    }
-                    i++
-                }
-            }
-            anim = anim + 1
-        }
-    }
-    // ANIMATE LINE SPECIALS
-    {
-        i = 0
-        while (i < int(numlinespecials)) {
-            line = linespeciallist[i]
-            let _cond = int(line.special)
-            if (_cond == 48) {
-                // EFFECT FIRSTCOL SCROLL +
-                deref(sides + int(line.sidenum[0])).textureoffset += FRACUNIT
+    anim = addr(anims[0])
+    while (intptr(anim) < intptr(lastanim)) {
+        i = anim.basepic
+        while (i < anim.basepic + anim.numpics) {
+            pic = anim.basepic + ((leveltime / anim.speed + i) % anim.numpics)
+            if (int(anim.istexture) != 0) {
+                texturetranslation[i] = pic
+            } else {
+                flattranslation[i] = pic
             }
             i++
         }
+        anim = anim + 1
+    }
+    // ANIMATE LINE SPECIALS
+    i = 0
+    while (i < int(numlinespecials)) {
+        line = linespeciallist[i]
+        let _cond = int(line.special)
+        if (_cond == 48) {
+            // EFFECT FIRSTCOL SCROLL +
+            sides[int(line.sidenum[0])].textureoffset += FRACUNIT
+        }
+        i++
     }
     // DO BUTTONS
     for (i1 in range(MAXBUTTONS)) {
@@ -760,11 +738,11 @@ def P_UpdateSpecials {
             if (!(buttonlist[i1].btimer != 0)) {
                 let _cond2 = buttonlist[i1]._c_where
                 if (_cond2 == bwhere_e.top) {
-                    deref(sides + int(buttonlist[i1].line.sidenum[0])).toptexture = int16(buttonlist[i1].btexture)
+                    sides[int(buttonlist[i1].line.sidenum[0])].toptexture = int16(buttonlist[i1].btexture)
                 } elif (_cond2 == bwhere_e.middle) {
-                    deref(sides + int(buttonlist[i1].line.sidenum[0])).midtexture = int16(buttonlist[i1].btexture)
+                    sides[int(buttonlist[i1].line.sidenum[0])].midtexture = int16(buttonlist[i1].btexture)
                 } elif (_cond2 == bwhere_e.bottom) {
-                    deref(sides + int(buttonlist[i1].line.sidenum[0])).bottomtexture = int16(buttonlist[i1].btexture)
+                    sides[int(buttonlist[i1].line.sidenum[0])].bottomtexture = int16(buttonlist[i1].btexture)
                 }
                 S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(buttonlist[i1].soundorg))), int(sfxenum_t.sfx_swtchn))
                 doom_memset(reinterpret<void?>(addr(buttonlist[0]) + end_index(i1, 16)), 0, int(uint64(typeinfo sizeof(type<button_t>))))
@@ -790,13 +768,13 @@ def EV_DoDonut(var line : line_s?) : int {
         if (!(secnum >= 0)) {
             break
         }
-        s1 = addr(deref(sectors + secnum))
+        s1 = addr(sectors[secnum])
         // ALREADY MOVING? IF SO, KEEP GOING...
         if (s1.specialdata != null) {
             continue
         }
         rtn = 1
-        s2 = getNextSector(deref(s1.lines + 0), s1)
+        s2 = getNextSector(s1.lines[0], s1)
         {
             i = 0
             var _f = false
@@ -808,10 +786,10 @@ def EV_DoDonut(var line : line_s?) : int {
                 if (!(i < s2.linecount)) {
                     break
                 }
-                if (!((int(deref(s2.lines + i).flags) & ML_TWOSIDED) != 0) || intptr(deref(s2.lines + i).backsector) == intptr(s1)) {
+                if ((!((int(s2.lines[i].flags) & ML_TWOSIDED) != 0)) || (intptr(s2.lines[i].backsector) == intptr(s1))) {
                     continue
                 }
-                s3 = deref(s2.lines + i).backsector
+                s3 = s2.lines[i].backsector
                 // Spawn rising slime
                 floor = reinterpret<floormove_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<floormove_t>))), PU_LEVSPEC, null))
                 P_AddThinker(addr(floor.thinker))
@@ -821,7 +799,7 @@ def EV_DoDonut(var line : line_s?) : int {
                 floor.crush = doom_boolean._c_false
                 floor.direction = 1
                 floor.sector = s2
-                floor.speed = (1 << 16) / 2
+                floor.speed = FRACUNIT / 2
                 floor.texture = s3.floorpic
                 floor.newspecial = 0
                 floor.floordestheight = s3.floorheight
@@ -834,7 +812,7 @@ def EV_DoDonut(var line : line_s?) : int {
                 floor.crush = doom_boolean._c_false
                 floor.direction = -1
                 floor.sector = s1
-                floor.speed = (1 << 16) / 2
+                floor.speed = FRACUNIT / 2
                 floor.floordestheight = s3.floorheight
                 break
             }
@@ -850,86 +828,82 @@ def P_SpawnSpecials {
     var i : int
     var episode : int
     episode = 1
-    if (W_CheckNumForName(reinterpret<uint8?>("texture2")) >= 0) {
+    if (W_CheckNumForName(cstr("texture2")) >= 0) {
         episode = 2
     }
     // See if -TIMER needs to be used.
     levelTimer = doom_boolean._c_false
-    i = M_CheckParm(reinterpret<uint8?>("-avg"))
+    i = M_CheckParm(cstr("-avg"))
     if (i != 0 && uint(int(deathmatch)) != 0) {
         levelTimer = doom_boolean._c_true
         levelTimeCount = 20 * 60 * 35
     }
-    i = M_CheckParm(reinterpret<uint8?>("-timer"))
+    i = M_CheckParm(cstr("-timer"))
     if (i != 0 && uint(int(deathmatch)) != 0) {
         var time : int
-        time = doom_atoi(deref(myargv + (i + 1))) * 60 * 35
+        time = doom_atoi(myargv[i + 1]) * 60 * 35
         levelTimer = doom_boolean._c_true
         levelTimeCount = time
     }
     // Init special SECTORs.
     sector = sectors
-    {
-        i = 0
-        while (i < numsectors) {
-            {
-                if (!(sector.special != 0)) {
-                    continue
-                }
-                let _cond = int(sector.special)
-                if (_cond == 1) {
-                    // FLICKERING LIGHTS
-                    P_SpawnLightFlash(sector)
-                } elif (_cond == 2) {
-                    // STROBE FAST
-                    P_SpawnStrobeFlash(sector, FASTDARK, 0)
-                } elif (_cond == 3) {
-                    // STROBE SLOW
-                    P_SpawnStrobeFlash(sector, SLOWDARK, 0)
-                } elif (_cond == 4) {
-                    // STROBE FAST/DEATH SLIME
-                    P_SpawnStrobeFlash(sector, FASTDARK, 0)
-                    sector.special = int16(4)
-                } elif (_cond == 8) {
-                    // GLOWING LIGHT
-                    P_SpawnGlowingLight(sector)
-                } elif (_cond == 9) {
-                    // SECRET SECTOR
-                    totalsecret++
-                } elif (_cond == 10) {
-                    // DOOR CLOSE IN 30 SECONDS
-                    P_SpawnDoorCloseIn30(sector)
-                } elif (_cond == 12) {
-                    // SYNC STROBE SLOW
-                    P_SpawnStrobeFlash(sector, SLOWDARK, 1)
-                } elif (_cond == 13) {
-                    // SYNC STROBE FAST
-                    P_SpawnStrobeFlash(sector, FASTDARK, 1)
-                } elif (_cond == 14) {
-                    // DOOR RAISE IN 5 MINUTES
-                    P_SpawnDoorRaiseIn5Mins(sector, i)
-                } elif (_cond == 17) {
-                    P_SpawnFireFlicker(sector)
-                }
-            } finally {
-                i++
-                sector = sector + 1
+    i = 0
+    while (i < numsectors) {
+        {
+            if (!(sector.special != 0)) {
+                continue
             }
+            let _cond = int(sector.special)
+            if (_cond == 1) {
+                // FLICKERING LIGHTS
+                P_SpawnLightFlash(sector)
+            } elif (_cond == 2) {
+                // STROBE FAST
+                P_SpawnStrobeFlash(sector, FASTDARK, 0)
+            } elif (_cond == 3) {
+                // STROBE SLOW
+                P_SpawnStrobeFlash(sector, SLOWDARK, 0)
+            } elif (_cond == 4) {
+                // STROBE FAST/DEATH SLIME
+                P_SpawnStrobeFlash(sector, FASTDARK, 0)
+                sector.special = int16(4)
+            } elif (_cond == 8) {
+                // GLOWING LIGHT
+                P_SpawnGlowingLight(sector)
+            } elif (_cond == 9) {
+                // SECRET SECTOR
+                totalsecret++
+            } elif (_cond == 10) {
+                // DOOR CLOSE IN 30 SECONDS
+                P_SpawnDoorCloseIn30(sector)
+            } elif (_cond == 12) {
+                // SYNC STROBE SLOW
+                P_SpawnStrobeFlash(sector, SLOWDARK, 1)
+            } elif (_cond == 13) {
+                // SYNC STROBE FAST
+                P_SpawnStrobeFlash(sector, FASTDARK, 1)
+            } elif (_cond == 14) {
+                // DOOR RAISE IN 5 MINUTES
+                P_SpawnDoorRaiseIn5Mins(sector, i)
+            } elif (_cond == 17) {
+                P_SpawnFireFlicker(sector)
+            }
+        } finally {
+            i++
+            sector = sector + 1
         }
     }
     // Init line EFFECTs
     numlinespecials = int16(0)
-    {
-        i = 0
-        while (i < numlines) {
-            let _cond2 = int(deref(lines + i).special)
-            if (_cond2 == 48) {
-                // EFFECT FIRSTCOL SCROLL+
-                linespeciallist[int(numlinespecials)] = addr(deref(lines + i))
-                numlinespecials = int16(int(numlinespecials) + 1)
-            }
-            i++
+    i = 0
+    while (i < numlines) {
+        let _cond2 = int(lines[i].special)
+        if (_cond2 == 48) {
+            // EFFECT FIRSTCOL SCROLL+
+            linespeciallist[int(numlinespecials)] = addr(lines[i])
+            numlinespecials = int16(int(numlinespecials) + 1)
         }
+        i++
     }
     // Init other misc stuff
     for (i1 in range(MAXCEILINGS)) {

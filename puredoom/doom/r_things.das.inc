@@ -27,36 +27,36 @@ var overflowsprite : vissprite_s
 // Local function for R_InitSprites.
 [c_function]
 def R_InstallSpriteLump(lump : int; frame : uint; var rotation : uint; flipped : doom_boolean) {
-    if (frame >= uint(29) || rotation > uint(8)) {
+    if (frame >= 29u || rotation > 8u) {
         // I_Error("Error: R_InstallSpriteLump: "
         // "Bad frame characters in lump %i", lump);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_InstallSpriteLump: Bad frame characters in lump "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_InstallSpriteLump: Bad frame characters in lump "))
         doom_concat(addr(error_buf[0]), doom_itoa(lump, 10))
         I_Error(addr(error_buf[0]))
     }
     if (int(frame) > maxframe) {
         maxframe = int(frame)
     }
-    if (rotation == uint(0)) {
+    if (rotation == 0u) {
         // the lump should be used for all rotations
         if (sprtemp[frame].rotate == doom_boolean._c_false) {
             // I_Error("Error: R_InitSprites: Sprite %s frame %c has "
             // "multip rot=0 lump", spritename, 'A' + frame);
-            doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_InitSprites: Sprite "))
+            doom_strcpy(addr(error_buf[0]), cstr("Error: R_InitSprites: Sprite "))
             doom_concat(addr(error_buf[0]), spritename)
-            doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" frame "))
+            doom_concat(addr(error_buf[0]), cstr(" frame "))
             doom_concat(addr(error_buf[0]), doom_ctoa(uint8(uint('A') + frame)))
-            doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" has multip rot=0 lump"))
+            doom_concat(addr(error_buf[0]), cstr(" has multip rot=0 lump"))
             I_Error(addr(error_buf[0]))
         }
         if (sprtemp[frame].rotate == doom_boolean._c_true) {
             // I_Error("Error: R_InitSprites: Sprite %s frame %c has rotations "
             // "and a rot=0 lump", spritename, 'A' + frame);
-            doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_InitSprites: Sprite "))
+            doom_strcpy(addr(error_buf[0]), cstr("Error: R_InitSprites: Sprite "))
             doom_concat(addr(error_buf[0]), spritename)
-            doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" frame "))
+            doom_concat(addr(error_buf[0]), cstr(" frame "))
             doom_concat(addr(error_buf[0]), doom_ctoa(uint8(uint('A') + frame)))
-            doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" has rotations "))
+            doom_concat(addr(error_buf[0]), cstr(" has rotations "))
             I_Error(addr(error_buf[0]))
         }
         sprtemp[frame].rotate = doom_boolean._c_false
@@ -70,11 +70,11 @@ def R_InstallSpriteLump(lump : int; frame : uint; var rotation : uint; flipped :
     if (sprtemp[frame].rotate == doom_boolean._c_false) {
         // I_Error("Error: R_InitSprites: Sprite %s frame %c has rotations "
         // "and a rot=0 lump", spritename, 'A' + frame);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_InitSprites: Sprite "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_InitSprites: Sprite "))
         doom_concat(addr(error_buf[0]), spritename)
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" frame "))
+        doom_concat(addr(error_buf[0]), cstr(" frame "))
         doom_concat(addr(error_buf[0]), doom_ctoa(uint8(uint('A') + frame)))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" has rotations "))
+        doom_concat(addr(error_buf[0]), cstr(" has rotations "))
         I_Error(addr(error_buf[0]))
     }
     sprtemp[frame].rotate = doom_boolean._c_true
@@ -84,13 +84,13 @@ def R_InstallSpriteLump(lump : int; frame : uint; var rotation : uint; flipped :
         // I_Error("Error: R_InitSprites: Sprite %s : %c : %c "
         // "has two lumps mapped to it",
         // spritename, 'A' + frame, '1' + rotation);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_InitSprites: Sprite "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_InitSprites: Sprite "))
         doom_concat(addr(error_buf[0]), spritename)
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" : "))
+        doom_concat(addr(error_buf[0]), cstr(" : "))
         doom_concat(addr(error_buf[0]), doom_ctoa(uint8(uint('A') + frame)))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" : "))
+        doom_concat(addr(error_buf[0]), cstr(" : "))
         doom_concat(addr(error_buf[0]), doom_ctoa(uint8(uint('1') + rotation)))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" "))
+        doom_concat(addr(error_buf[0]), cstr(" "))
         I_Error(addr(error_buf[0]))
     }
     sprtemp[frame].lump[rotation] = int16(lump - firstspritelump)
@@ -135,90 +135,80 @@ def R_InitSpriteDefs(var namelist : uint8 ??) {
     // scan all the lump names for each of the names,
     // noting the highest frame letter.
     // Just compare 4 characters as ints
-    {
-        i = 0
-        while (i < numsprites) {
-            {
-                spritename = deref(namelist + i)
-                doom_memset(reinterpret<void?>(addr(sprtemp[0])), -1, int(uint64(typeinfo sizeof(type<spriteframe_t[29]>))))
-                maxframe = -1
-                intname = deref(reinterpret<int?>(deref(namelist + i)))
-                // scan the lumps,
-                // filling in the frames for whatever is found
-                {
-                    l = start + 1
-                    while (l < end) {
-                        if (deref(reinterpret<int?>(addr(deref(lumpinfo + l).name[0]))) == intname) {
-                            frame = int(deref(lumpinfo + l).name[4]) - 'A'
-                            rotation = int(deref(lumpinfo + l).name[5]) - '0'
-                            if (int(modifiedgame) != 0) {
-                                patched = W_GetNumForName(addr(deref(lumpinfo + l).name[0]))
-                            } else {
-                                patched = l
-                            }
-                            R_InstallSpriteLump(patched, uint(frame), uint(rotation), doom_boolean._c_false)
-                            if (deref(lumpinfo + l).name[6] != 0) {
-                                frame = int(deref(lumpinfo + l).name[6]) - 'A'
-                                rotation = int(deref(lumpinfo + l).name[7]) - '0'
-                                R_InstallSpriteLump(l, uint(frame), uint(rotation), doom_boolean._c_true)
-                            }
-                        }
-                        l++
+    i = 0
+    while (i < numsprites) {
+        {
+            spritename = namelist[i]
+            doom_memset(reinterpret<void?>(addr(sprtemp[0])), -1, int(uint64(typeinfo sizeof(type<spriteframe_t[29]>))))
+            maxframe = -1
+            intname = deref(reinterpret<int?>(namelist[i]))
+            // scan the lumps,
+            // filling in the frames for whatever is found
+            l = start + 1
+            while (l < end) {
+                if (deref(reinterpret<int?>(addr(lumpinfo[l].name[0]))) == intname) {
+                    frame = int(lumpinfo[l].name[4]) - 'A'
+                    rotation = int(lumpinfo[l].name[5]) - '0'
+                    if (int(modifiedgame) != 0) {
+                        patched = W_GetNumForName(addr(lumpinfo[l].name[0]))
+                    } else {
+                        patched = l
+                    }
+                    R_InstallSpriteLump(patched, uint(frame), uint(rotation), doom_boolean._c_false)
+                    if (lumpinfo[l].name[6] != 0) {
+                        frame = int(lumpinfo[l].name[6]) - 'A'
+                        rotation = int(lumpinfo[l].name[7]) - '0'
+                        R_InstallSpriteLump(l, uint(frame), uint(rotation), doom_boolean._c_true)
                     }
                 }
-                // check the frames that were found for completeness
-                if (maxframe == -1) {
-                    deref(sprites + i).numframes = 0
-                    continue
-                }
-                maxframe++
-                {
-                    frame = 0
-                    while (frame < maxframe) {
-                        let _cond = sprtemp[frame].rotate
-                        if (int(_cond) == -1) {
-                            {
-                                // no rotations were found for that frame at all
-                                // I_Error("Error: R_InitSprites: No patches found "
-                                // "for %s frame %c", namelist[i], frame + 'A');
-                                doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_InitSprites: No patches found for "))
-                                doom_concat(addr(error_buf[0]), deref(namelist + i))
-                                doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" frame "))
-                                doom_concat(addr(error_buf[0]), doom_ctoa(uint8(frame + 'A')))
-                                I_Error(addr(error_buf[0]))
-                            }
-                        } elif (_cond == doom_boolean._c_false) {
-                        } elif (_cond == doom_boolean._c_true) {
-                            // only the first rotation is needed
-                            // must have all 8 frames
-                            {
-                                rotation = 0
-                                while (rotation < 8) {
-                                    if (int(sprtemp[frame].lump[rotation]) == -1) {
-                                        // I_Error("Error: R_InitSprites: Sprite %s frame %c "
-                                        // "is missing rotations",
-                                        // namelist[i], frame + 'A');
-                                        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_InitSprites: Sprite "))
-                                        doom_concat(addr(error_buf[0]), deref(namelist + i))
-                                        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" frame "))
-                                        doom_concat(addr(error_buf[0]), doom_ctoa(uint8(frame + 'A')))
-                                        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" is missing rotations"))
-                                        I_Error(addr(error_buf[0]))
-                                    }
-                                    rotation++
-                                }
-                            }
-                        }
-                        frame++
-                    }
-                }
-                // allocate space for the frames present and copy sprtemp to it
-                deref(sprites + i).numframes = maxframe
-                deref(sprites + i).spriteframes = reinterpret<spriteframe_t?>(Z_Malloc(int(uint64(maxframe) * uint64(typeinfo sizeof(type<spriteframe_t>))), PU_STATIC, null))
-                doom_memcpy(reinterpret<void?>(deref(sprites + i).spriteframes), reinterpret<void?>(addr(sprtemp[0])), int(uint64(maxframe) * uint64(typeinfo sizeof(type<spriteframe_t>))))
-            } finally {
-                i++
+                l++
             }
+            // check the frames that were found for completeness
+            if (maxframe == -1) {
+                sprites[i].numframes = 0
+                continue
+            }
+            maxframe++
+            frame = 0
+            while (frame < maxframe) {
+                let _cond = sprtemp[frame].rotate
+                if (int(_cond) == -1) {
+                    // no rotations were found for that frame at all
+                    // I_Error("Error: R_InitSprites: No patches found "
+                    // "for %s frame %c", namelist[i], frame + 'A');
+                    doom_strcpy(addr(error_buf[0]), cstr("Error: R_InitSprites: No patches found for "))
+                    doom_concat(addr(error_buf[0]), namelist[i])
+                    doom_concat(addr(error_buf[0]), cstr(" frame "))
+                    doom_concat(addr(error_buf[0]), doom_ctoa(uint8(frame + 'A')))
+                    I_Error(addr(error_buf[0]))
+                } elif (_cond == doom_boolean._c_false) {
+                } elif (_cond == doom_boolean._c_true) {
+                    // only the first rotation is needed
+                    // must have all 8 frames
+                    rotation = 0
+                    while (rotation < 8) {
+                        if (int(sprtemp[frame].lump[rotation]) == -1) {
+                            // I_Error("Error: R_InitSprites: Sprite %s frame %c "
+                            // "is missing rotations",
+                            // namelist[i], frame + 'A');
+                            doom_strcpy(addr(error_buf[0]), cstr("Error: R_InitSprites: Sprite "))
+                            doom_concat(addr(error_buf[0]), namelist[i])
+                            doom_concat(addr(error_buf[0]), cstr(" frame "))
+                            doom_concat(addr(error_buf[0]), doom_ctoa(uint8(frame + 'A')))
+                            doom_concat(addr(error_buf[0]), cstr(" is missing rotations"))
+                            I_Error(addr(error_buf[0]))
+                        }
+                        rotation++
+                    }
+                }
+                frame++
+            }
+            // allocate space for the frames present and copy sprtemp to it
+            sprites[i].numframes = maxframe
+            sprites[i].spriteframes = reinterpret<spriteframe_t?>(Z_Malloc(int(uint64(maxframe) * uint64(typeinfo sizeof(type<spriteframe_t>))), PU_STATIC, null))
+            doom_memcpy(reinterpret<void?>(sprites[i].spriteframes), reinterpret<void?>(addr(sprtemp[0])), int(uint64(maxframe) * uint64(typeinfo sizeof(type<spriteframe_t>))))
+        } finally {
+            i++
         }
     }
 }
@@ -254,30 +244,28 @@ def R_DrawMaskedColumn(var column : uint8?) {
     var bottomscreen : int
     var basetexturemid : int
     basetexturemid = dc_texturemid
-    {
-        while (int(read_post_t_topdelta(column, 0)) != 255) {
-            // calculate unclipped screen coordinates
-            // for post
-            topscreen = sprtopscreen + spryscale * int(read_post_t_topdelta(column, 0))
-            bottomscreen = topscreen + spryscale * int(read_post_t_length(column, 0))
-            dc_yl = topscreen + FRACUNIT - 1 >> FRACBITS
-            dc_yh = bottomscreen - 1 >> FRACBITS
-            if (dc_yh >= int(deref(mfloorclip + dc_x))) {
-                dc_yh = int(deref(mfloorclip + dc_x)) - 1
-            }
-            if (dc_yl <= int(deref(mceilingclip + dc_x))) {
-                dc_yl = int(deref(mceilingclip + dc_x)) + 1
-            }
-            if (dc_yl <= dc_yh) {
-                dc_source = reinterpret<uint8?>(column) + 3
-                dc_texturemid = basetexturemid - (int(read_post_t_topdelta(column, 0)) << FRACBITS)
-                // dc_source = (byte *)column + 3 - column->topdelta;
-                // Drawn by either R_DrawColumn
-                // or (SHADOW) R_DrawFuzzColumn.
-                invoke(colfunc)
-            }
-            column = reinterpret<uint8?>(reinterpret<uint8?>(column) + int(read_post_t_length(column, 0)) + 4)
+    while (int(read_post_t_topdelta(column, 0)) != 255) {
+        // calculate unclipped screen coordinates
+        // for post
+        topscreen = sprtopscreen + spryscale * int(read_post_t_topdelta(column, 0))
+        bottomscreen = topscreen + spryscale * int(read_post_t_length(column, 0))
+        dc_yl = (topscreen + FRACUNIT - 1) >> FRACBITS
+        dc_yh = (bottomscreen - 1) >> FRACBITS
+        if (dc_yh >= int(mfloorclip[dc_x])) {
+            dc_yh = int(mfloorclip[dc_x]) - 1
         }
+        if (dc_yl <= int(mceilingclip[dc_x])) {
+            dc_yl = int(mceilingclip[dc_x]) + 1
+        }
+        if (dc_yl <= dc_yh) {
+            dc_source = reinterpret<uint8?>(column) + 3
+            dc_texturemid = basetexturemid - (int(read_post_t_topdelta(column, 0)) << FRACBITS)
+            // dc_source = (byte *)column + 3 - column->topdelta;
+            // Drawn by either R_DrawColumn
+            // or (SHADOW) R_DrawFuzzColumn.
+            invoke(colfunc)
+        }
+        column = reinterpret<uint8?>(reinterpret<uint8?>(column) + int(read_post_t_length(column, 0)) + 4)
     }
     dc_texturemid = basetexturemid
 }
@@ -297,25 +285,23 @@ def R_DrawVisSprite(var vis : vissprite_s?; x1 : int; x2 : int) {
         colfunc = fuzzcolfunc
     } elif ((vis.mobjflags & int(mobjflag_t.MF_TRANSLATION)) != 0) {
         colfunc = @@R_DrawTranslatedColumn
-        dc_translation = translationtables - 256 + ((vis.mobjflags & int(mobjflag_t.MF_TRANSLATION)) >> int(mobjflag_t.MF_TRANSSHIFT) - 8)
+        dc_translation = translationtables - 256 + ((vis.mobjflags & int(mobjflag_t.MF_TRANSLATION)) >> (int(mobjflag_t.MF_TRANSSHIFT) - 8))
     }
     dc_iscale = (vis.xiscale < 0 ? -vis.xiscale : vis.xiscale) >> detailshift
     dc_texturemid = vis.texturemid
     frac = vis.startfrac
     spryscale = vis.scale
     sprtopscreen = centeryfrac - FixedMul(dc_texturemid, spryscale)
-    {
-        dc_x = vis.x1
-        while (dc_x <= vis.x2) {
-            texturecolumn = frac >> FRACBITS
-            if (texturecolumn < 0 || texturecolumn >= int(read_patch_t_width(patch, 0))) {
-                I_Error(reinterpret<uint8?>("Error: R_DrawSpriteRange: bad texturecolumn"))
-            }
-            column = reinterpret<uint8?>(reinterpret<uint8?>(patch) + deref(ptr_patch_t_columnofs(patch, 0) + texturecolumn))
-            R_DrawMaskedColumn(column)
-            dc_x++
-            frac += vis.xiscale
+    dc_x = vis.x1
+    while (dc_x <= vis.x2) {
+        texturecolumn = frac >> FRACBITS
+        if (texturecolumn < 0 || texturecolumn >= int(read_patch_t_width(patch, 0))) {
+            I_Error(cstr("Error: R_DrawSpriteRange: bad texturecolumn"))
         }
+        column = reinterpret<uint8?>(reinterpret<uint8?>(patch) + ptr_patch_t_columnofs(patch, 0)[texturecolumn])
+        R_DrawMaskedColumn(column)
+        dc_x++
+        frac += vis.xiscale
     }
     colfunc = basecolfunc
 }
@@ -358,34 +344,34 @@ def R_ProjectSprite(var thing : mobj_s?) {
     gyt = FixedMul(tr_y, viewcos)
     tx = -(gyt + gxt)
     // too far off the side?
-    if ((tx < 0 ? -tx : tx) > tz << 2) {
+    if ((tx < 0 ? -tx : tx) > (tz << 2)) {
         return
     }
     // decide which patch to use for sprite relative to player
     if (uint(int(thing.sprite)) >= uint(numsprites)) {
         // I_Error("Error: R_ProjectSprite: invalid sprite number %i ",
         // thing->sprite);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_ProjectSprite: invalid sprite number "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_ProjectSprite: invalid sprite number "))
         doom_concat(addr(error_buf[0]), doom_itoa(int(thing.sprite), 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" "))
+        doom_concat(addr(error_buf[0]), cstr(" "))
         I_Error(addr(error_buf[0]))
     }
-    sprdef = addr(deref(sprites + int(thing.sprite)))
+    sprdef = addr(sprites[int(thing.sprite)])
     if ((thing.frame & FF_FRAMEMASK) >= sprdef.numframes) {
         // I_Error("Error: R_ProjectSprite: invalid sprite frame %i : %i ",
         // thing->sprite, thing->frame);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_ProjectSprite: invalid sprite frame "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_ProjectSprite: invalid sprite frame "))
         doom_concat(addr(error_buf[0]), doom_itoa(int(thing.sprite), 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" : "))
+        doom_concat(addr(error_buf[0]), cstr(" : "))
         doom_concat(addr(error_buf[0]), doom_itoa(thing.frame, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" "))
+        doom_concat(addr(error_buf[0]), cstr(" "))
         I_Error(addr(error_buf[0]))
     }
-    sprframe = addr(deref(sprdef.spriteframes + (thing.frame & FF_FRAMEMASK)))
+    sprframe = addr(sprdef.spriteframes[thing.frame & FF_FRAMEMASK])
     if (int(sprframe.rotate) != 0) {
         // choose a different rotation based on player view
         ang = R_PointToAngle(thing.x, thing.y)
-        rot = ang - thing.angle + uint(ANG45 / 2) * uint(9) >> 29u
+        rot = (ang - thing.angle + uint(ANG45 / 2) * 9u) >> 29u
         lump = int(sprframe.lump[rot])
         flip = enum_from_int(type<doom_boolean>, int(sprframe.flip[rot]))
     } else {
@@ -394,14 +380,14 @@ def R_ProjectSprite(var thing : mobj_s?) {
         flip = enum_from_int(type<doom_boolean>, int(sprframe.flip[0]))
     }
     // calculate edges of the shape
-    tx -= deref(spriteoffset + lump)
-    x1 = centerxfrac + FixedMul(tx, xscale) >> FRACBITS
+    tx -= spriteoffset[lump]
+    x1 = (centerxfrac + FixedMul(tx, xscale)) >> FRACBITS
     // off the right side?
     if (x1 > viewwidth) {
         return
     }
-    tx += deref(spritewidth + lump)
-    x2 = (centerxfrac + FixedMul(tx, xscale) >> FRACBITS) - 1
+    tx += spritewidth[lump]
+    x2 = ((centerxfrac + FixedMul(tx, xscale)) >> FRACBITS) - 1
     // off the left side
     if (x2 < 0) {
         return
@@ -413,13 +399,13 @@ def R_ProjectSprite(var thing : mobj_s?) {
     vis.gx = thing.x
     vis.gy = thing.y
     vis.gz = thing.z
-    vis.gzt = thing.z + deref(spritetopoffset + lump)
+    vis.gzt = thing.z + spritetopoffset[lump]
     vis.texturemid = vis.gzt - viewz
     vis.x1 = x1 < 0 ? 0 : x1
     vis.x2 = x2 >= viewwidth ? viewwidth - 1 : x2
     iscale = FixedDiv(FRACUNIT, xscale)
     if (int(flip) != 0) {
-        vis.startfrac = deref(spritewidth + lump) - 1
+        vis.startfrac = spritewidth[lump] - 1
         vis.xiscale = -iscale
     } else {
         vis.startfrac = 0
@@ -441,11 +427,11 @@ def R_ProjectSprite(var thing : mobj_s?) {
         vis.colormap = colormaps
     } else {
         // diminished light
-        index = xscale >> LIGHTSCALESHIFT - detailshift
+        index = xscale >> (LIGHTSCALESHIFT - detailshift)
         if (index >= MAXLIGHTSCALE) {
             index = MAXLIGHTSCALE - 1
         }
-        vis.colormap = deref(spritelights + index)
+        vis.colormap = spritelights[index]
     }
 }
 
@@ -473,12 +459,10 @@ def R_AddSprites(var sec : sector_t?) {
         spritelights = addr(scalelight[lightnum][0])
     }
     // Handle all things in sector.
-    {
-        thing = sec.thinglist
-        while (thing != null) {
-            R_ProjectSprite(thing)
-            thing = thing.snext
-        }
+    thing = sec.thinglist
+    while (thing != null) {
+        R_ProjectSprite(thing)
+        thing = thing.snext
     }
 }
 
@@ -498,35 +482,35 @@ def R_DrawPSprite(var psp : pspdef_t?) {
     if (uint(int(psp.state.sprite)) >= uint(numsprites)) {
         // I_Error("Error: R_ProjectSprite: invalid sprite number %i ",
         // psp->state->sprite);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_ProjectSprite: invalid sprite number "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_ProjectSprite: invalid sprite number "))
         doom_concat(addr(error_buf[0]), doom_itoa(int(psp.state.sprite), 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" "))
+        doom_concat(addr(error_buf[0]), cstr(" "))
         I_Error(addr(error_buf[0]))
     }
-    sprdef = addr(deref(sprites + int(psp.state.sprite)))
+    sprdef = addr(sprites[int(psp.state.sprite)])
     if ((psp.state.frame & int64(FF_FRAMEMASK)) >= int64(sprdef.numframes)) {
         // I_Error("Error: R_ProjectSprite: invalid sprite frame %i : %i ",
         // psp->state->sprite, psp->state->frame);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_ProjectSprite: invalid sprite frame "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_ProjectSprite: invalid sprite frame "))
         doom_concat(addr(error_buf[0]), doom_itoa(int(psp.state.sprite), 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" : "))
+        doom_concat(addr(error_buf[0]), cstr(" : "))
         doom_concat(addr(error_buf[0]), doom_itoa(int(psp.state.frame), 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" "))
+        doom_concat(addr(error_buf[0]), cstr(" "))
         I_Error(addr(error_buf[0]))
     }
-    sprframe = addr(deref(sprdef.spriteframes + (psp.state.frame & int64(FF_FRAMEMASK))))
+    sprframe = addr(sprdef.spriteframes[psp.state.frame & int64(FF_FRAMEMASK)])
     lump = int(sprframe.lump[0])
     flip = enum_from_int(type<doom_boolean>, int(sprframe.flip[0]))
     // calculate edges of the shape
     tx = psp.sx - 160 * FRACUNIT
-    tx -= deref(spriteoffset + lump)
-    x1 = centerxfrac + FixedMul(tx, pspritescale) >> FRACBITS
+    tx -= spriteoffset[lump]
+    x1 = (centerxfrac + FixedMul(tx, pspritescale)) >> FRACBITS
     // off the right side
     if (x1 > viewwidth) {
         return
     }
-    tx += deref(spritewidth + lump)
-    x2 = (centerxfrac + FixedMul(tx, pspritescale) >> FRACBITS) - 1
+    tx += spritewidth[lump]
+    x2 = ((centerxfrac + FixedMul(tx, pspritescale)) >> FRACBITS) - 1
     // off the left side
     if (x2 < 0) {
         return
@@ -534,13 +518,13 @@ def R_DrawPSprite(var psp : pspdef_t?) {
     // store information in a vissprite
     vis = addr(avis)
     vis.mobjflags = 0
-    vis.texturemid = (BASEYCENTER << FRACBITS) + FRACUNIT / 2 - (psp.sy - deref(spritetopoffset + lump))
+    vis.texturemid = (BASEYCENTER << FRACBITS) + FRACUNIT / 2 - (psp.sy - spritetopoffset[lump])
     vis.x1 = x1 < 0 ? 0 : x1
     vis.x2 = x2 >= viewwidth ? viewwidth - 1 : x2
     vis.scale = pspritescale << detailshift
     if (int(flip) != 0) {
         vis.xiscale = -pspriteiscale
-        vis.startfrac = deref(spritewidth + lump) - 1
+        vis.startfrac = spritewidth[lump] - 1
     } else {
         vis.xiscale = pspriteiscale
         vis.startfrac = 0
@@ -560,7 +544,7 @@ def R_DrawPSprite(var psp : pspdef_t?) {
         vis.colormap = colormaps
     } else {
         // local light
-        vis.colormap = deref(spritelights + (MAXLIGHTSCALE - 1))
+        vis.colormap = spritelights[MAXLIGHTSCALE - 1]
     }
     R_DrawVisSprite(vis, vis.x1, vis.x2)
 }
@@ -584,16 +568,14 @@ def R_DrawPlayerSprites {
     mfloorclip = addr(screenheightarray[0])
     mceilingclip = addr(negonearray[0])
     // add all active psprites
-    {
-        i = 0
-        psp = addr(viewplayer.psprites[0])
-        while (i < int(psprnum_t.NUMPSPRITES)) {
-            if (psp.state != null) {
-                R_DrawPSprite(psp)
-            }
-            i++
-            psp = psp + 1
+    i = 0
+    psp = addr(viewplayer.psprites[0])
+    while (i < int(psprnum_t.NUMPSPRITES)) {
+        if (psp.state != null) {
+            R_DrawPSprite(psp)
         }
+        i++
+        psp = psp + 1
     }
 }
 
@@ -611,13 +593,11 @@ def R_SortVisSprites {
     if (!(count != 0)) {
         return
     }
-    {
-        ds = addr(vissprites[0])
-        while (intptr(ds) < intptr(vissprite_p)) {
-            ds.next = ds + 1
-            ds.prev = ds - 1
-            ds = ds + 1
-        }
+    ds = addr(vissprites[0])
+    while (intptr(ds) < intptr(vissprite_p)) {
+        ds.next = ds + 1
+        ds.prev = ds - 1
+        ds = ds + 1
     }
     vissprites[0].prev = addr(unsorted)
     unsorted.next = addr(vissprites[0])
@@ -629,15 +609,13 @@ def R_SortVisSprites {
     vsprsortedhead.next = vsprsortedhead.prev
     for (i in range(count)) {
         bestscale = DOOM_MAXINT
-        {
-            ds = unsorted.next
-            while (intptr(ds) != intptr(addr(unsorted))) {
-                if (ds.scale < bestscale) {
-                    bestscale = ds.scale
-                    best = ds
-                }
-                ds = ds.next
+        ds = unsorted.next
+        while (intptr(ds) != intptr(addr(unsorted))) {
+            if (ds.scale < bestscale) {
+                bestscale = ds.scale
+                best = ds
             }
+            ds = ds.next
         }
         best.next.prev = best.prev
         best.prev.next = best.next
@@ -660,106 +638,94 @@ def R_DrawSprite(var spr : vissprite_s?) {
     var scale : int
     var lowscale : int
     var silhouette : int
-    {
-        x = spr.x1
-        while (x <= spr.x2) {
-            cliptop[x] = int16(-2)
-            clipbot[x] = cliptop[x]
-            x++
-        }
+    x = spr.x1
+    while (x <= spr.x2) {
+        cliptop[x] = int16(-2)
+        clipbot[x] = cliptop[x]
+        x++
     }
     // Scan drawsegs from end to start for obscuring segs.
     // The first drawseg that has a greater scale
     // is the clip seg.
-    {
-        ds = ds_p - 1
-        while (intptr(ds) >= intptr(addr(drawsegs[0]))) {
-            {
-                // determine if the drawseg obscures the sprite
-                if (ds.x1 > spr.x2 || ds.x2 < spr.x1 || !(ds.silhouette != 0) && !(ds.maskedtexturecol != null)) {
-                    // does not cover sprite
-                    continue
-                }
-                r1 = ds.x1 < spr.x1 ? spr.x1 : ds.x1
-                r2 = ds.x2 > spr.x2 ? spr.x2 : ds.x2
-                if (ds.scale1 > ds.scale2) {
-                    lowscale = ds.scale2
-                    scale = ds.scale1
-                } else {
-                    lowscale = ds.scale1
-                    scale = ds.scale2
-                }
-                if (scale < spr.scale || lowscale < spr.scale && !(R_PointOnSegSide(spr.gx, spr.gy, ds.curline) != 0)) {
-                    // masked mid texture?
-                    if (ds.maskedtexturecol != null) {
-                        R_RenderMaskedSegRange(ds, r1, r2)
-                    }
-                    // seg is behind sprite
-                    continue
-                }
-                // clip this piece of the sprite
-                silhouette = ds.silhouette
-                if (spr.gz >= ds.bsilheight) {
-                    silhouette &= ~SIL_BOTTOM
-                }
-                if (spr.gzt <= ds.tsilheight) {
-                    silhouette &= ~SIL_TOP
-                }
-                if (silhouette == 1) {
-                    // bottom sil
-                    {
-                        x = r1
-                        while (x <= r2) {
-                            if (int(clipbot[x]) == -2) {
-                                clipbot[x] = deref(ds.sprbottomclip + x)
-                            }
-                            x++
-                        }
-                    }
-                } elif (silhouette == 2) {
-                    // top sil
-                    {
-                        x = r1
-                        while (x <= r2) {
-                            if (int(cliptop[x]) == -2) {
-                                cliptop[x] = deref(ds.sprtopclip + x)
-                            }
-                            x++
-                        }
-                    }
-                } elif (silhouette == 3) {
-                    // both
-                    {
-                        x = r1
-                        while (x <= r2) {
-                            if (int(clipbot[x]) == -2) {
-                                clipbot[x] = deref(ds.sprbottomclip + x)
-                            }
-                            if (int(cliptop[x]) == -2) {
-                                cliptop[x] = deref(ds.sprtopclip + x)
-                            }
-                            x++
-                        }
-                    }
-                }
-            } finally {
-                ds = ds - 1
+    ds = ds_p - 1
+    while (intptr(ds) >= intptr(addr(drawsegs[0]))) {
+        {
+            // determine if the drawseg obscures the sprite
+            if (ds.x1 > spr.x2 || ds.x2 < spr.x1 || (!(ds.silhouette != 0) && !(ds.maskedtexturecol != null))) {
+                // does not cover sprite
+                continue
             }
+            r1 = ds.x1 < spr.x1 ? spr.x1 : ds.x1
+            r2 = ds.x2 > spr.x2 ? spr.x2 : ds.x2
+            if (ds.scale1 > ds.scale2) {
+                lowscale = ds.scale2
+                scale = ds.scale1
+            } else {
+                lowscale = ds.scale1
+                scale = ds.scale2
+            }
+            if (scale < spr.scale || (lowscale < spr.scale && !(R_PointOnSegSide(spr.gx, spr.gy, ds.curline) != 0))) {
+                // masked mid texture?
+                if (ds.maskedtexturecol != null) {
+                    R_RenderMaskedSegRange(ds, r1, r2)
+                }
+                // seg is behind sprite
+                continue
+            }
+            // clip this piece of the sprite
+            silhouette = ds.silhouette
+            if (spr.gz >= ds.bsilheight) {
+                silhouette &= ~SIL_BOTTOM
+            }
+            if (spr.gzt <= ds.tsilheight) {
+                silhouette &= ~SIL_TOP
+            }
+            if (silhouette == 1) {
+                // bottom sil
+                x = r1
+                while (x <= r2) {
+                    if (int(clipbot[x]) == -2) {
+                        clipbot[x] = ds.sprbottomclip[x]
+                    }
+                    x++
+                }
+            } elif (silhouette == 2) {
+                // top sil
+                x = r1
+                while (x <= r2) {
+                    if (int(cliptop[x]) == -2) {
+                        cliptop[x] = ds.sprtopclip[x]
+                    }
+                    x++
+                }
+            } elif (silhouette == 3) {
+                // both
+                x = r1
+                while (x <= r2) {
+                    if (int(clipbot[x]) == -2) {
+                        clipbot[x] = ds.sprbottomclip[x]
+                    }
+                    if (int(cliptop[x]) == -2) {
+                        cliptop[x] = ds.sprtopclip[x]
+                    }
+                    x++
+                }
+            }
+        } finally {
+            ds = ds - 1
         }
     }
     // all clipping has been performed, so draw the sprite
     // check for unclipped columns
-    {
-        x = spr.x1
-        while (x <= spr.x2) {
-            if (int(clipbot[x]) == -2) {
-                clipbot[x] = int16(viewheight)
-            }
-            if (int(cliptop[x]) == -2) {
-                cliptop[x] = int16(-1)
-            }
-            x++
+    x = spr.x1
+    while (x <= spr.x2) {
+        if (int(clipbot[x]) == -2) {
+            clipbot[x] = int16(viewheight)
         }
+        if (int(cliptop[x]) == -2) {
+            cliptop[x] = int16(-1)
+        }
+        x++
     }
     mfloorclip = addr(clipbot[0])
     mceilingclip = addr(cliptop[0])
@@ -774,23 +740,19 @@ def R_DrawMasked {
     R_SortVisSprites()
     if (intptr(vissprite_p) > intptr(addr(vissprites[0]))) {
         // draw all vissprites back to front
-        {
-            spr = vsprsortedhead.next
-            while (intptr(spr) != intptr(addr(vsprsortedhead))) {
-                R_DrawSprite(spr)
-                spr = spr.next
-            }
+        spr = vsprsortedhead.next
+        while (intptr(spr) != intptr(addr(vsprsortedhead))) {
+            R_DrawSprite(spr)
+            spr = spr.next
         }
     }
     // render any remaining masked mid textures
-    {
-        ds = ds_p - 1
-        while (intptr(ds) >= intptr(addr(drawsegs[0]))) {
-            if (ds.maskedtexturecol != null) {
-                R_RenderMaskedSegRange(ds, ds.x1, ds.x2)
-            }
-            ds = ds - 1
+    ds = ds_p - 1
+    while (intptr(ds) >= intptr(addr(drawsegs[0]))) {
+        if (ds.maskedtexturecol != null) {
+            R_RenderMaskedSegRange(ds, ds.x1, ds.x2)
         }
+        ds = ds - 1
     }
     // draw the psprites on top of everything
     // but does not draw on side views

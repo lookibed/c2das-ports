@@ -42,16 +42,16 @@ var private keyboxes : int[3]
 var private st_randomnumber : int
 var private st_palette : int = 0
 var private st_stopped : doom_boolean = doom_boolean._c_true
-var cheat_mus_seq : uint8[9] = fixed_array(uint8(178), uint8(38), uint8(182), uint8(174), uint8(234), uint8(1), uint8(0), uint8(0), uint8(255))
-var cheat_choppers_seq : uint8[11] = fixed_array(uint8(178), uint8(38), uint8(226), uint8(50), uint8(246), uint8(42), uint8(42), uint8(166), uint8(106), uint8(234), uint8(255))
-var cheat_god_seq : uint8[6] = fixed_array(uint8(178), uint8(38), uint8(38), uint8(170), uint8(38), uint8(255))
-var cheat_ammo_seq : uint8[6] = fixed_array(uint8(178), uint8(38), uint8(242), uint8(102), uint8(162), uint8(255))
-var cheat_ammonokey_seq : uint8[5] = fixed_array(uint8(178), uint8(38), uint8(102), uint8(162), uint8(255))
-var cheat_noclip_seq : uint8[11] = fixed_array(uint8(178), uint8(38), uint8(234), uint8(42), uint8(178), uint8(234), uint8(42), uint8(246), uint8(42), uint8(38), uint8(255))
-var cheat_commercial_noclip_seq : uint8[7] = fixed_array(uint8(178), uint8(38), uint8(226), uint8(54), uint8(178), uint8(42), uint8(255))
-var cheat_powerup_seq : uint8[7][10] = fixed_array(fixed_array(uint8(178), uint8(38), uint8(98), uint8(166), uint8(50), uint8(246), uint8(54), uint8(38), uint8(110), uint8(255)), fixed_array(uint8(178), uint8(38), uint8(98), uint8(166), uint8(50), uint8(246), uint8(54), uint8(38), uint8(234), uint8(255)), fixed_array(uint8(178), uint8(38), uint8(98), uint8(166), uint8(50), uint8(246), uint8(54), uint8(38), uint8(178), uint8(255)), fixed_array(uint8(178), uint8(38), uint8(98), uint8(166), uint8(50), uint8(246), uint8(54), uint8(38), uint8(106), uint8(255)), fixed_array(uint8(178), uint8(38), uint8(98), uint8(166), uint8(50), uint8(246), uint8(54), uint8(38), uint8(162), uint8(255)), fixed_array(uint8(178), uint8(38), uint8(98), uint8(166), uint8(50), uint8(246), uint8(54), uint8(38), uint8(54), uint8(255)), fixed_array(uint8(178), uint8(38), uint8(98), uint8(166), uint8(50), uint8(246), uint8(54), uint8(38), uint8(255), uint8(0)))
-var cheat_clev_seq : uint8[10] = fixed_array(uint8(178), uint8(38), uint8(226), uint8(54), uint8(166), uint8(110), uint8(1), uint8(0), uint8(0), uint8(255))
-var cheat_mypos_seq : uint8[8] = fixed_array(uint8(178), uint8(38), uint8(182), uint8(186), uint8(42), uint8(246), uint8(234), uint8(255))
+var cheat_mus_seq : uint8[9] = fixed_array(178u8, 38u8, 182u8, 174u8, 234u8, 1u8, 0u8, 0u8, 255u8)
+var cheat_choppers_seq : uint8[11] = fixed_array(178u8, 38u8, 226u8, 50u8, 246u8, 42u8, 42u8, 166u8, 106u8, 234u8, 255u8)
+var cheat_god_seq : uint8[6] = fixed_array(178u8, 38u8, 38u8, 170u8, 38u8, 255u8)
+var cheat_ammo_seq : uint8[6] = fixed_array(178u8, 38u8, 242u8, 102u8, 162u8, 255u8)
+var cheat_ammonokey_seq : uint8[5] = fixed_array(178u8, 38u8, 102u8, 162u8, 255u8)
+var cheat_noclip_seq : uint8[11] = fixed_array(178u8, 38u8, 234u8, 42u8, 178u8, 234u8, 42u8, 246u8, 42u8, 38u8, 255u8)
+var cheat_commercial_noclip_seq : uint8[7] = fixed_array(178u8, 38u8, 226u8, 54u8, 178u8, 42u8, 255u8)
+var cheat_powerup_seq : uint8[7][10] = fixed_array(fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 110u8, 255u8), fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 234u8, 255u8), fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 178u8, 255u8), fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 106u8, 255u8), fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 162u8, 255u8), fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 54u8, 255u8), fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 255u8, uint8(0)))
+var cheat_clev_seq : uint8[10] = fixed_array(178u8, 38u8, 226u8, 54u8, 166u8, 110u8, 1u8, 0u8, 0u8, 255u8)
+var cheat_mypos_seq : uint8[8] = fixed_array(178u8, 38u8, 182u8, 186u8, 42u8, 246u8, 234u8, 255u8)
 var cheat_mus : cheatseq_t = cheatseq_t(sequence = unsafe(addr(cheat_mus_seq[0])), p = null)
 var cheat_god : cheatseq_t = cheatseq_t(sequence = unsafe(addr(cheat_god_seq[0])), p = null)
 var cheat_ammo : cheatseq_t = cheatseq_t(sequence = unsafe(addr(cheat_ammo_seq[0])), p = null)
@@ -84,7 +84,7 @@ def ST_refreshBackground {
 [c_function]
 def ST_Responder(var ev : event_t?) : doom_boolean {
     // Filter automap on/off.
-    if (ev._c_type == evtype_t.ev_keyup && (uint(ev.data1) & 4294901760u) == uint(AM_MSGHEADER)) {
+    if (ev._c_type == evtype_t.ev_keyup && ((uint(ev.data1) & 4294901760u) == uint(AM_MSGHEADER))) {
         let _cond = ev.data1
         if (_cond == 1634559232) {
             st_gamestate = st_stateenum_t.AutomapState
@@ -106,9 +106,9 @@ def ST_Responder(var ev : event_t?) : doom_boolean {
                         plyr.mo.health = 100
                     }
                     plyr.health = 100
-                    plyr.message = reinterpret<uint8?>("Degreelessness Mode On")
+                    plyr.message = cstr("Degreelessness Mode On")
                 } else {
-                    plyr.message = reinterpret<uint8?>("Degreelessness Mode Off")
+                    plyr.message = cstr("Degreelessness Mode Off")
                 }
             } elif (cht_CheckCheat(addr(cheat_ammonokey), uint8(ev.data1)) != 0) {
                 // 'fa' cheat for killer fucking arsenal
@@ -120,7 +120,7 @@ def ST_Responder(var ev : event_t?) : doom_boolean {
                 for (i in range(int(ammotype_t.NUMAMMO))) {
                     plyr.ammo[i] = plyr.maxammo[i]
                 }
-                plyr.message = reinterpret<uint8?>("Ammo (no keys) Added")
+                plyr.message = cstr("Ammo (no keys) Added")
             } elif (cht_CheckCheat(addr(cheat_ammo), uint8(ev.data1)) != 0) {
                 // 'kfa' cheat for key full ammo
                 plyr.armorpoints = 200
@@ -134,24 +134,24 @@ def ST_Responder(var ev : event_t?) : doom_boolean {
                 for (i in range(int(card_t.NUMCARDS))) {
                     plyr.cards[i] = doom_boolean._c_true
                 }
-                plyr.message = reinterpret<uint8?>("Very Happy Ammo Added")
+                plyr.message = cstr("Very Happy Ammo Added")
             } elif (cht_CheckCheat(addr(cheat_mus), uint8(ev.data1)) != 0) {
                 // 'mus' cheat for changing music
                 var buf : uint8[3]
                 var musnum : int
-                plyr.message = reinterpret<uint8?>("Music Change")
+                plyr.message = cstr("Music Change")
                 cht_GetParam(addr(cheat_mus), addr(buf[0]))
                 if (gamemode == GameMode_t.commercial) {
                     musnum = int(musicenum_t.mus_runnin) + (int(buf[0]) - '0') * 10 + int(buf[1]) - '0' - 1
-                    if ((int(buf[0]) - '0') * 10 + int(buf[1]) - '0' > 35) {
-                        plyr.message = reinterpret<uint8?>("IMPOSSIBLE SELECTION")
+                    if (((int(buf[0]) - '0') * 10 + int(buf[1]) - '0') > 35) {
+                        plyr.message = cstr("IMPOSSIBLE SELECTION")
                     } else {
                         S_ChangeMusic(musnum, 1)
                     }
                 } else {
                     musnum = int(musicenum_t.mus_e1m1) + (int(buf[0]) - '1') * 9 + (int(buf[1]) - '1')
-                    if ((int(buf[0]) - '1') * 9 + int(buf[1]) - '1' > 31) {
-                        plyr.message = reinterpret<uint8?>("IMPOSSIBLE SELECTION")
+                    if (((int(buf[0]) - '1') * 9 + int(buf[1]) - '1') > 31) {
+                        plyr.message = cstr("IMPOSSIBLE SELECTION")
                     } else {
                         S_ChangeMusic(musnum, 1)
                     }
@@ -161,9 +161,9 @@ def ST_Responder(var ev : event_t?) : doom_boolean {
                 // no clipping mode cheat
                 plyr.cheats ^= int(cheat_t.CF_NOCLIP)
                 if ((plyr.cheats & int(cheat_t.CF_NOCLIP)) != 0) {
-                    plyr.message = reinterpret<uint8?>("No Clipping Mode ON")
+                    plyr.message = cstr("No Clipping Mode ON")
                 } else {
-                    plyr.message = reinterpret<uint8?>("No Clipping Mode OFF")
+                    plyr.message = cstr("No Clipping Mode OFF")
                 }
             }
             // 'behold?' power-up cheats
@@ -176,30 +176,30 @@ def ST_Responder(var ev : event_t?) : doom_boolean {
                     } else {
                         plyr.powers[i] = 0
                     }
-                    plyr.message = reinterpret<uint8?>("Power-up Toggled")
+                    plyr.message = cstr("Power-up Toggled")
                 }
             }
             // 'behold' power-up menu
             if (cht_CheckCheat(addr(cheat_powerup[6]), uint8(ev.data1)) != 0) {
-                plyr.message = reinterpret<uint8?>("inVuln, Str, Inviso, Rad, Allmap, or Lite-amp")
+                plyr.message = cstr("inVuln, Str, Inviso, Rad, Allmap, or Lite-amp")
             } elif (cht_CheckCheat(addr(cheat_choppers), uint8(ev.data1)) != 0) {
                 // 'choppers' invulnerability & chainsaw
                 plyr.weaponowned[int(weapontype_t.wp_chainsaw)] = doom_boolean._c_true
                 plyr.powers[int(powertype_t.pw_invulnerability)] = int(doom_boolean._c_true)
-                plyr.message = reinterpret<uint8?>("... doesn't suck - GM")
+                plyr.message = cstr("... doesn't suck - GM")
             } elif (cht_CheckCheat(addr(cheat_mypos), uint8(ev.data1)) != 0) {
                 // 'mypos' for player position
                 // doom_sprintf(buf, "ang=0x%x;x,y=(0x%x,0x%x)",
                 // players[consoleplayer].mo->angle,
                 // players[consoleplayer].mo->x,
                 // players[consoleplayer].mo->y);
-                doom_strcpy(addr(ST_Responder_buf[0]), reinterpret<uint8?>("ang=0x"))
+                doom_strcpy(addr(ST_Responder_buf[0]), cstr("ang=0x"))
                 doom_concat(addr(ST_Responder_buf[0]), doom_itoa(int(players[consoleplayer].mo.angle), 16))
-                doom_concat(addr(ST_Responder_buf[0]), reinterpret<uint8?>(";x,y=(0x"))
+                doom_concat(addr(ST_Responder_buf[0]), cstr(";x,y=(0x"))
                 doom_concat(addr(ST_Responder_buf[0]), doom_itoa(players[consoleplayer].mo.x, 16))
-                doom_concat(addr(ST_Responder_buf[0]), reinterpret<uint8?>(",0x"))
+                doom_concat(addr(ST_Responder_buf[0]), cstr(",0x"))
                 doom_concat(addr(ST_Responder_buf[0]), doom_itoa(players[consoleplayer].mo.y, 16))
-                doom_concat(addr(ST_Responder_buf[0]), reinterpret<uint8?>(")"))
+                doom_concat(addr(ST_Responder_buf[0]), cstr(")"))
                 plyr.message = addr(ST_Responder_buf[0])
             }
         }
@@ -224,20 +224,20 @@ def ST_Responder(var ev : event_t?) : doom_boolean {
                 return doom_boolean._c_false
             }
             // Ohmygod - this is not going to work.
-            if (gamemode == GameMode_t.retail && (epsd > 4 || map > 9)) {
+            if ((gamemode == GameMode_t.retail) && ((epsd > 4) || (map > 9))) {
                 return doom_boolean._c_false
             }
-            if (gamemode == GameMode_t.registered && (epsd > 3 || map > 9)) {
+            if ((gamemode == GameMode_t.registered) && ((epsd > 3) || (map > 9))) {
                 return doom_boolean._c_false
             }
-            if (gamemode == GameMode_t.shareware && (epsd > 1 || map > 9)) {
+            if ((gamemode == GameMode_t.shareware) && ((epsd > 1) || (map > 9))) {
                 return doom_boolean._c_false
             }
-            if (gamemode == GameMode_t.commercial && (epsd > 1 || map > 34)) {
+            if ((gamemode == GameMode_t.commercial) && ((epsd > 1) || (map > 34))) {
                 return doom_boolean._c_false
             }
             // So be it.
-            plyr.message = reinterpret<uint8?>("Changing Level...")
+            plyr.message = cstr("Changing Level...")
             G_DeferedInitNew(gameskill, epsd, map)
         }
     }
@@ -248,7 +248,7 @@ def ST_calcPainOffset : int {
     var health : int
     health = plyr.health > 100 ? 100 : plyr.health
     if (health != ST_calcPainOffset_oldhealth) {
-        ST_calcPainOffset_lastcalc = ST_FACESTRIDE * ((100 - health) * ST_NUMPAINFACES / 101)
+        ST_calcPainOffset_lastcalc = ST_FACESTRIDE * (((100 - health) * ST_NUMPAINFACES) / 101)
         ST_calcPainOffset_oldhealth = health
     }
     return ST_calcPainOffset_lastcalc
@@ -365,7 +365,7 @@ def ST_updateFaceWidget {
     }
     // look left or look right if the facecount has timed out
     if (!(st_facecount != 0)) {
-        st_faceindex = ST_calcPainOffset() + st_randomnumber % 3
+        st_faceindex = ST_calcPainOffset() + (st_randomnumber % 3)
         st_facecount = ST_STRAIGHTFACECOUNT
         ST_updateFaceWidget_priority = 0
     }
@@ -433,13 +433,13 @@ def ST_doPaletteStuff {
         }
     }
     if (cnt != 0) {
-        palette = cnt + 7 >> 3
+        palette = (cnt + 7) >> 3
         if (palette >= NUMREDPALS) {
             palette = NUMREDPALS - 1
         }
         palette += STARTREDPALS
     } elif (plyr.bonuscount != 0) {
-        palette = plyr.bonuscount + 7 >> 3
+        palette = (plyr.bonuscount + 7) >> 3
         if (palette >= NUMBONUSPALS) {
             palette = NUMBONUSPALS - 1
         }
@@ -494,7 +494,7 @@ def ST_diffDraw {
 }
 
 def ST_Drawer(fullscreen : doom_boolean; refresh : doom_boolean) {
-    st_statusbaron = enum_from_int(type<doom_boolean>, !(int(fullscreen) != 0) || uint(int(automapactive)) != 0 ? 1 : 0)
+    st_statusbaron = enum_from_int(type<doom_boolean>, (!(int(fullscreen) != 0)) || uint(int(automapactive)) != 0 ? 1 : 0)
     st_firsttime = enum_from_int(type<doom_boolean>, uint(int(st_firsttime)) != 0 || uint(int(refresh)) != 0 ? 1 : 0)
     // Do red-/gold-shifts from damage/items
     ST_doPaletteStuff()
@@ -518,30 +518,30 @@ def ST_loadGraphics {
     // Load the numbers, tall and short
     for (i in range(10)) {
         // doom_sprintf(namebuf, "STTNUM%d", i);
-        doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("STTNUM"))
+        doom_strcpy(addr(namebuf[0]), cstr("STTNUM"))
         doom_concat(addr(namebuf[0]), doom_itoa(i, 10))
         tallnum[i] = reinterpret<uint8?>(W_CacheLumpName(addr(namebuf[0]), PU_STATIC))
         // doom_sprintf(namebuf, "STYSNUM%d", i);
-        doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("STYSNUM"))
+        doom_strcpy(addr(namebuf[0]), cstr("STYSNUM"))
         doom_concat(addr(namebuf[0]), doom_itoa(i, 10))
         shortnum[i] = reinterpret<uint8?>(W_CacheLumpName(addr(namebuf[0]), PU_STATIC))
     }
     // Load percent key.
     // Note: why not load STMINUS here, too?
-    tallpercent = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("STTPRCNT"), PU_STATIC))
+    tallpercent = reinterpret<uint8?>(W_CacheLumpName(cstr("STTPRCNT"), PU_STATIC))
     // key cards
     for (i in range(int(card_t.NUMCARDS))) {
         // doom_sprintf(namebuf, "STKEYS%d", i);
-        doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("STKEYS"))
+        doom_strcpy(addr(namebuf[0]), cstr("STKEYS"))
         doom_concat(addr(namebuf[0]), doom_itoa(i, 10))
         keys[i] = reinterpret<uint8?>(W_CacheLumpName(addr(namebuf[0]), PU_STATIC))
     }
     // arms background
-    armsbg = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("STARMS"), PU_STATIC))
+    armsbg = reinterpret<uint8?>(W_CacheLumpName(cstr("STARMS"), PU_STATIC))
     // arms ownership widgets
     for (i in range(6)) {
         // doom_sprintf(namebuf, "STGNUM%d", i + 2);
-        doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("STGNUM"))
+        doom_strcpy(addr(namebuf[0]), cstr("STGNUM"))
         doom_concat(addr(namebuf[0]), doom_itoa(i + 2, 10))
         // gray #
         arms[i][0] = reinterpret<uint8?>(W_CacheLumpName(addr(namebuf[0]), PU_STATIC))
@@ -550,17 +550,17 @@ def ST_loadGraphics {
     }
     // face backgrounds for different color players
     // doom_sprintf(namebuf, "STFB%d", consoleplayer);
-    doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("STFB"))
+    doom_strcpy(addr(namebuf[0]), cstr("STFB"))
     doom_concat(addr(namebuf[0]), doom_itoa(consoleplayer, 10))
     faceback = reinterpret<uint8?>(W_CacheLumpName(addr(namebuf[0]), PU_STATIC))
     // status bar background bits
-    sbar = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("STBAR"), PU_STATIC))
+    sbar = reinterpret<uint8?>(W_CacheLumpName(cstr("STBAR"), PU_STATIC))
     // face states
     facenum = 0
     for (i in range(ST_NUMPAINFACES)) {
         for (j in range(ST_NUMSTRAIGHTFACES)) {
             // doom_sprintf(namebuf, "STFST%d%d", i, j);
-            doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("STFST"))
+            doom_strcpy(addr(namebuf[0]), cstr("STFST"))
             doom_concat(addr(namebuf[0]), doom_itoa(i, 10))
             doom_concat(addr(namebuf[0]), doom_itoa(j, 10))
             let _t0 = facenum
@@ -568,33 +568,33 @@ def ST_loadGraphics {
             faces[_t0] = reinterpret<uint8?>(W_CacheLumpName(addr(namebuf[0]), PU_STATIC))
         }
         // doom_sprintf(namebuf, "STFTR%d0", i); // turn right
-        doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("STFTR"))
+        doom_strcpy(addr(namebuf[0]), cstr("STFTR"))
         doom_concat(addr(namebuf[0]), doom_itoa(i, 10))
-        doom_concat(addr(namebuf[0]), reinterpret<uint8?>("0"))
+        doom_concat(addr(namebuf[0]), cstr("0"))
         let _t1 = facenum
         facenum++
         faces[_t1] = reinterpret<uint8?>(W_CacheLumpName(addr(namebuf[0]), PU_STATIC))
         // doom_sprintf(namebuf, "STFTL%d0", i); // turn left
-        doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("STFTL"))
+        doom_strcpy(addr(namebuf[0]), cstr("STFTL"))
         doom_concat(addr(namebuf[0]), doom_itoa(i, 10))
-        doom_concat(addr(namebuf[0]), reinterpret<uint8?>("0"))
+        doom_concat(addr(namebuf[0]), cstr("0"))
         let _t2 = facenum
         facenum++
         faces[_t2] = reinterpret<uint8?>(W_CacheLumpName(addr(namebuf[0]), PU_STATIC))
         // doom_sprintf(namebuf, "STFOUCH%d", i); // ouch!
-        doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("STFOUCH"))
+        doom_strcpy(addr(namebuf[0]), cstr("STFOUCH"))
         doom_concat(addr(namebuf[0]), doom_itoa(i, 10))
         let _t3 = facenum
         facenum++
         faces[_t3] = reinterpret<uint8?>(W_CacheLumpName(addr(namebuf[0]), PU_STATIC))
         // doom_sprintf(namebuf, "STFEVL%d", i); // evil grin ;)
-        doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("STFEVL"))
+        doom_strcpy(addr(namebuf[0]), cstr("STFEVL"))
         doom_concat(addr(namebuf[0]), doom_itoa(i, 10))
         let _t4 = facenum
         facenum++
         faces[_t4] = reinterpret<uint8?>(W_CacheLumpName(addr(namebuf[0]), PU_STATIC))
         // doom_sprintf(namebuf, "STFKILL%d", i); // pissed off
-        doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("STFKILL"))
+        doom_strcpy(addr(namebuf[0]), cstr("STFKILL"))
         doom_concat(addr(namebuf[0]), doom_itoa(i, 10))
         let _t5 = facenum
         facenum++
@@ -602,15 +602,14 @@ def ST_loadGraphics {
     }
     let _t6 = facenum
     facenum++
-    faces[_t6] = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("STFGOD0"), PU_STATIC))
+    faces[_t6] = reinterpret<uint8?>(W_CacheLumpName(cstr("STFGOD0"), PU_STATIC))
     let _t7 = facenum
     facenum++
-    faces[_t7] = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("STFDEAD0"), PU_STATIC))
+    faces[_t7] = reinterpret<uint8?>(W_CacheLumpName(cstr("STFDEAD0"), PU_STATIC))
 }
 
-[c_function]
 def ST_loadData {
-    lu_palette = W_GetNumForName(reinterpret<uint8?>("PLAYPAL"))
+    lu_palette = W_GetNumForName(cstr("PLAYPAL"))
     ST_loadGraphics()
 }
 
@@ -618,91 +617,79 @@ def ST_loadData {
 def ST_unloadGraphics {
     // unload the numbers, tall and short
     for (i in range(10)) {
-        {
-            if (reinterpret<memblock_s?>(reinterpret<uint8?>(tallnum[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-                var buf : uint8[260]
-                doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
-                doom_concat(addr(buf[0]), doom_itoa(1111, 10))
-                I_Error(addr(buf[0]))
-            }
-            Z_ChangeTag2(reinterpret<void?>(tallnum[i]), 101)
-        }
-        {
-            if (reinterpret<memblock_s?>(reinterpret<uint8?>(shortnum[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-                var buf : uint8[260]
-                doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
-                doom_concat(addr(buf[0]), doom_itoa(1112, 10))
-                I_Error(addr(buf[0]))
-            }
-            Z_ChangeTag2(reinterpret<void?>(shortnum[i]), 101)
-        }
-    }
-    {
-        // unload tall percent
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(tallpercent) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        if (reinterpret<memblock_s?>(reinterpret<uint8?>(tallnum[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1115, 10))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
+            doom_concat(addr(buf[0]), doom_itoa(1111, 10))
             I_Error(addr(buf[0]))
         }
-        Z_ChangeTag2(reinterpret<void?>(tallpercent), 101)
-    }
-    {
-        // unload arms background
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(armsbg) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        Z_ChangeTag2(reinterpret<void?>(tallnum[i]), PU_CACHE)
+        if (reinterpret<memblock_s?>(reinterpret<uint8?>(shortnum[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1118, 10))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
+            doom_concat(addr(buf[0]), doom_itoa(1112, 10))
             I_Error(addr(buf[0]))
         }
-        Z_ChangeTag2(reinterpret<void?>(armsbg), 101)
+        Z_ChangeTag2(reinterpret<void?>(shortnum[i]), PU_CACHE)
     }
+    // unload tall percent
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(tallpercent) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1115, 10))
+        I_Error(addr(buf[0]))
+    }
+    Z_ChangeTag2(reinterpret<void?>(tallpercent), PU_CACHE)
+    // unload arms background
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(armsbg) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1118, 10))
+        I_Error(addr(buf[0]))
+    }
+    Z_ChangeTag2(reinterpret<void?>(armsbg), PU_CACHE)
     // unload gray #'s
     for (i in range(6)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(arms[i][0]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1122, 10))
             I_Error(addr(buf[0]))
         }
-        Z_ChangeTag2(reinterpret<void?>(arms[i][0]), 101)
+        Z_ChangeTag2(reinterpret<void?>(arms[i][0]), PU_CACHE)
     }
     // unload the key cards
     for (i in range(int(card_t.NUMCARDS))) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(keys[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1126, 10))
             I_Error(addr(buf[0]))
         }
-        Z_ChangeTag2(reinterpret<void?>(keys[i]), 101)
+        Z_ChangeTag2(reinterpret<void?>(keys[i]), PU_CACHE)
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(sbar) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1128, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(sbar), 101)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(sbar) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1128, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(faceback) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1129, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(faceback), 101)
+    Z_ChangeTag2(reinterpret<void?>(sbar), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(faceback) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1129, 10))
+        I_Error(addr(buf[0]))
     }
+    Z_ChangeTag2(reinterpret<void?>(faceback), PU_CACHE)
     for (i in range(ST_NUMFACES)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(faces[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/st_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1132, 10))
             I_Error(addr(buf[0]))
         }
-        Z_ChangeTag2(reinterpret<void?>(faces[i]), 101)
+        Z_ChangeTag2(reinterpret<void?>(faces[i]), PU_CACHE)
     }
 }
 
@@ -714,7 +701,7 @@ def ST_unloadData {
 def ST_initData {
     st_firsttime = doom_boolean._c_true
     plyr = addr(players[0]) + end_index(consoleplayer, 4)
-    st_clock = uint(0)
+    st_clock = 0u
     st_chatstate = st_chatstateenum_t.StartChatState
     st_gamestate = st_stateenum_t.FirstPersonState
     st_statusbaron = doom_boolean._c_true
@@ -745,7 +732,7 @@ def ST_createWidgets {
     STlib_initBinIcon(addr(w_armsbg), ST_ARMSBGX, ST_ARMSBGY, armsbg, addr(st_notdeathmatch), addr(st_statusbaron))
     // weapons owned
     for (i in range(6)) {
-        STlib_initMultIcon(addr(w_arms[0]) + end_index(i, 6), ST_ARMSX + i % 3 * ST_ARMSXSPACE, ST_ARMSY + i / 3 * ST_ARMSYSPACE, addr(arms[i][0]), reinterpret<int?>(addr(plyr.weaponowned[0]) + end_index(i + 1, 9)), addr(st_armson))
+        STlib_initMultIcon(addr(w_arms[0]) + end_index(i, 6), ST_ARMSX + (i % 3) * ST_ARMSXSPACE, ST_ARMSY + (i / 3) * ST_ARMSYSPACE, addr(arms[i][0]), reinterpret<int?>(addr(plyr.weaponowned[0]) + end_index(i + 1, 9)), addr(st_armson))
     }
     // frags sum
     STlib_initNum(addr(w_frags), ST_FRAGSX, ST_FRAGSY, addr(tallnum[0]), addr(st_fragscount), addr(st_fragson), ST_FRAGSWIDTH)
@@ -791,6 +778,6 @@ def ST_Stop {
 def ST_Init {
     veryfirsttime = 0
     ST_loadData()
-    screens[4] = reinterpret<uint8?>(Z_Malloc(320 * ST_HEIGHT, PU_STATIC, null))
+    screens[4] = reinterpret<uint8?>(Z_Malloc(SCREENWIDTH * ST_HEIGHT, PU_STATIC, null))
 }
 

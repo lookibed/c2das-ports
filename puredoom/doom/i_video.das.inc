@@ -40,18 +40,14 @@ def I_FinishUpdate {
         if (tics > 20) {
             tics = 20
         }
-        {
-            i = 0
-            while (i < tics * 2) {
-                deref(screens[0] + ((SCREENHEIGHT - 1) * SCREENWIDTH + i)) = uint8(255)
-                i += 2
-            }
+        i = 0
+        while (i < tics * 2) {
+            screens[0][(SCREENHEIGHT - 1) * SCREENWIDTH + i] = 255u8
+            i += 2
         }
-        {
-            while (i < 20 * 2) {
-                deref(screens[0] + ((SCREENHEIGHT - 1) * SCREENWIDTH + i)) = uint8(0)
-                i += 2
-            }
+        while (i < 20 * 2) {
+            screens[0][(SCREENHEIGHT - 1) * SCREENWIDTH + i] = 0u8
+            i += 2
         }
     }
 }

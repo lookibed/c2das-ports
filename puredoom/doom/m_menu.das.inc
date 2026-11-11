@@ -169,7 +169,7 @@ var skullAnimCounter : int16
 var whichSkull : int16
 var skullName : uint8[2][9] = fixed_array(cstr_array("M_SKULL1", 9), cstr_array("M_SKULL2", 9))
 var currentMenu : menu_s?
-var menu_custom_texts : menu_custom_text_t[4] = fixed_array(menu_custom_text_t(name = unsafe(reinterpret<uint8?>("TXT_MMOV")), segs = fixed_array(menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_MSENS")), x = 0, w = 74, offx = 0, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_MSENS")), x = 0, w = 31, offx = 83, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_MSENS")), x = 160, w = 14, offx = 83 + 31, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_MSENS")), x = 60, w = 14, offx = 83 + 31 + 14, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_DETAIL")), x = 169, w = 5, offx = 83 + 31 + 14 + 14, offy = 0), menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())), menu_custom_text_t(name = unsafe(reinterpret<uint8?>("TXT_MOPT")), segs = fixed_array(menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_MSENS")), x = 0, w = 74, offx = 0, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_OPTION")), x = 0, w = 92, offx = 74 + 9, offy = 0), menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())), menu_custom_text_t(name = unsafe(reinterpret<uint8?>("TXT_CROS")), segs = fixed_array(menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_SKILL")), x = 0, w = 16, offx = 0, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_DETAIL")), x = 14, w = 15, offx = 16, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_SKILL")), x = 46, w = 30, offx = 16 + 15, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_SKILL")), x = 62, w = 14, offx = 16 + 15 + 30, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_SKILL")), x = 16, w = 15, offx = 16 + 15 + 30 + 14, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_DETAIL")), x = 140, w = 19, offx = 16 + 15 + 30 + 14 + 15, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_DETAIL")), x = 14, w = 15, offx = 16 + 15 + 30 + 14 + 15 + 19, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_DETAIL")), x = 169, w = 5, offx = 16 + 15 + 30 + 14 + 15 + 19 + 15, offy = 0), menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())), menu_custom_text_t(name = unsafe(reinterpret<uint8?>("TXT_ARUN")), segs = fixed_array(menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_SGTTL")), x = 90, w = 17, offx = 0, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_GDLOW")), x = 0, w = 10, offx = 17, offy = 3), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_GDLOW")), x = 26, w = 16, offx = 17 + 10, offy = 3), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_DISP")), x = 57, w = 30, offx = 17 + 10 + 16, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_RDTHIS")), x = 99, w = 14, offx = 17 + 10 + 16 + 30, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_RDTHIS")), x = 0, w = 16, offx = 17 + 10 + 16 + 30 + 14 + 7, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_SFXVOL")), x = 90, w = 15, offx = 17 + 10 + 16 + 30 + 14 + 7 + 16, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_OPTION")), x = 62, w = 15, offx = 17 + 10 + 16 + 30 + 14 + 7 + 16 + 15, offy = 0), menu_custom_text_seg_t(lump = unsafe(reinterpret<uint8?>("M_DETAIL")), x = 169, w = 5, offx = 17 + 10 + 16 + 30 + 14 + 7 + 16 + 15 + 15, offy = 0), menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())))
+var menu_custom_texts : menu_custom_text_t[4] = fixed_array(menu_custom_text_t(name = cstr("TXT_MMOV"), segs = fixed_array(menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 0, w = 74, offx = 0, offy = 0), menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 0, w = 31, offx = 83, offy = 0), menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 160, w = 14, offx = 83 + 31, offy = 0), menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 60, w = 14, offx = 83 + 31 + 14, offy = 0), menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 169, w = 5, offx = 83 + 31 + 14 + 14, offy = 0), menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())), menu_custom_text_t(name = cstr("TXT_MOPT"), segs = fixed_array(menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 0, w = 74, offx = 0, offy = 0), menu_custom_text_seg_t(lump = cstr("M_OPTION"), x = 0, w = 92, offx = 74 + 9, offy = 0), menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())), menu_custom_text_t(name = cstr("TXT_CROS"), segs = fixed_array(menu_custom_text_seg_t(lump = cstr("M_SKILL"), x = 0, w = 16, offx = 0, offy = 0), menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 14, w = 15, offx = 16, offy = 0), menu_custom_text_seg_t(lump = cstr("M_SKILL"), x = 46, w = 30, offx = 16 + 15, offy = 0), menu_custom_text_seg_t(lump = cstr("M_SKILL"), x = 62, w = 14, offx = 16 + 15 + 30, offy = 0), menu_custom_text_seg_t(lump = cstr("M_SKILL"), x = 16, w = 15, offx = 16 + 15 + 30 + 14, offy = 0), menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 140, w = 19, offx = 16 + 15 + 30 + 14 + 15, offy = 0), menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 14, w = 15, offx = 16 + 15 + 30 + 14 + 15 + 19, offy = 0), menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 169, w = 5, offx = 16 + 15 + 30 + 14 + 15 + 19 + 15, offy = 0), menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())), menu_custom_text_t(name = cstr("TXT_ARUN"), segs = fixed_array(menu_custom_text_seg_t(lump = cstr("M_SGTTL"), x = 90, w = 17, offx = 0, offy = 0), menu_custom_text_seg_t(lump = cstr("M_GDLOW"), x = 0, w = 10, offx = 17, offy = 3), menu_custom_text_seg_t(lump = cstr("M_GDLOW"), x = 26, w = 16, offx = 17 + 10, offy = 3), menu_custom_text_seg_t(lump = cstr("M_DISP"), x = 57, w = 30, offx = 17 + 10 + 16, offy = 0), menu_custom_text_seg_t(lump = cstr("M_RDTHIS"), x = 99, w = 14, offx = 17 + 10 + 16 + 30, offy = 0), menu_custom_text_seg_t(lump = cstr("M_RDTHIS"), x = 0, w = 16, offx = 17 + 10 + 16 + 30 + 14 + 7, offy = 0), menu_custom_text_seg_t(lump = cstr("M_SFXVOL"), x = 90, w = 15, offx = 17 + 10 + 16 + 30 + 14 + 7 + 16, offy = 0), menu_custom_text_seg_t(lump = cstr("M_OPTION"), x = 62, w = 15, offx = 17 + 10 + 16 + 30 + 14 + 7 + 16 + 15, offy = 0), menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 169, w = 5, offx = 17 + 10 + 16 + 30 + 14 + 7 + 16 + 15 + 15, offy = 0), menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())))
 var custom_texts_count : int = int(uint64(typeinfo sizeof(type<menu_custom_text_t[4]>)) / uint64(typeinfo sizeof(type<menu_custom_text_t>)))
 var tempstring : uint8[80]
 var epi : int
@@ -206,7 +206,7 @@ var read_e : anon_823
 var ReadMenu1 : menuitem_t[1]
 var ReadDef1 : menu_s
 var read_e2 : anon_825
-var ReadMenu2 : menuitem_t[1] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_FinishReadThis, alphaKey = uint8(0)))
+var ReadMenu2 : menuitem_t[1] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_FinishReadThis, alphaKey = 0u8))
 var ReadDef2 : menu_s
 var SoundMenu : menuitem_t?
 var sound_e : anon_826
@@ -262,16 +262,14 @@ def M_ReadSaveStrings {
     var count : int
     var name : uint8[256]
     for (i in range(int(anon_830.load_end))) {
-        {
-            // doom_sprintf(name, "c:\\doomdata\\" SAVEGAMENAME "%d.dsg", i);
-            // doom_sprintf(name, SAVEGAMENAME"%d.dsg", i);
-            doom_strcpy(addr(name[0]), reinterpret<uint8?>("doomsav"))
-            doom_concat(addr(name[0]), doom_itoa(i, 10))
-            doom_concat(addr(name[0]), reinterpret<uint8?>(".dsg"))
-        }
-        handle = invoke(doom_open, addr(name[0]), reinterpret<uint8?>("r"))
+        // doom_sprintf(name, "c:\\doomdata\\" SAVEGAMENAME "%d.dsg", i);
+        // doom_sprintf(name, SAVEGAMENAME"%d.dsg", i);
+        doom_strcpy(addr(name[0]), cstr("doomsav"))
+        doom_concat(addr(name[0]), doom_itoa(i, 10))
+        doom_concat(addr(name[0]), cstr(".dsg"))
+        handle = invoke(doom_open, addr(name[0]), cstr("r"))
         if (handle == null) {
-            doom_strcpy(addr(savegamestrings[i][0]), reinterpret<uint8?>("empty slot"))
+            doom_strcpy(addr(savegamestrings[i][0]), cstr("empty slot"))
             DOOM_LoadMenu[i].status = int16(0)
             continue
         }
@@ -284,7 +282,7 @@ def M_ReadSaveStrings {
 // M_LoadGame & Cie.
 [c_function]
 def M_DrawLoad {
-    V_DrawPatchDirect(72, 28, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_LOADG"), PU_CACHE)))
+    V_DrawPatchDirect(72, 28, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_LOADG"), PU_CACHE)))
     for (i in range(int(anon_830.load_end))) {
         M_DrawSaveLoadBorder(int(LoadDef.x), int(LoadDef.y) + LINEHEIGHT * i)
         M_WriteText(int(LoadDef.x), int(LoadDef.y) + LINEHEIGHT * i, addr(savegamestrings[i][0]))
@@ -294,25 +292,23 @@ def M_DrawLoad {
 // Draw border for the savegame description
 [c_function]
 def M_DrawSaveLoadBorder(var x : int; y : int) {
-    V_DrawPatchDirect(x - 8, y + 7, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_LSLEFT"), PU_CACHE)))
+    V_DrawPatchDirect(x - 8, y + 7, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_LSLEFT"), PU_CACHE)))
     for (i in range(24)) {
-        V_DrawPatchDirect(x, y + 7, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_LSCNTR"), PU_CACHE)))
+        V_DrawPatchDirect(x, y + 7, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_LSCNTR"), PU_CACHE)))
         x += 8
     }
-    V_DrawPatchDirect(x, y + 7, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_LSRGHT"), PU_CACHE)))
+    V_DrawPatchDirect(x, y + 7, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_LSRGHT"), PU_CACHE)))
 }
 
 // User wants to load this game
 [c_function]
 def M_LoadSelect(choice : int) {
     var name : uint8[256]
-    {
-        // doom_sprintf(name, "c:\\doomdata\\"SAVEGAMENAME"%d.dsg", choice);
-        // doom_sprintf(name, SAVEGAMENAME"%d.dsg", choice);
-        doom_strcpy(addr(name[0]), reinterpret<uint8?>("doomsav"))
-        doom_concat(addr(name[0]), doom_itoa(choice, 10))
-        doom_concat(addr(name[0]), reinterpret<uint8?>(".dsg"))
-    }
+    // doom_sprintf(name, "c:\\doomdata\\"SAVEGAMENAME"%d.dsg", choice);
+    // doom_sprintf(name, SAVEGAMENAME"%d.dsg", choice);
+    doom_strcpy(addr(name[0]), cstr("doomsav"))
+    doom_concat(addr(name[0]), doom_itoa(choice, 10))
+    doom_concat(addr(name[0]), cstr(".dsg"))
     G_LoadGame(addr(name[0]))
     M_ClearMenus()
 }
@@ -321,7 +317,7 @@ def M_LoadSelect(choice : int) {
 [c_function]
 def M_LoadGame(choice : int) {
     if (int(netgame) != 0) {
-        M_StartMessage(reinterpret<uint8?>("you can't do load while in a net game!\n\npress a key."), null, doom_boolean._c_false)
+        M_StartMessage(cstr("you can't do load while in a net game!\n\npress a key."), null, doom_boolean._c_false)
         return
     }
     M_SetupNextMenu(addr(LoadDef))
@@ -332,14 +328,14 @@ def M_LoadGame(choice : int) {
 [c_function]
 def M_DrawSave {
     var i : int
-    V_DrawPatchDirect(72, 28, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_SAVEG"), PU_CACHE)))
+    V_DrawPatchDirect(72, 28, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_SAVEG"), PU_CACHE)))
     for (i1 in range(int(anon_830.load_end))) {
         M_DrawSaveLoadBorder(int(LoadDef.x), int(LoadDef.y) + LINEHEIGHT * i1)
         M_WriteText(int(LoadDef.x), int(LoadDef.y) + LINEHEIGHT * i1, addr(savegamestrings[i1][0]))
     }
     if (saveStringEnter != 0) {
         i = M_StringWidth(addr(savegamestrings[saveSlot][0]))
-        M_WriteText(int(LoadDef.x) + i, int(LoadDef.y) + LINEHEIGHT * saveSlot, reinterpret<uint8?>("_"))
+        M_WriteText(int(LoadDef.x) + i, int(LoadDef.y) + LINEHEIGHT * saveSlot, cstr("_"))
     }
 }
 
@@ -361,8 +357,8 @@ def M_SaveSelect(choice : int) {
     saveStringEnter = 1
     saveSlot = choice
     doom_strcpy(addr(saveOldString[0]), addr(savegamestrings[choice][0]))
-    if (!(doom_strcmp(addr(savegamestrings[choice][0]), reinterpret<uint8?>("empty slot")) != 0)) {
-        savegamestrings[choice][0] = uint8(0)
+    if (!(doom_strcmp(addr(savegamestrings[choice][0]), cstr("empty slot")) != 0)) {
+        savegamestrings[choice][0] = 0u8
     }
     saveCharIndex = doom_strlen(addr(savegamestrings[choice][0]))
 }
@@ -371,7 +367,7 @@ def M_SaveSelect(choice : int) {
 [c_function]
 def M_SaveGame(choice : int) {
     if (!(int(usergame) != 0)) {
-        M_StartMessage(reinterpret<uint8?>("you can't save if you aren't playing!\n\npress a key."), null, doom_boolean._c_false)
+        M_StartMessage(cstr("you can't save if you aren't playing!\n\npress a key."), null, doom_boolean._c_false)
         return
     }
     if (gamestate != gamestate_t.GS_LEVEL) {
@@ -407,9 +403,9 @@ def M_QuickSave {
         return
     }
     // doom_sprintf(tempstring, QSPROMPT, savegamestrings[quickSaveSlot]);
-    doom_strcpy(addr(tempstring[0]), reinterpret<uint8?>("quicksave over your game named\n\n'"))
+    doom_strcpy(addr(tempstring[0]), cstr("quicksave over your game named\n\n'"))
     doom_concat(addr(tempstring[0]), addr(savegamestrings[quickSaveSlot][0]))
-    doom_strcpy(addr(tempstring[0]), reinterpret<uint8?>("'?\n\npress y or n."))
+    doom_strcpy(addr(tempstring[0]), cstr("'?\n\npress y or n."))
     M_StartMessage(addr(tempstring[0]), reinterpret<void?>(@@M_QuickSaveResponse), doom_boolean._c_true)
 }
 
@@ -424,17 +420,17 @@ def M_QuickLoadResponse(ch : int) {
 [c_function]
 def M_QuickLoad {
     if (int(netgame) != 0) {
-        M_StartMessage(reinterpret<uint8?>("you can't quickload during a netgame!\n\npress a key."), null, doom_boolean._c_false)
+        M_StartMessage(cstr("you can't quickload during a netgame!\n\npress a key."), null, doom_boolean._c_false)
         return
     }
     if (quickSaveSlot < 0) {
-        M_StartMessage(reinterpret<uint8?>("you haven't picked a quicksave slot yet!\n\npress a key."), null, doom_boolean._c_false)
+        M_StartMessage(cstr("you haven't picked a quicksave slot yet!\n\npress a key."), null, doom_boolean._c_false)
         return
     }
     // doom_sprintf(tempstring, QLPROMPT, savegamestrings[quickSaveSlot]);
-    doom_strcpy(addr(tempstring[0]), reinterpret<uint8?>("do you want to quickload the game named\n\n'%s"))
+    doom_strcpy(addr(tempstring[0]), cstr("do you want to quickload the game named\n\n'%s"))
     doom_concat(addr(tempstring[0]), addr(savegamestrings[quickSaveSlot][0]))
-    doom_strcpy(addr(tempstring[0]), reinterpret<uint8?>("'?\n\npress y or n."))
+    doom_strcpy(addr(tempstring[0]), cstr("'?\n\npress y or n."))
     M_StartMessage(addr(tempstring[0]), reinterpret<void?>(@@M_QuickLoadResponse), doom_boolean._c_true)
 }
 
@@ -445,9 +441,9 @@ def M_DrawReadThis1 {
     inhelpscreens = doom_boolean._c_true
     let _cond = gamemode
     if (_cond == GameMode_t.commercial) {
-        V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("HELP"), PU_CACHE)))
+        V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("HELP"), PU_CACHE)))
     } elif (_cond == GameMode_t.shareware || _cond == GameMode_t.registered || _cond == GameMode_t.retail) {
-        V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("HELP1"), PU_CACHE)))
+        V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("HELP1"), PU_CACHE)))
     } else {
     }
     return
@@ -460,9 +456,9 @@ def M_DrawReadThis2 {
     let _cond = gamemode
     if (_cond == GameMode_t.retail || _cond == GameMode_t.commercial) {
         // This hack keeps us from having to change menus.
-        V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("CREDIT"), PU_CACHE)))
+        V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("CREDIT"), PU_CACHE)))
     } elif (_cond == GameMode_t.shareware || _cond == GameMode_t.registered) {
-        V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("HELP2"), PU_CACHE)))
+        V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("HELP2"), PU_CACHE)))
     } else {
     }
     return
@@ -471,7 +467,7 @@ def M_DrawReadThis2 {
 // Change Sfx & Music volumes
 [c_function]
 def M_DrawSound {
-    V_DrawPatchDirect(60, 38, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_SVOL"), PU_CACHE)))
+    V_DrawPatchDirect(60, 38, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_SVOL"), PU_CACHE)))
     if (!((doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) != 0)) {
         var offset : int = (doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) != 0 ? int(anon_829.sfx_vol_no_music) : int(anon_826.sfx_vol)
         M_DrawThermo(int(SoundDef.x), int(SoundDef.y) + LINEHEIGHT * (offset + 1), 16, snd_SfxVolume)
@@ -525,20 +521,20 @@ def M_MusicVol(choice : int) {
 // M_DrawMainMenu
 [c_function]
 def M_DrawMainMenu {
-    V_DrawPatchDirect(94, 2, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_DOOM"), PU_CACHE)))
+    V_DrawPatchDirect(94, 2, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_DOOM"), PU_CACHE)))
 }
 
 // M_NewGame
 [c_function]
 def M_DrawNewGame {
-    V_DrawPatchDirect(96, 14, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_NEWG"), PU_CACHE)))
-    V_DrawPatchDirect(54, 38, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_SKILL"), PU_CACHE)))
+    V_DrawPatchDirect(96, 14, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_NEWG"), PU_CACHE)))
+    V_DrawPatchDirect(54, 38, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_SKILL"), PU_CACHE)))
 }
 
 [c_function]
 def M_NewGame(choice : int) {
     if (uint(int(netgame)) != 0 && !(int(demoplayback) != 0)) {
-        M_StartMessage(reinterpret<uint8?>("you can't start a new game\nwhile in a network game.\n\npress a key."), null, doom_boolean._c_false)
+        M_StartMessage(cstr("you can't start a new game\nwhile in a network game.\n\npress a key."), null, doom_boolean._c_false)
         return
     }
     if (gamemode == GameMode_t.commercial) {
@@ -551,7 +547,7 @@ def M_NewGame(choice : int) {
 // M_Episode
 [c_function]
 def M_DrawEpisode {
-    V_DrawPatchDirect(54, 38, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_EPISOD"), PU_CACHE)))
+    V_DrawPatchDirect(54, 38, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_EPISOD"), PU_CACHE)))
 }
 
 def M_VerifyNightmare(ch : int) {
@@ -565,7 +561,7 @@ def M_VerifyNightmare(ch : int) {
 [c_function]
 def M_ChooseSkill(choice : int) {
     if (choice == int(anon_813.nightmare)) {
-        M_StartMessage(reinterpret<uint8?>("are you sure? this skill level\nisn't even remotely fair.\n\npress y or n."), reinterpret<void?>(@@M_VerifyNightmare), doom_boolean._c_true)
+        M_StartMessage(cstr("are you sure? this skill level\nisn't even remotely fair.\n\npress y or n."), reinterpret<void?>(@@M_VerifyNightmare), doom_boolean._c_true)
         return
     }
     G_DeferedInitNew(enum_from_int(type<skill_t>, choice), epi + 1, 1)
@@ -574,14 +570,14 @@ def M_ChooseSkill(choice : int) {
 
 [c_function]
 def M_Episode(var choice : int) {
-    if (gamemode == GameMode_t.shareware && choice != 0) {
-        M_StartMessage(reinterpret<uint8?>("this is the shareware version of doom.\n\nyou need to order the entire trilogy.\n\npress a key."), null, doom_boolean._c_false)
+    if ((gamemode == GameMode_t.shareware) && choice != 0) {
+        M_StartMessage(cstr("this is the shareware version of doom.\n\nyou need to order the entire trilogy.\n\npress a key."), null, doom_boolean._c_false)
         M_SetupNextMenu(addr(ReadDef1))
         return
     }
     // Yet another hack...
-    if (gamemode == GameMode_t.registered && choice > 2) {
-        invoke(doom_print, reinterpret<uint8?>("M_Episode: 4th episode requires UltimateDOOM\n"))
+    if ((gamemode == GameMode_t.registered) && (choice > 2)) {
+        invoke(doom_print, cstr("M_Episode: 4th episode requires UltimateDOOM\n"))
         choice = 0
     }
     epi = choice
@@ -591,7 +587,7 @@ def M_Episode(var choice : int) {
 // M_Options
 [c_function]
 def M_DrawOptions {
-    V_DrawPatchDirect(108, 15, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_OPTTTL"), PU_CACHE)))
+    V_DrawPatchDirect(108, 15, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_OPTTTL"), PU_CACHE)))
     // V_DrawPatchDirect (OptionsDef.x + 175,OptionsDef.y+LINEHEIGHT*detail,0,
     // W_CacheLumpName(detailNames[detailLevel],PU_CACHE)); // Details do nothing?
     V_DrawPatchDirect(int(OptionsDef.x) + 120, int(OptionsDef.y) + LINEHEIGHT * int(anon_815.messages), 0, reinterpret<uint8?>(W_CacheLumpName(addr(msgNames[showMessages][0]), PU_CACHE)))
@@ -602,7 +598,7 @@ def M_DrawOptions {
 
 [c_function]
 def M_DrawMouseOptions {
-    M_DrawCustomMenuText(reinterpret<uint8?>("TXT_MOPT"), 74, 45)
+    M_DrawCustomMenuText(cstr("TXT_MOPT"), 74, 45)
     V_DrawPatchDirect(int(MouseOptionsDef.x) + 149, int(MouseOptionsDef.y) + LINEHEIGHT * int(anon_821.mousemov), 0, reinterpret<uint8?>(W_CacheLumpName(addr(msgNames[mousemove][0]), PU_CACHE)))
     M_DrawThermo(int(MouseOptionsDef.x), int(MouseOptionsDef.y) + LINEHEIGHT * (int(anon_821.mousesens) + 1), 10, mouseSensitivity)
 }
@@ -613,43 +609,40 @@ def M_Options(choice : int) {
 }
 
 // Toggle messages on/off
-[c_function]
 def M_ChangeMessages(var choice : int) {
     // warning: unused parameter `int choice'
     choice = 0
     showMessages = 1 - showMessages
     if (!(showMessages != 0)) {
-        players[consoleplayer].message = reinterpret<uint8?>("Messages OFF")
+        players[consoleplayer].message = cstr("Messages OFF")
     } else {
-        players[consoleplayer].message = reinterpret<uint8?>("Messages ON")
+        players[consoleplayer].message = cstr("Messages ON")
     }
     message_dontfuckwithme = doom_boolean._c_true
 }
 
 // Toggle crosshair on/off
-[c_function]
 def M_ChangeCrosshair(var choice : int) {
     // warning: unused parameter `int choice'
     choice = 0
     crosshair = 1 - crosshair
     if (!(crosshair != 0)) {
-        players[consoleplayer].message = reinterpret<uint8?>("Crosshair OFF")
+        players[consoleplayer].message = cstr("Crosshair OFF")
     } else {
-        players[consoleplayer].message = reinterpret<uint8?>("Crosshair ON")
+        players[consoleplayer].message = cstr("Crosshair ON")
     }
     message_dontfuckwithme = doom_boolean._c_true
 }
 
 // Toggle always-run on/off
-[c_function]
 def M_ChangeAlwaysRun(var choice : int) {
     // warning: unused parameter `int choice'
     choice = 0
     always_run = 1 - always_run
     if (!(always_run != 0)) {
-        players[consoleplayer].message = reinterpret<uint8?>("Always run OFF")
+        players[consoleplayer].message = cstr("Always run OFF")
     } else {
-        players[consoleplayer].message = reinterpret<uint8?>("Always run ON")
+        players[consoleplayer].message = cstr("Always run ON")
     }
     message_dontfuckwithme = doom_boolean._c_true
 }
@@ -672,10 +665,10 @@ def M_EndGame(var choice : int) {
         return
     }
     if (int(netgame) != 0) {
-        M_StartMessage(reinterpret<uint8?>("you can't end a netgame!\n\npress a key."), null, doom_boolean._c_false)
+        M_StartMessage(cstr("you can't end a netgame!\n\npress a key."), null, doom_boolean._c_false)
         return
     }
-    M_StartMessage(reinterpret<uint8?>("are you sure you want to end the game?\n\npress y or n."), reinterpret<void?>(@@M_EndGameResponse), doom_boolean._c_true)
+    M_StartMessage(cstr("are you sure you want to end the game?\n\npress y or n."), reinterpret<void?>(@@M_EndGameResponse), doom_boolean._c_true)
 }
 
 // M_ReadThis
@@ -704,9 +697,9 @@ def M_QuitResponse(ch : int) {
     }
     if (!(int(netgame) != 0)) {
         if (gamemode == GameMode_t.commercial) {
-            S_StartSound(null, quitsounds2[gametic >> 2 & 7])
+            S_StartSound(null, quitsounds2[(gametic >> 2) & 7])
         } else {
-            S_StartSound(null, quitsounds[gametic >> 2 & 7])
+            S_StartSound(null, quitsounds[(gametic >> 2) & 7])
         }
         I_WaitVBL(105)
     }
@@ -720,11 +713,11 @@ def M_QuitDOOM(choice : int) {
     if (language != Language_t.english) {
         // doom_sprintf(endstring, "%s\n\n"DOSY, endmsg[0]);
         doom_strcpy(addr(endstring[0]), endmsg[0])
-        doom_concat(addr(endstring[0]), reinterpret<uint8?>("\n\n(press y to quit)"))
+        doom_concat(addr(endstring[0]), cstr("\n\n(press y to quit)"))
     } else {
         // doom_sprintf(endstring, "%s\n\n" DOSY, endmsg[gametic % (NUM_QUITMESSAGES - 2) + 1]);
         doom_strcpy(addr(endstring[0]), endmsg[gametic % (NUM_QUITMESSAGES - 2) + 1])
-        doom_concat(addr(endstring[0]), reinterpret<uint8?>("\n\n(press y to quit)"))
+        doom_concat(addr(endstring[0]), cstr("\n\n(press y to quit)"))
     }
     M_StartMessage(addr(endstring[0]), reinterpret<void?>(@@M_QuitResponse), doom_boolean._c_true)
 }
@@ -748,12 +741,11 @@ def M_MouseMove(var choice : int) {
     return
 }
 
-[c_function]
 def M_ChangeDetail(var choice : int) {
     choice = 0
     detailLevel = 1 - detailLevel
     // FIXME - does not work. Remove anyway?
-    invoke(doom_print, reinterpret<uint8?>("M_ChangeDetail: low detail mode n.a.\n"))
+    invoke(doom_print, cstr("M_ChangeDetail: low detail mode n.a.\n"))
 }
 
 def M_SizeDisplay(choice : int) {
@@ -777,24 +769,24 @@ def M_SizeDisplay(choice : int) {
 def M_DrawThermo(x : int; y : int; thermWidth : int; thermDot : int) {
     var xx : int
     xx = x
-    V_DrawPatchDirect(xx, y, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_THERML"), PU_CACHE)))
+    V_DrawPatchDirect(xx, y, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_THERML"), PU_CACHE)))
     xx += 8
     for (i in range(thermWidth)) {
-        V_DrawPatchDirect(xx, y, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_THERMM"), PU_CACHE)))
+        V_DrawPatchDirect(xx, y, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_THERMM"), PU_CACHE)))
         xx += 8
     }
-    V_DrawPatchDirect(xx, y, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_THERMR"), PU_CACHE)))
-    V_DrawPatchDirect(x + 8 + thermDot * 8, y, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_THERMO"), PU_CACHE)))
+    V_DrawPatchDirect(xx, y, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_THERMR"), PU_CACHE)))
+    V_DrawPatchDirect((x + 8) + thermDot * 8, y, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_THERMO"), PU_CACHE)))
 }
 
 [c_function]
 def M_DrawEmptyCell(var menu : menu_s?; item : int) {
-    V_DrawPatchDirect(int(menu.x) - 10, int(menu.y) + item * LINEHEIGHT - 1, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_CELL1"), PU_CACHE)))
+    V_DrawPatchDirect(int(menu.x) - 10, int(menu.y) + item * LINEHEIGHT - 1, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_CELL1"), PU_CACHE)))
 }
 
 [c_function]
 def M_DrawSelCell(var menu : menu_s?; item : int) {
-    V_DrawPatchDirect(int(menu.x) - 10, int(menu.y) + item * LINEHEIGHT - 1, 0, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("M_CELL2"), PU_CACHE)))
+    V_DrawPatchDirect(int(menu.x) - 10, int(menu.y) + item * LINEHEIGHT - 1, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_CELL2"), PU_CACHE)))
 }
 
 [c_function]
@@ -819,17 +811,15 @@ def M_StringWidth(var _c_string : uint8?) : int {
     var i : int
     var w : int = 0
     var c : int
-    {
-        i = 0
-        while (i < doom_strlen(_c_string)) {
-            c = doom_toupper(int(deref(_c_string + i))) - '!'
-            if (c < 0 || c >= HU_FONTSIZE) {
-                w += 4
-            } else {
-                w += int(read_patch_t_width(hu_font[c], 0))
-            }
-            i++
+    i = 0
+    while (i < doom_strlen(_c_string)) {
+        c = doom_toupper(int(_c_string[i])) - HU_FONTSTART
+        if (c < 0 || c >= HU_FONTSIZE) {
+            w += 4
+        } else {
+            w += int(read_patch_t_width(hu_font[c], 0))
         }
+        i++
     }
     return w
 }
@@ -841,14 +831,12 @@ def M_StringHeight(var _c_string : uint8?) : int {
     var h : int
     var height : int = int(read_patch_t_height(hu_font[0], 0))
     h = height
-    {
-        i = 0
-        while (i < doom_strlen(_c_string)) {
-            if (int(deref(_c_string + i)) == '\n') {
-                h += height
-            }
-            i++
+    i = 0
+    while (i < doom_strlen(_c_string)) {
+        if (int(_c_string[i]) == '\n') {
+            h += height
         }
+        i++
     }
     return h
 }
@@ -876,7 +864,7 @@ def M_WriteText(x : int; y : int; var _c_string : uint8?) {
             cy += 12
             continue
         }
-        c = doom_toupper(c) - '!'
+        c = doom_toupper(c) - HU_FONTSTART
         if (c < 0 || c >= HU_FONTSIZE) {
             cx += 4
             continue
@@ -967,7 +955,7 @@ def M_Responder(var ev : event_t?) : doom_boolean {
             if (_cond == 127) {
                 if (saveCharIndex > 0) {
                     saveCharIndex--
-                    savegamestrings[saveSlot][saveCharIndex] = uint8(0)
+                    savegamestrings[saveSlot][saveCharIndex] = 0u8
                 }
                 break
             }
@@ -986,7 +974,7 @@ def M_Responder(var ev : event_t?) : doom_boolean {
             if (!(_cond == 127 || _cond == 27 || _cond == 13)) {
                 ch = doom_toupper(ch)
                 if (ch != 32) {
-                    if (ch - '!' < 0 || ch - '!' >= HU_FONTSIZE) {
+                    if (ch - HU_FONTSTART < 0 || ch - HU_FONTSTART >= HU_FONTSIZE) {
                         break
                     }
                 }
@@ -994,7 +982,7 @@ def M_Responder(var ev : event_t?) : doom_boolean {
                     let _t0 = saveCharIndex
                     saveCharIndex++
                     savegamestrings[saveSlot][_t0] = uint8(ch)
-                    savegamestrings[saveSlot][saveCharIndex] = uint8(0)
+                    savegamestrings[saveSlot][saveCharIndex] = 0u8
                 }
                 break
             }
@@ -1110,7 +1098,7 @@ def M_Responder(var ev : event_t?) : doom_boolean {
                 usegamma = 0
             }
             players[consoleplayer].message = addr(gammamsg[usegamma][0])
-            I_SetPalette(reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("PLAYPAL"), PU_CACHE)))
+            I_SetPalette(reinterpret<uint8?>(W_CacheLumpName(cstr("PLAYPAL"), PU_CACHE)))
             return doom_boolean._c_true
         }
     }
@@ -1133,7 +1121,7 @@ def M_Responder(var ev : event_t?) : doom_boolean {
                 itemOn = int16(int(itemOn) + 1)
             }
             S_StartSound(null, int(sfxenum_t.sfx_pstop))
-            if (!(int(deref(currentMenu.menuitems + int(itemOn)).status) == -1)) {
+            if (!(int(currentMenu.menuitems[int(itemOn)].status) == -1)) {
                 break
             }
         }
@@ -1146,32 +1134,32 @@ def M_Responder(var ev : event_t?) : doom_boolean {
                 itemOn = int16(int(itemOn) - 1)
             }
             S_StartSound(null, int(sfxenum_t.sfx_pstop))
-            if (!(int(deref(currentMenu.menuitems + int(itemOn)).status) == -1)) {
+            if (!(int(currentMenu.menuitems[int(itemOn)].status) == -1)) {
                 break
             }
         }
         return doom_boolean._c_true
     } elif (_cond3 == 172) {
-        if (deref(currentMenu.menuitems + int(itemOn)).routine != null && int(deref(currentMenu.menuitems + int(itemOn)).status) == 2) {
+        if (currentMenu.menuitems[int(itemOn)].routine != null && int(currentMenu.menuitems[int(itemOn)].status) == 2) {
             S_StartSound(null, int(sfxenum_t.sfx_stnmov))
-            invoke(deref(currentMenu.menuitems + int(itemOn)).routine, 0)
+            invoke(currentMenu.menuitems[int(itemOn)].routine, 0)
         }
         return doom_boolean._c_true
     } elif (_cond3 == 174) {
-        if (deref(currentMenu.menuitems + int(itemOn)).routine != null && int(deref(currentMenu.menuitems + int(itemOn)).status) == 2) {
+        if (currentMenu.menuitems[int(itemOn)].routine != null && int(currentMenu.menuitems[int(itemOn)].status) == 2) {
             S_StartSound(null, int(sfxenum_t.sfx_stnmov))
-            invoke(deref(currentMenu.menuitems + int(itemOn)).routine, 1)
+            invoke(currentMenu.menuitems[int(itemOn)].routine, 1)
         }
         return doom_boolean._c_true
     } elif (_cond3 == 13) {
-        if (deref(currentMenu.menuitems + int(itemOn)).routine != null && deref(currentMenu.menuitems + int(itemOn)).status != 0) {
+        if (currentMenu.menuitems[int(itemOn)].routine != null && currentMenu.menuitems[int(itemOn)].status != 0) {
             currentMenu.lastOn = itemOn
-            if (int(deref(currentMenu.menuitems + int(itemOn)).status) == 2) {
+            if (int(currentMenu.menuitems[int(itemOn)].status) == 2) {
                 // right arrow
-                invoke(deref(currentMenu.menuitems + int(itemOn)).routine, 1)
+                invoke(currentMenu.menuitems[int(itemOn)].routine, 1)
                 S_StartSound(null, int(sfxenum_t.sfx_stnmov))
             } else {
-                invoke(deref(currentMenu.menuitems + int(itemOn)).routine, int(itemOn))
+                invoke(currentMenu.menuitems[int(itemOn)].routine, int(itemOn))
                 S_StartSound(null, int(sfxenum_t.sfx_pistol))
             }
         }
@@ -1190,27 +1178,23 @@ def M_Responder(var ev : event_t?) : doom_boolean {
         }
         return doom_boolean._c_true
     } else {
-        {
-            i = int(itemOn) + 1
-            while (i < int(currentMenu.numitems)) {
-                if (int(deref(currentMenu.menuitems + i).alphaKey) == ch) {
-                    itemOn = int16(i)
-                    S_StartSound(null, int(sfxenum_t.sfx_pstop))
-                    return doom_boolean._c_true
-                }
-                i++
+        i = int(itemOn) + 1
+        while (i < int(currentMenu.numitems)) {
+            if (int(currentMenu.menuitems[i].alphaKey) == ch) {
+                itemOn = int16(i)
+                S_StartSound(null, int(sfxenum_t.sfx_pstop))
+                return doom_boolean._c_true
             }
+            i++
         }
-        {
-            i = 0
-            while (i <= int(itemOn)) {
-                if (int(deref(currentMenu.menuitems + i).alphaKey) == ch) {
-                    itemOn = int16(i)
-                    S_StartSound(null, int(sfxenum_t.sfx_pstop))
-                    return doom_boolean._c_true
-                }
-                i++
+        i = 0
+        while (i <= int(itemOn)) {
+            if (int(currentMenu.menuitems[i].alphaKey) == ch) {
+                itemOn = int16(i)
+                S_StartSound(null, int(sfxenum_t.sfx_pstop))
+                return doom_boolean._c_true
             }
+            i++
         }
     }
     return doom_boolean._c_false
@@ -1244,18 +1228,16 @@ def M_Drawer {
     if (messageToPrint != 0) {
         start = 0
         M_Drawer_y = int16(100 - M_StringHeight(messageString) / 2)
-        while (deref(messageString + start) != 0) {
-            {
-                i = int16(0)
-                while (int(i) < doom_strlen(messageString + start)) {
-                    if (int(deref(messageString + start + int(i))) == '\n') {
-                        doom_memset(reinterpret<void?>(addr(_c_string[0])), 0, 40)
-                        doom_strncpy(addr(_c_string[0]), messageString + start, int(i))
-                        start += int(i) + 1
-                        break
-                    }
-                    i = int16(int(i) + 1)
+        while (messageString[start] != 0) {
+            i = int16(0)
+            while (int(i) < doom_strlen(messageString + start)) {
+                if (int((messageString + start)[int(i)]) == '\n') {
+                    doom_memset(reinterpret<void?>(addr(_c_string[0])), 0, 40)
+                    doom_strncpy(addr(_c_string[0]), messageString + start, int(i))
+                    start += int(i) + 1
+                    break
                 }
+                i = int16(int(i) + 1)
             }
             if (int(i) == doom_strlen(messageString + start)) {
                 doom_strcpy(addr(_c_string[0]), messageString + start)
@@ -1276,9 +1258,9 @@ def M_Drawer {
             var j : int = 0
             var len : int = SCREENWIDTH * SCREENHEIGHT
             while (j < len) {
-                var color : uint8 = deref(screens[0] + j)
-                color = deref(colormaps + (int(color) + 20 * 256))
-                deref(screens[0] + j) = color
+                var color : uint8 = screens[0][j]
+                color = colormaps[int(color) + (20 * 256)]
+                screens[0][j] = color
                 j++
             }
         }
@@ -1291,23 +1273,21 @@ def M_Drawer {
     M_Drawer_x = currentMenu.x
     M_Drawer_y = currentMenu.y
     max = currentMenu.numitems
-    {
-        i = int16(0)
-        while (int(i) < int(max)) {
-            var menuitem : menuitem_t? = currentMenu.menuitems + int(i)
-            if (menuitem.name[0] != 0) {
-                if (doom_strncmp(addr(menuitem.name[0]), reinterpret<uint8?>("TXT_"), 4) == 0) {
-                    M_DrawCustomMenuText(addr(menuitem.name[0]), int(M_Drawer_x), int(M_Drawer_y))
-                } else {
-                    V_DrawPatchDirect(int(M_Drawer_x), int(M_Drawer_y), 0, reinterpret<uint8?>(W_CacheLumpName(addr(menuitem.name[0]), PU_CACHE)))
-                }
+    i = int16(0)
+    while (int(i) < int(max)) {
+        var menuitem : menuitem_t? = currentMenu.menuitems + int(i)
+        if (menuitem.name[0] != 0) {
+            if (doom_strncmp(addr(menuitem.name[0]), cstr("TXT_"), 4) == 0) {
+                M_DrawCustomMenuText(addr(menuitem.name[0]), int(M_Drawer_x), int(M_Drawer_y))
+            } else {
+                V_DrawPatchDirect(int(M_Drawer_x), int(M_Drawer_y), 0, reinterpret<uint8?>(W_CacheLumpName(addr(menuitem.name[0]), PU_CACHE)))
             }
-            M_Drawer_y = int16(int(M_Drawer_y) + LINEHEIGHT)
-            i = int16(int(i) + 1)
         }
+        M_Drawer_y = int16(int(M_Drawer_y) + LINEHEIGHT)
+        i = int16(int(i) + 1)
     }
     // DRAW SKULL
-    V_DrawPatchDirect(int(M_Drawer_x) + -32, int(currentMenu.y) - 5 + int(itemOn) * LINEHEIGHT, 0, reinterpret<uint8?>(W_CacheLumpName(addr(skullName[int(whichSkull)][0]), PU_CACHE)))
+    V_DrawPatchDirect(int(M_Drawer_x) + SKULLXOFF, int(currentMenu.y) - 5 + int(itemOn) * LINEHEIGHT, 0, reinterpret<uint8?>(W_CacheLumpName(addr(skullName[int(whichSkull)][0]), PU_CACHE)))
 }
 
 // M_ClearMenus
@@ -1334,7 +1314,7 @@ def M_Ticker {
 [c_function]
 def M_Init {
     var hide_mouse : doom_boolean = (doom_flags & DOOM_FLAG_HIDE_MOUSE_OPTIONS) != 0 ? doom_boolean._c_true : doom_boolean._c_false
-    var hide_sound : doom_boolean = (doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) != 0 && (doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) != 0 ? doom_boolean._c_true : doom_boolean._c_false
+    var hide_sound : doom_boolean = ((doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) != 0 && (doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) != 0) ? doom_boolean._c_true : doom_boolean._c_false
     OptionsMenu = addr(OptionsMenuFull[0])
     if (uint(int(hide_mouse)) != 0 && !(int(hide_sound) != 0)) {
         OptionsMenu = addr(OptionsMenuNoMouse[0])

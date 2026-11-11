@@ -48,7 +48,7 @@ def getsfx(var sfxname : uint8?; var len : int?) : void? {
     // Get the sound data from the WAD, allocate lump
     // in zone memory.
     // doom_sprintf(name, "ds%s", sfxname);
-    doom_strcpy(addr(name[0]), reinterpret<uint8?>("ds"))
+    doom_strcpy(addr(name[0]), cstr("ds"))
     doom_concat(addr(name[0]), sfxname)
     // Now, there is a severe problem with the
     // sound handling, in it is not (yet/anymore)
@@ -61,7 +61,7 @@ def getsfx(var sfxname : uint8?; var len : int?) : void? {
     // variable. Instead, we will use a
     // default sound for replacement.
     if (W_CheckNumForName(addr(name[0])) == -1) {
-        sfxlump = W_GetNumForName(reinterpret<uint8?>("dspistol"))
+        sfxlump = W_GetNumForName(cstr("dspistol"))
     } else {
         sfxlump = W_GetNumForName(addr(name[0]))
     }
@@ -69,7 +69,7 @@ def getsfx(var sfxname : uint8?; var len : int?) : void? {
     sfx = reinterpret<uint8?>(W_CacheLumpNum(sfxlump, PU_STATIC))
     // Pads the sound effect out to the mixing buffer size.
     // The original realloc would interfere with zone memory.
-    paddedsize = (size - 8 + (SAMPLECOUNT - 1)) / SAMPLECOUNT * SAMPLECOUNT
+    paddedsize = ((size - 8 + (SAMPLECOUNT - 1)) / SAMPLECOUNT) * SAMPLECOUNT
     // Allocate from zone memory.
     paddedsfx = reinterpret<uint8?>(Z_Malloc(paddedsize + 8, PU_STATIC, null))
     // ddt: (unsigned char *) realloc(sfx, paddedsize+8);
@@ -78,7 +78,7 @@ def getsfx(var sfxname : uint8?; var len : int?) : void? {
     // Now copy and pad.
     doom_memcpy(reinterpret<void?>(paddedsfx), reinterpret<void?>(sfx), size)
     for (i in range(size, paddedsize + 8)) {
-        deref(paddedsfx + i) = uint8(128)
+        paddedsfx[i] = 128u8
     }
     // Remove the cached lump.
     Z_Free(reinterpret<void?>(sfx))
@@ -108,7 +108,7 @@ def addsfx(sfxid : int; volume : int; step : int; var seperation : int) : int {
         // Loop all channels, check.
         for (i1 in range(NUM_CHANNELS)) {
             // Active, and using the same SFX?
-            if (channels[i1] != null && channelids[i1] == sfxid) {
+            if (channels[i1] != null && (channelids[i1] == sfxid)) {
                 // Reset.
                 channels[i1] = null
                 // We are sure that iff,
@@ -118,15 +118,13 @@ def addsfx(sfxid : int; volume : int; step : int; var seperation : int) : int {
         }
     }
     // Loop all channels to find oldest SFX.
-    {
-        i = 0
-        while (i < NUM_CHANNELS && channels[i] != null) {
-            if (channelstart[i] < oldest) {
-                oldestnum = i
-                oldest = channelstart[i]
-            }
-            i++
+    i = 0
+    while ((i < NUM_CHANNELS) && channels[i] != null) {
+        if (channelstart[i] < oldest) {
+            oldestnum = i
+            oldest = channelstart[i]
         }
+        i++
     }
     // Tales from the cryptic.
     // If we found a channel, fine.
@@ -157,7 +155,7 @@ def addsfx(sfxid : int; volume : int; step : int; var seperation : int) : int {
     // Kinda getting the impression this is never used.
     channelstep[slot] = uint(step)
     // ???
-    channelstepremainder[slot] = uint(0)
+    channelstepremainder[slot] = 0u
     // Should be gametic, I presume.
     channelstart[slot] = gametic
     // Separation, that is, orientation/stereo.
@@ -166,16 +164,16 @@ def addsfx(sfxid : int; volume : int; step : int; var seperation : int) : int {
     // Per left/right channel.
     // x^2 seperation,
     // adjust volume properly.
-    leftvol = volume - (volume * seperation * seperation >> 16)
+    leftvol = volume - ((volume * seperation * seperation) >> 16)
     // (256*256);
     seperation -= 257
-    rightvol = volume - (volume * seperation * seperation >> 16)
+    rightvol = volume - ((volume * seperation * seperation) >> 16)
     // Sanity check, clamp volume.
     if (rightvol < 0 || rightvol > 127) {
-        I_Error(reinterpret<uint8?>("Error: rightvol out of bounds"))
+        I_Error(cstr("Error: rightvol out of bounds"))
     }
     if (leftvol < 0 || leftvol > 127) {
-        I_Error(reinterpret<uint8?>("Error: leftvol out of bounds"))
+        I_Error(cstr("Error: leftvol out of bounds"))
     }
     // Get the proper lookup table piece
     // for this volume level???
@@ -209,268 +207,268 @@ def I_SetChannels {
     // This table provides step widths for pitch parameters.
     // I fail to see that this is currently used.
     // steptablemid[i] = (int)(pow(2.0, (i / 64.0)) * 65536.0);
-    deref(steptablemid + -128) = 16384
-    deref(steptablemid + -127) = 16562
-    deref(steptablemid + -126) = 16742
-    deref(steptablemid + -125) = 16925
-    deref(steptablemid + -124) = 17109
-    deref(steptablemid + -123) = 17295
-    deref(steptablemid + -122) = 17484
-    deref(steptablemid + -121) = 17674
-    deref(steptablemid + -120) = 17866
-    deref(steptablemid + -119) = 18061
-    deref(steptablemid + -118) = 18258
-    deref(steptablemid + -117) = 18456
-    deref(steptablemid + -116) = 18657
-    deref(steptablemid + -115) = 18861
-    deref(steptablemid + -114) = 19066
-    deref(steptablemid + -113) = 19274
-    deref(steptablemid + -112) = 19483
-    deref(steptablemid + -111) = 19696
-    deref(steptablemid + -110) = 19910
-    deref(steptablemid + -109) = 20127
-    deref(steptablemid + -108) = 20346
-    deref(steptablemid + -107) = 20568
-    deref(steptablemid + -106) = 20792
-    deref(steptablemid + -105) = 21018
-    deref(steptablemid + -104) = 21247
-    deref(steptablemid + -103) = 21478
-    deref(steptablemid + -102) = 21712
-    deref(steptablemid + -101) = 21949
-    deref(steptablemid + -100) = 22188
-    deref(steptablemid + -99) = 22429
-    deref(steptablemid + -98) = 22673
-    deref(steptablemid + -97) = 22920
-    deref(steptablemid + -96) = 23170
-    deref(steptablemid + -95) = 23422
-    deref(steptablemid + -94) = 23677
-    deref(steptablemid + -93) = 23935
-    deref(steptablemid + -92) = 24196
-    deref(steptablemid + -91) = 24459
-    deref(steptablemid + -90) = 24726
-    deref(steptablemid + -89) = 24995
-    deref(steptablemid + -88) = 25267
-    deref(steptablemid + -87) = 25542
-    deref(steptablemid + -86) = 25820
-    deref(steptablemid + -85) = 26102
-    deref(steptablemid + -84) = 26386
-    deref(steptablemid + -83) = 26673
-    deref(steptablemid + -82) = 26964
-    deref(steptablemid + -81) = 27257
-    deref(steptablemid + -80) = 27554
-    deref(steptablemid + -79) = 27854
-    deref(steptablemid + -78) = 28157
-    deref(steptablemid + -77) = 28464
-    deref(steptablemid + -76) = 28774
-    deref(steptablemid + -75) = 29087
-    deref(steptablemid + -74) = 29404
-    deref(steptablemid + -73) = 29724
-    deref(steptablemid + -72) = 30048
-    deref(steptablemid + -71) = 30375
-    deref(steptablemid + -70) = 30706
-    deref(steptablemid + -69) = 31040
-    deref(steptablemid + -68) = 31378
-    deref(steptablemid + -67) = 31720
-    deref(steptablemid + -66) = 32065
-    deref(steptablemid + -65) = 32415
-    deref(steptablemid + -64) = 32768
-    deref(steptablemid + -63) = 33124
-    deref(steptablemid + -62) = 33485
-    deref(steptablemid + -61) = 33850
-    deref(steptablemid + -60) = 34218
-    deref(steptablemid + -59) = 34591
-    deref(steptablemid + -58) = 34968
-    deref(steptablemid + -57) = 35348
-    deref(steptablemid + -56) = 35733
-    deref(steptablemid + -55) = 36122
-    deref(steptablemid + -54) = 36516
-    deref(steptablemid + -53) = 36913
-    deref(steptablemid + -52) = 37315
-    deref(steptablemid + -51) = 37722
-    deref(steptablemid + -50) = 38132
-    deref(steptablemid + -49) = 38548
-    deref(steptablemid + -48) = 38967
-    deref(steptablemid + -47) = 39392
-    deref(steptablemid + -46) = 39821
-    deref(steptablemid + -45) = 40254
-    deref(steptablemid + -44) = 40693
-    deref(steptablemid + -43) = 41136
-    deref(steptablemid + -42) = 41584
-    deref(steptablemid + -41) = 42037
-    deref(steptablemid + -40) = 42494
-    deref(steptablemid + -39) = 42957
-    deref(steptablemid + -38) = 43425
-    deref(steptablemid + -37) = 43898
-    deref(steptablemid + -36) = 44376
-    deref(steptablemid + -35) = 44859
-    deref(steptablemid + -34) = 45347
-    deref(steptablemid + -33) = 45841
-    deref(steptablemid + -32) = 46340
-    deref(steptablemid + -31) = 46845
-    deref(steptablemid + -30) = 47355
-    deref(steptablemid + -29) = 47871
-    deref(steptablemid + -28) = 48392
-    deref(steptablemid + -27) = 48919
-    deref(steptablemid + -26) = 49452
-    deref(steptablemid + -25) = 49990
-    deref(steptablemid + -24) = 50535
-    deref(steptablemid + -23) = 51085
-    deref(steptablemid + -22) = 51641
-    deref(steptablemid + -21) = 52204
-    deref(steptablemid + -20) = 52772
-    deref(steptablemid + -19) = 53347
-    deref(steptablemid + -18) = 53928
-    deref(steptablemid + -17) = 54515
-    deref(steptablemid + -16) = 55108
-    deref(steptablemid + -15) = 55709
-    deref(steptablemid + -14) = 56315
-    deref(steptablemid + -13) = 56928
-    deref(steptablemid + -12) = 57548
-    deref(steptablemid + -11) = 58175
-    deref(steptablemid + -10) = 58809
-    deref(steptablemid + -9) = 59449
-    deref(steptablemid + -8) = 60096
-    deref(steptablemid + -7) = 60751
-    deref(steptablemid + -6) = 61412
-    deref(steptablemid + -5) = 62081
-    deref(steptablemid + -4) = 62757
-    deref(steptablemid + -3) = 63440
-    deref(steptablemid + -2) = 64131
-    deref(steptablemid + -1) = 64830
-    deref(steptablemid + 0) = 65536
-    deref(steptablemid + 1) = 66249
-    deref(steptablemid + 2) = 66971
-    deref(steptablemid + 3) = 67700
-    deref(steptablemid + 4) = 68437
-    deref(steptablemid + 5) = 69182
-    deref(steptablemid + 6) = 69936
-    deref(steptablemid + 7) = 70697
-    deref(steptablemid + 8) = 71467
-    deref(steptablemid + 9) = 72245
-    deref(steptablemid + 10) = 73032
-    deref(steptablemid + 11) = 73827
-    deref(steptablemid + 12) = 74631
-    deref(steptablemid + 13) = 75444
-    deref(steptablemid + 14) = 76265
-    deref(steptablemid + 15) = 77096
-    deref(steptablemid + 16) = 77935
-    deref(steptablemid + 17) = 78784
-    deref(steptablemid + 18) = 79642
-    deref(steptablemid + 19) = 80509
-    deref(steptablemid + 20) = 81386
-    deref(steptablemid + 21) = 82272
-    deref(steptablemid + 22) = 83168
-    deref(steptablemid + 23) = 84074
-    deref(steptablemid + 24) = 84989
-    deref(steptablemid + 25) = 85915
-    deref(steptablemid + 26) = 86850
-    deref(steptablemid + 27) = 87796
-    deref(steptablemid + 28) = 88752
-    deref(steptablemid + 29) = 89718
-    deref(steptablemid + 30) = 90695
-    deref(steptablemid + 31) = 91683
-    deref(steptablemid + 32) = 92681
-    deref(steptablemid + 33) = 93691
-    deref(steptablemid + 34) = 94711
-    deref(steptablemid + 35) = 95742
-    deref(steptablemid + 36) = 96785
-    deref(steptablemid + 37) = 97839
-    deref(steptablemid + 38) = 98904
-    deref(steptablemid + 39) = 99981
-    deref(steptablemid + 40) = 101070
-    deref(steptablemid + 41) = 102170
-    deref(steptablemid + 42) = 103283
-    deref(steptablemid + 43) = 104408
-    deref(steptablemid + 44) = 105545
-    deref(steptablemid + 45) = 106694
-    deref(steptablemid + 46) = 107856
-    deref(steptablemid + 47) = 109030
-    deref(steptablemid + 48) = 110217
-    deref(steptablemid + 49) = 111418
-    deref(steptablemid + 50) = 112631
-    deref(steptablemid + 51) = 113857
-    deref(steptablemid + 52) = 115097
-    deref(steptablemid + 53) = 116351
-    deref(steptablemid + 54) = 117618
-    deref(steptablemid + 55) = 118898
-    deref(steptablemid + 56) = 120193
-    deref(steptablemid + 57) = 121502
-    deref(steptablemid + 58) = 122825
-    deref(steptablemid + 59) = 124162
-    deref(steptablemid + 60) = 125514
-    deref(steptablemid + 61) = 126881
-    deref(steptablemid + 62) = 128263
-    deref(steptablemid + 63) = 129660
-    deref(steptablemid + 64) = 131072
-    deref(steptablemid + 65) = 132499
-    deref(steptablemid + 66) = 133942
-    deref(steptablemid + 67) = 135400
-    deref(steptablemid + 68) = 136875
-    deref(steptablemid + 69) = 138365
-    deref(steptablemid + 70) = 139872
-    deref(steptablemid + 71) = 141395
-    deref(steptablemid + 72) = 142935
-    deref(steptablemid + 73) = 144491
-    deref(steptablemid + 74) = 146064
-    deref(steptablemid + 75) = 147655
-    deref(steptablemid + 76) = 149263
-    deref(steptablemid + 77) = 150888
-    deref(steptablemid + 78) = 152531
-    deref(steptablemid + 79) = 154192
-    deref(steptablemid + 80) = 155871
-    deref(steptablemid + 81) = 157569
-    deref(steptablemid + 82) = 159284
-    deref(steptablemid + 83) = 161019
-    deref(steptablemid + 84) = 162772
-    deref(steptablemid + 85) = 164545
-    deref(steptablemid + 86) = 166337
-    deref(steptablemid + 87) = 168148
-    deref(steptablemid + 88) = 169979
-    deref(steptablemid + 89) = 171830
-    deref(steptablemid + 90) = 173701
-    deref(steptablemid + 91) = 175592
-    deref(steptablemid + 92) = 177504
-    deref(steptablemid + 93) = 179437
-    deref(steptablemid + 94) = 181391
-    deref(steptablemid + 95) = 183367
-    deref(steptablemid + 96) = 185363
-    deref(steptablemid + 97) = 187382
-    deref(steptablemid + 98) = 189422
-    deref(steptablemid + 99) = 191485
-    deref(steptablemid + 100) = 193570
-    deref(steptablemid + 101) = 195678
-    deref(steptablemid + 102) = 197809
-    deref(steptablemid + 103) = 199963
-    deref(steptablemid + 104) = 202140
-    deref(steptablemid + 105) = 204341
-    deref(steptablemid + 106) = 206566
-    deref(steptablemid + 107) = 208816
-    deref(steptablemid + 108) = 211090
-    deref(steptablemid + 109) = 213388
-    deref(steptablemid + 110) = 215712
-    deref(steptablemid + 111) = 218061
-    deref(steptablemid + 112) = 220435
-    deref(steptablemid + 113) = 222836
-    deref(steptablemid + 114) = 225262
-    deref(steptablemid + 115) = 227715
-    deref(steptablemid + 116) = 230195
-    deref(steptablemid + 117) = 232702
-    deref(steptablemid + 118) = 235236
-    deref(steptablemid + 119) = 237797
-    deref(steptablemid + 120) = 240387
-    deref(steptablemid + 121) = 243004
-    deref(steptablemid + 122) = 245650
-    deref(steptablemid + 123) = 248325
-    deref(steptablemid + 124) = 251029
-    deref(steptablemid + 125) = 253763
-    deref(steptablemid + 126) = 256526
-    deref(steptablemid + 127) = 259320
+    steptablemid[-128] = 16384
+    steptablemid[-127] = 16562
+    steptablemid[-126] = 16742
+    steptablemid[-125] = 16925
+    steptablemid[-124] = 17109
+    steptablemid[-123] = 17295
+    steptablemid[-122] = 17484
+    steptablemid[-121] = 17674
+    steptablemid[-120] = 17866
+    steptablemid[-119] = 18061
+    steptablemid[-118] = 18258
+    steptablemid[-117] = 18456
+    steptablemid[-116] = 18657
+    steptablemid[-115] = 18861
+    steptablemid[-114] = 19066
+    steptablemid[-113] = 19274
+    steptablemid[-112] = 19483
+    steptablemid[-111] = 19696
+    steptablemid[-110] = 19910
+    steptablemid[-109] = 20127
+    steptablemid[-108] = 20346
+    steptablemid[-107] = 20568
+    steptablemid[-106] = 20792
+    steptablemid[-105] = 21018
+    steptablemid[-104] = 21247
+    steptablemid[-103] = 21478
+    steptablemid[-102] = 21712
+    steptablemid[-101] = 21949
+    steptablemid[-100] = 22188
+    steptablemid[-99] = 22429
+    steptablemid[-98] = 22673
+    steptablemid[-97] = 22920
+    steptablemid[-96] = 23170
+    steptablemid[-95] = 23422
+    steptablemid[-94] = 23677
+    steptablemid[-93] = 23935
+    steptablemid[-92] = 24196
+    steptablemid[-91] = 24459
+    steptablemid[-90] = 24726
+    steptablemid[-89] = 24995
+    steptablemid[-88] = 25267
+    steptablemid[-87] = 25542
+    steptablemid[-86] = 25820
+    steptablemid[-85] = 26102
+    steptablemid[-84] = 26386
+    steptablemid[-83] = 26673
+    steptablemid[-82] = 26964
+    steptablemid[-81] = 27257
+    steptablemid[-80] = 27554
+    steptablemid[-79] = 27854
+    steptablemid[-78] = 28157
+    steptablemid[-77] = 28464
+    steptablemid[-76] = 28774
+    steptablemid[-75] = 29087
+    steptablemid[-74] = 29404
+    steptablemid[-73] = 29724
+    steptablemid[-72] = 30048
+    steptablemid[-71] = 30375
+    steptablemid[-70] = 30706
+    steptablemid[-69] = 31040
+    steptablemid[-68] = 31378
+    steptablemid[-67] = 31720
+    steptablemid[-66] = 32065
+    steptablemid[-65] = 32415
+    steptablemid[-64] = 32768
+    steptablemid[-63] = 33124
+    steptablemid[-62] = 33485
+    steptablemid[-61] = 33850
+    steptablemid[-60] = 34218
+    steptablemid[-59] = 34591
+    steptablemid[-58] = 34968
+    steptablemid[-57] = 35348
+    steptablemid[-56] = 35733
+    steptablemid[-55] = 36122
+    steptablemid[-54] = 36516
+    steptablemid[-53] = 36913
+    steptablemid[-52] = 37315
+    steptablemid[-51] = 37722
+    steptablemid[-50] = 38132
+    steptablemid[-49] = 38548
+    steptablemid[-48] = 38967
+    steptablemid[-47] = 39392
+    steptablemid[-46] = 39821
+    steptablemid[-45] = 40254
+    steptablemid[-44] = 40693
+    steptablemid[-43] = 41136
+    steptablemid[-42] = 41584
+    steptablemid[-41] = 42037
+    steptablemid[-40] = 42494
+    steptablemid[-39] = 42957
+    steptablemid[-38] = 43425
+    steptablemid[-37] = 43898
+    steptablemid[-36] = 44376
+    steptablemid[-35] = 44859
+    steptablemid[-34] = 45347
+    steptablemid[-33] = 45841
+    steptablemid[-32] = 46340
+    steptablemid[-31] = 46845
+    steptablemid[-30] = 47355
+    steptablemid[-29] = 47871
+    steptablemid[-28] = 48392
+    steptablemid[-27] = 48919
+    steptablemid[-26] = 49452
+    steptablemid[-25] = 49990
+    steptablemid[-24] = 50535
+    steptablemid[-23] = 51085
+    steptablemid[-22] = 51641
+    steptablemid[-21] = 52204
+    steptablemid[-20] = 52772
+    steptablemid[-19] = 53347
+    steptablemid[-18] = 53928
+    steptablemid[-17] = 54515
+    steptablemid[-16] = 55108
+    steptablemid[-15] = 55709
+    steptablemid[-14] = 56315
+    steptablemid[-13] = 56928
+    steptablemid[-12] = 57548
+    steptablemid[-11] = 58175
+    steptablemid[-10] = 58809
+    steptablemid[-9] = 59449
+    steptablemid[-8] = 60096
+    steptablemid[-7] = 60751
+    steptablemid[-6] = 61412
+    steptablemid[-5] = 62081
+    steptablemid[-4] = 62757
+    steptablemid[-3] = 63440
+    steptablemid[-2] = 64131
+    steptablemid[-1] = 64830
+    steptablemid[0] = 65536
+    steptablemid[1] = 66249
+    steptablemid[2] = 66971
+    steptablemid[3] = 67700
+    steptablemid[4] = 68437
+    steptablemid[5] = 69182
+    steptablemid[6] = 69936
+    steptablemid[7] = 70697
+    steptablemid[8] = 71467
+    steptablemid[9] = 72245
+    steptablemid[10] = 73032
+    steptablemid[11] = 73827
+    steptablemid[12] = 74631
+    steptablemid[13] = 75444
+    steptablemid[14] = 76265
+    steptablemid[15] = 77096
+    steptablemid[16] = 77935
+    steptablemid[17] = 78784
+    steptablemid[18] = 79642
+    steptablemid[19] = 80509
+    steptablemid[20] = 81386
+    steptablemid[21] = 82272
+    steptablemid[22] = 83168
+    steptablemid[23] = 84074
+    steptablemid[24] = 84989
+    steptablemid[25] = 85915
+    steptablemid[26] = 86850
+    steptablemid[27] = 87796
+    steptablemid[28] = 88752
+    steptablemid[29] = 89718
+    steptablemid[30] = 90695
+    steptablemid[31] = 91683
+    steptablemid[32] = 92681
+    steptablemid[33] = 93691
+    steptablemid[34] = 94711
+    steptablemid[35] = 95742
+    steptablemid[36] = 96785
+    steptablemid[37] = 97839
+    steptablemid[38] = 98904
+    steptablemid[39] = 99981
+    steptablemid[40] = 101070
+    steptablemid[41] = 102170
+    steptablemid[42] = 103283
+    steptablemid[43] = 104408
+    steptablemid[44] = 105545
+    steptablemid[45] = 106694
+    steptablemid[46] = 107856
+    steptablemid[47] = 109030
+    steptablemid[48] = 110217
+    steptablemid[49] = 111418
+    steptablemid[50] = 112631
+    steptablemid[51] = 113857
+    steptablemid[52] = 115097
+    steptablemid[53] = 116351
+    steptablemid[54] = 117618
+    steptablemid[55] = 118898
+    steptablemid[56] = 120193
+    steptablemid[57] = 121502
+    steptablemid[58] = 122825
+    steptablemid[59] = 124162
+    steptablemid[60] = 125514
+    steptablemid[61] = 126881
+    steptablemid[62] = 128263
+    steptablemid[63] = 129660
+    steptablemid[64] = 131072
+    steptablemid[65] = 132499
+    steptablemid[66] = 133942
+    steptablemid[67] = 135400
+    steptablemid[68] = 136875
+    steptablemid[69] = 138365
+    steptablemid[70] = 139872
+    steptablemid[71] = 141395
+    steptablemid[72] = 142935
+    steptablemid[73] = 144491
+    steptablemid[74] = 146064
+    steptablemid[75] = 147655
+    steptablemid[76] = 149263
+    steptablemid[77] = 150888
+    steptablemid[78] = 152531
+    steptablemid[79] = 154192
+    steptablemid[80] = 155871
+    steptablemid[81] = 157569
+    steptablemid[82] = 159284
+    steptablemid[83] = 161019
+    steptablemid[84] = 162772
+    steptablemid[85] = 164545
+    steptablemid[86] = 166337
+    steptablemid[87] = 168148
+    steptablemid[88] = 169979
+    steptablemid[89] = 171830
+    steptablemid[90] = 173701
+    steptablemid[91] = 175592
+    steptablemid[92] = 177504
+    steptablemid[93] = 179437
+    steptablemid[94] = 181391
+    steptablemid[95] = 183367
+    steptablemid[96] = 185363
+    steptablemid[97] = 187382
+    steptablemid[98] = 189422
+    steptablemid[99] = 191485
+    steptablemid[100] = 193570
+    steptablemid[101] = 195678
+    steptablemid[102] = 197809
+    steptablemid[103] = 199963
+    steptablemid[104] = 202140
+    steptablemid[105] = 204341
+    steptablemid[106] = 206566
+    steptablemid[107] = 208816
+    steptablemid[108] = 211090
+    steptablemid[109] = 213388
+    steptablemid[110] = 215712
+    steptablemid[111] = 218061
+    steptablemid[112] = 220435
+    steptablemid[113] = 222836
+    steptablemid[114] = 225262
+    steptablemid[115] = 227715
+    steptablemid[116] = 230195
+    steptablemid[117] = 232702
+    steptablemid[118] = 235236
+    steptablemid[119] = 237797
+    steptablemid[120] = 240387
+    steptablemid[121] = 243004
+    steptablemid[122] = 245650
+    steptablemid[123] = 248325
+    steptablemid[124] = 251029
+    steptablemid[125] = 253763
+    steptablemid[126] = 256526
+    steptablemid[127] = 259320
     // Generates volume lookup tables
     // which also turn the unsigned samples
     // into signed samples.
     for (i in range(128)) {
         for (j in range(256)) {
-            vol_lookup[i * 256 + j] = i * (j - 128) * 256 / 127
+            vol_lookup[i * 256 + j] = (i * (j - 128) * 256) / 127
         }
     }
 }
@@ -491,7 +489,7 @@ def I_SetMusicVolume(volume : int) {
     for (i in range(16)) {
         let _t0 = queue_midi_tail
         queue_midi_tail++
-        queued_midi_msgs[_t0 % MAX_QUEUED_MIDI_MSGS] = uint64(176 | i | 1792 | mus_channel_volumes[i] * mus_volume / 127 << 16)
+        queued_midi_msgs[_t0 % MAX_QUEUED_MIDI_MSGS] = uint64(176 | i | 1792 | (((mus_channel_volumes[i] * mus_volume) / 127) << 16))
     }
 }
 
@@ -501,7 +499,7 @@ def I_SetMusicVolume(volume : int) {
 def I_GetSfxLumpNum(var sfx : sfxinfo_struct?) : int {
     var namebuf : uint8[9]
     // doom_sprintf(namebuf, "ds%s", sfx->name);
-    doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("ds"))
+    doom_strcpy(addr(namebuf[0]), cstr("ds"))
     doom_concat(addr(namebuf[0]), sfx.name)
     return W_GetNumForName(addr(namebuf[0]))
 }
@@ -589,8 +587,8 @@ def I_UpdateSound {
                 // for this channel (sound)
                 // to the current data.
                 // Adjust volume accordingly.
-                dl += deref(channelleftvol_lookup[chan] + sample)
-                dr += deref(channelrightvol_lookup[chan] + sample)
+                dl += channelleftvol_lookup[chan][sample]
+                dr += channelrightvol_lookup[chan][sample]
                 // Increment index ???
                 channelstepremainder[chan] += channelstep[chan]
                 // MSB is next sample???
@@ -641,19 +639,16 @@ def I_SubmitSound {
 def I_UpdateSoundParams(handle : int; vol : int; sep : int; pitch : int) {
 }
 
-[c_function]
 def I_ShutdownSound {
     // Wait till all pending sounds are finished.
     var done : int = 0
     var i : int
     // FIXME (below).
-    invoke(doom_print, reinterpret<uint8?>("I_ShutdownSound: NOT finishing pending sounds\n"))
+    invoke(doom_print, cstr("I_ShutdownSound: NOT finishing pending sounds\n"))
     while (!(done != 0)) {
-        {
-            i = 0
-            while (i < 8 && !(channels[i] != null)) {
-                i++
-            }
+        i = 0
+        while (i < 8 && !(channels[i] != null)) {
+            i++
         }
         // FIXME. No proper channel output.
         // if (i==8)
@@ -666,9 +661,9 @@ def I_ShutdownSound {
 [c_function]
 def I_InitSound {
     // Secure and configure sound device first.
-    invoke(doom_print, reinterpret<uint8?>("I_InitSound: "))
+    invoke(doom_print, cstr("I_InitSound: "))
     // Initialize external data (all sounds) at start, keep static.
-    invoke(doom_print, reinterpret<uint8?>("I_InitSound: "))
+    invoke(doom_print, cstr("I_InitSound: "))
     for (i in range(1, int(sfxenum_t.NUMSFX))) {
         // Alias? Example is the chaingun sound linked to pistol.
         if (!(S_sfx[i].link != null)) {
@@ -680,13 +675,13 @@ def I_InitSound {
             lengths[i] = lengths[uint64(int64(S_sfx[i].link - addr(S_sfx[0]))) / uint64(typeinfo sizeof(type<sfxinfo_struct>))]
         }
     }
-    invoke(doom_print, reinterpret<uint8?>(" pre-cached all sound data\n"))
+    invoke(doom_print, cstr(" pre-cached all sound data\n"))
     // Now initialize mixbuffer with zero.
     for (i in range(MIXBUFFERSIZE)) {
         mixbuffer[i] = int16(0)
     }
     // Finished initialization.
-    invoke(doom_print, reinterpret<uint8?>("I_InitSound: sound module ready\n"))
+    invoke(doom_print, cstr("I_InitSound: sound module ready\n"))
 }
 
 // MUSIC API.
@@ -716,7 +711,7 @@ def private reset_all_channels {
     for (i in range(16)) {
         let _t0 = queue_midi_tail
         queue_midi_tail++
-        queued_midi_msgs[_t0 % MAX_QUEUED_MIDI_MSGS] = uint64(176 | i | 123 << 8)
+        queued_midi_msgs[_t0 % MAX_QUEUED_MIDI_MSGS] = uint64(176 | i | (123 << 8))
     }
 }
 
@@ -735,7 +730,7 @@ def I_UnRegisterSong(handle : int) {
 [c_function]
 def I_RegisterSong(var data : void?) : int {
     doom_memcpy(reinterpret<void?>(addr(mus_header)), data, int(uint64(typeinfo sizeof(type<mus_header_t>))))
-    if (doom_strncmp(addr(mus_header.ID[0]), reinterpret<uint8?>("MUS"), 3) != 0 || int(mus_header.ID[3]) != 26) {
+    if (doom_strncmp(addr(mus_header.ID[0]), cstr("MUS"), 3) != 0 || int(mus_header.ID[3]) != 26) {
         return 0
     }
     mus_data = reinterpret<uint8?>(data)
@@ -752,7 +747,7 @@ def I_QrySongPlaying(handle : int) : int {
 
 [c_function]
 def I_TickSong : uint64 {
-    var midi_event : uint64 = uint64(0)
+    var midi_event : uint64 = 0ul
     // Dequeue MIDI events
     if (queue_midi_head != queue_midi_tail) {
         let _t0 = queue_midi_head
@@ -760,12 +755,12 @@ def I_TickSong : uint64 {
         return queued_midi_msgs[_t0 % MAX_QUEUED_MIDI_MSGS]
     }
     if (!(int(mus_playing) != 0) || !(mus_data != null)) {
-        return uint64(0)
+        return 0ul
     }
     if (mus_delay <= 0) {
         let _t1 = mus_offset
         mus_offset++
-        var event : int = int(deref(mus_data + _t1))
+        var event : int = int(mus_data[_t1])
         var _c_type : int = (event & 112) >> 4
         var channel : int = event & 15
         // Percussion is 9 on GM
@@ -781,8 +776,8 @@ def I_TickSong : uint64 {
                 {
                     let _t2 = mus_offset
                     mus_offset++
-                    var note : int = int(deref(mus_data + _t2)) & 127
-                    midi_event = uint64(128 | channel | note << 8)
+                    var note : int = int(mus_data[_t2]) & 127
+                    midi_event = uint64(128 | channel | (note << 8))
                     break
                 }
             }
@@ -790,15 +785,15 @@ def I_TickSong : uint64 {
                 {
                     let _t3 = mus_offset
                     mus_offset++
-                    var note_bytes : int = int(deref(mus_data + _t3))
+                    var note_bytes : int = int(mus_data[_t3])
                     var note : int = note_bytes & 127
                     var vol : int = 127
                     if ((note_bytes & 128) != 0) {
                         let _t4 = mus_offset
                         mus_offset++
-                        vol = int(deref(mus_data + _t4)) & 127
+                        vol = int(mus_data[_t4]) & 127
                     }
-                    midi_event = uint64(144 | channel | note << 8 | vol << 16)
+                    midi_event = uint64(144 | channel | (note << 8) | (vol << 16))
                     break
                 }
             }
@@ -806,10 +801,10 @@ def I_TickSong : uint64 {
                 {
                     let _t5 = mus_offset
                     mus_offset++
-                    var bend_amount : int = int(deref(mus_data + _t5)) * 64
+                    var bend_amount : int = int(mus_data[_t5]) * 64
                     var l : int = bend_amount & 127
                     var m : int = (bend_amount & 65408) >> 7
-                    midi_event = uint64(224 | channel | l << 8 | m << 16)
+                    midi_event = uint64(224 | channel | (l << 8) | (m << 16))
                     break
                 }
             }
@@ -817,18 +812,18 @@ def I_TickSong : uint64 {
                 {
                     let _t6 = mus_offset
                     mus_offset++
-                    var controller : int = int(deref(mus_data + _t6)) & 127
+                    var controller : int = int(mus_data[_t6]) & 127
                     let _cond2 = controller
                     if (_cond2 == 10) {
-                        midi_event = uint64(176 | channel | 120 << 8)
+                        midi_event = uint64(176 | channel | (120 << 8))
                     } elif (_cond2 == 11) {
-                        midi_event = uint64(176 | channel | 123 << 8)
+                        midi_event = uint64(176 | channel | (123 << 8))
                     } elif (_cond2 == 12) {
-                        midi_event = uint64(176 | channel | 126 << 8)
+                        midi_event = uint64(176 | channel | (126 << 8))
                     } elif (_cond2 == 13) {
-                        midi_event = uint64(176 | channel | 127 << 8)
+                        midi_event = uint64(176 | channel | (127 << 8))
                     } elif (_cond2 == 14) {
-                        midi_event = uint64(176 | channel | 121 << 8)
+                        midi_event = uint64(176 | channel | (121 << 8))
                     } elif (_cond2 == 15) {
                     }
                     // Doom never implemented
@@ -839,53 +834,49 @@ def I_TickSong : uint64 {
                 {
                     let _t7 = mus_offset
                     mus_offset++
-                    var controller : int = int(deref(mus_data + _t7)) & 127
+                    var controller : int = int(mus_data[_t7]) & 127
                     let _t8 = mus_offset
                     mus_offset++
-                    var value : int = int(deref(mus_data + _t8)) & 127
+                    var value : int = int(mus_data[_t8]) & 127
                     let _cond3 = controller
                     if (_cond3 == 0) {
-                        midi_event = uint64(192 | channel | value << 8)
+                        midi_event = uint64(192 | channel | (value << 8))
                     } elif (_cond3 == 1) {
-                        midi_event = uint64(176 | channel | 8192 | value << 16)
+                        midi_event = uint64(176 | channel | 8192 | (value << 16))
                     } elif (_cond3 == 2) {
-                        midi_event = uint64(176 | channel | 256 | value << 16)
+                        midi_event = uint64(176 | channel | 256 | (value << 16))
                     } elif (_cond3 == 3) {
                         mus_channel_volumes[channel] = value
-                        midi_event = uint64(176 | channel | 1792 | mus_channel_volumes[channel] * mus_volume / 127 << 16)
+                        midi_event = uint64(176 | channel | 1792 | (((mus_channel_volumes[channel] * mus_volume) / 127) << 16))
                     } elif (_cond3 == 4) {
-                        midi_event = uint64(176 | channel | 2560 | value << 16)
+                        midi_event = uint64(176 | channel | 2560 | (value << 16))
                     } elif (_cond3 == 5) {
-                        midi_event = uint64(176 | channel | 2816 | value << 16)
+                        midi_event = uint64(176 | channel | 2816 | (value << 16))
                     } elif (_cond3 == 6) {
-                        midi_event = uint64(176 | channel | 23296 | value << 16)
+                        midi_event = uint64(176 | channel | 23296 | (value << 16))
                     } elif (_cond3 == 7) {
-                        midi_event = uint64(176 | channel | 23808 | value << 16)
+                        midi_event = uint64(176 | channel | 23808 | (value << 16))
                     } elif (_cond3 == 8) {
-                        midi_event = uint64(176 | channel | 16384 | value << 16)
+                        midi_event = uint64(176 | channel | 16384 | (value << 16))
                     } elif (_cond3 == 9) {
-                        midi_event = uint64(176 | channel | 17152 | value << 16)
+                        midi_event = uint64(176 | channel | 17152 | (value << 16))
                     }
                     break
                 }
             }
             if (_cond == 5) {
-                {
-                    break
-                }
+                break
             }
             _flag ||= _cond == 6
             if (_flag) {
-                {
-                    // Loop
-                    if (int(mus_loop) != 0) {
-                        mus_delay = 0
-                        mus_offset = int(mus_header.scoreStart)
-                        break
-                    } else {
-                        mus_playing = doom_boolean._c_false
-                        return uint64(0)
-                    }
+                // Loop
+                if (int(mus_loop) != 0) {
+                    mus_delay = 0
+                    mus_offset = int(mus_header.scoreStart)
+                    break
+                } else {
+                    mus_playing = doom_boolean._c_false
+                    return 0ul
                 }
             }
             _flag ||= _cond == 7
@@ -893,7 +884,7 @@ def I_TickSong : uint64 {
                 {
                     let _t9 = mus_offset
                     mus_offset++
-                    var dummy : int = int(deref(mus_data + _t9))
+                    var dummy : int = int(mus_data[_t9])
                     break
                 }
             }
@@ -906,7 +897,7 @@ def I_TickSong : uint64 {
             while (true) {
                 let _t10 = mus_offset
                 mus_offset++
-                delay_byte = int(deref(mus_data + _t10))
+                delay_byte = int(mus_data[_t10])
                 mus_delay = mus_delay * 128 + delay_byte & 127
                 if (!((delay_byte & 128) != 0)) {
                     break

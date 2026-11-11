@@ -33,15 +33,15 @@ def NetbufferSize : int {
 def NetbufferChecksum : uint {
     var c : uint
     var l : int
-    c = uint(19088743)
+    c = 19088743u
     // FIXME -endianess?
     // #ifdef NORMALUNIX
     // byte order problems
-    return uint(0)
+    return 0u
     // #endif
     l = (NetbufferSize() - int(int64(typeinfo offsetof < retransmitfrom > (type<doomdata_t>)))) / 4
     for (i in range(l)) {
-        c += deref(reinterpret<uint?>(addr(netbuffer.retransmitfrom)) + i) * uint(i + 1)
+        c += reinterpret<uint?>(addr(netbuffer.retransmitfrom))[i] * uint(i + 1)
     }
     return c & uint(NCMD_CHECKSUM)
 }
@@ -60,9 +60,9 @@ def ExpandTics(low : int) : int {
         return (maketic & ~255) + 256 + low
     }
     // I_Error("Error: ExpandTics: strange value %i at maketic %i", low, maketic);
-    doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: ExpandTics: strange value "))
+    doom_strcpy(addr(error_buf[0]), cstr("Error: ExpandTics: strange value "))
     doom_concat(addr(error_buf[0]), doom_itoa(low, 10))
-    doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" at maketic "))
+    doom_concat(addr(error_buf[0]), cstr(" at maketic "))
     doom_concat(addr(error_buf[0]), doom_itoa(maketic, 10))
     I_Error(addr(error_buf[0]))
     return 0
@@ -81,7 +81,7 @@ def HSendPacket(node : int; flags : int) {
         return
     }
     if (!(int(netgame) != 0)) {
-        I_Error(reinterpret<uint8?>("Error: Tried to transmit to another node"))
+        I_Error(cstr("Error: Tried to transmit to another node"))
     }
     doomcom.command = int16(int(command_t.CMD_SEND))
     doomcom.remotenode = int16(node)
@@ -94,30 +94,26 @@ def HSendPacket(node : int; flags : int) {
         } else {
             realretrans = -1
         }
-        {
-            // fprintf(debugfile, "send (%i + %i, R %i) [%i] ",
-            // ExpandTics(netbuffer->starttic),
-            // netbuffer->numtics, realretrans, doomcom->datalength);
-            doom_fprint(debugfile, reinterpret<uint8?>("send ("))
-            doom_fprint(debugfile, doom_itoa(ExpandTics(int(netbuffer.starttic)), 10))
-            doom_fprint(debugfile, reinterpret<uint8?>(" + "))
-            doom_fprint(debugfile, doom_itoa(int(netbuffer.numtics), 10))
-            doom_fprint(debugfile, reinterpret<uint8?>(", R "))
-            doom_fprint(debugfile, doom_itoa(realretrans, 10))
-            doom_fprint(debugfile, reinterpret<uint8?>(") ["))
-            doom_fprint(debugfile, doom_itoa(int(doomcom.datalength), 10))
-            doom_fprint(debugfile, reinterpret<uint8?>("] "))
+        // fprintf(debugfile, "send (%i + %i, R %i) [%i] ",
+        // ExpandTics(netbuffer->starttic),
+        // netbuffer->numtics, realretrans, doomcom->datalength);
+        doom_fprint(debugfile, cstr("send ("))
+        doom_fprint(debugfile, doom_itoa(ExpandTics(int(netbuffer.starttic)), 10))
+        doom_fprint(debugfile, cstr(" + "))
+        doom_fprint(debugfile, doom_itoa(int(netbuffer.numtics), 10))
+        doom_fprint(debugfile, cstr(", R "))
+        doom_fprint(debugfile, doom_itoa(realretrans, 10))
+        doom_fprint(debugfile, cstr(") ["))
+        doom_fprint(debugfile, doom_itoa(int(doomcom.datalength), 10))
+        doom_fprint(debugfile, cstr("] "))
+        i = 0
+        while (i < int(doomcom.datalength)) {
+            // fprintf(debugfile, "%i ", ((byte*)netbuffer)[i]);
+            doom_fprint(debugfile, doom_itoa(int(reinterpret<uint8?>(netbuffer)[i]), 10))
+            doom_fprint(debugfile, cstr(" "))
+            i++
         }
-        {
-            i = 0
-            while (i < int(doomcom.datalength)) {
-                // fprintf(debugfile, "%i ", ((byte*)netbuffer)[i]);
-                doom_fprint(debugfile, doom_itoa(int(deref(reinterpret<uint8?>(netbuffer) + i)), 10))
-                doom_fprint(debugfile, reinterpret<uint8?>(" "))
-                i++
-            }
-        }
-        doom_fprint(debugfile, reinterpret<uint8?>("\n"))
+        doom_fprint(debugfile, cstr("\n"))
     }
     I_NetCmd()
 }
@@ -146,15 +142,15 @@ def HGetPacket : doom_boolean {
     if (int(doomcom.datalength) != NetbufferSize()) {
         if (debugfile != null) {
             // fprintf(debugfile, "bad packet length %i\n", doomcom->datalength);
-            doom_fprint(debugfile, reinterpret<uint8?>("bad packet length "))
+            doom_fprint(debugfile, cstr("bad packet length "))
             doom_fprint(debugfile, doom_itoa(int(doomcom.datalength), 10))
-            doom_fprint(debugfile, reinterpret<uint8?>("\n"))
+            doom_fprint(debugfile, cstr("\n"))
         }
         return doom_boolean._c_false
     }
     if (NetbufferChecksum() != (netbuffer.checksum & uint(NCMD_CHECKSUM))) {
         if (debugfile != null) {
-            doom_fprint(debugfile, reinterpret<uint8?>("bad packet checksum\n"))
+            doom_fprint(debugfile, cstr("bad packet checksum\n"))
         }
         return doom_boolean._c_false
     }
@@ -162,40 +158,36 @@ def HGetPacket : doom_boolean {
         var realretrans : int
         var i : int
         if ((netbuffer.checksum & uint(NCMD_SETUP)) != 0) {
-            doom_fprint(debugfile, reinterpret<uint8?>("setup packet\n"))
+            doom_fprint(debugfile, cstr("setup packet\n"))
         } else {
             if ((netbuffer.checksum & uint(NCMD_RETRANSMIT)) != 0) {
                 realretrans = ExpandTics(int(netbuffer.retransmitfrom))
             } else {
                 realretrans = -1
             }
-            {
-                // fprintf(debugfile, "get %i = (%i + %i, R %i)[%i] ",
-                // doomcom->remotenode,
-                // ExpandTics(netbuffer->starttic),
-                // netbuffer->numtics, realretrans, doomcom->datalength);
-                doom_fprint(debugfile, reinterpret<uint8?>("get "))
-                doom_fprint(debugfile, doom_itoa(int(doomcom.remotenode), 10))
-                doom_fprint(debugfile, reinterpret<uint8?>(" = ("))
-                doom_fprint(debugfile, doom_itoa(ExpandTics(int(netbuffer.starttic)), 10))
-                doom_fprint(debugfile, reinterpret<uint8?>(" + "))
-                doom_fprint(debugfile, doom_itoa(int(netbuffer.numtics), 10))
-                doom_fprint(debugfile, reinterpret<uint8?>(", R "))
-                doom_fprint(debugfile, doom_itoa(realretrans, 10))
-                doom_fprint(debugfile, reinterpret<uint8?>(")["))
-                doom_fprint(debugfile, doom_itoa(int(doomcom.datalength), 10))
-                doom_fprint(debugfile, reinterpret<uint8?>("] "))
+            // fprintf(debugfile, "get %i = (%i + %i, R %i)[%i] ",
+            // doomcom->remotenode,
+            // ExpandTics(netbuffer->starttic),
+            // netbuffer->numtics, realretrans, doomcom->datalength);
+            doom_fprint(debugfile, cstr("get "))
+            doom_fprint(debugfile, doom_itoa(int(doomcom.remotenode), 10))
+            doom_fprint(debugfile, cstr(" = ("))
+            doom_fprint(debugfile, doom_itoa(ExpandTics(int(netbuffer.starttic)), 10))
+            doom_fprint(debugfile, cstr(" + "))
+            doom_fprint(debugfile, doom_itoa(int(netbuffer.numtics), 10))
+            doom_fprint(debugfile, cstr(", R "))
+            doom_fprint(debugfile, doom_itoa(realretrans, 10))
+            doom_fprint(debugfile, cstr(")["))
+            doom_fprint(debugfile, doom_itoa(int(doomcom.datalength), 10))
+            doom_fprint(debugfile, cstr("] "))
+            i = 0
+            while (i < int(doomcom.datalength)) {
+                // fprintf(debugfile, "%i ", ((byte*)netbuffer)[i]);
+                doom_fprint(debugfile, doom_itoa(int(reinterpret<uint8?>(netbuffer)[i]), 10))
+                doom_fprint(debugfile, cstr(" "))
+                i++
             }
-            {
-                i = 0
-                while (i < int(doomcom.datalength)) {
-                    // fprintf(debugfile, "%i ", ((byte*)netbuffer)[i]);
-                    doom_fprint(debugfile, doom_itoa(int(deref(reinterpret<uint8?>(netbuffer) + i)), 10))
-                    doom_fprint(debugfile, reinterpret<uint8?>(" "))
-                    i++
-                }
-            }
-            doom_fprint(debugfile, reinterpret<uint8?>("\n"))
+            doom_fprint(debugfile, cstr("\n"))
         }
     }
     return doom_boolean._c_true
@@ -228,7 +220,7 @@ def GetPackets {
             }
             nodeingame[netnode] = doom_boolean._c_false
             playeringame[netconsole] = doom_boolean._c_false
-            doom_strcpy(addr(exitmsg[0]), reinterpret<uint8?>("Player 1 left the game"))
+            doom_strcpy(addr(exitmsg[0]), cstr("Player 1 left the game"))
             exitmsg[7] = uint8(int(exitmsg[7]) + netconsole)
             players[consoleplayer].message = addr(exitmsg[0])
             if (int(demorecording) != 0) {
@@ -238,7 +230,7 @@ def GetPackets {
         }
         // check for a remote game kill
         if ((netbuffer.checksum & uint(NCMD_KILL)) != 0) {
-            I_Error(reinterpret<uint8?>("Error: Killed by network driver"))
+            I_Error(cstr("Error: Killed by network driver"))
         }
         nodeforplayer[netconsole] = netnode
         // check for retransmit request
@@ -246,9 +238,9 @@ def GetPackets {
             resendto[netnode] = ExpandTics(int(netbuffer.retransmitfrom))
             if (debugfile != null) {
                 // fprintf(debugfile, "retransmit from %i\n", resendto[netnode]);
-                doom_fprint(debugfile, reinterpret<uint8?>("retransmit from "))
+                doom_fprint(debugfile, cstr("retransmit from "))
                 doom_fprint(debugfile, doom_itoa(resendto[netnode], 10))
-                doom_fprint(debugfile, reinterpret<uint8?>("\n"))
+                doom_fprint(debugfile, cstr("\n"))
             }
             resendcount[netnode] = RESENDCOUNT
         } else {
@@ -263,11 +255,11 @@ def GetPackets {
                 // fprintf(debugfile,
                 // "out of order packet (%i + %i)\n",
                 // realstart, netbuffer->numtics);
-                doom_fprint(debugfile, reinterpret<uint8?>("out of order packet ("))
+                doom_fprint(debugfile, cstr("out of order packet ("))
                 doom_fprint(debugfile, doom_itoa(realstart, 10))
-                doom_fprint(debugfile, reinterpret<uint8?>(" + "))
+                doom_fprint(debugfile, cstr(" + "))
                 doom_fprint(debugfile, doom_itoa(int(netbuffer.numtics), 10))
-                doom_fprint(debugfile, reinterpret<uint8?>(")\n"))
+                doom_fprint(debugfile, cstr(")\n"))
             }
             continue
         }
@@ -278,13 +270,13 @@ def GetPackets {
                 // fprintf(debugfile,
                 // "missed tics from %i (%i - %i)\n",
                 // netnode, realstart, nettics[netnode]);
-                doom_fprint(debugfile, reinterpret<uint8?>("missed tics from "))
+                doom_fprint(debugfile, cstr("missed tics from "))
                 doom_fprint(debugfile, doom_itoa(netnode, 10))
-                doom_fprint(debugfile, reinterpret<uint8?>(" ("))
+                doom_fprint(debugfile, cstr(" ("))
                 doom_fprint(debugfile, doom_itoa(realstart, 10))
-                doom_fprint(debugfile, reinterpret<uint8?>(" - "))
+                doom_fprint(debugfile, cstr(" - "))
                 doom_fprint(debugfile, doom_itoa(nettics[netnode], 10))
-                doom_fprint(debugfile, reinterpret<uint8?>(")\n"))
+                doom_fprint(debugfile, cstr(")\n"))
             }
             remoteresend[netnode] = doom_boolean._c_true
             continue
@@ -334,54 +326,48 @@ def NetUpdate {
     netbuffer.player = uint8(consoleplayer)
     // build new ticcmds for console player
     gameticdiv = gametic / ticdup
-    {
-        i = 0
-        while (i < newtics) {
-            I_StartTic()
-            D_ProcessEvents()
-            if (maketic - gameticdiv >= BACKUPTICS / 2 - 1) {
-                // can't hold any more
-                break
-            }
-            // doom_print ("mk:%i ",maketic);
-            G_BuildTiccmd(addr(localcmds[0]) + end_index(maketic % BACKUPTICS, 12))
-            maketic++
-            i++
+    i = 0
+    while (i < newtics) {
+        I_StartTic()
+        D_ProcessEvents()
+        if (maketic - gameticdiv >= BACKUPTICS / 2 - 1) {
+            // can't hold any more
+            break
         }
+        // doom_print ("mk:%i ",maketic);
+        G_BuildTiccmd(addr(localcmds[0]) + end_index(maketic % BACKUPTICS, 12))
+        maketic++
+        i++
     }
     if (int(singletics) != 0) {
         // singletic update is syncronous
         return
     }
     // send the packet to the other nodes
-    {
-        i = 0
-        while (i < int(doomcom.numnodes)) {
-            if (int(nodeingame[i]) != 0) {
-                realstart = resendto[i]
-                netbuffer.starttic = uint8(realstart)
-                netbuffer.numtics = uint8(maketic - realstart)
-                if (int(netbuffer.numtics) > BACKUPTICS) {
-                    I_Error(reinterpret<uint8?>("Error: NetUpdate: netbuffer->numtics > BACKUPTICS"))
-                }
-                resendto[i] = maketic - int(doomcom.extratics)
-                {
-                    j = 0
-                    while (j < int(netbuffer.numtics)) {
-                        netbuffer.cmds[j] = localcmds[(realstart + j) % BACKUPTICS]
-                        j++
-                    }
-                }
-                if (int(remoteresend[i]) != 0) {
-                    netbuffer.retransmitfrom = uint8(nettics[i])
-                    HSendPacket(i, NCMD_RETRANSMIT)
-                } else {
-                    netbuffer.retransmitfrom = uint8(0)
-                    HSendPacket(i, 0)
-                }
+    i = 0
+    while (i < int(doomcom.numnodes)) {
+        if (int(nodeingame[i]) != 0) {
+            realstart = resendto[i]
+            netbuffer.starttic = uint8(realstart)
+            netbuffer.numtics = uint8(maketic - realstart)
+            if (int(netbuffer.numtics) > BACKUPTICS) {
+                I_Error(cstr("Error: NetUpdate: netbuffer->numtics > BACKUPTICS"))
             }
-            i++
+            resendto[i] = maketic - int(doomcom.extratics)
+            j = 0
+            while (j < int(netbuffer.numtics)) {
+                netbuffer.cmds[j] = localcmds[(realstart + j) % BACKUPTICS]
+                j++
+            }
+            if (int(remoteresend[i]) != 0) {
+                netbuffer.retransmitfrom = uint8(nettics[i])
+                HSendPacket(i, NCMD_RETRANSMIT)
+            } else {
+                netbuffer.retransmitfrom = 0u8
+                HSendPacket(i, 0)
+            }
         }
+        i++
     }
     label 1:  // listen
     // listen for other packets
@@ -398,16 +384,14 @@ def CheckAbort {
         I_StartTic()
     }
     I_StartTic()
-    {
-        while (eventtail != eventhead) {
-            ev = addr(events[0]) + end_index(eventtail, 4096)
-            if (ev._c_type == evtype_t.ev_keydown && ev.data1 == KEY_ESCAPE) {
-                I_Error(reinterpret<uint8?>("Error: Network game synchronization aborted."))
-            }
+    while (eventtail != eventhead) {
+        ev = addr(events[0]) + end_index(eventtail, 4096)
+        if (ev._c_type == evtype_t.ev_keydown && ev.data1 == KEY_ESCAPE) {
+            I_Error(cstr("Error: Network game synchronization aborted."))
         }
     }
     eventtail++
-    eventtail &= MAXEVENTS - 1
+    eventtail &= (MAXEVENTS - 1)
 }
 
 // D_ArbitrateNetStart
@@ -419,7 +403,7 @@ def D_ArbitrateNetStart {
     doom_memset(reinterpret<void?>(addr(gotinfo[0])), 0, int(uint64(typeinfo sizeof(type<doom_boolean[8]>))))
     if (doomcom.consoleplayer != 0) {
         // listen for setup info from key player
-        invoke(doom_print, reinterpret<uint8?>("listening for network start info...\n"))
+        invoke(doom_print, cstr("listening for network start info...\n"))
         while (1 != 0) {
             CheckAbort()
             if (!(int(HGetPacket()) != 0)) {
@@ -427,7 +411,7 @@ def D_ArbitrateNetStart {
             }
             if ((netbuffer.checksum & uint(NCMD_SETUP)) != 0) {
                 if (int(netbuffer.player) != int(anon_82.VERSION)) {
-                    I_Error(reinterpret<uint8?>("Error: Different DOOM versions cannot play a net game!"))
+                    I_Error(cstr("Error: Different DOOM versions cannot play a net game!"))
                 }
                 startskill = enum_from_int(type<skill_t>, int(netbuffer.retransmitfrom) & 15)
                 deathmatch = enum_from_int(type<doom_boolean>, (int(netbuffer.retransmitfrom) & 192) >> 6)
@@ -440,46 +424,40 @@ def D_ArbitrateNetStart {
         }
     } else {
         // key player, send the setup info
-        invoke(doom_print, reinterpret<uint8?>("sending network start info...\n"))
+        invoke(doom_print, cstr("sending network start info...\n"))
         while (true) {
             CheckAbort()
-            {
-                i = 0
-                while (i < int(doomcom.numnodes)) {
-                    netbuffer.retransmitfrom = uint8(int(startskill))
-                    if (int(deathmatch) != 0) {
-                        netbuffer.retransmitfrom = uint8(uint(netbuffer.retransmitfrom) | uint(int(deathmatch)) << 6u)
-                    }
-                    if (int(nomonsters) != 0) {
-                        netbuffer.retransmitfrom = uint8(int(netbuffer.retransmitfrom) | 32)
-                    }
-                    if (int(respawnparm) != 0) {
-                        netbuffer.retransmitfrom = uint8(int(netbuffer.retransmitfrom) | 16)
-                    }
-                    netbuffer.starttic = uint8(startepisode * 64 + startmap)
-                    netbuffer.player = uint8(int(anon_82.VERSION))
-                    netbuffer.numtics = uint8(0)
-                    HSendPacket(i, NCMD_SETUP)
-                    i++
+            i = 0
+            while (i < int(doomcom.numnodes)) {
+                netbuffer.retransmitfrom = uint8(int(startskill))
+                if (int(deathmatch) != 0) {
+                    netbuffer.retransmitfrom = uint8(uint(netbuffer.retransmitfrom) | (uint(int(deathmatch)) << 6u))
                 }
+                if (int(nomonsters) != 0) {
+                    netbuffer.retransmitfrom = uint8(int(netbuffer.retransmitfrom) | 32)
+                }
+                if (int(respawnparm) != 0) {
+                    netbuffer.retransmitfrom = uint8(int(netbuffer.retransmitfrom) | 16)
+                }
+                netbuffer.starttic = uint8(startepisode * 64 + startmap)
+                netbuffer.player = uint8(int(anon_82.VERSION))
+                netbuffer.numtics = 0u8
+                HSendPacket(i, NCMD_SETUP)
+                i++
             }
-            {
-                i = 10
-                while (i != 0 && uint(int(HGetPacket())) != 0) {
-                    if ((int(netbuffer.player) & 127) < MAXNETNODES) {
-                        gotinfo[int(netbuffer.player) & 127] = doom_boolean._c_true
-                    }
-                    i--
+            i = 10
+            while (i != 0 && uint(int(HGetPacket())) != 0) {
+                if ((int(netbuffer.player) & 127) < MAXNETNODES) {
+                    gotinfo[int(netbuffer.player) & 127] = doom_boolean._c_true
                 }
+                i--
             }
-            {
-                i = 1
-                while (i < int(doomcom.numnodes)) {
-                    if (!(int(gotinfo[i]) != 0)) {
-                        break
-                    }
-                    i++
+            i = 1
+            while (i < int(doomcom.numnodes)) {
+                if (!(int(gotinfo[i]) != 0)) {
+                    break
                 }
+                i++
             }
             if (!(i < int(doomcom.numnodes))) {
                 break
@@ -504,7 +482,7 @@ def D_CheckNetGame {
     // I_InitNetwork sets doomcom and netgame
     I_InitNetwork()
     if (doomcom.id != DOOMCOM_ID) {
-        I_Error(reinterpret<uint8?>("Error: Doomcom buffer invalid!"))
+        I_Error(cstr("Error: Doomcom buffer invalid!"))
     }
     netbuffer = addr(doomcom.data)
     displayplayer = int(doomcom.consoleplayer)
@@ -514,44 +492,40 @@ def D_CheckNetGame {
     }
     // doom_print("startskill %i deathmatch: %i startmap: %i startepisode: %i\n",
     // startskill, deathmatch, startmap, startepisode);
-    invoke(doom_print, reinterpret<uint8?>("startskill "))
+    invoke(doom_print, cstr("startskill "))
     invoke(doom_print, doom_itoa(int(startskill), 10))
-    invoke(doom_print, reinterpret<uint8?>("  deathmatch: "))
+    invoke(doom_print, cstr("  deathmatch: "))
     invoke(doom_print, doom_itoa(int(deathmatch), 10))
-    invoke(doom_print, reinterpret<uint8?>("  startmap: "))
+    invoke(doom_print, cstr("  startmap: "))
     invoke(doom_print, doom_itoa(startmap, 10))
-    invoke(doom_print, reinterpret<uint8?>("  startepisode: "))
+    invoke(doom_print, cstr("  startepisode: "))
     invoke(doom_print, doom_itoa(startepisode, 10))
-    invoke(doom_print, reinterpret<uint8?>("\n"))
+    invoke(doom_print, cstr("\n"))
     // read values out of doomcom
     ticdup = int(doomcom.ticdup)
     maxsend = BACKUPTICS / (2 * ticdup) - 1
     if (maxsend < 1) {
         maxsend = 1
     }
-    {
-        i = 0
-        while (i < int(doomcom.numplayers)) {
-            playeringame[i] = doom_boolean._c_true
-            i++
-        }
+    i = 0
+    while (i < int(doomcom.numplayers)) {
+        playeringame[i] = doom_boolean._c_true
+        i++
     }
-    {
-        i = 0
-        while (i < int(doomcom.numnodes)) {
-            nodeingame[i] = doom_boolean._c_true
-            i++
-        }
+    i = 0
+    while (i < int(doomcom.numnodes)) {
+        nodeingame[i] = doom_boolean._c_true
+        i++
     }
     // doom_print("player %i of %i (%i nodes)\n",
     // consoleplayer + 1, doomcom->numplayers, doomcom->numnodes);
-    invoke(doom_print, reinterpret<uint8?>("player "))
+    invoke(doom_print, cstr("player "))
     invoke(doom_print, doom_itoa(consoleplayer + 1, 10))
-    invoke(doom_print, reinterpret<uint8?>(" of "))
+    invoke(doom_print, cstr(" of "))
     invoke(doom_print, doom_itoa(int(doomcom.numplayers), 10))
-    invoke(doom_print, reinterpret<uint8?>(" ("))
+    invoke(doom_print, cstr(" ("))
     invoke(doom_print, doom_itoa(int(doomcom.numnodes), 10))
-    invoke(doom_print, reinterpret<uint8?>(" nodes)\n"))
+    invoke(doom_print, cstr(" nodes)\n"))
 }
 
 // D_QuitNetGame
@@ -567,16 +541,14 @@ def D_QuitNetGame {
     }
     // send a bunch of packets for security
     netbuffer.player = uint8(consoleplayer)
-    netbuffer.numtics = uint8(0)
+    netbuffer.numtics = 0u8
     for (i in range(4)) {
-        {
-            j = 1
-            while (j < int(doomcom.numnodes)) {
-                if (int(nodeingame[j]) != 0) {
-                    HSendPacket(j, int(NCMD_EXIT))
-                }
-                j++
+        j = 1
+        while (j < int(doomcom.numnodes)) {
+            if (int(nodeingame[j]) != 0) {
+                HSendPacket(j, int(NCMD_EXIT))
             }
+            j++
         }
         I_WaitVBL(1)
     }
@@ -600,17 +572,15 @@ def TryRunTics {
     NetUpdate()
     lowtic = DOOM_MAXINT
     numplaying = 0
-    {
-        i = 0
-        while (i < int(doomcom.numnodes)) {
-            if (int(nodeingame[i]) != 0) {
-                numplaying++
-                if (nettics[i] < lowtic) {
-                    lowtic = nettics[i]
-                }
+    i = 0
+    while (i < int(doomcom.numnodes)) {
+        if (int(nodeingame[i]) != 0) {
+            numplaying++
+            if (nettics[i] < lowtic) {
+                lowtic = nettics[i]
             }
-            i++
         }
+        i++
     }
     availabletics = lowtic - gametic / ticdup
     // decide how many tics to run
@@ -629,25 +599,23 @@ def TryRunTics {
         // fprintf(debugfile,
         // "=======real: %i avail: %i game: %i\n",
         // realtics, availabletics, counts);
-        doom_fprint(debugfile, reinterpret<uint8?>("=======real: "))
+        doom_fprint(debugfile, cstr("=======real: "))
         doom_fprint(debugfile, doom_itoa(realtics, 10))
-        doom_fprint(debugfile, reinterpret<uint8?>("  avail: "))
+        doom_fprint(debugfile, cstr("  avail: "))
         doom_fprint(debugfile, doom_itoa(availabletics, 10))
-        doom_fprint(debugfile, reinterpret<uint8?>("  game: "))
+        doom_fprint(debugfile, cstr("  game: "))
         doom_fprint(debugfile, doom_itoa(counts, 10))
-        doom_fprint(debugfile, reinterpret<uint8?>("\n"))
+        doom_fprint(debugfile, cstr("\n"))
     }
     if (!(int(demoplayback) != 0)) {
         // ideally nettics[0] should be 1 - 3 tics above lowtic
         // if we are consistantly slower, speed up time
-        {
-            i = 0
-            while (i < MAXPLAYERS) {
-                if (int(playeringame[i]) != 0) {
-                    break
-                }
-                i++
+        i = 0
+        while (i < MAXPLAYERS) {
+            if (int(playeringame[i]) != 0) {
+                break
             }
+            i++
         }
         if (consoleplayer == i) {
         } else {
@@ -656,7 +624,7 @@ def TryRunTics {
                 gametime--
             }
             // doom_print ("-");
-            frameskip[frameon & 3] = oldnettics > nettics[nodeforplayer[i]] ? 1 : 0
+            frameskip[frameon & 3] = (oldnettics > nettics[nodeforplayer[i]]) ? 1 : 0
             oldnettics = nettics[0]
             if (frameskip[0] != 0 && frameskip[1] != 0 && frameskip[2] != 0 && frameskip[3] != 0) {
                 skiptics = 1
@@ -669,17 +637,15 @@ def TryRunTics {
     while (lowtic < gametic / ticdup + counts) {
         NetUpdate()
         lowtic = DOOM_MAXINT
-        {
-            i = 0
-            while (i < int(doomcom.numnodes)) {
-                if (uint(int(nodeingame[i])) != 0 && nettics[i] < lowtic) {
-                    lowtic = nettics[i]
-                }
-                i++
+        i = 0
+        while (i < int(doomcom.numnodes)) {
+            if (uint(int(nodeingame[i])) != 0 && nettics[i] < lowtic) {
+                lowtic = nettics[i]
             }
+            i++
         }
         if (lowtic < gametic / ticdup) {
-            I_Error(reinterpret<uint8?>("Error: TryRunTics: lowtic < gametic"))
+            I_Error(cstr("Error: TryRunTics: lowtic < gametic"))
         }
         // don't stay in here forever -- give the menu a chance to work
         if (I_GetTime() / ticdup - entertic >= 20) {
@@ -694,33 +660,31 @@ def TryRunTics {
         if (!(_t0 != 0)) {
             break
         }
-        {
-            i = 0
-            while (i < ticdup) {
-                if (gametic / ticdup > lowtic) {
-                    I_Error(reinterpret<uint8?>("Error: gametic>lowtic"))
-                }
-                if (int(advancedemo) != 0) {
-                    D_DoAdvanceDemo()
-                }
-                M_Ticker()
-                G_Ticker()
-                gametic++
-                // modify command for duplicated tics
-                if (i != ticdup - 1) {
-                    var cmd : ticcmd_t?
-                    var buf : int
-                    buf = gametic / ticdup % BACKUPTICS
-                    for (j in range(MAXPLAYERS)) {
-                        cmd = addr(netcmds[j][0]) + end_index(buf, 12)
-                        cmd.chatchar = uint8(0)
-                        if ((int(cmd.buttons) & int(buttoncode_t.BT_SPECIAL)) != 0) {
-                            cmd.buttons = uint8(0)
-                        }
+        i = 0
+        while (i < ticdup) {
+            if (gametic / ticdup > lowtic) {
+                I_Error(cstr("Error: gametic>lowtic"))
+            }
+            if (int(advancedemo) != 0) {
+                D_DoAdvanceDemo()
+            }
+            M_Ticker()
+            G_Ticker()
+            gametic++
+            // modify command for duplicated tics
+            if (i != ticdup - 1) {
+                var cmd : ticcmd_t?
+                var buf : int
+                buf = (gametic / ticdup) % BACKUPTICS
+                for (j in range(MAXPLAYERS)) {
+                    cmd = addr(netcmds[j][0]) + end_index(buf, 12)
+                    cmd.chatchar = 0u8
+                    if ((int(cmd.buttons) & int(buttoncode_t.BT_SPECIAL)) != 0) {
+                        cmd.buttons = 0u8
                     }
                 }
-                i++
             }
+            i++
         }
         // check for new console commands
         NetUpdate()

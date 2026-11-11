@@ -43,12 +43,5 @@ struct event_t {
     data1, data2, data3 : int
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<event_t>) == 16 && typeinfo alignof(type<event_t>) == 4, "event_t: clang lays it out as size 16, align 4")
-    static_assert(typeinfo offsetof < _c_type > (type<event_t>) == 0, "event_t._c_type: clang puts it at 0")
-    static_assert(typeinfo offsetof < data1 > (type<event_t>) == 4, "event_t.data1: clang puts it at 4")
-    static_assert(typeinfo offsetof < data2 > (type<event_t>) == 8, "event_t.data2: clang puts it at 8")
-    static_assert(typeinfo offsetof < data3 > (type<event_t>) == 12, "event_t.data3: clang puts it at 12")
-}
+include d_event_h.layout.das.inc
 

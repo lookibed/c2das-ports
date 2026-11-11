@@ -44,11 +44,11 @@ def R_MapPlane(y : int; x1 : int; x2 : int) {
     var index : uint
     if (x2 < x1 || x1 < 0 || x2 >= viewwidth || uint(y) > uint(viewheight)) {
         // I_Error("Error: R_MapPlane: %i, %i at %i", x1, x2, y);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_MapPlane: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_MapPlane: "))
         doom_concat(addr(error_buf[0]), doom_itoa(x1, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(", "))
+        doom_concat(addr(error_buf[0]), cstr(", "))
         doom_concat(addr(error_buf[0]), doom_itoa(x2, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" at "))
+        doom_concat(addr(error_buf[0]), cstr(" at "))
         doom_concat(addr(error_buf[0]), doom_itoa(y, 10))
         I_Error(addr(error_buf[0]))
     }
@@ -66,8 +66,8 @@ def R_MapPlane(y : int; x1 : int; x2 : int) {
         ds_ystep = cachedystep[y]
     }
     length = FixedMul(distance, distscale[x1])
-    angle = viewangle + xtoviewangle[x1] >> 19u
-    ds_xfrac = viewx + FixedMul(deref(finecosine + angle), length)
+    angle = (viewangle + xtoviewangle[x1]) >> uint(ANGLETOFINESHIFT)
+    ds_xfrac = viewx + FixedMul(finecosine[angle], length)
     ds_yfrac = -viewy - FixedMul(finesine[angle], length)
     if (fixedcolormap != null) {
         ds_colormap = fixedcolormap
@@ -76,7 +76,7 @@ def R_MapPlane(y : int; x1 : int; x2 : int) {
         if (index >= uint(MAXLIGHTZ)) {
             index = uint(MAXLIGHTZ - 1)
         }
-        ds_colormap = deref(planezlight + index)
+        ds_colormap = planezlight[index]
     }
     ds_y = y
     ds_x1 = x1
@@ -92,22 +92,20 @@ def R_ClearPlanes {
     var i : int
     var angle : uint
     // opening / clipping determination
-    {
-        i = 0
-        while (i < viewwidth) {
-            floorclip[i] = int16(viewheight)
-            ceilingclip[i] = int16(-1)
-            i++
-        }
+    i = 0
+    while (i < viewwidth) {
+        floorclip[i] = int16(viewheight)
+        ceilingclip[i] = int16(-1)
+        i++
     }
     lastvisplane = addr(visplanes[0])
     lastopening = addr(openings[0])
     // texture calculation
     doom_memset(reinterpret<void?>(addr(cachedheight[0])), 0, int(uint64(typeinfo sizeof(type<int[200]>))))
     // left to right mapping
-    angle = viewangle - uint(ANG90) >> 19u
+    angle = (viewangle - uint(ANG90)) >> uint(ANGLETOFINESHIFT)
     // scale will be unit scale at SCREENWIDTH/2 distance
-    basexscale = FixedDiv(deref(finecosine + angle), centerxfrac)
+    basexscale = FixedDiv(finecosine[angle], centerxfrac)
     baseyscale = -FixedDiv(finesine[angle], centerxfrac)
 }
 
@@ -120,20 +118,18 @@ def R_FindPlane(var height : int; picnum : int; var lightlevel : int) : visplane
         height = 0
         lightlevel = 0
     }
-    {
-        check = addr(visplanes[0])
-        while (intptr(check) < intptr(lastvisplane)) {
-            if (height == check.height && picnum == check.picnum && lightlevel == check.lightlevel) {
-                break
-            }
-            check = check + 1
+    check = addr(visplanes[0])
+    while (intptr(check) < intptr(lastvisplane)) {
+        if (height == check.height && picnum == check.picnum && lightlevel == check.lightlevel) {
+            break
         }
+        check = check + 1
     }
     if (intptr(check) < intptr(lastvisplane)) {
         return check
     }
     if (int64(lastvisplane - addr(visplanes[0])) == int64(MAXVISPLANES)) {
-        I_Error(reinterpret<uint8?>("Error: R_FindPlane: no more visplanes"))
+        I_Error(cstr("Error: R_FindPlane: no more visplanes"))
     }
     lastvisplane = lastvisplane + 1
     check.height = height
@@ -167,14 +163,12 @@ def R_CheckPlane(var pl : visplane_t?; start : int; stop : int) : visplane_t? {
         unionh = pl.maxx
         intrh = stop
     }
-    {
-        x = intrl
-        while (x <= intrh) {
-            if (int(deref(addr(pl.top[0]) + x)) != 255) {
-                break
-            }
-            x++
+    x = intrl
+    while (x <= intrh) {
+        if (int(addr(pl.top[0])[x]) != 255) {
+            break
         }
+        x++
     }
     if (x > intrh) {
         pl.minx = unionl
@@ -227,92 +221,84 @@ def R_DrawPlanes {
     if (int64(ds_p - addr(drawsegs[0])) > int64(MAXDRAWSEGS)) {
         // I_Error("Error: R_DrawPlanes: drawsegs overflow (%i)",
         // ds_p - drawsegs);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_DrawPlanes: drawsegs overflow ("))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_DrawPlanes: drawsegs overflow ("))
         doom_concat(addr(error_buf[0]), doom_itoa(int(int64(ds_p - addr(drawsegs[0]))), 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(")"))
+        doom_concat(addr(error_buf[0]), cstr(")"))
         I_Error(addr(error_buf[0]))
     }
     if (int64(lastvisplane - addr(visplanes[0])) > int64(MAXVISPLANES)) {
         // I_Error("Error: R_DrawPlanes: visplane overflow (%i)",
         // lastvisplane - visplanes);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_DrawPlanes: visplane overflow ("))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_DrawPlanes: visplane overflow ("))
         doom_concat(addr(error_buf[0]), doom_itoa(int(int64(lastvisplane - addr(visplanes[0]))), 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(")"))
+        doom_concat(addr(error_buf[0]), cstr(")"))
         I_Error(addr(error_buf[0]))
     }
-    if (int64(lastopening - addr(openings[0])) > int64(320 * 64)) {
+    if (int64(lastopening - addr(openings[0])) > int64(SCREENWIDTH * 64)) {
         // I_Error("Error: R_DrawPlanes: opening overflow (%i)",
         // lastopening - openings);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_DrawPlanes: opening overflow ("))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_DrawPlanes: opening overflow ("))
         doom_concat(addr(error_buf[0]), doom_itoa(int(int64(lastopening - addr(openings[0]))), 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(")"))
+        doom_concat(addr(error_buf[0]), cstr(")"))
         I_Error(addr(error_buf[0]))
     }
-    {
-        pl = addr(visplanes[0])
-        while (intptr(pl) < intptr(lastvisplane)) {
-            {
-                if (pl.minx > pl.maxx) {
-                    continue
-                }
-                // sky flat
-                if (pl.picnum == skyflatnum) {
-                    dc_iscale = pspriteiscale >> detailshift
-                    // Sky is allways drawn full bright,
-                    // i.e. colormaps[0] is used.
-                    // Because of this hack, sky is not affected
-                    // by INVUL inverse mapping.
-                    dc_colormap = colormaps
-                    dc_texturemid = skytexturemid
-                    {
-                        x = pl.minx
-                        while (x <= pl.maxx) {
-                            dc_yl = int(deref(addr(pl.top[0]) + x))
-                            dc_yh = int(deref(addr(pl.bottom[0]) + x))
-                            if (dc_yl <= dc_yh) {
-                                angle = int(viewangle + xtoviewangle[x] >> 22u)
-                                dc_x = x
-                                dc_source = R_GetColumn(skytexture, angle)
-                                invoke(colfunc)
-                            }
-                            x++
-                        }
-                    }
-                    continue
-                }
-                // regular flat
-                ds_source = reinterpret<uint8?>(W_CacheLumpNum(firstflat + deref(flattranslation + pl.picnum), PU_STATIC))
-                planeheight = pl.height - viewz < 0 ? -(pl.height - viewz) : pl.height - viewz
-                light = (pl.lightlevel >> LIGHTSEGSHIFT) + extralight
-                if (light >= LIGHTLEVELS) {
-                    light = LIGHTLEVELS - 1
-                }
-                if (light < 0) {
-                    light = 0
-                }
-                planezlight = addr(zlight[light][0])
-                deref(addr(pl.top[0]) + (pl.maxx + 1)) = uint8(255)
-                deref(addr(pl.top[0]) + (pl.minx - 1)) = uint8(255)
-                stop = pl.maxx + 1
-                {
-                    x = pl.minx
-                    while (x <= stop) {
-                        R_MakeSpans(x, int(deref(addr(pl.top[0]) + (x - 1))), int(deref(addr(pl.bottom[0]) + (x - 1))), int(deref(addr(pl.top[0]) + x)), int(deref(addr(pl.bottom[0]) + x)))
-                        x++
-                    }
-                }
-                {
-                    if (reinterpret<memblock_s?>(ds_source + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-                        var buf : uint8[260]
-                        doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/r_plane.c:"))
-                        doom_concat(addr(buf[0]), doom_itoa(454, 10))
-                        I_Error(addr(buf[0]))
-                    }
-                    Z_ChangeTag2(reinterpret<void?>(ds_source), 101)
-                }
-            } finally {
-                pl = pl + 1
+    pl = addr(visplanes[0])
+    while (intptr(pl) < intptr(lastvisplane)) {
+        {
+            if (pl.minx > pl.maxx) {
+                continue
             }
+            // sky flat
+            if (pl.picnum == skyflatnum) {
+                dc_iscale = pspriteiscale >> detailshift
+                // Sky is allways drawn full bright,
+                // i.e. colormaps[0] is used.
+                // Because of this hack, sky is not affected
+                // by INVUL inverse mapping.
+                dc_colormap = colormaps
+                dc_texturemid = skytexturemid
+                x = pl.minx
+                while (x <= pl.maxx) {
+                    dc_yl = int(addr(pl.top[0])[x])
+                    dc_yh = int(addr(pl.bottom[0])[x])
+                    if (dc_yl <= dc_yh) {
+                        angle = int((viewangle + xtoviewangle[x]) >> uint(ANGLETOSKYSHIFT))
+                        dc_x = x
+                        dc_source = R_GetColumn(skytexture, angle)
+                        invoke(colfunc)
+                    }
+                    x++
+                }
+                continue
+            }
+            // regular flat
+            ds_source = reinterpret<uint8?>(W_CacheLumpNum(firstflat + flattranslation[pl.picnum], PU_STATIC))
+            planeheight = pl.height - viewz < 0 ? -(pl.height - viewz) : pl.height - viewz
+            light = (pl.lightlevel >> LIGHTSEGSHIFT) + extralight
+            if (light >= LIGHTLEVELS) {
+                light = LIGHTLEVELS - 1
+            }
+            if (light < 0) {
+                light = 0
+            }
+            planezlight = addr(zlight[light][0])
+            addr(pl.top[0])[pl.maxx + 1] = 255u8
+            addr(pl.top[0])[pl.minx - 1] = 255u8
+            stop = pl.maxx + 1
+            x = pl.minx
+            while (x <= stop) {
+                R_MakeSpans(x, int(addr(pl.top[0])[x - 1]), int(addr(pl.bottom[0])[x - 1]), int(addr(pl.top[0])[x]), int(addr(pl.bottom[0])[x]))
+                x++
+            }
+            if (reinterpret<memblock_s?>(ds_source + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+                var buf : uint8[260]
+                doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/r_plane.c:"))
+                doom_concat(addr(buf[0]), doom_itoa(454, 10))
+                I_Error(addr(buf[0]))
+            }
+            Z_ChangeTag2(reinterpret<void?>(ds_source), PU_CACHE)
+        } finally {
+            pl = pl + 1
         }
     }
 }

@@ -63,7 +63,7 @@ def T_MoveCeiling(var ceiling : ceiling_t?) {
                 }
                 _flag5 ||= _cond5 == ceiling_e.crushAndRaise
                 if (_flag5) {
-                    ceiling.speed = 1 << 16
+                    ceiling.speed = FRACUNIT
                 }
                 _flag5 ||= _cond5 == ceiling_e.fastCrushAndRaise
                 if (_flag5) {
@@ -84,7 +84,7 @@ def T_MoveCeiling(var ceiling : ceiling_t?) {
             if (res == result_e.crushed) {
                 let _cond6 = ceiling._c_type
                 if (_cond6 == ceiling_e.silentCrushAndRaise || _cond6 == ceiling_e.crushAndRaise || _cond6 == ceiling_e.lowerAndCrush) {
-                    ceiling.speed = (1 << 16) / 8
+                    ceiling.speed = FRACUNIT / 8
                 } else {
                 }
             }
@@ -123,7 +123,7 @@ def EV_DoCeiling(var line : line_s?; _c_type : ceiling_e) : int {
         if (!(secnum >= 0)) {
             break
         }
-        sec = addr(deref(sectors + secnum))
+        sec = addr(sectors[secnum])
         if (sec.specialdata != null) {
             continue
         }
@@ -141,9 +141,9 @@ def EV_DoCeiling(var line : line_s?; _c_type : ceiling_e) : int {
             if (_cond2 == ceiling_e.fastCrushAndRaise) {
                 ceiling.crush = doom_boolean._c_true
                 ceiling.topheight = sec.ceilingheight
-                ceiling.bottomheight = sec.floorheight + 8 * FRACUNIT
+                ceiling.bottomheight = sec.floorheight + (8 * FRACUNIT)
                 ceiling.direction = -1
-                ceiling.speed = (1 << 16) * 2
+                ceiling.speed = FRACUNIT * 2
                 break
             }
             _flag2 ||= _cond2 == ceiling_e.silentCrushAndRaise
@@ -160,13 +160,13 @@ def EV_DoCeiling(var line : line_s?; _c_type : ceiling_e) : int {
                     ceiling.bottomheight += 8 * FRACUNIT
                 }
                 ceiling.direction = -1
-                ceiling.speed = 1 << 16
+                ceiling.speed = FRACUNIT
                 break
             }
             if (_cond2 == ceiling_e.raiseToHighest) {
                 ceiling.topheight = P_FindHighestCeilingSurrounding(sec)
                 ceiling.direction = 1
-                ceiling.speed = 1 << 16
+                ceiling.speed = FRACUNIT
                 break
             }
             break
@@ -205,7 +205,7 @@ def P_RemoveActiveCeiling(var c : ceiling_t?) {
 [c_function]
 def P_ActivateInStasisCeiling(var line : line_s?) {
     for (i in range(MAXCEILINGS)) {
-        if (activeceilings[i] != null && activeceilings[i].tag == int(line.tag) && activeceilings[i].direction == 0) {
+        if (activeceilings[i] != null && (activeceilings[i].tag == int(line.tag)) && (activeceilings[i].direction == 0)) {
             activeceilings[i].direction = activeceilings[i].olddirection
             activeceilings[i].thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_MoveCeiling)
         }
@@ -218,7 +218,7 @@ def EV_CeilingCrushStop(var line : line_s?) : int {
     var rtn : int
     rtn = 0
     for (i in range(MAXCEILINGS)) {
-        if (activeceilings[i] != null && activeceilings[i].tag == int(line.tag) && activeceilings[i].direction != 0) {
+        if (activeceilings[i] != null && (activeceilings[i].tag == int(line.tag)) && (activeceilings[i].direction != 0)) {
             activeceilings[i].olddirection = activeceilings[i].direction
             activeceilings[i].thinker._c_function.acv = default<function<() : void>>
             // in-stasis

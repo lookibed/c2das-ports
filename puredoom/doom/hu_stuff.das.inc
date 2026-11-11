@@ -13,20 +13,20 @@ var private headsupactive : doom_boolean = doom_boolean._c_false
 var private chatchars : uint8[128]
 var private head : int = 0
 var private tail : int = 0
-var chat_macros : uint8? [10] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("No")), unsafe(reinterpret<uint8?>("I'm ready to kick butt!")), unsafe(reinterpret<uint8?>("I'm OK.")), unsafe(reinterpret<uint8?>("I'm not looking too good!")), unsafe(reinterpret<uint8?>("Help!")), unsafe(reinterpret<uint8?>("You suck!")), unsafe(reinterpret<uint8?>("Next time, scumbag...")), unsafe(reinterpret<uint8?>("Come here!")), unsafe(reinterpret<uint8?>("I'll take care of it.")), unsafe(reinterpret<uint8?>("Yes")))
-var player_names : uint8? [4] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("Green: ")), unsafe(reinterpret<uint8?>("Indigo: ")), unsafe(reinterpret<uint8?>("Brown: ")), unsafe(reinterpret<uint8?>("Red: ")))
+var chat_macros : uint8? [10] = fixed_array<uint8?>(cstr("No"), cstr("I'm ready to kick butt!"), cstr("I'm OK."), cstr("I'm not looking too good!"), cstr("Help!"), cstr("You suck!"), cstr("Next time, scumbag..."), cstr("Come here!"), cstr("I'll take care of it."), cstr("Yes"))
+var player_names : uint8? [4] = fixed_array<uint8?>(cstr("Green: "), cstr("Indigo: "), cstr("Brown: "), cstr("Red: "))
 var shiftxform : uint8?
-var french_shiftxform : uint8[128] = fixed_array(uint8(0), uint8(1), uint8(2), uint8(3), uint8(4), uint8(5), uint8(6), uint8(7), uint8(8), uint8(9), uint8(10), uint8(11), uint8(12), uint8(13), uint8(14), uint8(15), uint8(16), uint8(17), uint8(18), uint8(19), uint8(20), uint8(21), uint8(22), uint8(23), uint8(24), uint8(25), uint8(26), uint8(27), uint8(28), uint8(29), uint8(30), uint8(31), uint8(' '), uint8('!'), uint8('"'), uint8('#'), uint8('$'), uint8('%'), uint8('&'), uint8('"'), uint8('('), uint8(')'), uint8('*'), uint8('+'), uint8('?'), uint8('_'), uint8('>'), uint8('?'), uint8('0'), uint8('1'), uint8('2'), uint8('3'), uint8('4'), uint8('5'), uint8('6'), uint8('7'), uint8('8'), uint8('9'), uint8('/'), uint8('.'), uint8('<'), uint8('+'), uint8('>'), uint8('?'), uint8('@'), uint8('A'), uint8('B'), uint8('C'), uint8('D'), uint8('E'), uint8('F'), uint8('G'), uint8('H'), uint8('I'), uint8('J'), uint8('K'), uint8('L'), uint8('M'), uint8('N'), uint8('O'), uint8('P'), uint8('Q'), uint8('R'), uint8('S'), uint8('T'), uint8('U'), uint8('V'), uint8('W'), uint8('X'), uint8('Y'), uint8('Z'), uint8('['), uint8('!'), uint8(']'), uint8('"'), uint8('_'), uint8('\''), uint8('A'), uint8('B'), uint8('C'), uint8('D'), uint8('E'), uint8('F'), uint8('G'), uint8('H'), uint8('I'), uint8('J'), uint8('K'), uint8('L'), uint8('M'), uint8('N'), uint8('O'), uint8('P'), uint8('Q'), uint8('R'), uint8('S'), uint8('T'), uint8('U'), uint8('V'), uint8('W'), uint8('X'), uint8('Y'), uint8('Z'), uint8('{'), uint8('|'), uint8('}'), uint8('~'), uint8(127))
-var english_shiftxform : uint8[128] = fixed_array(uint8(0), uint8(1), uint8(2), uint8(3), uint8(4), uint8(5), uint8(6), uint8(7), uint8(8), uint8(9), uint8(10), uint8(11), uint8(12), uint8(13), uint8(14), uint8(15), uint8(16), uint8(17), uint8(18), uint8(19), uint8(20), uint8(21), uint8(22), uint8(23), uint8(24), uint8(25), uint8(26), uint8(27), uint8(28), uint8(29), uint8(30), uint8(31), uint8(' '), uint8('!'), uint8('"'), uint8('#'), uint8('$'), uint8('%'), uint8('&'), uint8('"'), uint8('('), uint8(')'), uint8('*'), uint8('+'), uint8('<'), uint8('_'), uint8('>'), uint8('?'), uint8(')'), uint8('!'), uint8('@'), uint8('#'), uint8('$'), uint8('%'), uint8('^'), uint8('&'), uint8('*'), uint8('('), uint8(':'), uint8(':'), uint8('<'), uint8('+'), uint8('>'), uint8('?'), uint8('@'), uint8('A'), uint8('B'), uint8('C'), uint8('D'), uint8('E'), uint8('F'), uint8('G'), uint8('H'), uint8('I'), uint8('J'), uint8('K'), uint8('L'), uint8('M'), uint8('N'), uint8('O'), uint8('P'), uint8('Q'), uint8('R'), uint8('S'), uint8('T'), uint8('U'), uint8('V'), uint8('W'), uint8('X'), uint8('Y'), uint8('Z'), uint8('['), uint8('!'), uint8(']'), uint8('"'), uint8('_'), uint8('\''), uint8('A'), uint8('B'), uint8('C'), uint8('D'), uint8('E'), uint8('F'), uint8('G'), uint8('H'), uint8('I'), uint8('J'), uint8('K'), uint8('L'), uint8('M'), uint8('N'), uint8('O'), uint8('P'), uint8('Q'), uint8('R'), uint8('S'), uint8('T'), uint8('U'), uint8('V'), uint8('W'), uint8('X'), uint8('Y'), uint8('Z'), uint8('{'), uint8('|'), uint8('}'), uint8('~'), uint8(127))
-var frenchKeyMap : uint8[128] = fixed_array(uint8(0), uint8(1), uint8(2), uint8(3), uint8(4), uint8(5), uint8(6), uint8(7), uint8(8), uint8(9), uint8(10), uint8(11), uint8(12), uint8(13), uint8(14), uint8(15), uint8(16), uint8(17), uint8(18), uint8(19), uint8(20), uint8(21), uint8(22), uint8(23), uint8(24), uint8(25), uint8(26), uint8(27), uint8(28), uint8(29), uint8(30), uint8(31), uint8(' '), uint8('!'), uint8('"'), uint8('#'), uint8('$'), uint8('%'), uint8('&'), uint8('%'), uint8('('), uint8(')'), uint8('*'), uint8('+'), uint8(';'), uint8('-'), uint8(':'), uint8('!'), uint8('0'), uint8('1'), uint8('2'), uint8('3'), uint8('4'), uint8('5'), uint8('6'), uint8('7'), uint8('8'), uint8('9'), uint8(':'), uint8('M'), uint8('<'), uint8('='), uint8('>'), uint8('?'), uint8('@'), uint8('Q'), uint8('B'), uint8('C'), uint8('D'), uint8('E'), uint8('F'), uint8('G'), uint8('H'), uint8('I'), uint8('J'), uint8('K'), uint8('L'), uint8(','), uint8('N'), uint8('O'), uint8('P'), uint8('A'), uint8('R'), uint8('S'), uint8('T'), uint8('U'), uint8('V'), uint8('Z'), uint8('X'), uint8('Y'), uint8('W'), uint8('^'), uint8('\\'), uint8('$'), uint8('^'), uint8('_'), uint8('@'), uint8('Q'), uint8('B'), uint8('C'), uint8('D'), uint8('E'), uint8('F'), uint8('G'), uint8('H'), uint8('I'), uint8('J'), uint8('K'), uint8('L'), uint8(','), uint8('N'), uint8('O'), uint8('P'), uint8('A'), uint8('R'), uint8('S'), uint8('T'), uint8('U'), uint8('V'), uint8('Z'), uint8('X'), uint8('Y'), uint8('W'), uint8('^'), uint8('\\'), uint8('$'), uint8('^'), uint8(127))
+var french_shiftxform : uint8[128] = fixed_array(0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8, 11u8, 12u8, 13u8, 14u8, 15u8, 16u8, 17u8, 18u8, 19u8, 20u8, 21u8, 22u8, 23u8, 24u8, 25u8, 26u8, 27u8, 28u8, 29u8, 30u8, 31u8, uint8(' '), uint8('!'), uint8('"'), uint8('#'), uint8('$'), uint8('%'), uint8('&'), uint8('"'), uint8('('), uint8(')'), uint8('*'), uint8('+'), uint8('?'), uint8('_'), uint8('>'), uint8('?'), uint8('0'), uint8('1'), uint8('2'), uint8('3'), uint8('4'), uint8('5'), uint8('6'), uint8('7'), uint8('8'), uint8('9'), uint8('/'), uint8('.'), uint8('<'), uint8('+'), uint8('>'), uint8('?'), uint8('@'), uint8('A'), uint8('B'), uint8('C'), uint8('D'), uint8('E'), uint8('F'), uint8('G'), uint8('H'), uint8('I'), uint8('J'), uint8('K'), uint8('L'), uint8('M'), uint8('N'), uint8('O'), uint8('P'), uint8('Q'), uint8('R'), uint8('S'), uint8('T'), uint8('U'), uint8('V'), uint8('W'), uint8('X'), uint8('Y'), uint8('Z'), uint8('['), uint8('!'), uint8(']'), uint8('"'), uint8('_'), uint8('\''), uint8('A'), uint8('B'), uint8('C'), uint8('D'), uint8('E'), uint8('F'), uint8('G'), uint8('H'), uint8('I'), uint8('J'), uint8('K'), uint8('L'), uint8('M'), uint8('N'), uint8('O'), uint8('P'), uint8('Q'), uint8('R'), uint8('S'), uint8('T'), uint8('U'), uint8('V'), uint8('W'), uint8('X'), uint8('Y'), uint8('Z'), uint8('{'), uint8('|'), uint8('}'), uint8('~'), 127u8)
+var english_shiftxform : uint8[128] = fixed_array(0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8, 11u8, 12u8, 13u8, 14u8, 15u8, 16u8, 17u8, 18u8, 19u8, 20u8, 21u8, 22u8, 23u8, 24u8, 25u8, 26u8, 27u8, 28u8, 29u8, 30u8, 31u8, uint8(' '), uint8('!'), uint8('"'), uint8('#'), uint8('$'), uint8('%'), uint8('&'), uint8('"'), uint8('('), uint8(')'), uint8('*'), uint8('+'), uint8('<'), uint8('_'), uint8('>'), uint8('?'), uint8(')'), uint8('!'), uint8('@'), uint8('#'), uint8('$'), uint8('%'), uint8('^'), uint8('&'), uint8('*'), uint8('('), uint8(':'), uint8(':'), uint8('<'), uint8('+'), uint8('>'), uint8('?'), uint8('@'), uint8('A'), uint8('B'), uint8('C'), uint8('D'), uint8('E'), uint8('F'), uint8('G'), uint8('H'), uint8('I'), uint8('J'), uint8('K'), uint8('L'), uint8('M'), uint8('N'), uint8('O'), uint8('P'), uint8('Q'), uint8('R'), uint8('S'), uint8('T'), uint8('U'), uint8('V'), uint8('W'), uint8('X'), uint8('Y'), uint8('Z'), uint8('['), uint8('!'), uint8(']'), uint8('"'), uint8('_'), uint8('\''), uint8('A'), uint8('B'), uint8('C'), uint8('D'), uint8('E'), uint8('F'), uint8('G'), uint8('H'), uint8('I'), uint8('J'), uint8('K'), uint8('L'), uint8('M'), uint8('N'), uint8('O'), uint8('P'), uint8('Q'), uint8('R'), uint8('S'), uint8('T'), uint8('U'), uint8('V'), uint8('W'), uint8('X'), uint8('Y'), uint8('Z'), uint8('{'), uint8('|'), uint8('}'), uint8('~'), 127u8)
+var frenchKeyMap : uint8[128] = fixed_array(0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8, 11u8, 12u8, 13u8, 14u8, 15u8, 16u8, 17u8, 18u8, 19u8, 20u8, 21u8, 22u8, 23u8, 24u8, 25u8, 26u8, 27u8, 28u8, 29u8, 30u8, 31u8, uint8(' '), uint8('!'), uint8('"'), uint8('#'), uint8('$'), uint8('%'), uint8('&'), uint8('%'), uint8('('), uint8(')'), uint8('*'), uint8('+'), uint8(';'), uint8('-'), uint8(':'), uint8('!'), uint8('0'), uint8('1'), uint8('2'), uint8('3'), uint8('4'), uint8('5'), uint8('6'), uint8('7'), uint8('8'), uint8('9'), uint8(':'), uint8('M'), uint8('<'), uint8('='), uint8('>'), uint8('?'), uint8('@'), uint8('Q'), uint8('B'), uint8('C'), uint8('D'), uint8('E'), uint8('F'), uint8('G'), uint8('H'), uint8('I'), uint8('J'), uint8('K'), uint8('L'), uint8(','), uint8('N'), uint8('O'), uint8('P'), uint8('A'), uint8('R'), uint8('S'), uint8('T'), uint8('U'), uint8('V'), uint8('Z'), uint8('X'), uint8('Y'), uint8('W'), uint8('^'), uint8('\\'), uint8('$'), uint8('^'), uint8('_'), uint8('@'), uint8('Q'), uint8('B'), uint8('C'), uint8('D'), uint8('E'), uint8('F'), uint8('G'), uint8('H'), uint8('I'), uint8('J'), uint8('K'), uint8('L'), uint8(','), uint8('N'), uint8('O'), uint8('P'), uint8('A'), uint8('R'), uint8('S'), uint8('T'), uint8('U'), uint8('V'), uint8('Z'), uint8('X'), uint8('Y'), uint8('W'), uint8('^'), uint8('\\'), uint8('$'), uint8('^'), 127u8)
 var chat_char : uint8
 var hu_font : uint8? [63]
 var chat_on : doom_boolean
 var message_dontfuckwithme : doom_boolean
-var mapnames : uint8? [45] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("E1M1: Hangar")), unsafe(reinterpret<uint8?>("E1M2: Nuclear Plant")), unsafe(reinterpret<uint8?>("E1M3: Toxin Refinery")), unsafe(reinterpret<uint8?>("E1M4: Command Control")), unsafe(reinterpret<uint8?>("E1M5: Phobos Lab")), unsafe(reinterpret<uint8?>("E1M6: Central Processing")), unsafe(reinterpret<uint8?>("E1M7: Computer Station")), unsafe(reinterpret<uint8?>("E1M8: Phobos Anomaly")), unsafe(reinterpret<uint8?>("E1M9: Military Base")), unsafe(reinterpret<uint8?>("E2M1: Deimos Anomaly")), unsafe(reinterpret<uint8?>("E2M2: Containment Area")), unsafe(reinterpret<uint8?>("E2M3: Refinery")), unsafe(reinterpret<uint8?>("E2M4: Deimos Lab")), unsafe(reinterpret<uint8?>("E2M5: Command Center")), unsafe(reinterpret<uint8?>("E2M6: Halls of the Damned")), unsafe(reinterpret<uint8?>("E2M7: Spawning Vats")), unsafe(reinterpret<uint8?>("E2M8: Tower of Babel")), unsafe(reinterpret<uint8?>("E2M9: Fortress of Mystery")), unsafe(reinterpret<uint8?>("E3M1: Hell Keep")), unsafe(reinterpret<uint8?>("E3M2: Slough of Despair")), unsafe(reinterpret<uint8?>("E3M3: Pandemonium")), unsafe(reinterpret<uint8?>("E3M4: House of Pain")), unsafe(reinterpret<uint8?>("E3M5: Unholy Cathedral")), unsafe(reinterpret<uint8?>("E3M6: Mt. Erebus")), unsafe(reinterpret<uint8?>("E3M7: Limbo")), unsafe(reinterpret<uint8?>("E3M8: Dis")), unsafe(reinterpret<uint8?>("E3M9: Warrens")), unsafe(reinterpret<uint8?>("E4M1: Hell Beneath")), unsafe(reinterpret<uint8?>("E4M2: Perfect Hatred")), unsafe(reinterpret<uint8?>("E4M3: Sever The Wicked")), unsafe(reinterpret<uint8?>("E4M4: Unruly Evil")), unsafe(reinterpret<uint8?>("E4M5: They Will Repent")), unsafe(reinterpret<uint8?>("E4M6: Against Thee Wickedly")), unsafe(reinterpret<uint8?>("E4M7: And Hell Followed")), unsafe(reinterpret<uint8?>("E4M8: Unto The Cruel")), unsafe(reinterpret<uint8?>("E4M9: Fear")), unsafe(reinterpret<uint8?>("NEWLEVEL")), unsafe(reinterpret<uint8?>("NEWLEVEL")), unsafe(reinterpret<uint8?>("NEWLEVEL")), unsafe(reinterpret<uint8?>("NEWLEVEL")), unsafe(reinterpret<uint8?>("NEWLEVEL")), unsafe(reinterpret<uint8?>("NEWLEVEL")), unsafe(reinterpret<uint8?>("NEWLEVEL")), unsafe(reinterpret<uint8?>("NEWLEVEL")), unsafe(reinterpret<uint8?>("NEWLEVEL")))
-var mapnames2 : uint8? [32] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("level 1: entryway")), unsafe(reinterpret<uint8?>("level 2: underhalls")), unsafe(reinterpret<uint8?>("level 3: the gantlet")), unsafe(reinterpret<uint8?>("level 4: the focus")), unsafe(reinterpret<uint8?>("level 5: the waste tunnels")), unsafe(reinterpret<uint8?>("level 6: the crusher")), unsafe(reinterpret<uint8?>("level 7: dead simple")), unsafe(reinterpret<uint8?>("level 8: tricks and traps")), unsafe(reinterpret<uint8?>("level 9: the pit")), unsafe(reinterpret<uint8?>("level 10: refueling base")), unsafe(reinterpret<uint8?>("level 11: 'o' of destruction!")), unsafe(reinterpret<uint8?>("level 12: the factory")), unsafe(reinterpret<uint8?>("level 13: downtown")), unsafe(reinterpret<uint8?>("level 14: the inmost dens")), unsafe(reinterpret<uint8?>("level 15: industrial zone")), unsafe(reinterpret<uint8?>("level 16: suburbs")), unsafe(reinterpret<uint8?>("level 17: tenements")), unsafe(reinterpret<uint8?>("level 18: the courtyard")), unsafe(reinterpret<uint8?>("level 19: the citadel")), unsafe(reinterpret<uint8?>("level 20: gotcha!")), unsafe(reinterpret<uint8?>("level 21: nirvana")), unsafe(reinterpret<uint8?>("level 22: the catacombs")), unsafe(reinterpret<uint8?>("level 23: barrels o' fun")), unsafe(reinterpret<uint8?>("level 24: the chasm")), unsafe(reinterpret<uint8?>("level 25: bloodfalls")), unsafe(reinterpret<uint8?>("level 26: the abandoned mines")), unsafe(reinterpret<uint8?>("level 27: monster condo")), unsafe(reinterpret<uint8?>("level 28: the spirit world")), unsafe(reinterpret<uint8?>("level 29: the living end")), unsafe(reinterpret<uint8?>("level 30: icon of sin")), unsafe(reinterpret<uint8?>("level 31: wolfenstein")), unsafe(reinterpret<uint8?>("level 32: grosse")))
-var mapnamesp : uint8? [32] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("level 1: congo")), unsafe(reinterpret<uint8?>("level 2: well of souls")), unsafe(reinterpret<uint8?>("level 3: aztec")), unsafe(reinterpret<uint8?>("level 4: caged")), unsafe(reinterpret<uint8?>("level 5: ghost town")), unsafe(reinterpret<uint8?>("level 6: baron's lair")), unsafe(reinterpret<uint8?>("level 7: caughtyard")), unsafe(reinterpret<uint8?>("level 8: realm")), unsafe(reinterpret<uint8?>("level 9: abattoire")), unsafe(reinterpret<uint8?>("level 10: onslaught")), unsafe(reinterpret<uint8?>("level 11: hunted")), unsafe(reinterpret<uint8?>("level 12: speed")), unsafe(reinterpret<uint8?>("level 13: the crypt")), unsafe(reinterpret<uint8?>("level 14: genesis")), unsafe(reinterpret<uint8?>("level 15: the twilight")), unsafe(reinterpret<uint8?>("level 16: the omen")), unsafe(reinterpret<uint8?>("level 17: compound")), unsafe(reinterpret<uint8?>("level 18: neurosphere")), unsafe(reinterpret<uint8?>("level 19: nme")), unsafe(reinterpret<uint8?>("level 20: the death domain")), unsafe(reinterpret<uint8?>("level 21: slayer")), unsafe(reinterpret<uint8?>("level 22: impossible mission")), unsafe(reinterpret<uint8?>("level 23: tombstone")), unsafe(reinterpret<uint8?>("level 24: the final frontier")), unsafe(reinterpret<uint8?>("level 25: the temple of darkness")), unsafe(reinterpret<uint8?>("level 26: bunker")), unsafe(reinterpret<uint8?>("level 27: anti-christ")), unsafe(reinterpret<uint8?>("level 28: the sewers")), unsafe(reinterpret<uint8?>("level 29: odyssey of noises")), unsafe(reinterpret<uint8?>("level 30: the gateway of hell")), unsafe(reinterpret<uint8?>("level 31: cyberden")), unsafe(reinterpret<uint8?>("level 32: go 2 it")))
-var mapnamest : uint8? [32] = fixed_array<uint8?>(unsafe(reinterpret<uint8?>("level 1: system control")), unsafe(reinterpret<uint8?>("level 2: human bbq")), unsafe(reinterpret<uint8?>("level 3: power control")), unsafe(reinterpret<uint8?>("level 4: wormhole")), unsafe(reinterpret<uint8?>("level 5: hanger")), unsafe(reinterpret<uint8?>("level 6: open season")), unsafe(reinterpret<uint8?>("level 7: prison")), unsafe(reinterpret<uint8?>("level 8: metal")), unsafe(reinterpret<uint8?>("level 9: stronghold")), unsafe(reinterpret<uint8?>("level 10: redemption")), unsafe(reinterpret<uint8?>("level 11: storage facility")), unsafe(reinterpret<uint8?>("level 12: crater")), unsafe(reinterpret<uint8?>("level 13: nukage processing")), unsafe(reinterpret<uint8?>("level 14: steel works")), unsafe(reinterpret<uint8?>("level 15: dead zone")), unsafe(reinterpret<uint8?>("level 16: deepest reaches")), unsafe(reinterpret<uint8?>("level 17: processing area")), unsafe(reinterpret<uint8?>("level 18: mill")), unsafe(reinterpret<uint8?>("level 19: shipping/respawning")), unsafe(reinterpret<uint8?>("level 20: central processing")), unsafe(reinterpret<uint8?>("level 21: administration center")), unsafe(reinterpret<uint8?>("level 22: habitat")), unsafe(reinterpret<uint8?>("level 23: lunar mining project")), unsafe(reinterpret<uint8?>("level 24: quarry")), unsafe(reinterpret<uint8?>("level 25: baron's den")), unsafe(reinterpret<uint8?>("level 26: ballistyx")), unsafe(reinterpret<uint8?>("level 27: mount pain")), unsafe(reinterpret<uint8?>("level 28: heck")), unsafe(reinterpret<uint8?>("level 29: river styx")), unsafe(reinterpret<uint8?>("level 30: last call")), unsafe(reinterpret<uint8?>("level 31: pharaoh")), unsafe(reinterpret<uint8?>("level 32: caribbean")))
+var mapnames : uint8? [45] = fixed_array<uint8?>(cstr("E1M1: Hangar"), cstr("E1M2: Nuclear Plant"), cstr("E1M3: Toxin Refinery"), cstr("E1M4: Command Control"), cstr("E1M5: Phobos Lab"), cstr("E1M6: Central Processing"), cstr("E1M7: Computer Station"), cstr("E1M8: Phobos Anomaly"), cstr("E1M9: Military Base"), cstr("E2M1: Deimos Anomaly"), cstr("E2M2: Containment Area"), cstr("E2M3: Refinery"), cstr("E2M4: Deimos Lab"), cstr("E2M5: Command Center"), cstr("E2M6: Halls of the Damned"), cstr("E2M7: Spawning Vats"), cstr("E2M8: Tower of Babel"), cstr("E2M9: Fortress of Mystery"), cstr("E3M1: Hell Keep"), cstr("E3M2: Slough of Despair"), cstr("E3M3: Pandemonium"), cstr("E3M4: House of Pain"), cstr("E3M5: Unholy Cathedral"), cstr("E3M6: Mt. Erebus"), cstr("E3M7: Limbo"), cstr("E3M8: Dis"), cstr("E3M9: Warrens"), cstr("E4M1: Hell Beneath"), cstr("E4M2: Perfect Hatred"), cstr("E4M3: Sever The Wicked"), cstr("E4M4: Unruly Evil"), cstr("E4M5: They Will Repent"), cstr("E4M6: Against Thee Wickedly"), cstr("E4M7: And Hell Followed"), cstr("E4M8: Unto The Cruel"), cstr("E4M9: Fear"), cstr("NEWLEVEL"), cstr("NEWLEVEL"), cstr("NEWLEVEL"), cstr("NEWLEVEL"), cstr("NEWLEVEL"), cstr("NEWLEVEL"), cstr("NEWLEVEL"), cstr("NEWLEVEL"), cstr("NEWLEVEL"))
+var mapnames2 : uint8? [32] = fixed_array<uint8?>(cstr("level 1: entryway"), cstr("level 2: underhalls"), cstr("level 3: the gantlet"), cstr("level 4: the focus"), cstr("level 5: the waste tunnels"), cstr("level 6: the crusher"), cstr("level 7: dead simple"), cstr("level 8: tricks and traps"), cstr("level 9: the pit"), cstr("level 10: refueling base"), cstr("level 11: 'o' of destruction!"), cstr("level 12: the factory"), cstr("level 13: downtown"), cstr("level 14: the inmost dens"), cstr("level 15: industrial zone"), cstr("level 16: suburbs"), cstr("level 17: tenements"), cstr("level 18: the courtyard"), cstr("level 19: the citadel"), cstr("level 20: gotcha!"), cstr("level 21: nirvana"), cstr("level 22: the catacombs"), cstr("level 23: barrels o' fun"), cstr("level 24: the chasm"), cstr("level 25: bloodfalls"), cstr("level 26: the abandoned mines"), cstr("level 27: monster condo"), cstr("level 28: the spirit world"), cstr("level 29: the living end"), cstr("level 30: icon of sin"), cstr("level 31: wolfenstein"), cstr("level 32: grosse"))
+var mapnamesp : uint8? [32] = fixed_array<uint8?>(cstr("level 1: congo"), cstr("level 2: well of souls"), cstr("level 3: aztec"), cstr("level 4: caged"), cstr("level 5: ghost town"), cstr("level 6: baron's lair"), cstr("level 7: caughtyard"), cstr("level 8: realm"), cstr("level 9: abattoire"), cstr("level 10: onslaught"), cstr("level 11: hunted"), cstr("level 12: speed"), cstr("level 13: the crypt"), cstr("level 14: genesis"), cstr("level 15: the twilight"), cstr("level 16: the omen"), cstr("level 17: compound"), cstr("level 18: neurosphere"), cstr("level 19: nme"), cstr("level 20: the death domain"), cstr("level 21: slayer"), cstr("level 22: impossible mission"), cstr("level 23: tombstone"), cstr("level 24: the final frontier"), cstr("level 25: the temple of darkness"), cstr("level 26: bunker"), cstr("level 27: anti-christ"), cstr("level 28: the sewers"), cstr("level 29: odyssey of noises"), cstr("level 30: the gateway of hell"), cstr("level 31: cyberden"), cstr("level 32: go 2 it"))
+var mapnamest : uint8? [32] = fixed_array<uint8?>(cstr("level 1: system control"), cstr("level 2: human bbq"), cstr("level 3: power control"), cstr("level 4: wormhole"), cstr("level 5: hanger"), cstr("level 6: open season"), cstr("level 7: prison"), cstr("level 8: metal"), cstr("level 9: stronghold"), cstr("level 10: redemption"), cstr("level 11: storage facility"), cstr("level 12: crater"), cstr("level 13: nukage processing"), cstr("level 14: steel works"), cstr("level 15: dead zone"), cstr("level 16: deepest reaches"), cstr("level 17: processing area"), cstr("level 18: mill"), cstr("level 19: shipping/respawning"), cstr("level 20: central processing"), cstr("level 21: administration center"), cstr("level 22: habitat"), cstr("level 23: lunar mining project"), cstr("level 24: quarry"), cstr("level 25: baron's den"), cstr("level 26: ballistyx"), cstr("level 27: mount pain"), cstr("level 28: heck"), cstr("level 29: river styx"), cstr("level 30: last call"), cstr("level 31: pharaoh"), cstr("level 32: caribbean"))
 var private HU_Responder_lastmessage : uint8[81]
 var private HU_Responder_shiftdown : doom_boolean = doom_boolean._c_false
 var private HU_Responder_altdown : doom_boolean = doom_boolean._c_false
@@ -47,16 +47,16 @@ def HU_Init {
         shiftxform = addr(english_shiftxform[0])
     }
     // load the heads-up font
-    j = '!'
+    j = HU_FONTSTART
     for (i in range(HU_FONTSIZE)) {
         // if (j == 40) __debugbreak();
         // doom_sprintf(buffer, "STCFN%.3d", j++);
-        doom_strcpy(addr(buffer[0]), reinterpret<uint8?>("STCFN"))
+        doom_strcpy(addr(buffer[0]), cstr("STCFN"))
         if (j < 100) {
-            doom_concat(addr(buffer[0]), reinterpret<uint8?>("0"))
+            doom_concat(addr(buffer[0]), cstr("0"))
         }
         if (j < 10) {
-            doom_concat(addr(buffer[0]), reinterpret<uint8?>("0"))
+            doom_concat(addr(buffer[0]), cstr("0"))
         }
         let _t0 = j
         j++
@@ -103,7 +103,7 @@ def HU_Start {
         HUlib_addCharToTextLine(addr(w_title), deref(_t0))
     }
     // create the chat widget
-    HUlib_initIText(addr(w_chat), HU_INPUTX, 0 + 1 * (int(read_patch_t_height(hu_font[0], 0)) + 1), addr(hu_font[0]), HU_FONTSTART, addr(chat_on))
+    HUlib_initIText(addr(w_chat), HU_INPUTX, HU_MSGY + HU_MSGHEIGHT * (int(read_patch_t_height(hu_font[0], 0)) + 1), addr(hu_font[0]), HU_FONTSTART, addr(chat_on))
     // create the inputbuffer widgets
     for (i in range(MAXPLAYERS)) {
         HUlib_initIText(addr(w_inputbuffer[0]) + end_index(i, 4), 0, 0, null, 0, addr(always_off))
@@ -143,7 +143,7 @@ def HU_Ticker {
     }
     if (showMessages != 0 || uint(int(message_dontfuckwithme)) != 0) {
         // display message if necessary
-        if (hu_stuff_plr.message != null && !(int(message_nottobefuckedwith) != 0) || hu_stuff_plr.message != null && uint(int(message_dontfuckwithme)) != 0) {
+        if ((hu_stuff_plr.message != null && !(int(message_nottobefuckedwith) != 0)) || (hu_stuff_plr.message != null && uint(int(message_dontfuckwithme)) != 0)) {
             HUlib_addMessageToSText(addr(w_message), null, hu_stuff_plr.message)
             hu_stuff_plr.message = null
             message_on = doom_boolean._c_true
@@ -169,7 +169,7 @@ def HU_Ticker {
                     chat_dest[i] = c
                 } else {
                     if (int(c) >= 'a' && int(c) <= 'z') {
-                        c = deref(shiftxform + int(uint8(c)))
+                        c = shiftxform[int(uint8(c))]
                     }
                     rc = int(HUlib_keyInIText(addr(w_inputbuffer[0]) + end_index(i, 4), uint8(c)))
                     if (rc != 0 && int(c) == KEY_ENTER) {
@@ -187,19 +187,18 @@ def HU_Ticker {
                         HUlib_resetIText(addr(w_inputbuffer[0]) + end_index(i, 4))
                     }
                 }
-                players[i].cmd.chatchar = uint8(0)
+                players[i].cmd.chatchar = 0u8
             }
         }
     }
 }
 
-[c_function]
 def HU_queueChatChar(c : uint8) {
-    if ((head + 1 & QUEUESIZE - 1) == tail) {
-        hu_stuff_plr.message = reinterpret<uint8?>("[Message unsent]")
+    if (((head + 1) & (QUEUESIZE - 1)) == tail) {
+        hu_stuff_plr.message = cstr("[Message unsent]")
     } else {
         chatchars[head] = c
-        head = head + 1 & QUEUESIZE - 1
+        head = (head + 1) & (QUEUESIZE - 1)
     }
 }
 
@@ -207,9 +206,9 @@ def HU_dequeueChatChar : uint8 {
     var c : uint8
     if (head != tail) {
         c = chatchars[tail]
-        tail = tail + 1 & QUEUESIZE - 1
+        tail = (tail + 1) & (QUEUESIZE - 1)
     } else {
-        c = uint8(0)
+        c = 0u8
     }
     return c
 }
@@ -235,7 +234,7 @@ def HU_Responder(var ev : event_t?) : doom_boolean {
         return doom_boolean._c_false
     }
     if (!(int(chat_on) != 0)) {
-        if (ev.data1 == 13) {
+        if (ev.data1 == KEY_ENTER) {
             message_on = doom_boolean._c_true
             message_counter = HU_MSGTIMEOUT
             eatkey = doom_boolean._c_true
@@ -256,15 +255,15 @@ def HU_Responder(var ev : event_t?) : doom_boolean {
                     } elif (i == consoleplayer) {
                         HU_Responder_num_nobrainers++
                         if (HU_Responder_num_nobrainers < 3) {
-                            hu_stuff_plr.message = reinterpret<uint8?>("You mumble to yourself")
+                            hu_stuff_plr.message = cstr("You mumble to yourself")
                         } elif (HU_Responder_num_nobrainers < 6) {
-                            hu_stuff_plr.message = reinterpret<uint8?>("Who's there?")
+                            hu_stuff_plr.message = cstr("Who's there?")
                         } elif (HU_Responder_num_nobrainers < 9) {
-                            hu_stuff_plr.message = reinterpret<uint8?>("You scare yourself")
+                            hu_stuff_plr.message = cstr("You scare yourself")
                         } elif (HU_Responder_num_nobrainers < 32) {
-                            hu_stuff_plr.message = reinterpret<uint8?>("You start to rave")
+                            hu_stuff_plr.message = cstr("You start to rave")
                         } else {
-                            hu_stuff_plr.message = reinterpret<uint8?>("You've lost it...")
+                            hu_stuff_plr.message = cstr("You've lost it...")
                         }
                     }
                 }
@@ -298,8 +297,8 @@ def HU_Responder(var ev : event_t?) : doom_boolean {
             if (int(Language_t.french) != 0) {
                 c = uint8(ForeignTranslation(c))
             }
-            if (uint(int(HU_Responder_shiftdown)) != 0 || int(c) >= 'a' && int(c) <= 'z') {
-                c = uint8(deref(shiftxform + int(c)))
+            if (uint(int(HU_Responder_shiftdown)) != 0 || (int(c) >= 'a' && int(c) <= 'z')) {
+                c = uint8(shiftxform[int(c)])
             }
             eatkey = HUlib_keyInIText(addr(w_chat), c)
             if (int(eatkey) != 0) {

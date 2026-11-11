@@ -118,7 +118,7 @@ def EV_StartLightStrobing(var line : line_s?) {
         if (!(secnum >= 0)) {
             break
         }
-        sec = addr(deref(sectors + secnum))
+        sec = addr(sectors[secnum])
         if (sec.specialdata != null) {
             continue
         }
@@ -136,33 +136,29 @@ def EV_TurnTagLightsOff(var line : line_s?) {
     var tsec : sector_t?
     var templine : line_s?
     sector = sectors
-    {
-        j = 0
-        while (j < numsectors) {
-            if (int(sector.tag) == int(line.tag)) {
-                min = int(sector.lightlevel)
+    j = 0
+    while (j < numsectors) {
+        if (int(sector.tag) == int(line.tag)) {
+            min = int(sector.lightlevel)
+            i = 0
+            while (i < sector.linecount) {
                 {
-                    i = 0
-                    while (i < sector.linecount) {
-                        {
-                            templine = deref(sector.lines + i)
-                            tsec = getNextSector(templine, sector)
-                            if (!(tsec != null)) {
-                                continue
-                            }
-                            if (int(tsec.lightlevel) < min) {
-                                min = int(tsec.lightlevel)
-                            }
-                        } finally {
-                            i++
-                        }
+                    templine = sector.lines[i]
+                    tsec = getNextSector(templine, sector)
+                    if (!(tsec != null)) {
+                        continue
                     }
+                    if (int(tsec.lightlevel) < min) {
+                        min = int(tsec.lightlevel)
+                    }
+                } finally {
+                    i++
                 }
-                sector.lightlevel = int16(min)
             }
-            j++
-            sector = sector + 1
+            sector.lightlevel = int16(min)
         }
+        j++
+        sector = sector + 1
     }
 }
 
@@ -175,37 +171,33 @@ def EV_LightTurnOn(var line : line_s?; var bright : int) {
     var temp : sector_t?
     var templine : line_s?
     sector = sectors
-    {
-        i = 0
-        while (i < numsectors) {
-            if (int(sector.tag) == int(line.tag)) {
-                // bright = 0 means to search
-                // for highest light level
-                // surrounding sector
-                if (!(bright != 0)) {
+    i = 0
+    while (i < numsectors) {
+        if (int(sector.tag) == int(line.tag)) {
+            // bright = 0 means to search
+            // for highest light level
+            // surrounding sector
+            if (!(bright != 0)) {
+                j = 0
+                while (j < sector.linecount) {
                     {
-                        j = 0
-                        while (j < sector.linecount) {
-                            {
-                                templine = deref(sector.lines + j)
-                                temp = getNextSector(templine, sector)
-                                if (!(temp != null)) {
-                                    continue
-                                }
-                                if (int(temp.lightlevel) > bright) {
-                                    bright = int(temp.lightlevel)
-                                }
-                            } finally {
-                                j++
-                            }
+                        templine = sector.lines[j]
+                        temp = getNextSector(templine, sector)
+                        if (!(temp != null)) {
+                            continue
                         }
+                        if (int(temp.lightlevel) > bright) {
+                            bright = int(temp.lightlevel)
+                        }
+                    } finally {
+                        j++
                     }
                 }
-                sector.lightlevel = int16(bright)
             }
-            i++
-            sector = sector + 1
+            sector.lightlevel = int16(bright)
         }
+        i++
+        sector = sector + 1
     }
 }
 

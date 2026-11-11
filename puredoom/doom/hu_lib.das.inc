@@ -6,7 +6,7 @@ def HUlib_init {
 
 def HUlib_clearTextLine(var t : hu_textline_t?) {
     t.len = 0
-    t.l[0] = uint8(0)
+    t.l[0] = 0u8
     t.needsupdate = int(doom_boolean._c_true)
 }
 
@@ -25,7 +25,7 @@ def HUlib_addCharToTextLine(var t : hu_textline_t?; ch : uint8) : doom_boolean {
         let _t0 = t.len
         t.len++
         t.l[_t0] = ch
-        t.l[t.len] = uint8(0)
+        t.l[t.len] = 0u8
         t.needsupdate = 4
         return doom_boolean._c_true
     }
@@ -36,7 +36,7 @@ def HUlib_delCharFromTextLine(var t : hu_textline_t?) : doom_boolean {
         return doom_boolean._c_false
     } else {
         t.len--
-        t.l[t.len] = uint8(0)
+        t.l[t.len] = 0u8
         t.needsupdate = 4
         return doom_boolean._c_true
     }
@@ -50,29 +50,27 @@ def HUlib_drawTextLine(var l : hu_textline_t?; drawcursor : doom_boolean) {
     var c : uint8
     // draw the new stuff
     x = l.x
-    {
-        i = 0
-        while (i < l.len) {
-            c = uint8(doom_toupper(int(l.l[i])))
-            if (int(c) != ' ' && int(c) >= l.sc && int(c) <= '_') {
-                w = int(read_patch_t_width(deref(l.f + (int(c) - l.sc)), 0))
-                if (x + w > SCREENWIDTH) {
-                    break
-                }
-                V_DrawPatchDirect(x, l.y, FG, deref(l.f + (int(c) - l.sc)))
-                x += w
-            } else {
-                x += 4
-                if (x >= SCREENWIDTH) {
-                    break
-                }
+    i = 0
+    while (i < l.len) {
+        c = uint8(doom_toupper(int(l.l[i])))
+        if (int(c) != ' ' && int(c) >= l.sc && int(c) <= '_') {
+            w = int(read_patch_t_width(l.f[int(c) - l.sc], 0))
+            if (x + w > SCREENWIDTH) {
+                break
             }
-            i++
+            V_DrawPatchDirect(x, l.y, FG, l.f[int(c) - l.sc])
+            x += w
+        } else {
+            x += 4
+            if (x >= SCREENWIDTH) {
+                break
+            }
         }
+        i++
     }
     // draw the cursor if requested
-    if (uint(int(drawcursor)) != 0 && x + int(read_patch_t_width(deref(l.f + ('_' - l.sc)), 0)) <= SCREENWIDTH) {
-        V_DrawPatchDirect(x, l.y, FG, deref(l.f + ('_' - l.sc)))
+    if (uint(int(drawcursor)) != 0 && x + int(read_patch_t_width(l.f['_' - l.sc], 0)) <= SCREENWIDTH) {
+        V_DrawPatchDirect(x, l.y, FG, l.f['_' - l.sc])
     }
 }
 
@@ -86,22 +84,20 @@ def HUlib_eraseTextLine(var l : hu_textline_t?) {
     // and the text must either need updating or refreshing
     // (because of a recent change back from the automap)
     if (!(int(automapactive) != 0) && viewwindowx != 0 && l.needsupdate != 0) {
-        lh = int(read_patch_t_height(deref(l.f + 0), 0)) + 1
-        {
-            y = l.y
-            yoffset = y * SCREENWIDTH
-            while (y < l.y + lh) {
-                if (y < viewwindowy || y >= viewwindowy + viewheight) {
-                    // erase entire line
-                    R_VideoErase(uint(yoffset), SCREENWIDTH)
-                } else {
-                    // erase left border
-                    R_VideoErase(uint(yoffset), viewwindowx)
-                    R_VideoErase(uint(yoffset + viewwindowx + viewwidth), viewwindowx)
-                }
-                y++
-                yoffset += SCREENWIDTH
+        lh = int(read_patch_t_height(l.f[0], 0)) + 1
+        y = l.y
+        yoffset = y * SCREENWIDTH
+        while (y < l.y + lh) {
+            if (y < viewwindowy || y >= viewwindowy + viewheight) {
+                // erase entire line
+                R_VideoErase(uint(yoffset), SCREENWIDTH)
+            } else {
+                // erase left border
+                R_VideoErase(uint(yoffset), viewwindowx)
+                R_VideoErase(uint(yoffset + viewwindowx + viewwidth), viewwindowx)
             }
+            y++
+            yoffset += SCREENWIDTH
         }
     }
     // erase right border
@@ -118,7 +114,7 @@ def HUlib_initSText(var s : hu_stext_t?; x : int; y : int; h : int; var font : u
     s.laston = doom_boolean._c_true
     s.cl = 0
     for (i in range(h)) {
-        HUlib_initTextLine(addr(s.l[0]) + end_index(i, 4), x, y - i * (int(read_patch_t_height(deref(font + 0), 0)) + 1), font, startchar)
+        HUlib_initTextLine(addr(s.l[0]) + end_index(i, 4), x, y - i * (int(read_patch_t_height(font[0], 0)) + 1), font, startchar)
     }
 }
 
@@ -132,12 +128,10 @@ def HUlib_addLineToSText(var s : hu_stext_t?) {
     }
     HUlib_clearTextLine(addr(s.l[0]) + end_index(s.cl, 4))
     // everything needs updating
-    {
-        i = 0
-        while (i < s.h) {
-            s.l[i].needsupdate = 4
-            i++
-        }
+    i = 0
+    while (i < s.h) {
+        s.l[i].needsupdate = 4
+        i++
     }
 }
 
@@ -168,35 +162,31 @@ def HUlib_drawSText(var s : hu_stext_t?) {
         return
     }
     // draw everything
-    {
-        i = 0
-        while (i < s.h) {
-            idx = s.cl - i
-            if (idx < 0) {
-                // handle queue of lines
-                idx += s.h
-            }
-            l = addr(s.l[0]) + end_index(idx, 4)
-            // need a decision made here on whether to skip the draw
-            // no cursor, please
-            HUlib_drawTextLine(l, doom_boolean._c_false)
-            i++
+    i = 0
+    while (i < s.h) {
+        idx = s.cl - i
+        if (idx < 0) {
+            // handle queue of lines
+            idx += s.h
         }
+        l = addr(s.l[0]) + end_index(idx, 4)
+        // need a decision made here on whether to skip the draw
+        // no cursor, please
+        HUlib_drawTextLine(l, doom_boolean._c_false)
+        i++
     }
 }
 
 [c_function]
 def HUlib_eraseSText(var s : hu_stext_t?) {
     var i : int
-    {
-        i = 0
-        while (i < s.h) {
-            if (uint(int(s.laston)) != 0 && !(int(deref(s.on)) != 0)) {
-                s.l[i].needsupdate = 4
-            }
-            HUlib_eraseTextLine(addr(s.l[0]) + end_index(i, 4))
-            i++
+    i = 0
+    while (i < s.h) {
+        if (uint(int(s.laston)) != 0 && !(int(deref(s.on)) != 0)) {
+            s.l[i].needsupdate = 4
         }
+        HUlib_eraseTextLine(addr(s.l[0]) + end_index(i, 4))
+        i++
     }
     s.laston = deref(s.on)
 }

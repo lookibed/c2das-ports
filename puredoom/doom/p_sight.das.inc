@@ -59,7 +59,7 @@ def P_InterceptVector2(var v2 : divline_t?; var v1 : divline_t?) : int {
     if (den == 0) {
         return 0
     }
-    num = FixedMul(v1.x - v2.x >> 8, v1.dy) + FixedMul(v2.y - v1.y >> 8, v1.dx)
+    num = FixedMul((v1.x - v2.x) >> 8, v1.dy) + FixedMul((v2.y - v1.y) >> 8, v1.dx)
     frac = FixedDiv(num, den)
     return frac
 }
@@ -88,16 +88,16 @@ def P_CrossSubsector(num : int) : doom_boolean {
         // I_Error("Error: P_CrossSubsector: ss %i with numss = %i",
         // num,
         // numsubsectors);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: P_CrossSubsector: ss "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: P_CrossSubsector: ss "))
         doom_concat(addr(error_buf[0]), doom_itoa(num, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" with numss = "))
+        doom_concat(addr(error_buf[0]), cstr(" with numss = "))
         doom_concat(addr(error_buf[0]), doom_itoa(numsubsectors, 10))
         I_Error(addr(error_buf[0]))
     }
-    sub = addr(deref(subsectors + num))
+    sub = addr(subsectors[num])
     // check lines
     count = int(sub.numlines)
-    seg = addr(deref(segs + int(sub.firstline)))
+    seg = addr(segs[int(sub.firstline)])
     {
         var _f = false
         while (true) {
@@ -197,10 +197,10 @@ def P_CrossBSPNode(bspnum : int) : doom_boolean {
         if (bspnum == -1) {
             return P_CrossSubsector(0)
         } else {
-            return P_CrossSubsector(bspnum & ~NF_SUBSECTOR)
+            return P_CrossSubsector(bspnum & (~NF_SUBSECTOR))
         }
     }
-    bsp = addr(deref(nodes + bspnum))
+    bsp = addr(nodes[bspnum])
     // decide which side the start point is on
     side = P_DivlineSide(strace.x, strace.y, reinterpret<divline_t?>(bsp))
     if (side == 2) {
@@ -239,7 +239,7 @@ def P_CheckSight(var t1 : mobj_s?; var t2 : mobj_s?) : doom_boolean {
     bytenum = pnum >> 3
     bitnum = 1 << (pnum & 7)
     // Check in REJECT table.
-    if ((int(deref(rejectmatrix + bytenum)) & bitnum) != 0) {
+    if ((int(rejectmatrix[bytenum]) & bitnum) != 0) {
         sightcounts[0]++
         // can't possibly be connected
         return doom_boolean._c_false
@@ -249,7 +249,7 @@ def P_CheckSight(var t1 : mobj_s?; var t2 : mobj_s?) : doom_boolean {
     sightcounts[1]++
     validcount++
     sightzstart = t1.z + t1.height - (t1.height >> 2)
-    topslope = t2.z + t2.height - sightzstart
+    topslope = (t2.z + t2.height) - sightzstart
     bottomslope = t2.z - sightzstart
     strace.x = t1.x
     strace.y = t1.y

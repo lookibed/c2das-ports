@@ -17,13 +17,5 @@ struct thinker_s {
     _c_function : actionf_t
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<actionf_t>) == 8 && typeinfo alignof(type<actionf_t>) == 8, "actionf_t: clang lays it out as size 8, align 8")
-    static_assert(typeinfo offsetof < _storage > (type<actionf_t>) == 0, "actionf_t: every member sits at 0")
-    static_assert(typeinfo sizeof(type<thinker_s>) == 24 && typeinfo alignof(type<thinker_s>) == 8, "thinker_s: clang lays it out as size 24, align 8")
-    static_assert(typeinfo offsetof < prev > (type<thinker_s>) == 0, "thinker_s.prev: clang puts it at 0")
-    static_assert(typeinfo offsetof < next > (type<thinker_s>) == 8, "thinker_s.next: clang puts it at 8")
-    static_assert(typeinfo offsetof < _c_function > (type<thinker_s>) == 16, "thinker_s._c_function: clang puts it at 16")
-}
+include d_think_h.layout.das.inc
 

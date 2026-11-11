@@ -74,11 +74,11 @@ var private marknums : uint8? [10]
 var private markpoints : mpoint_t[10]
 var private markpointnum : int = 0
 var private followplayer : int = 1
-var private cheat_amap_seq : uint8[5] = fixed_array(uint8(178), uint8(38), uint8(38), uint8(46), uint8(255))
+var private cheat_amap_seq : uint8[5] = fixed_array(178u8, 38u8, 38u8, 46u8, 255u8)
 var private cheat_amap : cheatseq_t = cheatseq_t(sequence = unsafe(addr(cheat_amap_seq[0])), p = null)
 var private stopped : doom_boolean = doom_boolean._c_true
-var private AM_initVariables_st_notify : event_t = event_t(_c_type = evtype_t.ev_keyup, data1 = ('a' << 24) + ('m' << 16) | 'e' << 8)
-var private AM_Stop_st_notify : event_t = event_t(_c_type = evtype_t.ev_keydown, data1 = int(evtype_t.ev_keyup), data2 = ('a' << 24) + ('m' << 16) | 'x' << 8)
+var private AM_initVariables_st_notify : event_t = event_t(_c_type = evtype_t.ev_keyup, data1 = ('a' << 24) + ('m' << 16) | ('e' << 8))
+var private AM_Stop_st_notify : event_t = event_t(_c_type = evtype_t.ev_keydown, data1 = int(evtype_t.ev_keyup), data2 = ('a' << 24) + ('m' << 16) | ('x' << 8))
 var private AM_Start_lastlevel : int = -1
 var private AM_Start_lastepisode : int = -1
 var private AM_Responder_cheatstate : int = 0
@@ -165,31 +165,29 @@ def AM_findMinMaxBoundaries {
     min_x = min_y
     max_y = -DOOM_MAXINT
     max_x = max_y
-    {
-        i = 0
-        while (i < numvertexes) {
-            if (deref(vertexes + i).x < min_x) {
-                min_x = deref(vertexes + i).x
-            } elif (deref(vertexes + i).x > max_x) {
-                max_x = deref(vertexes + i).x
-            }
-            if (deref(vertexes + i).y < min_y) {
-                min_y = deref(vertexes + i).y
-            } elif (deref(vertexes + i).y > max_y) {
-                max_y = deref(vertexes + i).y
-            }
-            i++
+    i = 0
+    while (i < numvertexes) {
+        if (vertexes[i].x < min_x) {
+            min_x = vertexes[i].x
+        } elif (vertexes[i].x > max_x) {
+            max_x = vertexes[i].x
         }
+        if (vertexes[i].y < min_y) {
+            min_y = vertexes[i].y
+        } elif (vertexes[i].y > max_y) {
+            max_y = vertexes[i].y
+        }
+        i++
     }
     max_w = max_x - min_x
     max_h = max_y - min_y
     // const? never changed?
-    min_w = 2 * 16 * (1 << 16)
-    min_h = 2 * 16 * (1 << 16)
+    min_w = 2 * 16 * FRACUNIT
+    min_h = 2 * 16 * FRACUNIT
     a = FixedDiv(f_w << FRACBITS, max_w)
     b = FixedDiv(f_h << FRACBITS, max_h)
     min_scale_mtof = a < b ? a : b
-    max_scale_mtof = FixedDiv(f_h << FRACBITS, 2 * 16 * (1 << 16))
+    max_scale_mtof = FixedDiv(f_h << FRACBITS, 2 * 16 * FRACUNIT)
 }
 
 def AM_changeWindowLoc {
@@ -230,14 +228,12 @@ def AM_initVariables {
     // find player to center on initially
     pnum = consoleplayer
     if (!(int(playeringame[pnum]) != 0)) {
-        {
-            pnum = 0
-            while (pnum < MAXPLAYERS) {
-                if (int(playeringame[pnum]) != 0) {
-                    break
-                }
-                pnum++
+        pnum = 0
+        while (pnum < MAXPLAYERS) {
+            if (int(playeringame[pnum]) != 0) {
+                break
             }
+            pnum++
         }
     }
     am_map_plr = addr(players[0]) + end_index(pnum, 4)
@@ -257,7 +253,7 @@ def AM_initVariables {
 def AM_loadPics {
     var namebuf : uint8[9]
     for (i in range(10)) {
-        doom_concat(doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("AMMNUM")), doom_itoa(i, 10))
+        doom_concat(doom_strcpy(addr(namebuf[0]), cstr("AMMNUM")), doom_itoa(i, 10))
         marknums[i] = reinterpret<uint8?>(W_CacheLumpName(addr(namebuf[0]), PU_STATIC))
     }
 }
@@ -267,11 +263,11 @@ def AM_unloadPics {
     for (i in range(10)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(marknums[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/am_map.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/am_map.c:"))
             doom_concat(addr(buf[0]), doom_itoa(509, 10))
             I_Error(addr(buf[0]))
         }
-        Z_ChangeTag2(reinterpret<void?>(marknums[i]), 101)
+        Z_ChangeTag2(reinterpret<void?>(marknums[i]), PU_CACHE)
     }
 }
 
@@ -353,28 +349,28 @@ def AM_Responder(var ev : event_t?) : doom_boolean {
         if (_cond == 174) {
             // pan right
             if (!(followplayer != 0)) {
-                m_paninc.x = FixedMul(4 << 16, scale_ftom)
+                m_paninc.x = FixedMul(F_PANINC << 16, scale_ftom)
             } else {
                 rc = int(doom_boolean._c_false)
             }
         } elif (_cond == 172) {
             // pan left
             if (!(followplayer != 0)) {
-                m_paninc.x = -FixedMul(4 << 16, scale_ftom)
+                m_paninc.x = -FixedMul(F_PANINC << 16, scale_ftom)
             } else {
                 rc = int(doom_boolean._c_false)
             }
         } elif (_cond == 173) {
             // pan up
             if (!(followplayer != 0)) {
-                m_paninc.y = FixedMul(4 << 16, scale_ftom)
+                m_paninc.y = FixedMul(F_PANINC << 16, scale_ftom)
             } else {
                 rc = int(doom_boolean._c_false)
             }
         } elif (_cond == 175) {
             // pan down
             if (!(followplayer != 0)) {
-                m_paninc.y = -FixedMul(4 << 16, scale_ftom)
+                m_paninc.y = -FixedMul(F_PANINC << 16, scale_ftom)
             } else {
                 rc = int(doom_boolean._c_false)
             }
@@ -401,20 +397,20 @@ def AM_Responder(var ev : event_t?) : doom_boolean {
         } elif (_cond == 'f') {
             followplayer = !(followplayer != 0) ? 1 : 0
             f_oldloc.x = DOOM_MAXINT
-            am_map_plr.message = followplayer != 0 ? reinterpret<uint8?>("Follow Mode ON") : reinterpret<uint8?>("Follow Mode OFF")
+            am_map_plr.message = followplayer != 0 ? cstr("Follow Mode ON") : cstr("Follow Mode OFF")
         } elif (_cond == 'g') {
             grid = !(grid != 0) ? 1 : 0
-            am_map_plr.message = grid != 0 ? reinterpret<uint8?>("Grid ON") : reinterpret<uint8?>("Grid OFF")
+            am_map_plr.message = grid != 0 ? cstr("Grid ON") : cstr("Grid OFF")
         } elif (_cond == 'm') {
-            doom_strcpy(addr(AM_Responder_buffer[0]), reinterpret<uint8?>("Marked Spot"))
-            doom_concat(addr(AM_Responder_buffer[0]), reinterpret<uint8?>(" "))
+            doom_strcpy(addr(AM_Responder_buffer[0]), cstr("Marked Spot"))
+            doom_concat(addr(AM_Responder_buffer[0]), cstr(" "))
             doom_concat(addr(AM_Responder_buffer[0]), doom_itoa(markpointnum, 10))
             // doom_sprintf(buffer, "%s %d", AMSTR_MARKEDSPOT, markpointnum);
             am_map_plr.message = addr(AM_Responder_buffer[0])
             AM_addMark()
         } elif (_cond == 'c') {
             AM_clearMarks()
-            am_map_plr.message = reinterpret<uint8?>("All Marks Cleared")
+            am_map_plr.message = cstr("All Marks Cleared")
         } else {
             AM_Responder_cheatstate = 0
             rc = int(doom_boolean._c_false)
@@ -466,8 +462,8 @@ def AM_changeWindowScale {
 
 def AM_doFollowPlayer {
     if (f_oldloc.x != am_map_plr.mo.x || f_oldloc.y != am_map_plr.mo.y) {
-        m_x = FixedMul(FixedMul(am_map_plr.mo.x, scale_mtof) >> 16 << 16, scale_ftom) - m_w / 2
-        m_y = FixedMul(FixedMul(am_map_plr.mo.y, scale_mtof) >> 16 << 16, scale_ftom) - m_h / 2
+        m_x = FixedMul((FixedMul(am_map_plr.mo.x, scale_mtof) >> 16) << 16, scale_ftom) - m_w / 2
+        m_y = FixedMul((FixedMul(am_map_plr.mo.y, scale_mtof) >> 16) << 16, scale_ftom) - m_h / 2
         m_x2 = m_x + m_w
         m_y2 = m_y + m_h
         f_oldloc.x = am_map_plr.mo.x
@@ -485,7 +481,7 @@ def AM_updateLightLev {
         if (uint64(AM_updateLightLev_litelevelscnt) == uint64(typeinfo sizeof(type<int[8]>)) / uint64(typeinfo sizeof(type<int>))) {
             AM_updateLightLev_litelevelscnt = 0
         }
-        AM_updateLightLev_nexttic = amclock + 6 - amclock % 6
+        AM_updateLightLev_nexttic = amclock + 6 - (amclock % 6)
     }
 }
 
@@ -596,22 +592,22 @@ def AM_clipMline(var ml : mline_t?; var fl : fline_t?) : doom_boolean {
         if ((outside & int(anon_545.TOP)) != 0) {
             dy = fl.a.y - fl.b.y
             dx = fl.b.x - fl.a.x
-            tmp.x = fl.a.x + dx * fl.a.y / dy
+            tmp.x = fl.a.x + (dx * fl.a.y) / dy
             tmp.y = 0
         } elif ((outside & int(anon_545.BOTTOM)) != 0) {
             dy = fl.a.y - fl.b.y
             dx = fl.b.x - fl.a.x
-            tmp.x = fl.a.x + dx * (fl.a.y - f_h) / dy
+            tmp.x = fl.a.x + (dx * (fl.a.y - f_h)) / dy
             tmp.y = f_h - 1
         } elif ((outside & int(anon_545.RIGHT)) != 0) {
             dy = fl.b.y - fl.a.y
             dx = fl.b.x - fl.a.x
-            tmp.y = fl.a.y + dy * (f_w - 1 - fl.a.x) / dx
+            tmp.y = fl.a.y + (dy * (f_w - 1 - fl.a.x)) / dx
             tmp.x = f_w - 1
         } elif ((outside & int(anon_545.LEFT)) != 0) {
             dy = fl.b.y - fl.a.y
             dx = fl.b.x - fl.a.x
-            tmp.y = fl.a.y + dy * -fl.a.x / dx
+            tmp.y = fl.a.y + (dy * (-fl.a.x)) / dx
             tmp.x = 0
         }
         if (outside == outcode1) {
@@ -674,7 +670,7 @@ def AM_drawFline(var fl : fline_t?; color : int) {
     if (ax > ay) {
         d = ay - ax / 2
         while (1 != 0) {
-            deref(fb + (y * f_w + x)) = uint8(color)
+            fb[y * f_w + x] = uint8(color)
             if (x == fl.b.x) {
                 return
             }
@@ -688,7 +684,7 @@ def AM_drawFline(var fl : fline_t?; color : int) {
     } else {
         d = ax - ay / 2
         while (1 != 0) {
-            deref(fb + (y * f_w + x)) = uint8(color)
+            fb[y * f_w + x] = uint8(color)
             if (y == fl.b.y) {
                 return
             }
@@ -722,38 +718,34 @@ def AM_drawGrid(color : int) {
     // Figure out start of vertical gridlines
     start = m_x
     if ((start - bmaporgx) % (MAPBLOCKUNITS << FRACBITS) != 0) {
-        start += (MAPBLOCKUNITS << FRACBITS) - (start - bmaporgx) % (MAPBLOCKUNITS << FRACBITS)
+        start += (MAPBLOCKUNITS << FRACBITS) - ((start - bmaporgx) % (MAPBLOCKUNITS << FRACBITS))
     }
     end = m_x + m_w
     // draw vertical gridlines
     ml.a.y = m_y
     ml.b.y = m_y + m_h
-    {
-        x = start
-        while (x < end) {
-            ml.a.x = x
-            ml.b.x = x
-            AM_drawMline(addr(ml), color)
-            x += MAPBLOCKUNITS << FRACBITS
-        }
+    x = start
+    while (x < end) {
+        ml.a.x = x
+        ml.b.x = x
+        AM_drawMline(addr(ml), color)
+        x += MAPBLOCKUNITS << FRACBITS
     }
     // Figure out start of horizontal gridlines
     start = m_y
     if ((start - bmaporgy) % (MAPBLOCKUNITS << FRACBITS) != 0) {
-        start += (MAPBLOCKUNITS << FRACBITS) - (start - bmaporgy) % (MAPBLOCKUNITS << FRACBITS)
+        start += (MAPBLOCKUNITS << FRACBITS) - ((start - bmaporgy) % (MAPBLOCKUNITS << FRACBITS))
     }
     end = m_y + m_h
     // draw horizontal gridlines
     ml.a.x = m_x
     ml.b.x = m_x + m_w
-    {
-        y = start
-        while (y < end) {
-            ml.a.y = y
-            ml.b.y = y
-            AM_drawMline(addr(ml), color)
-            y += MAPBLOCKUNITS << FRACBITS
-        }
+    y = start
+    while (y < end) {
+        ml.a.y = y
+        ml.b.y = y
+        AM_drawMline(addr(ml), color)
+        y += MAPBLOCKUNITS << FRACBITS
     }
 }
 
@@ -762,49 +754,47 @@ def AM_drawGrid(color : int) {
 [c_function]
 def AM_drawWalls {
     var i : int
-    {
-        i = 0
-        while (i < numlines) {
-            {
-                AM_drawWalls_l.a.x = deref(lines + i).v1.x
-                AM_drawWalls_l.a.y = deref(lines + i).v1.y
-                AM_drawWalls_l.b.x = deref(lines + i).v2.x
-                AM_drawWalls_l.b.y = deref(lines + i).v2.y
-                if (cheating != 0 || (int(deref(lines + i).flags) & ML_MAPPED) != 0) {
-                    if ((int(deref(lines + i).flags) & LINE_NEVERSEE) != 0 && !(cheating != 0)) {
-                        continue
-                    }
-                    if (!(deref(lines + i).backsector != null)) {
-                        AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + lightlev)
-                    } else {
-                        if (int(deref(lines + i).special) == 39) {
-                            // teleporters
-                            AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + WALLRANGE / 2)
-                        } elif ((int(deref(lines + i).flags) & ML_SECRET) != 0) {
-                            // secret door
-                            if (cheating != 0) {
-                                AM_drawMline(addr(AM_drawWalls_l), SECRETWALLCOLORS + lightlev)
-                            } else {
-                                AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + lightlev)
-                            }
-                        } elif (deref(lines + i).backsector.floorheight != deref(lines + i).frontsector.floorheight) {
-                            // floor level change
-                            AM_drawMline(addr(AM_drawWalls_l), FDWALLCOLORS + lightlev)
-                        } elif (deref(lines + i).backsector.ceilingheight != deref(lines + i).frontsector.ceilingheight) {
-                            // ceiling level change
-                            AM_drawMline(addr(AM_drawWalls_l), CDWALLCOLORS + lightlev)
-                        } elif (cheating != 0) {
-                            AM_drawMline(addr(AM_drawWalls_l), TSWALLCOLORS + lightlev)
+    i = 0
+    while (i < numlines) {
+        {
+            AM_drawWalls_l.a.x = lines[i].v1.x
+            AM_drawWalls_l.a.y = lines[i].v1.y
+            AM_drawWalls_l.b.x = lines[i].v2.x
+            AM_drawWalls_l.b.y = lines[i].v2.y
+            if (cheating != 0 || (int(lines[i].flags) & ML_MAPPED) != 0) {
+                if ((int(lines[i].flags) & LINE_NEVERSEE) != 0 && !(cheating != 0)) {
+                    continue
+                }
+                if (!(lines[i].backsector != null)) {
+                    AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + lightlev)
+                } else {
+                    if (int(lines[i].special) == 39) {
+                        // teleporters
+                        AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + WALLRANGE / 2)
+                    } elif ((int(lines[i].flags) & ML_SECRET) != 0) {
+                        // secret door
+                        if (cheating != 0) {
+                            AM_drawMline(addr(AM_drawWalls_l), SECRETWALLCOLORS + lightlev)
+                        } else {
+                            AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + lightlev)
                         }
-                    }
-                } elif (am_map_plr.powers[int(powertype_t.pw_allmap)] != 0) {
-                    if (!((int(deref(lines + i).flags) & LINE_NEVERSEE) != 0)) {
-                        AM_drawMline(addr(AM_drawWalls_l), GRAYS + 3)
+                    } elif (lines[i].backsector.floorheight != lines[i].frontsector.floorheight) {
+                        // floor level change
+                        AM_drawMline(addr(AM_drawWalls_l), FDWALLCOLORS + lightlev)
+                    } elif (lines[i].backsector.ceilingheight != lines[i].frontsector.ceilingheight) {
+                        // ceiling level change
+                        AM_drawMline(addr(AM_drawWalls_l), CDWALLCOLORS + lightlev)
+                    } elif (cheating != 0) {
+                        AM_drawMline(addr(AM_drawWalls_l), TSWALLCOLORS + lightlev)
                     }
                 }
-            } finally {
-                i++
+            } elif (am_map_plr.powers[int(powertype_t.pw_allmap)] != 0) {
+                if (!((int(lines[i].flags) & LINE_NEVERSEE) != 0)) {
+                    AM_drawMline(addr(AM_drawWalls_l), GRAYS + 3)
+                }
             }
+        } finally {
+            i++
         }
     }
 }
@@ -814,8 +804,8 @@ def AM_drawWalls {
 [c_function]
 def AM_rotate(var x : int?; var y : int?; a : uint) {
     var tmpx : int
-    tmpx = FixedMul(deref(x), deref(finecosine + (a >> 19u))) - FixedMul(deref(y), finesine[a >> 19u])
-    deref(y) = FixedMul(deref(x), finesine[a >> 19u]) + FixedMul(deref(y), deref(finecosine + (a >> 19u)))
+    tmpx = FixedMul(deref(x), finecosine[a >> uint(ANGLETOFINESHIFT)]) - FixedMul(deref(y), finesine[a >> uint(ANGLETOFINESHIFT)])
+    deref(y) = FixedMul(deref(x), finesine[a >> uint(ANGLETOFINESHIFT)]) + FixedMul(deref(y), finecosine[a >> uint(ANGLETOFINESHIFT)])
     deref(x) = tmpx
 }
 
@@ -823,8 +813,8 @@ def AM_rotate(var x : int?; var y : int?; a : uint) {
 def AM_drawLineCharacter(var lineguy : mline_t?; lineguylines : int; scale : int; angle : uint; color : int; x : int; y : int) {
     var l : mline_t
     for (i in range(lineguylines)) {
-        l.a.x = deref(lineguy + i).a.x
-        l.a.y = deref(lineguy + i).a.y
+        l.a.x = lineguy[i].a.x
+        l.a.y = lineguy[i].a.y
         if (scale != 0) {
             l.a.x = FixedMul(scale, l.a.x)
             l.a.y = FixedMul(scale, l.a.y)
@@ -834,8 +824,8 @@ def AM_drawLineCharacter(var lineguy : mline_t?; lineguylines : int; scale : int
         }
         l.a.x += x
         l.a.y += y
-        l.b.x = deref(lineguy + i).b.x
-        l.b.y = deref(lineguy + i).b.y
+        l.b.x = lineguy[i].b.x
+        l.b.y = lineguy[i].b.y
         if (scale != 0) {
             l.b.x = FixedMul(scale, l.b.x)
             l.b.y = FixedMul(scale, l.b.y)
@@ -865,7 +855,7 @@ def AM_drawPlayers {
     for (i in range(MAXPLAYERS)) {
         their_color++
         p = addr(players[0]) + end_index(i, 4)
-        if (uint(int(deathmatch)) != 0 && !(int(singledemo) != 0) && intptr(p) != intptr(am_map_plr)) {
+        if ((uint(int(deathmatch)) != 0 && !(int(singledemo) != 0)) && intptr(p) != intptr(am_map_plr)) {
             continue
         }
         if (!(int(playeringame[i]) != 0)) {
@@ -885,16 +875,14 @@ def AM_drawPlayers {
 def AM_drawThings(colors : int; colorrange : int) {
     var i : int
     var t : mobj_s?
-    {
-        i = 0
-        while (i < numsectors) {
-            t = deref(sectors + i).thinglist
-            while (t != null) {
-                AM_drawLineCharacter(addr(thintriangle_guy[0]), int(NUMTHINTRIANGLEGUYLINES), 16 << FRACBITS, t.angle, colors + lightlev, t.x, t.y)
-                t = t.snext
-            }
-            i++
+    i = 0
+    while (i < numsectors) {
+        t = sectors[i].thinglist
+        while (t != null) {
+            AM_drawLineCharacter(addr(thintriangle_guy[0]), int(NUMTHINTRIANGLEGUYLINES), 16 << FRACBITS, t.angle, colors + lightlev, t.x, t.y)
+            t = t.snext
         }
+        i++
     }
 }
 
@@ -923,7 +911,7 @@ def AM_drawMarks {
 [c_function]
 def AM_drawCrosshair(color : int) {
     // single point for now
-    deref(fb + f_w * (f_h + 1) / 2) = uint8(color)
+    fb[(f_w * (f_h + 1)) / 2] = uint8(color)
 }
 
 def AM_Drawer {

@@ -205,22 +205,5 @@ struct musicinfo_t {
     handle : int
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<sfxinfo_struct>) == 48 && typeinfo alignof(type<sfxinfo_struct>) == 8, "sfxinfo_struct: clang lays it out as size 48, align 8")
-    static_assert(typeinfo offsetof < name > (type<sfxinfo_struct>) == 0, "sfxinfo_struct.name: clang puts it at 0")
-    static_assert(typeinfo offsetof < singularity > (type<sfxinfo_struct>) == 8, "sfxinfo_struct.singularity: clang puts it at 8")
-    static_assert(typeinfo offsetof < priority > (type<sfxinfo_struct>) == 12, "sfxinfo_struct.priority: clang puts it at 12")
-    static_assert(typeinfo offsetof < link > (type<sfxinfo_struct>) == 16, "sfxinfo_struct.link: clang puts it at 16")
-    static_assert(typeinfo offsetof < pitch > (type<sfxinfo_struct>) == 24, "sfxinfo_struct.pitch: clang puts it at 24")
-    static_assert(typeinfo offsetof < volume > (type<sfxinfo_struct>) == 28, "sfxinfo_struct.volume: clang puts it at 28")
-    static_assert(typeinfo offsetof < data > (type<sfxinfo_struct>) == 32, "sfxinfo_struct.data: clang puts it at 32")
-    static_assert(typeinfo offsetof < usefulness > (type<sfxinfo_struct>) == 40, "sfxinfo_struct.usefulness: clang puts it at 40")
-    static_assert(typeinfo offsetof < lumpnum > (type<sfxinfo_struct>) == 44, "sfxinfo_struct.lumpnum: clang puts it at 44")
-    static_assert(typeinfo sizeof(type<musicinfo_t>) == 32 && typeinfo alignof(type<musicinfo_t>) == 8, "musicinfo_t: clang lays it out as size 32, align 8")
-    static_assert(typeinfo offsetof < name > (type<musicinfo_t>) == 0, "musicinfo_t.name: clang puts it at 0")
-    static_assert(typeinfo offsetof < lumpnum > (type<musicinfo_t>) == 8, "musicinfo_t.lumpnum: clang puts it at 8")
-    static_assert(typeinfo offsetof < data > (type<musicinfo_t>) == 16, "musicinfo_t.data: clang puts it at 16")
-    static_assert(typeinfo offsetof < handle > (type<musicinfo_t>) == 24, "musicinfo_t.handle: clang puts it at 24")
-}
+include sounds_h.layout.das.inc
 

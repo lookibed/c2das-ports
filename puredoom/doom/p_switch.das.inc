@@ -17,25 +17,23 @@ def P_InitSwitchList {
     } elif (gamemode == GameMode_t.commercial) {
         episode = 3
     }
-    {
-        index = 0
-        i = 0
-        while (i < MAXSWITCHES) {
-            if (!(alphSwitchList[i].episode != 0)) {
-                numswitches = index / 2
-                switchlist[index] = -1
-                break
-            }
-            if (int(alphSwitchList[i].episode) <= episode) {
-                let _t0 = index
-                index++
-                switchlist[_t0] = R_TextureNumForName(addr(alphSwitchList[i].name1[0]))
-                let _t1 = index
-                index++
-                switchlist[_t1] = R_TextureNumForName(addr(alphSwitchList[i].name2[0]))
-            }
-            i++
+    index = 0
+    i = 0
+    while (i < MAXSWITCHES) {
+        if (!(alphSwitchList[i].episode != 0)) {
+            numswitches = index / 2
+            switchlist[index] = -1
+            break
         }
+        if (int(alphSwitchList[i].episode) <= episode) {
+            let _t0 = index
+            index++
+            switchlist[_t0] = R_TextureNumForName(addr(alphSwitchList[i].name1[0]))
+            let _t1 = index
+            index++
+            switchlist[_t1] = R_TextureNumForName(addr(alphSwitchList[i].name2[0]))
+        }
+        i++
     }
 }
 
@@ -58,7 +56,7 @@ def P_StartButton(var line : line_s?; w : bwhere_e; texture : int; time : int) {
             return
         }
     }
-    I_Error(reinterpret<uint8?>("Error: P_StartButton: no button slots left!"))
+    I_Error(cstr("Error: P_StartButton: no button slots left!"))
 }
 
 // Function that changes wall texture.
@@ -73,45 +71,43 @@ def P_ChangeSwitchTexture(var line : line_s?; useAgain : int) {
     if (!(useAgain != 0)) {
         line.special = int16(0)
     }
-    texTop = int(deref(sides + int(line.sidenum[0])).toptexture)
-    texMid = int(deref(sides + int(line.sidenum[0])).midtexture)
-    texBot = int(deref(sides + int(line.sidenum[0])).bottomtexture)
+    texTop = int(sides[int(line.sidenum[0])].toptexture)
+    texMid = int(sides[int(line.sidenum[0])].midtexture)
+    texBot = int(sides[int(line.sidenum[0])].bottomtexture)
     sound = int(sfxenum_t.sfx_swtchn)
     // EXIT SWITCH?
     if (int(line.special) == 11) {
         sound = int(sfxenum_t.sfx_swtchx)
     }
-    {
-        i = 0
-        while (i < numswitches * 2) {
-            if (switchlist[i] == texTop) {
+    i = 0
+    while (i < numswitches * 2) {
+        if (switchlist[i] == texTop) {
+            S_StartSound(reinterpret<void?>(addr(buttonlist[0]).soundorg), sound)
+            sides[int(line.sidenum[0])].toptexture = int16(switchlist[i ^ 1])
+            if (useAgain != 0) {
+                P_StartButton(line, bwhere_e.top, switchlist[i], BUTTONTIME)
+            }
+            return
+        } else {
+            if (switchlist[i] == texMid) {
                 S_StartSound(reinterpret<void?>(addr(buttonlist[0]).soundorg), sound)
-                deref(sides + int(line.sidenum[0])).toptexture = int16(switchlist[i ^ 1])
+                sides[int(line.sidenum[0])].midtexture = int16(switchlist[i ^ 1])
                 if (useAgain != 0) {
-                    P_StartButton(line, bwhere_e.top, switchlist[i], BUTTONTIME)
+                    P_StartButton(line, bwhere_e.middle, switchlist[i], BUTTONTIME)
                 }
                 return
             } else {
-                if (switchlist[i] == texMid) {
+                if (switchlist[i] == texBot) {
                     S_StartSound(reinterpret<void?>(addr(buttonlist[0]).soundorg), sound)
-                    deref(sides + int(line.sidenum[0])).midtexture = int16(switchlist[i ^ 1])
+                    sides[int(line.sidenum[0])].bottomtexture = int16(switchlist[i ^ 1])
                     if (useAgain != 0) {
-                        P_StartButton(line, bwhere_e.middle, switchlist[i], BUTTONTIME)
+                        P_StartButton(line, bwhere_e.bottom, switchlist[i], BUTTONTIME)
                     }
                     return
-                } else {
-                    if (switchlist[i] == texBot) {
-                        S_StartSound(reinterpret<void?>(addr(buttonlist[0]).soundorg), sound)
-                        deref(sides + int(line.sidenum[0])).bottomtexture = int16(switchlist[i ^ 1])
-                        if (useAgain != 0) {
-                            P_StartButton(line, bwhere_e.bottom, switchlist[i], BUTTONTIME)
-                        }
-                        return
-                    }
                 }
             }
-            i++
         }
+        i++
     }
 }
 

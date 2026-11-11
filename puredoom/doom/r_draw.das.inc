@@ -49,11 +49,11 @@ def R_DrawColumn {
     }
     if (uint(dc_x) >= uint(SCREENWIDTH) || dc_yl < 0 || dc_yh >= SCREENHEIGHT) {
         // I_Error("Error: R_DrawColumn: %i to %i at %i", dc_yl, dc_yh, dc_x);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_DrawColumn: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_DrawColumn: "))
         doom_concat(addr(error_buf[0]), doom_itoa(dc_yl, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" to "))
+        doom_concat(addr(error_buf[0]), cstr(" to "))
         doom_concat(addr(error_buf[0]), doom_itoa(dc_yh, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" at "))
+        doom_concat(addr(error_buf[0]), cstr(" at "))
         doom_concat(addr(error_buf[0]), doom_itoa(dc_x, 10))
         I_Error(addr(error_buf[0]))
     }
@@ -71,7 +71,7 @@ def R_DrawColumn {
     for (_t0 in urange64(uint64(uint(count)) + 1ul)) {
         // Re-map color indices from wall texture column
         // using a lighting/special effects LUT.
-        deref(dest) = deref(dc_colormap + int(deref(dc_source + (frac >> FRACBITS & 127))))
+        deref(dest) = dc_colormap[int(dc_source[(frac >> FRACBITS) & 127])]
         dest = dest + SCREENWIDTH
         frac += fracstep
     }
@@ -91,11 +91,11 @@ def R_DrawColumnLow {
     }
     if (uint(dc_x) >= uint(SCREENWIDTH) || dc_yl < 0 || dc_yh >= SCREENHEIGHT) {
         // I_Error("Error: R_DrawColumn: %i to %i at %i", dc_yl, dc_yh, dc_x);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_DrawColumn: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_DrawColumn: "))
         doom_concat(addr(error_buf[0]), doom_itoa(dc_yl, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" to "))
+        doom_concat(addr(error_buf[0]), cstr(" to "))
         doom_concat(addr(error_buf[0]), doom_itoa(dc_yh, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" at "))
+        doom_concat(addr(error_buf[0]), cstr(" at "))
         doom_concat(addr(error_buf[0]), doom_itoa(dc_x, 10))
         I_Error(addr(error_buf[0]))
     }
@@ -107,7 +107,7 @@ def R_DrawColumnLow {
     frac = dc_texturemid + (dc_yl - centery) * fracstep
     for (_t0 in urange64(uint64(uint(count)) + 1ul)) {
         // Hack. Does not work corretly.
-        deref(dest) = deref(dc_colormap + int(deref(dc_source + (frac >> FRACBITS & 127))))
+        deref(dest) = dc_colormap[int(dc_source[(frac >> FRACBITS) & 127])]
         deref(dest2) = deref(dest)
         dest = dest + SCREENWIDTH
         dest2 = dest2 + SCREENWIDTH
@@ -143,11 +143,11 @@ def R_DrawFuzzColumn {
     if (uint(dc_x) >= uint(SCREENWIDTH) || dc_yl < 0 || dc_yh >= SCREENHEIGHT) {
         // I_Error("Error: R_DrawFuzzColumn: %i to %i at %i",
         // dc_yl, dc_yh, dc_x);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_DrawFuzzColumn: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_DrawFuzzColumn: "))
         doom_concat(addr(error_buf[0]), doom_itoa(dc_yl, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" to "))
+        doom_concat(addr(error_buf[0]), cstr(" to "))
         doom_concat(addr(error_buf[0]), doom_itoa(dc_yh, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" at "))
+        doom_concat(addr(error_buf[0]), cstr(" at "))
         doom_concat(addr(error_buf[0]), doom_itoa(dc_x, 10))
         I_Error(addr(error_buf[0]))
     }
@@ -164,7 +164,7 @@ def R_DrawFuzzColumn {
         // a pixel that is either one column
         // left or right of the current one.
         // Add index from colormap to index.
-        deref(dest) = deref(colormaps + (6 * 256 + int(deref(dest + fuzzoffset[fuzzpos]))))
+        deref(dest) = colormaps[6 * 256 + int(dest[fuzzoffset[fuzzpos]])]
         // Clamp table lookup index.
         fuzzpos++
         if (fuzzpos == FUZZTABLE) {
@@ -195,11 +195,11 @@ def R_DrawTranslatedColumn {
     if (uint(dc_x) >= uint(SCREENWIDTH) || dc_yl < 0 || dc_yh >= SCREENHEIGHT) {
         // I_Error("Error: R_DrawColumn: %i to %i at %i",
         // dc_yl, dc_yh, dc_x);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_DrawColumn: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_DrawColumn: "))
         doom_concat(addr(error_buf[0]), doom_itoa(dc_yl, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" to "))
+        doom_concat(addr(error_buf[0]), cstr(" to "))
         doom_concat(addr(error_buf[0]), doom_itoa(dc_yh, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" at "))
+        doom_concat(addr(error_buf[0]), cstr(" at "))
         doom_concat(addr(error_buf[0]), doom_itoa(dc_x, 10))
         I_Error(addr(error_buf[0]))
     }
@@ -215,7 +215,7 @@ def R_DrawTranslatedColumn {
         // used with PLAY sprites.
         // Thus the "green" ramp of the player 0 sprite
         // is mapped to gray, red, black/indigo.
-        deref(dest) = deref(dc_colormap + int(deref(dc_translation + int(deref(dc_source + (frac >> FRACBITS))))))
+        deref(dest) = dc_colormap[int(dc_translation[int(dc_source[frac >> FRACBITS])])]
         dest = dest + SCREENWIDTH
         frac += fracstep
     }
@@ -229,19 +229,19 @@ def R_DrawTranslatedColumn {
 [c_function]
 def R_InitTranslationTables {
     translationtables = reinterpret<uint8?>(Z_Malloc(256 * 3 + 255, PU_STATIC, null))
-    translationtables = reinterpret<uint8?>(uint64(uint64(intptr(translationtables)) + uint64(255) & uint64(~255)))
+    translationtables = reinterpret<uint8?>(uint64((uint64(intptr(translationtables)) + 255ul) & uint64(~255)))
     // translate just the 16 green colors
     for (i in range(256)) {
         if (i >= 112 && i <= 127) {
             // map green ramp to gray, brown, red
-            deref(translationtables + i) = uint8(96 + (i & 15))
-            deref(translationtables + (i + 256)) = uint8(64 + (i & 15))
-            deref(translationtables + (i + 512)) = uint8(32 + (i & 15))
+            translationtables[i] = uint8(96 + (i & 15))
+            translationtables[i + 256] = uint8(64 + (i & 15))
+            translationtables[i + 512] = uint8(32 + (i & 15))
         } else {
             // Keep all other colors as is.
-            deref(translationtables + (i + 512)) = uint8(i)
-            deref(translationtables + (i + 256)) = deref(translationtables + (i + 512))
-            deref(translationtables + i) = deref(translationtables + (i + 256))
+            translationtables[i + 512] = uint8(i)
+            translationtables[i + 256] = translationtables[i + 512]
+            translationtables[i] = translationtables[i + 256]
         }
     }
 }
@@ -257,11 +257,11 @@ def R_DrawSpan {
     if (ds_x2 < ds_x1 || ds_x1 < 0 || ds_x2 >= SCREENWIDTH || uint(ds_y) > uint(SCREENHEIGHT)) {
         // I_Error("Error: R_DrawSpan: %i to %i at %i",
         // ds_x1, ds_x2, ds_y);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_DrawSpan: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_DrawSpan: "))
         doom_concat(addr(error_buf[0]), doom_itoa(ds_x1, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" to "))
+        doom_concat(addr(error_buf[0]), cstr(" to "))
         doom_concat(addr(error_buf[0]), doom_itoa(ds_x2, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" at "))
+        doom_concat(addr(error_buf[0]), cstr(" at "))
         doom_concat(addr(error_buf[0]), doom_itoa(ds_y, 10))
         I_Error(addr(error_buf[0]))
     }
@@ -272,12 +272,12 @@ def R_DrawSpan {
     count = ds_x2 - ds_x1
     for (_t0 in urange64(uint64(uint(count)) + 1ul)) {
         // Current texture index in u,v.
-        spot = (yfrac >> 16 - 6 & 63 * 64) + (xfrac >> 16 & 63)
+        spot = ((yfrac >> (16 - 6)) & (63 * 64)) + ((xfrac >> 16) & 63)
         // Lookup pixel from flat texture tile,
         // re-index using light/colormap.
         var _t1 = dest
         dest = dest + 1
-        deref(_t1) = deref(ds_colormap + int(deref(ds_source + spot)))
+        deref(_t1) = ds_colormap[int(ds_source[spot])]
         // Next step in u,v.
         xfrac += ds_xstep
         yfrac += ds_ystep
@@ -295,11 +295,11 @@ def R_DrawSpanLow {
     if (ds_x2 < ds_x1 || ds_x1 < 0 || ds_x2 >= SCREENWIDTH || uint(ds_y) > uint(SCREENHEIGHT)) {
         // I_Error("Error: R_DrawSpan: %i to %i at %i",
         // ds_x1, ds_x2, ds_y);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: R_DrawSpan: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: R_DrawSpan: "))
         doom_concat(addr(error_buf[0]), doom_itoa(ds_x1, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" to "))
+        doom_concat(addr(error_buf[0]), cstr(" to "))
         doom_concat(addr(error_buf[0]), doom_itoa(ds_x2, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" at "))
+        doom_concat(addr(error_buf[0]), cstr(" at "))
         doom_concat(addr(error_buf[0]), doom_itoa(ds_y, 10))
         I_Error(addr(error_buf[0]))
     }
@@ -311,15 +311,15 @@ def R_DrawSpanLow {
     dest = ylookup[ds_y] + columnofs[ds_x1]
     count = ds_x2 - ds_x1
     for (_t0 in urange64(uint64(uint(count)) + 1ul)) {
-        spot = (yfrac >> 16 - 6 & 63 * 64) + (xfrac >> 16 & 63)
+        spot = ((yfrac >> (16 - 6)) & (63 * 64)) + ((xfrac >> 16) & 63)
         // Lowres/blocky mode does it twice,
         // while scale is adjusted appropriately.
         var _t1 = dest
         dest = dest + 1
-        deref(_t1) = deref(ds_colormap + int(deref(ds_source + spot)))
+        deref(_t1) = ds_colormap[int(ds_source[spot])]
         var _t2 = dest
         dest = dest + 1
-        deref(_t2) = deref(ds_colormap + int(deref(ds_source + spot)))
+        deref(_t2) = ds_colormap[int(ds_source[spot])]
         xfrac += ds_xstep
         yfrac += ds_ystep
     }
@@ -335,7 +335,7 @@ def R_InitBuffer(width : int; height : int) {
     // Handle resize,
     // e.g. smaller view windows
     // with border and/or status bar.
-    viewwindowx = SCREENWIDTH - width >> 1
+    viewwindowx = (SCREENWIDTH - width) >> 1
     // Column offset. For windows.
     for (i in range(width)) {
         columnofs[i] = viewwindowx + i
@@ -344,7 +344,7 @@ def R_InitBuffer(width : int; height : int) {
     if (width == SCREENWIDTH) {
         viewwindowy = 0
     } else {
-        viewwindowy = SCREENHEIGHT - SBARHEIGHT - height >> 1
+        viewwindowy = (SCREENHEIGHT - SBARHEIGHT - height) >> 1
     }
     // Preclaculate all row offsets.
     for (i in range(height)) {
@@ -379,56 +379,46 @@ def R_FillBackScreen {
     src = reinterpret<uint8?>(W_CacheLumpName(name, PU_CACHE))
     dest = screens[1]
     for (y1 in range(SCREENHEIGHT - SBARHEIGHT)) {
-        {
-            x = 0
-            while (x < SCREENWIDTH / 64) {
-                doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(src + ((y1 & 63) << 6)), 64)
-                dest = dest + 64
-                x++
-            }
+        x = 0
+        while (x < SCREENWIDTH / 64) {
+            doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(src + ((y1 & 63) << 6)), 64)
+            dest = dest + 64
+            x++
         }
         if ((SCREENWIDTH & 63) != 0) {
             doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(src + ((y1 & 63) << 6)), SCREENWIDTH & 63)
             dest = dest + (SCREENWIDTH & 63)
         }
     }
-    patch = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("brdr_t"), PU_CACHE))
-    {
-        x = 0
-        while (x < scaledviewwidth) {
-            V_DrawPatch(viewwindowx + x, viewwindowy - 8, 1, patch)
-            x += 8
-        }
+    patch = reinterpret<uint8?>(W_CacheLumpName(cstr("brdr_t"), PU_CACHE))
+    x = 0
+    while (x < scaledviewwidth) {
+        V_DrawPatch(viewwindowx + x, viewwindowy - 8, 1, patch)
+        x += 8
     }
-    patch = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("brdr_b"), PU_CACHE))
-    {
-        x = 0
-        while (x < scaledviewwidth) {
-            V_DrawPatch(viewwindowx + x, viewwindowy + viewheight, 1, patch)
-            x += 8
-        }
+    patch = reinterpret<uint8?>(W_CacheLumpName(cstr("brdr_b"), PU_CACHE))
+    x = 0
+    while (x < scaledviewwidth) {
+        V_DrawPatch(viewwindowx + x, viewwindowy + viewheight, 1, patch)
+        x += 8
     }
-    patch = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("brdr_l"), PU_CACHE))
-    {
-        y = 0
-        while (y < viewheight) {
-            V_DrawPatch(viewwindowx - 8, viewwindowy + y, 1, patch)
-            y += 8
-        }
+    patch = reinterpret<uint8?>(W_CacheLumpName(cstr("brdr_l"), PU_CACHE))
+    y = 0
+    while (y < viewheight) {
+        V_DrawPatch(viewwindowx - 8, viewwindowy + y, 1, patch)
+        y += 8
     }
-    patch = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("brdr_r"), PU_CACHE))
-    {
-        y = 0
-        while (y < viewheight) {
-            V_DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + y, 1, patch)
-            y += 8
-        }
+    patch = reinterpret<uint8?>(W_CacheLumpName(cstr("brdr_r"), PU_CACHE))
+    y = 0
+    while (y < viewheight) {
+        V_DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + y, 1, patch)
+        y += 8
     }
     // Draw beveled edge.
-    V_DrawPatch(viewwindowx - 8, viewwindowy - 8, 1, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("brdr_tl"), PU_CACHE)))
-    V_DrawPatch(viewwindowx + scaledviewwidth, viewwindowy - 8, 1, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("brdr_tr"), PU_CACHE)))
-    V_DrawPatch(viewwindowx - 8, viewwindowy + viewheight, 1, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("brdr_bl"), PU_CACHE)))
-    V_DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + viewheight, 1, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("brdr_br"), PU_CACHE)))
+    V_DrawPatch(viewwindowx - 8, viewwindowy - 8, 1, reinterpret<uint8?>(W_CacheLumpName(cstr("brdr_tl"), PU_CACHE)))
+    V_DrawPatch(viewwindowx + scaledviewwidth, viewwindowy - 8, 1, reinterpret<uint8?>(W_CacheLumpName(cstr("brdr_tr"), PU_CACHE)))
+    V_DrawPatch(viewwindowx - 8, viewwindowy + viewheight, 1, reinterpret<uint8?>(W_CacheLumpName(cstr("brdr_bl"), PU_CACHE)))
+    V_DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + viewheight, 1, reinterpret<uint8?>(W_CacheLumpName(cstr("brdr_br"), PU_CACHE)))
 }
 
 // Copy a screen buffer.
@@ -450,23 +440,21 @@ def R_DrawViewBorder {
     if (scaledviewwidth == SCREENWIDTH) {
         return
     }
-    top = (SCREENHEIGHT - SBARHEIGHT - viewheight) / 2
+    top = ((SCREENHEIGHT - SBARHEIGHT) - viewheight) / 2
     side = (SCREENWIDTH - scaledviewwidth) / 2
     // copy top and one line of left side
-    R_VideoErase(uint(0), top * SCREENWIDTH + side)
+    R_VideoErase(0u, top * SCREENWIDTH + side)
     // copy one line of right side and bottom
     ofs = (viewheight + top) * SCREENWIDTH - side
     R_VideoErase(uint(ofs), top * SCREENWIDTH + side)
     // copy sides using wraparound
     ofs = top * SCREENWIDTH + SCREENWIDTH - side
     side <<= 1
-    {
-        i = 1
-        while (i < viewheight) {
-            R_VideoErase(uint(ofs), side)
-            ofs += SCREENWIDTH
-            i++
-        }
+    i = 1
+    while (i < viewheight) {
+        R_VideoErase(uint(ofs), side)
+        ofs += SCREENWIDTH
+        i++
     }
     // ?
     V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT)

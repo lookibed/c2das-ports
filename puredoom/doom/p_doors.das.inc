@@ -84,7 +84,6 @@ def T_VerticalDoor(var door : vldoor_t?) {
 
 // EV_DoLockedDoor
 // Move a locked door up/down
-[c_function]
 def EV_DoLockedDoor(var line : line_s?; _c_type : vldoor_e; var thing : mobj_s?) : int {
     var p : player_s?
     p = thing.player
@@ -98,7 +97,7 @@ def EV_DoLockedDoor(var line : line_s?; _c_type : vldoor_e; var thing : mobj_s?)
             return 0
         }
         if (!(int(p.cards[int(card_t.it_bluecard)]) != 0) && !(int(p.cards[int(card_t.it_blueskull)]) != 0)) {
-            p.message = reinterpret<uint8?>("You need a blue key to activate this object")
+            p.message = cstr("You need a blue key to activate this object")
             S_StartSound(null, int(sfxenum_t.sfx_oof))
             return 0
         }
@@ -108,7 +107,7 @@ def EV_DoLockedDoor(var line : line_s?; _c_type : vldoor_e; var thing : mobj_s?)
             return 0
         }
         if (!(int(p.cards[int(card_t.it_redcard)]) != 0) && !(int(p.cards[int(card_t.it_redskull)]) != 0)) {
-            p.message = reinterpret<uint8?>("You need a red key to activate this object")
+            p.message = cstr("You need a red key to activate this object")
             S_StartSound(null, int(sfxenum_t.sfx_oof))
             return 0
         }
@@ -118,7 +117,7 @@ def EV_DoLockedDoor(var line : line_s?; _c_type : vldoor_e; var thing : mobj_s?)
             return 0
         }
         if (!(int(p.cards[int(card_t.it_yellowcard)]) != 0) && !(int(p.cards[int(card_t.it_yellowskull)]) != 0)) {
-            p.message = reinterpret<uint8?>("You need a yellow key to activate this object")
+            p.message = cstr("You need a yellow key to activate this object")
             S_StartSound(null, int(sfxenum_t.sfx_oof))
             return 0
         }
@@ -139,7 +138,7 @@ def EV_DoDoor(var line : line_s?; _c_type : vldoor_e) : int {
         if (!(secnum >= 0)) {
             break
         }
-        sec = addr(deref(sectors + secnum))
+        sec = addr(sectors[secnum])
         if (sec.specialdata != null) {
             continue
         }
@@ -152,13 +151,13 @@ def EV_DoDoor(var line : line_s?; _c_type : vldoor_e) : int {
         door.sector = sec
         door._c_type = _c_type
         door.topwait = VDOORWAIT
-        door.speed = (1 << 16) * 2
+        door.speed = FRACUNIT * 2
         let _cond = _c_type
         if (_cond == vldoor_e.blazeClose) {
             door.topheight = P_FindLowestCeilingSurrounding(sec)
             door.topheight -= 4 * FRACUNIT
             door.direction = -1
-            door.speed = (1 << 16) * 2 * 4
+            door.speed = FRACUNIT * 2 * 4
             S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_bdcls))
         } elif (_cond == vldoor_e.door_close) {
             door.topheight = P_FindLowestCeilingSurrounding(sec)
@@ -173,7 +172,7 @@ def EV_DoDoor(var line : line_s?; _c_type : vldoor_e) : int {
             door.direction = 1
             door.topheight = P_FindLowestCeilingSurrounding(sec)
             door.topheight -= 4 * FRACUNIT
-            door.speed = (1 << 16) * 2 * 4
+            door.speed = FRACUNIT * 2 * 4
             if (door.topheight != sec.ceilingheight) {
                 S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_bdopn))
             }
@@ -209,7 +208,7 @@ def EV_VerticalDoor(var line : line_s?; var thing : mobj_s?) {
             return
         }
         if (!(int(player.cards[int(card_t.it_bluecard)]) != 0) && !(int(player.cards[int(card_t.it_blueskull)]) != 0)) {
-            player.message = reinterpret<uint8?>("You need a blue key to open this door")
+            player.message = cstr("You need a blue key to open this door")
             S_StartSound(null, int(sfxenum_t.sfx_oof))
             return
         }
@@ -219,7 +218,7 @@ def EV_VerticalDoor(var line : line_s?; var thing : mobj_s?) {
             return
         }
         if (!(int(player.cards[int(card_t.it_yellowcard)]) != 0) && !(int(player.cards[int(card_t.it_yellowskull)]) != 0)) {
-            player.message = reinterpret<uint8?>("You need a yellow key to open this door")
+            player.message = cstr("You need a yellow key to open this door")
             S_StartSound(null, int(sfxenum_t.sfx_oof))
             return
         }
@@ -229,13 +228,13 @@ def EV_VerticalDoor(var line : line_s?; var thing : mobj_s?) {
             return
         }
         if (!(int(player.cards[int(card_t.it_redcard)]) != 0) && !(int(player.cards[int(card_t.it_redskull)]) != 0)) {
-            player.message = reinterpret<uint8?>("You need a red key to open this door")
+            player.message = cstr("You need a red key to open this door")
             S_StartSound(null, int(sfxenum_t.sfx_oof))
             return
         }
     }
     // if the sector has an active thinker, use it
-    sec = deref(sides + int(line.sidenum[side ^ 1])).sector
+    sec = sides[int(line.sidenum[side ^ 1])].sector
     secnum = int(int64(sec - sectors))
     if (sec.specialdata != null) {
         door = reinterpret<vldoor_t?>(sec.specialdata)
@@ -276,7 +275,7 @@ def EV_VerticalDoor(var line : line_s?; var thing : mobj_s?) {
     door.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_VerticalDoor)
     door.sector = sec
     door.direction = 1
-    door.speed = (1 << 16) * 2
+    door.speed = FRACUNIT * 2
     door.topwait = VDOORWAIT
     let _cond4 = int(line.special)
     if (_cond4 == 1 || _cond4 == 26 || _cond4 == 27 || _cond4 == 28) {
@@ -287,12 +286,12 @@ def EV_VerticalDoor(var line : line_s?; var thing : mobj_s?) {
     } elif (_cond4 == 117) {
         // blazing door raise
         door._c_type = vldoor_e.blazeRaise
-        door.speed = (1 << 16) * 2 * 4
+        door.speed = FRACUNIT * 2 * 4
     } elif (_cond4 == 118) {
         // blazing door open
         door._c_type = vldoor_e.blazeOpen
         line.special = int16(0)
-        door.speed = (1 << 16) * 2 * 4
+        door.speed = FRACUNIT * 2 * 4
     }
     // find the top and bottom of the movement range
     door.topheight = P_FindLowestCeilingSurrounding(sec)
@@ -311,7 +310,7 @@ def P_SpawnDoorCloseIn30(var sec : sector_t?) {
     door.sector = sec
     door.direction = 0
     door._c_type = vldoor_e.door_normal
-    door.speed = (1 << 16) * 2
+    door.speed = FRACUNIT * 2
     door.topcountdown = 30 * 35
 }
 
@@ -327,7 +326,7 @@ def P_SpawnDoorRaiseIn5Mins(var sec : sector_t?; secnum : int) {
     door.sector = sec
     door.direction = 2
     door._c_type = vldoor_e.raiseIn5Mins
-    door.speed = (1 << 16) * 2
+    door.speed = FRACUNIT * 2
     door.topheight = P_FindLowestCeilingSurrounding(sec)
     door.topheight -= 4 * FRACUNIT
     door.topwait = VDOORWAIT

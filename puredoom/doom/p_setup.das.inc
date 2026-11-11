@@ -43,15 +43,13 @@ def P_LoadVertexes(lump : int) {
     li = vertexes
     // Copy and convert vertex coordinates,
     // internal representation as fixed.
-    {
-        i = 0
-        while (i < numvertexes) {
-            li.x = int(read_mapvertex_t_x(ml, 0)) << FRACBITS
-            li.y = int(read_mapvertex_t_y(ml, 0)) << FRACBITS
-            i++
-            li = li + 1
-            ml = ml + 4
-        }
+    i = 0
+    while (i < numvertexes) {
+        li.x = int(read_mapvertex_t_x(ml, 0)) << FRACBITS
+        li.y = int(read_mapvertex_t_y(ml, 0)) << FRACBITS
+        i++
+        li = li + 1
+        ml = ml + 4
     }
     // Free buffer memory.
     Z_Free(reinterpret<void?>(data))
@@ -73,28 +71,26 @@ def P_LoadSegs(lump : int) {
     data = reinterpret<uint8?>(W_CacheLumpNum(lump, PU_STATIC))
     ml = reinterpret<uint8?>(data)
     li = segs
-    {
-        i = 0
-        while (i < numsegs) {
-            li.v1 = addr(deref(vertexes + int(read_mapseg_t_v1(ml, 0))))
-            li.v2 = addr(deref(vertexes + int(read_mapseg_t_v2(ml, 0))))
-            li.angle = uint(int(read_mapseg_t_angle(ml, 0)) << 16)
-            li.offset = int(read_mapseg_t_offset(ml, 0)) << 16
-            linedef = int(read_mapseg_t_linedef(ml, 0))
-            ldef = addr(deref(lines + linedef))
-            li.linedef = ldef
-            side = int(read_mapseg_t_side(ml, 0))
-            li.sidedef = addr(deref(sides + int(ldef.sidenum[side])))
-            li.frontsector = deref(sides + int(ldef.sidenum[side])).sector
-            if ((int(ldef.flags) & ML_TWOSIDED) != 0) {
-                li.backsector = deref(sides + int(ldef.sidenum[side ^ 1])).sector
-            } else {
-                li.backsector = null
-            }
-            i++
-            li = li + 1
-            ml = ml + 12
+    i = 0
+    while (i < numsegs) {
+        li.v1 = addr(vertexes[int(read_mapseg_t_v1(ml, 0))])
+        li.v2 = addr(vertexes[int(read_mapseg_t_v2(ml, 0))])
+        li.angle = uint(int(read_mapseg_t_angle(ml, 0)) << 16)
+        li.offset = int(read_mapseg_t_offset(ml, 0)) << 16
+        linedef = int(read_mapseg_t_linedef(ml, 0))
+        ldef = addr(lines[linedef])
+        li.linedef = ldef
+        side = int(read_mapseg_t_side(ml, 0))
+        li.sidedef = addr(sides[int(ldef.sidenum[side])])
+        li.frontsector = sides[int(ldef.sidenum[side])].sector
+        if ((int(ldef.flags) & ML_TWOSIDED) != 0) {
+            li.backsector = sides[int(ldef.sidenum[side ^ 1])].sector
+        } else {
+            li.backsector = null
         }
+        i++
+        li = li + 1
+        ml = ml + 12
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -112,15 +108,13 @@ def P_LoadSubsectors(lump : int) {
     ms = reinterpret<uint8?>(data)
     doom_memset(reinterpret<void?>(subsectors), 0, int(uint64(numsubsectors) * uint64(typeinfo sizeof(type<subsector_s>))))
     ss = subsectors
-    {
-        i = 0
-        while (i < numsubsectors) {
-            ss.numlines = read_mapsubsector_t_numsegs(ms, 0)
-            ss.firstline = read_mapsubsector_t_firstseg(ms, 0)
-            i++
-            ss = ss + 1
-            ms = ms + 4
-        }
+    i = 0
+    while (i < numsubsectors) {
+        ss.numlines = read_mapsubsector_t_numsegs(ms, 0)
+        ss.firstline = read_mapsubsector_t_firstseg(ms, 0)
+        i++
+        ss = ss + 1
+        ms = ms + 4
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -138,21 +132,19 @@ def P_LoadSectors(lump : int) {
     data = reinterpret<uint8?>(W_CacheLumpNum(lump, PU_STATIC))
     ms = reinterpret<uint8?>(data)
     ss = sectors
-    {
-        i = 0
-        while (i < numsectors) {
-            ss.floorheight = int(read_mapsector_t_floorheight(ms, 0)) << FRACBITS
-            ss.ceilingheight = int(read_mapsector_t_ceilingheight(ms, 0)) << FRACBITS
-            ss.floorpic = int16(R_FlatNumForName(ptr_mapsector_t_floorpic(ms, 0)))
-            ss.ceilingpic = int16(R_FlatNumForName(ptr_mapsector_t_ceilingpic(ms, 0)))
-            ss.lightlevel = read_mapsector_t_lightlevel(ms, 0)
-            ss.special = read_mapsector_t_special(ms, 0)
-            ss.tag = read_mapsector_t_tag(ms, 0)
-            ss.thinglist = null
-            i++
-            ss = ss + 1
-            ms = ms + 26
-        }
+    i = 0
+    while (i < numsectors) {
+        ss.floorheight = int(read_mapsector_t_floorheight(ms, 0)) << FRACBITS
+        ss.ceilingheight = int(read_mapsector_t_ceilingheight(ms, 0)) << FRACBITS
+        ss.floorpic = int16(R_FlatNumForName(ptr_mapsector_t_floorpic(ms, 0)))
+        ss.ceilingpic = int16(R_FlatNumForName(ptr_mapsector_t_ceilingpic(ms, 0)))
+        ss.lightlevel = read_mapsector_t_lightlevel(ms, 0)
+        ss.special = read_mapsector_t_special(ms, 0)
+        ss.tag = read_mapsector_t_tag(ms, 0)
+        ss.thinglist = null
+        i++
+        ss = ss + 1
+        ms = ms + 26
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -169,23 +161,21 @@ def P_LoadNodes(lump : int) {
     data = reinterpret<uint8?>(W_CacheLumpNum(lump, PU_STATIC))
     mn = reinterpret<uint8?>(data)
     no = nodes
-    {
-        i = 0
-        while (i < numnodes) {
-            no.x = int(read_mapnode_t_x(mn, 0)) << FRACBITS
-            no.y = int(read_mapnode_t_y(mn, 0)) << FRACBITS
-            no.dx = int(read_mapnode_t_dx(mn, 0)) << FRACBITS
-            no.dy = int(read_mapnode_t_dy(mn, 0)) << FRACBITS
-            for (j in range(2)) {
-                no.children[j] = deref(ptr_mapnode_t_children(mn, 0) + j)
-                for (k in range(4)) {
-                    no.bbox[j][k] = int(deref(ptr_mapnode_t_bbox(mn, 0) + j)[k]) << FRACBITS
-                }
+    i = 0
+    while (i < numnodes) {
+        no.x = int(read_mapnode_t_x(mn, 0)) << FRACBITS
+        no.y = int(read_mapnode_t_y(mn, 0)) << FRACBITS
+        no.dx = int(read_mapnode_t_dx(mn, 0)) << FRACBITS
+        no.dy = int(read_mapnode_t_dy(mn, 0)) << FRACBITS
+        for (j in range(2)) {
+            no.children[j] = ptr_mapnode_t_children(mn, 0)[j]
+            for (k in range(4)) {
+                no.bbox[j][k] = int(ptr_mapnode_t_bbox(mn, 0)[j][k]) << FRACBITS
             }
-            i++
-            no = no + 1
-            mn = mn + 28
         }
+        i++
+        no = no + 1
+        mn = mn + 28
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -201,40 +191,38 @@ def P_LoadThings(lump : int) {
     data = reinterpret<uint8?>(W_CacheLumpNum(lump, PU_STATIC))
     numthings = int(uint64(W_LumpLength(lump)) / uint64(typeinfo sizeof(type<mapthing_t>)))
     mt = reinterpret<mapthing_t?>(data)
-    {
-        i = 0
-        while (i < numthings) {
-            spawn = doom_boolean._c_true
-            // Do not spawn cool, new monsters if !commercial
-            if (gamemode != GameMode_t.commercial) {
-                let _cond = int(mt._c_type)
-                if (_cond == 68 || _cond == 64 || _cond == 88 || _cond == 89 || _cond == 69 || _cond == 67 || _cond == 71 || _cond == 65 || _cond == 66 || _cond == 84) {
-                    // Arachnotron
-                    // Archvile
-                    // Boss Brain
-                    // Boss Shooter
-                    // Hell Knight
-                    // Mancubus
-                    // Pain Elemental
-                    // Former Human Commando
-                    // Revenant
-                    // Wolf SS
-                    spawn = doom_boolean._c_false
-                }
+    i = 0
+    while (i < numthings) {
+        spawn = doom_boolean._c_true
+        // Do not spawn cool, new monsters if !commercial
+        if (gamemode != GameMode_t.commercial) {
+            let _cond = int(mt._c_type)
+            if (_cond == 68 || _cond == 64 || _cond == 88 || _cond == 89 || _cond == 69 || _cond == 67 || _cond == 71 || _cond == 65 || _cond == 66 || _cond == 84) {
+                // Arachnotron
+                // Archvile
+                // Boss Brain
+                // Boss Shooter
+                // Hell Knight
+                // Mancubus
+                // Pain Elemental
+                // Former Human Commando
+                // Revenant
+                // Wolf SS
+                spawn = doom_boolean._c_false
             }
-            if (spawn == doom_boolean._c_false) {
-                break
-            }
-            // Do spawn all other stuff.
-            mt.x = mt.x
-            mt.y = mt.y
-            mt.angle = mt.angle
-            mt._c_type = mt._c_type
-            mt._c_options = mt._c_options
-            P_SpawnMapThing(mt)
-            i++
-            mt = mt + 1
         }
+        if (spawn == doom_boolean._c_false) {
+            break
+        }
+        // Do spawn all other stuff.
+        mt.x = mt.x
+        mt.y = mt.y
+        mt.angle = mt.angle
+        mt._c_type = mt._c_type
+        mt._c_options = mt._c_options
+        P_SpawnMapThing(mt)
+        i++
+        mt = mt + 1
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -255,59 +243,57 @@ def P_LoadLineDefs(lump : int) {
     data = reinterpret<uint8?>(W_CacheLumpNum(lump, PU_STATIC))
     mld = reinterpret<uint8?>(data)
     ld = lines
-    {
-        i = 0
-        while (i < numlines) {
-            ld.flags = read_maplinedef_t_flags(mld, 0)
-            ld.special = read_maplinedef_t_special(mld, 0)
-            ld.tag = read_maplinedef_t_tag(mld, 0)
-            ld.v1 = addr(deref(vertexes + int(read_maplinedef_t_v1(mld, 0))))
-            v1 = ld.v1
-            ld.v2 = addr(deref(vertexes + int(read_maplinedef_t_v2(mld, 0))))
-            v2 = ld.v2
-            ld.dx = v2.x - v1.x
-            ld.dy = v2.y - v1.y
-            if (!(ld.dx != 0)) {
-                ld.slopetype = slopetype_t.ST_VERTICAL
-            } elif (!(ld.dy != 0)) {
-                ld.slopetype = slopetype_t.ST_HORIZONTAL
+    i = 0
+    while (i < numlines) {
+        ld.flags = read_maplinedef_t_flags(mld, 0)
+        ld.special = read_maplinedef_t_special(mld, 0)
+        ld.tag = read_maplinedef_t_tag(mld, 0)
+        ld.v1 = addr(vertexes[int(read_maplinedef_t_v1(mld, 0))])
+        v1 = ld.v1
+        ld.v2 = addr(vertexes[int(read_maplinedef_t_v2(mld, 0))])
+        v2 = ld.v2
+        ld.dx = v2.x - v1.x
+        ld.dy = v2.y - v1.y
+        if (!(ld.dx != 0)) {
+            ld.slopetype = slopetype_t.ST_VERTICAL
+        } elif (!(ld.dy != 0)) {
+            ld.slopetype = slopetype_t.ST_HORIZONTAL
+        } else {
+            if (FixedDiv(ld.dy, ld.dx) > 0) {
+                ld.slopetype = slopetype_t.ST_POSITIVE
             } else {
-                if (FixedDiv(ld.dy, ld.dx) > 0) {
-                    ld.slopetype = slopetype_t.ST_POSITIVE
-                } else {
-                    ld.slopetype = slopetype_t.ST_NEGATIVE
-                }
+                ld.slopetype = slopetype_t.ST_NEGATIVE
             }
-            if (v1.x < v2.x) {
-                ld.bbox[int(anon_787.BOXLEFT)] = v1.x
-                ld.bbox[int(anon_787.BOXRIGHT)] = v2.x
-            } else {
-                ld.bbox[int(anon_787.BOXLEFT)] = v2.x
-                ld.bbox[int(anon_787.BOXRIGHT)] = v1.x
-            }
-            if (v1.y < v2.y) {
-                ld.bbox[int(anon_787.BOXBOTTOM)] = v1.y
-                ld.bbox[int(anon_787.BOXTOP)] = v2.y
-            } else {
-                ld.bbox[int(anon_787.BOXBOTTOM)] = v2.y
-                ld.bbox[int(anon_787.BOXTOP)] = v1.y
-            }
-            ld.sidenum[0] = deref(ptr_maplinedef_t_sidenum(mld, 0) + 0)
-            ld.sidenum[1] = deref(ptr_maplinedef_t_sidenum(mld, 0) + 1)
-            if (int(ld.sidenum[0]) != -1) {
-                ld.frontsector = deref(sides + int(ld.sidenum[0])).sector
-            } else {
-                ld.frontsector = null
-            }
-            if (int(ld.sidenum[1]) != -1) {
-                ld.backsector = deref(sides + int(ld.sidenum[1])).sector
-            } else {
-                ld.backsector = null
-            }
-            i++
-            mld = mld + 14
-            ld = ld + 1
         }
+        if (v1.x < v2.x) {
+            ld.bbox[int(anon_787.BOXLEFT)] = v1.x
+            ld.bbox[int(anon_787.BOXRIGHT)] = v2.x
+        } else {
+            ld.bbox[int(anon_787.BOXLEFT)] = v2.x
+            ld.bbox[int(anon_787.BOXRIGHT)] = v1.x
+        }
+        if (v1.y < v2.y) {
+            ld.bbox[int(anon_787.BOXBOTTOM)] = v1.y
+            ld.bbox[int(anon_787.BOXTOP)] = v2.y
+        } else {
+            ld.bbox[int(anon_787.BOXBOTTOM)] = v2.y
+            ld.bbox[int(anon_787.BOXTOP)] = v1.y
+        }
+        ld.sidenum[0] = ptr_maplinedef_t_sidenum(mld, 0)[0]
+        ld.sidenum[1] = ptr_maplinedef_t_sidenum(mld, 0)[1]
+        if (int(ld.sidenum[0]) != -1) {
+            ld.frontsector = sides[int(ld.sidenum[0])].sector
+        } else {
+            ld.frontsector = null
+        }
+        if (int(ld.sidenum[1]) != -1) {
+            ld.backsector = sides[int(ld.sidenum[1])].sector
+        } else {
+            ld.backsector = null
+        }
+        i++
+        mld = mld + 14
+        ld = ld + 1
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -325,19 +311,17 @@ def P_LoadSideDefs(lump : int) {
     data = reinterpret<uint8?>(W_CacheLumpNum(lump, PU_STATIC))
     msd = reinterpret<uint8?>(data)
     sd = sides
-    {
-        i = 0
-        while (i < numsides) {
-            sd.textureoffset = int(read_mapsidedef_t_textureoffset(msd, 0)) << FRACBITS
-            sd.rowoffset = int(read_mapsidedef_t_rowoffset(msd, 0)) << FRACBITS
-            sd.toptexture = int16(R_TextureNumForName(ptr_mapsidedef_t_toptexture(msd, 0)))
-            sd.bottomtexture = int16(R_TextureNumForName(ptr_mapsidedef_t_bottomtexture(msd, 0)))
-            sd.midtexture = int16(R_TextureNumForName(ptr_mapsidedef_t_midtexture(msd, 0)))
-            sd.sector = addr(deref(sectors + int(read_mapsidedef_t_sector(msd, 0))))
-            i++
-            msd = msd + 30
-            sd = sd + 1
-        }
+    i = 0
+    while (i < numsides) {
+        sd.textureoffset = int(read_mapsidedef_t_textureoffset(msd, 0)) << FRACBITS
+        sd.rowoffset = int(read_mapsidedef_t_rowoffset(msd, 0)) << FRACBITS
+        sd.toptexture = int16(R_TextureNumForName(ptr_mapsidedef_t_toptexture(msd, 0)))
+        sd.bottomtexture = int16(R_TextureNumForName(ptr_mapsidedef_t_bottomtexture(msd, 0)))
+        sd.midtexture = int16(R_TextureNumForName(ptr_mapsidedef_t_midtexture(msd, 0)))
+        sd.sector = addr(sectors[int(read_mapsidedef_t_sector(msd, 0))])
+        i++
+        msd = msd + 30
+        sd = sd + 1
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -350,12 +334,12 @@ def P_LoadBlockMap(lump : int) {
     blockmap = blockmaplump + 4
     count = W_LumpLength(lump) / 2
     for (i in range(count)) {
-        deref(blockmaplump + i) = deref(blockmaplump + i)
+        blockmaplump[i] = blockmaplump[i]
     }
-    bmaporgx = int(deref(blockmaplump + 0)) << FRACBITS
-    bmaporgy = int(deref(blockmaplump + 1)) << FRACBITS
-    bmapwidth = int(deref(blockmaplump + 2))
-    bmapheight = int(deref(blockmaplump + 3))
+    bmaporgx = int(blockmaplump[0]) << FRACBITS
+    bmaporgy = int(blockmaplump[1]) << FRACBITS
+    bmapwidth = int(blockmaplump[2])
+    bmapheight = int(blockmaplump[3])
     // clear out mobj chains
     count = int(uint64(typeinfo sizeof(type<mobj_s?>)) * uint64(bmapwidth) * uint64(bmapheight))
     blocklinks = reinterpret<mobj_s ??>(Z_Malloc(count, PU_LEVEL, null))
@@ -379,76 +363,68 @@ def P_GroupLines {
     var _c_block : int
     // look up sector number for each subsector
     ss = subsectors
-    {
-        i = 0
-        while (i < numsubsectors) {
-            seg = addr(deref(segs + int(ss.firstline)))
-            ss.sector = seg.sidedef.sector
-            i++
-            ss = ss + 1
-        }
+    i = 0
+    while (i < numsubsectors) {
+        seg = addr(segs[int(ss.firstline)])
+        ss.sector = seg.sidedef.sector
+        i++
+        ss = ss + 1
     }
     // count number of lines in each sector
     li = lines
     total = 0
-    {
-        i = 0
-        while (i < numlines) {
+    i = 0
+    while (i < numlines) {
+        total++
+        li.frontsector.linecount++
+        if (li.backsector != null && intptr(li.backsector) != intptr(li.frontsector)) {
+            li.backsector.linecount++
             total++
-            li.frontsector.linecount++
-            if (li.backsector != null && intptr(li.backsector) != intptr(li.frontsector)) {
-                li.backsector.linecount++
-                total++
-            }
-            i++
-            li = li + 1
         }
+        i++
+        li = li + 1
     }
     // build line tables for each sector
     linebuffer = reinterpret<line_s ??>(Z_Malloc(int(uint64(total) * uint64(typeinfo sizeof(type<line_s?>))), PU_LEVEL, null))
     sector = sectors
-    {
-        i = 0
-        while (i < numsectors) {
-            M_ClearBox(addr(bbox[0]))
-            sector.lines = linebuffer
-            li = lines
-            {
-                j = 0
-                while (j < numlines) {
-                    if (intptr(li.frontsector) == intptr(sector) || intptr(li.backsector) == intptr(sector)) {
-                        var _t0 = linebuffer
-                        linebuffer = linebuffer + 1
-                        deref(_t0) = li
-                        M_AddToBox(addr(bbox[0]), li.v1.x, li.v1.y)
-                        M_AddToBox(addr(bbox[0]), li.v2.x, li.v2.y)
-                    }
-                    j++
-                    li = li + 1
-                }
+    i = 0
+    while (i < numsectors) {
+        M_ClearBox(addr(bbox[0]))
+        sector.lines = linebuffer
+        li = lines
+        j = 0
+        while (j < numlines) {
+            if (intptr(li.frontsector) == intptr(sector) || intptr(li.backsector) == intptr(sector)) {
+                var _t0 = linebuffer
+                linebuffer = linebuffer + 1
+                deref(_t0) = li
+                M_AddToBox(addr(bbox[0]), li.v1.x, li.v1.y)
+                M_AddToBox(addr(bbox[0]), li.v2.x, li.v2.y)
             }
-            if (int64(linebuffer - sector.lines) != int64(sector.linecount)) {
-                I_Error(reinterpret<uint8?>("Error: P_GroupLines: miscounted"))
-            }
-            // set the degenmobj_t to the middle of the bounding box
-            sector.soundorg.x = (bbox[int(anon_787.BOXRIGHT)] + bbox[int(anon_787.BOXLEFT)]) / 2
-            sector.soundorg.y = (bbox[int(anon_787.BOXTOP)] + bbox[int(anon_787.BOXBOTTOM)]) / 2
-            // adjust bounding box to map blocks
-            _c_block = bbox[int(anon_787.BOXTOP)] - bmaporgy + 32 * (1 << 16) >> MAPBLOCKSHIFT
-            _c_block = _c_block >= bmapheight ? bmapheight - 1 : _c_block
-            sector.blockbox[int(anon_787.BOXTOP)] = _c_block
-            _c_block = bbox[int(anon_787.BOXBOTTOM)] - bmaporgy - 32 * (1 << 16) >> MAPBLOCKSHIFT
-            _c_block = _c_block < 0 ? 0 : _c_block
-            sector.blockbox[int(anon_787.BOXBOTTOM)] = _c_block
-            _c_block = bbox[int(anon_787.BOXRIGHT)] - bmaporgx + 32 * (1 << 16) >> MAPBLOCKSHIFT
-            _c_block = _c_block >= bmapwidth ? bmapwidth - 1 : _c_block
-            sector.blockbox[int(anon_787.BOXRIGHT)] = _c_block
-            _c_block = bbox[int(anon_787.BOXLEFT)] - bmaporgx - 32 * (1 << 16) >> MAPBLOCKSHIFT
-            _c_block = _c_block < 0 ? 0 : _c_block
-            sector.blockbox[int(anon_787.BOXLEFT)] = _c_block
-            i++
-            sector = sector + 1
+            j++
+            li = li + 1
         }
+        if (int64(linebuffer - sector.lines) != int64(sector.linecount)) {
+            I_Error(cstr("Error: P_GroupLines: miscounted"))
+        }
+        // set the degenmobj_t to the middle of the bounding box
+        sector.soundorg.x = (bbox[int(anon_787.BOXRIGHT)] + bbox[int(anon_787.BOXLEFT)]) / 2
+        sector.soundorg.y = (bbox[int(anon_787.BOXTOP)] + bbox[int(anon_787.BOXBOTTOM)]) / 2
+        // adjust bounding box to map blocks
+        _c_block = (bbox[int(anon_787.BOXTOP)] - bmaporgy + 32 * FRACUNIT) >> MAPBLOCKSHIFT
+        _c_block = _c_block >= bmapheight ? bmapheight - 1 : _c_block
+        sector.blockbox[int(anon_787.BOXTOP)] = _c_block
+        _c_block = (bbox[int(anon_787.BOXBOTTOM)] - bmaporgy - 32 * FRACUNIT) >> MAPBLOCKSHIFT
+        _c_block = _c_block < 0 ? 0 : _c_block
+        sector.blockbox[int(anon_787.BOXBOTTOM)] = _c_block
+        _c_block = (bbox[int(anon_787.BOXRIGHT)] - bmaporgx + 32 * FRACUNIT) >> MAPBLOCKSHIFT
+        _c_block = _c_block >= bmapwidth ? bmapwidth - 1 : _c_block
+        sector.blockbox[int(anon_787.BOXRIGHT)] = _c_block
+        _c_block = (bbox[int(anon_787.BOXLEFT)] - bmaporgx - 32 * FRACUNIT) >> MAPBLOCKSHIFT
+        _c_block = _c_block < 0 ? 0 : _c_block
+        sector.blockbox[int(anon_787.BOXLEFT)] = _c_block
+        i++
+        sector = sector + 1
     }
 }
 
@@ -481,11 +457,11 @@ def P_SetupLevel(episode : int; map : int; playermask : int; skill : skill_t) {
     if (gamemode == GameMode_t.commercial) {
         if (map < 10) {
             // doom_sprintf(lumpname, "map0%i", map);
-            doom_strcpy(addr(lumpname[0]), reinterpret<uint8?>("map0"))
+            doom_strcpy(addr(lumpname[0]), cstr("map0"))
             doom_concat(addr(lumpname[0]), doom_itoa(map, 10))
         } else {
             // doom_sprintf(lumpname, "map%i", map);
-            doom_strcpy(addr(lumpname[0]), reinterpret<uint8?>("map"))
+            doom_strcpy(addr(lumpname[0]), cstr("map"))
             doom_concat(addr(lumpname[0]), doom_itoa(map, 10))
         }
     } else {
@@ -493,7 +469,7 @@ def P_SetupLevel(episode : int; map : int; playermask : int; skill : skill_t) {
         lumpname[1] = uint8('0' + episode)
         lumpname[2] = uint8('M')
         lumpname[3] = uint8('0' + map)
-        lumpname[4] = uint8(0)
+        lumpname[4] = 0u8
     }
     lumpnum = W_GetNumForName(addr(lumpname[0]))
     leveltime = 0

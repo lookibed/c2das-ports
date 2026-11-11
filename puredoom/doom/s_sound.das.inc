@@ -20,9 +20,9 @@ var numChannels : int
 def S_Init(sfxVolume : int; musicVolume : int) {
     var i : int
     // doom_print("S_Init: default sfx volume %d\n", sfxVolume);
-    invoke(doom_print, reinterpret<uint8?>("S_Init: default sfx volume "))
+    invoke(doom_print, cstr("S_Init: default sfx volume "))
     invoke(doom_print, doom_itoa(sfxVolume, 10))
-    invoke(doom_print, reinterpret<uint8?>("\n"))
+    invoke(doom_print, cstr("\n"))
     // Whatever these did with DMX, these are rather dummies now.
     I_SetChannels()
     S_SetSfxVolume(sfxVolume)
@@ -33,12 +33,10 @@ def S_Init(sfxVolume : int; musicVolume : int) {
     // simultaneously) within zone memory.
     channels_s_sound = reinterpret<channel_t?>(Z_Malloc(int(uint64(numChannels) * uint64(typeinfo sizeof(type<channel_t>))), PU_STATIC, null))
     // Free all channels for use
-    {
-        i = 0
-        while (i < numChannels) {
-            deref(channels_s_sound + i).sfxinfo = null
-            i++
-        }
+    i = 0
+    while (i < numChannels) {
+        channels_s_sound[i].sfxinfo = null
+        i++
     }
     // no sounds are playing, and they are not mus_paused
     mus_paused = doom_boolean._c_false
@@ -58,14 +56,12 @@ def S_Start {
     var mnum : int
     // kill all playing sounds at start of level
     // (trust me - a good idea)
-    {
-        cnum = 0
-        while (cnum < numChannels) {
-            if (deref(channels_s_sound + cnum).sfxinfo != null) {
-                S_StopChannel(cnum)
-            }
-            cnum++
+    cnum = 0
+    while (cnum < numChannels) {
+        if (channels_s_sound[cnum].sfxinfo != null) {
+            S_StopChannel(cnum)
         }
+        cnum++
     }
     // start new music for the level
     mus_paused = doom_boolean._c_false
@@ -108,7 +104,7 @@ def S_StartSoundAtVolume(var origin_p : void?; sfx_id : int; var volume : int) {
     // check for bogus sound #
     if (sfx_id < 1 || sfx_id > int(sfxenum_t.NUMSFX)) {
         // I_Error("Error: Bad sfx #: %d", sfx_id);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: Bad sfx #: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: Bad sfx #: "))
         doom_concat(addr(error_buf[0]), doom_itoa(sfx_id, 10))
         I_Error(addr(error_buf[0]))
     }
@@ -173,7 +169,7 @@ def S_StartSoundAtVolume(var origin_p : void?; sfx_id : int; var volume : int) {
     }
     // cache data if necessary
     if (!(sfx.data != null)) {
-        invoke(doom_print, reinterpret<uint8?>("S_StartSoundAtVolume: 16bit and not pre-cached - wtf?\n"))
+        invoke(doom_print, cstr("S_StartSoundAtVolume: 16bit and not pre-cached - wtf?\n"))
     }
     // DOS remains, 8bit handling
     // sfx->data = (void *) W_CacheLumpNum(sfx->lumpnum, PU_MUSIC);
@@ -188,7 +184,7 @@ def S_StartSoundAtVolume(var origin_p : void?; sfx_id : int; var volume : int) {
     }
     // Assigns the handle to one of the channels in the
     // mix/output buffer.
-    deref(channels_s_sound + cnum).handle = I_StartSound(sfx_id, volume, sep, pitch, priority)
+    channels_s_sound[cnum].handle = I_StartSound(sfx_id, volume, sep, pitch, priority)
 }
 
 def S_StartSound(var origin : void?; sfx_id : int) {
@@ -198,15 +194,13 @@ def S_StartSound(var origin : void?; sfx_id : int) {
 [c_function]
 def S_StopSound(var origin : void?) {
     var cnum : int
-    {
-        cnum = 0
-        while (cnum < numChannels) {
-            if (deref(channels_s_sound + cnum).sfxinfo != null && intptr(deref(channels_s_sound + cnum).origin) == intptr(origin)) {
-                S_StopChannel(cnum)
-                break
-            }
-            cnum++
+    cnum = 0
+    while (cnum < numChannels) {
+        if (channels_s_sound[cnum].sfxinfo != null && intptr(channels_s_sound[cnum].origin) == intptr(origin)) {
+            S_StopChannel(cnum)
+            break
         }
+        cnum++
     }
 }
 
@@ -236,47 +230,45 @@ def S_UpdateSounds(var listener_p : void?) {
     var sfx : sfxinfo_struct?
     var c : channel_t?
     var listener : mobj_s? = reinterpret<mobj_s?>(listener_p)
-    {
-        cnum = 0
-        while (cnum < numChannels) {
-            {
-                c = addr(deref(channels_s_sound + cnum))
-                sfx = c.sfxinfo
-                if (c.sfxinfo != null) {
-                    if (I_SoundIsPlaying(c.handle) != 0) {
-                        // initialize parameters
-                        volume = snd_SfxVolume
-                        pitch = NORM_PITCH
-                        sep = NORM_SEP
-                        if (sfx.link != null) {
-                            pitch = sfx.pitch
-                            volume += sfx.volume
-                            if (volume < 1) {
-                                S_StopChannel(cnum)
-                                continue
-                            } elif (volume > snd_SfxVolume) {
-                                volume = snd_SfxVolume
-                            }
+    cnum = 0
+    while (cnum < numChannels) {
+        {
+            c = addr(channels_s_sound[cnum])
+            sfx = c.sfxinfo
+            if (c.sfxinfo != null) {
+                if (I_SoundIsPlaying(c.handle) != 0) {
+                    // initialize parameters
+                    volume = snd_SfxVolume
+                    pitch = NORM_PITCH
+                    sep = NORM_SEP
+                    if (sfx.link != null) {
+                        pitch = sfx.pitch
+                        volume += sfx.volume
+                        if (volume < 1) {
+                            S_StopChannel(cnum)
+                            continue
+                        } elif (volume > snd_SfxVolume) {
+                            volume = snd_SfxVolume
                         }
-                        // check non-local sounds for distance clipping
-                        // or modify their params
-                        if (c.origin != null && intptr(listener_p) != intptr(c.origin)) {
-                            audible = S_AdjustSoundParams(listener, reinterpret<mobj_s?>(c.origin), addr(volume), addr(sep), addr(pitch))
-                            if (!(audible != 0)) {
-                                S_StopChannel(cnum)
-                            } else {
-                                I_UpdateSoundParams(c.handle, volume, sep, pitch)
-                            }
-                        }
-                    } else {
-                        // if channel is allocated but sound has stopped,
-                        // free it
-                        S_StopChannel(cnum)
                     }
+                    // check non-local sounds for distance clipping
+                    // or modify their params
+                    if (c.origin != null && intptr(listener_p) != intptr(c.origin)) {
+                        audible = S_AdjustSoundParams(listener, reinterpret<mobj_s?>(c.origin), addr(volume), addr(sep), addr(pitch))
+                        if (!(audible != 0)) {
+                            S_StopChannel(cnum)
+                        } else {
+                            I_UpdateSoundParams(c.handle, volume, sep, pitch)
+                        }
+                    }
+                } else {
+                    // if channel is allocated but sound has stopped,
+                    // free it
+                    S_StopChannel(cnum)
                 }
-            } finally {
-                cnum++
             }
+        } finally {
+            cnum++
         }
     }
 }
@@ -286,7 +278,7 @@ def S_SetMusicVolume(volume : int) {
     if (volume < 0 || volume > 127) {
         // I_Error("Error: Attempt to set music volume at %d",
         // volume);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: Attempt to set music volume at "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: Attempt to set music volume at "))
         doom_concat(addr(error_buf[0]), doom_itoa(volume, 10))
         I_Error(addr(error_buf[0]))
     }
@@ -299,7 +291,7 @@ def S_SetMusicVolume(volume : int) {
 def S_SetSfxVolume(volume : int) {
     if (volume < 0 || volume > 127) {
         // I_Error("Error: Attempt to set sfx volume at %d", volume);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: Attempt to set sfx volume at "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: Attempt to set sfx volume at "))
         doom_concat(addr(error_buf[0]), doom_itoa(volume, 10))
         I_Error(addr(error_buf[0]))
     }
@@ -315,9 +307,9 @@ def S_StartMusic(m_id : int) {
 def S_ChangeMusic(musicnum : int; looping : int) {
     var music : musicinfo_t?
     var namebuf : uint8[9]
-    if (musicnum <= int(musicenum_t.mus_None) || musicnum >= int(musicenum_t.NUMMUSIC)) {
+    if ((musicnum <= int(musicenum_t.mus_None)) || (musicnum >= int(musicenum_t.NUMMUSIC))) {
         // I_Error("Error: Bad music number %d", musicnum);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: Bad music number "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: Bad music number "))
         doom_concat(addr(error_buf[0]), doom_itoa(musicnum, 10))
         I_Error(addr(error_buf[0]))
     } else {
@@ -331,7 +323,7 @@ def S_ChangeMusic(musicnum : int; looping : int) {
     // get lumpnum if neccessary
     if (!(music.lumpnum != 0)) {
         // doom_sprintf(namebuf, "d_%s", music->name);
-        doom_strcpy(addr(namebuf[0]), reinterpret<uint8?>("d_"))
+        doom_strcpy(addr(namebuf[0]), cstr("d_"))
         doom_concat(addr(namebuf[0]), music.name)
         music.lumpnum = W_GetNumForName(addr(namebuf[0]))
     }
@@ -351,15 +343,13 @@ def S_StopMusic {
         }
         I_StopSong(mus_playing_s_sound.handle)
         I_UnRegisterSong(mus_playing_s_sound.handle)
-        {
-            if (reinterpret<memblock_s?>(reinterpret<uint8?>(mus_playing_s_sound.data) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-                var buf : uint8[260]
-                doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/s_sound.c:"))
-                doom_concat(addr(buf[0]), doom_itoa(567, 10))
-                I_Error(addr(buf[0]))
-            }
-            Z_ChangeTag2(mus_playing_s_sound.data, 101)
+        if (reinterpret<memblock_s?>(reinterpret<uint8?>(mus_playing_s_sound.data) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+            var buf : uint8[260]
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/s_sound.c:"))
+            doom_concat(addr(buf[0]), doom_itoa(567, 10))
+            I_Error(addr(buf[0]))
         }
+        Z_ChangeTag2(mus_playing_s_sound.data, PU_CACHE)
         mus_playing_s_sound.data = null
         mus_playing_s_sound = null
     }
@@ -368,7 +358,7 @@ def S_StopMusic {
 [c_function]
 def S_StopChannel(cnum : int) {
     var i : int
-    var c : channel_t? = addr(deref(channels_s_sound + cnum))
+    var c : channel_t? = addr(channels_s_sound[cnum])
     if (c.sfxinfo != null) {
         // stop the sound playing
         if (I_SoundIsPlaying(c.handle) != 0) {
@@ -376,14 +366,12 @@ def S_StopChannel(cnum : int) {
         }
         // check to see
         // if other channels are playing the sound
-        {
-            i = 0
-            while (i < numChannels) {
-                if (cnum != i && intptr(c.sfxinfo) == intptr(deref(channels_s_sound + i).sfxinfo)) {
-                    break
-                }
-                i++
+        i = 0
+        while (i < numChannels) {
+            if (cnum != i && intptr(c.sfxinfo) == intptr(channels_s_sound[i].sfxinfo)) {
+                break
             }
+            i++
         }
         // degrade usefulness of sound data
         c.sfxinfo.usefulness--
@@ -417,7 +405,7 @@ def S_AdjustSoundParams(var listener : mobj_s?; var source : mobj_s?; var vol : 
     } else {
         angle += (4294967295u - listener.angle)
     }
-    angle >>= 19u
+    angle >>= uint(ANGLETOFINESHIFT)
     // stereo separation
     deref(sep) = 128 - (FixedMul(S_STEREO_SWING, finesine[angle]) >> FRACBITS)
     // volume calculation
@@ -427,12 +415,12 @@ def S_AdjustSoundParams(var listener : mobj_s?; var source : mobj_s?; var vol : 
         if (approx_dist > S_CLIPPING_DIST) {
             approx_dist = S_CLIPPING_DIST
         }
-        deref(vol) = 15 + (snd_SfxVolume - 15) * (S_CLIPPING_DIST - approx_dist >> FRACBITS) / S_ATTENUATOR
+        deref(vol) = 15 + ((snd_SfxVolume - 15) * ((S_CLIPPING_DIST - approx_dist) >> FRACBITS)) / S_ATTENUATOR
     } else {
         // distance effect
-        deref(vol) = snd_SfxVolume * (S_CLIPPING_DIST - approx_dist >> FRACBITS) / S_ATTENUATOR
+        deref(vol) = (snd_SfxVolume * ((S_CLIPPING_DIST - approx_dist) >> FRACBITS)) / S_ATTENUATOR
     }
-    return deref(vol) > 0 ? 1 : 0
+    return (deref(vol) > 0) ? 1 : 0
 }
 
 // S_getChannel :
@@ -443,29 +431,25 @@ def S_getChannel(var origin : void?; var sfxinfo : sfxinfo_struct?) : int {
     var cnum : int
     var c : channel_t?
     // Find an open channel
-    {
-        cnum = 0
-        while (cnum < numChannels) {
-            if (!(deref(channels_s_sound + cnum).sfxinfo != null)) {
-                break
-            } elif (origin != null && intptr(deref(channels_s_sound + cnum).origin) == intptr(origin)) {
-                S_StopChannel(cnum)
-                break
-            }
-            cnum++
+    cnum = 0
+    while (cnum < numChannels) {
+        if (!(channels_s_sound[cnum].sfxinfo != null)) {
+            break
+        } elif (origin != null && intptr(channels_s_sound[cnum].origin) == intptr(origin)) {
+            S_StopChannel(cnum)
+            break
         }
+        cnum++
     }
     // None available
     if (cnum == numChannels) {
         // Look for lower priority
-        {
-            cnum = 0
-            while (cnum < numChannels) {
-                if (deref(channels_s_sound + cnum).sfxinfo.priority >= sfxinfo.priority) {
-                    break
-                }
-                cnum++
+        cnum = 0
+        while (cnum < numChannels) {
+            if (channels_s_sound[cnum].sfxinfo.priority >= sfxinfo.priority) {
+                break
             }
+            cnum++
         }
         if (cnum == numChannels) {
             // FUCK! No lower priority. Sorry, Charlie.
@@ -475,7 +459,7 @@ def S_getChannel(var origin : void?; var sfxinfo : sfxinfo_struct?) : int {
             S_StopChannel(cnum)
         }
     }
-    c = addr(deref(channels_s_sound + cnum))
+    c = addr(channels_s_sound[cnum])
     // channel is decided to be cnum.
     c.sfxinfo = sfxinfo
     c.origin = origin

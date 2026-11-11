@@ -10,14 +10,5 @@ struct ticcmd_t {
     chatchar, buttons : uint8
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<ticcmd_t>) == 8 && typeinfo alignof(type<ticcmd_t>) == 2, "ticcmd_t: clang lays it out as size 8, align 2")
-    static_assert(typeinfo offsetof < forwardmove > (type<ticcmd_t>) == 0, "ticcmd_t.forwardmove: clang puts it at 0")
-    static_assert(typeinfo offsetof < sidemove > (type<ticcmd_t>) == 1, "ticcmd_t.sidemove: clang puts it at 1")
-    static_assert(typeinfo offsetof < angleturn > (type<ticcmd_t>) == 2, "ticcmd_t.angleturn: clang puts it at 2")
-    static_assert(typeinfo offsetof < consistancy > (type<ticcmd_t>) == 4, "ticcmd_t.consistancy: clang puts it at 4")
-    static_assert(typeinfo offsetof < chatchar > (type<ticcmd_t>) == 6, "ticcmd_t.chatchar: clang puts it at 6")
-    static_assert(typeinfo offsetof < buttons > (type<ticcmd_t>) == 7, "ticcmd_t.buttons: clang puts it at 7")
-}
+include d_ticcmd_h.layout.das.inc
 

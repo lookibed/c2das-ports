@@ -8,10 +8,5 @@ struct cheatseq_t {
     sequence, p : uint8?
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<cheatseq_t>) == 16 && typeinfo alignof(type<cheatseq_t>) == 8, "cheatseq_t: clang lays it out as size 16, align 8")
-    static_assert(typeinfo offsetof < sequence > (type<cheatseq_t>) == 0, "cheatseq_t.sequence: clang puts it at 0")
-    static_assert(typeinfo offsetof < p > (type<cheatseq_t>) == 8, "cheatseq_t.p: clang puts it at 8")
-}
+include m_cheat_h.layout.das.inc
 

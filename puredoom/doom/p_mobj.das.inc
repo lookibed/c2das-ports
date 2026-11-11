@@ -140,9 +140,9 @@ def P_XYMovement(var mo : mobj_s?) {
             }
         }
     }
-    if (mo.momx > -STOPSPEED && mo.momx < STOPSPEED && mo.momy > -STOPSPEED && mo.momy < STOPSPEED && (!(player != null) || int(player.cmd.forwardmove) == 0 && int(player.cmd.sidemove) == 0)) {
+    if (mo.momx > -STOPSPEED && mo.momx < STOPSPEED && mo.momy > -STOPSPEED && mo.momy < STOPSPEED && (!(player != null) || (int(player.cmd.forwardmove) == 0 && int(player.cmd.sidemove) == 0))) {
         // if in a walking frame, stop moving
-        if (player != null && uint(int64(player.mo.state - addr(states[0])) - int64(int(statenum_t.S_PLAY_RUN1))) < uint(4)) {
+        if (player != null && uint(int64(player.mo.state - addr(states[0])) - int64(int(statenum_t.S_PLAY_RUN1))) < 4u) {
             P_SetMobjState(player.mo, statenum_t.S_PLAY)
         }
         mo.momx = 0
@@ -161,7 +161,7 @@ def P_ZMovement(var mo : mobj_s?) {
     // check for smooth step up
     if (mo.player != null && mo.z < mo.floorz) {
         mo.player.viewheight -= mo.floorz - mo.z
-        mo.player.deltaviewheight = VIEWHEIGHT - mo.player.viewheight >> 3
+        mo.player.deltaviewheight = (VIEWHEIGHT - mo.player.viewheight) >> 3
     }
     // adjust height
     mo.z += mo.momz
@@ -169,10 +169,10 @@ def P_ZMovement(var mo : mobj_s?) {
         // float down towards target if too close
         if (!((mo.flags & int(mobjflag_t.MF_SKULLFLY)) != 0) && !((mo.flags & int(mobjflag_t.MF_INFLOAT)) != 0)) {
             dist = P_AproxDistance(mo.x - mo.target.x, mo.y - mo.target.y)
-            delta = mo.target.z + (mo.height >> 1) - mo.z
+            delta = (mo.target.z + (mo.height >> 1)) - mo.z
             if (delta < 0 && dist < -(delta * 3)) {
                 mo.z -= FLOATSPEED
-            } elif (delta > 0 && dist < delta * 3) {
+            } elif (delta > 0 && dist < (delta * 3)) {
                 mo.z += FLOATSPEED
             }
         }
@@ -188,7 +188,7 @@ def P_ZMovement(var mo : mobj_s?) {
             mo.momz = -mo.momz
         }
         if (mo.momz < 0) {
-            if (mo.player != null && mo.momz < -(1 << 16) * 8) {
+            if (mo.player != null && mo.momz < -FRACUNIT * 8) {
                 // Squat down.
                 // Decrease viewheight for a moment
                 // after hitting the ground (hard),
@@ -205,9 +205,9 @@ def P_ZMovement(var mo : mobj_s?) {
         }
     } elif (!((mo.flags & int(mobjflag_t.MF_NOGRAVITY)) != 0)) {
         if (mo.momz == 0) {
-            mo.momz = -(1 << 16) * 2
+            mo.momz = -FRACUNIT * 2
         } else {
-            mo.momz -= 1 << 16
+            mo.momz -= FRACUNIT
         }
     }
     if (mo.z + mo.height > mo.ceilingz) {
@@ -215,9 +215,7 @@ def P_ZMovement(var mo : mobj_s?) {
         if (mo.momz > 0) {
             mo.momz = 0
         }
-        {
-            mo.z = mo.ceilingz - mo.height
-        }
+        mo.z = mo.ceilingz - mo.height
         if ((mo.flags & int(mobjflag_t.MF_SKULLFLY)) != 0) {
             // the skull slammed into something
             mo.momz = -mo.momz
@@ -258,9 +256,9 @@ def P_NightmareRespawn(var mobj : mobj_s?) {
     mthing = addr(mobj.spawnpoint)
     // spawn it
     if ((mobj.info.flags & int(mobjflag_t.MF_SPAWNCEILING)) != 0) {
-        z = 2147483647
+        z = DOOM_MAXINT
     } else {
-        z = int(2147483648u)
+        z = DOOM_MININT
     }
     // inherit attributes from deceased one
     mo = P_SpawnMobj(x, y, z, mobj._c_type)
@@ -286,7 +284,7 @@ def P_MobjThinker(var mobj : mobj_s?) {
             return
         }
     }
-    if (mobj.z != mobj.floorz || mobj.momz != 0) {
+    if ((mobj.z != mobj.floorz) || mobj.momz != 0) {
         P_ZMovement(mobj)
         // FIXME: decent NOP/0/Nil function pointer please.
         if (mobj.thinker._c_function.acv == reinterpret<function<() : void>>(uint64(-1))) {
@@ -359,9 +357,9 @@ def P_SpawnMobj(x : int; y : int; z : int; _c_type : mobjtype_t) : mobj_s? {
     P_SetThingPosition(mobj)
     mobj.floorz = mobj.subsector.sector.floorheight
     mobj.ceilingz = mobj.subsector.sector.ceilingheight
-    if (z == int(2147483648u)) {
+    if (z == DOOM_MININT) {
         mobj.z = mobj.floorz
-    } elif (z == 2147483647) {
+    } elif (z == DOOM_MAXINT) {
         mobj.z = mobj.ceilingz - mobj.info.height
     } else {
         mobj.z = z
@@ -374,13 +372,13 @@ def P_SpawnMobj(x : int; y : int; z : int; _c_type : mobjtype_t) : mobj_s? {
 // P_RemoveMobj
 [c_function]
 def P_RemoveMobj(var mobj : mobj_s?) {
-    if ((mobj.flags & int(mobjflag_t.MF_SPECIAL)) != 0 && !((mobj.flags & int(mobjflag_t.MF_DROPPED)) != 0) && mobj._c_type != mobjtype_t.MT_INV && mobj._c_type != mobjtype_t.MT_INS) {
+    if ((mobj.flags & int(mobjflag_t.MF_SPECIAL)) != 0 && !((mobj.flags & int(mobjflag_t.MF_DROPPED)) != 0) && (mobj._c_type != mobjtype_t.MT_INV) && (mobj._c_type != mobjtype_t.MT_INS)) {
         itemrespawnque[iquehead] = mobj.spawnpoint
         itemrespawntime[iquehead] = leveltime
-        iquehead = iquehead + 1 & ITEMQUESIZE - 1
+        iquehead = (iquehead + 1) & (ITEMQUESIZE - 1)
         // lose one off the end?
         if (iquehead == iquetail) {
-            iquetail = iquetail + 1 & ITEMQUESIZE - 1
+            iquetail = (iquetail + 1) & (ITEMQUESIZE - 1)
         }
     }
     // unlink from sector and block lists
@@ -402,7 +400,7 @@ def P_RespawnSpecials {
     var mthing : mapthing_t?
     var i : int
     // only respawn items in deathmatch
-    if (uint(int(deathmatch)) != uint(2)) {
+    if (uint(int(deathmatch)) != 2u) {
         return
     }
     // nothing left to respawn?
@@ -421,26 +419,24 @@ def P_RespawnSpecials {
     mo = P_SpawnMobj(x, y, ss.sector.floorheight, mobjtype_t.MT_IFOG)
     S_StartSound(reinterpret<void?>(mo), int(sfxenum_t.sfx_itmbk))
     // find which type to spawn
-    {
-        i = 0
-        while (i < int(mobjtype_t.NUMMOBJTYPES)) {
-            if (int(mthing._c_type) == mobjinfo[i].doomednum) {
-                break
-            }
-            i++
+    i = 0
+    while (i < int(mobjtype_t.NUMMOBJTYPES)) {
+        if (int(mthing._c_type) == mobjinfo[i].doomednum) {
+            break
         }
+        i++
     }
     // spawn it
     if ((mobjinfo[i].flags & int(mobjflag_t.MF_SPAWNCEILING)) != 0) {
-        z = 2147483647
+        z = DOOM_MAXINT
     } else {
-        z = int(2147483648u)
+        z = DOOM_MININT
     }
     mo = P_SpawnMobj(x, y, z, enum_from_int(type<mobjtype_t>, i))
     mo.spawnpoint = deref(mthing)
     mo.angle = uint(ANG45 * (int(mthing.angle) / 45))
     // pull it from the que
-    iquetail = iquetail + 1 & ITEMQUESIZE - 1
+    iquetail = (iquetail + 1) & (ITEMQUESIZE - 1)
 }
 
 // P_SpawnPlayer
@@ -464,11 +460,11 @@ def P_SpawnPlayer(var mthing : mapthing_t?) {
     }
     x = int(mthing.x) << FRACBITS
     y = int(mthing.y) << FRACBITS
-    z = int(2147483648u)
+    z = DOOM_MININT
     mobj = P_SpawnMobj(x, y, z, mobjtype_t.MT_PLAYER)
     // set color translations for player sprites
     if (int(mthing._c_type) > 1) {
-        mobj.flags |= int(mthing._c_type) - 1 << int(mobjflag_t.MF_TRANSSHIFT)
+        mobj.flags |= (int(mthing._c_type) - 1) << int(mobjflag_t.MF_TRANSSHIFT)
     }
     mobj.angle = uint(ANG45 * (int(mthing.angle) / 45))
     mobj.player = p
@@ -535,32 +531,30 @@ def P_SpawnMapThing(var mthing : mapthing_t?) {
     } elif (gameskill == skill_t.sk_nightmare) {
         bit = 4
     } else {
-        bit = 1 << int(uint(int(gameskill)) - uint(1))
+        bit = 1 << int(uint(int(gameskill)) - 1u)
     }
     if (!((int(mthing._c_options) & bit) != 0)) {
         return
     }
     // find which type to spawn
-    {
-        i = 0
-        while (i < int(mobjtype_t.NUMMOBJTYPES)) {
-            if (int(mthing._c_type) == mobjinfo[i].doomednum) {
-                break
-            }
-            i++
+    i = 0
+    while (i < int(mobjtype_t.NUMMOBJTYPES)) {
+        if (int(mthing._c_type) == mobjinfo[i].doomednum) {
+            break
         }
+        i++
     }
     if (i == int(mobjtype_t.NUMMOBJTYPES)) {
         // I_Error("Error: P_SpawnMapThing: Unknown type %i at (%i, %i)",
         // mthing->type,
         // mthing->x, mthing->y);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: P_SpawnMapThing: Unknown type "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: P_SpawnMapThing: Unknown type "))
         doom_concat(addr(error_buf[0]), doom_itoa(int(mthing._c_type), 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" at ("))
+        doom_concat(addr(error_buf[0]), cstr(" at ("))
         doom_concat(addr(error_buf[0]), doom_itoa(int(mthing.x), 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(", "))
+        doom_concat(addr(error_buf[0]), cstr(", "))
         doom_concat(addr(error_buf[0]), doom_itoa(int(mthing.y), 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(")"))
+        doom_concat(addr(error_buf[0]), cstr(")"))
         I_Error(addr(error_buf[0]))
     }
     // don't spawn keycards and players in deathmatch
@@ -575,14 +569,14 @@ def P_SpawnMapThing(var mthing : mapthing_t?) {
     x = int(mthing.x) << FRACBITS
     y = int(mthing.y) << FRACBITS
     if ((mobjinfo[i].flags & int(mobjflag_t.MF_SPAWNCEILING)) != 0) {
-        z = 2147483647
+        z = DOOM_MAXINT
     } else {
-        z = int(2147483648u)
+        z = DOOM_MININT
     }
     mobj = P_SpawnMobj(x, y, z, enum_from_int(type<mobjtype_t>, i))
     mobj.spawnpoint = deref(mthing)
     if (mobj.tics > 0) {
-        mobj.tics = 1 + P_Random() % mobj.tics
+        mobj.tics = 1 + (P_Random() % mobj.tics)
     }
     if ((mobj.flags & int(mobjflag_t.MF_COUNTKILL)) != 0) {
         totalkills++
@@ -599,7 +593,7 @@ def P_SpawnMapThing(var mthing : mapthing_t?) {
 // P_SpawnPuff
 def P_SpawnPuff(x : int; y : int; var z : int) {
     var th : mobj_s?
-    z += P_Random() - P_Random() << 10
+    z += (P_Random() - P_Random()) << 10
     th = P_SpawnMobj(x, y, z, mobjtype_t.MT_PUFF)
     th.momz = FRACUNIT
     th.tics -= P_Random() & 3
@@ -615,7 +609,7 @@ def P_SpawnPuff(x : int; y : int; var z : int) {
 // P_SpawnBlood
 def P_SpawnBlood(x : int; y : int; var z : int; damage : int) {
     var th : mobj_s?
-    z += P_Random() - P_Random() << 10
+    z += (P_Random() - P_Random()) << 10
     th = P_SpawnMobj(x, y, z, mobjtype_t.MT_BLOOD)
     th.momz = FRACUNIT * 2
     th.tics -= P_Random() & 3
@@ -662,11 +656,11 @@ def P_SpawnMissile(var source : mobj_s?; var dest : mobj_s?; _c_type : mobjtype_
     an = R_PointToAngle2(source.x, source.y, dest.x, dest.y)
     // fuzzy player
     if ((dest.flags & int(mobjflag_t.MF_SHADOW)) != 0) {
-        an += uint(P_Random() - P_Random() << 20)
+        an += uint((P_Random() - P_Random()) << 20)
     }
     th.angle = an
-    an >>= 19u
-    th.momx = FixedMul(th.info.speed, deref(finecosine + an))
+    an >>= uint(ANGLETOFINESHIFT)
+    th.momx = FixedMul(th.info.speed, finecosine[an])
     th.momy = FixedMul(th.info.speed, finesine[an])
     dist = P_AproxDistance(dest.x - source.x, dest.y - source.y)
     dist = dist / th.info.speed
@@ -712,8 +706,8 @@ def P_SpawnPlayerMissile(var source : mobj_s?; _c_type : mobjtype_t) {
     }
     th.target = source
     th.angle = an
-    th.momx = FixedMul(th.info.speed, deref(finecosine + (an >> 19u)))
-    th.momy = FixedMul(th.info.speed, finesine[an >> 19u])
+    th.momx = FixedMul(th.info.speed, finecosine[an >> uint(ANGLETOFINESHIFT)])
+    th.momy = FixedMul(th.info.speed, finesine[an >> uint(ANGLETOFINESHIFT)])
     th.momz = FixedMul(th.info.speed, slope)
     P_CheckMissileSpawn(th)
 }

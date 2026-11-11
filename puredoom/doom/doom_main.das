@@ -8,6 +8,7 @@ require DOOM_cluster
 require c_runtime/c_args
 require c_runtime/c_exit
 require c_runtime/c_function
+require c_runtime/cstr
 require c_runtime/printf
 require c_runtime/setjmp
 require c_types
@@ -18,8 +19,8 @@ def private c2das_dialect {
     c_long_bits = 64
 }
 
-var private virtual_usec : int64 = int64(0)
-var private work_started : int64 = int64(-1)
+var private virtual_usec : int64 = 0l
+var private work_started : int64 = -1l
 var private return_from_main : int = 0
 var private exit_code : int = 0
 var private leave_main : CJmpBuf
@@ -28,15 +29,15 @@ let private MAX_UPDATES = 2000000
 
 [c_function]
 def private virtual_gettime(var sec : int?; var usec : int?) {
-    deref(sec) = int(virtual_usec / int64(1000000))
-    deref(usec) = int(virtual_usec % int64(1000000))
+    deref(sec) = int(virtual_usec / 1000000l)
+    deref(usec) = int(virtual_usec % 1000000l)
 }
 
 // the playback's line: the tics Doom has run and the CPU seconds since the update loop started
 [c_function]
 def private report_work {
-    if (work_started >= int64(0)) {
-        printf(reinterpret<uint8?>("host: timed %d gametics in %.6f s\n"), gametic, double(crt::clock() - work_started) / double(int64(1000000)))
+    if (work_started >= 0l) {
+        printf(cstr("host: timed %d gametics in %.6f s\n"), gametic, double(crt::clock() - work_started) / double(1000000l))
     }
 }
 
@@ -65,11 +66,11 @@ def private play(argc : int; var argv : uint8 ??; tic_cap : int) {
             doom_force_update()
             virtual_usec += int64(1000000 / 35)
             if (tic_cap > 0 && gametic >= tic_cap) {
-                printf(reinterpret<uint8?>("host: stopped after %d tics\n"), gametic)
+                printf(cstr("host: stopped after %d tics\n"), gametic)
                 flush_and_exit(0)
             }
         }
-        printf(reinterpret<uint8?>("host: Doom did not exit within %d updates\n"), MAX_UPDATES)
+        printf(cstr("host: Doom did not exit within %d updates\n"), MAX_UPDATES)
         exit_code = 2
     } recover {
         if (c_jmp_target != addr(leave_main)) {
@@ -83,10 +84,10 @@ def private play(argc : int; var argv : uint8 ??; tic_cap : int) {
 def c_main(argc : int; var argv : uint8 ??) : int {
     var tic_cap : int = 0
     for (i in range(1, argc)) {
-        if (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-tics")) == 0 && i + 1 < argc) {
-            tic_cap = crt::atoi(deref(argv + (i + 1)))
+        if (crt::strcmp(argv[i], cstr("-tics")) == 0 && i + 1 < argc) {
+            tic_cap = crt::atoi(argv[i + 1])
         }
-        if (crt::strcmp(deref(argv + i), reinterpret<uint8?>("-return-from-main")) == 0) {
+        if (crt::strcmp(argv[i], cstr("-return-from-main")) == 0) {
             return_from_main = 1
         }
     }

@@ -16,12 +16,5 @@ struct pspdef_t {
     tics, sx, sy : int
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<pspdef_t>) == 24 && typeinfo alignof(type<pspdef_t>) == 8, "pspdef_t: clang lays it out as size 24, align 8")
-    static_assert(typeinfo offsetof < state > (type<pspdef_t>) == 0, "pspdef_t.state: clang puts it at 0")
-    static_assert(typeinfo offsetof < tics > (type<pspdef_t>) == 8, "pspdef_t.tics: clang puts it at 8")
-    static_assert(typeinfo offsetof < sx > (type<pspdef_t>) == 12, "pspdef_t.sx: clang puts it at 12")
-    static_assert(typeinfo offsetof < sy > (type<pspdef_t>) == 16, "pspdef_t.sy: clang puts it at 16")
-}
+include p_pspr_h.layout.das.inc
 

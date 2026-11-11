@@ -20,9 +20,8 @@ var doom_gettime : function<(var a0 : int?; var a1 : int?) : void> = default<fun
 var doom_exit : function<(a0 : int) : void> = default<function<(a0 : int) : void>>
 var doom_getenv : function<(var a0 : uint8?) : uint8?> = default<function<(var a0 : uint8?) : uint8?>>
 
-[c_function]
 def private doom_print_impl(var str : uint8?) {
-    printf(reinterpret<uint8?>("%s"), str)
+    printf(cstr("%s"), str)
 }
 
 [c_function]
@@ -47,12 +46,12 @@ def doom_close_impl(var handle : void?) {
 
 [c_function]
 def doom_read_impl(var handle : void?; var buf : void?; count : int) : int {
-    return int(crt::fread(buf, uint64(1), uint64(count), reinterpret<void?>(reinterpret<_IO_FILE?>(handle))))
+    return int(crt::fread(buf, 1ul, uint64(count), reinterpret<void?>(reinterpret<_IO_FILE?>(handle))))
 }
 
 [c_function]
 def doom_write_impl(var handle : void?; var buf : void?; count : int) : int {
-    return int(crt::fwrite(buf, uint64(1), uint64(count), reinterpret<void?>(reinterpret<_IO_FILE?>(handle))))
+    return int(crt::fwrite(buf, 1ul, uint64(count), reinterpret<void?>(reinterpret<_IO_FILE?>(handle))))
 }
 
 [c_function]
@@ -162,19 +161,17 @@ def doom_strcpy(var dst : uint8?; var src : uint8?) : uint8? {
 [c_function]
 def doom_strncpy(var dst : uint8?; var src : uint8?; num : int) : uint8? {
     var i : int = 0
-    {
-        while (i < num) {
-            if (!(deref(src + i) != 0)) {
-                break
-            }
-            deref(dst + i) = deref(src + i)
-            i++
+    while (i < num) {
+        if (!(src[i] != 0)) {
+            break
         }
+        dst[i] = src[i]
+        i++
     }
     while (i < num) {
         let _t0 = i
         i++
-        deref(dst + _t0) = uint8('\0')
+        dst[_t0] = uint8('\0')
     }
     return dst
 }
@@ -332,7 +329,7 @@ def doom_itoa(k : int; radix : int) : uint8? {
     if (radix == 10) {
         while (i != 0) {
             idx--
-            itoa_buf[idx] = uint8('0' + i % 10)
+            itoa_buf[idx] = uint8('0' + (i % 10))
             i /= 10
         }
     } else {
@@ -372,15 +369,15 @@ def doom_ptoa(var p : void?) : uint8? {
     idx++
     itoa_buf[_t1] = uint8('x')
     while (i != 0) {
-        var k : int = int(i & uint64(15))
+        var k : int = int(i & 15ul)
         if (k >= 10) {
             let _t2 = idx
             idx++
-            itoa_buf[_t2] = uint8(uint64('A') + ((i & uint64(15)) - uint64(10)))
+            itoa_buf[_t2] = uint8(uint64('A') + ((i & 15ul) - 10ul))
         } else {
             let _t3 = idx
             idx++
-            itoa_buf[_t3] = uint8(uint64('0') + (i & uint64(15)))
+            itoa_buf[_t3] = uint8(uint64('0') + (i & 15ul))
         }
         i >>= 4ul
     }
@@ -550,47 +547,41 @@ def doom_get_framebuffer(channels : int) : uint8? {
             y = SCREENHEIGHT / 2 - 8
         }
         for (i1 in range(2)) {
-            deref(screen_buffer + (SCREENWIDTH / 2 - 2 - i1 + y * SCREENWIDTH)) = uint8(4)
-            deref(screen_buffer + (SCREENWIDTH / 2 + 2 + i1 + y * SCREENWIDTH)) = uint8(4)
+            screen_buffer[SCREENWIDTH / 2 - 2 - i1 + y * SCREENWIDTH] = 4u8
+            screen_buffer[SCREENWIDTH / 2 + 2 + i1 + y * SCREENWIDTH] = 4u8
         }
-        {
-            i = 0
-            while (i < 2) {
-                deref(screen_buffer + (SCREENWIDTH / 2 + (y - 2 - i) * SCREENWIDTH)) = uint8(4)
-                deref(screen_buffer + (SCREENWIDTH / 2 + (y + 2 + i) * SCREENWIDTH)) = uint8(4)
-                i++
-            }
+        i = 0
+        while (i < 2) {
+            screen_buffer[SCREENWIDTH / 2 + (y - 2 - i) * SCREENWIDTH] = 4u8
+            screen_buffer[SCREENWIDTH / 2 + (y + 2 + i) * SCREENWIDTH] = 4u8
+            i++
         }
     }
     if (channels == 1) {
         return screen_buffer
     } elif (channels == 3) {
-        {
-            i = 0
-            len = SCREENWIDTH * SCREENHEIGHT
-            while (i < len) {
-                var k : int = i * 3
-                var kpal : int = int(deref(screen_buffer + i)) * 3
-                deref(final_screen_buffer + (k + 0)) = screen_palette[kpal + 0]
-                deref(final_screen_buffer + (k + 1)) = screen_palette[kpal + 1]
-                deref(final_screen_buffer + (k + 2)) = screen_palette[kpal + 2]
-                i++
-            }
+        i = 0
+        len = SCREENWIDTH * SCREENHEIGHT
+        while (i < len) {
+            var k : int = i * 3
+            var kpal : int = int(screen_buffer[i]) * 3
+            final_screen_buffer[k + 0] = screen_palette[kpal + 0]
+            final_screen_buffer[k + 1] = screen_palette[kpal + 1]
+            final_screen_buffer[k + 2] = screen_palette[kpal + 2]
+            i++
         }
         return final_screen_buffer
     } elif (channels == 4) {
-        {
-            i = 0
-            len = SCREENWIDTH * SCREENHEIGHT
-            while (i < len) {
-                var k : int = i * 4
-                var kpal : int = int(deref(screen_buffer + i)) * 3
-                deref(final_screen_buffer + (k + 0)) = screen_palette[kpal + 0]
-                deref(final_screen_buffer + (k + 1)) = screen_palette[kpal + 1]
-                deref(final_screen_buffer + (k + 2)) = screen_palette[kpal + 2]
-                deref(final_screen_buffer + (k + 3)) = uint8(255)
-                i++
-            }
+        i = 0
+        len = SCREENWIDTH * SCREENHEIGHT
+        while (i < len) {
+            var k : int = i * 4
+            var kpal : int = int(screen_buffer[i]) * 3
+            final_screen_buffer[k + 0] = screen_palette[kpal + 0]
+            final_screen_buffer[k + 1] = screen_palette[kpal + 1]
+            final_screen_buffer[k + 2] = screen_palette[kpal + 2]
+            final_screen_buffer[k + 3] = 255u8
+            i++
         }
         return final_screen_buffer
     } else {

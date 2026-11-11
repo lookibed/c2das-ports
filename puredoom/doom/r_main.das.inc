@@ -41,17 +41,17 @@ var transcolfunc : function<() : void>
 // so that it encloses a given point.
 [c_function]
 def R_AddPointToBox(x : int; y : int; var box : int?) {
-    if (x < deref(box + int(anon_787.BOXLEFT))) {
-        deref(box + int(anon_787.BOXLEFT)) = x
+    if (x < box[int(anon_787.BOXLEFT)]) {
+        box[int(anon_787.BOXLEFT)] = x
     }
-    if (x > deref(box + int(anon_787.BOXRIGHT))) {
-        deref(box + int(anon_787.BOXRIGHT)) = x
+    if (x > box[int(anon_787.BOXRIGHT)]) {
+        box[int(anon_787.BOXRIGHT)] = x
     }
-    if (y < deref(box + int(anon_787.BOXBOTTOM))) {
-        deref(box + int(anon_787.BOXBOTTOM)) = y
+    if (y < box[int(anon_787.BOXBOTTOM)]) {
+        box[int(anon_787.BOXBOTTOM)] = y
     }
-    if (y > deref(box + int(anon_787.BOXTOP))) {
-        deref(box + int(anon_787.BOXTOP)) = y
+    if (y > box[int(anon_787.BOXTOP)]) {
+        box[int(anon_787.BOXTOP)] = y
     }
 }
 
@@ -144,8 +144,8 @@ def R_PointOnSegSide(x : int; y : int; var line : seg_t?) : int {
 def R_PointToAngle(var x : int; var y : int) : uint {
     x -= viewx
     y -= viewy
-    if (!(x != 0) && !(y != 0)) {
-        return uint(0)
+    if ((!(x != 0)) && (!(y != 0))) {
+        return 0u
     }
     if (x >= 0) {
         // x >=0
@@ -176,7 +176,7 @@ def R_PointToAngle(var x : int; var y : int) : uint {
             // y>= 0
             if (x > y) {
                 // octant 3
-                return ANG180 - uint(1) - tantoangle[SlopeDiv(uint(y), uint(x))]
+                return ANG180 - 1u - tantoangle[SlopeDiv(uint(y), uint(x))]
             } else {
                 // octant 2
                 return uint(ANG90) + tantoangle[SlopeDiv(uint(x), uint(y))]
@@ -189,11 +189,11 @@ def R_PointToAngle(var x : int; var y : int) : uint {
                 return ANG180 + tantoangle[SlopeDiv(uint(y), uint(x))]
             } else {
                 // octant 5
-                return ANG270 - uint(1) - tantoangle[SlopeDiv(uint(x), uint(y))]
+                return ANG270 - 1u - tantoangle[SlopeDiv(uint(x), uint(y))]
             }
         }
     }
-    return uint(0)
+    return 0u
 }
 
 def R_PointToAngle2(x1 : int; y1 : int; x2 : int; y2 : int) : uint {
@@ -215,7 +215,7 @@ def R_PointToDist(x : int; y : int) : int {
         dx = dy
         dy = temp
     }
-    angle = int(tantoangle[FixedDiv(dy, dx) >> DBITS] + uint(ANG90) >> 19u)
+    angle = int((tantoangle[FixedDiv(dy, dx) >> DBITS] + uint(ANG90)) >> uint(ANGLETOFINESHIFT))
     // use as cosine
     dist = FixedDiv(dx, finesine[angle])
     return dist
@@ -243,8 +243,8 @@ def R_ScaleFromGlobalAngle(visangle : uint) : int {
     // both sines are allways positive
     // [c2das] An angle past ANG180 makes the int index negative, and the native build reads
     // finetangent, which tables.c lays right before finesine: that read, spelled out.
-    sinea = anglea >> ANGLETOFINESHIFT < 0 ? finetangent[FINEANGLES / 2 + (anglea >> ANGLETOFINESHIFT)] : finesine[anglea >> ANGLETOFINESHIFT]
-    sineb = angleb >> ANGLETOFINESHIFT < 0 ? finetangent[FINEANGLES / 2 + (angleb >> ANGLETOFINESHIFT)] : finesine[angleb >> ANGLETOFINESHIFT]
+    sinea = (anglea >> ANGLETOFINESHIFT) < 0 ? finetangent[FINEANGLES / 2 + (anglea >> ANGLETOFINESHIFT)] : finesine[anglea >> ANGLETOFINESHIFT]
+    sineb = (angleb >> ANGLETOFINESHIFT) < 0 ? finetangent[FINEANGLES / 2 + (angleb >> ANGLETOFINESHIFT)] : finesine[angleb >> ANGLETOFINESHIFT]
     num = FixedMul(projection, sineb) << detailshift
     den = FixedMul(rw_distance, sinea)
     if (den > num >> 16) {
@@ -276,53 +276,47 @@ def R_InitTextureMapping {
     // Calc focallength
     // so FIELDOFVIEW angles covers SCREENWIDTH.
     focallength = FixedDiv(centerxfrac, finetangent[FINEANGLES / 4 + FIELDOFVIEW / 2])
-    {
-        i = 0
-        while (i < FINEANGLES / 2) {
-            if (finetangent[i] > FRACUNIT * 2) {
+    i = 0
+    while (i < FINEANGLES / 2) {
+        if (finetangent[i] > FRACUNIT * 2) {
+            t = -1
+        } elif (finetangent[i] < -FRACUNIT * 2) {
+            t = viewwidth + 1
+        } else {
+            t = FixedMul(finetangent[i], focallength)
+            t = (centerxfrac - t + FRACUNIT - 1) >> FRACBITS
+            if (t < -1) {
                 t = -1
-            } elif (finetangent[i] < -FRACUNIT * 2) {
+            } elif (t > viewwidth + 1) {
                 t = viewwidth + 1
-            } else {
-                t = FixedMul(finetangent[i], focallength)
-                t = centerxfrac - t + FRACUNIT - 1 >> FRACBITS
-                if (t < -1) {
-                    t = -1
-                } elif (t > viewwidth + 1) {
-                    t = viewwidth + 1
-                }
             }
-            viewangletox[i] = t
-            i++
         }
+        viewangletox[i] = t
+        i++
     }
     // Scan viewangletox[] to generate xtoviewangle[]:
     // xtoviewangle will give the smallest view angle
     // that maps to x.
-    {
-        x = 0
-        while (x <= viewwidth) {
-            i = 0
-            while (viewangletox[i] > x) {
-                i++
-            }
-            xtoviewangle[x] = uint((i << ANGLETOFINESHIFT) - ANG90)
-            x++
-        }
-    }
-    // Take out the fencepost cases from viewangletox.
-    {
+    x = 0
+    while (x <= viewwidth) {
         i = 0
-        while (i < FINEANGLES / 2) {
-            t = FixedMul(finetangent[i], focallength)
-            t = centerx - t
-            if (viewangletox[i] == -1) {
-                viewangletox[i] = 0
-            } elif (viewangletox[i] == viewwidth + 1) {
-                viewangletox[i] = viewwidth
-            }
+        while (viewangletox[i] > x) {
             i++
         }
+        xtoviewangle[x] = uint((i << ANGLETOFINESHIFT) - ANG90)
+        x++
+    }
+    // Take out the fencepost cases from viewangletox.
+    i = 0
+    while (i < FINEANGLES / 2) {
+        t = FixedMul(finetangent[i], focallength)
+        t = centerx - t
+        if (viewangletox[i] == -1) {
+            viewangletox[i] = 0
+        } elif (viewangletox[i] == viewwidth + 1) {
+            viewangletox[i] = viewwidth
+        }
+        i++
     }
     clipangle = xtoviewangle[0]
 }
@@ -335,9 +329,9 @@ def R_InitLightTables {
     // Calculate the light levels to use
     // for each level / distance combination.
     for (i in range(LIGHTLEVELS)) {
-        startmap = (LIGHTLEVELS - 1 - i) * 2 * NUMCOLORMAPS / LIGHTLEVELS
+        startmap = ((LIGHTLEVELS - 1 - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS
         for (j in range(MAXLIGHTZ)) {
-            scale = FixedDiv(SCREENWIDTH / 2 * FRACUNIT, j + 1 << LIGHTZSHIFT)
+            scale = FixedDiv(SCREENWIDTH / 2 * FRACUNIT, (j + 1) << LIGHTZSHIFT)
             scale >>= LIGHTSCALESHIFT
             level = startmap - scale / DISTMAP
             if (level < 0) {
@@ -371,7 +365,7 @@ def R_ExecuteSetViewSize {
         viewheight = SCREENHEIGHT
     } else {
         scaledviewwidth = setblocks * 32
-        viewheight = setblocks * 168 / 10 & ~7
+        viewheight = (setblocks * 168 / 10) & ~7
     }
     detailshift = setdetail
     viewwidth = scaledviewwidth >> detailshift
@@ -399,35 +393,29 @@ def R_ExecuteSetViewSize {
     pspritescale = FRACUNIT * viewwidth / SCREENWIDTH
     pspriteiscale = FRACUNIT * SCREENWIDTH / viewwidth
     // thing clipping
-    {
-        i = 0
-        while (i < viewwidth) {
-            screenheightarray[i] = int16(viewheight)
-            i++
-        }
+    i = 0
+    while (i < viewwidth) {
+        screenheightarray[i] = int16(viewheight)
+        i++
     }
     // planes
-    {
-        i = 0
-        while (i < viewheight) {
-            dy = (i - viewheight / 2 << FRACBITS) + FRACUNIT / 2
-            dy = dy < 0 ? -dy : dy
-            yslope[i] = FixedDiv((viewwidth << detailshift) / 2 * FRACUNIT, dy)
-            i++
-        }
+    i = 0
+    while (i < viewheight) {
+        dy = ((i - viewheight / 2) << FRACBITS) + FRACUNIT / 2
+        dy = dy < 0 ? -dy : dy
+        yslope[i] = FixedDiv((viewwidth << detailshift) / 2 * FRACUNIT, dy)
+        i++
     }
-    {
-        i = 0
-        while (i < viewwidth) {
-            cosadj = deref(finecosine + (xtoviewangle[i] >> 19u)) < 0 ? -deref(finecosine + (xtoviewangle[i] >> 19u)) : deref(finecosine + (xtoviewangle[i] >> 19u))
-            distscale[i] = FixedDiv(FRACUNIT, cosadj)
-            i++
-        }
+    i = 0
+    while (i < viewwidth) {
+        cosadj = finecosine[xtoviewangle[i] >> uint(ANGLETOFINESHIFT)] < 0 ? -finecosine[xtoviewangle[i] >> uint(ANGLETOFINESHIFT)] : finecosine[xtoviewangle[i] >> uint(ANGLETOFINESHIFT)]
+        distscale[i] = FixedDiv(FRACUNIT, cosadj)
+        i++
     }
     // Calculate the light levels to use
     // for each level / scale combination.
     for (i1 in range(LIGHTLEVELS)) {
-        startmap = (LIGHTLEVELS - 1 - i1) * 2 * NUMCOLORMAPS / LIGHTLEVELS
+        startmap = ((LIGHTLEVELS - 1 - i1) * 2) * NUMCOLORMAPS / LIGHTLEVELS
         for (j in range(MAXLIGHTSCALE)) {
             level = startmap - j * SCREENWIDTH / (viewwidth << detailshift) / DISTMAP
             if (level < 0) {
@@ -442,24 +430,23 @@ def R_ExecuteSetViewSize {
 }
 
 // R_Init
-[c_function]
 def R_Init {
     R_InitData()
-    invoke(doom_print, reinterpret<uint8?>("\nR_InitData"))
+    invoke(doom_print, cstr("\nR_InitData"))
     R_InitPointToAngle()
-    invoke(doom_print, reinterpret<uint8?>("\nR_InitPointToAngle"))
+    invoke(doom_print, cstr("\nR_InitPointToAngle"))
     R_InitTables()
     // viewwidth / viewheight / detailLevel are set by the defaults
-    invoke(doom_print, reinterpret<uint8?>("\nR_InitTables"))
+    invoke(doom_print, cstr("\nR_InitTables"))
     R_SetViewSize(screenblocks, detailLevel)
     R_InitPlanes()
-    invoke(doom_print, reinterpret<uint8?>("\nR_InitPlanes"))
+    invoke(doom_print, cstr("\nR_InitPlanes"))
     R_InitLightTables()
-    invoke(doom_print, reinterpret<uint8?>("\nR_InitLightTables"))
+    invoke(doom_print, cstr("\nR_InitLightTables"))
     R_InitSkyMap()
-    invoke(doom_print, reinterpret<uint8?>("\nR_InitSkyMap"))
+    invoke(doom_print, cstr("\nR_InitSkyMap"))
     R_InitTranslationTables()
-    invoke(doom_print, reinterpret<uint8?>("\nR_InitTranslationsTables"))
+    invoke(doom_print, cstr("\nR_InitTranslationsTables"))
     framecount = 0
 }
 
@@ -475,11 +462,11 @@ def R_PointInSubsector(x : int; y : int) : subsector_s? {
     }
     nodenum = numnodes - 1
     while (!((nodenum & NF_SUBSECTOR) != 0)) {
-        node = addr(deref(nodes + nodenum))
+        node = addr(nodes[nodenum])
         side = R_PointOnSide(x, y, node)
         nodenum = int(node.children[side])
     }
-    return addr(deref(subsectors + (nodenum & ~NF_SUBSECTOR)))
+    return addr(subsectors[nodenum & ~NF_SUBSECTOR])
 }
 
 // R_SetupFrame
@@ -491,8 +478,8 @@ def R_SetupFrame(var player : player_s?) {
     viewangle = player.mo.angle + uint(viewangleoffset)
     extralight = player.extralight
     viewz = player.viewz
-    viewsin = finesine[viewangle >> 19u]
-    viewcos = deref(finecosine + (viewangle >> 19u))
+    viewsin = finesine[viewangle >> uint(ANGLETOFINESHIFT)]
+    viewcos = finecosine[viewangle >> uint(ANGLETOFINESHIFT)]
     sscount = 0
     if (player.fixedcolormap != 0) {
         fixedcolormap = colormaps + uint64(player.fixedcolormap * 256) * uint64(typeinfo sizeof(type<uint8>))

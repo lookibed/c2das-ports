@@ -61,7 +61,7 @@ var private victims : uint8?
 var private total : uint8?
 var private star : uint8?
 var private bstar : uint8?
-var private wi_stuff_p : uint8? [4]
+var private p : uint8? [4]
 var private bp : uint8? [4]
 var private lnames : uint8 ??
 var private snl_pointeron : doom_boolean = doom_boolean._c_false
@@ -90,9 +90,9 @@ def WI_Responder(var ev : event_t?) : doom_boolean {
 def WI_drawLF {
     var y : int = WI_TITLEY
     // draw <LevelName>
-    V_DrawPatch((SCREENWIDTH - int(read_patch_t_width(deref(lnames + wbs.last), 0))) / 2, y, FB, deref(lnames + wbs.last))
+    V_DrawPatch((SCREENWIDTH - int(read_patch_t_width(lnames[wbs.last], 0))) / 2, y, FB, lnames[wbs.last])
     // draw "Finished!"
-    y += 5 * int(read_patch_t_height(deref(lnames + wbs.last), 0)) / 4
+    y += (5 * int(read_patch_t_height(lnames[wbs.last], 0))) / 4
     V_DrawPatch((SCREENWIDTH - int(read_patch_t_width(finished, 0))) / 2, y, FB, finished)
 }
 
@@ -103,8 +103,8 @@ def WI_drawEL {
     // draw "Entering"
     V_DrawPatch((SCREENWIDTH - int(read_patch_t_width(entering, 0))) / 2, y, FB, entering)
     // draw level
-    y += 5 * int(read_patch_t_height(deref(lnames + wbs.next), 0)) / 4
-    V_DrawPatch((SCREENWIDTH - int(read_patch_t_width(deref(lnames + wbs.next), 0))) / 2, y, FB, deref(lnames + wbs.next))
+    y += (5 * int(read_patch_t_height(lnames[wbs.next], 0))) / 4
+    V_DrawPatch((SCREENWIDTH - int(read_patch_t_width(lnames[wbs.next], 0))) / 2, y, FB, lnames[wbs.next])
 }
 
 [c_function]
@@ -117,10 +117,10 @@ def WI_drawOnLnode(n : int; var c : uint8 ??) {
     var fits : doom_boolean = doom_boolean._c_false
     i = 0
     while (true) {
-        left = lnodes[wbs.epsd][n].x - int(read_patch_t_leftoffset(deref(c + i), 0))
-        top = lnodes[wbs.epsd][n].y - int(read_patch_t_topoffset(deref(c + i), 0))
-        right = left + int(read_patch_t_width(deref(c + i), 0))
-        bottom = top + int(read_patch_t_height(deref(c + i), 0))
+        left = lnodes[wbs.epsd][n].x - int(read_patch_t_leftoffset(c[i], 0))
+        top = lnodes[wbs.epsd][n].y - int(read_patch_t_topoffset(c[i], 0))
+        right = left + int(read_patch_t_width(c[i], 0))
+        bottom = top + int(read_patch_t_height(c[i], 0))
         if (left >= 0 && right < SCREENWIDTH && top >= 0 && bottom < SCREENHEIGHT) {
             fits = doom_boolean._c_true
         } else {
@@ -131,11 +131,11 @@ def WI_drawOnLnode(n : int; var c : uint8 ??) {
         }
     }
     if (uint(int(fits)) != 0 && i < 2) {
-        V_DrawPatch(lnodes[wbs.epsd][n].x, lnodes[wbs.epsd][n].y, FB, deref(c + i))
+        V_DrawPatch(lnodes[wbs.epsd][n].x, lnodes[wbs.epsd][n].y, FB, c[i])
     } else {
         // DEBUG
         // doom_print("Could not place patch on level %d", n + 1);
-        invoke(doom_print, reinterpret<uint8?>("Could not place patch on level "))
+        invoke(doom_print, cstr("Could not place patch on level "))
         invoke(doom_print, doom_itoa(n + 1, 10))
     }
 }
@@ -150,22 +150,20 @@ def WI_initAnimatedBack {
     if (wbs.epsd > 2) {
         return
     }
-    {
-        i = 0
-        while (i < NUMANIMS[wbs.epsd]) {
-            a = addr(deref(anims_wi_stuff[wbs.epsd] + i))
-            // init variables
-            a.ctr = -1
-            // specify the next time to draw it
-            if (a._c_type == animenum_t.ANIM_ALWAYS) {
-                a.nexttic = bcnt + 1 + M_Random() % a.period
-            } elif (a._c_type == animenum_t.ANIM_RANDOM) {
-                a.nexttic = bcnt + 1 + a.data2 + M_Random() % a.data1
-            } elif (a._c_type == animenum_t.ANIM_LEVEL) {
-                a.nexttic = bcnt + 1
-            }
-            i++
+    i = 0
+    while (i < NUMANIMS[wbs.epsd]) {
+        a = addr(anims_wi_stuff[wbs.epsd][i])
+        // init variables
+        a.ctr = -1
+        // specify the next time to draw it
+        if (a._c_type == animenum_t.ANIM_ALWAYS) {
+            a.nexttic = bcnt + 1 + (M_Random() % a.period)
+        } elif (a._c_type == animenum_t.ANIM_RANDOM) {
+            a.nexttic = bcnt + 1 + a.data2 + (M_Random() % a.data1)
+        } elif (a._c_type == animenum_t.ANIM_LEVEL) {
+            a.nexttic = bcnt + 1
         }
+        i++
     }
 }
 
@@ -179,39 +177,37 @@ def WI_updateAnimatedBack {
     if (wbs.epsd > 2) {
         return
     }
-    {
-        i = 0
-        while (i < NUMANIMS[wbs.epsd]) {
-            a = addr(deref(anims_wi_stuff[wbs.epsd] + i))
-            if (bcnt == a.nexttic) {
-                let _cond = a._c_type
-                if (_cond == animenum_t.ANIM_ALWAYS) {
-                    a.ctr++
-                    if (a.ctr >= a.nanims) {
-                        a.ctr = 0
-                    }
+    i = 0
+    while (i < NUMANIMS[wbs.epsd]) {
+        a = addr(anims_wi_stuff[wbs.epsd][i])
+        if (bcnt == a.nexttic) {
+            let _cond = a._c_type
+            if (_cond == animenum_t.ANIM_ALWAYS) {
+                a.ctr++
+                if (a.ctr >= a.nanims) {
+                    a.ctr = 0
+                }
+                a.nexttic = bcnt + a.period
+            } elif (_cond == animenum_t.ANIM_RANDOM) {
+                a.ctr++
+                if (a.ctr == a.nanims) {
+                    a.ctr = -1
+                    a.nexttic = bcnt + a.data2 + (M_Random() % a.data1)
+                } else {
                     a.nexttic = bcnt + a.period
-                } elif (_cond == animenum_t.ANIM_RANDOM) {
+                }
+            } elif (_cond == animenum_t.ANIM_LEVEL) {
+                // gawd-awful hack for level anims
+                if (!(state == stateenum_t.StatCount && i == 7) && wbs.next == a.data1) {
                     a.ctr++
                     if (a.ctr == a.nanims) {
-                        a.ctr = -1
-                        a.nexttic = bcnt + a.data2 + M_Random() % a.data1
-                    } else {
-                        a.nexttic = bcnt + a.period
+                        a.ctr--
                     }
-                } elif (_cond == animenum_t.ANIM_LEVEL) {
-                    // gawd-awful hack for level anims
-                    if (!(state == stateenum_t.StatCount && i == 7) && wbs.next == a.data1) {
-                        a.ctr++
-                        if (a.ctr == a.nanims) {
-                            a.ctr--
-                        }
-                        a.nexttic = bcnt + a.period
-                    }
+                    a.nexttic = bcnt + a.period
                 }
             }
-            i++
         }
+        i++
     }
 }
 
@@ -225,15 +221,13 @@ def WI_drawAnimatedBack {
     if (wbs.epsd > 2) {
         return
     }
-    {
-        i = 0
-        while (i < NUMANIMS[wbs.epsd]) {
-            a = addr(deref(anims_wi_stuff[wbs.epsd] + i))
-            if (a.ctr >= 0) {
-                V_DrawPatch(a.loc.x, a.loc.y, FB, a.p[a.ctr])
-            }
-            i++
+    i = 0
+    while (i < NUMANIMS[wbs.epsd]) {
+        a = addr(anims_wi_stuff[wbs.epsd][i])
+        if (a.ctr >= 0) {
+            V_DrawPatch(a.loc.x, a.loc.y, FB, a.p[a.ctr])
         }
+        i++
     }
 }
 
@@ -305,7 +299,7 @@ def WI_drawTime(var x : int; y : int; t : int) {
     if (t <= 61 * 59) {
         div = 1
         while (true) {
-            n = t / div % 60
+            n = (t / div) % 60
             x = WI_drawNum(x, y, n, 2) - int(read_patch_t_width(colon, 0))
             div *= 60
             // draw
@@ -370,14 +364,12 @@ def WI_drawShowNextLoc {
             WI_drawEL()
             return
         }
-        last = wbs.last == 8 ? wbs.next - 1 : wbs.last
+        last = (wbs.last == 8) ? wbs.next - 1 : wbs.last
         // draw a splat on taken cities.
-        {
-            i = 0
-            while (i <= last) {
-                WI_drawOnLnode(i, addr(splat))
-                i++
-            }
+        i = 0
+        while (i <= last) {
+            WI_drawOnLnode(i, addr(splat))
+            i++
         }
         // splat the secret level?
         if (int(wbs.didsecret) != 0) {
@@ -389,7 +381,7 @@ def WI_drawShowNextLoc {
         }
     }
     // draws which level you are entering..
-    if (gamemode != GameMode_t.commercial || wbs.next != 30) {
+    if ((gamemode != GameMode_t.commercial) || wbs.next != 30) {
         WI_drawEL()
     }
 }
@@ -404,11 +396,11 @@ def WI_fragSum(playernum : int) : int {
     var frags : int = 0
     for (i in range(MAXPLAYERS)) {
         if (uint(int(playeringame[i])) != 0 && i != playernum) {
-            frags += deref(plrs + playernum).frags[i]
+            frags += plrs[playernum].frags[i]
         }
     }
     // JDC hack - negative frags.
-    frags -= deref(plrs + playernum).frags[playernum]
+    frags -= plrs[playernum].frags[playernum]
     // UNUSED if (frags < 0)
     // frags = 0;
     return frags
@@ -442,7 +434,7 @@ def WI_updateDeathmatchStats {
             if (int(playeringame[i]) != 0) {
                 for (j in range(MAXPLAYERS)) {
                     if (int(playeringame[j]) != 0) {
-                        dm_frags[i][j] = deref(plrs + i).frags[j]
+                        dm_frags[i][j] = plrs[i].frags[j]
                     }
                 }
                 dm_totals[i] = WI_fragSum(i)
@@ -459,8 +451,8 @@ def WI_updateDeathmatchStats {
         for (i in range(MAXPLAYERS)) {
             if (int(playeringame[i]) != 0) {
                 for (j in range(MAXPLAYERS)) {
-                    if (uint(int(playeringame[j])) != 0 && dm_frags[i][j] != deref(plrs + i).frags[j]) {
-                        if (deref(plrs + i).frags[j] < 0) {
+                    if (uint(int(playeringame[j])) != 0 && dm_frags[i][j] != plrs[i].frags[j]) {
+                        if (plrs[i].frags[j] < 0) {
                             dm_frags[i][j]--
                         } else {
                             dm_frags[i][j]++
@@ -525,11 +517,11 @@ def WI_drawDeathmatchStats {
     y = DM_MATRIXY
     for (i in range(MAXPLAYERS)) {
         if (int(playeringame[i]) != 0) {
-            V_DrawPatch(x - int(read_patch_t_width(wi_stuff_p[i], 0)) / 2, DM_MATRIXY - WI_SPACINGY, FB, wi_stuff_p[i])
-            V_DrawPatch(DM_MATRIXX - int(read_patch_t_width(wi_stuff_p[i], 0)) / 2, y, FB, wi_stuff_p[i])
+            V_DrawPatch(x - int(read_patch_t_width(p[i], 0)) / 2, DM_MATRIXY - WI_SPACINGY, FB, p[i])
+            V_DrawPatch(DM_MATRIXX - int(read_patch_t_width(p[i], 0)) / 2, y, FB, p[i])
             if (i == me) {
-                V_DrawPatch(x - int(read_patch_t_width(wi_stuff_p[i], 0)) / 2, DM_MATRIXY - WI_SPACINGY, FB, bstar)
-                V_DrawPatch(DM_MATRIXX - int(read_patch_t_width(wi_stuff_p[i], 0)) / 2, y, FB, star)
+                V_DrawPatch(x - int(read_patch_t_width(p[i], 0)) / 2, DM_MATRIXY - WI_SPACINGY, FB, bstar)
+                V_DrawPatch(DM_MATRIXX - int(read_patch_t_width(p[i], 0)) / 2, y, FB, star)
             }
         } else {
         }
@@ -588,9 +580,9 @@ def WI_updateNetgameStats {
             if (!(int(playeringame[i]) != 0)) {
                 continue
             }
-            cnt_kills[i] = deref(plrs + i).skills * 100 / wbs.maxkills
-            cnt_items[i] = deref(plrs + i).sitems * 100 / wbs.maxitems
-            cnt_secret[i] = deref(plrs + i).ssecret * 100 / wbs.maxsecret
+            cnt_kills[i] = (plrs[i].skills * 100) / wbs.maxkills
+            cnt_items[i] = (plrs[i].sitems * 100) / wbs.maxitems
+            cnt_secret[i] = (plrs[i].ssecret * 100) / wbs.maxsecret
             if (dofrags != 0) {
                 cnt_frags[i] = WI_fragSum(i)
             }
@@ -608,8 +600,8 @@ def WI_updateNetgameStats {
                 continue
             }
             cnt_kills[i] += 2
-            if (cnt_kills[i] >= deref(plrs + i).skills * 100 / wbs.maxkills) {
-                cnt_kills[i] = deref(plrs + i).skills * 100 / wbs.maxkills
+            if (cnt_kills[i] >= (plrs[i].skills * 100) / wbs.maxkills) {
+                cnt_kills[i] = (plrs[i].skills * 100) / wbs.maxkills
             } else {
                 stillticking = doom_boolean._c_true
             }
@@ -628,8 +620,8 @@ def WI_updateNetgameStats {
                 continue
             }
             cnt_items[i] += 2
-            if (cnt_items[i] >= deref(plrs + i).sitems * 100 / wbs.maxitems) {
-                cnt_items[i] = deref(plrs + i).sitems * 100 / wbs.maxitems
+            if (cnt_items[i] >= (plrs[i].sitems * 100) / wbs.maxitems) {
+                cnt_items[i] = (plrs[i].sitems * 100) / wbs.maxitems
             } else {
                 stillticking = doom_boolean._c_true
             }
@@ -648,8 +640,8 @@ def WI_updateNetgameStats {
                 continue
             }
             cnt_secret[i] += 2
-            if (cnt_secret[i] >= deref(plrs + i).ssecret * 100 / wbs.maxsecret) {
-                cnt_secret[i] = deref(plrs + i).ssecret * 100 / wbs.maxsecret
+            if (cnt_secret[i] >= (plrs[i].ssecret * 100) / wbs.maxsecret) {
+                cnt_secret[i] = (plrs[i].ssecret * 100) / wbs.maxsecret
             } else {
                 stillticking = doom_boolean._c_true
             }
@@ -719,9 +711,9 @@ def WI_drawNetgameStats {
             continue
         }
         x = 32 + int(read_patch_t_width(star, 0)) / 2 + 32 * (!(dofrags != 0) ? 1 : 0)
-        V_DrawPatch(x - int(read_patch_t_width(wi_stuff_p[i], 0)), y, FB, wi_stuff_p[i])
+        V_DrawPatch(x - int(read_patch_t_width(p[i], 0)), y, FB, p[i])
         if (i == me) {
-            V_DrawPatch(x - int(read_patch_t_width(wi_stuff_p[i], 0)), y, FB, star)
+            V_DrawPatch(x - int(read_patch_t_width(p[i], 0)), y, FB, star)
         }
         x += NG_SPACINGX
         WI_drawPercent(x - pwidth, y + 10, cnt_kills[i])
@@ -755,10 +747,10 @@ def WI_updateStats {
     WI_updateAnimatedBack()
     if (acceleratestage != 0 && sp_state != 10) {
         acceleratestage = 0
-        cnt_kills[0] = deref(plrs + me).skills * 100 / wbs.maxkills
-        cnt_items[0] = deref(plrs + me).sitems * 100 / wbs.maxitems
-        cnt_secret[0] = deref(plrs + me).ssecret * 100 / wbs.maxsecret
-        cnt_time = deref(plrs + me).stime / TICRATE
+        cnt_kills[0] = (plrs[me].skills * 100) / wbs.maxkills
+        cnt_items[0] = (plrs[me].sitems * 100) / wbs.maxitems
+        cnt_secret[0] = (plrs[me].ssecret * 100) / wbs.maxsecret
+        cnt_time = plrs[me].stime / TICRATE
         cnt_par = wbs.partime / TICRATE
         S_StartSound(null, int(sfxenum_t.sfx_barexp))
         sp_state = 10
@@ -768,8 +760,8 @@ def WI_updateStats {
         if (!((bcnt & 3) != 0)) {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
-        if (cnt_kills[0] >= deref(plrs + me).skills * 100 / wbs.maxkills) {
-            cnt_kills[0] = deref(plrs + me).skills * 100 / wbs.maxkills
+        if (cnt_kills[0] >= (plrs[me].skills * 100) / wbs.maxkills) {
+            cnt_kills[0] = (plrs[me].skills * 100) / wbs.maxkills
             S_StartSound(null, int(sfxenum_t.sfx_barexp))
             sp_state++
         }
@@ -778,8 +770,8 @@ def WI_updateStats {
         if (!((bcnt & 3) != 0)) {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
-        if (cnt_items[0] >= deref(plrs + me).sitems * 100 / wbs.maxitems) {
-            cnt_items[0] = deref(plrs + me).sitems * 100 / wbs.maxitems
+        if (cnt_items[0] >= (plrs[me].sitems * 100) / wbs.maxitems) {
+            cnt_items[0] = (plrs[me].sitems * 100) / wbs.maxitems
             S_StartSound(null, int(sfxenum_t.sfx_barexp))
             sp_state++
         }
@@ -788,8 +780,8 @@ def WI_updateStats {
         if (!((bcnt & 3) != 0)) {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
-        if (cnt_secret[0] >= deref(plrs + me).ssecret * 100 / wbs.maxsecret) {
-            cnt_secret[0] = deref(plrs + me).ssecret * 100 / wbs.maxsecret
+        if (cnt_secret[0] >= (plrs[me].ssecret * 100) / wbs.maxsecret) {
+            cnt_secret[0] = (plrs[me].ssecret * 100) / wbs.maxsecret
             S_StartSound(null, int(sfxenum_t.sfx_barexp))
             sp_state++
         }
@@ -798,13 +790,13 @@ def WI_updateStats {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
         cnt_time += 3
-        if (cnt_time >= deref(plrs + me).stime / TICRATE) {
-            cnt_time = deref(plrs + me).stime / TICRATE
+        if (cnt_time >= plrs[me].stime / TICRATE) {
+            cnt_time = plrs[me].stime / TICRATE
         }
         cnt_par += 3
         if (cnt_par >= wbs.partime / TICRATE) {
             cnt_par = wbs.partime / TICRATE
-            if (cnt_time >= deref(plrs + me).stime / TICRATE) {
+            if (cnt_time >= plrs[me].stime / TICRATE) {
                 S_StartSound(null, int(sfxenum_t.sfx_barexp))
                 sp_state++
             }
@@ -830,7 +822,7 @@ def WI_updateStats {
 def WI_drawStats {
     // line height
     var lh : int
-    lh = 3 * int(read_patch_t_height(num[0], 0)) / 2
+    lh = (3 * int(read_patch_t_height(num[0], 0))) / 2
     WI_slamBackground()
     // draw animated background
     WI_drawAnimatedBack()
@@ -854,31 +846,29 @@ def WI_checkForAccelerate {
     var i : int
     var player : player_s?
     // check for button presses to skip delays
-    {
-        i = 0
-        player = addr(players[0])
-        while (i < MAXPLAYERS) {
-            if (int(playeringame[i]) != 0) {
-                if ((int(player.cmd.buttons) & int(buttoncode_t.BT_ATTACK)) != 0) {
-                    if (!(player.attackdown != 0)) {
-                        acceleratestage = 1
-                    }
-                    player.attackdown = int(doom_boolean._c_true)
-                } else {
-                    player.attackdown = int(doom_boolean._c_false)
+    i = 0
+    player = addr(players[0])
+    while (i < MAXPLAYERS) {
+        if (int(playeringame[i]) != 0) {
+            if ((int(player.cmd.buttons) & int(buttoncode_t.BT_ATTACK)) != 0) {
+                if (!(player.attackdown != 0)) {
+                    acceleratestage = 1
                 }
-                if ((int(player.cmd.buttons) & int(buttoncode_t.BT_USE)) != 0) {
-                    if (!(player.usedown != 0)) {
-                        acceleratestage = 1
-                    }
-                    player.usedown = int(doom_boolean._c_true)
-                } else {
-                    player.usedown = int(doom_boolean._c_false)
-                }
+                player.attackdown = int(doom_boolean._c_true)
+            } else {
+                player.attackdown = int(doom_boolean._c_false)
             }
-            i++
-            player = player + 1
+            if ((int(player.cmd.buttons) & int(buttoncode_t.BT_USE)) != 0) {
+                if (!(player.usedown != 0)) {
+                    acceleratestage = 1
+                }
+                player.usedown = int(doom_boolean._c_true)
+            } else {
+                player.usedown = int(doom_boolean._c_false)
+            }
         }
+        i++
+        player = player + 1
     }
 }
 
@@ -918,15 +908,15 @@ def WI_loadData {
     var name : uint8[9]
     var a : anim_t_wi_stuff?
     if (gamemode == GameMode_t.commercial) {
-        doom_strcpy(addr(name[0]), reinterpret<uint8?>("INTERPIC"))
+        doom_strcpy(addr(name[0]), cstr("INTERPIC"))
     } else {
         // doom_sprintf(name, "WIMAP%d", wbs->epsd);
-        doom_strcpy(addr(name[0]), reinterpret<uint8?>("WIMAP"))
+        doom_strcpy(addr(name[0]), cstr("WIMAP"))
         doom_concat(addr(name[0]), doom_itoa(wbs.epsd, 10))
     }
     if (gamemode == GameMode_t.retail) {
         if (wbs.epsd == 3) {
-            doom_strcpy(addr(name[0]), reinterpret<uint8?>("INTERPIC"))
+            doom_strcpy(addr(name[0]), cstr("INTERPIC"))
         }
     }
     // background
@@ -935,130 +925,124 @@ def WI_loadData {
     if (gamemode == GameMode_t.commercial) {
         NUMCMAPS = 32
         lnames = reinterpret<uint8 ??>(Z_Malloc(int(uint64(typeinfo sizeof(type<uint8?>)) * uint64(NUMCMAPS)), PU_STATIC, null))
-        {
-            i = 0
-            while (i < NUMCMAPS) {
-                // doom_sprintf(name, "CWILV%2.2d", i);
-                doom_strcpy(addr(name[0]), reinterpret<uint8?>("CWILV"))
-                if (i < 10) {
-                    doom_concat(addr(name[0]), reinterpret<uint8?>("0"))
-                }
-                doom_concat(addr(name[0]), doom_itoa(i, 10))
-                deref(lnames + i) = reinterpret<uint8?>(W_CacheLumpName(addr(name[0]), PU_STATIC))
-                i++
+        i = 0
+        while (i < NUMCMAPS) {
+            // doom_sprintf(name, "CWILV%2.2d", i);
+            doom_strcpy(addr(name[0]), cstr("CWILV"))
+            if (i < 10) {
+                doom_concat(addr(name[0]), cstr("0"))
             }
+            doom_concat(addr(name[0]), doom_itoa(i, 10))
+            lnames[i] = reinterpret<uint8?>(W_CacheLumpName(addr(name[0]), PU_STATIC))
+            i++
         }
     } else {
         lnames = reinterpret<uint8 ??>(Z_Malloc(int(uint64(typeinfo sizeof(type<uint8?>)) * uint64(NUMMAPS)), PU_STATIC, null))
         for (i1 in range(NUMMAPS)) {
             // doom_sprintf(name, "WILV%d%d", wbs->epsd, i);
-            doom_strcpy(addr(name[0]), reinterpret<uint8?>("WILV"))
+            doom_strcpy(addr(name[0]), cstr("WILV"))
             doom_concat(addr(name[0]), doom_itoa(wbs.epsd, 10))
             doom_concat(addr(name[0]), doom_itoa(i1, 10))
-            deref(lnames + i1) = reinterpret<uint8?>(W_CacheLumpName(addr(name[0]), PU_STATIC))
+            lnames[i1] = reinterpret<uint8?>(W_CacheLumpName(addr(name[0]), PU_STATIC))
         }
         // you are here
-        yah[0] = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIURH0"), PU_STATIC))
+        yah[0] = reinterpret<uint8?>(W_CacheLumpName(cstr("WIURH0"), PU_STATIC))
         // you are here (alt.)
-        yah[1] = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIURH1"), PU_STATIC))
+        yah[1] = reinterpret<uint8?>(W_CacheLumpName(cstr("WIURH1"), PU_STATIC))
         // splat
-        splat = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WISPLAT"), PU_STATIC))
+        splat = reinterpret<uint8?>(W_CacheLumpName(cstr("WISPLAT"), PU_STATIC))
         if (wbs.epsd < 3) {
-            {
-                j = 0
-                while (j < NUMANIMS[wbs.epsd]) {
-                    a = addr(deref(anims_wi_stuff[wbs.epsd] + j))
-                    {
-                        i = 0
-                        while (i < a.nanims) {
-                            // MONDO HACK!
-                            if (wbs.epsd != 1 || j != 8) {
-                                // animations
-                                // doom_sprintf(name, "WIA%d%.2d%.2d", wbs->epsd, j, i);
-                                doom_strcpy(addr(name[0]), reinterpret<uint8?>("WIA"))
-                                doom_concat(addr(name[0]), doom_itoa(wbs.epsd, 10))
-                                if (j < 10) {
-                                    doom_concat(addr(name[0]), reinterpret<uint8?>("0"))
-                                }
-                                doom_concat(addr(name[0]), doom_itoa(j, 10))
-                                if (i < 10) {
-                                    doom_concat(addr(name[0]), reinterpret<uint8?>("0"))
-                                }
-                                doom_concat(addr(name[0]), doom_itoa(i, 10))
-                                a.p[i] = reinterpret<uint8?>(W_CacheLumpName(addr(name[0]), PU_STATIC))
-                            } else {
-                                // HACK ALERT!
-                                a.p[i] = deref(anims_wi_stuff[1] + 4).p[i]
-                            }
-                            i++
+            j = 0
+            while (j < NUMANIMS[wbs.epsd]) {
+                a = addr(anims_wi_stuff[wbs.epsd][j])
+                i = 0
+                while (i < a.nanims) {
+                    // MONDO HACK!
+                    if (wbs.epsd != 1 || j != 8) {
+                        // animations
+                        // doom_sprintf(name, "WIA%d%.2d%.2d", wbs->epsd, j, i);
+                        doom_strcpy(addr(name[0]), cstr("WIA"))
+                        doom_concat(addr(name[0]), doom_itoa(wbs.epsd, 10))
+                        if (j < 10) {
+                            doom_concat(addr(name[0]), cstr("0"))
                         }
+                        doom_concat(addr(name[0]), doom_itoa(j, 10))
+                        if (i < 10) {
+                            doom_concat(addr(name[0]), cstr("0"))
+                        }
+                        doom_concat(addr(name[0]), doom_itoa(i, 10))
+                        a.p[i] = reinterpret<uint8?>(W_CacheLumpName(addr(name[0]), PU_STATIC))
+                    } else {
+                        // HACK ALERT!
+                        a.p[i] = anims_wi_stuff[1][4].p[i]
                     }
-                    j++
+                    i++
                 }
+                j++
             }
         }
     }
     // More hacks on minus sign.
-    wiminus = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIMINUS"), PU_STATIC))
+    wiminus = reinterpret<uint8?>(W_CacheLumpName(cstr("WIMINUS"), PU_STATIC))
     for (i1 in range(10)) {
         // numbers 0-9
         // doom_sprintf(name, "WINUM%d", i);
-        doom_strcpy(addr(name[0]), reinterpret<uint8?>("WINUM"))
+        doom_strcpy(addr(name[0]), cstr("WINUM"))
         doom_concat(addr(name[0]), doom_itoa(i1, 10))
         num[i1] = reinterpret<uint8?>(W_CacheLumpName(addr(name[0]), PU_STATIC))
     }
     // percent sign
-    percent = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIPCNT"), PU_STATIC))
+    percent = reinterpret<uint8?>(W_CacheLumpName(cstr("WIPCNT"), PU_STATIC))
     // "finished"
-    finished = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIF"), PU_STATIC))
+    finished = reinterpret<uint8?>(W_CacheLumpName(cstr("WIF"), PU_STATIC))
     // "entering"
-    entering = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIENTER"), PU_STATIC))
+    entering = reinterpret<uint8?>(W_CacheLumpName(cstr("WIENTER"), PU_STATIC))
     // "kills"
-    kills = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIOSTK"), PU_STATIC))
+    kills = reinterpret<uint8?>(W_CacheLumpName(cstr("WIOSTK"), PU_STATIC))
     // "scrt"
-    secret = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIOSTS"), PU_STATIC))
+    secret = reinterpret<uint8?>(W_CacheLumpName(cstr("WIOSTS"), PU_STATIC))
     // "secret"
-    sp_secret = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WISCRT2"), PU_STATIC))
+    sp_secret = reinterpret<uint8?>(W_CacheLumpName(cstr("WISCRT2"), PU_STATIC))
     // Yuck.
     if (int(Language_t.french) != 0) {
         // "items"
         if (uint(int(netgame)) != 0 && !(int(deathmatch) != 0)) {
-            items = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIOBJ"), PU_STATIC))
+            items = reinterpret<uint8?>(W_CacheLumpName(cstr("WIOBJ"), PU_STATIC))
         } else {
-            items = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIOSTI"), PU_STATIC))
+            items = reinterpret<uint8?>(W_CacheLumpName(cstr("WIOSTI"), PU_STATIC))
         }
     } else {
-        items = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIOSTI"), PU_STATIC))
+        items = reinterpret<uint8?>(W_CacheLumpName(cstr("WIOSTI"), PU_STATIC))
     }
     // "frgs"
-    frags = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIFRGS"), PU_STATIC))
+    frags = reinterpret<uint8?>(W_CacheLumpName(cstr("WIFRGS"), PU_STATIC))
     // ":"
-    colon = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WICOLON"), PU_STATIC))
+    colon = reinterpret<uint8?>(W_CacheLumpName(cstr("WICOLON"), PU_STATIC))
     // "time"
-    time_patch = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WITIME"), PU_STATIC))
+    time_patch = reinterpret<uint8?>(W_CacheLumpName(cstr("WITIME"), PU_STATIC))
     // "sucks"
-    sucks = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WISUCKS"), PU_STATIC))
+    sucks = reinterpret<uint8?>(W_CacheLumpName(cstr("WISUCKS"), PU_STATIC))
     // "par"
-    par = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIPAR"), PU_STATIC))
+    par = reinterpret<uint8?>(W_CacheLumpName(cstr("WIPAR"), PU_STATIC))
     // "killers" (vertical)
-    killers = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIKILRS"), PU_STATIC))
+    killers = reinterpret<uint8?>(W_CacheLumpName(cstr("WIKILRS"), PU_STATIC))
     // "victims" (horiz)
-    victims = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIVCTMS"), PU_STATIC))
+    victims = reinterpret<uint8?>(W_CacheLumpName(cstr("WIVCTMS"), PU_STATIC))
     // "total"
-    total = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("WIMSTT"), PU_STATIC))
+    total = reinterpret<uint8?>(W_CacheLumpName(cstr("WIMSTT"), PU_STATIC))
     // your face
-    star = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("STFST01"), PU_STATIC))
+    star = reinterpret<uint8?>(W_CacheLumpName(cstr("STFST01"), PU_STATIC))
     // dead face
-    bstar = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("STFDEAD0"), PU_STATIC))
+    bstar = reinterpret<uint8?>(W_CacheLumpName(cstr("STFDEAD0"), PU_STATIC))
     for (i1 in range(MAXPLAYERS)) {
         // "1,2,3,4"
         // doom_sprintf(name, "STPB%d", i);
-        doom_strcpy(addr(name[0]), reinterpret<uint8?>("STPB"))
+        doom_strcpy(addr(name[0]), cstr("STPB"))
         doom_concat(addr(name[0]), doom_itoa(i1, 10))
-        wi_stuff_p[i1] = reinterpret<uint8?>(W_CacheLumpName(addr(name[0]), PU_STATIC))
+        p[i1] = reinterpret<uint8?>(W_CacheLumpName(addr(name[0]), PU_STATIC))
         // "1,2,3,4"
         // doom_sprintf(name, "WIBP%d", i + 1);
-        doom_strcpy(addr(name[0]), reinterpret<uint8?>("WIBP"))
+        doom_strcpy(addr(name[0]), cstr("WIBP"))
         doom_concat(addr(name[0]), doom_itoa(i1 + 1, 10))
         bp[i1] = reinterpret<uint8?>(W_CacheLumpName(addr(name[0]), PU_STATIC))
     }
@@ -1068,254 +1052,210 @@ def WI_loadData {
 def WI_unloadData {
     var i : int
     var j : int
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(wiminus) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1659, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(wiminus), 101)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(wiminus) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1659, 10))
+        I_Error(addr(buf[0]))
     }
+    Z_ChangeTag2(reinterpret<void?>(wiminus), PU_CACHE)
     for (i1 in range(10)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(num[i1]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1662, 10))
             I_Error(addr(buf[0]))
         }
-        Z_ChangeTag2(reinterpret<void?>(num[i1]), 101)
+        Z_ChangeTag2(reinterpret<void?>(num[i1]), PU_CACHE)
     }
     if (gamemode == GameMode_t.commercial) {
-        {
-            i = 0
-            while (i < NUMCMAPS) {
-                if (reinterpret<memblock_s?>(reinterpret<uint8?>(deref(lnames + i)) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-                    var buf : uint8[260]
-                    doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-                    doom_concat(addr(buf[0]), doom_itoa(1667, 10))
-                    I_Error(addr(buf[0]))
-                }
-                Z_ChangeTag2(reinterpret<void?>(deref(lnames + i)), 101)
-                i++
+        i = 0
+        while (i < NUMCMAPS) {
+            if (reinterpret<memblock_s?>(reinterpret<uint8?>(lnames[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+                var buf : uint8[260]
+                doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+                doom_concat(addr(buf[0]), doom_itoa(1667, 10))
+                I_Error(addr(buf[0]))
             }
+            Z_ChangeTag2(reinterpret<void?>(lnames[i]), PU_CACHE)
+            i++
         }
     } else {
-        {
-            if (reinterpret<memblock_s?>(reinterpret<uint8?>(yah[0]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-                var buf : uint8[260]
-                doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-                doom_concat(addr(buf[0]), doom_itoa(1671, 10))
-                I_Error(addr(buf[0]))
-            }
-            Z_ChangeTag2(reinterpret<void?>(yah[0]), 101)
+        if (reinterpret<memblock_s?>(reinterpret<uint8?>(yah[0]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+            var buf : uint8[260]
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+            doom_concat(addr(buf[0]), doom_itoa(1671, 10))
+            I_Error(addr(buf[0]))
         }
-        {
-            if (reinterpret<memblock_s?>(reinterpret<uint8?>(yah[1]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-                var buf : uint8[260]
-                doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-                doom_concat(addr(buf[0]), doom_itoa(1672, 10))
-                I_Error(addr(buf[0]))
-            }
-            Z_ChangeTag2(reinterpret<void?>(yah[1]), 101)
+        Z_ChangeTag2(reinterpret<void?>(yah[0]), PU_CACHE)
+        if (reinterpret<memblock_s?>(reinterpret<uint8?>(yah[1]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+            var buf : uint8[260]
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+            doom_concat(addr(buf[0]), doom_itoa(1672, 10))
+            I_Error(addr(buf[0]))
         }
-        {
-            if (reinterpret<memblock_s?>(reinterpret<uint8?>(splat) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-                var buf : uint8[260]
-                doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-                doom_concat(addr(buf[0]), doom_itoa(1674, 10))
-                I_Error(addr(buf[0]))
-            }
-            Z_ChangeTag2(reinterpret<void?>(splat), 101)
+        Z_ChangeTag2(reinterpret<void?>(yah[1]), PU_CACHE)
+        if (reinterpret<memblock_s?>(reinterpret<uint8?>(splat) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+            var buf : uint8[260]
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+            doom_concat(addr(buf[0]), doom_itoa(1674, 10))
+            I_Error(addr(buf[0]))
         }
+        Z_ChangeTag2(reinterpret<void?>(splat), PU_CACHE)
         for (i1 in range(NUMMAPS)) {
-            if (reinterpret<memblock_s?>(reinterpret<uint8?>(deref(lnames + i1)) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+            if (reinterpret<memblock_s?>(reinterpret<uint8?>(lnames[i1]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
                 var buf : uint8[260]
-                doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+                doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
                 doom_concat(addr(buf[0]), doom_itoa(1677, 10))
                 I_Error(addr(buf[0]))
             }
-            Z_ChangeTag2(reinterpret<void?>(deref(lnames + i1)), 101)
+            Z_ChangeTag2(reinterpret<void?>(lnames[i1]), PU_CACHE)
         }
         if (wbs.epsd < 3) {
-            {
-                j = 0
-                while (j < NUMANIMS[wbs.epsd]) {
-                    if (wbs.epsd != 1 || j != 8) {
-                        {
-                            i = 0
-                            while (i < deref(anims_wi_stuff[wbs.epsd] + j).nanims) {
-                                if (reinterpret<memblock_s?>(reinterpret<uint8?>(deref(anims_wi_stuff[wbs.epsd] + j).p[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-                                    var buf : uint8[260]
-                                    doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-                                    doom_concat(addr(buf[0]), doom_itoa(1685, 10))
-                                    I_Error(addr(buf[0]))
-                                }
-                                Z_ChangeTag2(reinterpret<void?>(deref(anims_wi_stuff[wbs.epsd] + j).p[i]), 101)
-                                i++
-                            }
+            j = 0
+            while (j < NUMANIMS[wbs.epsd]) {
+                if (wbs.epsd != 1 || j != 8) {
+                    i = 0
+                    while (i < anims_wi_stuff[wbs.epsd][j].nanims) {
+                        if (reinterpret<memblock_s?>(reinterpret<uint8?>(anims_wi_stuff[wbs.epsd][j].p[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+                            var buf : uint8[260]
+                            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+                            doom_concat(addr(buf[0]), doom_itoa(1685, 10))
+                            I_Error(addr(buf[0]))
                         }
+                        Z_ChangeTag2(reinterpret<void?>(anims_wi_stuff[wbs.epsd][j].p[i]), PU_CACHE)
+                        i++
                     }
-                    j++
                 }
+                j++
             }
         }
     }
     Z_Free(reinterpret<void?>(lnames))
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(percent) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1692, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(percent), 101)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(percent) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1692, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(colon) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1693, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(colon), 101)
+    Z_ChangeTag2(reinterpret<void?>(percent), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(colon) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1693, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(finished) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1694, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(finished), 101)
+    Z_ChangeTag2(reinterpret<void?>(colon), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(finished) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1694, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(entering) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1695, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(entering), 101)
+    Z_ChangeTag2(reinterpret<void?>(finished), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(entering) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1695, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(kills) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1696, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(kills), 101)
+    Z_ChangeTag2(reinterpret<void?>(entering), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(kills) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1696, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(secret) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1697, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(secret), 101)
+    Z_ChangeTag2(reinterpret<void?>(kills), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(secret) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1697, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(sp_secret) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1698, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(sp_secret), 101)
+    Z_ChangeTag2(reinterpret<void?>(secret), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(sp_secret) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1698, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(items) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1699, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(items), 101)
+    Z_ChangeTag2(reinterpret<void?>(sp_secret), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(items) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1699, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(frags) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1700, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(frags), 101)
+    Z_ChangeTag2(reinterpret<void?>(items), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(frags) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1700, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(time_patch) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1701, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(time_patch), 101)
+    Z_ChangeTag2(reinterpret<void?>(frags), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(time_patch) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1701, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(sucks) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1702, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(sucks), 101)
+    Z_ChangeTag2(reinterpret<void?>(time_patch), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(sucks) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1702, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(par) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1703, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(par), 101)
+    Z_ChangeTag2(reinterpret<void?>(sucks), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(par) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1703, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(victims) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1705, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(victims), 101)
+    Z_ChangeTag2(reinterpret<void?>(par), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(victims) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1705, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(killers) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1706, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(killers), 101)
+    Z_ChangeTag2(reinterpret<void?>(victims), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(killers) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1706, 10))
+        I_Error(addr(buf[0]))
     }
-    {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(total) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
-            var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
-            doom_concat(addr(buf[0]), doom_itoa(1707, 10))
-            I_Error(addr(buf[0]))
-        }
-        Z_ChangeTag2(reinterpret<void?>(total), 101)
+    Z_ChangeTag2(reinterpret<void?>(killers), PU_CACHE)
+    if (reinterpret<memblock_s?>(reinterpret<uint8?>(total) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        var buf : uint8[260]
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+        doom_concat(addr(buf[0]), doom_itoa(1707, 10))
+        I_Error(addr(buf[0]))
     }
+    Z_ChangeTag2(reinterpret<void?>(total), PU_CACHE)
     // Z_ChangeTag(star, PU_CACHE);
     // Z_ChangeTag(bstar, PU_CACHE);
     for (i1 in range(MAXPLAYERS)) {
-        if (reinterpret<memblock_s?>(reinterpret<uint8?>(wi_stuff_p[i1]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+        if (reinterpret<memblock_s?>(reinterpret<uint8?>(p[i1]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1712, 10))
             I_Error(addr(buf[0]))
         }
-        Z_ChangeTag2(reinterpret<void?>(wi_stuff_p[i1]), 101)
+        Z_ChangeTag2(reinterpret<void?>(p[i1]), PU_CACHE)
     }
     for (i1 in range(MAXPLAYERS)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(bp[i1]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), reinterpret<uint8?>("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1715, 10))
             I_Error(addr(buf[0]))
         }
-        Z_ChangeTag2(reinterpret<void?>(bp[i1]), 101)
+        Z_ChangeTag2(reinterpret<void?>(bp[i1]), PU_CACHE)
     }
 }
 

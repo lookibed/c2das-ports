@@ -3,7 +3,7 @@ var sttminus : uint8?
 
 [c_function]
 def STlib_init {
-    sttminus = reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("STTMINUS"), PU_STATIC))
+    sttminus = reinterpret<uint8?>(W_CacheLumpName(cstr("STTMINUS"), PU_STATIC))
 }
 
 // ?
@@ -24,8 +24,8 @@ def STlib_initNum(var n : st_number_t?; x : int; y : int; var pl : uint8 ??; var
 def STlib_drawNum(var n : st_number_t?; refresh : doom_boolean) {
     var numdigits : int = n.width
     var num : int = deref(n.num)
-    var w : int = int(read_patch_t_width(deref(n.p + 0), 0))
-    var h : int = int(read_patch_t_height(deref(n.p + 0), 0))
+    var w : int = int(read_patch_t_width(n.p[0], 0))
+    var h : int = int(read_patch_t_height(n.p[0], 0))
     var x : int = n.x
     var neg : int
     n.oldnum = deref(n.num)
@@ -41,7 +41,7 @@ def STlib_drawNum(var n : st_number_t?; refresh : doom_boolean) {
     // clear the area
     x = n.x - numdigits * w
     if (n.y - ST_Y < 0) {
-        I_Error(reinterpret<uint8?>("Error: drawNum: n->y - ST_Y < 0"))
+        I_Error(cstr("Error: drawNum: n->y - ST_Y < 0"))
     }
     V_CopyRect(x, n.y - ST_Y, STLIB_BG, w * numdigits, h, x, n.y, STLIB_FG)
     // if non-number, do not draw it
@@ -51,7 +51,7 @@ def STlib_drawNum(var n : st_number_t?; refresh : doom_boolean) {
     x = n.x
     // in the special case of 0, you draw 0
     if (!(num != 0)) {
-        V_DrawPatch(x - w, n.y, STLIB_FG, deref(n.p + 0))
+        V_DrawPatch(x - w, n.y, STLIB_FG, n.p[0])
     }
     // draw the new number
     while (true) {
@@ -65,7 +65,7 @@ def STlib_drawNum(var n : st_number_t?; refresh : doom_boolean) {
             break
         }
         x -= w
-        V_DrawPatch(x, n.y, STLIB_FG, deref(n.p + num % 10))
+        V_DrawPatch(x, n.y, STLIB_FG, n.p[num % 10])
         num /= 10
     }
     // draw a minus sign if necessary
@@ -110,18 +110,18 @@ def STlib_updateMultIcon(var mi : st_multicon_t?; refresh : doom_boolean) {
     var h : int
     var x : int
     var y : int
-    if (uint(int(deref(mi.on))) != 0 && (mi.oldinum != deref(mi.inum) || uint(int(refresh)) != 0) && deref(mi.inum) != -1) {
+    if (uint(int(deref(mi.on))) != 0 && (mi.oldinum != deref(mi.inum) || uint(int(refresh)) != 0) && (deref(mi.inum) != -1)) {
         if (mi.oldinum != -1) {
-            x = mi.x - int(read_patch_t_leftoffset(deref(mi.p + mi.oldinum), 0))
-            y = mi.y - int(read_patch_t_topoffset(deref(mi.p + mi.oldinum), 0))
-            w = int(read_patch_t_width(deref(mi.p + mi.oldinum), 0))
-            h = int(read_patch_t_height(deref(mi.p + mi.oldinum), 0))
+            x = mi.x - int(read_patch_t_leftoffset(mi.p[mi.oldinum], 0))
+            y = mi.y - int(read_patch_t_topoffset(mi.p[mi.oldinum], 0))
+            w = int(read_patch_t_width(mi.p[mi.oldinum], 0))
+            h = int(read_patch_t_height(mi.p[mi.oldinum], 0))
             if (y - ST_Y < 0) {
-                I_Error(reinterpret<uint8?>("Error: updateMultIcon: y - ST_Y < 0"))
+                I_Error(cstr("Error: updateMultIcon: y - ST_Y < 0"))
             }
             V_CopyRect(x, y - ST_Y, STLIB_BG, w, h, x, y, STLIB_FG)
         }
-        V_DrawPatch(mi.x, mi.y, STLIB_FG, deref(mi.p + deref(mi.inum)))
+        V_DrawPatch(mi.x, mi.y, STLIB_FG, mi.p[deref(mi.inum)])
         mi.oldinum = deref(mi.inum)
     }
 }
@@ -147,7 +147,7 @@ def STlib_updateBinIcon(var bi : st_binicon_t?; refresh : doom_boolean) {
         w = int(read_patch_t_width(bi.p, 0))
         h = int(read_patch_t_height(bi.p, 0))
         if (y - ST_Y < 0) {
-            I_Error(reinterpret<uint8?>("Error: updateBinIcon: y - ST_Y < 0"))
+            I_Error(cstr("Error: updateBinIcon: y - ST_Y < 0"))
         }
         if (int(deref(bi.val)) != 0) {
             V_DrawPatch(bi.x, bi.y, STLIB_FG, bi.p)

@@ -84,24 +84,20 @@ def P_TeleportMove(var thing : mobj_s?; x : int; y : int) : doom_boolean {
     validcount++
     numspechit = 0
     // stomp on any things contacted
-    xl = tmbbox[int(anon_787.BOXLEFT)] - bmaporgx - 32 * (1 << 16) >> MAPBLOCKSHIFT
-    xh = tmbbox[int(anon_787.BOXRIGHT)] - bmaporgx + 32 * (1 << 16) >> MAPBLOCKSHIFT
-    yl = tmbbox[int(anon_787.BOXBOTTOM)] - bmaporgy - 32 * (1 << 16) >> MAPBLOCKSHIFT
-    yh = tmbbox[int(anon_787.BOXTOP)] - bmaporgy + 32 * (1 << 16) >> MAPBLOCKSHIFT
-    {
-        bx = xl
-        while (bx <= xh) {
-            {
-                by = yl
-                while (by <= yh) {
-                    if (!(int(P_BlockThingsIterator(bx, by, @@PIT_StompThing)) != 0)) {
-                        return doom_boolean._c_false
-                    }
-                    by++
-                }
+    xl = (tmbbox[int(anon_787.BOXLEFT)] - bmaporgx - 32 * FRACUNIT) >> MAPBLOCKSHIFT
+    xh = (tmbbox[int(anon_787.BOXRIGHT)] - bmaporgx + 32 * FRACUNIT) >> MAPBLOCKSHIFT
+    yl = (tmbbox[int(anon_787.BOXBOTTOM)] - bmaporgy - 32 * FRACUNIT) >> MAPBLOCKSHIFT
+    yh = (tmbbox[int(anon_787.BOXTOP)] - bmaporgy + 32 * FRACUNIT) >> MAPBLOCKSHIFT
+    bx = xl
+    while (bx <= xh) {
+        by = yl
+        while (by <= yh) {
+            if (!(int(P_BlockThingsIterator(bx, by, @@PIT_StompThing)) != 0)) {
+                return doom_boolean._c_false
             }
-            bx++
+            by++
         }
+        bx++
     }
     // the move is ok,
     // so link the thing into its new position
@@ -187,7 +183,7 @@ def PIT_CheckThing(var thing : mobj_s?) : doom_boolean {
     }
     // check for skulls slamming into things
     if ((tmthing.flags & int(mobjflag_t.MF_SKULLFLY)) != 0) {
-        damage = (P_Random() % 8 + 1) * tmthing.info.damage
+        damage = ((P_Random() % 8) + 1) * tmthing.info.damage
         P_DamageMobj(thing, tmthing, tmthing, damage)
         tmthing.flags &= ~int(mobjflag_t.MF_SKULLFLY)
         tmthing.momz = 0
@@ -208,7 +204,7 @@ def PIT_CheckThing(var thing : mobj_s?) : doom_boolean {
             // underneath
             return doom_boolean._c_true
         }
-        if (tmthing.target != null && (tmthing.target._c_type == thing._c_type || tmthing.target._c_type == mobjtype_t.MT_KNIGHT && thing._c_type == mobjtype_t.MT_BRUISER || tmthing.target._c_type == mobjtype_t.MT_BRUISER && thing._c_type == mobjtype_t.MT_KNIGHT)) {
+        if (tmthing.target != null && (tmthing.target._c_type == thing._c_type || (tmthing.target._c_type == mobjtype_t.MT_KNIGHT && thing._c_type == mobjtype_t.MT_BRUISER) || (tmthing.target._c_type == mobjtype_t.MT_BRUISER && thing._c_type == mobjtype_t.MT_KNIGHT))) {
             // Don't hit same species as originator.
             if (intptr(thing) == intptr(tmthing.target)) {
                 return doom_boolean._c_true
@@ -224,7 +220,7 @@ def PIT_CheckThing(var thing : mobj_s?) : doom_boolean {
             return enum_from_int(type<doom_boolean>, !((thing.flags & int(mobjflag_t.MF_SOLID)) != 0) ? 1 : 0)
         }
         // damage / explode
-        damage = (P_Random() % 8 + 1) * tmthing.info.damage
+        damage = ((P_Random() % 8) + 1) * tmthing.info.damage
         P_DamageMobj(thing, tmthing, tmthing.target, damage)
         // don't traverse any more
         return doom_boolean._c_false
@@ -295,44 +291,36 @@ def P_CheckPosition(var thing : mobj_s?; x : int; y : int) : doom_boolean {
     // because mobj_ts are grouped into mapblocks
     // based on their origin point, and can overlap
     // into adjacent blocks by up to MAXRADIUS units.
-    xl = tmbbox[int(anon_787.BOXLEFT)] - bmaporgx - 32 * (1 << 16) >> MAPBLOCKSHIFT
-    xh = tmbbox[int(anon_787.BOXRIGHT)] - bmaporgx + 32 * (1 << 16) >> MAPBLOCKSHIFT
-    yl = tmbbox[int(anon_787.BOXBOTTOM)] - bmaporgy - 32 * (1 << 16) >> MAPBLOCKSHIFT
-    yh = tmbbox[int(anon_787.BOXTOP)] - bmaporgy + 32 * (1 << 16) >> MAPBLOCKSHIFT
-    {
-        bx = xl
-        while (bx <= xh) {
-            {
-                by = yl
-                while (by <= yh) {
-                    if (!(int(P_BlockThingsIterator(bx, by, @@PIT_CheckThing)) != 0)) {
-                        return doom_boolean._c_false
-                    }
-                    by++
-                }
+    xl = (tmbbox[int(anon_787.BOXLEFT)] - bmaporgx - 32 * FRACUNIT) >> MAPBLOCKSHIFT
+    xh = (tmbbox[int(anon_787.BOXRIGHT)] - bmaporgx + 32 * FRACUNIT) >> MAPBLOCKSHIFT
+    yl = (tmbbox[int(anon_787.BOXBOTTOM)] - bmaporgy - 32 * FRACUNIT) >> MAPBLOCKSHIFT
+    yh = (tmbbox[int(anon_787.BOXTOP)] - bmaporgy + 32 * FRACUNIT) >> MAPBLOCKSHIFT
+    bx = xl
+    while (bx <= xh) {
+        by = yl
+        while (by <= yh) {
+            if (!(int(P_BlockThingsIterator(bx, by, @@PIT_CheckThing)) != 0)) {
+                return doom_boolean._c_false
             }
-            bx++
+            by++
         }
+        bx++
     }
     // check lines
-    xl = tmbbox[int(anon_787.BOXLEFT)] - bmaporgx >> MAPBLOCKSHIFT
-    xh = tmbbox[int(anon_787.BOXRIGHT)] - bmaporgx >> MAPBLOCKSHIFT
-    yl = tmbbox[int(anon_787.BOXBOTTOM)] - bmaporgy >> MAPBLOCKSHIFT
-    yh = tmbbox[int(anon_787.BOXTOP)] - bmaporgy >> MAPBLOCKSHIFT
-    {
-        bx = xl
-        while (bx <= xh) {
-            {
-                by = yl
-                while (by <= yh) {
-                    if (!(int(P_BlockLinesIterator(bx, by, @@PIT_CheckLine)) != 0)) {
-                        return doom_boolean._c_false
-                    }
-                    by++
-                }
+    xl = (tmbbox[int(anon_787.BOXLEFT)] - bmaporgx) >> MAPBLOCKSHIFT
+    xh = (tmbbox[int(anon_787.BOXRIGHT)] - bmaporgx) >> MAPBLOCKSHIFT
+    yl = (tmbbox[int(anon_787.BOXBOTTOM)] - bmaporgy) >> MAPBLOCKSHIFT
+    yh = (tmbbox[int(anon_787.BOXTOP)] - bmaporgy) >> MAPBLOCKSHIFT
+    bx = xl
+    while (bx <= xh) {
+        by = yl
+        while (by <= yh) {
+            if (!(int(P_BlockLinesIterator(bx, by, @@PIT_CheckLine)) != 0)) {
+                return doom_boolean._c_false
             }
-            bx++
+            by++
         }
+        bx++
     }
     return doom_boolean._c_true
 }
@@ -413,7 +401,7 @@ def P_TryMove(var thing : mobj_s?; x : int; y : int) : doom_boolean {
 // and false will be returned.
 def P_ThingHeightClip(var thing : mobj_s?) : doom_boolean {
     var onfloor : doom_boolean
-    onfloor = enum_from_int(type<doom_boolean>, thing.z == thing.floorz ? 1 : 0)
+    onfloor = enum_from_int(type<doom_boolean>, (thing.z == thing.floorz) ? 1 : 0)
     P_CheckPosition(thing, thing.x, thing.y)
     // what about stranding a monster partially off an edge?
     thing.floorz = tmfloorz
@@ -462,20 +450,19 @@ def P_HitSlideLine(var ld : line_s?) {
     if (deltaangle > ANG180) {
         deltaangle += ANG180
     }
-    lineangle >>= 19u
-    deltaangle >>= 19u
+    lineangle >>= uint(ANGLETOFINESHIFT)
+    deltaangle >>= uint(ANGLETOFINESHIFT)
     movelen = P_AproxDistance(tmxmove, tmymove)
-    newlen = FixedMul(movelen, deref(finecosine + deltaangle))
-    tmxmove = FixedMul(newlen, deref(finecosine + lineangle))
+    newlen = FixedMul(movelen, finecosine[deltaangle])
+    tmxmove = FixedMul(newlen, finecosine[lineangle])
     tmymove = FixedMul(newlen, finesine[lineangle])
 }
 
 // PTR_SlideTraverse
-[c_function]
 def PTR_SlideTraverse(var _c_in : intercept_t?) : doom_boolean {
     var li : line_s?
     if (!(int(_c_in.isaline) != 0)) {
-        I_Error(reinterpret<uint8?>("Error: PTR_SlideTraverse: not a line?"))
+        I_Error(cstr("Error: PTR_SlideTraverse: not a line?"))
     }
     li = _c_in.d.line
     if (!((int(li.flags) & ML_TWOSIDED) != 0)) {
@@ -779,9 +766,9 @@ def PTR_ShootTraverse(var _c_in : intercept_t?) : doom_boolean {
 def P_AimLineAttack(var t1 : mobj_s?; var angle : uint; distance : int) : int {
     var x2 : int
     var y2 : int
-    angle >>= 19u
+    angle >>= uint(ANGLETOFINESHIFT)
     shootthing = t1
-    x2 = t1.x + (distance >> FRACBITS) * deref(finecosine + angle)
+    x2 = t1.x + (distance >> FRACBITS) * finecosine[angle]
     y2 = t1.y + (distance >> FRACBITS) * finesine[angle]
     shootz = t1.z + (t1.height >> 1) + 8 * FRACUNIT
     // can't shoot outside view angles
@@ -803,10 +790,10 @@ def P_AimLineAttack(var t1 : mobj_s?; var angle : uint; distance : int) : int {
 def P_LineAttack(var t1 : mobj_s?; var angle : uint; distance : int; slope : int; damage : int) {
     var x2 : int
     var y2 : int
-    angle >>= 19u
+    angle >>= uint(ANGLETOFINESHIFT)
     shootthing = t1
     la_damage = damage
-    x2 = t1.x + (distance >> FRACBITS) * deref(finecosine + angle)
+    x2 = t1.x + (distance >> FRACBITS) * finecosine[angle]
     y2 = t1.y + (distance >> FRACBITS) * finesine[angle]
     shootz = t1.z + (t1.height >> 1) + 8 * FRACUNIT
     attackrange = distance
@@ -847,10 +834,10 @@ def P_UseLines(var player : player_s?) {
     var x2 : int
     var y2 : int
     usething = player.mo
-    angle = int(player.mo.angle >> 19u)
+    angle = int(player.mo.angle >> uint(ANGLETOFINESHIFT))
     x1 = player.mo.x
     y1 = player.mo.y
-    x2 = x1 + (USERANGE >> FRACBITS) * deref(finecosine + angle)
+    x2 = x1 + (USERANGE >> FRACBITS) * finecosine[angle]
     y2 = y1 + (USERANGE >> FRACBITS) * finesine[angle]
     P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES, @@PTR_UseTraverse)
 }
@@ -873,7 +860,7 @@ def PIT_RadiusAttack(var thing : mobj_s?) : doom_boolean {
     dx = thing.x - bombspot.x < 0 ? -(thing.x - bombspot.x) : thing.x - bombspot.x
     dy = thing.y - bombspot.y < 0 ? -(thing.y - bombspot.y) : thing.y - bombspot.y
     dist = dx > dy ? dx : dy
-    dist = dist - thing.radius >> FRACBITS
+    dist = (dist - thing.radius) >> FRACBITS
     if (dist < 0) {
         dist = 0
     }
@@ -898,26 +885,22 @@ def P_RadiusAttack(var spot : mobj_s?; var source : mobj_s?; damage : int) {
     var yl : int
     var yh : int
     var dist : int
-    dist = damage + 32 * (1 << 16) << FRACBITS
-    yh = spot.y + dist - bmaporgy >> MAPBLOCKSHIFT
-    yl = spot.y - dist - bmaporgy >> MAPBLOCKSHIFT
-    xh = spot.x + dist - bmaporgx >> MAPBLOCKSHIFT
-    xl = spot.x - dist - bmaporgx >> MAPBLOCKSHIFT
+    dist = (damage + 32 * FRACUNIT) << FRACBITS
+    yh = (spot.y + dist - bmaporgy) >> MAPBLOCKSHIFT
+    yl = (spot.y - dist - bmaporgy) >> MAPBLOCKSHIFT
+    xh = (spot.x + dist - bmaporgx) >> MAPBLOCKSHIFT
+    xl = (spot.x - dist - bmaporgx) >> MAPBLOCKSHIFT
     bombspot = spot
     bombsource = source
     bombdamage = damage
-    {
-        y = yl
-        while (y <= yh) {
-            {
-                x = xl
-                while (x <= xh) {
-                    P_BlockThingsIterator(x, y, @@PIT_RadiusAttack)
-                    x++
-                }
-            }
-            y++
+    y = yl
+    while (y <= yh) {
+        x = xl
+        while (x <= xh) {
+            P_BlockThingsIterator(x, y, @@PIT_RadiusAttack)
+            x++
         }
+        y++
     }
 }
 
@@ -952,8 +935,8 @@ def PIT_ChangeSector(var thing : mobj_s?) : doom_boolean {
         P_DamageMobj(thing, null, null, 10)
         // spray blood in a random direction
         mo = P_SpawnMobj(thing.x, thing.y, thing.z + thing.height / 2, mobjtype_t.MT_BLOOD)
-        mo.momx = P_Random() - P_Random() << 12
-        mo.momy = P_Random() - P_Random() << 12
+        mo.momx = (P_Random() - P_Random()) << 12
+        mo.momy = (P_Random() - P_Random()) << 12
     }
     // keep checking (crush other things)
     return doom_boolean._c_true
@@ -966,18 +949,14 @@ def P_ChangeSector(var sector : sector_t?; crunch : doom_boolean) : doom_boolean
     nofit = doom_boolean._c_false
     crushchange = crunch
     // re-check heights for all things near the moving sector
-    {
-        x = sector.blockbox[int(anon_787.BOXLEFT)]
-        while (x <= sector.blockbox[int(anon_787.BOXRIGHT)]) {
-            {
-                y = sector.blockbox[int(anon_787.BOXBOTTOM)]
-                while (y <= sector.blockbox[int(anon_787.BOXTOP)]) {
-                    P_BlockThingsIterator(x, y, @@PIT_ChangeSector)
-                    y++
-                }
-            }
-            x++
+    x = sector.blockbox[int(anon_787.BOXLEFT)]
+    while (x <= sector.blockbox[int(anon_787.BOXRIGHT)]) {
+        y = sector.blockbox[int(anon_787.BOXBOTTOM)]
+        while (y <= sector.blockbox[int(anon_787.BOXTOP)]) {
+            P_BlockThingsIterator(x, y, @@PIT_ChangeSector)
+            y++
         }
+        x++
     }
     return nofit
 }

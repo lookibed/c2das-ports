@@ -169,7 +169,7 @@ def EV_DoFloor(var line : line_s?; floortype : floor_e) : int {
         if (!(secnum >= 0)) {
             break
         }
-        sec = addr(deref(sectors + secnum))
+        sec = addr(sectors[secnum])
         // ALREADY MOVING? IF SO, KEEP GOING...
         if (sec.specialdata != null) {
             continue
@@ -188,21 +188,21 @@ def EV_DoFloor(var line : line_s?; floortype : floor_e) : int {
             if (_cond == floor_e.lowerFloor) {
                 floor.direction = -1
                 floor.sector = sec
-                floor.speed = 1 << 16
+                floor.speed = FRACUNIT
                 floor.floordestheight = P_FindHighestFloorSurrounding(sec)
                 break
             }
             if (_cond == floor_e.lowerFloorToLowest) {
                 floor.direction = -1
                 floor.sector = sec
-                floor.speed = 1 << 16
+                floor.speed = FRACUNIT
                 floor.floordestheight = P_FindLowestFloorSurrounding(sec)
                 break
             }
             if (_cond == floor_e.turboLower) {
                 floor.direction = -1
                 floor.sector = sec
-                floor.speed = (1 << 16) * 4
+                floor.speed = FRACUNIT * 4
                 floor.floordestheight = P_FindHighestFloorSurrounding(sec)
                 if (floor.floordestheight != sec.floorheight) {
                     floor.floordestheight += 8 * FRACUNIT
@@ -217,46 +217,46 @@ def EV_DoFloor(var line : line_s?; floortype : floor_e) : int {
             if (_flag) {
                 floor.direction = 1
                 floor.sector = sec
-                floor.speed = 1 << 16
+                floor.speed = FRACUNIT
                 floor.floordestheight = P_FindLowestCeilingSurrounding(sec)
                 if (floor.floordestheight > sec.ceilingheight) {
                     floor.floordestheight = sec.ceilingheight
                 }
-                floor.floordestheight -= 8 * FRACUNIT * (floortype == floor_e.raiseFloorCrush ? 1 : 0)
+                floor.floordestheight -= (8 * FRACUNIT) * ((floortype == floor_e.raiseFloorCrush) ? 1 : 0)
                 break
             }
             if (_cond == floor_e.raiseFloorTurbo) {
                 floor.direction = 1
                 floor.sector = sec
-                floor.speed = (1 << 16) * 4
+                floor.speed = FRACUNIT * 4
                 floor.floordestheight = P_FindNextHighestFloor(sec, sec.floorheight)
                 break
             }
             if (_cond == floor_e.raiseFloorToNearest) {
                 floor.direction = 1
                 floor.sector = sec
-                floor.speed = 1 << 16
+                floor.speed = FRACUNIT
                 floor.floordestheight = P_FindNextHighestFloor(sec, sec.floorheight)
                 break
             }
             if (_cond == floor_e.raiseFloor24) {
                 floor.direction = 1
                 floor.sector = sec
-                floor.speed = 1 << 16
+                floor.speed = FRACUNIT
                 floor.floordestheight = floor.sector.floorheight + 24 * FRACUNIT
                 break
             }
             if (_cond == floor_e.raiseFloor512) {
                 floor.direction = 1
                 floor.sector = sec
-                floor.speed = 1 << 16
+                floor.speed = FRACUNIT
                 floor.floordestheight = floor.sector.floorheight + 512 * FRACUNIT
                 break
             }
             if (_cond == floor_e.raiseFloor24AndChange) {
                 floor.direction = 1
                 floor.sector = sec
-                floor.speed = 1 << 16
+                floor.speed = FRACUNIT
                 floor.floordestheight = floor.sector.floorheight + 24 * FRACUNIT
                 sec.floorpic = line.frontsector.floorpic
                 sec.special = line.frontsector.special
@@ -268,26 +268,24 @@ def EV_DoFloor(var line : line_s?; floortype : floor_e) : int {
                     var side : side_t?
                     floor.direction = 1
                     floor.sector = sec
-                    floor.speed = 1 << 16
-                    {
-                        i = 0
-                        while (i < sec.linecount) {
-                            if (twoSided(secnum, i) != 0) {
-                                side = getSide(secnum, i, 0)
-                                if (int(side.bottomtexture) >= 0) {
-                                    if (deref(textureheight + int(side.bottomtexture)) < minsize) {
-                                        minsize = deref(textureheight + int(side.bottomtexture))
-                                    }
-                                }
-                                side = getSide(secnum, i, 1)
-                                if (int(side.bottomtexture) >= 0) {
-                                    if (deref(textureheight + int(side.bottomtexture)) < minsize) {
-                                        minsize = deref(textureheight + int(side.bottomtexture))
-                                    }
+                    floor.speed = FRACUNIT
+                    i = 0
+                    while (i < sec.linecount) {
+                        if (twoSided(secnum, i) != 0) {
+                            side = getSide(secnum, i, 0)
+                            if (int(side.bottomtexture) >= 0) {
+                                if (textureheight[int(side.bottomtexture)] < minsize) {
+                                    minsize = textureheight[int(side.bottomtexture)]
                                 }
                             }
-                            i++
+                            side = getSide(secnum, i, 1)
+                            if (int(side.bottomtexture) >= 0) {
+                                if (textureheight[int(side.bottomtexture)] < minsize) {
+                                    minsize = textureheight[int(side.bottomtexture)]
+                                }
+                            }
                         }
+                        i++
                     }
                     floor.floordestheight = floor.sector.floorheight + minsize
                 }
@@ -297,31 +295,29 @@ def EV_DoFloor(var line : line_s?; floortype : floor_e) : int {
             if (_flag) {
                 floor.direction = -1
                 floor.sector = sec
-                floor.speed = 1 << 16
+                floor.speed = FRACUNIT
                 floor.floordestheight = P_FindLowestFloorSurrounding(sec)
                 floor.texture = sec.floorpic
-                {
-                    i = 0
-                    while (i < sec.linecount) {
-                        if (twoSided(secnum, i) != 0) {
-                            if (int64(getSide(secnum, i, 0).sector - sectors) == int64(secnum)) {
-                                sec = getSector(secnum, i, 1)
-                                if (sec.floorheight == floor.floordestheight) {
-                                    floor.texture = sec.floorpic
-                                    floor.newspecial = int(sec.special)
-                                    break
-                                }
-                            } else {
-                                sec = getSector(secnum, i, 0)
-                                if (sec.floorheight == floor.floordestheight) {
-                                    floor.texture = sec.floorpic
-                                    floor.newspecial = int(sec.special)
-                                    break
-                                }
+                i = 0
+                while (i < sec.linecount) {
+                    if (twoSided(secnum, i) != 0) {
+                        if (int64(getSide(secnum, i, 0).sector - sectors) == int64(secnum)) {
+                            sec = getSector(secnum, i, 1)
+                            if (sec.floorheight == floor.floordestheight) {
+                                floor.texture = sec.floorpic
+                                floor.newspecial = int(sec.special)
+                                break
+                            }
+                        } else {
+                            sec = getSector(secnum, i, 0)
+                            if (sec.floorheight == floor.floordestheight) {
+                                floor.texture = sec.floorpic
+                                floor.newspecial = int(sec.special)
+                                break
                             }
                         }
-                        i++
                     }
+                    i++
                 }
             }
             _flag ||= !(_cond == floor_e.lowerFloor || _cond == floor_e.lowerFloorToLowest || _cond == floor_e.turboLower || _cond == floor_e.raiseFloorCrush || _cond == floor_e.raiseFloor || _cond == floor_e.raiseFloorTurbo || _cond == floor_e.raiseFloorToNearest || _cond == floor_e.raiseFloor24 || _cond == floor_e.raiseFloor512 || _cond == floor_e.raiseFloor24AndChange || _cond == floor_e.raiseToTexture || _cond == floor_e.lowerAndChange)
@@ -356,7 +352,7 @@ def EV_BuildStairs(var line : line_s?; _c_type : stair_e) : int {
         if (!(secnum >= 0)) {
             break
         }
-        sec = addr(deref(sectors + secnum))
+        sec = addr(sectors[secnum])
         // ALREADY MOVING? IF SO, KEEP GOING...
         if (sec.specialdata != null) {
             continue
@@ -371,10 +367,10 @@ def EV_BuildStairs(var line : line_s?; _c_type : stair_e) : int {
         floor.sector = sec
         let _cond = _c_type
         if (_cond == stair_e.build8) {
-            speed = (1 << 16) / 4
+            speed = FRACUNIT / 4
             stairsize = 8 * FRACUNIT
         } elif (_cond == stair_e.turbo16) {
-            speed = (1 << 16) * 4
+            speed = FRACUNIT * 4
             stairsize = 16 * FRACUNIT
         }
         floor.speed = speed
@@ -397,15 +393,15 @@ def EV_BuildStairs(var line : line_s?; _c_type : stair_e) : int {
                     if (!(i < sec.linecount)) {
                         break
                     }
-                    if (!((int(deref(sec.lines + i).flags) & ML_TWOSIDED) != 0)) {
+                    if (!((int(sec.lines[i].flags) & ML_TWOSIDED) != 0)) {
                         continue
                     }
-                    tsec = deref(sec.lines + i).frontsector
+                    tsec = sec.lines[i].frontsector
                     newsecnum = int(int64(tsec - sectors))
                     if (secnum != newsecnum) {
                         continue
                     }
-                    tsec = deref(sec.lines + i).backsector
+                    tsec = sec.lines[i].backsector
                     newsecnum = int(int64(tsec - sectors))
                     if (int(tsec.floorpic) != texture) {
                         continue

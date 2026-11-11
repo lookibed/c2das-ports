@@ -22,33 +22,5 @@ struct doomcom_t {
     data : doomdata_t
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<doomdata_t>) == 104 && typeinfo alignof(type<doomdata_t>) == 4, "doomdata_t: clang lays it out as size 104, align 4")
-    static_assert(typeinfo offsetof < checksum > (type<doomdata_t>) == 0, "doomdata_t.checksum: clang puts it at 0")
-    static_assert(typeinfo offsetof < retransmitfrom > (type<doomdata_t>) == 4, "doomdata_t.retransmitfrom: clang puts it at 4")
-    static_assert(typeinfo offsetof < starttic > (type<doomdata_t>) == 5, "doomdata_t.starttic: clang puts it at 5")
-    static_assert(typeinfo offsetof < player > (type<doomdata_t>) == 6, "doomdata_t.player: clang puts it at 6")
-    static_assert(typeinfo offsetof < numtics > (type<doomdata_t>) == 7, "doomdata_t.numtics: clang puts it at 7")
-    static_assert(typeinfo offsetof < cmds > (type<doomdata_t>) == 8, "doomdata_t.cmds: clang puts it at 8")
-    static_assert(typeinfo sizeof(type<doomcom_t>) == 144 && typeinfo alignof(type<doomcom_t>) == 8, "doomcom_t: clang lays it out as size 144, align 8")
-    static_assert(typeinfo offsetof < id > (type<doomcom_t>) == 0, "doomcom_t.id: clang puts it at 0")
-    static_assert(typeinfo offsetof < intnum > (type<doomcom_t>) == 8, "doomcom_t.intnum: clang puts it at 8")
-    static_assert(typeinfo offsetof < command > (type<doomcom_t>) == 10, "doomcom_t.command: clang puts it at 10")
-    static_assert(typeinfo offsetof < remotenode > (type<doomcom_t>) == 12, "doomcom_t.remotenode: clang puts it at 12")
-    static_assert(typeinfo offsetof < datalength > (type<doomcom_t>) == 14, "doomcom_t.datalength: clang puts it at 14")
-    static_assert(typeinfo offsetof < numnodes > (type<doomcom_t>) == 16, "doomcom_t.numnodes: clang puts it at 16")
-    static_assert(typeinfo offsetof < ticdup > (type<doomcom_t>) == 18, "doomcom_t.ticdup: clang puts it at 18")
-    static_assert(typeinfo offsetof < extratics > (type<doomcom_t>) == 20, "doomcom_t.extratics: clang puts it at 20")
-    static_assert(typeinfo offsetof < deathmatch > (type<doomcom_t>) == 22, "doomcom_t.deathmatch: clang puts it at 22")
-    static_assert(typeinfo offsetof < savegame > (type<doomcom_t>) == 24, "doomcom_t.savegame: clang puts it at 24")
-    static_assert(typeinfo offsetof < episode > (type<doomcom_t>) == 26, "doomcom_t.episode: clang puts it at 26")
-    static_assert(typeinfo offsetof < map > (type<doomcom_t>) == 28, "doomcom_t.map: clang puts it at 28")
-    static_assert(typeinfo offsetof < skill > (type<doomcom_t>) == 30, "doomcom_t.skill: clang puts it at 30")
-    static_assert(typeinfo offsetof < consoleplayer > (type<doomcom_t>) == 32, "doomcom_t.consoleplayer: clang puts it at 32")
-    static_assert(typeinfo offsetof < numplayers > (type<doomcom_t>) == 34, "doomcom_t.numplayers: clang puts it at 34")
-    static_assert(typeinfo offsetof < angleoffset > (type<doomcom_t>) == 36, "doomcom_t.angleoffset: clang puts it at 36")
-    static_assert(typeinfo offsetof < drone > (type<doomcom_t>) == 38, "doomcom_t.drone: clang puts it at 38")
-    static_assert(typeinfo offsetof < data > (type<doomcom_t>) == 40, "doomcom_t.data: clang puts it at 40")
-}
+include d_net_h.layout.das.inc
 

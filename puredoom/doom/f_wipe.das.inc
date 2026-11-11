@@ -12,7 +12,7 @@ def wipe_shittyColMajorXform(var _c_array : int16?; width : int; height : int) {
     dest = reinterpret<int16?>(Z_Malloc(int(uint64(width * height) * uint64(typeinfo sizeof(type<int16>))), PU_STATIC, null))
     for (y in range(height)) {
         for (x in range(width)) {
-            deref(dest + (x * height + y)) = deref(_c_array + (y * width + x))
+            dest[x * height + y] = _c_array[y * width + x]
         }
     }
     doom_memcpy(reinterpret<void?>(_c_array), reinterpret<void?>(dest), width * height * 2)
@@ -76,14 +76,14 @@ def wipe_initMelt(width : int; height : int; ticks : int) : int {
     // setup initial column positions
     // (y<0 => not ready to scroll yet)
     y = reinterpret<int?>(Z_Malloc(int(uint64(width) * uint64(typeinfo sizeof(type<int>))), PU_STATIC, null))
-    deref(y + 0) = -(M_Random() % 16)
+    y[0] = -(M_Random() % 16)
     for (i in range(1, width)) {
-        r = M_Random() % 3 - 1
-        deref(y + i) = deref(y + (i - 1)) + r
-        if (deref(y + i) > 0) {
-            deref(y + i) = 0
-        } elif (deref(y + i) == -16) {
-            deref(y + i) = -15
+        r = (M_Random() % 3) - 1
+        y[i] = y[i - 1] + r
+        if (y[i] > 0) {
+            y[i] = 0
+        } elif (y[i] == -16) {
+            y[i] = -15
         }
     }
     return 0
@@ -105,40 +105,36 @@ def wipe_doMelt(var width : int; height : int; var ticks : int) : int {
             break
         }
         for (i in range(width)) {
-            if (deref(y + i) < 0) {
-                deref(y + i)++
+            if (y[i] < 0) {
+                y[i]++
                 done = doom_boolean._c_false
-            } elif (deref(y + i) < height) {
-                dy = deref(y + i) < 16 ? deref(y + i) + 1 : 8
-                if (deref(y + i) + dy >= height) {
-                    dy = height - deref(y + i)
+            } elif (y[i] < height) {
+                dy = (y[i] < 16) ? y[i] + 1 : 8
+                if (y[i] + dy >= height) {
+                    dy = height - y[i]
                 }
-                s = addr(deref(reinterpret<int16?>(wipe_scr_end) + (i * height + deref(y + i))))
-                d = addr(deref(reinterpret<int16?>(wipe_scr) + (deref(y + i) * width + i)))
+                s = addr(reinterpret<int16?>(wipe_scr_end)[i * height + y[i]])
+                d = addr(reinterpret<int16?>(wipe_scr)[y[i] * width + i])
                 idx = 0
-                {
-                    j = dy
-                    while (j != 0) {
-                        var _t1 = s
-                        s = s + 1
-                        deref(d + idx) = deref(_t1)
-                        idx += width
-                        j--
-                    }
+                j = dy
+                while (j != 0) {
+                    var _t1 = s
+                    s = s + 1
+                    d[idx] = deref(_t1)
+                    idx += width
+                    j--
                 }
-                deref(y + i) += dy
-                s = addr(deref(reinterpret<int16?>(wipe_scr_start) + i * height))
-                d = addr(deref(reinterpret<int16?>(wipe_scr) + (deref(y + i) * width + i)))
+                y[i] += dy
+                s = addr(reinterpret<int16?>(wipe_scr_start)[i * height])
+                d = addr(reinterpret<int16?>(wipe_scr)[y[i] * width + i])
                 idx = 0
-                {
-                    j = height - deref(y + i)
-                    while (j != 0) {
-                        var _t2 = s
-                        s = s + 1
-                        deref(d + idx) = deref(_t2)
-                        idx += width
-                        j--
-                    }
+                j = height - y[i]
+                while (j != 0) {
+                    var _t2 = s
+                    s = s + 1
+                    d[idx] = deref(_t2)
+                    idx += width
+                    j--
                 }
                 done = doom_boolean._c_false
             }

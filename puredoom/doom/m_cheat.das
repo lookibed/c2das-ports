@@ -62,13 +62,13 @@ def cht_GetParam(var cht : cheatseq_t?; var buffer : uint8?) {
         deref(_t1) = uint8(c)
         var _t2 = p
         p = p + 1
-        deref(_t2) = uint8(0)
+        deref(_t2) = 0u8
         if (!(c != 0 && int(deref(p)) != 255)) {
             break
         }
     }
     if (int(deref(p)) == 255) {
-        deref(buffer) = uint8(0)
+        deref(buffer) = 0u8
     }
 }
 

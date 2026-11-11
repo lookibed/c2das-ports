@@ -22,7 +22,7 @@ def M_DrawText(var x : int; y : int; direct : doom_boolean; var _c_string : uint
     var c : int
     var w : int
     while (deref(_c_string) != 0) {
-        c = doom_toupper(int(deref(_c_string))) - '!'
+        c = doom_toupper(int(deref(_c_string))) - HU_FONTSTART
         _c_string = _c_string + 1
         if (c < 0 || c > HU_FONTSIZE) {
             x += 4
@@ -43,11 +43,10 @@ def M_DrawText(var x : int; y : int; direct : doom_boolean; var _c_string : uint
 }
 
 // M_WriteFile
-[c_function]
 def M_WriteFile(var name : uint8?; var source : void?; length : int) : doom_boolean {
     var handle : void?
     var count : int
-    handle = invoke(doom_open, name, reinterpret<uint8?>("wb"))
+    handle = invoke(doom_open, name, cstr("wb"))
     if (handle == null) {
         return doom_boolean._c_false
     }
@@ -66,10 +65,10 @@ def M_ReadFile(var name : uint8?; var buffer : uint8 ??) : int {
     var count : int
     var length : int
     var buf : uint8?
-    handle = invoke(doom_open, name, reinterpret<uint8?>("rb"))
+    handle = invoke(doom_open, name, cstr("rb"))
     if (handle == null) {
         // I_Error("Error: Couldn't read file %s", name);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: Couldn't read file "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: Couldn't read file "))
         doom_concat(addr(error_buf[0]), name)
         I_Error(addr(error_buf[0]))
     }
@@ -81,7 +80,7 @@ def M_ReadFile(var name : uint8?; var buffer : uint8 ??) : int {
     invoke(doom_close, handle)
     if (count < length) {
         // I_Error("Error: Couldn't read file %s", name);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: Couldn't read file "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: Couldn't read file "))
         doom_concat(addr(error_buf[0]), name)
         I_Error(addr(error_buf[0]))
     }
@@ -95,31 +94,29 @@ def M_SaveDefaults {
     var i : int
     var v : int
     var f : void?
-    f = invoke(doom_open, defaultfile, reinterpret<uint8?>("w"))
+    f = invoke(doom_open, defaultfile, cstr("w"))
     if (!(f != null)) {
         // can't write the file, but don't complain
         return
     }
-    {
-        i = 0
-        while (i < numdefaults) {
-            if (defaults[i].defaultvalue > -4095 && defaults[i].defaultvalue < 4095) {
-                v = deref(defaults[i].location)
-                // fprintf(f, "%s\t\t%i\n", defaults[i].name, v);
-                doom_fprint(f, defaults[i].name)
-                doom_fprint(f, reinterpret<uint8?>("\t\t"))
-                doom_fprint(f, doom_itoa(v, 10))
-                doom_fprint(f, reinterpret<uint8?>("\n"))
-            } else {
-                // fprintf(f, "%s\t\t\"%s\"\n", defaults[i].name,
-                // (char**)(defaults[i].text_location));
-                doom_fprint(f, defaults[i].name)
-                doom_fprint(f, reinterpret<uint8?>("\t\t\""))
-                doom_fprint(f, deref(defaults[i].text_location))
-                doom_fprint(f, reinterpret<uint8?>("\"\n"))
-            }
-            i++
+    i = 0
+    while (i < numdefaults) {
+        if (defaults[i].defaultvalue > -4095 && defaults[i].defaultvalue < 4095) {
+            v = deref(defaults[i].location)
+            // fprintf(f, "%s\t\t%i\n", defaults[i].name, v);
+            doom_fprint(f, defaults[i].name)
+            doom_fprint(f, cstr("\t\t"))
+            doom_fprint(f, doom_itoa(v, 10))
+            doom_fprint(f, cstr("\n"))
+        } else {
+            // fprintf(f, "%s\t\t\"%s\"\n", defaults[i].name,
+            // (char**)(defaults[i].text_location));
+            doom_fprint(f, defaults[i].name)
+            doom_fprint(f, cstr("\t\t\""))
+            doom_fprint(f, deref(defaults[i].text_location))
+            doom_fprint(f, cstr("\"\n"))
         }
+        i++
     }
     invoke(doom_close, f)
 }
@@ -137,48 +134,44 @@ def M_LoadDefaults {
     var isstring : doom_boolean
     // set everything to base values
     // numdefaults = sizeof(defaults)/sizeof(defaults[0]);
-    {
-        i = 0
-        while (i < numdefaults) {
-            if (defaults[i].defaultvalue == 65535) {
-                deref(defaults[i].text_location) = defaults[i].default_text_value
-            } else {
-                deref(defaults[i].location) = defaults[i].defaultvalue
-            }
-            i++
+    i = 0
+    while (i < numdefaults) {
+        if (defaults[i].defaultvalue == 65535) {
+            deref(defaults[i].text_location) = defaults[i].default_text_value
+        } else {
+            deref(defaults[i].location) = defaults[i].defaultvalue
         }
+        i++
     }
     // check for a custom default file
-    i = M_CheckParm(reinterpret<uint8?>("-config"))
+    i = M_CheckParm(cstr("-config"))
     if (i != 0 && i < myargc - 1) {
-        defaultfile = deref(myargv + (i + 1))
+        defaultfile = myargv[i + 1]
         // doom_print(" default file: %s\n", defaultfile);
-        invoke(doom_print, reinterpret<uint8?>("        default file: "))
+        invoke(doom_print, cstr("        default file: "))
         invoke(doom_print, defaultfile)
-        invoke(doom_print, reinterpret<uint8?>("\n"))
+        invoke(doom_print, cstr("\n"))
     } else {
         defaultfile = addr(basedefault[0])
     }
     // read the file in, overriding any set defaults
-    f = invoke(doom_open, defaultfile, reinterpret<uint8?>("r"))
+    f = invoke(doom_open, defaultfile, cstr("r"))
     if (f != null) {
         while (!(invoke(doom_eof, f) != 0)) {
             // def
             var arg_read : int = 0
             var c : uint8
-            {
-                i = 0
-                while (i < 79) {
-                    invoke(doom_read, f, reinterpret<void?>(addr(c)), 1)
-                    if (int(c) == ' ' || int(c) == '\n' || int(c) == '\t') {
-                        if (i > 0) {
-                            arg_read++
-                        }
-                        break
+            i = 0
+            while (i < 79) {
+                invoke(doom_read, f, reinterpret<void?>(addr(c)), 1)
+                if (int(c) == ' ' || int(c) == '\n' || int(c) == '\t') {
+                    if (i > 0) {
+                        arg_read++
                     }
-                    _c_def[i] = c
-                    i++
+                    break
                 }
+                _c_def[i] = c
+                i++
             }
             _c_def[i] = uint8('\0')
             // Ignore spaces
@@ -192,18 +185,16 @@ def M_LoadDefaults {
                 // strparam
                 i = 0
                 if (int(c) != '\n') {
-                    {
-                        while (i < 260) {
-                            let _t0 = i
-                            i++
-                            strparm[_t0] = c
-                            invoke(doom_read, f, reinterpret<void?>(addr(c)), 1)
-                            if (int(c) == '\n') {
-                                if (i > 0) {
-                                    arg_read++
-                                }
-                                break
+                    while (i < 260) {
+                        let _t0 = i
+                        i++
+                        strparm[_t0] = c
+                        invoke(doom_read, f, reinterpret<void?>(addr(c)), 1)
+                        if (int(c) == '\n') {
+                            if (i > 0) {
+                                arg_read++
                             }
+                            break
                         }
                     }
                 }
@@ -217,7 +208,7 @@ def M_LoadDefaults {
                     isstring = doom_boolean._c_true
                     len = doom_strlen(addr(strparm[0]))
                     newstring = reinterpret<uint8?>(invoke(doom_malloc, len))
-                    strparm[len - 1] = uint8(0)
+                    strparm[len - 1] = 0u8
                     doom_strcpy(newstring, addr(strparm[0]) + 1)
                 } elif (int(strparm[0]) == '0' && int(strparm[1]) == 'x') {
                     // sscanf(strparm + 2, "%x", &parm);
@@ -226,19 +217,17 @@ def M_LoadDefaults {
                     // sscanf(strparm, "%i", &parm);
                     parm = doom_atoi(addr(strparm[0]))
                 }
-                {
-                    i = 0
-                    while (i < numdefaults) {
-                        if (!(doom_strcmp(addr(_c_def[0]), defaults[i].name) != 0)) {
-                            if (!(int(isstring) != 0)) {
-                                deref(defaults[i].location) = parm
-                            } else {
-                                deref(defaults[i].text_location) = newstring
-                            }
-                            break
+                i = 0
+                while (i < numdefaults) {
+                    if (!(doom_strcmp(addr(_c_def[0]), defaults[i].name) != 0)) {
+                        if (!(int(isstring) != 0)) {
+                            deref(defaults[i].location) = parm
+                        } else {
+                            deref(defaults[i].text_location) = newstring
                         }
-                        i++
+                        break
                     }
+                    i++
                 }
             }
         }
@@ -254,13 +243,13 @@ def WritePCXfile(var filename : uint8?; var data : uint8?; width : int; height :
     var pack : uint8?
     pcx = reinterpret<pcx_t?>(Z_Malloc(width * height * 2 + 1000, PU_STATIC, null))
     // PCX id
-    pcx.manufacturer = uint8(10)
+    pcx.manufacturer = 10u8
     // 256 color
-    pcx.version = uint8(5)
+    pcx.version = 5u8
     // uncompressed
-    pcx.encoding = uint8(1)
+    pcx.encoding = 1u8
     // 256 color
-    pcx.bits_per_pixel = uint8(8)
+    pcx.bits_per_pixel = 8u8
     pcx.xmin = uint16(0)
     pcx.ymin = uint16(0)
     pcx.xmax = uint16(width - 1)
@@ -269,7 +258,7 @@ def WritePCXfile(var filename : uint8?; var data : uint8?; width : int; height :
     pcx.vres = uint16(height)
     doom_memset(reinterpret<void?>(addr(pcx.palette[0])), 0, int(uint64(typeinfo sizeof(type<uint8[48]>))))
     // chunky image
-    pcx.color_planes = uint8(1)
+    pcx.color_planes = 1u8
     pcx.bytes_per_line = uint16(width)
     // not a grey scale
     pcx.palette_type = uint16(2)
@@ -286,7 +275,7 @@ def WritePCXfile(var filename : uint8?; var data : uint8?; width : int; height :
         } else {
             var _t2 = pack
             pack = pack + 1
-            deref(_t2) = uint8(193)
+            deref(_t2) = 193u8
             var _t3 = pack
             pack = pack + 1
             var _t4 = data
@@ -298,7 +287,7 @@ def WritePCXfile(var filename : uint8?; var data : uint8?; width : int; height :
     // palette ID byte
     var _t5 = pack
     pack = pack + 1
-    deref(_t5) = uint8(12)
+    deref(_t5) = 12u8
     for (i in range(768)) {
         var _t6 = pack
         pack = pack + 1
@@ -323,26 +312,24 @@ def M_ScreenShot {
     linear = screens[2]
     I_ReadScreen(linear)
     // find a file name to save it to
-    doom_strcpy(addr(lbmname[0]), reinterpret<uint8?>("DOOM00.pcx"))
-    {
-        i = 0
-        while (i <= 99) {
-            lbmname[4] = uint8(i / 10 + '0')
-            lbmname[5] = uint8(i % 10 + '0')
-            f = invoke(doom_open, addr(lbmname[0]), reinterpret<uint8?>("wb"))
-            if (f == null) {
-                // file doesn't exist
-                break
-            }
-            invoke(doom_close, f)
-            i++
+    doom_strcpy(addr(lbmname[0]), cstr("DOOM00.pcx"))
+    i = 0
+    while (i <= 99) {
+        lbmname[4] = uint8(i / 10 + '0')
+        lbmname[5] = uint8(i % 10 + '0')
+        f = invoke(doom_open, addr(lbmname[0]), cstr("wb"))
+        if (f == null) {
+            // file doesn't exist
+            break
         }
+        invoke(doom_close, f)
+        i++
     }
     if (i == 100) {
-        I_Error(reinterpret<uint8?>("Error: M_ScreenShot: Couldn't create a PCX"))
+        I_Error(cstr("Error: M_ScreenShot: Couldn't create a PCX"))
     }
     // save the pcx file
-    WritePCXfile(addr(lbmname[0]), linear, SCREENWIDTH, SCREENHEIGHT, reinterpret<uint8?>(W_CacheLumpName(reinterpret<uint8?>("PLAYPAL"), PU_CACHE)))
-    players[consoleplayer].message = reinterpret<uint8?>("screen shot")
+    WritePCXfile(addr(lbmname[0]), linear, SCREENWIDTH, SCREENHEIGHT, reinterpret<uint8?>(W_CacheLumpName(cstr("PLAYPAL"), PU_CACHE)))
+    players[consoleplayer].message = cstr("screen shot")
 }
 

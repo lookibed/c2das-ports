@@ -10,14 +10,5 @@ struct weaponinfo_t {
     upstate, downstate, readystate, atkstate, flashstate : int
 }
 
-[init]
-def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<weaponinfo_t>) == 24 && typeinfo alignof(type<weaponinfo_t>) == 4, "weaponinfo_t: clang lays it out as size 24, align 4")
-    static_assert(typeinfo offsetof < ammo > (type<weaponinfo_t>) == 0, "weaponinfo_t.ammo: clang puts it at 0")
-    static_assert(typeinfo offsetof < upstate > (type<weaponinfo_t>) == 4, "weaponinfo_t.upstate: clang puts it at 4")
-    static_assert(typeinfo offsetof < downstate > (type<weaponinfo_t>) == 8, "weaponinfo_t.downstate: clang puts it at 8")
-    static_assert(typeinfo offsetof < readystate > (type<weaponinfo_t>) == 12, "weaponinfo_t.readystate: clang puts it at 12")
-    static_assert(typeinfo offsetof < atkstate > (type<weaponinfo_t>) == 16, "weaponinfo_t.atkstate: clang puts it at 16")
-    static_assert(typeinfo offsetof < flashstate > (type<weaponinfo_t>) == 20, "weaponinfo_t.flashstate: clang puts it at 20")
-}
+include d_items_h.layout.das.inc
 

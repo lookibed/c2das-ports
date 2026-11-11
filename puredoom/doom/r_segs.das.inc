@@ -47,7 +47,7 @@ def R_RenderMaskedSegRange(var ds : drawseg_s?; x1 : int; x2 : int) {
     curline = ds.curline
     frontsector = curline.frontsector
     backsector = curline.backsector
-    texnum = deref(texturetranslation + int(curline.sidedef.midtexture))
+    texnum = texturetranslation[int(curline.sidedef.midtexture)]
     lightnum = (int(frontsector.lightlevel) >> LIGHTSEGSHIFT) + extralight
     if (curline.v1.y == curline.v2.y) {
         lightnum--
@@ -69,7 +69,7 @@ def R_RenderMaskedSegRange(var ds : drawseg_s?; x1 : int; x2 : int) {
     // find positioning
     if ((int(curline.linedef.flags) & ML_DONTPEGBOTTOM) != 0) {
         dc_texturemid = frontsector.floorheight > backsector.floorheight ? frontsector.floorheight : backsector.floorheight
-        dc_texturemid = dc_texturemid + deref(textureheight + texnum) - viewz
+        dc_texturemid = dc_texturemid + textureheight[texnum] - viewz
     } else {
         dc_texturemid = frontsector.ceilingheight < backsector.ceilingheight ? frontsector.ceilingheight : backsector.ceilingheight
         dc_texturemid -= viewz
@@ -79,28 +79,26 @@ def R_RenderMaskedSegRange(var ds : drawseg_s?; x1 : int; x2 : int) {
         dc_colormap = fixedcolormap
     }
     // draw the columns
-    {
-        dc_x = x1
-        while (dc_x <= x2) {
-            // calculate lighting
-            if (int(deref(maskedtexturecol + dc_x)) != int(DOOM_MAXSHORT)) {
-                if (!(fixedcolormap != null)) {
-                    index = uint(spryscale >> LIGHTSCALESHIFT)
-                    if (index >= uint(MAXLIGHTSCALE)) {
-                        index = uint(MAXLIGHTSCALE - 1)
-                    }
-                    dc_colormap = deref(walllights + index)
+    dc_x = x1
+    while (dc_x <= x2) {
+        // calculate lighting
+        if (int(maskedtexturecol[dc_x]) != int(DOOM_MAXSHORT)) {
+            if (!(fixedcolormap != null)) {
+                index = uint(spryscale >> LIGHTSCALESHIFT)
+                if (index >= uint(MAXLIGHTSCALE)) {
+                    index = uint(MAXLIGHTSCALE - 1)
                 }
-                sprtopscreen = centeryfrac - FixedMul(dc_texturemid, spryscale)
-                dc_iscale = int(4294967295u / uint(spryscale))
-                // draw the texture
-                col = reinterpret<uint8?>(R_GetColumn(texnum, int(deref(maskedtexturecol + dc_x))) + -(3))
-                R_DrawMaskedColumn(col)
-                deref(maskedtexturecol + dc_x) = DOOM_MAXSHORT
+                dc_colormap = walllights[index]
             }
-            spryscale += rw_scalestep
-            dc_x++
+            sprtopscreen = centeryfrac - FixedMul(dc_texturemid, spryscale)
+            dc_iscale = int(4294967295u / uint(spryscale))
+            // draw the texture
+            col = reinterpret<uint8?>(R_GetColumn(texnum, int(maskedtexturecol[dc_x])) + -(3))
+            R_DrawMaskedColumn(col)
+            maskedtexturecol[dc_x] = DOOM_MAXSHORT
         }
+        spryscale += rw_scalestep
+        dc_x++
     }
 }
 
@@ -120,127 +118,125 @@ def R_RenderSegLoop {
     var texturecolumn : int
     var top : int
     var bottom : int
-    {
-        while (rw_x < rw_stopx) {
-            // mark floor / ceiling areas
-            yl = topfrac + HEIGHTUNIT - 1 >> HEIGHTBITS
-            // no space above wall?
-            if (yl < int(ceilingclip[rw_x]) + 1) {
-                yl = int(ceilingclip[rw_x]) + 1
-            }
-            if (int(markceiling) != 0) {
-                top = int(ceilingclip[rw_x]) + 1
-                bottom = yl - 1
-                if (bottom >= int(floorclip[rw_x])) {
-                    bottom = int(floorclip[rw_x]) - 1
-                }
-                if (top <= bottom) {
-                    deref(addr(ceilingplane.top[0]) + rw_x) = uint8(top)
-                    deref(addr(ceilingplane.bottom[0]) + rw_x) = uint8(bottom)
-                }
-            }
-            yh = bottomfrac >> HEIGHTBITS
-            if (yh >= int(floorclip[rw_x])) {
-                yh = int(floorclip[rw_x]) - 1
-            }
-            if (int(markfloor) != 0) {
-                top = yh + 1
-                bottom = int(floorclip[rw_x]) - 1
-                if (top <= int(ceilingclip[rw_x])) {
-                    top = int(ceilingclip[rw_x]) + 1
-                }
-                if (top <= bottom) {
-                    deref(addr(floorplane.top[0]) + rw_x) = uint8(top)
-                    deref(addr(floorplane.bottom[0]) + rw_x) = uint8(bottom)
-                }
-            }
-            // texturecolumn and lighting are independent of wall tiers
-            if (int(segtextured) != 0) {
-                // calculate texture offset
-                angle = rw_centerangle + xtoviewangle[rw_x] >> 19u
-                // [c2das] An angle past FINEANGLES / 2 indexes past finetangent, and the native build
-                // reads finesine, which tables.c lays right after it: that read, spelled out.
-                texturecolumn = rw_offset - FixedMul(angle >= uint(FINEANGLES / 2) ? finesine[angle - uint(FINEANGLES / 2)] : finetangent[angle], rw_distance)
-                texturecolumn >>= FRACBITS
-                // calculate lighting
-                index = uint(rw_scale >> LIGHTSCALESHIFT)
-                if (index >= uint(MAXLIGHTSCALE)) {
-                    index = uint(MAXLIGHTSCALE - 1)
-                }
-                dc_colormap = deref(walllights + index)
-                dc_x = rw_x
-                dc_iscale = int(4294967295u / uint(rw_scale))
-            }
-            // draw the wall tiers
-            if (midtexture != 0) {
-                // single sided line
-                dc_yl = yl
-                dc_yh = yh
-                dc_texturemid = rw_midtexturemid
-                dc_source = R_GetColumn(midtexture, texturecolumn)
-                invoke(colfunc)
-                ceilingclip[rw_x] = int16(viewheight)
-                floorclip[rw_x] = int16(-1)
-            } else {
-                // two sided line
-                if (toptexture != 0) {
-                    // top wall
-                    mid = pixhigh >> HEIGHTBITS
-                    pixhigh += pixhighstep
-                    if (mid >= int(floorclip[rw_x])) {
-                        mid = int(floorclip[rw_x]) - 1
-                    }
-                    if (mid >= yl) {
-                        dc_yl = yl
-                        dc_yh = mid
-                        dc_texturemid = rw_toptexturemid
-                        dc_source = R_GetColumn(toptexture, texturecolumn)
-                        invoke(colfunc)
-                        ceilingclip[rw_x] = int16(mid)
-                    } else {
-                        ceilingclip[rw_x] = int16(yl - 1)
-                    }
-                } else {
-                    // no top wall
-                    if (int(markceiling) != 0) {
-                        ceilingclip[rw_x] = int16(yl - 1)
-                    }
-                }
-                if (bottomtexture != 0) {
-                    // bottom wall
-                    mid = pixlow + HEIGHTUNIT - 1 >> HEIGHTBITS
-                    pixlow += pixlowstep
-                    // no space above wall?
-                    if (mid <= int(ceilingclip[rw_x])) {
-                        mid = int(ceilingclip[rw_x]) + 1
-                    }
-                    if (mid <= yh) {
-                        dc_yl = mid
-                        dc_yh = yh
-                        dc_texturemid = rw_bottomtexturemid
-                        dc_source = R_GetColumn(bottomtexture, texturecolumn)
-                        invoke(colfunc)
-                        floorclip[rw_x] = int16(mid)
-                    } else {
-                        floorclip[rw_x] = int16(yh + 1)
-                    }
-                } else {
-                    // no bottom wall
-                    if (int(markfloor) != 0) {
-                        floorclip[rw_x] = int16(yh + 1)
-                    }
-                }
-                if (int(maskedtexture) != 0) {
-                    // save texturecol
-                    // for backdrawing of masked mid texture
-                    deref(maskedtexturecol + rw_x) = int16(texturecolumn)
-                }
-            }
-            rw_scale += rw_scalestep
-            topfrac += topstep
-            bottomfrac += bottomstep
-            rw_x++
+    while (rw_x < rw_stopx) {
+        // mark floor / ceiling areas
+        yl = (topfrac + HEIGHTUNIT - 1) >> HEIGHTBITS
+        // no space above wall?
+        if (yl < int(ceilingclip[rw_x]) + 1) {
+            yl = int(ceilingclip[rw_x]) + 1
         }
+        if (int(markceiling) != 0) {
+            top = int(ceilingclip[rw_x]) + 1
+            bottom = yl - 1
+            if (bottom >= int(floorclip[rw_x])) {
+                bottom = int(floorclip[rw_x]) - 1
+            }
+            if (top <= bottom) {
+                addr(ceilingplane.top[0])[rw_x] = uint8(top)
+                addr(ceilingplane.bottom[0])[rw_x] = uint8(bottom)
+            }
+        }
+        yh = bottomfrac >> HEIGHTBITS
+        if (yh >= int(floorclip[rw_x])) {
+            yh = int(floorclip[rw_x]) - 1
+        }
+        if (int(markfloor) != 0) {
+            top = yh + 1
+            bottom = int(floorclip[rw_x]) - 1
+            if (top <= int(ceilingclip[rw_x])) {
+                top = int(ceilingclip[rw_x]) + 1
+            }
+            if (top <= bottom) {
+                addr(floorplane.top[0])[rw_x] = uint8(top)
+                addr(floorplane.bottom[0])[rw_x] = uint8(bottom)
+            }
+        }
+        // texturecolumn and lighting are independent of wall tiers
+        if (int(segtextured) != 0) {
+            // calculate texture offset
+            angle = (rw_centerangle + xtoviewangle[rw_x]) >> uint(ANGLETOFINESHIFT)
+            // [c2das] An angle past FINEANGLES / 2 indexes past finetangent, and the native build
+            // reads finesine, which tables.c lays right after it: that read, spelled out.
+            texturecolumn = rw_offset - FixedMul(angle >= uint(FINEANGLES / 2) ? finesine[angle - uint(FINEANGLES / 2)] : finetangent[angle], rw_distance)
+            texturecolumn >>= FRACBITS
+            // calculate lighting
+            index = uint(rw_scale >> LIGHTSCALESHIFT)
+            if (index >= uint(MAXLIGHTSCALE)) {
+                index = uint(MAXLIGHTSCALE - 1)
+            }
+            dc_colormap = walllights[index]
+            dc_x = rw_x
+            dc_iscale = int(4294967295u / uint(rw_scale))
+        }
+        // draw the wall tiers
+        if (midtexture != 0) {
+            // single sided line
+            dc_yl = yl
+            dc_yh = yh
+            dc_texturemid = rw_midtexturemid
+            dc_source = R_GetColumn(midtexture, texturecolumn)
+            invoke(colfunc)
+            ceilingclip[rw_x] = int16(viewheight)
+            floorclip[rw_x] = int16(-1)
+        } else {
+            // two sided line
+            if (toptexture != 0) {
+                // top wall
+                mid = pixhigh >> HEIGHTBITS
+                pixhigh += pixhighstep
+                if (mid >= int(floorclip[rw_x])) {
+                    mid = int(floorclip[rw_x]) - 1
+                }
+                if (mid >= yl) {
+                    dc_yl = yl
+                    dc_yh = mid
+                    dc_texturemid = rw_toptexturemid
+                    dc_source = R_GetColumn(toptexture, texturecolumn)
+                    invoke(colfunc)
+                    ceilingclip[rw_x] = int16(mid)
+                } else {
+                    ceilingclip[rw_x] = int16(yl - 1)
+                }
+            } else {
+                // no top wall
+                if (int(markceiling) != 0) {
+                    ceilingclip[rw_x] = int16(yl - 1)
+                }
+            }
+            if (bottomtexture != 0) {
+                // bottom wall
+                mid = (pixlow + HEIGHTUNIT - 1) >> HEIGHTBITS
+                pixlow += pixlowstep
+                // no space above wall?
+                if (mid <= int(ceilingclip[rw_x])) {
+                    mid = int(ceilingclip[rw_x]) + 1
+                }
+                if (mid <= yh) {
+                    dc_yl = mid
+                    dc_yh = yh
+                    dc_texturemid = rw_bottomtexturemid
+                    dc_source = R_GetColumn(bottomtexture, texturecolumn)
+                    invoke(colfunc)
+                    floorclip[rw_x] = int16(mid)
+                } else {
+                    floorclip[rw_x] = int16(yh + 1)
+                }
+            } else {
+                // no bottom wall
+                if (int(markfloor) != 0) {
+                    floorclip[rw_x] = int16(yh + 1)
+                }
+            }
+            if (int(maskedtexture) != 0) {
+                // save texturecol
+                // for backdrawing of masked mid texture
+                maskedtexturecol[rw_x] = int16(texturecolumn)
+            }
+        }
+        rw_scale += rw_scalestep
+        topfrac += topstep
+        bottomfrac += bottomstep
+        rw_x++
     }
 }
 
@@ -261,9 +257,9 @@ def R_StoreWallRange(start : int; stop : int) {
     }
     if (start >= viewwidth || start > stop) {
         // I_Error("Error: Bad R_RenderWallRange: %i to %i", start, stop);
-        doom_strcpy(addr(error_buf[0]), reinterpret<uint8?>("Error: Bad R_RenderWallRange: "))
+        doom_strcpy(addr(error_buf[0]), cstr("Error: Bad R_RenderWallRange: "))
         doom_concat(addr(error_buf[0]), doom_itoa(start, 10))
-        doom_concat(addr(error_buf[0]), reinterpret<uint8?>(" to "))
+        doom_concat(addr(error_buf[0]), cstr(" to "))
         doom_concat(addr(error_buf[0]), doom_itoa(stop, 10))
         I_Error(addr(error_buf[0]))
     }
@@ -283,7 +279,7 @@ def R_StoreWallRange(start : int; stop : int) {
     }
     distangle = uint(ANG90) - offsetangle
     hyp = R_PointToDist(curline.v1.x, curline.v1.y)
-    sineval = finesine[distangle >> 19u]
+    sineval = finesine[distangle >> uint(ANGLETOFINESHIFT)]
     rw_distance = FixedMul(hyp, sineval)
     rw_x = start
     ds_p.x1 = rw_x
@@ -312,12 +308,12 @@ def R_StoreWallRange(start : int; stop : int) {
     ds_p.maskedtexturecol = null
     if (!(backsector != null)) {
         // single sided line
-        midtexture = deref(texturetranslation + int(sidedef.midtexture))
+        midtexture = texturetranslation[int(sidedef.midtexture)]
         // a single sided line is terminal, so it must mark ends
         markceiling = doom_boolean._c_true
         markfloor = markceiling
         if ((int(linedef.flags) & ML_DONTPEGBOTTOM) != 0) {
-            vtop = frontsector.floorheight + deref(textureheight + int(sidedef.midtexture))
+            vtop = frontsector.floorheight + textureheight[int(sidedef.midtexture)]
             // bottom of texture at bottom
             rw_midtexturemid = vtop - viewz
         } else {
@@ -386,19 +382,19 @@ def R_StoreWallRange(start : int; stop : int) {
         }
         if (worldhigh < worldtop) {
             // top texture
-            toptexture = deref(texturetranslation + int(sidedef.toptexture))
+            toptexture = texturetranslation[int(sidedef.toptexture)]
             if ((int(linedef.flags) & ML_DONTPEGTOP) != 0) {
                 // top of texture at top
                 rw_toptexturemid = worldtop
             } else {
-                vtop = backsector.ceilingheight + deref(textureheight + int(sidedef.toptexture))
+                vtop = backsector.ceilingheight + textureheight[int(sidedef.toptexture)]
                 // bottom of texture
                 rw_toptexturemid = vtop - viewz
             }
         }
         if (worldlow > worldbottom) {
             // bottom texture
-            bottomtexture = deref(texturetranslation + int(sidedef.bottomtexture))
+            bottomtexture = texturetranslation[int(sidedef.bottomtexture)]
             if ((int(linedef.flags) & ML_DONTPEGBOTTOM) != 0) {
                 // bottom of texture at bottom
                 // top of texture at top
@@ -429,7 +425,7 @@ def R_StoreWallRange(start : int; stop : int) {
         if (offsetangle > uint(ANG90)) {
             offsetangle = uint(ANG90)
         }
-        sineval = finesine[offsetangle >> 19u]
+        sineval = finesine[offsetangle >> uint(ANGLETOFINESHIFT)]
         rw_offset = FixedMul(hyp, sineval)
         if (rw_normalangle - uint(rw_angle1) < ANG180) {
             rw_offset = -rw_offset
