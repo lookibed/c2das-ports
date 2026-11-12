@@ -6,11 +6,14 @@ options stack = 8388608
 options strict_aliasing = false
 require c_runtime/c_args
 require c_runtime/c_bounds
+require c_runtime/c_do_while
 require c_runtime/c_exit
 require c_runtime/c_function
+require c_runtime/c_switch
 require c_runtime/c_union
 require c_runtime/cstr
 require c_runtime/enum_from_int
+require c_runtime/int_of
 require c_runtime/printf
 require crt
 
@@ -814,7 +817,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < luma > (type<image_t>) == 16, "image_t.luma: clang puts it at 16")
     static_assert(typeinfo offsetof < cb > (type<image_t>) == 24, "image_t.cb: clang puts it at 24")
     static_assert(typeinfo offsetof < cr > (type<image_t>) == 32, "image_t.cr: clang puts it at 32")
-    static_assert(typeinfo sizeof(type<hrdParameters_t>) == 412 && typeinfo alignof(type<hrdParameters_t>) == 4, "hrdParameters_t: clang lays it out as size 412, align 4")
+    static_assert(typeinfo sizeof(type<hrdParameters_t>) == 412 && typeinfo alignof(type<hrdParameters_t>) == 4,
+            "hrdParameters_t: clang lays it out as size 412, align 4")
     static_assert(typeinfo offsetof < cpbCnt > (type<hrdParameters_t>) == 0, "hrdParameters_t.cpbCnt: clang puts it at 0")
     static_assert(typeinfo offsetof < bitRateScale > (type<hrdParameters_t>) == 4, "hrdParameters_t.bitRateScale: clang puts it at 4")
     static_assert(typeinfo offsetof < cpbSizeScale > (type<hrdParameters_t>) == 8, "hrdParameters_t.cpbSizeScale: clang puts it at 8")
@@ -825,7 +829,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < cpbRemovalDelayLength > (type<hrdParameters_t>) == 400, "hrdParameters_t.cpbRemovalDelayLength: clang puts it at 400")
     static_assert(typeinfo offsetof < dpbOutputDelayLength > (type<hrdParameters_t>) == 404, "hrdParameters_t.dpbOutputDelayLength: clang puts it at 404")
     static_assert(typeinfo offsetof < timeOffsetLength > (type<hrdParameters_t>) == 408, "hrdParameters_t.timeOffsetLength: clang puts it at 408")
-    static_assert(typeinfo sizeof(type<vuiParameters_t>) == 952 && typeinfo alignof(type<vuiParameters_t>) == 4, "vuiParameters_t: clang lays it out as size 952, align 4")
+    static_assert(typeinfo sizeof(type<vuiParameters_t>) == 952 && typeinfo alignof(type<vuiParameters_t>) == 4,
+            "vuiParameters_t: clang lays it out as size 952, align 4")
     static_assert(typeinfo offsetof < aspectRatioPresentFlag > (type<vuiParameters_t>) == 0, "vuiParameters_t.aspectRatioPresentFlag: clang puts it at 0")
     static_assert(typeinfo offsetof < aspectRatioIdc > (type<vuiParameters_t>) == 4, "vuiParameters_t.aspectRatioIdc: clang puts it at 4")
     static_assert(typeinfo offsetof < sarWidth > (type<vuiParameters_t>) == 8, "vuiParameters_t.sarWidth: clang puts it at 8")
@@ -860,7 +865,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < log2MaxMvLengthVertical > (type<vuiParameters_t>) == 940, "vuiParameters_t.log2MaxMvLengthVertical: clang puts it at 940")
     static_assert(typeinfo offsetof < numReorderFrames > (type<vuiParameters_t>) == 944, "vuiParameters_t.numReorderFrames: clang puts it at 944")
     static_assert(typeinfo offsetof < maxDecFrameBuffering > (type<vuiParameters_t>) == 948, "vuiParameters_t.maxDecFrameBuffering: clang puts it at 948")
-    static_assert(typeinfo sizeof(type<seqParamSet_t>) == 104 && typeinfo alignof(type<seqParamSet_t>) == 8, "seqParamSet_t: clang lays it out as size 104, align 8")
+    static_assert(typeinfo sizeof(type<seqParamSet_t>) == 104 && typeinfo alignof(type<seqParamSet_t>) == 8,
+            "seqParamSet_t: clang lays it out as size 104, align 8")
     static_assert(typeinfo offsetof < profileIdc > (type<seqParamSet_t>) == 0, "seqParamSet_t.profileIdc: clang puts it at 0")
     static_assert(typeinfo offsetof < levelIdc > (type<seqParamSet_t>) == 4, "seqParamSet_t.levelIdc: clang puts it at 4")
     static_assert(typeinfo offsetof < seqParameterSetId > (type<seqParamSet_t>) == 8, "seqParamSet_t.seqParameterSetId: clang puts it at 8")
@@ -884,7 +890,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < vuiParametersPresentFlag > (type<seqParamSet_t>) == 84, "seqParamSet_t.vuiParametersPresentFlag: clang puts it at 84")
     static_assert(typeinfo offsetof < vuiParameters > (type<seqParamSet_t>) == 88, "seqParamSet_t.vuiParameters: clang puts it at 88")
     static_assert(typeinfo offsetof < maxDpbSize > (type<seqParamSet_t>) == 96, "seqParamSet_t.maxDpbSize: clang puts it at 96")
-    static_assert(typeinfo sizeof(type<picParamSet_t>) == 96 && typeinfo alignof(type<picParamSet_t>) == 8, "picParamSet_t: clang lays it out as size 96, align 8")
+    static_assert(typeinfo sizeof(type<picParamSet_t>) == 96 && typeinfo alignof(type<picParamSet_t>) == 8,
+            "picParamSet_t: clang lays it out as size 96, align 8")
     static_assert(typeinfo offsetof < picParameterSetId > (type<picParamSet_t>) == 0, "picParamSet_t.picParameterSetId: clang puts it at 0")
     static_assert(typeinfo offsetof < seqParameterSetId > (type<picParamSet_t>) == 4, "picParamSet_t.seqParameterSetId: clang puts it at 4")
     static_assert(typeinfo offsetof < picOrderPresentFlag > (type<picParamSet_t>) == 8, "picParamSet_t.picOrderPresentFlag: clang puts it at 8")
@@ -906,25 +913,30 @@ def private c2das_layout_check {
     static_assert(typeinfo sizeof(type<nalUnit_t>) == 8 && typeinfo alignof(type<nalUnit_t>) == 4, "nalUnit_t: clang lays it out as size 8, align 4")
     static_assert(typeinfo offsetof < nalUnitType > (type<nalUnit_t>) == 0, "nalUnit_t.nalUnitType: clang puts it at 0")
     static_assert(typeinfo offsetof < nalRefIdc > (type<nalUnit_t>) == 4, "nalUnit_t.nalRefIdc: clang puts it at 4")
-    static_assert(typeinfo sizeof(type<refPicListReorderingOperation_t>) == 12 && typeinfo alignof(type<refPicListReorderingOperation_t>) == 4, "refPicListReorderingOperation_t: clang lays it out as size 12, align 4")
+    static_assert(typeinfo sizeof(type<refPicListReorderingOperation_t>) == 12 && typeinfo alignof(type<refPicListReorderingOperation_t>) == 4,
+            "refPicListReorderingOperation_t: clang lays it out as size 12, align 4")
     static_assert(typeinfo offsetof < reorderingOfPicNumsIdc > (type<refPicListReorderingOperation_t>) == 0, "refPicListReorderingOperation_t.reorderingOfPicNumsIdc: clang puts it at 0")
     static_assert(typeinfo offsetof < absDiffPicNum > (type<refPicListReorderingOperation_t>) == 4, "refPicListReorderingOperation_t.absDiffPicNum: clang puts it at 4")
     static_assert(typeinfo offsetof < longTermPicNum > (type<refPicListReorderingOperation_t>) == 8, "refPicListReorderingOperation_t.longTermPicNum: clang puts it at 8")
-    static_assert(typeinfo sizeof(type<refPicListReordering_t>) == 208 && typeinfo alignof(type<refPicListReordering_t>) == 4, "refPicListReordering_t: clang lays it out as size 208, align 4")
+    static_assert(typeinfo sizeof(type<refPicListReordering_t>) == 208 && typeinfo alignof(type<refPicListReordering_t>) == 4,
+            "refPicListReordering_t: clang lays it out as size 208, align 4")
     static_assert(typeinfo offsetof < refPicListReorderingFlagL0 > (type<refPicListReordering_t>) == 0, "refPicListReordering_t.refPicListReorderingFlagL0: clang puts it at 0")
     static_assert(typeinfo offsetof < command > (type<refPicListReordering_t>) == 4, "refPicListReordering_t.command: clang puts it at 4")
-    static_assert(typeinfo sizeof(type<memoryManagementOperation_t>) == 20 && typeinfo alignof(type<memoryManagementOperation_t>) == 4, "memoryManagementOperation_t: clang lays it out as size 20, align 4")
+    static_assert(typeinfo sizeof(type<memoryManagementOperation_t>) == 20 && typeinfo alignof(type<memoryManagementOperation_t>) == 4,
+            "memoryManagementOperation_t: clang lays it out as size 20, align 4")
     static_assert(typeinfo offsetof < memoryManagementControlOperation > (type<memoryManagementOperation_t>) == 0, "memoryManagementOperation_t.memoryManagementControlOperation: clang puts it at 0")
     static_assert(typeinfo offsetof < differenceOfPicNums > (type<memoryManagementOperation_t>) == 4, "memoryManagementOperation_t.differenceOfPicNums: clang puts it at 4")
     static_assert(typeinfo offsetof < longTermPicNum > (type<memoryManagementOperation_t>) == 8, "memoryManagementOperation_t.longTermPicNum: clang puts it at 8")
     static_assert(typeinfo offsetof < longTermFrameIdx > (type<memoryManagementOperation_t>) == 12, "memoryManagementOperation_t.longTermFrameIdx: clang puts it at 12")
     static_assert(typeinfo offsetof < maxLongTermFrameIdx > (type<memoryManagementOperation_t>) == 16, "memoryManagementOperation_t.maxLongTermFrameIdx: clang puts it at 16")
-    static_assert(typeinfo sizeof(type<decRefPicMarking_t>) == 712 && typeinfo alignof(type<decRefPicMarking_t>) == 4, "decRefPicMarking_t: clang lays it out as size 712, align 4")
+    static_assert(typeinfo sizeof(type<decRefPicMarking_t>) == 712 && typeinfo alignof(type<decRefPicMarking_t>) == 4,
+            "decRefPicMarking_t: clang lays it out as size 712, align 4")
     static_assert(typeinfo offsetof < noOutputOfPriorPicsFlag > (type<decRefPicMarking_t>) == 0, "decRefPicMarking_t.noOutputOfPriorPicsFlag: clang puts it at 0")
     static_assert(typeinfo offsetof < longTermReferenceFlag > (type<decRefPicMarking_t>) == 4, "decRefPicMarking_t.longTermReferenceFlag: clang puts it at 4")
     static_assert(typeinfo offsetof < adaptiveRefPicMarkingModeFlag > (type<decRefPicMarking_t>) == 8, "decRefPicMarking_t.adaptiveRefPicMarkingModeFlag: clang puts it at 8")
     static_assert(typeinfo offsetof < operation > (type<decRefPicMarking_t>) == 12, "decRefPicMarking_t.operation: clang puts it at 12")
-    static_assert(typeinfo sizeof(type<sliceHeader_t>) == 988 && typeinfo alignof(type<sliceHeader_t>) == 4, "sliceHeader_t: clang lays it out as size 988, align 4")
+    static_assert(typeinfo sizeof(type<sliceHeader_t>) == 988 && typeinfo alignof(type<sliceHeader_t>) == 4,
+            "sliceHeader_t: clang lays it out as size 988, align 4")
     static_assert(typeinfo offsetof < firstMbInSlice > (type<sliceHeader_t>) == 0, "sliceHeader_t.firstMbInSlice: clang puts it at 0")
     static_assert(typeinfo offsetof < sliceType > (type<sliceHeader_t>) == 4, "sliceHeader_t.sliceType: clang puts it at 4")
     static_assert(typeinfo offsetof < picParameterSetId > (type<sliceHeader_t>) == 8, "sliceHeader_t.picParameterSetId: clang puts it at 8")
@@ -954,7 +966,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < picId > (type<dpbPicture_t>) == 36, "dpbPicture_t.picId: clang puts it at 36")
     static_assert(typeinfo offsetof < numErrMbs > (type<dpbPicture_t>) == 40, "dpbPicture_t.numErrMbs: clang puts it at 40")
     static_assert(typeinfo offsetof < isIdr > (type<dpbPicture_t>) == 44, "dpbPicture_t.isIdr: clang puts it at 44")
-    static_assert(typeinfo sizeof(type<dpbOutPicture_t>) == 24 && typeinfo alignof(type<dpbOutPicture_t>) == 8, "dpbOutPicture_t: clang lays it out as size 24, align 8")
+    static_assert(typeinfo sizeof(type<dpbOutPicture_t>) == 24 && typeinfo alignof(type<dpbOutPicture_t>) == 8,
+            "dpbOutPicture_t: clang lays it out as size 24, align 8")
     static_assert(typeinfo offsetof < data > (type<dpbOutPicture_t>) == 0, "dpbOutPicture_t.data: clang puts it at 0")
     static_assert(typeinfo offsetof < picId > (type<dpbOutPicture_t>) == 8, "dpbOutPicture_t.picId: clang puts it at 8")
     static_assert(typeinfo offsetof < numErrMbs > (type<dpbOutPicture_t>) == 12, "dpbOutPicture_t.numErrMbs: clang puts it at 12")
@@ -993,7 +1006,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < totalCoeff > (type<residual_t>) == 0, "residual_t.totalCoeff: clang puts it at 0")
     static_assert(typeinfo offsetof < level > (type<residual_t>) == 56, "residual_t.level: clang puts it at 56")
     static_assert(typeinfo offsetof < coeffMap > (type<residual_t>) == 1720, "residual_t.coeffMap: clang puts it at 1720")
-    static_assert(typeinfo sizeof(type<macroblockLayer_t>) == 2088 && typeinfo alignof(type<macroblockLayer_t>) == 4, "macroblockLayer_t: clang lays it out as size 2088, align 4")
+    static_assert(typeinfo sizeof(type<macroblockLayer_t>) == 2088 && typeinfo alignof(type<macroblockLayer_t>) == 4,
+            "macroblockLayer_t: clang lays it out as size 2088, align 4")
     static_assert(typeinfo offsetof < mbType > (type<macroblockLayer_t>) == 0, "macroblockLayer_t.mbType: clang puts it at 0")
     static_assert(typeinfo offsetof < codedBlockPattern > (type<macroblockLayer_t>) == 4, "macroblockLayer_t.codedBlockPattern: clang puts it at 4")
     static_assert(typeinfo offsetof < mbQpDelta > (type<macroblockLayer_t>) == 8, "macroblockLayer_t.mbQpDelta: clang puts it at 8")
@@ -1023,7 +1037,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < prevPicOrderCntMsb > (type<pocStorage_t>) == 4, "pocStorage_t.prevPicOrderCntMsb: clang puts it at 4")
     static_assert(typeinfo offsetof < prevFrameNum > (type<pocStorage_t>) == 8, "pocStorage_t.prevFrameNum: clang puts it at 8")
     static_assert(typeinfo offsetof < prevFrameNumOffset > (type<pocStorage_t>) == 12, "pocStorage_t.prevFrameNumOffset: clang puts it at 12")
-    static_assert(typeinfo sizeof(type<sliceStorage_t>) == 12 && typeinfo alignof(type<sliceStorage_t>) == 4, "sliceStorage_t: clang lays it out as size 12, align 4")
+    static_assert(typeinfo sizeof(type<sliceStorage_t>) == 12 && typeinfo alignof(type<sliceStorage_t>) == 4,
+            "sliceStorage_t: clang lays it out as size 12, align 4")
     static_assert(typeinfo offsetof < sliceId > (type<sliceStorage_t>) == 0, "sliceStorage_t.sliceId: clang puts it at 0")
     static_assert(typeinfo offsetof < numDecodedMbs > (type<sliceStorage_t>) == 4, "sliceStorage_t.numDecodedMbs: clang puts it at 4")
     static_assert(typeinfo offsetof < lastMbAddr > (type<sliceStorage_t>) == 8, "sliceStorage_t.lastMbAddr: clang puts it at 8")
@@ -1068,7 +1083,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < intraConcealmentFlag > (type<storage>) == 4628, "storage.intraConcealmentFlag: clang puts it at 4628")
     static_assert(typeinfo offsetof < conversionBuffer > (type<storage>) == 4632, "storage.conversionBuffer: clang puts it at 4632")
     static_assert(typeinfo offsetof < conversionBufferSize > (type<storage>) == 4640, "storage.conversionBufferSize: clang puts it at 4640")
-    static_assert(typeinfo sizeof(type<edgeThreshold_t>) == 16 && typeinfo alignof(type<edgeThreshold_t>) == 8, "edgeThreshold_t: clang lays it out as size 16, align 8")
+    static_assert(typeinfo sizeof(type<edgeThreshold_t>) == 16 && typeinfo alignof(type<edgeThreshold_t>) == 8,
+            "edgeThreshold_t: clang lays it out as size 16, align 8")
     static_assert(typeinfo offsetof < tc0 > (type<edgeThreshold_t>) == 0, "edgeThreshold_t.tc0: clang puts it at 0")
     static_assert(typeinfo offsetof < alpha > (type<edgeThreshold_t>) == 8, "edgeThreshold_t.alpha: clang puts it at 8")
     static_assert(typeinfo offsetof < beta > (type<edgeThreshold_t>) == 12, "edgeThreshold_t.beta: clang puts it at 12")
@@ -1078,15 +1094,18 @@ def private c2das_layout_check {
     static_assert(typeinfo sizeof(type<neighbour_t>) == 8 && typeinfo alignof(type<neighbour_t>) == 4, "neighbour_t: clang lays it out as size 8, align 4")
     static_assert(typeinfo offsetof < mb > (type<neighbour_t>) == 0, "neighbour_t.mb: clang puts it at 0")
     static_assert(typeinfo offsetof < index > (type<neighbour_t>) == 4, "neighbour_t.index: clang puts it at 4")
-    static_assert(typeinfo sizeof(type<interNeighbour_t>) == 12 && typeinfo alignof(type<interNeighbour_t>) == 4, "interNeighbour_t: clang lays it out as size 12, align 4")
+    static_assert(typeinfo sizeof(type<interNeighbour_t>) == 12 && typeinfo alignof(type<interNeighbour_t>) == 4,
+            "interNeighbour_t: clang lays it out as size 12, align 4")
     static_assert(typeinfo offsetof < available > (type<interNeighbour_t>) == 0, "interNeighbour_t.available: clang puts it at 0")
     static_assert(typeinfo offsetof < refIndex > (type<interNeighbour_t>) == 4, "interNeighbour_t.refIndex: clang puts it at 4")
     static_assert(typeinfo offsetof < mv > (type<interNeighbour_t>) == 8, "interNeighbour_t.mv: clang puts it at 8")
-    static_assert(typeinfo sizeof(type<seiBufferingPeriod_t>) == 260 && typeinfo alignof(type<seiBufferingPeriod_t>) == 4, "seiBufferingPeriod_t: clang lays it out as size 260, align 4")
+    static_assert(typeinfo sizeof(type<seiBufferingPeriod_t>) == 260 && typeinfo alignof(type<seiBufferingPeriod_t>) == 4,
+            "seiBufferingPeriod_t: clang lays it out as size 260, align 4")
     static_assert(typeinfo offsetof < seqParameterSetId > (type<seiBufferingPeriod_t>) == 0, "seiBufferingPeriod_t.seqParameterSetId: clang puts it at 0")
     static_assert(typeinfo offsetof < initialCpbRemovalDelay > (type<seiBufferingPeriod_t>) == 4, "seiBufferingPeriod_t.initialCpbRemovalDelay: clang puts it at 4")
     static_assert(typeinfo offsetof < initialCpbRemovalDelayOffset > (type<seiBufferingPeriod_t>) == 132, "seiBufferingPeriod_t.initialCpbRemovalDelayOffset: clang puts it at 132")
-    static_assert(typeinfo sizeof(type<seiPicTiming_t>) == 204 && typeinfo alignof(type<seiPicTiming_t>) == 4, "seiPicTiming_t: clang lays it out as size 204, align 4")
+    static_assert(typeinfo sizeof(type<seiPicTiming_t>) == 204 && typeinfo alignof(type<seiPicTiming_t>) == 4,
+            "seiPicTiming_t: clang lays it out as size 204, align 4")
     static_assert(typeinfo offsetof < cpbRemovalDelay > (type<seiPicTiming_t>) == 0, "seiPicTiming_t.cpbRemovalDelay: clang puts it at 0")
     static_assert(typeinfo offsetof < dpbOutputDelay > (type<seiPicTiming_t>) == 4, "seiPicTiming_t.dpbOutputDelay: clang puts it at 4")
     static_assert(typeinfo offsetof < picStruct > (type<seiPicTiming_t>) == 8, "seiPicTiming_t.picStruct: clang puts it at 8")
@@ -1106,7 +1125,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < hoursFlag > (type<seiPicTiming_t>) == 168, "seiPicTiming_t.hoursFlag: clang puts it at 168")
     static_assert(typeinfo offsetof < hoursValue > (type<seiPicTiming_t>) == 180, "seiPicTiming_t.hoursValue: clang puts it at 180")
     static_assert(typeinfo offsetof < timeOffset > (type<seiPicTiming_t>) == 192, "seiPicTiming_t.timeOffset: clang puts it at 192")
-    static_assert(typeinfo sizeof(type<seiPanScanRect_t>) == 528 && typeinfo alignof(type<seiPanScanRect_t>) == 4, "seiPanScanRect_t: clang lays it out as size 528, align 4")
+    static_assert(typeinfo sizeof(type<seiPanScanRect_t>) == 528 && typeinfo alignof(type<seiPanScanRect_t>) == 4,
+            "seiPanScanRect_t: clang lays it out as size 528, align 4")
     static_assert(typeinfo offsetof < panScanRectId > (type<seiPanScanRect_t>) == 0, "seiPanScanRect_t.panScanRectId: clang puts it at 0")
     static_assert(typeinfo offsetof < panScanRectCancelFlag > (type<seiPanScanRect_t>) == 4, "seiPanScanRect_t.panScanRectCancelFlag: clang puts it at 4")
     static_assert(typeinfo offsetof < panScanCnt > (type<seiPanScanRect_t>) == 8, "seiPanScanRect_t.panScanCnt: clang puts it at 8")
@@ -1115,25 +1135,30 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < panScanRectTopOffset > (type<seiPanScanRect_t>) == 268, "seiPanScanRect_t.panScanRectTopOffset: clang puts it at 268")
     static_assert(typeinfo offsetof < panScanRectBottomOffset > (type<seiPanScanRect_t>) == 396, "seiPanScanRect_t.panScanRectBottomOffset: clang puts it at 396")
     static_assert(typeinfo offsetof < panScanRectRepetitionPeriod > (type<seiPanScanRect_t>) == 524, "seiPanScanRect_t.panScanRectRepetitionPeriod: clang puts it at 524")
-    static_assert(typeinfo sizeof(type<seiUserDataRegisteredItuTT35_t>) == 24 && typeinfo alignof(type<seiUserDataRegisteredItuTT35_t>) == 8, "seiUserDataRegisteredItuTT35_t: clang lays it out as size 24, align 8")
+    static_assert(typeinfo sizeof(type<seiUserDataRegisteredItuTT35_t>) == 24 && typeinfo alignof(type<seiUserDataRegisteredItuTT35_t>) == 8,
+            "seiUserDataRegisteredItuTT35_t: clang lays it out as size 24, align 8")
     static_assert(typeinfo offsetof < ituTT35CountryCode > (type<seiUserDataRegisteredItuTT35_t>) == 0, "seiUserDataRegisteredItuTT35_t.ituTT35CountryCode: clang puts it at 0")
     static_assert(typeinfo offsetof < ituTT35CountryCodeExtensionByte > (type<seiUserDataRegisteredItuTT35_t>) == 4, "seiUserDataRegisteredItuTT35_t.ituTT35CountryCodeExtensionByte: clang puts it at 4")
     static_assert(typeinfo offsetof < ituTT35PayloadByte > (type<seiUserDataRegisteredItuTT35_t>) == 8, "seiUserDataRegisteredItuTT35_t.ituTT35PayloadByte: clang puts it at 8")
     static_assert(typeinfo offsetof < numPayloadBytes > (type<seiUserDataRegisteredItuTT35_t>) == 16, "seiUserDataRegisteredItuTT35_t.numPayloadBytes: clang puts it at 16")
-    static_assert(typeinfo sizeof(type<seiUserDataUnregistered_t>) == 32 && typeinfo alignof(type<seiUserDataUnregistered_t>) == 8, "seiUserDataUnregistered_t: clang lays it out as size 32, align 8")
+    static_assert(typeinfo sizeof(type<seiUserDataUnregistered_t>) == 32 && typeinfo alignof(type<seiUserDataUnregistered_t>) == 8,
+            "seiUserDataUnregistered_t: clang lays it out as size 32, align 8")
     static_assert(typeinfo offsetof < uuidIsoIec11578 > (type<seiUserDataUnregistered_t>) == 0, "seiUserDataUnregistered_t.uuidIsoIec11578: clang puts it at 0")
     static_assert(typeinfo offsetof < userDataPayloadByte > (type<seiUserDataUnregistered_t>) == 16, "seiUserDataUnregistered_t.userDataPayloadByte: clang puts it at 16")
     static_assert(typeinfo offsetof < numPayloadBytes > (type<seiUserDataUnregistered_t>) == 24, "seiUserDataUnregistered_t.numPayloadBytes: clang puts it at 24")
-    static_assert(typeinfo sizeof(type<seiRecoveryPoint_t>) == 16 && typeinfo alignof(type<seiRecoveryPoint_t>) == 4, "seiRecoveryPoint_t: clang lays it out as size 16, align 4")
+    static_assert(typeinfo sizeof(type<seiRecoveryPoint_t>) == 16 && typeinfo alignof(type<seiRecoveryPoint_t>) == 4,
+            "seiRecoveryPoint_t: clang lays it out as size 16, align 4")
     static_assert(typeinfo offsetof < recoveryFrameCnt > (type<seiRecoveryPoint_t>) == 0, "seiRecoveryPoint_t.recoveryFrameCnt: clang puts it at 0")
     static_assert(typeinfo offsetof < exactMatchFlag > (type<seiRecoveryPoint_t>) == 4, "seiRecoveryPoint_t.exactMatchFlag: clang puts it at 4")
     static_assert(typeinfo offsetof < brokenLinkFlag > (type<seiRecoveryPoint_t>) == 8, "seiRecoveryPoint_t.brokenLinkFlag: clang puts it at 8")
     static_assert(typeinfo offsetof < changingSliceGroupIdc > (type<seiRecoveryPoint_t>) == 12, "seiRecoveryPoint_t.changingSliceGroupIdc: clang puts it at 12")
-    static_assert(typeinfo sizeof(type<seiDecRefPicMarkingRepetition_t>) == 720 && typeinfo alignof(type<seiDecRefPicMarkingRepetition_t>) == 4, "seiDecRefPicMarkingRepetition_t: clang lays it out as size 720, align 4")
+    static_assert(typeinfo sizeof(type<seiDecRefPicMarkingRepetition_t>) == 720 && typeinfo alignof(type<seiDecRefPicMarkingRepetition_t>) == 4,
+            "seiDecRefPicMarkingRepetition_t: clang lays it out as size 720, align 4")
     static_assert(typeinfo offsetof < originalIdrFlag > (type<seiDecRefPicMarkingRepetition_t>) == 0, "seiDecRefPicMarkingRepetition_t.originalIdrFlag: clang puts it at 0")
     static_assert(typeinfo offsetof < originalFrameNum > (type<seiDecRefPicMarkingRepetition_t>) == 4, "seiDecRefPicMarkingRepetition_t.originalFrameNum: clang puts it at 4")
     static_assert(typeinfo offsetof < decRefPicMarking > (type<seiDecRefPicMarkingRepetition_t>) == 8, "seiDecRefPicMarkingRepetition_t.decRefPicMarking: clang puts it at 8")
-    static_assert(typeinfo sizeof(type<seiSparePic_t>) == 464 && typeinfo alignof(type<seiSparePic_t>) == 8, "seiSparePic_t: clang lays it out as size 464, align 8")
+    static_assert(typeinfo sizeof(type<seiSparePic_t>) == 464 && typeinfo alignof(type<seiSparePic_t>) == 8,
+            "seiSparePic_t: clang lays it out as size 464, align 8")
     static_assert(typeinfo offsetof < targetFrameNum > (type<seiSparePic_t>) == 0, "seiSparePic_t.targetFrameNum: clang puts it at 0")
     static_assert(typeinfo offsetof < spareFieldFlag > (type<seiSparePic_t>) == 4, "seiSparePic_t.spareFieldFlag: clang puts it at 4")
     static_assert(typeinfo offsetof < targetBottomFieldFlag > (type<seiSparePic_t>) == 8, "seiSparePic_t.targetBottomFieldFlag: clang puts it at 8")
@@ -1143,12 +1168,14 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < spareAreaIdc > (type<seiSparePic_t>) == 144, "seiSparePic_t.spareAreaIdc: clang puts it at 144")
     static_assert(typeinfo offsetof < spareUnitFlag > (type<seiSparePic_t>) == 208, "seiSparePic_t.spareUnitFlag: clang puts it at 208")
     static_assert(typeinfo offsetof < zeroRunLength > (type<seiSparePic_t>) == 336, "seiSparePic_t.zeroRunLength: clang puts it at 336")
-    static_assert(typeinfo sizeof(type<seiSceneInfo_t>) == 16 && typeinfo alignof(type<seiSceneInfo_t>) == 4, "seiSceneInfo_t: clang lays it out as size 16, align 4")
+    static_assert(typeinfo sizeof(type<seiSceneInfo_t>) == 16 && typeinfo alignof(type<seiSceneInfo_t>) == 4,
+            "seiSceneInfo_t: clang lays it out as size 16, align 4")
     static_assert(typeinfo offsetof < sceneInfoPresentFlag > (type<seiSceneInfo_t>) == 0, "seiSceneInfo_t.sceneInfoPresentFlag: clang puts it at 0")
     static_assert(typeinfo offsetof < sceneId > (type<seiSceneInfo_t>) == 4, "seiSceneInfo_t.sceneId: clang puts it at 4")
     static_assert(typeinfo offsetof < sceneTransitionType > (type<seiSceneInfo_t>) == 8, "seiSceneInfo_t.sceneTransitionType: clang puts it at 8")
     static_assert(typeinfo offsetof < secondSceneId > (type<seiSceneInfo_t>) == 12, "seiSceneInfo_t.secondSceneId: clang puts it at 12")
-    static_assert(typeinfo sizeof(type<seiSubSeqInfo_t>) == 28 && typeinfo alignof(type<seiSubSeqInfo_t>) == 4, "seiSubSeqInfo_t: clang lays it out as size 28, align 4")
+    static_assert(typeinfo sizeof(type<seiSubSeqInfo_t>) == 28 && typeinfo alignof(type<seiSubSeqInfo_t>) == 4,
+            "seiSubSeqInfo_t: clang lays it out as size 28, align 4")
     static_assert(typeinfo offsetof < subSeqLayerNum > (type<seiSubSeqInfo_t>) == 0, "seiSubSeqInfo_t.subSeqLayerNum: clang puts it at 0")
     static_assert(typeinfo offsetof < subSeqId > (type<seiSubSeqInfo_t>) == 4, "seiSubSeqInfo_t.subSeqId: clang puts it at 4")
     static_assert(typeinfo offsetof < firstRefPicFlag > (type<seiSubSeqInfo_t>) == 8, "seiSubSeqInfo_t.firstRefPicFlag: clang puts it at 8")
@@ -1156,12 +1183,14 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < lastPicFlag > (type<seiSubSeqInfo_t>) == 16, "seiSubSeqInfo_t.lastPicFlag: clang puts it at 16")
     static_assert(typeinfo offsetof < subSeqFrameNumFlag > (type<seiSubSeqInfo_t>) == 20, "seiSubSeqInfo_t.subSeqFrameNumFlag: clang puts it at 20")
     static_assert(typeinfo offsetof < subSeqFrameNum > (type<seiSubSeqInfo_t>) == 24, "seiSubSeqInfo_t.subSeqFrameNum: clang puts it at 24")
-    static_assert(typeinfo sizeof(type<seiSubSeqLayerCharacteristics_t>) == 3076 && typeinfo alignof(type<seiSubSeqLayerCharacteristics_t>) == 4, "seiSubSeqLayerCharacteristics_t: clang lays it out as size 3076, align 4")
+    static_assert(typeinfo sizeof(type<seiSubSeqLayerCharacteristics_t>) == 3076 && typeinfo alignof(type<seiSubSeqLayerCharacteristics_t>) == 4,
+            "seiSubSeqLayerCharacteristics_t: clang lays it out as size 3076, align 4")
     static_assert(typeinfo offsetof < numSubSeqLayers > (type<seiSubSeqLayerCharacteristics_t>) == 0, "seiSubSeqLayerCharacteristics_t.numSubSeqLayers: clang puts it at 0")
     static_assert(typeinfo offsetof < accurateStatisticsFlag > (type<seiSubSeqLayerCharacteristics_t>) == 4, "seiSubSeqLayerCharacteristics_t.accurateStatisticsFlag: clang puts it at 4")
     static_assert(typeinfo offsetof < averageBitRate > (type<seiSubSeqLayerCharacteristics_t>) == 1028, "seiSubSeqLayerCharacteristics_t.averageBitRate: clang puts it at 1028")
     static_assert(typeinfo offsetof < averageFrameRate > (type<seiSubSeqLayerCharacteristics_t>) == 2052, "seiSubSeqLayerCharacteristics_t.averageFrameRate: clang puts it at 2052")
-    static_assert(typeinfo sizeof(type<seiSubSeqCharacteristics_t>) == 3108 && typeinfo alignof(type<seiSubSeqCharacteristics_t>) == 4, "seiSubSeqCharacteristics_t: clang lays it out as size 3108, align 4")
+    static_assert(typeinfo sizeof(type<seiSubSeqCharacteristics_t>) == 3108 && typeinfo alignof(type<seiSubSeqCharacteristics_t>) == 4,
+            "seiSubSeqCharacteristics_t: clang lays it out as size 3108, align 4")
     static_assert(typeinfo offsetof < subSeqLayerNum > (type<seiSubSeqCharacteristics_t>) == 0, "seiSubSeqCharacteristics_t.subSeqLayerNum: clang puts it at 0")
     static_assert(typeinfo offsetof < subSeqId > (type<seiSubSeqCharacteristics_t>) == 4, "seiSubSeqCharacteristics_t.subSeqId: clang puts it at 4")
     static_assert(typeinfo offsetof < durationFlag > (type<seiSubSeqCharacteristics_t>) == 8, "seiSubSeqCharacteristics_t.durationFlag: clang puts it at 8")
@@ -1174,25 +1203,32 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < refSubSeqLayerNum > (type<seiSubSeqCharacteristics_t>) == 36, "seiSubSeqCharacteristics_t.refSubSeqLayerNum: clang puts it at 36")
     static_assert(typeinfo offsetof < refSubSeqId > (type<seiSubSeqCharacteristics_t>) == 1060, "seiSubSeqCharacteristics_t.refSubSeqId: clang puts it at 1060")
     static_assert(typeinfo offsetof < refSubSeqDirection > (type<seiSubSeqCharacteristics_t>) == 2084, "seiSubSeqCharacteristics_t.refSubSeqDirection: clang puts it at 2084")
-    static_assert(typeinfo sizeof(type<seiFullFrameFreeze_t>) == 4 && typeinfo alignof(type<seiFullFrameFreeze_t>) == 4, "seiFullFrameFreeze_t: clang lays it out as size 4, align 4")
+    static_assert(typeinfo sizeof(type<seiFullFrameFreeze_t>) == 4 && typeinfo alignof(type<seiFullFrameFreeze_t>) == 4,
+            "seiFullFrameFreeze_t: clang lays it out as size 4, align 4")
     static_assert(typeinfo offsetof < fullFrameFreezeRepetitionPeriod > (type<seiFullFrameFreeze_t>) == 0, "seiFullFrameFreeze_t.fullFrameFreezeRepetitionPeriod: clang puts it at 0")
-    static_assert(typeinfo sizeof(type<seiFullFrameSnapshot_t>) == 4 && typeinfo alignof(type<seiFullFrameSnapshot_t>) == 4, "seiFullFrameSnapshot_t: clang lays it out as size 4, align 4")
+    static_assert(typeinfo sizeof(type<seiFullFrameSnapshot_t>) == 4 && typeinfo alignof(type<seiFullFrameSnapshot_t>) == 4,
+            "seiFullFrameSnapshot_t: clang lays it out as size 4, align 4")
     static_assert(typeinfo offsetof < snapShotId > (type<seiFullFrameSnapshot_t>) == 0, "seiFullFrameSnapshot_t.snapShotId: clang puts it at 0")
-    static_assert(typeinfo sizeof(type<seiProgressiveRefinementSegmentStart_t>) == 8 && typeinfo alignof(type<seiProgressiveRefinementSegmentStart_t>) == 4, "seiProgressiveRefinementSegmentStart_t: clang lays it out as size 8, align 4")
+    static_assert(typeinfo sizeof(type<seiProgressiveRefinementSegmentStart_t>) == 8 && typeinfo alignof(type<seiProgressiveRefinementSegmentStart_t>) == 4,
+            "seiProgressiveRefinementSegmentStart_t: clang lays it out as size 8, align 4")
     static_assert(typeinfo offsetof < progressiveRefinementId > (type<seiProgressiveRefinementSegmentStart_t>) == 0, "seiProgressiveRefinementSegmentStart_t.progressiveRefinementId: clang puts it at 0")
     static_assert(typeinfo offsetof < numRefinementSteps > (type<seiProgressiveRefinementSegmentStart_t>) == 4, "seiProgressiveRefinementSegmentStart_t.numRefinementSteps: clang puts it at 4")
-    static_assert(typeinfo sizeof(type<seiProgressiveRefinementSegmentEnd_t>) == 4 && typeinfo alignof(type<seiProgressiveRefinementSegmentEnd_t>) == 4, "seiProgressiveRefinementSegmentEnd_t: clang lays it out as size 4, align 4")
+    static_assert(typeinfo sizeof(type<seiProgressiveRefinementSegmentEnd_t>) == 4 && typeinfo alignof(type<seiProgressiveRefinementSegmentEnd_t>) == 4,
+            "seiProgressiveRefinementSegmentEnd_t: clang lays it out as size 4, align 4")
     static_assert(typeinfo offsetof < progressiveRefinementId > (type<seiProgressiveRefinementSegmentEnd_t>) == 0, "seiProgressiveRefinementSegmentEnd_t.progressiveRefinementId: clang puts it at 0")
-    static_assert(typeinfo sizeof(type<seiMotionConstrainedSliceGroupSet_t>) == 48 && typeinfo alignof(type<seiMotionConstrainedSliceGroupSet_t>) == 4, "seiMotionConstrainedSliceGroupSet_t: clang lays it out as size 48, align 4")
+    static_assert(typeinfo sizeof(type<seiMotionConstrainedSliceGroupSet_t>) == 48 && typeinfo alignof(type<seiMotionConstrainedSliceGroupSet_t>) == 4,
+            "seiMotionConstrainedSliceGroupSet_t: clang lays it out as size 48, align 4")
     static_assert(typeinfo offsetof < numSliceGroupsInSet > (type<seiMotionConstrainedSliceGroupSet_t>) == 0, "seiMotionConstrainedSliceGroupSet_t.numSliceGroupsInSet: clang puts it at 0")
     static_assert(typeinfo offsetof < sliceGroupId > (type<seiMotionConstrainedSliceGroupSet_t>) == 4, "seiMotionConstrainedSliceGroupSet_t.sliceGroupId: clang puts it at 4")
     static_assert(typeinfo offsetof < exactSampleValueMatchFlag > (type<seiMotionConstrainedSliceGroupSet_t>) == 36, "seiMotionConstrainedSliceGroupSet_t.exactSampleValueMatchFlag: clang puts it at 36")
     static_assert(typeinfo offsetof < panScanRectFlag > (type<seiMotionConstrainedSliceGroupSet_t>) == 40, "seiMotionConstrainedSliceGroupSet_t.panScanRectFlag: clang puts it at 40")
     static_assert(typeinfo offsetof < panScanRectId > (type<seiMotionConstrainedSliceGroupSet_t>) == 44, "seiMotionConstrainedSliceGroupSet_t.panScanRectId: clang puts it at 44")
-    static_assert(typeinfo sizeof(type<seiReservedSeiMessage_t>) == 16 && typeinfo alignof(type<seiReservedSeiMessage_t>) == 8, "seiReservedSeiMessage_t: clang lays it out as size 16, align 8")
+    static_assert(typeinfo sizeof(type<seiReservedSeiMessage_t>) == 16 && typeinfo alignof(type<seiReservedSeiMessage_t>) == 8,
+            "seiReservedSeiMessage_t: clang lays it out as size 16, align 8")
     static_assert(typeinfo offsetof < reservedSeiMessagePayloadByte > (type<seiReservedSeiMessage_t>) == 0, "seiReservedSeiMessage_t.reservedSeiMessagePayloadByte: clang puts it at 0")
     static_assert(typeinfo offsetof < numPayloadBytes > (type<seiReservedSeiMessage_t>) == 8, "seiReservedSeiMessage_t.numPayloadBytes: clang puts it at 8")
-    static_assert(typeinfo sizeof(type<seiMessage_t>) == 8568 && typeinfo alignof(type<seiMessage_t>) == 8, "seiMessage_t: clang lays it out as size 8568, align 8")
+    static_assert(typeinfo sizeof(type<seiMessage_t>) == 8568 && typeinfo alignof(type<seiMessage_t>) == 8,
+            "seiMessage_t: clang lays it out as size 8568, align 8")
     static_assert(typeinfo offsetof < payloadType > (type<seiMessage_t>) == 0, "seiMessage_t.payloadType: clang puts it at 0")
     static_assert(typeinfo offsetof < bufferingPeriod > (type<seiMessage_t>) == 4, "seiMessage_t.bufferingPeriod: clang puts it at 4")
     static_assert(typeinfo offsetof < picTiming > (type<seiMessage_t>) == 264, "seiMessage_t.picTiming: clang puts it at 264")
@@ -1234,7 +1270,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < height > (type<anon_610>) == 4, "anon_610.height: clang puts it at 4")
     static_assert(typeinfo sizeof(type<anon_611>) == 8 && typeinfo alignof(type<anon_611>) == 4, "anon_611: clang lays it out as size 8, align 4")
     static_assert(typeinfo offsetof < _storage > (type<anon_611>) == 0, "anon_611: every member sits at 0")
-    static_assert(typeinfo sizeof(type<MP4D_track_t>) == 120 && typeinfo alignof(type<MP4D_track_t>) == 8, "MP4D_track_t: clang lays it out as size 120, align 8")
+    static_assert(typeinfo sizeof(type<MP4D_track_t>) == 120 && typeinfo alignof(type<MP4D_track_t>) == 8,
+            "MP4D_track_t: clang lays it out as size 120, align 8")
     static_assert(typeinfo offsetof < sample_count > (type<MP4D_track_t>) == 0, "MP4D_track_t.sample_count: clang puts it at 0")
     static_assert(typeinfo offsetof < dsi > (type<MP4D_track_t>) == 8, "MP4D_track_t.dsi: clang puts it at 8")
     static_assert(typeinfo offsetof < dsi_bytes > (type<MP4D_track_t>) == 16, "MP4D_track_t.dsi_bytes: clang puts it at 16")
@@ -1261,7 +1298,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < year > (type<anon_616>) == 24, "anon_616.year: clang puts it at 24")
     static_assert(typeinfo offsetof < comment > (type<anon_616>) == 32, "anon_616.comment: clang puts it at 32")
     static_assert(typeinfo offsetof < genre > (type<anon_616>) == 40, "anon_616.genre: clang puts it at 40")
-    static_assert(typeinfo sizeof(type<MP4D_demux_tag>) == 104 && typeinfo alignof(type<MP4D_demux_tag>) == 8, "MP4D_demux_tag: clang lays it out as size 104, align 8")
+    static_assert(typeinfo sizeof(type<MP4D_demux_tag>) == 104 && typeinfo alignof(type<MP4D_demux_tag>) == 8,
+            "MP4D_demux_tag: clang lays it out as size 104, align 8")
     static_assert(typeinfo offsetof < read_pos > (type<MP4D_demux_tag>) == 0, "MP4D_demux_tag.read_pos: clang puts it at 0")
     static_assert(typeinfo offsetof < read_size > (type<MP4D_demux_tag>) == 8, "MP4D_demux_tag.read_size: clang puts it at 8")
     static_assert(typeinfo offsetof < track > (type<MP4D_demux_tag>) == 16, "MP4D_demux_tag.track: clang puts it at 16")
@@ -1272,17 +1310,20 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < duration_lo > (type<MP4D_demux_tag>) == 48, "MP4D_demux_tag.duration_lo: clang puts it at 48")
     static_assert(typeinfo offsetof < timescale > (type<MP4D_demux_tag>) == 52, "MP4D_demux_tag.timescale: clang puts it at 52")
     static_assert(typeinfo offsetof < tag > (type<MP4D_demux_tag>) == 56, "MP4D_demux_tag.tag: clang puts it at 56")
-    static_assert(typeinfo sizeof(type<MP4D_sample_to_chunk_t_tag>) == 8 && typeinfo alignof(type<MP4D_sample_to_chunk_t_tag>) == 4, "MP4D_sample_to_chunk_t_tag: clang lays it out as size 8, align 4")
+    static_assert(typeinfo sizeof(type<MP4D_sample_to_chunk_t_tag>) == 8 && typeinfo alignof(type<MP4D_sample_to_chunk_t_tag>) == 4,
+            "MP4D_sample_to_chunk_t_tag: clang lays it out as size 8, align 4")
     static_assert(typeinfo offsetof < first_chunk > (type<MP4D_sample_to_chunk_t_tag>) == 0, "MP4D_sample_to_chunk_t_tag.first_chunk: clang puts it at 0")
     static_assert(typeinfo offsetof < samples_per_chunk > (type<MP4D_sample_to_chunk_t_tag>) == 4, "MP4D_sample_to_chunk_t_tag.samples_per_chunk: clang puts it at 4")
-    static_assert(typeinfo sizeof(type<h264_sps_id_patcher_t>) == 4608 && typeinfo alignof(type<h264_sps_id_patcher_t>) == 8, "h264_sps_id_patcher_t: clang lays it out as size 4608, align 8")
+    static_assert(typeinfo sizeof(type<h264_sps_id_patcher_t>) == 4608 && typeinfo alignof(type<h264_sps_id_patcher_t>) == 8,
+            "h264_sps_id_patcher_t: clang lays it out as size 4608, align 8")
     static_assert(typeinfo offsetof < sps_cache > (type<h264_sps_id_patcher_t>) == 0, "h264_sps_id_patcher_t.sps_cache: clang puts it at 0")
     static_assert(typeinfo offsetof < pps_cache > (type<h264_sps_id_patcher_t>) == 256, "h264_sps_id_patcher_t.pps_cache: clang puts it at 256")
     static_assert(typeinfo offsetof < sps_bytes > (type<h264_sps_id_patcher_t>) == 2304, "h264_sps_id_patcher_t.sps_bytes: clang puts it at 2304")
     static_assert(typeinfo offsetof < pps_bytes > (type<h264_sps_id_patcher_t>) == 2432, "h264_sps_id_patcher_t.pps_bytes: clang puts it at 2432")
     static_assert(typeinfo offsetof < map_sps > (type<h264_sps_id_patcher_t>) == 3456, "h264_sps_id_patcher_t.map_sps: clang puts it at 3456")
     static_assert(typeinfo offsetof < map_pps > (type<h264_sps_id_patcher_t>) == 3584, "h264_sps_id_patcher_t.map_pps: clang puts it at 3584")
-    static_assert(typeinfo sizeof(type<mp4_h26x_writer_tag>) == 4640 && typeinfo alignof(type<mp4_h26x_writer_tag>) == 8, "mp4_h26x_writer_tag: clang lays it out as size 4640, align 8")
+    static_assert(typeinfo sizeof(type<mp4_h26x_writer_tag>) == 4640 && typeinfo alignof(type<mp4_h26x_writer_tag>) == 8,
+            "mp4_h26x_writer_tag: clang lays it out as size 4640, align 8")
     static_assert(typeinfo offsetof < sps_patcher > (type<mp4_h26x_writer_tag>) == 0, "mp4_h26x_writer_tag.sps_patcher: clang puts it at 0")
     static_assert(typeinfo offsetof < mux > (type<mp4_h26x_writer_tag>) == 4608, "mp4_h26x_writer_tag.mux: clang puts it at 4608")
     static_assert(typeinfo offsetof < mux_track_id > (type<mp4_h26x_writer_tag>) == 4616, "mp4_h26x_writer_tag.mux_track_id: clang puts it at 4616")
@@ -1296,7 +1337,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < offset > (type<sample_t>) == 8, "sample_t.offset: clang puts it at 8")
     static_assert(typeinfo offsetof < duration > (type<sample_t>) == 16, "sample_t.duration: clang puts it at 16")
     static_assert(typeinfo offsetof < flag_random_access > (type<sample_t>) == 20, "sample_t.flag_random_access: clang puts it at 20")
-    static_assert(typeinfo sizeof(type<minimp4_vector_t>) == 16 && typeinfo alignof(type<minimp4_vector_t>) == 8, "minimp4_vector_t: clang lays it out as size 16, align 8")
+    static_assert(typeinfo sizeof(type<minimp4_vector_t>) == 16 && typeinfo alignof(type<minimp4_vector_t>) == 8,
+            "minimp4_vector_t: clang lays it out as size 16, align 8")
     static_assert(typeinfo offsetof < data > (type<minimp4_vector_t>) == 0, "minimp4_vector_t.data: clang puts it at 0")
     static_assert(typeinfo offsetof < bytes > (type<minimp4_vector_t>) == 8, "minimp4_vector_t.bytes: clang puts it at 8")
     static_assert(typeinfo offsetof < capacity > (type<minimp4_vector_t>) == 12, "minimp4_vector_t.capacity: clang puts it at 12")
@@ -1337,7 +1379,8 @@ def private c2das_layout_check {
     static_assert(typeinfo sizeof(type<anon_753>) == 8 && typeinfo alignof(type<anon_753>) == 4, "anon_753: clang lays it out as size 8, align 4")
     static_assert(typeinfo offsetof < name > (type<anon_753>) == 0, "anon_753.name: clang puts it at 0")
     static_assert(typeinfo offsetof < _c_type > (type<anon_753>) == 4, "anon_753._c_type: clang puts it at 4")
-    static_assert(typeinfo sizeof(type<DecodeSummary>) == 24 && typeinfo alignof(type<DecodeSummary>) == 4, "DecodeSummary: clang lays it out as size 24, align 4")
+    static_assert(typeinfo sizeof(type<DecodeSummary>) == 24 && typeinfo alignof(type<DecodeSummary>) == 4,
+            "DecodeSummary: clang lays it out as size 24, align 4")
     static_assert(typeinfo offsetof < combined_hash > (type<DecodeSummary>) == 0, "DecodeSummary.combined_hash: clang puts it at 0")
     static_assert(typeinfo offsetof < first_hash > (type<DecodeSummary>) == 4, "DecodeSummary.first_hash: clang puts it at 4")
     static_assert(typeinfo offsetof < last_hash > (type<DecodeSummary>) == 8, "DecodeSummary.last_hash: clang puts it at 8")
@@ -1369,32 +1412,119 @@ def private c2das_layout_check {
 
 var private h264_file_all__heap : uint8[33554432]
 var private h264_file_all__heap_offset : uint64 = 8ul
-var h264bsdQpC : uint[52] = fixed_array(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u, 8u, 9u, 10u, 11u, 12u, 13u, 14u, 15u, 16u, 17u, 18u, 19u, 20u, 21u, 22u, 23u, 24u, 25u, 26u, 27u, 28u, 29u, 29u, 30u, 31u, 32u, 32u, 33u, 34u, 34u, 35u, 35u, 36u, 36u, 37u, 37u, 37u, 38u, 38u, 38u, 39u, 39u, 39u, 39u)
-var private h264_file_all__coeffToken0_0 : uint16[32] = fixed_array(uint16(0), uint16(0), uint16(0), uint16(8294), uint16(4134), uint16(2054), uint16(6245), uint16(6245), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082))
-var private h264_file_all__coeffToken0_1 : uint16[48] = fixed_array(uint16(0), uint16(0), uint16(0), uint16(0), uint16(16490), uint16(12362), uint16(10282), uint16(8202), uint16(14441), uint16(14441), uint16(10313), uint16(10313), uint16(8233), uint16(8233), uint16(6153), uint16(6153), uint16(12392), uint16(12392), uint16(12392), uint16(12392), uint16(8264), uint16(8264), uint16(8264), uint16(8264), uint16(6184), uint16(6184), uint16(6184), uint16(6184), uint16(4104), uint16(4104), uint16(4104), uint16(4104), uint16(10343), uint16(10343), uint16(10343), uint16(10343), uint16(10343), uint16(10343), uint16(10343), uint16(10343), uint16(6215), uint16(6215), uint16(6215), uint16(6215), uint16(6215), uint16(6215), uint16(6215), uint16(6215))
-var private h264_file_all__coeffToken0_2 : uint16[56] = fixed_array(uint16(24686), uint16(22606), uint16(20526), uint16(20494), uint16(22638), uint16(20558), uint16(18478), uint16(18446), uint16(16397), uint16(16397), uint16(18509), uint16(18509), uint16(16429), uint16(16429), uint16(14349), uint16(14349), uint16(20589), uint16(20589), uint16(16461), uint16(16461), uint16(14381), uint16(14381), uint16(12301), uint16(12301), uint16(18539), uint16(18539), uint16(18539), uint16(18539), uint16(18539), uint16(18539), uint16(18539), uint16(18539), uint16(14411), uint16(14411), uint16(14411), uint16(14411), uint16(14411), uint16(14411), uint16(14411), uint16(14411), uint16(12331), uint16(12331), uint16(12331), uint16(12331), uint16(12331), uint16(12331), uint16(12331), uint16(12331), uint16(10251), uint16(10251), uint16(10251), uint16(10251), uint16(10251), uint16(10251), uint16(10251), uint16(10251))
-var private h264_file_all__coeffToken0_3 : uint16[32] = fixed_array(uint16(0), uint16(0), uint16(26671), uint16(26671), uint16(32784), uint16(32848), uint16(32816), uint16(30736), uint16(32880), uint16(30800), uint16(30768), uint16(28688), uint16(30832), uint16(28752), uint16(28720), uint16(26640), uint16(28783), uint16(28783), uint16(26703), uint16(26703), uint16(24623), uint16(24623), uint16(24591), uint16(24591), uint16(26735), uint16(26735), uint16(24655), uint16(24655), uint16(22575), uint16(22575), uint16(22543), uint16(22543))
-var private h264_file_all__coeffToken2_0 : uint16[32] = fixed_array(uint16(0), uint16(0), uint16(0), uint16(0), uint16(14438), uint16(8262), uint16(8230), uint16(4102), uint16(12390), uint16(6214), uint16(6182), uint16(2054), uint16(10341), uint16(10341), uint16(4133), uint16(4133), uint16(8292), uint16(8292), uint16(8292), uint16(8292), uint16(6244), uint16(6244), uint16(6244), uint16(6244), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163))
-var private h264_file_all__coeffToken2_1 : uint16[32] = fixed_array(uint16(0), uint16(0), uint16(0), uint16(0), uint16(18537), uint16(14409), uint16(14377), uint16(12297), uint16(10248), uint16(10248), uint16(12360), uint16(12360), uint16(12328), uint16(12328), uint16(8200), uint16(8200), uint16(16487), uint16(16487), uint16(16487), uint16(16487), uint16(10311), uint16(10311), uint16(10311), uint16(10311), uint16(10279), uint16(10279), uint16(10279), uint16(10279), uint16(6151), uint16(6151), uint16(6151), uint16(6151))
-var private h264_file_all__coeffToken2_2 : uint16[128] = fixed_array(uint16(0), uint16(0), uint16(30829), uint16(30829), uint16(32878), uint16(32846), uint16(32814), uint16(32782), uint16(30766), uint16(30734), uint16(30798), uint16(28718), uint16(28749), uint16(28749), uint16(28685), uint16(28685), uint16(28781), uint16(28781), uint16(26701), uint16(26701), uint16(26669), uint16(26669), uint16(26637), uint16(26637), uint16(26733), uint16(26733), uint16(24653), uint16(24653), uint16(24621), uint16(24621), uint16(24589), uint16(24589), uint16(22540), uint16(22540), uint16(22540), uint16(22540), uint16(22604), uint16(22604), uint16(22604), uint16(22604), uint16(22572), uint16(22572), uint16(22572), uint16(22572), uint16(20492), uint16(20492), uint16(20492), uint16(20492), uint16(24684), uint16(24684), uint16(24684), uint16(24684), uint16(20556), uint16(20556), uint16(20556), uint16(20556), uint16(20524), uint16(20524), uint16(20524), uint16(20524), uint16(18444), uint16(18444), uint16(18444), uint16(18444), uint16(22635), uint16(22635), uint16(22635), uint16(22635), uint16(22635), uint16(22635), uint16(22635), uint16(22635), uint16(18507), uint16(18507), uint16(18507), uint16(18507), uint16(18507), uint16(18507), uint16(18507), uint16(18507), uint16(18475), uint16(18475), uint16(18475), uint16(18475), uint16(18475), uint16(18475), uint16(18475), uint16(18475), uint16(16395), uint16(16395), uint16(16395), uint16(16395), uint16(16395), uint16(16395), uint16(16395), uint16(16395), uint16(20587), uint16(20587), uint16(20587), uint16(20587), uint16(20587), uint16(20587), uint16(20587), uint16(20587), uint16(16459), uint16(16459), uint16(16459), uint16(16459), uint16(16459), uint16(16459), uint16(16459), uint16(16459), uint16(16427), uint16(16427), uint16(16427), uint16(16427), uint16(16427), uint16(16427), uint16(16427), uint16(16427), uint16(14347), uint16(14347), uint16(14347), uint16(14347), uint16(14347), uint16(14347), uint16(14347), uint16(14347))
-var private h264_file_all__coeffToken4_0 : uint16[64] = fixed_array(uint16(0), uint16(0), uint16(0), uint16(0), uint16(0), uint16(0), uint16(0), uint16(0), uint16(6150), uint16(14406), uint16(14374), uint16(4102), uint16(18534), uint16(12358), uint16(12326), uint16(2054), uint16(10277), uint16(10277), uint16(10309), uint16(10309), uint16(8229), uint16(8229), uint16(8261), uint16(8261), uint16(6181), uint16(6181), uint16(16485), uint16(16485), uint16(6213), uint16(6213), uint16(4133), uint16(4133), uint16(14436), uint16(14436), uint16(14436), uint16(14436), uint16(12388), uint16(12388), uint16(12388), uint16(12388), uint16(10340), uint16(10340), uint16(10340), uint16(10340), uint16(8292), uint16(8292), uint16(8292), uint16(8292), uint16(6244), uint16(6244), uint16(6244), uint16(6244), uint16(4164), uint16(4164), uint16(4164), uint16(4164), uint16(2084), uint16(2084), uint16(2084), uint16(2084), uint16(4), uint16(4), uint16(4), uint16(4))
-var private h264_file_all__coeffToken4_1 : uint16[128] = fixed_array(uint16(0), uint16(32778), uint16(32874), uint16(32842), uint16(32810), uint16(30730), uint16(30826), uint16(30794), uint16(30762), uint16(28682), uint16(28778), uint16(28746), uint16(28714), uint16(26634), uint16(26665), uint16(26665), uint16(24585), uint16(24585), uint16(26697), uint16(26697), uint16(24617), uint16(24617), uint16(22537), uint16(22537), uint16(26729), uint16(26729), uint16(24649), uint16(24649), uint16(22569), uint16(22569), uint16(20489), uint16(20489), uint16(24680), uint16(24680), uint16(24680), uint16(24680), uint16(22600), uint16(22600), uint16(22600), uint16(22600), uint16(20520), uint16(20520), uint16(20520), uint16(20520), uint16(18440), uint16(18440), uint16(18440), uint16(18440), uint16(22632), uint16(22632), uint16(22632), uint16(22632), uint16(20552), uint16(20552), uint16(20552), uint16(20552), uint16(18472), uint16(18472), uint16(18472), uint16(18472), uint16(16392), uint16(16392), uint16(16392), uint16(16392), uint16(14343), uint16(14343), uint16(14343), uint16(14343), uint16(14343), uint16(14343), uint16(14343), uint16(14343), uint16(12295), uint16(12295), uint16(12295), uint16(12295), uint16(12295), uint16(12295), uint16(12295), uint16(12295), uint16(18503), uint16(18503), uint16(18503), uint16(18503), uint16(18503), uint16(18503), uint16(18503), uint16(18503), uint16(10247), uint16(10247), uint16(10247), uint16(10247), uint16(10247), uint16(10247), uint16(10247), uint16(10247), uint16(20583), uint16(20583), uint16(20583), uint16(20583), uint16(20583), uint16(20583), uint16(20583), uint16(20583), uint16(16455), uint16(16455), uint16(16455), uint16(16455), uint16(16455), uint16(16455), uint16(16455), uint16(16455), uint16(16423), uint16(16423), uint16(16423), uint16(16423), uint16(16423), uint16(16423), uint16(16423), uint16(16423), uint16(8199), uint16(8199), uint16(8199), uint16(8199), uint16(8199), uint16(8199), uint16(8199), uint16(8199))
-var private h264_file_all__coeffToken8 : uint16[64] = fixed_array(uint16(2054), uint16(2086), uint16(0), uint16(6), uint16(4102), uint16(4134), uint16(4166), uint16(0), uint16(6150), uint16(6182), uint16(6214), uint16(6246), uint16(8198), uint16(8230), uint16(8262), uint16(8294), uint16(10246), uint16(10278), uint16(10310), uint16(10342), uint16(12294), uint16(12326), uint16(12358), uint16(12390), uint16(14342), uint16(14374), uint16(14406), uint16(14438), uint16(16390), uint16(16422), uint16(16454), uint16(16486), uint16(18438), uint16(18470), uint16(18502), uint16(18534), uint16(20486), uint16(20518), uint16(20550), uint16(20582), uint16(22534), uint16(22566), uint16(22598), uint16(22630), uint16(24582), uint16(24614), uint16(24646), uint16(24678), uint16(26630), uint16(26662), uint16(26694), uint16(26726), uint16(28678), uint16(28710), uint16(28742), uint16(28774), uint16(30726), uint16(30758), uint16(30790), uint16(30822), uint16(32774), uint16(32806), uint16(32838), uint16(32870))
-var private h264_file_all__coeffTokenMinus1_0 : uint16[8] = fixed_array(uint16(0), uint16(4163), uint16(2), uint16(2), uint16(2081), uint16(2081), uint16(2081), uint16(2081))
-var private h264_file_all__coeffTokenMinus1_1 : uint16[32] = fixed_array(uint16(8295), uint16(8295), uint16(8264), uint16(8232), uint16(6215), uint16(6215), uint16(6183), uint16(6183), uint16(8198), uint16(8198), uint16(8198), uint16(8198), uint16(6150), uint16(6150), uint16(6150), uint16(6150), uint16(4102), uint16(4102), uint16(4102), uint16(4102), uint16(6246), uint16(6246), uint16(6246), uint16(6246), uint16(4134), uint16(4134), uint16(4134), uint16(4134), uint16(2054), uint16(2054), uint16(2054), uint16(2054))
-var private h264_file_all__totalZeros_1_0 : uint8[32] = fixed_array(0u8, 0u8, 101u8, 85u8, 68u8, 68u8, 52u8, 52u8, 35u8, 35u8, 35u8, 35u8, 19u8, 19u8, 19u8, 19u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8)
-var private h264_file_all__totalZeros_1_1 : uint8[32] = fixed_array(0u8, 249u8, 233u8, 217u8, 200u8, 200u8, 184u8, 184u8, 167u8, 167u8, 167u8, 167u8, 151u8, 151u8, 151u8, 151u8, 134u8, 134u8, 134u8, 134u8, 134u8, 134u8, 134u8, 134u8, 118u8, 118u8, 118u8, 118u8, 118u8, 118u8, 118u8, 118u8)
-var private h264_file_all__totalZeros_2 : uint8[64] = fixed_array(230u8, 214u8, 198u8, 182u8, 165u8, 165u8, 149u8, 149u8, 132u8, 132u8, 132u8, 132u8, 116u8, 116u8, 116u8, 116u8, 100u8, 100u8, 100u8, 100u8, 84u8, 84u8, 84u8, 84u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 19u8, 19u8, 19u8, 19u8, 19u8, 19u8, 19u8, 19u8, 3u8, 3u8, 3u8, 3u8, 3u8, 3u8, 3u8, 3u8)
-var private h264_file_all__totalZeros_3 : uint8[64] = fixed_array(214u8, 182u8, 197u8, 197u8, 165u8, 165u8, 149u8, 149u8, 132u8, 132u8, 132u8, 132u8, 84u8, 84u8, 84u8, 84u8, 68u8, 68u8, 68u8, 68u8, 4u8, 4u8, 4u8, 4u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 19u8, 19u8, 19u8, 19u8, 19u8, 19u8, 19u8, 19u8)
-var private h264_file_all__totalZeros_4 : uint8[32] = fixed_array(197u8, 181u8, 165u8, 5u8, 148u8, 148u8, 116u8, 116u8, 52u8, 52u8, 36u8, 36u8, 131u8, 131u8, 131u8, 131u8, 99u8, 99u8, 99u8, 99u8, 83u8, 83u8, 83u8, 83u8, 67u8, 67u8, 67u8, 67u8, 19u8, 19u8, 19u8, 19u8)
-var private h264_file_all__totalZeros_5 : uint8[32] = fixed_array(181u8, 149u8, 164u8, 164u8, 132u8, 132u8, 36u8, 36u8, 20u8, 20u8, 4u8, 4u8, 115u8, 115u8, 115u8, 115u8, 99u8, 99u8, 99u8, 99u8, 83u8, 83u8, 83u8, 83u8, 67u8, 67u8, 67u8, 67u8, 51u8, 51u8, 51u8, 51u8)
-var private h264_file_all__totalZeros_6 : uint8[64] = fixed_array(166u8, 6u8, 21u8, 21u8, 132u8, 132u8, 132u8, 132u8, 147u8, 147u8, 147u8, 147u8, 147u8, 147u8, 147u8, 147u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 83u8, 83u8, 83u8, 83u8, 83u8, 83u8, 83u8, 83u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8)
-var private h264_file_all__totalZeros_7 : uint8[64] = fixed_array(150u8, 6u8, 21u8, 21u8, 116u8, 116u8, 116u8, 116u8, 131u8, 131u8, 131u8, 131u8, 131u8, 131u8, 131u8, 131u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8)
-var private h264_file_all__totalZeros_8 : uint8[64] = fixed_array(134u8, 6u8, 37u8, 37u8, 20u8, 20u8, 20u8, 20u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8)
-var private h264_file_all__totalZeros_9 : uint8[64] = fixed_array(22u8, 6u8, 117u8, 117u8, 36u8, 36u8, 36u8, 36u8, 83u8, 83u8, 83u8, 83u8, 83u8, 83u8, 83u8, 83u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8)
-var private h264_file_all__totalZeros_10 : uint8[32] = fixed_array(21u8, 5u8, 100u8, 100u8, 35u8, 35u8, 35u8, 35u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8)
-var private h264_file_all__totalZeros_11 : uint8[16] = fixed_array(4u8, 20u8, 35u8, 35u8, 51u8, 51u8, 83u8, 83u8, 65u8, 65u8, 65u8, 65u8, 65u8, 65u8, 65u8, 65u8)
-var private h264_file_all__totalZeros_12 : uint8[16] = fixed_array(4u8, 20u8, 67u8, 67u8, 34u8, 34u8, 34u8, 34u8, 49u8, 49u8, 49u8, 49u8, 49u8, 49u8, 49u8, 49u8)
+var h264bsdQpC : uint[52] = fixed_array(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u, 8u, 9u, 10u, 11u, 12u, 13u, 14u, 15u, 16u, 17u, 18u, 19u, 20u, 21u, 22u, 23u, 24u, 25u,
+        26u, 27u, 28u, 29u, 29u, 30u, 31u, 32u, 32u, 33u, 34u, 34u, 35u, 35u, 36u, 36u, 37u, 37u, 37u, 38u, 38u, 38u, 39u, 39u, 39u, 39u)
+var private h264_file_all__coeffToken0_0 : uint16[32] = fixed_array(uint16(0), uint16(0), uint16(0), uint16(8294), uint16(4134), uint16(2054), uint16(6245),
+        uint16(6245), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(2082),
+        uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082),
+        uint16(2082), uint16(2082), uint16(2082), uint16(2082), uint16(2082))
+var private h264_file_all__coeffToken0_1 : uint16[48] = fixed_array(uint16(0), uint16(0), uint16(0), uint16(0), uint16(16490), uint16(12362), uint16(10282),
+        uint16(8202), uint16(14441), uint16(14441), uint16(10313), uint16(10313), uint16(8233), uint16(8233), uint16(6153), uint16(6153), uint16(12392),
+        uint16(12392), uint16(12392), uint16(12392), uint16(8264), uint16(8264), uint16(8264), uint16(8264), uint16(6184), uint16(6184), uint16(6184),
+        uint16(6184), uint16(4104), uint16(4104), uint16(4104), uint16(4104), uint16(10343), uint16(10343), uint16(10343), uint16(10343), uint16(10343),
+        uint16(10343), uint16(10343), uint16(10343), uint16(6215), uint16(6215), uint16(6215), uint16(6215), uint16(6215), uint16(6215), uint16(6215),
+        uint16(6215))
+var private h264_file_all__coeffToken0_2 : uint16[56] = fixed_array(uint16(24686), uint16(22606), uint16(20526), uint16(20494), uint16(22638), uint16(20558),
+        uint16(18478), uint16(18446), uint16(16397), uint16(16397), uint16(18509), uint16(18509), uint16(16429), uint16(16429), uint16(14349), uint16(14349),
+        uint16(20589), uint16(20589), uint16(16461), uint16(16461), uint16(14381), uint16(14381), uint16(12301), uint16(12301), uint16(18539), uint16(18539),
+        uint16(18539), uint16(18539), uint16(18539), uint16(18539), uint16(18539), uint16(18539), uint16(14411), uint16(14411), uint16(14411), uint16(14411),
+        uint16(14411), uint16(14411), uint16(14411), uint16(14411), uint16(12331), uint16(12331), uint16(12331), uint16(12331), uint16(12331), uint16(12331),
+        uint16(12331), uint16(12331), uint16(10251), uint16(10251), uint16(10251), uint16(10251), uint16(10251), uint16(10251), uint16(10251), uint16(10251))
+var private h264_file_all__coeffToken0_3 : uint16[32] = fixed_array(uint16(0), uint16(0), uint16(26671), uint16(26671), uint16(32784), uint16(32848),
+        uint16(32816), uint16(30736), uint16(32880), uint16(30800), uint16(30768), uint16(28688), uint16(30832), uint16(28752), uint16(28720), uint16(26640),
+        uint16(28783), uint16(28783), uint16(26703), uint16(26703), uint16(24623), uint16(24623), uint16(24591), uint16(24591), uint16(26735), uint16(26735),
+        uint16(24655), uint16(24655), uint16(22575), uint16(22575), uint16(22543), uint16(22543))
+var private h264_file_all__coeffToken2_0 : uint16[32] = fixed_array(uint16(0), uint16(0), uint16(0), uint16(0), uint16(14438), uint16(8262), uint16(8230),
+        uint16(4102), uint16(12390), uint16(6214), uint16(6182), uint16(2054), uint16(10341), uint16(10341), uint16(4133), uint16(4133), uint16(8292),
+        uint16(8292), uint16(8292), uint16(8292), uint16(6244), uint16(6244), uint16(6244), uint16(6244), uint16(4163), uint16(4163), uint16(4163),
+        uint16(4163), uint16(4163), uint16(4163), uint16(4163), uint16(4163))
+var private h264_file_all__coeffToken2_1 : uint16[32] = fixed_array(uint16(0), uint16(0), uint16(0), uint16(0), uint16(18537), uint16(14409), uint16(14377),
+        uint16(12297), uint16(10248), uint16(10248), uint16(12360), uint16(12360), uint16(12328), uint16(12328), uint16(8200), uint16(8200), uint16(16487),
+        uint16(16487), uint16(16487), uint16(16487), uint16(10311), uint16(10311), uint16(10311), uint16(10311), uint16(10279), uint16(10279), uint16(10279),
+        uint16(10279), uint16(6151), uint16(6151), uint16(6151), uint16(6151))
+var private h264_file_all__coeffToken2_2 : uint16[128] = fixed_array(uint16(0), uint16(0), uint16(30829), uint16(30829), uint16(32878), uint16(32846),
+        uint16(32814), uint16(32782), uint16(30766), uint16(30734), uint16(30798), uint16(28718), uint16(28749), uint16(28749), uint16(28685), uint16(28685),
+        uint16(28781), uint16(28781), uint16(26701), uint16(26701), uint16(26669), uint16(26669), uint16(26637), uint16(26637), uint16(26733), uint16(26733),
+        uint16(24653), uint16(24653), uint16(24621), uint16(24621), uint16(24589), uint16(24589), uint16(22540), uint16(22540), uint16(22540), uint16(22540),
+        uint16(22604), uint16(22604), uint16(22604), uint16(22604), uint16(22572), uint16(22572), uint16(22572), uint16(22572), uint16(20492), uint16(20492),
+        uint16(20492), uint16(20492), uint16(24684), uint16(24684), uint16(24684), uint16(24684), uint16(20556), uint16(20556), uint16(20556), uint16(20556),
+        uint16(20524), uint16(20524), uint16(20524), uint16(20524), uint16(18444), uint16(18444), uint16(18444), uint16(18444), uint16(22635), uint16(22635),
+        uint16(22635), uint16(22635), uint16(22635), uint16(22635), uint16(22635), uint16(22635), uint16(18507), uint16(18507), uint16(18507), uint16(18507),
+        uint16(18507), uint16(18507), uint16(18507), uint16(18507), uint16(18475), uint16(18475), uint16(18475), uint16(18475), uint16(18475), uint16(18475),
+        uint16(18475), uint16(18475), uint16(16395), uint16(16395), uint16(16395), uint16(16395), uint16(16395), uint16(16395), uint16(16395), uint16(16395),
+        uint16(20587), uint16(20587), uint16(20587), uint16(20587), uint16(20587), uint16(20587), uint16(20587), uint16(20587), uint16(16459), uint16(16459),
+        uint16(16459), uint16(16459), uint16(16459), uint16(16459), uint16(16459), uint16(16459), uint16(16427), uint16(16427), uint16(16427), uint16(16427),
+        uint16(16427), uint16(16427), uint16(16427), uint16(16427), uint16(14347), uint16(14347), uint16(14347), uint16(14347), uint16(14347), uint16(14347),
+        uint16(14347), uint16(14347))
+var private h264_file_all__coeffToken4_0 : uint16[64] = fixed_array(uint16(0), uint16(0), uint16(0), uint16(0), uint16(0), uint16(0), uint16(0), uint16(0),
+        uint16(6150), uint16(14406), uint16(14374), uint16(4102), uint16(18534), uint16(12358), uint16(12326), uint16(2054), uint16(10277), uint16(10277),
+        uint16(10309), uint16(10309), uint16(8229), uint16(8229), uint16(8261), uint16(8261), uint16(6181), uint16(6181), uint16(16485), uint16(16485),
+        uint16(6213), uint16(6213), uint16(4133), uint16(4133), uint16(14436), uint16(14436), uint16(14436), uint16(14436), uint16(12388), uint16(12388),
+        uint16(12388), uint16(12388), uint16(10340), uint16(10340), uint16(10340), uint16(10340), uint16(8292), uint16(8292), uint16(8292), uint16(8292),
+        uint16(6244), uint16(6244), uint16(6244), uint16(6244), uint16(4164), uint16(4164), uint16(4164), uint16(4164), uint16(2084), uint16(2084),
+        uint16(2084), uint16(2084), uint16(4), uint16(4), uint16(4), uint16(4))
+var private h264_file_all__coeffToken4_1 : uint16[128] = fixed_array(uint16(0), uint16(32778), uint16(32874), uint16(32842), uint16(32810), uint16(30730),
+        uint16(30826), uint16(30794), uint16(30762), uint16(28682), uint16(28778), uint16(28746), uint16(28714), uint16(26634), uint16(26665), uint16(26665),
+        uint16(24585), uint16(24585), uint16(26697), uint16(26697), uint16(24617), uint16(24617), uint16(22537), uint16(22537), uint16(26729), uint16(26729),
+        uint16(24649), uint16(24649), uint16(22569), uint16(22569), uint16(20489), uint16(20489), uint16(24680), uint16(24680), uint16(24680), uint16(24680),
+        uint16(22600), uint16(22600), uint16(22600), uint16(22600), uint16(20520), uint16(20520), uint16(20520), uint16(20520), uint16(18440), uint16(18440),
+        uint16(18440), uint16(18440), uint16(22632), uint16(22632), uint16(22632), uint16(22632), uint16(20552), uint16(20552), uint16(20552), uint16(20552),
+        uint16(18472), uint16(18472), uint16(18472), uint16(18472), uint16(16392), uint16(16392), uint16(16392), uint16(16392), uint16(14343), uint16(14343),
+        uint16(14343), uint16(14343), uint16(14343), uint16(14343), uint16(14343), uint16(14343), uint16(12295), uint16(12295), uint16(12295), uint16(12295),
+        uint16(12295), uint16(12295), uint16(12295), uint16(12295), uint16(18503), uint16(18503), uint16(18503), uint16(18503), uint16(18503), uint16(18503),
+        uint16(18503), uint16(18503), uint16(10247), uint16(10247), uint16(10247), uint16(10247), uint16(10247), uint16(10247), uint16(10247), uint16(10247),
+        uint16(20583), uint16(20583), uint16(20583), uint16(20583), uint16(20583), uint16(20583), uint16(20583), uint16(20583), uint16(16455), uint16(16455),
+        uint16(16455), uint16(16455), uint16(16455), uint16(16455), uint16(16455), uint16(16455), uint16(16423), uint16(16423), uint16(16423), uint16(16423),
+        uint16(16423), uint16(16423), uint16(16423), uint16(16423), uint16(8199), uint16(8199), uint16(8199), uint16(8199), uint16(8199), uint16(8199),
+        uint16(8199), uint16(8199))
+var private h264_file_all__coeffToken8 : uint16[64] = fixed_array(uint16(2054), uint16(2086), uint16(0), uint16(6), uint16(4102), uint16(4134), uint16(4166),
+        uint16(0), uint16(6150), uint16(6182), uint16(6214), uint16(6246), uint16(8198), uint16(8230), uint16(8262), uint16(8294), uint16(10246), uint16(10278),
+        uint16(10310), uint16(10342), uint16(12294), uint16(12326), uint16(12358), uint16(12390), uint16(14342), uint16(14374), uint16(14406), uint16(14438),
+        uint16(16390), uint16(16422), uint16(16454), uint16(16486), uint16(18438), uint16(18470), uint16(18502), uint16(18534), uint16(20486), uint16(20518),
+        uint16(20550), uint16(20582), uint16(22534), uint16(22566), uint16(22598), uint16(22630), uint16(24582), uint16(24614), uint16(24646), uint16(24678),
+        uint16(26630), uint16(26662), uint16(26694), uint16(26726), uint16(28678), uint16(28710), uint16(28742), uint16(28774), uint16(30726), uint16(30758),
+        uint16(30790), uint16(30822), uint16(32774), uint16(32806), uint16(32838), uint16(32870))
+var private h264_file_all__coeffTokenMinus1_0 : uint16[8] = fixed_array(uint16(0), uint16(4163), uint16(2), uint16(2), uint16(2081), uint16(2081), uint16(2081),
+        uint16(2081))
+var private h264_file_all__coeffTokenMinus1_1 : uint16[32] = fixed_array(uint16(8295), uint16(8295), uint16(8264), uint16(8232), uint16(6215), uint16(6215),
+        uint16(6183), uint16(6183), uint16(8198), uint16(8198), uint16(8198), uint16(8198), uint16(6150), uint16(6150), uint16(6150), uint16(6150),
+        uint16(4102), uint16(4102), uint16(4102), uint16(4102), uint16(6246), uint16(6246), uint16(6246), uint16(6246), uint16(4134), uint16(4134),
+        uint16(4134), uint16(4134), uint16(2054), uint16(2054), uint16(2054), uint16(2054))
+var private h264_file_all__totalZeros_1_0 : uint8[32] = fixed_array(0u8, 0u8, 101u8, 85u8, 68u8, 68u8, 52u8, 52u8, 35u8, 35u8, 35u8, 35u8, 19u8, 19u8, 19u8,
+        19u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8)
+var private h264_file_all__totalZeros_1_1 : uint8[32] = fixed_array(0u8, 249u8, 233u8, 217u8, 200u8, 200u8, 184u8, 184u8, 167u8, 167u8, 167u8, 167u8, 151u8,
+        151u8, 151u8, 151u8, 134u8, 134u8, 134u8, 134u8, 134u8, 134u8, 134u8, 134u8, 118u8, 118u8, 118u8, 118u8, 118u8, 118u8, 118u8, 118u8)
+var private h264_file_all__totalZeros_2 : uint8[64] = fixed_array(230u8, 214u8, 198u8, 182u8, 165u8, 165u8, 149u8, 149u8, 132u8, 132u8, 132u8, 132u8, 116u8,
+        116u8, 116u8, 116u8, 100u8, 100u8, 100u8, 100u8, 84u8, 84u8, 84u8, 84u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 51u8, 51u8, 51u8, 51u8, 51u8,
+        51u8, 51u8, 51u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 19u8, 19u8, 19u8, 19u8, 19u8, 19u8, 19u8, 19u8, 3u8, 3u8, 3u8, 3u8, 3u8, 3u8, 3u8,
+        3u8)
+var private h264_file_all__totalZeros_3 : uint8[64] = fixed_array(214u8, 182u8, 197u8, 197u8, 165u8, 165u8, 149u8, 149u8, 132u8, 132u8, 132u8, 132u8, 84u8,
+        84u8, 84u8, 84u8, 68u8, 68u8, 68u8, 68u8, 4u8, 4u8, 4u8, 4u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 99u8, 99u8, 99u8, 99u8, 99u8,
+        99u8, 99u8, 99u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 19u8, 19u8, 19u8, 19u8, 19u8, 19u8,
+        19u8, 19u8)
+var private h264_file_all__totalZeros_4 : uint8[32] = fixed_array(197u8, 181u8, 165u8, 5u8, 148u8, 148u8, 116u8, 116u8, 52u8, 52u8, 36u8, 36u8, 131u8, 131u8,
+        131u8, 131u8, 99u8, 99u8, 99u8, 99u8, 83u8, 83u8, 83u8, 83u8, 67u8, 67u8, 67u8, 67u8, 19u8, 19u8, 19u8, 19u8)
+var private h264_file_all__totalZeros_5 : uint8[32] = fixed_array(181u8, 149u8, 164u8, 164u8, 132u8, 132u8, 36u8, 36u8, 20u8, 20u8, 4u8, 4u8, 115u8, 115u8,
+        115u8, 115u8, 99u8, 99u8, 99u8, 99u8, 83u8, 83u8, 83u8, 83u8, 67u8, 67u8, 67u8, 67u8, 51u8, 51u8, 51u8, 51u8)
+var private h264_file_all__totalZeros_6 : uint8[64] = fixed_array(166u8, 6u8, 21u8, 21u8, 132u8, 132u8, 132u8, 132u8, 147u8, 147u8, 147u8, 147u8, 147u8, 147u8,
+        147u8, 147u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 83u8, 83u8, 83u8, 83u8, 83u8,
+        83u8, 83u8, 83u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8,
+        35u8, 35u8)
+var private h264_file_all__totalZeros_7 : uint8[64] = fixed_array(150u8, 6u8, 21u8, 21u8, 116u8, 116u8, 116u8, 116u8, 131u8, 131u8, 131u8, 131u8, 131u8, 131u8,
+        131u8, 131u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 67u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8,
+        51u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 35u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8)
+var private h264_file_all__totalZeros_8 : uint8[64] = fixed_array(134u8, 6u8, 37u8, 37u8, 20u8, 20u8, 20u8, 20u8, 115u8, 115u8, 115u8, 115u8, 115u8, 115u8,
+        115u8, 115u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 99u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 51u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8,
+        82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8)
+var private h264_file_all__totalZeros_9 : uint8[64] = fixed_array(22u8, 6u8, 117u8, 117u8, 36u8, 36u8, 36u8, 36u8, 83u8, 83u8, 83u8, 83u8, 83u8, 83u8, 83u8,
+        83u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 98u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8,
+        66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8)
+var private h264_file_all__totalZeros_10 : uint8[32] = fixed_array(21u8, 5u8, 100u8, 100u8, 35u8, 35u8, 35u8, 35u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8, 82u8,
+        82u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 66u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8, 50u8)
+var private h264_file_all__totalZeros_11 : uint8[16] = fixed_array(4u8, 20u8, 35u8, 35u8, 51u8, 51u8, 83u8, 83u8, 65u8, 65u8, 65u8, 65u8, 65u8, 65u8, 65u8,
+        65u8)
+var private h264_file_all__totalZeros_12 : uint8[16] = fixed_array(4u8, 20u8, 67u8, 67u8, 34u8, 34u8, 34u8, 34u8, 49u8, 49u8, 49u8, 49u8, 49u8, 49u8, 49u8,
+        49u8)
 var private h264_file_all__totalZeros_13 : uint8[8] = fixed_array(3u8, 19u8, 50u8, 50u8, 33u8, 33u8, 33u8, 33u8)
 var private h264_file_all__totalZeros_14 : uint8[4] = fixed_array(2u8, 18u8, 33u8, 33u8)
 var private h264_file_all__runBefore_6 : uint8[8] = fixed_array(19u8, 35u8, 67u8, 51u8, 99u8, 83u8, 2u8, 2u8)
@@ -1403,11 +1533,78 @@ var private h264_file_all__runBefore_4 : uint8[8] = fixed_array(67u8, 51u8, 34u8
 var private h264_file_all__runBefore_3 : uint8[4] = fixed_array(50u8, 34u8, 18u8, 2u8)
 var private h264_file_all__runBefore_2 : uint8[4] = fixed_array(34u8, 18u8, 1u8, 1u8)
 var private h264_file_all__runBefore_1 : uint8[2] = fixed_array(17u8, 1u8)
-var private h264_file_all__alphas : uint8[52] = fixed_array(0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 4u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8, 12u8, 13u8, 15u8, 17u8, 20u8, 22u8, 25u8, 28u8, 32u8, 36u8, 40u8, 45u8, 50u8, 56u8, 63u8, 71u8, 80u8, 90u8, 101u8, 113u8, 127u8, 144u8, 162u8, 182u8, 203u8, 226u8, 255u8, 255u8)
-var private h264_file_all__betas : uint8[52] = fixed_array(0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 2u8, 2u8, 3u8, 3u8, 3u8, 3u8, 4u8, 4u8, 4u8, 6u8, 6u8, 7u8, 7u8, 8u8, 8u8, 9u8, 9u8, 10u8, 10u8, 11u8, 11u8, 12u8, 12u8, 13u8, 13u8, 14u8, 14u8, 15u8, 15u8, 16u8, 16u8, 17u8, 17u8, 18u8, 18u8)
-var private h264_file_all__tc0 : uint8[52][3] = fixed_array(fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 1u8), fixed_array(0u8, 0u8, 1u8), fixed_array(0u8, 0u8, 1u8), fixed_array(0u8, 0u8, 1u8), fixed_array(0u8, 1u8, 1u8), fixed_array(0u8, 1u8, 1u8), fixed_array(1u8, 1u8, 1u8), fixed_array(1u8, 1u8, 1u8), fixed_array(1u8, 1u8, 1u8), fixed_array(1u8, 1u8, 1u8), fixed_array(1u8, 1u8, 2u8), fixed_array(1u8, 1u8, 2u8), fixed_array(1u8, 1u8, 2u8), fixed_array(1u8, 1u8, 2u8), fixed_array(1u8, 2u8, 3u8), fixed_array(1u8, 2u8, 3u8), fixed_array(2u8, 2u8, 3u8), fixed_array(2u8, 2u8, 4u8), fixed_array(2u8, 3u8, 4u8), fixed_array(2u8, 3u8, 4u8), fixed_array(3u8, 3u8, 5u8), fixed_array(3u8, 4u8, 6u8), fixed_array(3u8, 4u8, 6u8), fixed_array(4u8, 5u8, 7u8), fixed_array(4u8, 5u8, 8u8), fixed_array(4u8, 6u8, 9u8), fixed_array(5u8, 7u8, 10u8), fixed_array(6u8, 8u8, 11u8), fixed_array(6u8, 8u8, 13u8), fixed_array(7u8, 10u8, 14u8), fixed_array(8u8, 11u8, 16u8), fixed_array(9u8, 12u8, 18u8), fixed_array(10u8, 13u8, 20u8), fixed_array(11u8, 15u8, 23u8), fixed_array(13u8, 17u8, 25u8))
+var private h264_file_all__alphas : uint8[52] = fixed_array(0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 4u8, 4u8, 5u8, 6u8,
+        7u8, 8u8, 9u8, 10u8, 12u8, 13u8, 15u8, 17u8, 20u8, 22u8, 25u8, 28u8, 32u8, 36u8, 40u8, 45u8, 50u8, 56u8, 63u8, 71u8, 80u8, 90u8, 101u8, 113u8, 127u8,
+        144u8, 162u8, 182u8, 203u8, 226u8, 255u8, 255u8)
+var private h264_file_all__betas : uint8[52] = fixed_array(0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 2u8, 2u8, 3u8,
+        3u8, 3u8, 3u8, 4u8, 4u8, 4u8, 6u8, 6u8, 7u8, 7u8, 8u8, 8u8, 9u8, 9u8, 10u8, 10u8, 11u8, 11u8, 12u8, 12u8, 13u8, 13u8, 14u8, 14u8, 15u8, 15u8, 16u8,
+        16u8, 17u8, 17u8, 18u8, 18u8)
+var private h264_file_all__tc0 : uint8[52][3] = fixed_array(fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8),
+        fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8),
+        fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8),
+        fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 0u8), fixed_array(0u8, 0u8, 1u8),
+        fixed_array(0u8, 0u8, 1u8), fixed_array(0u8, 0u8, 1u8), fixed_array(0u8, 0u8, 1u8), fixed_array(0u8, 1u8, 1u8), fixed_array(0u8, 1u8, 1u8),
+        fixed_array(1u8, 1u8, 1u8), fixed_array(1u8, 1u8, 1u8), fixed_array(1u8, 1u8, 1u8), fixed_array(1u8, 1u8, 1u8), fixed_array(1u8, 1u8, 2u8),
+        fixed_array(1u8, 1u8, 2u8), fixed_array(1u8, 1u8, 2u8), fixed_array(1u8, 1u8, 2u8), fixed_array(1u8, 2u8, 3u8), fixed_array(1u8, 2u8, 3u8),
+        fixed_array(2u8, 2u8, 3u8), fixed_array(2u8, 2u8, 4u8), fixed_array(2u8, 3u8, 4u8), fixed_array(2u8, 3u8, 4u8), fixed_array(3u8, 3u8, 5u8),
+        fixed_array(3u8, 4u8, 6u8), fixed_array(3u8, 4u8, 6u8), fixed_array(4u8, 5u8, 7u8), fixed_array(4u8, 5u8, 8u8), fixed_array(4u8, 6u8, 9u8),
+        fixed_array(5u8, 7u8, 10u8), fixed_array(6u8, 8u8, 11u8), fixed_array(6u8, 8u8, 13u8), fixed_array(7u8, 10u8, 14u8), fixed_array(8u8, 11u8, 16u8),
+        fixed_array(9u8, 12u8, 18u8), fixed_array(10u8, 13u8, 20u8), fixed_array(11u8, 15u8, 23u8), fixed_array(13u8, 17u8, 25u8))
 var private h264_file_all__mb4x4Index : uint[16] = fixed_array(0u, 1u, 4u, 5u, 2u, 3u, 6u, 7u, 8u, 9u, 12u, 13u, 10u, 11u, 14u, 15u)
-var h264bsdClip : uint8[1280] = fixed_array(0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8, 11u8, 12u8, 13u8, 14u8, 15u8, 16u8, 17u8, 18u8, 19u8, 20u8, 21u8, 22u8, 23u8, 24u8, 25u8, 26u8, 27u8, 28u8, 29u8, 30u8, 31u8, 32u8, 33u8, 34u8, 35u8, 36u8, 37u8, 38u8, 39u8, 40u8, 41u8, 42u8, 43u8, 44u8, 45u8, 46u8, 47u8, 48u8, 49u8, 50u8, 51u8, 52u8, 53u8, 54u8, 55u8, 56u8, 57u8, 58u8, 59u8, 60u8, 61u8, 62u8, 63u8, 64u8, 65u8, 66u8, 67u8, 68u8, 69u8, 70u8, 71u8, 72u8, 73u8, 74u8, 75u8, 76u8, 77u8, 78u8, 79u8, 80u8, 81u8, 82u8, 83u8, 84u8, 85u8, 86u8, 87u8, 88u8, 89u8, 90u8, 91u8, 92u8, 93u8, 94u8, 95u8, 96u8, 97u8, 98u8, 99u8, 100u8, 101u8, 102u8, 103u8, 104u8, 105u8, 106u8, 107u8, 108u8, 109u8, 110u8, 111u8, 112u8, 113u8, 114u8, 115u8, 116u8, 117u8, 118u8, 119u8, 120u8, 121u8, 122u8, 123u8, 124u8, 125u8, 126u8, 127u8, 128u8, 129u8, 130u8, 131u8, 132u8, 133u8, 134u8, 135u8, 136u8, 137u8, 138u8, 139u8, 140u8, 141u8, 142u8, 143u8, 144u8, 145u8, 146u8, 147u8, 148u8, 149u8, 150u8, 151u8, 152u8, 153u8, 154u8, 155u8, 156u8, 157u8, 158u8, 159u8, 160u8, 161u8, 162u8, 163u8, 164u8, 165u8, 166u8, 167u8, 168u8, 169u8, 170u8, 171u8, 172u8, 173u8, 174u8, 175u8, 176u8, 177u8, 178u8, 179u8, 180u8, 181u8, 182u8, 183u8, 184u8, 185u8, 186u8, 187u8, 188u8, 189u8, 190u8, 191u8, 192u8, 193u8, 194u8, 195u8, 196u8, 197u8, 198u8, 199u8, 200u8, 201u8, 202u8, 203u8, 204u8, 205u8, 206u8, 207u8, 208u8, 209u8, 210u8, 211u8, 212u8, 213u8, 214u8, 215u8, 216u8, 217u8, 218u8, 219u8, 220u8, 221u8, 222u8, 223u8, 224u8, 225u8, 226u8, 227u8, 228u8, 229u8, 230u8, 231u8, 232u8, 233u8, 234u8, 235u8, 236u8, 237u8, 238u8, 239u8, 240u8, 241u8, 242u8, 243u8, 244u8, 245u8, 246u8, 247u8, 248u8, 249u8, 250u8, 251u8, 252u8, 253u8, 254u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8)
+var h264bsdClip : uint8[1280] = fixed_array(0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8, 8u8, 9u8, 10u8, 11u8, 12u8, 13u8, 14u8, 15u8, 16u8, 17u8, 18u8,
+        19u8, 20u8, 21u8, 22u8, 23u8, 24u8, 25u8, 26u8, 27u8, 28u8, 29u8, 30u8, 31u8, 32u8, 33u8, 34u8, 35u8, 36u8, 37u8, 38u8, 39u8, 40u8, 41u8, 42u8, 43u8,
+        44u8, 45u8, 46u8, 47u8, 48u8, 49u8, 50u8, 51u8, 52u8, 53u8, 54u8, 55u8, 56u8, 57u8, 58u8, 59u8, 60u8, 61u8, 62u8, 63u8, 64u8, 65u8, 66u8, 67u8, 68u8,
+        69u8, 70u8, 71u8, 72u8, 73u8, 74u8, 75u8, 76u8, 77u8, 78u8, 79u8, 80u8, 81u8, 82u8, 83u8, 84u8, 85u8, 86u8, 87u8, 88u8, 89u8, 90u8, 91u8, 92u8, 93u8,
+        94u8, 95u8, 96u8, 97u8, 98u8, 99u8, 100u8, 101u8, 102u8, 103u8, 104u8, 105u8, 106u8, 107u8, 108u8, 109u8, 110u8, 111u8, 112u8, 113u8, 114u8, 115u8,
+        116u8, 117u8, 118u8, 119u8, 120u8, 121u8, 122u8, 123u8, 124u8, 125u8, 126u8, 127u8, 128u8, 129u8, 130u8, 131u8, 132u8, 133u8, 134u8, 135u8, 136u8,
+        137u8, 138u8, 139u8, 140u8, 141u8, 142u8, 143u8, 144u8, 145u8, 146u8, 147u8, 148u8, 149u8, 150u8, 151u8, 152u8, 153u8, 154u8, 155u8, 156u8, 157u8,
+        158u8, 159u8, 160u8, 161u8, 162u8, 163u8, 164u8, 165u8, 166u8, 167u8, 168u8, 169u8, 170u8, 171u8, 172u8, 173u8, 174u8, 175u8, 176u8, 177u8, 178u8,
+        179u8, 180u8, 181u8, 182u8, 183u8, 184u8, 185u8, 186u8, 187u8, 188u8, 189u8, 190u8, 191u8, 192u8, 193u8, 194u8, 195u8, 196u8, 197u8, 198u8, 199u8,
+        200u8, 201u8, 202u8, 203u8, 204u8, 205u8, 206u8, 207u8, 208u8, 209u8, 210u8, 211u8, 212u8, 213u8, 214u8, 215u8, 216u8, 217u8, 218u8, 219u8, 220u8,
+        221u8, 222u8, 223u8, 224u8, 225u8, 226u8, 227u8, 228u8, 229u8, 230u8, 231u8, 232u8, 233u8, 234u8, 235u8, 236u8, 237u8, 238u8, 239u8, 240u8, 241u8,
+        242u8, 243u8, 244u8, 245u8, 246u8, 247u8, 248u8, 249u8, 250u8, 251u8, 252u8, 253u8, 254u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+        255u8)
 var sample : int = 0
 var hashA : uint = 0u
 var hashB : uint = 0u
@@ -1415,30 +1612,581 @@ var hashC : uint = 0u
 var hashD : uint = 0u
 var h264bsdBlockX : uint[16] = fixed_array(0u, 4u, 0u, 4u, 8u, 12u, 8u, 12u, 0u, 4u, 0u, 4u, 8u, 12u, 8u, 12u)
 var h264bsdBlockY : uint[16] = fixed_array(0u, 0u, 4u, 4u, 0u, 0u, 4u, 4u, 8u, 8u, 12u, 12u, 8u, 8u, 12u, 12u)
-var private h264_file_all__N_A_SUB_PART : neighbour_t[4][4][4] = fixed_array(fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8))), fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8))), fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 10u8))), fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 14u8))))
-var private h264_file_all__N_B_SUB_PART : neighbour_t[4][4][4] = fixed_array(fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8))), fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 5u8))), fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8))), fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 13u8))))
-var private h264_file_all__N_C_SUB_PART : neighbour_t[4][4][4] = fixed_array(fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 4u8))), fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_C, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_C, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_C, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_C, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8))), fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 12u8))), fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_NA, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_NA, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 8u8))))
-var private h264_file_all__N_D_SUB_PART : neighbour_t[4][4][4] = fixed_array(fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_D, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_D, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_D, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_D, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8))), fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8))), fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8))), fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)), fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8))))
+var private h264_file_all__N_A_SUB_PART : neighbour_t[4][4][4] = fixed_array(fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8))),
+        fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8),
+                neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8))),
+        fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 15u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8),
+                neighbour_t(mb = neighbourMb_e.MB_A, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 10u8))),
+        fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 11u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8),
+                neighbour_t(mb = neighbourMb_e.MB_CURR, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 14u8))))
+var private h264_file_all__N_B_SUB_PART : neighbour_t[4][4][4] = fixed_array(fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8),
+                neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8))),
+        fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 15u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 15u8),
+                neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 5u8))),
+        fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8),
+                neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8))),
+        fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 7u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 7u8),
+                neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 13u8))))
+var private h264_file_all__N_C_SUB_PART : neighbour_t[4][4][4] = fixed_array(fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 4u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8),
+                neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 4u8))),
+        fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_C, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_C, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_C, index = 10u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_C, index = 10u8),
+                neighbour_t(mb = neighbourMb_e.MB_CURR, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8))),
+        fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 12u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8),
+                neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 12u8))),
+        fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_NA, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_NA, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 8u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 2u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 2u8),
+                neighbour_t(mb = neighbourMb_e.MB_CURR, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 8u8))))
+var private h264_file_all__N_D_SUB_PART : neighbour_t[4][4][4] = fixed_array(fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_D, index = 15u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_D, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_D, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_D, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8),
+                neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8))),
+        fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8),
+                neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8))),
+        fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8),
+                neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8))),
+        fixed_array(fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8),
+                neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8)),
+            fixed_array(neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8),
+                neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8))))
 var private h264_file_all__dcCoeffIndex : uint[16] = fixed_array(0u, 1u, 4u, 5u, 2u, 3u, 6u, 7u, 8u, 9u, 12u, 13u, 10u, 11u, 14u, 15u)
-var private h264_file_all__N_A_4x4B : neighbour_t[24] = fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 17u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 16u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 19u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 18u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 21u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 20u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 23u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 22u8))
-var private h264_file_all__N_B_4x4B : neighbour_t[24] = fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 18u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 19u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 16u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 17u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 22u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 23u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 20u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 21u8))
-var private h264_file_all__N_C_4x4B : neighbour_t[24] = fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_C, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 19u8), neighbour_t(mb = neighbourMb_e.MB_C, index = 18u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 17u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 16u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 23u8), neighbour_t(mb = neighbourMb_e.MB_C, index = 22u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 21u8), neighbour_t(mb = neighbourMb_e.MB_NA, index = 20u8))
-var private h264_file_all__N_D_4x4B : neighbour_t[24] = fixed_array(neighbour_t(mb = neighbourMb_e.MB_D, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_D, index = 19u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 18u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 17u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 16u8), neighbour_t(mb = neighbourMb_e.MB_D, index = 23u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 22u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 21u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 20u8))
+var private h264_file_all__N_A_4x4B : neighbour_t[24] = fixed_array(neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 15u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 11u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 17u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 16u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 19u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 18u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 21u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 20u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 23u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 22u8))
+var private h264_file_all__N_B_4x4B : neighbour_t[24] = fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8),
+        neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8),
+        neighbour_t(mb = neighbourMb_e.MB_B, index = 15u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 5u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 7u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 13u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 18u8),
+        neighbour_t(mb = neighbourMb_e.MB_B, index = 19u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 16u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 17u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 22u8),
+        neighbour_t(mb = neighbourMb_e.MB_B, index = 23u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 20u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 21u8))
+var private h264_file_all__N_C_4x4B : neighbour_t[24] = fixed_array(neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8),
+        neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8),
+        neighbour_t(mb = neighbourMb_e.MB_NA, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 15u8),
+        neighbour_t(mb = neighbourMb_e.MB_C, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 5u8),
+        neighbour_t(mb = neighbourMb_e.MB_NA, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8),
+        neighbour_t(mb = neighbourMb_e.MB_NA, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 7u8),
+        neighbour_t(mb = neighbourMb_e.MB_NA, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 13u8),
+        neighbour_t(mb = neighbourMb_e.MB_NA, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 19u8),
+        neighbour_t(mb = neighbourMb_e.MB_C, index = 18u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 17u8),
+        neighbour_t(mb = neighbourMb_e.MB_NA, index = 16u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 23u8),
+        neighbour_t(mb = neighbourMb_e.MB_C, index = 22u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 21u8),
+        neighbour_t(mb = neighbourMb_e.MB_NA, index = 20u8))
+var private h264_file_all__N_D_4x4B : neighbour_t[24] = fixed_array(neighbour_t(mb = neighbourMb_e.MB_D, index = 15u8),
+        neighbour_t(mb = neighbourMb_e.MB_B, index = 10u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 5u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 0u8), neighbour_t(mb = neighbourMb_e.MB_B, index = 11u8),
+        neighbour_t(mb = neighbourMb_e.MB_B, index = 14u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 1u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 4u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 7u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 2u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 13u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 8u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 3u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 6u8), neighbour_t(mb = neighbourMb_e.MB_CURR, index = 9u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 12u8), neighbour_t(mb = neighbourMb_e.MB_D, index = 19u8),
+        neighbour_t(mb = neighbourMb_e.MB_B, index = 18u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 17u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 16u8), neighbour_t(mb = neighbourMb_e.MB_D, index = 23u8),
+        neighbour_t(mb = neighbourMb_e.MB_B, index = 22u8), neighbour_t(mb = neighbourMb_e.MB_A, index = 21u8),
+        neighbour_t(mb = neighbourMb_e.MB_CURR, index = 20u8))
 var private h264_file_all__CeilLog2NumSliceGroups : uint[8] = fixed_array(1u, 1u, 2u, 2u, 3u, 3u, 3u, 3u)
-var private h264_file_all__lumaFracPos : uint[4][4] = fixed_array(fixed_array(0u, 1u, 2u, 3u), fixed_array(4u, 5u, 6u, 7u), fixed_array(8u, 9u, 10u, 11u), fixed_array(12u, 13u, 14u, 15u))
+var private h264_file_all__lumaFracPos : uint[4][4] = fixed_array(fixed_array(0u, 1u, 2u, 3u), fixed_array(4u, 5u, 6u, 7u), fixed_array(8u, 9u, 10u, 11u),
+        fixed_array(12u, 13u, 14u, 15u))
 var private h264_file_all__numClockTS : uint[9] = fixed_array(1u, 1u, 1u, 2u, 2u, 3u, 3u, 2u, 3u)
 var private h264_file_all__ceilLog2NumSliceGroups : uint[9] = fixed_array(0u, 1u, 1u, 2u, 2u, 3u, 3u, 3u, 3u)
-var private h264_file_all__levelScale : int[6][3] = fixed_array(fixed_array(10, 13, 16), fixed_array(11, 14, 18), fixed_array(13, 16, 20), fixed_array(14, 18, 23), fixed_array(16, 20, 25), fixed_array(18, 23, 29))
-var private h264_file_all__qpMod6 : uint8[52] = fixed_array(0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8)
-var private h264_file_all__qpDiv6 : uint8[52] = fixed_array(0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 3u8, 3u8, 3u8, 3u8, 3u8, 3u8, 4u8, 4u8, 4u8, 4u8, 4u8, 4u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 8u8, 8u8, 8u8, 8u8)
+var private h264_file_all__levelScale : int[6][3] = fixed_array(fixed_array(10, 13, 16), fixed_array(11, 14, 18), fixed_array(13, 16, 20),
+        fixed_array(14, 18, 23), fixed_array(16, 20, 25), fixed_array(18, 23, 29))
+var private h264_file_all__qpMod6 : uint8[52] = fixed_array(0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8,
+        2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 0u8, 1u8,
+        2u8, 3u8)
+var private h264_file_all__qpDiv6 : uint8[52] = fixed_array(0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 3u8, 3u8,
+        3u8, 3u8, 3u8, 3u8, 4u8, 4u8, 4u8, 4u8, 4u8, 4u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 8u8, 8u8,
+        8u8, 8u8)
 var private h264_file_all__stuffingTable : uint[8] = fixed_array(1u, 2u, 4u, 8u, 16u, 32u, 64u, 128u)
-var private h264_file_all__codedBlockPatternIntra4x4 : uint8[48] = fixed_array(47u8, 31u8, 15u8, 0u8, 23u8, 27u8, 29u8, 30u8, 7u8, 11u8, 13u8, 14u8, 39u8, 43u8, 45u8, 46u8, 16u8, 3u8, 5u8, 10u8, 12u8, 19u8, 21u8, 26u8, 28u8, 35u8, 37u8, 42u8, 44u8, 1u8, 2u8, 4u8, 8u8, 17u8, 18u8, 20u8, 24u8, 6u8, 9u8, 22u8, 25u8, 32u8, 33u8, 34u8, 36u8, 40u8, 38u8, 41u8)
-var private h264_file_all__codedBlockPatternInter : uint8[48] = fixed_array(0u8, 16u8, 1u8, 2u8, 4u8, 8u8, 32u8, 3u8, 5u8, 10u8, 12u8, 15u8, 47u8, 7u8, 11u8, 13u8, 14u8, 6u8, 9u8, 31u8, 35u8, 37u8, 42u8, 44u8, 33u8, 34u8, 36u8, 40u8, 39u8, 43u8, 45u8, 46u8, 17u8, 18u8, 20u8, 24u8, 19u8, 21u8, 26u8, 28u8, 23u8, 27u8, 29u8, 30u8, 22u8, 25u8, 38u8, 41u8)
-var private h264_file_all__box_ftyp : uint8[24] = fixed_array(0u8, 0u8, 0u8, 24u8, uint8('f'), uint8('t'), uint8('y'), uint8('p'), uint8('m'), uint8('p'), uint8('4'), uint8('2'), 0u8, 0u8, 0u8, 0u8, uint8('m'), uint8('p'), uint8('4'), uint8('2'), uint8('i'), uint8('s'), uint8('o'), uint8('m'))
-var private MP4D_open_g_fullbox : anon_751[13] = fixed_array(anon_751(name = uint(int(anon_644.BOX_mdhd)), max_version = 1u, use_track_flag = 1u), anon_751(name = uint(int(anon_644.BOX_mvhd)), max_version = 1u, use_track_flag = 0u), anon_751(name = uint(int(anon_644.BOX_hdlr)), max_version = 0u, use_track_flag = 0u), anon_751(name = uint(int(anon_644.BOX_meta)), max_version = 0u, use_track_flag = 0u), anon_751(name = uint(int(anon_644.BOX_stts)), max_version = 0u, use_track_flag = 0u), anon_751(name = uint(int(anon_644.BOX_ctts)), max_version = 0u, use_track_flag = 0u), anon_751(name = uint(int(anon_644.BOX_stz2)), max_version = 0u, use_track_flag = 1u), anon_751(name = uint(int(anon_644.BOX_stsz)), max_version = 0u, use_track_flag = 1u), anon_751(name = uint(int(anon_644.BOX_stsc)), max_version = 0u, use_track_flag = 1u), anon_751(name = uint(int(anon_644.BOX_stco)), max_version = 0u, use_track_flag = 1u), anon_751(name = uint(int(anon_644.BOX_co64)), max_version = 0u, use_track_flag = 1u), anon_751(name = uint(int(anon_644.BOX_stsd)), max_version = 0u, use_track_flag = 0u), anon_751(name = uint(int(anon_644.BOX_esds)), max_version = 0u, use_track_flag = 1u))
-var private MP4D_open_g_envelope_box : anon_753[20] = fixed_array(anon_753(name = uint(int(anon_644.BOX_esds)), _c_type = boxtype_t.BOX_OD), anon_753(name = uint(int(anon_644.OD_ESD)), _c_type = boxtype_t.BOX_OD), anon_753(name = uint(int(anon_644.OD_DCD)), _c_type = boxtype_t.BOX_OD), anon_753(name = uint(int(anon_644.OD_DSI)), _c_type = boxtype_t.BOX_OD), anon_753(name = uint(int(anon_644.BOX_trak)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_moov)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_mdia)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_tref)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_minf)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_dinf)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_stbl)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_stsd)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_mp4a)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_mp4s)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_mp4v)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_avc1)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_hvc1)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_udta)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_meta)), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(int(anon_644.BOX_ilst)), _c_type = boxtype_t.BOX_ATOM))
+var private h264_file_all__codedBlockPatternIntra4x4 : uint8[48] = fixed_array(47u8, 31u8, 15u8, 0u8, 23u8, 27u8, 29u8, 30u8, 7u8, 11u8, 13u8, 14u8, 39u8, 43u8,
+        45u8, 46u8, 16u8, 3u8, 5u8, 10u8, 12u8, 19u8, 21u8, 26u8, 28u8, 35u8, 37u8, 42u8, 44u8, 1u8, 2u8, 4u8, 8u8, 17u8, 18u8, 20u8, 24u8, 6u8, 9u8, 22u8,
+        25u8, 32u8, 33u8, 34u8, 36u8, 40u8, 38u8, 41u8)
+var private h264_file_all__codedBlockPatternInter : uint8[48] = fixed_array(0u8, 16u8, 1u8, 2u8, 4u8, 8u8, 32u8, 3u8, 5u8, 10u8, 12u8, 15u8, 47u8, 7u8, 11u8,
+        13u8, 14u8, 6u8, 9u8, 31u8, 35u8, 37u8, 42u8, 44u8, 33u8, 34u8, 36u8, 40u8, 39u8, 43u8, 45u8, 46u8, 17u8, 18u8, 20u8, 24u8, 19u8, 21u8, 26u8, 28u8,
+        23u8, 27u8, 29u8, 30u8, 22u8, 25u8, 38u8, 41u8)
+var private h264_file_all__box_ftyp : uint8[24] = fixed_array(0u8, 0u8, 0u8, 24u8, uint8('f'), uint8('t'), uint8('y'), uint8('p'), uint8('m'), uint8('p'),
+        uint8('4'), uint8('2'), 0u8, 0u8, 0u8, 0u8, uint8('m'), uint8('p'), uint8('4'), uint8('2'), uint8('i'), uint8('s'), uint8('o'), uint8('m'))
+var private MP4D_open_g_fullbox : anon_751[13] = fixed_array(anon_751(name = uint(anon_644.BOX_mdhd), max_version = 1u, use_track_flag = 1u),
+        anon_751(name = uint(anon_644.BOX_mvhd), max_version = 1u, use_track_flag = 0u),
+        anon_751(name = uint(anon_644.BOX_hdlr), max_version = 0u, use_track_flag = 0u),
+        anon_751(name = uint(anon_644.BOX_meta), max_version = 0u, use_track_flag = 0u),
+        anon_751(name = uint(anon_644.BOX_stts), max_version = 0u, use_track_flag = 0u),
+        anon_751(name = uint(anon_644.BOX_ctts), max_version = 0u, use_track_flag = 0u),
+        anon_751(name = uint(anon_644.BOX_stz2), max_version = 0u, use_track_flag = 1u),
+        anon_751(name = uint(anon_644.BOX_stsz), max_version = 0u, use_track_flag = 1u),
+        anon_751(name = uint(anon_644.BOX_stsc), max_version = 0u, use_track_flag = 1u),
+        anon_751(name = uint(anon_644.BOX_stco), max_version = 0u, use_track_flag = 1u),
+        anon_751(name = uint(anon_644.BOX_co64), max_version = 0u, use_track_flag = 1u),
+        anon_751(name = uint(anon_644.BOX_stsd), max_version = 0u, use_track_flag = 0u),
+        anon_751(name = uint(anon_644.BOX_esds), max_version = 0u, use_track_flag = 1u))
+var private MP4D_open_g_envelope_box : anon_753[20] = fixed_array(anon_753(name = uint(anon_644.BOX_esds), _c_type = boxtype_t.BOX_OD),
+        anon_753(name = uint(anon_644.OD_ESD), _c_type = boxtype_t.BOX_OD), anon_753(name = uint(anon_644.OD_DCD), _c_type = boxtype_t.BOX_OD),
+        anon_753(name = uint(anon_644.OD_DSI), _c_type = boxtype_t.BOX_OD), anon_753(name = uint(anon_644.BOX_trak), _c_type = boxtype_t.BOX_ATOM),
+        anon_753(name = uint(anon_644.BOX_moov), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(anon_644.BOX_mdia), _c_type = boxtype_t.BOX_ATOM),
+        anon_753(name = uint(anon_644.BOX_tref), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(anon_644.BOX_minf), _c_type = boxtype_t.BOX_ATOM),
+        anon_753(name = uint(anon_644.BOX_dinf), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(anon_644.BOX_stbl), _c_type = boxtype_t.BOX_ATOM),
+        anon_753(name = uint(anon_644.BOX_stsd), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(anon_644.BOX_mp4a), _c_type = boxtype_t.BOX_ATOM),
+        anon_753(name = uint(anon_644.BOX_mp4s), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(anon_644.BOX_mp4v), _c_type = boxtype_t.BOX_ATOM),
+        anon_753(name = uint(anon_644.BOX_avc1), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(anon_644.BOX_hvc1), _c_type = boxtype_t.BOX_ATOM),
+        anon_753(name = uint(anon_644.BOX_udta), _c_type = boxtype_t.BOX_ATOM), anon_753(name = uint(anon_644.BOX_meta), _c_type = boxtype_t.BOX_ATOM),
+        anon_753(name = uint(anon_644.BOX_ilst), _c_type = boxtype_t.BOX_ATOM))
 var private h264_file_all__sample_mp4_len : uint = 8044u
-var private h264_file_all__sample_mp4_bytes : uint8[8044] = fixed_array(0u8, 0u8, 0u8, 32u8, 102u8, 116u8, 121u8, 112u8, 105u8, 115u8, 111u8, 109u8, 0u8, 0u8, 2u8, 0u8, 105u8, 115u8, 111u8, 109u8, 105u8, 115u8, 111u8, 50u8, 97u8, 118u8, 99u8, 49u8, 109u8, 112u8, 52u8, 49u8, 0u8, 0u8, 0u8, 8u8, 102u8, 114u8, 101u8, 101u8, 0u8, 0u8, 27u8, 241u8, 109u8, 100u8, 97u8, 116u8, 0u8, 0u8, 2u8, 113u8, 6u8, 5u8, 255u8, 255u8, 109u8, 220u8, 69u8, 233u8, 189u8, 230u8, 217u8, 72u8, 183u8, 150u8, 44u8, 216u8, 32u8, 217u8, 35u8, 238u8, 239u8, 120u8, 50u8, 54u8, 52u8, 32u8, 45u8, 32u8, 99u8, 111u8, 114u8, 101u8, 32u8, 49u8, 54u8, 53u8, 32u8, 114u8, 51u8, 50u8, 50u8, 50u8, 32u8, 98u8, 51u8, 53u8, 54u8, 48u8, 53u8, 97u8, 32u8, 45u8, 32u8, 72u8, 46u8, 50u8, 54u8, 52u8, 47u8, 77u8, 80u8, 69u8, 71u8, 45u8, 52u8, 32u8, 65u8, 86u8, 67u8, 32u8, 99u8, 111u8, 100u8, 101u8, 99u8, 32u8, 45u8, 32u8, 67u8, 111u8, 112u8, 121u8, 108u8, 101u8, 102u8, 116u8, 32u8, 50u8, 48u8, 48u8, 51u8, 45u8, 50u8, 48u8, 50u8, 53u8, 32u8, 45u8, 32u8, 104u8, 116u8, 116u8, 112u8, 58u8, 47u8, 47u8, 119u8, 119u8, 119u8, 46u8, 118u8, 105u8, 100u8, 101u8, 111u8, 108u8, 97u8, 110u8, 46u8, 111u8, 114u8, 103u8, 47u8, 120u8, 50u8, 54u8, 52u8, 46u8, 104u8, 116u8, 109u8, 108u8, 32u8, 45u8, 32u8, 111u8, 112u8, 116u8, 105u8, 111u8, 110u8, 115u8, 58u8, 32u8, 99u8, 97u8, 98u8, 97u8, 99u8, 61u8, 48u8, 32u8, 114u8, 101u8, 102u8, 61u8, 51u8, 32u8, 100u8, 101u8, 98u8, 108u8, 111u8, 99u8, 107u8, 61u8, 49u8, 58u8, 48u8, 58u8, 48u8, 32u8, 97u8, 110u8, 97u8, 108u8, 121u8, 115u8, 101u8, 61u8, 48u8, 120u8, 49u8, 58u8, 48u8, 120u8, 49u8, 49u8, 49u8, 32u8, 109u8, 101u8, 61u8, 104u8, 101u8, 120u8, 32u8, 115u8, 117u8, 98u8, 109u8, 101u8, 61u8, 55u8, 32u8, 112u8, 115u8, 121u8, 61u8, 49u8, 32u8, 112u8, 115u8, 121u8, 95u8, 114u8, 100u8, 61u8, 49u8, 46u8, 48u8, 48u8, 58u8, 48u8, 46u8, 48u8, 48u8, 32u8, 109u8, 105u8, 120u8, 101u8, 100u8, 95u8, 114u8, 101u8, 102u8, 61u8, 49u8, 32u8, 109u8, 101u8, 95u8, 114u8, 97u8, 110u8, 103u8, 101u8, 61u8, 49u8, 54u8, 32u8, 99u8, 104u8, 114u8, 111u8, 109u8, 97u8, 95u8, 109u8, 101u8, 61u8, 49u8, 32u8, 116u8, 114u8, 101u8, 108u8, 108u8, 105u8, 115u8, 61u8, 49u8, 32u8, 56u8, 120u8, 56u8, 100u8, 99u8, 116u8, 61u8, 48u8, 32u8, 99u8, 113u8, 109u8, 61u8, 48u8, 32u8, 100u8, 101u8, 97u8, 100u8, 122u8, 111u8, 110u8, 101u8, 61u8, 50u8, 49u8, 44u8, 49u8, 49u8, 32u8, 102u8, 97u8, 115u8, 116u8, 95u8, 112u8, 115u8, 107u8, 105u8, 112u8, 61u8, 49u8, 32u8, 99u8, 104u8, 114u8, 111u8, 109u8, 97u8, 95u8, 113u8, 112u8, 95u8, 111u8, 102u8, 102u8, 115u8, 101u8, 116u8, 61u8, 45u8, 50u8, 32u8, 116u8, 104u8, 114u8, 101u8, 97u8, 100u8, 115u8, 61u8, 50u8, 32u8, 108u8, 111u8, 111u8, 107u8, 97u8, 104u8, 101u8, 97u8, 100u8, 95u8, 116u8, 104u8, 114u8, 101u8, 97u8, 100u8, 115u8, 61u8, 49u8, 32u8, 115u8, 108u8, 105u8, 99u8, 101u8, 100u8, 95u8, 116u8, 104u8, 114u8, 101u8, 97u8, 100u8, 115u8, 61u8, 48u8, 32u8, 110u8, 114u8, 61u8, 48u8, 32u8, 100u8, 101u8, 99u8, 105u8, 109u8, 97u8, 116u8, 101u8, 61u8, 49u8, 32u8, 105u8, 110u8, 116u8, 101u8, 114u8, 108u8, 97u8, 99u8, 101u8, 100u8, 61u8, 48u8, 32u8, 98u8, 108u8, 117u8, 114u8, 97u8, 121u8, 95u8, 99u8, 111u8, 109u8, 112u8, 97u8, 116u8, 61u8, 48u8, 32u8, 99u8, 111u8, 110u8, 115u8, 116u8, 114u8, 97u8, 105u8, 110u8, 101u8, 100u8, 95u8, 105u8, 110u8, 116u8, 114u8, 97u8, 61u8, 48u8, 32u8, 98u8, 102u8, 114u8, 97u8, 109u8, 101u8, 115u8, 61u8, 48u8, 32u8, 119u8, 101u8, 105u8, 103u8, 104u8, 116u8, 112u8, 61u8, 48u8, 32u8, 107u8, 101u8, 121u8, 105u8, 110u8, 116u8, 61u8, 50u8, 53u8, 48u8, 32u8, 107u8, 101u8, 121u8, 105u8, 110u8, 116u8, 95u8, 109u8, 105u8, 110u8, 61u8, 49u8, 50u8, 32u8, 115u8, 99u8, 101u8, 110u8, 101u8, 99u8, 117u8, 116u8, 61u8, 52u8, 48u8, 32u8, 105u8, 110u8, 116u8, 114u8, 97u8, 95u8, 114u8, 101u8, 102u8, 114u8, 101u8, 115u8, 104u8, 61u8, 48u8, 32u8, 114u8, 99u8, 95u8, 108u8, 111u8, 111u8, 107u8, 97u8, 104u8, 101u8, 97u8, 100u8, 61u8, 52u8, 48u8, 32u8, 114u8, 99u8, 61u8, 99u8, 114u8, 102u8, 32u8, 109u8, 98u8, 116u8, 114u8, 101u8, 101u8, 61u8, 49u8, 32u8, 99u8, 114u8, 102u8, 61u8, 50u8, 51u8, 46u8, 48u8, 32u8, 113u8, 99u8, 111u8, 109u8, 112u8, 61u8, 48u8, 46u8, 54u8, 48u8, 32u8, 113u8, 112u8, 109u8, 105u8, 110u8, 61u8, 48u8, 32u8, 113u8, 112u8, 109u8, 97u8, 120u8, 61u8, 54u8, 57u8, 32u8, 113u8, 112u8, 115u8, 116u8, 101u8, 112u8, 61u8, 52u8, 32u8, 105u8, 112u8, 95u8, 114u8, 97u8, 116u8, 105u8, 111u8, 61u8, 49u8, 46u8, 52u8, 48u8, 32u8, 97u8, 113u8, 61u8, 49u8, 58u8, 49u8, 46u8, 48u8, 48u8, 0u8, 128u8, 0u8, 0u8, 6u8, 205u8, 101u8, 136u8, 132u8, 55u8, 196u8, 34u8, 42u8, 224u8, 192u8, 133u8, 248u8, 8u8, 83u8, 34u8, 0u8, 1u8, 0u8, 154u8, 212u8, 24u8, 96u8, 0u8, 241u8, 120u8, 206u8, 140u8, 104u8, 232u8, 23u8, 221u8, 255u8, 226u8, 103u8, 220u8, 153u8, 17u8, 138u8, 191u8, 176u8, 111u8, 254u8, 210u8, 94u8, 97u8, 162u8, 50u8, 176u8, 246u8, 207u8, 251u8, 8u8, 252u8, 69u8, 150u8, 100u8, 62u8, 206u8, 66u8, 95u8, 246u8, 11u8, 52u8, 184u8, 169u8, 4u8, 178u8, 39u8, 251u8, 107u8, 141u8, 67u8, 19u8, 147u8, 229u8, 225u8, 234u8, 245u8, 43u8, 140u8, 26u8, 50u8, 132u8, 221u8, 94u8, 160u8, 117u8, 153u8, 180u8, 112u8, 95u8, 143u8, 239u8, 148u8, 28u8, 84u8, 93u8, 84u8, 19u8, 55u8, 251u8, 224u8, 64u8, 0u8, 88u8, 0u8, 193u8, 77u8, 132u8, 0u8, 9u8, 120u8, 0u8, 8u8, 4u8, 0u8, 9u8, 243u8, 48u8, 171u8, 49u8, 208u8, 33u8, 23u8, 202u8, 155u8, 7u8, 134u8, 185u8, 209u8, 164u8, 247u8, 32u8, 56u8, 159u8, 255u8, 180u8, 224u8, 87u8, 49u8, 37u8, 136u8, 210u8, 0u8, 55u8, 92u8, 81u8, 85u8, 133u8, 69u8, 160u8, 2u8, 13u8, 42u8, 116u8, 189u8, 86u8, 192u8, 35u8, 13u8, 255u8, 251u8, 199u8, 1u8, 78u8, 229u8, 178u8, 35u8, 74u8, 34u8, 160u8, 35u8, 241u8, 118u8, 166u8, 80u8, 56u8, 128u8, 64u8, 51u8, 47u8, 249u8, 50u8, 18u8, 147u8, 188u8, 117u8, 131u8, 7u8, 192u8, 1u8, 226u8, 240u8, 206u8, 140u8, 108u8, 84u8, 11u8, 229u8, 127u8, 250u8, 227u8, 80u8, 198u8, 228u8, 249u8, 104u8, 61u8, 94u8, 6u8, 173u8, 98u8, 86u8, 43u8, 20u8, 33u8, 234u8, 244u8, 128u8, 53u8, 153u8, 146u8, 56u8, 63u8, 191u8, 191u8, 245u8, 194u8, 50u8, 43u8, 57u8, 74u8, 131u8, 168u8, 7u8, 235u8, 120u8, 179u8, 103u8, 124u8, 93u8, 148u8, 89u8, 102u8, 131u8, 169u8, 143u8, 33u8, 239u8, 244u8, 224u8, 134u8, 116u8, 33u8, 76u8, 232u8, 58u8, 172u8, 26u8, 124u8, 84u8, 176u8, 37u8, 186u8, 127u8, 190u8, 3u8, 3u8, 120u8, 72u8, 0u8, 8u8, 24u8, 160u8, 0u8, 8u8, 19u8, 134u8, 194u8, 236u8, 128u8, 51u8, 240u8, 122u8, 108u8, 85u8, 152u8, 6u8, 45u8, 3u8, 216u8, 75u8, 38u8, 82u8, 5u8, 165u8, 127u8, 223u8, 96u8, 212u8, 102u8, 122u8, 3u8, 214u8, 183u8, 239u8, 130u8, 108u8, 6u8, 214u8, 20u8, 160u8, 63u8, 39u8, 213u8, 80u8, 26u8, 248u8, 199u8, 1u8, 117u8, 62u8, 193u8, 184u8, 200u8, 217u8, 128u8, 253u8, 134u8, 253u8, 246u8, 4u8, 188u8, 140u8, 215u8, 40u8, 37u8, 194u8, 127u8, 252u8, 136u8, 171u8, 136u8, 168u8, 19u8, 101u8, 97u8, 224u8, 113u8, 0u8, 128u8, 102u8, 95u8, 242u8, 100u8, 152u8, 93u8, 226u8, 252u8, 55u8, 17u8, 120u8, 203u8, 152u8, 145u8, 240u8, 254u8, 239u8, 255u8, 127u8, 201u8, 145u8, 24u8, 93u8, 239u8, 249u8, 3u8, 184u8, 212u8, 49u8, 185u8, 62u8, 90u8, 143u8, 87u8, 182u8, 82u8, 57u8, 32u8, 123u8, 59u8, 51u8, 255u8, 168u8, 15u8, 144u8, 140u8, 152u8, 160u8, 47u8, 223u8, 247u8, 203u8, 3u8, 206u8, 71u8, 74u8, 80u8, 36u8, 102u8, 255u8, 125u8, 113u8, 168u8, 99u8, 114u8, 124u8, 190u8, 61u8, 94u8, 6u8, 186u8, 197u8, 216u8, 172u8, 86u8, 61u8, 94u8, 160u8, 107u8, 146u8, 145u8, 7u8, 151u8, 239u8, 251u8, 211u8, 145u8, 147u8, 179u8, 151u8, 160u8, 234u8, 14u8, 96u8, 6u8, 4u8, 128u8, 72u8, 0u8, 6u8, 105u8, 1u8, 212u8, 10u8, 88u8, 218u8, 152u8, 108u8, 0u8, 249u8, 112u8, 57u8, 246u8, 15u8, 48u8, 5u8, 241u8, 13u8, 184u8, 218u8, 158u8, 9u8, 50u8, 52u8, 136u8, 41u8, 58u8, 254u8, 243u8, 62u8, 208u8, 37u8, 27u8, 83u8, 26u8, 248u8, 197u8, 159u8, 93u8, 140u8, 12u8, 215u8, 193u8, 101u8, 241u8, 189u8, 57u8, 129u8, 252u8, 232u8, 189u8, 69u8, 153u8, 174u8, 253u8, 236u8, 113u8, 21u8, 123u8, 36u8, 191u8, 6u8, 144u8, 0u8, 16u8, 53u8, 101u8, 224u8, 0u8, 240u8, 189u8, 56u8, 188u8, 167u8, 82u8, 248u8, 213u8, 157u8, 255u8, 239u8, 205u8, 72u8, 50u8, 51u8, 137u8, 107u8, 157u8, 218u8, 238u8, 33u8, 122u8, 113u8, 121u8, 78u8, 165u8, 241u8, 235u8, 59u8, 255u8, 192u8, 174u8, 47u8, 204u8, 198u8, 17u8, 78u8, 81u8, 234u8, 247u8, 59u8, 9u8, 31u8, 35u8, 15u8, 156u8, 182u8, 43u8, 255u8, 214u8, 28u8, 22u8, 31u8, 85u8, 156u8, 222u8, 151u8, 127u8, 172u8, 13u8, 186u8, 11u8, 211u8, 6u8, 105u8, 215u8, 253u8, 245u8, 168u8, 123u8, 28u8, 17u8, 77u8, 88u8, 222u8, 30u8, 175u8, 91u8, 133u8, 241u8, 193u8, 84u8, 197u8, 140u8, 233u8, 234u8, 244u8, 128u8, 0u8, 243u8, 24u8, 205u8, 142u8, 0u8, 171u8, 127u8, 127u8, 237u8, 0u8, 120u8, 230u8, 59u8, 115u8, 128u8, 34u8, 151u8, 253u8, 240u8, 32u8, 64u8, 0u8, 64u8, 33u8, 128u8, 0u8, 160u8, 136u8, 6u8, 91u8, 147u8, 176u8, 9u8, 180u8, 229u8, 16u8, 42u8, 196u8, 196u8, 192u8, 9u8, 149u8, 128u8, 12u8, 54u8, 167u8, 128u8, 217u8, 14u8, 83u8, 169u8, 0u8, 185u8, 54u8, 239u8, 223u8, 48u8, 0u8, 4u8, 142u8, 193u8, 132u8, 82u8, 99u8, 106u8, 115u8, 86u8, 248u8, 131u8, 243u8, 236u8, 206u8, 53u8, 200u8, 56u8, 218u8, 158u8, 5u8, 251u8, 35u8, 101u8, 9u8, 113u8, 9u8, 253u8, 243u8, 0u8, 2u8, 202u8, 41u8, 55u8, 3u8, 106u8, 113u8, 21u8, 1u8, 31u8, 109u8, 141u8, 51u8, 1u8, 208u8, 32u8, 102u8, 95u8, 114u8, 100u8, 152u8, 187u8, 175u8, 198u8, 255u8, 224u8, 248u8, 0u8, 82u8, 241u8, 190u8, 98u8, 71u8, 194u8, 251u8, 191u8, 253u8, 75u8, 163u8, 4u8, 142u8, 161u8, 85u8, 171u8, 199u8, 157u8, 7u8, 230u8, 100u8, 135u8, 226u8, 207u8, 246u8, 192u8, 229u8, 198u8, 200u8, 74u8, 233u8, 171u8, 203u8, 105u8, 78u8, 80u8, 27u8, 16u8, 226u8, 111u8, 244u8, 9u8, 101u8, 180u8, 159u8, 165u8, 84u8, 30u8, 185u8, 210u8, 195u8, 113u8, 191u8, 190u8, 192u8, 193u8, 167u8, 10u8, 0u8, 11u8, 129u8, 131u8, 16u8, 31u8, 42u8, 32u8, 75u8, 79u8, 171u8, 96u8, 116u8, 170u8, 129u8, 41u8, 62u8, 194u8, 45u8, 28u8, 161u8, 25u8, 41u8, 127u8, 252u8, 211u8, 22u8, 95u8, 245u8, 97u8, 242u8, 169u8, 15u8, 255u8, 21u8, 54u8, 4u8, 36u8, 79u8, 10u8, 30u8, 2u8, 18u8, 103u8, 128u8, 110u8, 115u8, 45u8, 227u8, 58u8, 194u8, 127u8, 249u8, 133u8, 229u8, 144u8, 210u8, 201u8, 143u8, 212u8, 69u8, 92u8, 69u8, 65u8, 220u8, 164u8, 62u8, 96u8, 58u8, 33u8, 153u8, 123u8, 197u8, 90u8, 219u8, 226u8, 223u8, 224u8, 40u8, 137u8, 200u8, 167u8, 15u8, 183u8, 127u8, 176u8, 26u8, 90u8, 76u8, 183u8, 186u8, 255u8, 237u8, 200u8, 156u8, 138u8, 112u8, 251u8, 119u8, 250u8, 185u8, 98u8, 77u8, 159u8, 151u8, 236u8, 84u8, 234u8, 58u8, 105u8, 95u8, 245u8, 15u8, 73u8, 83u8, 3u8, 251u8, 251u8, 229u8, 14u8, 105u8, 219u8, 2u8, 223u8, 251u8, 229u8, 106u8, 197u8, 151u8, 159u8, 106u8, 245u8, 102u8, 199u8, 147u8, 155u8, 234u8, 244u8, 131u8, 164u8, 169u8, 129u8, 247u8, 247u8, 254u8, 208u8, 230u8, 157u8, 176u8, 44u8, 191u8, 223u8, 4u8, 8u8, 116u8, 32u8, 0u8, 8u8, 1u8, 128u8, 14u8, 154u8, 74u8, 240u8, 67u8, 106u8, 100u8, 165u8, 120u8, 33u8, 181u8, 54u8, 2u8, 185u8, 137u8, 40u8, 218u8, 152u8, 128u8, 174u8, 98u8, 74u8, 54u8, 166u8, 76u8, 3u8, 231u8, 14u8, 54u8, 166u8, 76u8, 3u8, 231u8, 14u8, 54u8, 166u8, 192u8, 10u8, 114u8, 158u8, 193u8, 181u8, 49u8, 0u8, 41u8, 202u8, 123u8, 6u8, 212u8, 224u8, 0u8, 2u8, 53u8, 8u8, 125u8, 134u8, 133u8, 185u8, 123u8, 55u8, 192u8, 31u8, 183u8, 130u8, 39u8, 213u8, 117u8, 3u8, 32u8, 48u8, 0u8, 129u8, 89u8, 0u8, 12u8, 72u8, 14u8, 5u8, 128u8, 124u8, 71u8, 128u8, 112u8, 28u8, 3u8, 96u8, 32u8, 138u8, 11u8, 64u8, 5u8, 96u8, 104u8, 226u8, 80u8, 28u8, 1u8, 176u8, 226u8, 32u8, 28u8, 48u8, 241u8, 197u8, 231u8, 182u8, 76u8, 203u8, 243u8, 223u8, 124u8, 12u8, 1u8, 57u8, 3u8, 8u8, 16u8, 0u8, 148u8, 93u8, 248u8, 63u8, 104u8, 100u8, 212u8, 249u8, 192u8, 252u8, 155u8, 255u8, 235u8, 133u8, 13u8, 55u8, 127u8, 243u8, 254u8, 40u8, 28u8, 13u8, 6u8, 16u8, 52u8, 52u8, 125u8, 246u8, 15u8, 248u8, 135u8, 163u8, 158u8, 127u8, 128u8, 147u8, 225u8, 196u8, 127u8, 70u8, 187u8, 154u8, 239u8, 38u8, 62u8, 35u8, 254u8, 131u8, 66u8, 76u8, 251u8, 117u8, 127u8, 252u8, 129u8, 94u8, 155u8, 32u8, 78u8, 203u8, 206u8, 244u8, 195u8, 2u8, 112u8, 26u8, 32u8, 0u8, 128u8, 150u8, 183u8, 73u8, 136u8, 151u8, 225u8, 111u8, 61u8, 225u8, 31u8, 255u8, 162u8, 53u8, 137u8, 126u8, 43u8, 84u8, 157u8, 88u8, 174u8, 59u8, 195u8, 30u8, 187u8, 160u8, 0u8, 79u8, 134u8, 176u8, 169u8, 217u8, 37u8, 240u8, 206u8, 51u8, 104u8, 63u8, 156u8, 186u8, 146u8, 195u8, 0u8, 20u8, 5u8, 132u8, 1u8, 87u8, 1u8, 155u8, 56u8, 104u8, 101u8, 17u8, 197u8, 104u8, 216u8, 60u8, 230u8, 92u8, 46u8, 202u8, 13u8, 33u8, 57u8, 91u8, 247u8, 119u8, 31u8, 52u8, 140u8, 93u8, 142u8, 80u8, 26u8, 122u8, 103u8, 56u8, 120u8, 96u8, 22u8, 4u8, 198u8, 30u8, 126u8, 171u8, 254u8, 160u8, 1u8, 75u8, 204u8, 121u8, 26u8, 46u8, 58u8, 147u8, 255u8, 218u8, 135u8, 125u8, 164u8, 167u8, 65u8, 163u8, 20u8, 219u8, 239u8, 86u8, 11u8, 107u8, 70u8, 160u8, 185u8, 175u8, 246u8, 193u8, 8u8, 1u8, 41u8, 128u8, 192u8, 3u8, 192u8, 14u8, 24u8, 204u8, 109u8, 180u8, 129u8, 236u8, 23u8, 146u8, 54u8, 226u8, 13u8, 13u8, 255u8, 251u8, 192u8, 195u8, 34u8, 248u8, 147u8, 105u8, 240u8, 2u8, 29u8, 93u8, 124u8, 7u8, 29u8, 194u8, 51u8, 22u8, 159u8, 41u8, 31u8, 206u8, 88u8, 97u8, 128u8, 127u8, 193u8, 88u8, 156u8, 4u8, 200u8, 157u8, 137u8, 90u8, 187u8, 3u8, 128u8, 1u8, 12u8, 3u8, 132u8, 16u8, 0u8, 118u8, 128u8, 10u8, 0u8, 202u8, 109u8, 158u8, 100u8, 96u8, 68u8, 100u8, 150u8, 30u8, 0u8, 66u8, 104u8, 208u8, 106u8, 132u8, 27u8, 156u8, 89u8, 68u8, 0u8, 8u8, 97u8, 50u8, 195u8, 248u8, 6u8, 0u8, 28u8, 3u8, 97u8, 178u8, 96u8, 114u8, 3u8, 6u8, 101u8, 226u8, 128u8, 60u8, 72u8, 0u8, 104u8, 72u8, 0u8, 8u8, 1u8, 160u8, 228u8, 24u8, 146u8, 195u8, 144u8, 98u8, 75u8, 28u8, 32u8, 118u8, 7u8, 4u8, 12u8, 192u8, 112u8, 138u8, 68u8, 176u8, 225u8, 20u8, 137u8, 99u8, 128u8, 64u8, 43u8, 3u8, 128u8, 32u8, 17u8, 142u8, 1u8, 0u8, 255u8, 193u8, 89u8, 48u8, 60u8, 24u8, 102u8, 88u8, 72u8, 16u8, 192u8, 240u8, 128u8, 64u8, 10u8, 192u8, 12u8, 14u8, 19u8, 141u8, 44u8, 128u8, 156u8, 105u8, 127u8, 174u8, 235u8, 190u8, 64u8, 1u8, 128u8, 127u8, 176u8, 86u8, 80u8, 21u8, 99u8, 14u8, 100u8, 74u8, 178u8, 40u8, 41u8, 149u8, 134u8, 0u8, 2u8, 2u8, 108u8, 0u8, 2u8, 4u8, 144u8, 200u8, 180u8, 28u8, 1u8, 16u8, 250u8, 160u8, 28u8, 4u8, 99u8, 98u8, 137u8, 145u8, 65u8, 73u8, 43u8, 122u8, 105u8, 158u8, 3u8, 128u8, 67u8, 190u8, 73u8, 48u8, 60u8, 6u8, 51u8, 35u8, 129u8, 35u8, 134u8, 204u8, 131u8, 182u8, 95u8, 162u8, 123u8, 224u8, 96u8, 3u8, 67u8, 132u8, 128u8, 0u8, 128u8, 139u8, 0u8, 0u8, 128u8, 0u8, 24u8, 240u8, 86u8, 207u8, 8u8, 66u8, 178u8, 207u8, 2u8, 206u8, 0u8, 153u8, 0u8, 150u8, 102u8, 88u8, 216u8, 233u8, 187u8, 74u8, 60u8, 65u8, 221u8, 156u8, 181u8, 102u8, 115u8, 157u8, 192u8, 32u8, 16u8, 130u8, 225u8, 39u8, 196u8, 241u8, 254u8, 92u8, 123u8, 138u8, 0u8, 7u8, 160u8, 9u8, 237u8, 41u8, 85u8, 175u8, 159u8, 216u8, 66u8, 5u8, 134u8, 8u8, 0u8, 10u8, 0u8, 135u8, 135u8, 154u8, 135u8, 217u8, 202u8, 73u8, 164u8, 184u8, 85u8, 32u8, 209u8, 54u8, 16u8, 32u8, 150u8, 89u8, 2u8, 9u8, 229u8, 128u8, 172u8, 36u8, 206u8, 47u8, 163u8, 119u8, 179u8, 192u8, 35u8, 116u8, 100u8, 50u8, 24u8, 124u8, 41u8, 227u8, 17u8, 221u8, 163u8, 65u8, 44u8, 99u8, 24u8, 255u8, 240u8, 195u8, 176u8, 84u8, 9u8, 4u8, 0u8, 2u8, 128u8, 168u8, 64u8, 0u8, 52u8, 2u8, 172u8, 28u8, 64u8, 9u8, 128u8, 114u8, 0u8, 108u8, 96u8, 224u8, 32u8, 102u8, 1u8, 192u8, 129u8, 216u8, 51u8, 4u8, 113u8, 172u8, 96u8, 3u8, 195u8, 0u8, 255u8, 216u8, 43u8, 131u8, 145u8, 255u8, 68u8, 148u8, 92u8, 92u8, 92u8, 92u8, 92u8, 92u8, 92u8, 95u8, 12u8, 3u8, 255u8, 96u8, 174u8, 47u8, 196u8, 0u8, 18u8, 68u8, 0u8, 8u8, 145u8, 89u8, 108u8, 86u8, 43u8, 17u8, 96u8, 128u8, 4u8, 186u8, 225u8, 214u8, 3u8, 128u8, 37u8, 215u8, 32u8, 28u8, 63u8, 246u8, 10u8, 226u8, 191u8, 196u8, 0u8, 1u8, 6u8, 80u8, 0u8, 16u8, 68u8, 136u8, 0u8, 2u8, 60u8, 0u8, 0u8, 35u8, 147u8, 45u8, 25u8, 96u8, 16u8, 0u8, 16u8, 49u8, 96u8, 84u8, 99u8, 128u8, 64u8, 0u8, 64u8, 197u8, 130u8, 0u8, 151u8, 92u8, 32u8, 0u8, 4u8, 35u8, 232u8, 0u8, 8u8, 200u8, 92u8, 14u8, 4u8, 186u8, 224u8, 112u8, 0u8, 16u8, 143u8, 160u8, 0u8, 35u8, 33u8, 114u8, 0u8, 0u8, 1u8, 202u8, 65u8, 154u8, 56u8, 111u8, 227u8, 97u8, 110u8, 34u8, 31u8, 127u8, 2u8, 20u8, 241u8, 202u8, 12u8, 156u8, 247u8, 153u8, 35u8, 13u8, 60u8, 189u8, 247u8, 191u8, 132u8, 0u8, 6u8, 65u8, 196u8, 162u8, 16u8, 1u8, 17u8, 72u8, 0u8, 10u8, 72u8, 136u8, 129u8, 145u8, 133u8, 45u8, 5u8, 158u8, 123u8, 120u8, 189u8, 36u8, 210u8, 215u8, 126u8, 150u8, 219u8, 87u8, 141u8, 82u8, 169u8, 112u8, 0u8, 103u8, 23u8, 137u8, 122u8, 17u8, 76u8, 35u8, 35u8, 159u8, 252u8, 186u8, 195u8, 121u8, 254u8, 22u8, 47u8, 33u8, 76u8, 195u8, 47u8, 8u8, 214u8, 151u8, 69u8, 127u8, 253u8, 59u8, 249u8, 226u8, 95u8, 218u8, 95u8, 225u8, 142u8, 18u8, 81u8, 175u8, 4u8, 93u8, 26u8, 171u8, 137u8, 151u8, 4u8, 126u8, 79u8, 222u8, 1u8, 15u8, 151u8, 57u8, 234u8, 94u8, 127u8, 111u8, 52u8, 104u8, 206u8, 0u8, 21u8, 232u8, 148u8, 220u8, 126u8, 87u8, 221u8, 26u8, 166u8, 141u8, 124u8, 231u8, 187u8, 246u8, 110u8, 50u8, 40u8, 251u8, 246u8, 244u8, 9u8, 90u8, 53u8, 238u8, 118u8, 83u8, 250u8, 94u8, 100u8, 207u8, 1u8, 56u8, 227u8, 230u8, 6u8, 220u8, 53u8, 248u8, 163u8, 131u8, 84u8, 195u8, 197u8, 104u8, 186u8, 187u8, 162u8, 76u8, 246u8, 56u8, 191u8, 168u8, 10u8, 220u8, 18u8, 72u8, 195u8, 169u8, 119u8, 221u8, 75u8, 188u8, 45u8, 226u8, 254u8, 66u8, 162u8, 120u8, 125u8, 45u8, 231u8, 6u8, 165u8, 223u8, 106u8, 93u8, 232u8, 201u8, 127u8, 3u8, 34u8, 98u8, 134u8, 203u8, 63u8, 231u8, 120u8, 84u8, 90u8, 137u8, 231u8, 131u8, 73u8, 50u8, 23u8, 11u8, 22u8, 64u8, 173u8, 8u8, 180u8, 31u8, 245u8, 132u8, 154u8, 195u8, 208u8, 236u8, 120u8, 88u8, 248u8, 233u8, 98u8, 186u8, 90u8, 69u8, 242u8, 125u8, 207u8, 208u8, 66u8, 18u8, 130u8, 243u8, 96u8, 245u8, 159u8, 15u8, 120u8, 113u8, 128u8, 184u8, 74u8, 83u8, 107u8, 188u8, 255u8, 137u8, 69u8, 46u8, 120u8, 9u8, 127u8, 165u8, 242u8, 248u8, 75u8, 139u8, 225u8, 83u8, 129u8, 8u8, 36u8, 77u8, 4u8, 145u8, 163u8, 58u8, 92u8, 207u8, 3u8, 7u8, 28u8, 133u8, 184u8, 149u8, 209u8, 96u8, 220u8, 215u8, 239u8, 36u8, 191u8, 143u8, 161u8, 61u8, 247u8, 245u8, 137u8, 8u8, 133u8, 120u8, 48u8, 68u8, 203u8, 151u8, 250u8, 8u8, 129u8, 222u8, 63u8, 192u8, 70u8, 90u8, 107u8, 188u8, 255u8, 203u8, 248u8, 156u8, 34u8, 23u8, 8u8, 135u8, 6u8, 64u8, 5u8, 249u8, 214u8, 195u8, 65u8, 183u8, 183u8, 104u8, 62u8, 108u8, 93u8, 81u8, 244u8, 92u8, 226u8, 161u8, 119u8, 248u8, 4u8, 167u8, 159u8, 15u8, 159u8, 192u8, 20u8, 21u8, 233u8, 49u8, 201u8, 132u8, 32u8, 140u8, 114u8, 43u8, 113u8, 51u8, 152u8, 227u8, 224u8, 142u8, 189u8, 159u8, 4u8, 139u8, 182u8, 123u8, 9u8, 97u8, 0u8, 74u8, 112u8, 85u8, 92u8, 152u8, 247u8, 242u8, 97u8, 32u8, 116u8, 117u8, 112u8, 140u8, 32u8, 30u8, 224u8, 192u8, 89u8, 144u8, 120u8, 102u8, 101u8, 202u8, 129u8, 199u8, 30u8, 77u8, 206u8, 16u8, 81u8, 152u8, 52u8, 166u8, 7u8, 4u8, 98u8, 229u8, 252u8, 56u8, 227u8, 69u8, 128u8, 19u8, 190u8, 247u8, 63u8, 189u8, 82u8, 8u8, 3u8, 8u8, 32u8, 52u8, 185u8, 102u8, 170u8, 171u8, 123u8, 132u8, 32u8, 241u8, 129u8, 10u8, 213u8, 247u8, 32u8, 35u8, 181u8, 220u8, 60u8, 59u8, 105u8, 77u8, 221u8, 231u8, 250u8, 97u8, 8u8, 70u8, 190u8, 145u8, 224u8, 196u8, 35u8, 128u8, 0u8, 0u8, 1u8, 220u8, 65u8, 154u8, 84u8, 27u8, 252u8, 110u8, 164u8, 254u8, 50u8, 166u8, 14u8, 177u8, 185u8, 62u8, 197u8, 81u8, 75u8, 77u8, 234u8, 248u8, 59u8, 177u8, 50u8, 0u8, 29u8, 203u8, 170u8, 92u8, 135u8, 192u8, 247u8, 167u8, 145u8, 133u8, 183u8, 111u8, 229u8, 19u8, 218u8, 220u8, 132u8, 191u8, 99u8, 130u8, 243u8, 211u8, 225u8, 141u8, 247u8, 155u8, 157u8, 239u8, 165u8, 65u8, 254u8, 11u8, 187u8, 218u8, 255u8, 13u8, 240u8, 223u8, 167u8, 147u8, 248u8, 79u8, 229u8, 250u8, 47u8, 226u8, 120u8, 92u8, 34u8, 28u8, 34u8, 128u8, 11u8, 243u8, 172u8, 195u8, 97u8, 181u8, 27u8, 176u8, 0u8, 231u8, 70u8, 136u8, 106u8, 137u8, 171u8, 210u8, 77u8, 139u8, 170u8, 23u8, 69u8, 206u8, 1u8, 4u8, 203u8, 128u8, 38u8, 107u8, 209u8, 223u8, 215u8, 196u8, 96u8, 0u8, 59u8, 255u8, 205u8, 55u8, 233u8, 210u8, 123u8, 136u8, 154u8, 244u8, 52u8, 152u8, 0u8, 151u8, 77u8, 15u8, 53u8, 211u8, 189u8, 190u8, 252u8, 2u8, 90u8, 49u8, 87u8, 154u8, 162u8, 224u8, 255u8, 5u8, 158u8, 36u8, 0u8, 71u8, 109u8, 14u8, 117u8, 189u8, 61u8, 254u8, 133u8, 43u8, 202u8, 185u8, 141u8, 184u8, 214u8, 254u8, 141u8, 123u8, 228u8, 239u8, 107u8, 4u8, 78u8, 89u8, 210u8, 8u8, 133u8, 142u8, 249u8, 154u8, 239u8, 248u8, 127u8, 135u8, 221u8, 127u8, 75u8, 22u8, 164u8, 11u8, 141u8, 252u8, 3u8, 16u8, 75u8, 29u8, 249u8, 21u8, 229u8, 210u8, 10u8, 179u8, 216u8, 27u8, 220u8, 255u8, 59u8, 169u8, 101u8, 146u8, 105u8, 47u8, 87u8, 22u8, 196u8, 123u8, 214u8, 230u8, 3u8, 150u8, 181u8, 32u8, 38u8, 158u8, 254u8, 244u8, 162u8, 112u8, 254u8, 235u8, 234u8, 186u8, 79u8, 220u8, 37u8, 225u8, 16u8, 168u8, 182u8, 115u8, 102u8, 15u8, 89u8, 131u8, 1u8, 70u8, 89u8, 210u8, 13u8, 151u8, 124u8, 103u8, 189u8, 98u8, 186u8, 47u8, 35u8, 175u8, 51u8, 10u8, 240u8, 233u8, 238u8, 60u8, 176u8, 29u8, 89u8, 80u8, 172u8, 140u8, 14u8, 116u8, 4u8, 191u8, 155u8, 13u8, 6u8, 27u8, 157u8, 126u8, 254u8, 4u8, 185u8, 215u8, 236u8, 84u8, 53u8, 35u8, 82u8, 252u8, 191u8, 229u8, 240u8, 69u8, 252u8, 42u8, 92u8, 4u8, 194u8, 70u8, 85u8, 106u8, 45u8, 89u8, 131u8, 73u8, 178u8, 127u8, 1u8, 102u8, 47u8, 144u8, 118u8, 62u8, 102u8, 175u8, 231u8, 196u8, 221u8, 216u8, 255u8, 175u8, 56u8, 68u8, 51u8, 47u8, 254u8, 71u8, 254u8, 1u8, 159u8, 63u8, 170u8, 28u8, 31u8, 232u8, 21u8, 18u8, 9u8, 195u8, 131u8, 32u8, 2u8, 39u8, 167u8, 169u8, 247u8, 191u8, 208u8, 68u8, 109u8, 180u8, 154u8, 220u8, 239u8, 190u8, 126u8, 234u8, 93u8, 242u8, 47u8, 143u8, 143u8, 62u8, 212u8, 187u8, 228u8, 38u8, 207u8, 143u8, 19u8, 194u8, 16u8, 184u8, 75u8, 207u8, 13u8, 24u8, 248u8, 248u8, 11u8, 0u8, 151u8, 5u8, 106u8, 125u8, 237u8, 143u8, 189u8, 124u8, 190u8, 16u8, 234u8, 38u8, 21u8, 18u8, 170u8, 6u8, 221u8, 197u8, 105u8, 150u8, 15u8, 7u8, 132u8, 145u8, 55u8, 142u8, 132u8, 90u8, 110u8, 132u8, 167u8, 231u8, 67u8, 139u8, 5u8, 108u8, 158u8, 207u8, 172u8, 193u8, 8u8, 68u8, 18u8, 85u8, 116u8, 202u8, 95u8, 195u8, 88u8, 68u8, 176u8, 174u8, 29u8, 247u8, 203u8, 18u8, 197u8, 197u8, 136u8, 41u8, 199u8, 3u8, 179u8, 187u8, 103u8, 0u8, 12u8, 94u8, 238u8, 211u8, 116u8, 33u8, 71u8, 162u8, 105u8, 90u8, 15u8, 180u8, 95u8, 4u8, 1u8, 144u8, 66u8, 17u8, 130u8, 104u8, 38u8, 71u8, 74u8, 151u8, 17u8, 208u8, 129u8, 193u8, 121u8, 108u8, 46u8, 220u8, 147u8, 183u8, 61u8, 64u8, 0u8, 0u8, 1u8, 159u8, 65u8, 154u8, 96u8, 223u8, 225u8, 254u8, 121u8, 75u8, 58u8, 220u8, 38u8, 255u8, 215u8, 6u8, 124u8, 0u8, 78u8, 105u8, 121u8, 244u8, 96u8, 191u8, 235u8, 94u8, 142u8, 21u8, 111u8, 50u8, 240u8, 96u8, 64u8, 255u8, 206u8, 239u8, 102u8, 110u8, 151u8, 240u8, 222u8, 222u8, 124u8, 201u8, 80u8, 127u8, 227u8, 214u8, 183u8, 180u8, 190u8, 23u8, 39u8, 0u8, 6u8, 156u8, 66u8, 93u8, 149u8, 115u8, 250u8, 72u8, 190u8, 98u8, 215u8, 95u8, 209u8, 185u8, 184u8, 92u8, 78u8, 0u8, 113u8, 199u8, 165u8, 192u8, 205u8, 58u8, 225u8, 133u8, 128u8, 155u8, 124u8, 191u8, 23u8, 192u8, 204u8, 41u8, 98u8, 247u8, 101u8, 218u8, 183u8, 0u8, 40u8, 205u8, 23u8, 99u8, 250u8, 254u8, 79u8, 91u8, 198u8, 215u8, 26u8, 76u8, 48u8, 3u8, 23u8, 239u8, 171u8, 238u8, 218u8, 189u8, 224u8, 105u8, 91u8, 47u8, 198u8, 252u8, 217u8, 35u8, 174u8, 188u8, 245u8, 160u8, 190u8, 237u8, 47u8, 27u8, 44u8, 159u8, 217u8, 67u8, 177u8, 106u8, 122u8, 190u8, 255u8, 154u8, 35u8, 230u8, 50u8, 189u8, 123u8, 103u8, 5u8, 48u8, 138u8, 251u8, 140u8, 214u8, 239u8, 131u8, 125u8, 128u8, 242u8, 179u8, 28u8, 31u8, 239u8, 136u8, 164u8, 33u8, 105u8, 117u8, 227u8, 247u8, 151u8, 202u8, 117u8, 172u8, 118u8, 183u8, 172u8, 13u8, 181u8, 99u8, 121u8, 52u8, 216u8, 9u8, 254u8, 111u8, 147u8, 242u8, 243u8, 220u8, 20u8, 141u8, 243u8, 3u8, 9u8, 244u8, 19u8, 123u8, 239u8, 201u8, 63u8, 124u8, 158u8, 17u8, 4u8, 34u8, 196u8, 122u8, 146u8, 114u8, 29u8, 89u8, 192u8, 118u8, 181u8, 242u8, 248u8, 46u8, 242u8, 225u8, 168u8, 158u8, 98u8, 56u8, 32u8, 61u8, 1u8, 250u8, 38u8, 129u8, 96u8, 244u8, 27u8, 151u8, 192u8, 192u8, 115u8, 133u8, 175u8, 151u8, 193u8, 135u8, 225u8, 16u8, 86u8, 47u8, 4u8, 109u8, 36u8, 189u8, 238u8, 247u8, 115u8, 43u8, 95u8, 133u8, 255u8, 146u8, 47u8, 181u8, 164u8, 255u8, 0u8, 11u8, 231u8, 93u8, 223u8, 219u8, 131u8, 252u8, 159u8, 215u8, 227u8, 66u8, 33u8, 192u8, 132u8, 1u8, 10u8, 215u8, 61u8, 15u8, 237u8, 130u8, 150u8, 20u8, 46u8, 246u8, 10u8, 237u8, 253u8, 133u8, 171u8, 127u8, 224u8, 3u8, 32u8, 171u8, 231u8, 148u8, 63u8, 224u8, 1u8, 183u8, 167u8, 214u8, 72u8, 242u8, 159u8, 8u8, 118u8, 208u8, 32u8, 132u8, 73u8, 147u8, 215u8, 2u8, 135u8, 8u8, 240u8, 201u8, 143u8, 143u8, 128u8, 177u8, 22u8, 160u8, 118u8, 109u8, 121u8, 210u8, 141u8, 53u8, 242u8, 248u8, 91u8, 8u8, 112u8, 136u8, 100u8, 74u8, 168u8, 2u8, 22u8, 144u8, 34u8, 156u8, 106u8, 212u8, 210u8, 76u8, 52u8, 51u8, 230u8, 9u8, 109u8, 132u8, 183u8, 129u8, 41u8, 154u8, 200u8, 255u8, 83u8, 255u8, 128u8, 202u8, 99u8, 147u8, 43u8, 250u8, 223u8, 254u8, 179u8, 4u8, 20u8, 20u8, 107u8, 85u8, 93u8, 50u8, 172u8, 24u8, 112u8, 175u8, 54u8, 47u8, 224u8, 210u8, 76u8, 128u8, 192u8, 98u8, 1u8, 153u8, 129u8, 212u8, 57u8, 104u8, 251u8, 172u8, 95u8, 13u8, 139u8, 126u8, 164u8, 206u8, 191u8, 94u8, 17u8, 239u8, 253u8, 120u8, 67u8, 123u8, 162u8, 29u8, 48u8, 0u8, 0u8, 1u8, 135u8, 65u8, 154u8, 128u8, 223u8, 225u8, 254u8, 25u8, 123u8, 217u8, 77u8, 156u8, 9u8, 174u8, 217u8, 218u8, 87u8, 205u8, 9u8, 109u8, 52u8, 84u8, 7u8, 31u8, 20u8, 32u8, 2u8, 239u8, 249u8, 210u8, 12u8, 252u8, 107u8, 73u8, 159u8, 122u8, 56u8, 245u8, 183u8, 31u8, 248u8, 94u8, 31u8, 158u8, 177u8, 215u8, 8u8, 133u8, 250u8, 126u8, 223u8, 127u8, 4u8, 126u8, 251u8, 202u8, 215u8, 0u8, 10u8, 252u8, 56u8, 72u8, 0u8, 58u8, 99u8, 202u8, 196u8, 147u8, 185u8, 118u8, 189u8, 230u8, 154u8, 65u8, 36u8, 52u8, 149u8, 202u8, 63u8, 252u8, 6u8, 120u8, 4u8, 120u8, 0u8, 215u8, 229u8, 87u8, 191u8, 62u8, 224u8, 7u8, 239u8, 114u8, 149u8, 235u8, 111u8, 13u8, 147u8, 93u8, 38u8, 156u8, 24u8, 88u8, 167u8, 95u8, 239u8, 128u8, 98u8, 165u8, 226u8, 150u8, 209u8, 95u8, 206u8, 124u8, 124u8, 172u8, 199u8, 7u8, 250u8, 248u8, 140u8, 174u8, 90u8, 212u8, 18u8, 209u8, 5u8, 77u8, 224u8, 230u8, 156u8, 96u8, 59u8, 209u8, 123u8, 111u8, 48u8, 62u8, 176u8, 85u8, 102u8, 178u8, 1u8, 76u8, 169u8, 237u8, 190u8, 190u8, 17u8, 12u8, 137u8, 103u8, 241u8, 122u8, 233u8, 252u8, 187u8, 79u8, 227u8, 184u8, 252u8, 190u8, 35u8, 160u8, 142u8, 27u8, 62u8, 95u8, 127u8, 234u8, 111u8, 47u8, 130u8, 239u8, 146u8, 21u8, 35u8, 87u8, 181u8, 17u8, 193u8, 60u8, 3u8, 12u8, 96u8, 114u8, 210u8, 96u8, 14u8, 142u8, 76u8, 164u8, 124u8, 191u8, 1u8, 164u8, 227u8, 120u8, 39u8, 203u8, 225u8, 14u8, 112u8, 140u8, 34u8, 81u8, 165u8, 199u8, 119u8, 175u8, 195u8, 38u8, 159u8, 254u8, 255u8, 0u8, 33u8, 31u8, 239u8, 175u8, 251u8, 248u8, 127u8, 147u8, 211u8, 241u8, 60u8, 76u8, 56u8, 42u8, 0u8, 100u8, 2u8, 191u8, 160u8, 47u8, 20u8, 238u8, 148u8, 62u8, 210u8, 99u8, 35u8, 129u8, 246u8, 195u8, 130u8, 101u8, 133u8, 61u8, 126u8, 0u8, 31u8, 101u8, 177u8, 146u8, 217u8, 186u8, 127u8, 175u8, 192u8, 5u8, 231u8, 33u8, 22u8, 111u8, 226u8, 239u8, 170u8, 225u8, 0u8, 134u8, 150u8, 225u8, 24u8, 84u8, 67u8, 190u8, 243u8, 224u8, 52u8, 134u8, 200u8, 36u8, 153u8, 5u8, 52u8, 99u8, 179u8, 64u8, 26u8, 156u8, 56u8, 200u8, 119u8, 251u8, 95u8, 154u8, 192u8, 13u8, 152u8, 177u8, 246u8, 79u8, 181u8, 250u8, 194u8, 1u8, 0u8, 128u8, 68u8, 24u8, 9u8, 207u8, 225u8, 176u8, 81u8, 191u8, 144u8, 223u8, 255u8, 197u8, 47u8, 211u8, 173u8, 4u8, 20u8, 17u8, 241u8, 172u8, 73u8, 80u8, 218u8, 172u8, 24u8, 4u8, 18u8, 10u8, 241u8, 60u8, 95u8, 192u8, 225u8, 5u8, 57u8, 144u8, 129u8, 68u8, 16u8, 18u8, 144u8, 160u8, 210u8, 28u8, 185u8, 208u8, 185u8, 4u8, 127u8, 246u8, 190u8, 83u8, 5u8, 198u8, 35u8, 152u8, 38u8, 158u8, 72u8, 132u8, 55u8, 107u8, 245u8, 225u8, 29u8, 47u8, 250u8, 132u8, 54u8, 185u8, 100u8, 8u8, 132u8, 219u8, 205u8, 254u8, 218u8, 11u8, 29u8, 48u8, 0u8, 0u8, 1u8, 168u8, 65u8, 154u8, 160u8, 222u8, 171u8, 195u8, 16u8, 53u8, 109u8, 37u8, 19u8, 170u8, 6u8, 190u8, 224u8, 176u8, 152u8, 112u8, 128u8, 76u8, 217u8, 67u8, 70u8, 250u8, 4u8, 21u8, 89u8, 97u8, 19u8, 71u8, 48u8, 33u8, 181u8, 107u8, 192u8, 127u8, 57u8, 100u8, 219u8, 174u8, 122u8, 28u8, 78u8, 24u8, 33u8, 172u8, 196u8, 112u8, 254u8, 27u8, 243u8, 118u8, 112u8, 174u8, 191u8, 255u8, 193u8, 54u8, 71u8, 253u8, 110u8, 219u8, 120u8, 152u8, 96u8, 150u8, 231u8, 234u8, 0u8, 29u8, 40u8, 140u8, 235u8, 234u8, 241u8, 112u8, 87u8, 127u8, 128u8, 36u8, 58u8, 172u8, 153u8, 63u8, 124u8, 189u8, 243u8, 165u8, 211u8, 59u8, 212u8, 192u8, 68u8, 195u8, 158u8, 0u8, 1u8, 246u8, 155u8, 81u8, 162u8, 131u8, 221u8, 216u8, 30u8, 221u8, 192u8, 8u8, 107u8, 73u8, 211u8, 119u8, 239u8, 231u8, 182u8, 241u8, 81u8, 166u8, 1u8, 6u8, 146u8, 143u8, 7u8, 252u8, 0u8, 115u8, 181u8, 29u8, 169u8, 102u8, 129u8, 176u8, 147u8, 235u8, 174u8, 250u8, 252u8, 8u8, 125u8, 182u8, 0u8, 170u8, 35u8, 173u8, 175u8, 122u8, 254u8, 183u8, 52u8, 80u8, 237u8, 196u8, 113u8, 174u8, 183u8, 117u8, 83u8, 158u8, 153u8, 2u8, 204u8, 151u8, 251u8, 251u8, 33u8, 250u8, 70u8, 52u8, 69u8, 222u8, 176u8, 166u8, 50u8, 53u8, 129u8, 140u8, 197u8, 101u8, 160u8, 53u8, 92u8, 59u8, 87u8, 105u8, 58u8, 241u8, 233u8, 192u8, 1u8, 221u8, 223u8, 159u8, 189u8, 155u8, 13u8, 131u8, 86u8, 81u8, 68u8, 25u8, 40u8, 210u8, 168u8, 116u8, 92u8, 191u8, 136u8, 194u8, 40u8, 34u8, 9u8, 133u8, 206u8, 78u8, 178u8, 185u8, 226u8, 242u8, 188u8, 68u8, 42u8, 124u8, 75u8, 155u8, 191u8, 19u8, 175u8, 71u8, 31u8, 229u8, 240u8, 93u8, 241u8, 97u8, 16u8, 247u8, 49u8, 18u8, 199u8, 19u8, 197u8, 115u8, 17u8, 197u8, 104u8, 21u8, 66u8, 216u8, 17u8, 22u8, 78u8, 215u8, 224u8, 21u8, 180u8, 107u8, 163u8, 242u8, 255u8, 194u8, 48u8, 152u8, 43u8, 23u8, 203u8, 143u8, 110u8, 238u8, 231u8, 165u8, 182u8, 79u8, 174u8, 32u8, 78u8, 17u8, 116u8, 71u8, 221u8, 10u8, 184u8, 92u8, 33u8, 252u8, 0u8, 41u8, 126u8, 83u8, 229u8, 233u8, 127u8, 253u8, 189u8, 81u8, 177u8, 43u8, 12u8, 67u8, 245u8, 240u8, 16u8, 66u8, 238u8, 208u8, 67u8, 122u8, 128u8, 116u8, 98u8, 53u8, 102u8, 191u8, 50u8, 35u8, 231u8, 255u8, 212u8, 2u8, 226u8, 181u8, 91u8, 244u8, 255u8, 190u8, 174u8, 16u8, 8u8, 104u8, 191u8, 133u8, 2u8, 1u8, 28u8, 34u8, 21u8, 17u8, 184u8, 45u8, 125u8, 138u8, 63u8, 72u8, 0u8, 64u8, 238u8, 192u8, 8u8, 217u8, 190u8, 38u8, 223u8, 124u8, 12u8, 78u8, 186u8, 118u8, 135u8, 248u8, 0u8, 200u8, 189u8, 41u8, 181u8, 126u8, 248u8, 25u8, 119u8, 109u8, 53u8, 143u8, 250u8, 208u8, 67u8, 5u8, 2u8, 220u8, 67u8, 157u8, 222u8, 218u8, 208u8, 64u8, 208u8, 74u8, 89u8, 51u8, 166u8, 211u8, 73u8, 21u8, 96u8, 186u8, 120u8, 100u8, 70u8, 108u8, 129u8, 181u8, 192u8, 149u8, 78u8, 176u8, 63u8, 255u8, 175u8, 8u8, 233u8, 127u8, 240u8, 65u8, 244u8, 32u8, 104u8, 118u8, 79u8, 216u8, 75u8, 140u8, 203u8, 255u8, 208u8, 225u8, 109u8, 128u8, 0u8, 0u8, 1u8, 179u8, 65u8, 154u8, 192u8, 223u8, 225u8, 184u8, 25u8, 111u8, 183u8, 250u8, 9u8, 134u8, 226u8, 65u8, 50u8, 204u8, 178u8, 7u8, 192u8, 44u8, 230u8, 221u8, 243u8, 9u8, 184u8, 200u8, 208u8, 106u8, 62u8, 27u8, 128u8, 155u8, 95u8, 30u8, 249u8, 107u8, 110u8, 216u8, 13u8, 112u8, 151u8, 181u8, 126u8, 180u8, 223u8, 145u8, 253u8, 31u8, 45u8, 186u8, 240u8, 65u8, 224u8, 0u8, 203u8, 217u8, 17u8, 185u8, 54u8, 201u8, 19u8, 151u8, 147u8, 125u8, 236u8, 161u8, 169u8, 20u8, 67u8, 4u8, 63u8, 93u8, 184u8, 74u8, 38u8, 34u8, 134u8, 0u8, 66u8, 247u8, 221u8, 110u8, 240u8, 236u8, 228u8, 136u8, 226u8, 46u8, 221u8, 219u8, 242u8, 26u8, 151u8, 72u8, 74u8, 92u8, 126u8, 3u8, 206u8, 155u8, 19u8, 221u8, 143u8, 122u8, 79u8, 164u8, 205u8, 23u8, 241u8, 162u8, 58u8, 95u8, 22u8, 141u8, 27u8, 127u8, 95u8, 104u8, 51u8, 229u8, 55u8, 203u8, 25u8, 133u8, 189u8, 104u8, 238u8, 139u8, 210u8, 238u8, 90u8, 11u8, 59u8, 151u8, 75u8, 121u8, 155u8, 97u8, 233u8, 134u8, 35u8, 223u8, 239u8, 4u8, 51u8, 35u8, 172u8, 21u8, 52u8, 109u8, 172u8, 217u8, 104u8, 50u8, 55u8, 195u8, 177u8, 187u8, 224u8, 223u8, 128u8, 113u8, 29u8, 206u8, 15u8, 247u8, 196u8, 180u8, 34u8, 144u8, 104u8, 64u8, 154u8, 54u8, 144u8, 211u8, 37u8, 111u8, 192u8, 107u8, 62u8, 19u8, 91u8, 238u8, 203u8, 178u8, 233u8, 217u8, 96u8, 54u8, 108u8, 91u8, 169u8, 23u8, 172u8, 127u8, 202u8, 174u8, 152u8, 111u8, 180u8, 222u8, 250u8, 190u8, 17u8, 26u8, 37u8, 98u8, 14u8, 86u8, 32u8, 144u8, 30u8, 211u8, 224u8, 240u8, 221u8, 151u8, 147u8, 80u8, 78u8, 146u8, 212u8, 156u8, 37u8, 59u8, 210u8, 2u8, 187u8, 175u8, 246u8, 66u8, 227u8, 97u8, 247u8, 151u8, 94u8, 188u8, 66u8, 12u8, 149u8, 4u8, 125u8, 233u8, 93u8, 192u8, 218u8, 58u8, 220u8, 105u8, 84u8, 162u8, 142u8, 126u8, 130u8, 90u8, 87u8, 229u8, 240u8, 109u8, 229u8, 18u8, 17u8, 13u8, 231u8, 143u8, 220u8, 17u8, 251u8, 219u8, 194u8, 47u8, 15u8, 125u8, 126u8, 81u8, 239u8, 119u8, 248u8, 100u8, 68u8, 30u8, 253u8, 208u8, 0u8, 255u8, 129u8, 9u8, 201u8, 163u8, 70u8, 120u8, 63u8, 201u8, 233u8, 248u8, 159u8, 97u8, 192u8, 132u8, 0u8, 217u8, 44u8, 237u8, 43u8, 165u8, 111u8, 16u8, 68u8, 99u8, 85u8, 32u8, 17u8, 0u8, 255u8, 240u8, 2u8, 105u8, 249u8, 165u8, 95u8, 158u8, 255u8, 128u8, 18u8, 181u8, 17u8, 207u8, 255u8, 42u8, 225u8, 0u8, 132u8, 152u8, 119u8, 223u8, 137u8, 32u8, 100u8, 172u8, 197u8, 248u8, 1u8, 240u8, 193u8, 128u8, 255u8, 47u8, 129u8, 4u8, 140u8, 32u8, 62u8, 16u8, 8u8, 134u8, 77u8, 169u8, 176u8, 41u8, 17u8, 112u8, 180u8, 222u8, 31u8, 253u8, 100u8, 8u8, 96u8, 160u8, 162u8, 183u8, 119u8, 63u8, 63u8, 45u8, 191u8, 154u8, 101u8, 47u8, 142u8, 230u8, 225u8, 146u8, 147u8, 21u8, 223u8, 47u8, 133u8, 47u8, 87u8, 30u8, 245u8, 131u8, 9u8, 194u8, 40u8, 197u8, 77u8, 120u8, 71u8, 75u8, 254u8, 240u8, 208u8, 118u8, 3u8, 169u8, 174u8, 237u8, 248u8, 0u8, 135u8, 238u8, 231u8, 89u8, 249u8, 124u8, 225u8, 19u8, 125u8, 4u8, 146u8, 42u8, 198u8, 112u8, 208u8, 169u8, 188u8, 222u8, 181u8, 135u8, 240u8, 15u8, 128u8, 0u8, 0u8, 1u8, 30u8, 65u8, 154u8, 224u8, 71u8, 248u8, 111u8, 128u8, 160u8, 189u8, 170u8, 74u8, 114u8, 155u8, 156u8, 116u8, 57u8, 14u8, 55u8, 252u8, 55u8, 88u8, 113u8, 237u8, 112u8, 32u8, 255u8, 110u8, 231u8, 255u8, 4u8, 111u8, 143u8, 59u8, 144u8, 159u8, 118u8, 34u8, 39u8, 225u8, 99u8, 96u8, 1u8, 118u8, 251u8, 171u8, 254u8, 254u8, 239u8, 240u8, 1u8, 127u8, 25u8, 20u8, 125u8, 251u8, 122u8, 6u8, 164u8, 107u8, 220u8, 236u8, 171u8, 238u8, 142u8, 174u8, 18u8, 61u8, 119u8, 172u8, 243u8, 9u8, 96u8, 140u8, 250u8, 254u8, 79u8, 47u8, 227u8, 176u8, 138u8, 133u8, 68u8, 233u8, 249u8, 193u8, 160u8, 74u8, 203u8, 130u8, 150u8, 10u8, 93u8, 128u8, 228u8, 232u8, 198u8, 189u8, 243u8, 124u8, 239u8, 8u8, 42u8, 199u8, 86u8, 117u8, 255u8, 12u8, 209u8, 148u8, 14u8, 149u8, 238u8, 22u8, 73u8, 219u8, 246u8, 222u8, 245u8, 145u8, 31u8, 243u8, 59u8, 212u8, 181u8, 255u8, 151u8, 253u8, 132u8, 225u8, 16u8, 80u8, 115u8, 17u8, 93u8, 109u8, 107u8, 95u8, 130u8, 0u8, 138u8, 61u8, 203u8, 232u8, 174u8, 250u8, 59u8, 252u8, 103u8, 180u8, 79u8, 107u8, 252u8, 34u8, 8u8, 122u8, 195u8, 65u8, 192u8, 105u8, 38u8, 72u8, 64u8, 247u8, 192u8, 2u8, 98u8, 93u8, 240u8, 84u8, 97u8, 254u8, 72u8, 100u8, 167u8, 243u8, 83u8, 137u8, 23u8, 173u8, 107u8, 62u8, 95u8, 132u8, 5u8, 4u8, 6u8, 20u8, 88u8, 68u8, 54u8, 104u8, 6u8, 188u8, 140u8, 46u8, 101u8, 184u8, 0u8, 115u8, 180u8, 213u8, 223u8, 110u8, 252u8, 0u8, 100u8, 178u8, 220u8, 209u8, 45u8, 255u8, 187u8, 151u8, 197u8, 4u8, 56u8, 68u8, 208u8, 70u8, 113u8, 88u8, 172u8, 119u8, 5u8, 188u8, 128u8, 198u8, 95u8, 21u8, 127u8, 10u8, 205u8, 154u8, 90u8, 170u8, 69u8, 227u8, 173u8, 87u8, 119u8, 215u8, 156u8, 34u8, 9u8, 13u8, 195u8, 126u8, 139u8, 175u8, 175u8, 175u8, 107u8, 156u8, 34u8, 26u8, 9u8, 159u8, 13u8, 244u8, 5u8, 192u8, 143u8, 85u8, 95u8, 136u8, 239u8, 240u8, 168u8, 133u8, 90u8, 75u8, 89u8, 208u8, 148u8, 191u8, 142u8, 172u8, 255u8, 130u8, 113u8, 78u8, 239u8, 89u8, 190u8, 59u8, 152u8, 0u8, 0u8, 1u8, 196u8, 65u8, 155u8, 0u8, 71u8, 248u8, 111u8, 128u8, 180u8, 153u8, 213u8, 98u8, 198u8, 101u8, 141u8, 96u8, 5u8, 29u8, 127u8, 39u8, 195u8, 214u8, 27u8, 248u8, 201u8, 195u8, 96u8, 248u8, 111u8, 134u8, 60u8, 133u8, 229u8, 204u8, 162u8, 154u8, 77u8, 15u8, 157u8, 248u8, 12u8, 70u8, 229u8, 249u8, 236u8, 191u8, 139u8, 248u8, 92u8, 156u8, 0u8, 62u8, 91u8, 250u8, 186u8, 223u8, 187u8, 232u8, 198u8, 115u8, 33u8, 162u8, 118u8, 173u8, 232u8, 136u8, 67u8, 86u8, 160u8, 17u8, 10u8, 218u8, 224u8, 7u8, 151u8, 237u8, 42u8, 170u8, 220u8, 0u8, 160u8, 170u8, 139u8, 155u8, 87u8, 242u8, 122u8, 118u8, 42u8, 187u8, 141u8, 38u8, 30u8, 89u8, 233u8, 38u8, 109u8, 77u8, 248u8, 33u8, 252u8, 254u8, 170u8, 7u8, 0u8, 16u8, 107u8, 235u8, 245u8, 115u8, 254u8, 227u8, 83u8, 70u8, 14u8, 186u8, 251u8, 251u8, 240u8, 70u8, 41u8, 10u8, 163u8, 221u8, 215u8, 213u8, 123u8, 150u8, 127u8, 2u8, 154u8, 30u8, 156u8, 253u8, 24u8, 0u8, 215u8, 252u8, 85u8, 228u8, 254u8, 176u8, 65u8, 133u8, 68u8, 67u8, 162u8, 118u8, 208u8, 49u8, 156u8, 140u8, 255u8, 128u8, 246u8, 190u8, 103u8, 86u8, 121u8, 11u8, 204u8, 14u8, 90u8, 140u8, 49u8, 149u8, 175u8, 26u8, 151u8, 142u8, 255u8, 215u8, 210u8, 205u8, 175u8, 147u8, 245u8, 8u8, 255u8, 12u8, 252u8, 160u8, 134u8, 201u8, 56u8, 60u8, 21u8, 36u8, 197u8, 69u8, 106u8, 249u8, 95u8, 175u8, 249u8, 235u8, 71u8, 235u8, 225u8, 16u8, 192u8, 209u8, 165u8, 158u8, 179u8, 17u8, 39u8, 108u8, 165u8, 129u8, 23u8, 207u8, 172u8, 178u8, 184u8, 143u8, 175u8, 198u8, 135u8, 67u8, 197u8, 202u8, 113u8, 177u8, 91u8, 169u8, 67u8, 41u8, 144u8, 156u8, 207u8, 106u8, 45u8, 127u8, 92u8, 173u8, 2u8, 207u8, 24u8, 30u8, 15u8, 236u8, 57u8, 38u8, 87u8, 127u8, 27u8, 249u8, 38u8, 64u8, 156u8, 62u8, 99u8, 154u8, 104u8, 75u8, 30u8, 47u8, 58u8, 240u8, 248u8, 134u8, 203u8, 36u8, 5u8, 93u8, 226u8, 58u8, 185u8, 172u8, 50u8, 30u8, 75u8, 239u8, 253u8, 0u8, 193u8, 234u8, 127u8, 236u8, 15u8, 255u8, 244u8, 144u8, 142u8, 28u8, 25u8, 0u8, 11u8, 233u8, 154u8, 190u8, 166u8, 219u8, 235u8, 90u8, 46u8, 171u8, 67u8, 217u8, 41u8, 136u8, 93u8, 81u8, 67u8, 110u8, 171u8, 133u8, 2u8, 48u8, 175u8, 6u8, 211u8, 46u8, 80u8, 73u8, 146u8, 99u8, 218u8, 95u8, 29u8, 0u8, 67u8, 241u8, 191u8, 159u8, 191u8, 240u8, 207u8, 179u8, 1u8, 210u8, 196u8, 0u8, 248u8, 8u8, 134u8, 159u8, 117u8, 47u8, 252u8, 190u8, 40u8, 33u8, 8u8, 4u8, 10u8, 44u8, 34u8, 24u8, 33u8, 239u8, 0u8, 79u8, 213u8, 174u8, 181u8, 125u8, 208u8, 22u8, 242u8, 248u8, 0u8, 62u8, 169u8, 180u8, 190u8, 95u8, 135u8, 128u8, 5u8, 207u8, 210u8, 250u8, 106u8, 79u8, 254u8, 250u8, 200u8, 16u8, 52u8, 18u8, 156u8, 52u8, 243u8, 243u8, 221u8, 189u8, 155u8, 212u8, 240u8, 175u8, 38u8, 3u8, 137u8, 102u8, 108u8, 241u8, 66u8, 188u8, 213u8, 0u8, 136u8, 106u8, 125u8, 210u8, 215u8, 127u8, 75u8, 194u8, 40u8, 197u8, 23u8, 125u8, 60u8, 33u8, 63u8, 207u8, 10u8, 139u8, 159u8, 49u8, 42u8, 133u8, 233u8, 196u8, 154u8, 74u8, 127u8, 91u8, 8u8, 194u8, 193u8, 158u8, 26u8, 73u8, 76u8, 246u8, 176u8, 133u8, 185u8, 255u8, 11u8, 138u8, 173u8, 93u8, 98u8, 124u8, 22u8, 169u8, 252u8, 94u8, 176u8, 0u8, 0u8, 1u8, 178u8, 65u8, 155u8, 32u8, 87u8, 87u8, 134u8, 235u8, 12u8, 123u8, 238u8, 2u8, 22u8, 166u8, 215u8, 251u8, 39u8, 223u8, 248u8, 68u8, 16u8, 135u8, 49u8, 112u8, 3u8, 20u8, 209u8, 13u8, 89u8, 53u8, 123u8, 192u8, 68u8, 37u8, 39u8, 192u8, 35u8, 220u8, 180u8, 95u8, 239u8, 128u8, 1u8, 255u8, 92u8, 168u8, 225u8, 39u8, 170u8, 106u8, 63u8, 110u8, 52u8, 152u8, 1u8, 247u8, 20u8, 105u8, 164u8, 189u8, 140u8, 127u8, 233u8, 199u8, 14u8, 111u8, 196u8, 40u8, 80u8, 122u8, 65u8, 26u8, 212u8, 7u8, 159u8, 147u8, 99u8, 124u8, 236u8, 204u8, 191u8, 140u8, 189u8, 231u8, 140u8, 165u8, 5u8, 148u8, 23u8, 239u8, 33u8, 86u8, 204u8, 103u8, 122u8, 246u8, 206u8, 10u8, 97u8, 21u8, 247u8, 25u8, 173u8, 223u8, 6u8, 251u8, 1u8, 229u8, 102u8, 56u8, 63u8, 223u8, 13u8, 52u8, 132u8, 232u8, 4u8, 47u8, 119u8, 187u8, 135u8, 51u8, 235u8, 51u8, 27u8, 94u8, 248u8, 54u8, 213u8, 141u8, 228u8, 211u8, 96u8, 4u8, 127u8, 157u8, 82u8, 15u8, 57u8, 59u8, 226u8, 19u8, 79u8, 224u8, 75u8, 122u8, 9u8, 191u8, 187u8, 223u8, 124u8, 58u8, 112u8, 32u8, 5u8, 230u8, 134u8, 69u8, 207u8, 57u8, 156u8, 24u8, 11u8, 178u8, 28u8, 23u8, 130u8, 197u8, 228u8, 16u8, 63u8, 147u8, 0u8, 35u8, 103u8, 205u8, 26u8, 111u8, 247u8, 194u8, 151u8, 168u8, 72u8, 207u8, 117u8, 106u8, 254u8, 79u8, 92u8, 16u8, 255u8, 12u8, 248u8, 160u8, 0u8, 70u8, 40u8, 0u8, 48u8, 130u8, 204u8, 65u8, 67u8, 18u8, 3u8, 51u8, 255u8, 201u8, 235u8, 146u8, 19u8, 160u8, 136u8, 68u8, 62u8, 22u8, 8u8, 227u8, 213u8, 74u8, 124u8, 103u8, 252u8, 254u8, 9u8, 94u8, 94u8, 125u8, 181u8, 85u8, 10u8, 135u8, 2u8, 80u8, 0u8, 111u8, 232u8, 98u8, 42u8, 46u8, 213u8, 63u8, 17u8, 212u8, 202u8, 140u8, 214u8, 102u8, 38u8, 175u8, 255u8, 47u8, 252u8, 1u8, 50u8, 157u8, 180u8, 248u8, 254u8, 255u8, 224u8, 2u8, 89u8, 167u8, 73u8, 245u8, 223u8, 233u8, 127u8, 25u8, 194u8, 48u8, 169u8, 0u8, 122u8, 133u8, 199u8, 243u8, 248u8, 60u8, 176u8, 2u8, 110u8, 155u8, 21u8, 60u8, 1u8, 8u8, 189u8, 182u8, 26u8, 227u8, 246u8, 195u8, 141u8, 55u8, 173u8, 112u8, 200u8, 190u8, 10u8, 28u8, 52u8, 179u8, 206u8, 33u8, 101u8, 24u8, 159u8, 4u8, 34u8, 63u8, 0u8, 217u8, 101u8, 141u8, 138u8, 223u8, 107u8, 255u8, 92u8, 32u8, 22u8, 8u8, 130u8, 241u8, 82u8, 101u8, 194u8, 17u8, 127u8, 222u8, 3u8, 98u8, 230u8, 101u8, 30u8, 178u8, 147u8, 145u8, 74u8, 112u8, 20u8, 238u8, 176u8, 0u8, 109u8, 156u8, 86u8, 82u8, 255u8, 15u8, 4u8, 123u8, 216u8, 0u8, 199u8, 34u8, 22u8, 70u8, 187u8, 190u8, 31u8, 52u8, 42u8, 81u8, 44u8, 31u8, 203u8, 226u8, 31u8, 18u8, 15u8, 227u8, 19u8, 135u8, 47u8, 130u8, 107u8, 148u8, 34u8, 224u8, 146u8, 170u8, 182u8, 240u8, 97u8, 57u8, 12u8, 159u8, 135u8, 116u8, 87u8, 254u8, 255u8, 240u8, 135u8, 120u8, 66u8, 112u8, 137u8, 202u8, 190u8, 25u8, 181u8, 127u8, 249u8, 124u8, 225u8, 18u8, 124u8, 18u8, 148u8, 60u8, 41u8, 23u8, 206u8, 191u8, 137u8, 21u8, 100u8, 210u8, 225u8, 172u8, 20u8, 236u8, 46u8, 33u8, 239u8, 171u8, 169u8, 83u8, 249u8, 161u8, 88u8, 0u8, 0u8, 1u8, 251u8, 65u8, 155u8, 64u8, 103u8, 41u8, 63u8, 173u8, 252u8, 47u8, 224u8, 7u8, 169u8, 234u8, 189u8, 63u8, 135u8, 1u8, 61u8, 38u8, 213u8, 245u8, 55u8, 25u8, 2u8, 175u8, 14u8, 195u8, 253u8, 224u8, 9u8, 95u8, 250u8, 113u8, 57u8, 39u8, 182u8, 154u8, 254u8, 22u8, 38u8, 4u8, 229u8, 71u8, 53u8, 228u8, 235u8, 251u8, 189u8, 100u8, 23u8, 102u8, 46u8, 144u8, 120u8, 12u8, 116u8, 29u8, 132u8, 17u8, 187u8, 189u8, 106u8, 23u8, 32u8, 5u8, 13u8, 220u8, 175u8, 8u8, 102u8, 241u8, 47u8, 235u8, 255u8, 223u8, 121u8, 235u8, 130u8, 53u8, 61u8, 64u8, 211u8, 35u8, 127u8, 247u8, 223u8, 47u8, 224u8, 219u8, 194u8, 33u8, 99u8, 128u8, 158u8, 145u8, 157u8, 106u8, 243u8, 233u8, 73u8, 148u8, 19u8, 101u8, 167u8, 217u8, 225u8, 1u8, 86u8, 112u8, 145u8, 116u8, 45u8, 140u8, 92u8, 188u8, 56u8, 194u8, 223u8, 250u8, 93u8, 126u8, 25u8, 131u8, 105u8, 144u8, 245u8, 156u8, 7u8, 64u8, 116u8, 58u8, 99u8, 151u8, 240u8, 106u8, 28u8, 190u8, 45u8, 224u8, 64u8, 227u8, 65u8, 56u8, 31u8, 166u8, 82u8, 95u8, 3u8, 244u8, 202u8, 75u8, 225u8, 147u8, 145u8, 220u8, 201u8, 197u8, 223u8, 208u8, 156u8, 142u8, 230u8, 78u8, 46u8, 254u8, 54u8, 135u8, 192u8, 16u8, 147u8, 83u8, 213u8, 127u8, 176u8, 244u8, 154u8, 158u8, 171u8, 253u8, 165u8, 28u8, 135u8, 106u8, 82u8, 142u8, 67u8, 181u8, 32u8, 23u8, 21u8, 201u8, 253u8, 50u8, 113u8, 92u8, 159u8, 211u8, 50u8, 223u8, 187u8, 226u8, 59u8, 126u8, 239u8, 134u8, 168u8, 78u8, 134u8, 130u8, 143u8, 192u8, 8u8, 143u8, 194u8, 142u8, 236u8, 126u8, 108u8, 49u8, 90u8, 70u8, 200u8, 181u8, 123u8, 225u8, 85u8, 25u8, 164u8, 64u8, 198u8, 92u8, 232u8, 62u8, 217u8, 26u8, 70u8, 12u8, 101u8, 206u8, 48u8, 132u8, 98u8, 38u8, 0u8, 26u8, 156u8, 26u8, 246u8, 219u8, 201u8, 184u8, 31u8, 108u8, 137u8, 35u8, 4u8, 34u8, 231u8, 80u8, 204u8, 189u8, 106u8, 126u8, 253u8, 194u8, 16u8, 208u8, 128u8, 145u8, 1u8, 69u8, 234u8, 183u8, 209u8, 87u8, 71u8, 84u8, 130u8, 194u8, 245u8, 24u8, 241u8, 240u8, 239u8, 164u8, 17u8, 175u8, 226u8, 182u8, 233u8, 175u8, 220u8, 228u8, 156u8, 160u8, 253u8, 64u8, 198u8, 110u8, 112u8, 86u8, 55u8, 223u8, 210u8, 254u8, 12u8, 130u8, 24u8, 70u8, 30u8, 134u8, 166u8, 68u8, 107u8, 228u8, 30u8, 177u8, 85u8, 25u8, 226u8, 137u8, 50u8, 192u8, 93u8, 52u8, 25u8, 142u8, 106u8, 213u8, 241u8, 22u8, 131u8, 5u8, 59u8, 13u8, 225u8, 127u8, 128u8, 8u8, 141u8, 221u8, 175u8, 128u8, 140u8, 85u8, 118u8, 86u8, 114u8, 252u8, 0u8, 40u8, 181u8, 145u8, 204u8, 153u8, 151u8, 6u8, 124u8, 190u8, 110u8, 18u8, 8u8, 216u8, 47u8, 196u8, 39u8, 137u8, 222u8, 238u8, 31u8, 48u8, 15u8, 210u8, 93u8, 192u8, 241u8, 121u8, 192u8, 159u8, 203u8, 201u8, 114u8, 190u8, 159u8, 175u8, 112u8, 85u8, 27u8, 91u8, 183u8, 203u8, 137u8, 67u8, 79u8, 123u8, 50u8, 249u8, 34u8, 236u8, 34u8, 231u8, 233u8, 151u8, 241u8, 123u8, 176u8, 117u8, 7u8, 12u8, 57u8, 192u8, 64u8, 143u8, 182u8, 173u8, 90u8, 196u8, 47u8, 193u8, 41u8, 63u8, 224u8, 4u8, 94u8, 186u8, 61u8, 62u8, 251u8, 248u8, 0u8, 81u8, 50u8, 26u8, 35u8, 147u8, 185u8, 28u8, 143u8, 194u8, 58u8, 120u8, 46u8, 148u8, 120u8, 34u8, 196u8, 57u8, 225u8, 238u8, 21u8, 43u8, 138u8, 231u8, 199u8, 191u8, 168u8, 1u8, 34u8, 54u8, 175u8, 242u8, 249u8, 42u8, 94u8, 190u8, 201u8, 239u8, 96u8, 150u8, 10u8, 230u8, 8u8, 140u8, 97u8, 114u8, 123u8, 115u8, 113u8, 15u8, 63u8, 192u8, 27u8, 197u8, 216u8, 175u8, 68u8, 138u8, 178u8, 89u8, 135u8, 211u8, 1u8, 45u8, 204u8, 175u8, 238u8, 225u8, 192u8, 1u8, 243u8, 70u8, 37u8, 236u8, 92u8, 133u8, 202u8, 36u8, 0u8, 0u8, 1u8, 193u8, 65u8, 155u8, 96u8, 33u8, 203u8, 225u8, 204u8, 1u8, 144u8, 100u8, 201u8, 190u8, 212u8, 40u8, 180u8, 154u8, 96u8, 197u8, 237u8, 0u8, 112u8, 17u8, 224u8, 6u8, 108u8, 157u8, 249u8, 206u8, 0u8, 59u8, 47u8, 205u8, 114u8, 222u8, 253u8, 118u8, 234u8, 55u8, 154u8, 32u8, 0u8, 217u8, 122u8, 49u8, 248u8, 141u8, 162u8, 252u8, 251u8, 155u8, 112u8, 69u8, 238u8, 157u8, 244u8, 110u8, 204u8, 54u8, 91u8, 109u8, 98u8, 103u8, 105u8, 149u8, 101u8, 24u8, 245u8, 201u8, 95u8, 238u8, 176u8, 155u8, 101u8, 98u8, 179u8, 22u8, 75u8, 185u8, 233u8, 144u8, 40u8, 201u8, 239u8, 239u8, 236u8, 135u8, 121u8, 16u8, 106u8, 171u8, 235u8, 175u8, 20u8, 176u8, 158u8, 130u8, 110u8, 252u8, 255u8, 142u8, 231u8, 52u8, 59u8, 217u8, 193u8, 72u8, 22u8, 113u8, 103u8, 252u8, 195u8, 107u8, 209u8, 206u8, 168u8, 111u8, 122u8, 248u8, 68u8, 16u8, 240u8, 20u8, 23u8, 156u8, 200u8, 123u8, 200u8, 144u8, 214u8, 225u8, 24u8, 116u8, 72u8, 58u8, 88u8, 14u8, 172u8, 7u8, 175u8, 224u8, 196u8, 208u8, 96u8, 218u8, 65u8, 219u8, 132u8, 15u8, 117u8, 7u8, 5u8, 192u8, 3u8, 96u8, 203u8, 242u8, 95u8, 73u8, 183u8, 54u8, 185u8, 237u8, 255u8, 128u8, 37u8, 55u8, 164u8, 125u8, 125u8, 26u8, 251u8, 60u8, 98u8, 29u8, 182u8, 205u8, 60u8, 27u8, 126u8, 62u8, 240u8, 247u8, 191u8, 80u8, 185u8, 191u8, 0u8, 11u8, 212u8, 153u8, 158u8, 74u8, 190u8, 161u8, 63u8, 72u8, 208u8, 64u8, 191u8, 191u8, 80u8, 52u8, 177u8, 110u8, 221u8, 133u8, 173u8, 125u8, 216u8, 3u8, 129u8, 95u8, 213u8, 2u8, 184u8, 2u8, 93u8, 87u8, 48u8, 143u8, 63u8, 255u8, 244u8, 7u8, 229u8, 5u8, 112u8, 5u8, 233u8, 61u8, 205u8, 3u8, 38u8, 191u8, 253u8, 201u8, 250u8, 194u8, 8u8, 33u8, 194u8, 33u8, 157u8, 64u8, 58u8, 193u8, 83u8, 22u8, 64u8, 57u8, 0u8, 232u8, 105u8, 2u8, 125u8, 132u8, 182u8, 192u8, 34u8, 25u8, 108u8, 175u8, 252u8, 254u8, 28u8, 1u8, 150u8, 229u8, 177u8, 95u8, 254u8, 127u8, 15u8, 194u8, 16u8, 220u8, 14u8, 132u8, 68u8, 25u8, 223u8, 10u8, 152u8, 194u8, 167u8, 224u8, 113u8, 12u8, 91u8, 159u8, 192u8, 26u8, 216u8, 246u8, 47u8, 61u8, 245u8, 226u8, 225u8, 89u8, 49u8, 117u8, 193u8, 246u8, 3u8, 45u8, 9u8, 144u8, 149u8, 40u8, 28u8, 228u8, 215u8, 134u8, 12u8, 237u8, 107u8, 95u8, 147u8, 223u8, 6u8, 159u8, 56u8, 68u8, 51u8, 120u8, 85u8, 209u8, 41u8, 218u8, 253u8, 171u8, 99u8, 93u8, 95u8, 130u8, 141u8, 86u8, 181u8, 246u8, 95u8, 240u8, 97u8, 132u8, 14u8, 76u8, 63u8, 4u8, 223u8, 217u8, 255u8, 84u8, 120u8, 84u8, 224u8, 245u8, 224u8, 245u8, 240u8, 117u8, 120u8, 58u8, 184u8, 128u8, 37u8, 66u8, 0u8, 9u8, 208u8, 113u8, 12u8, 91u8, 129u8, 200u8, 102u8, 185u8, 228u8, 2u8, 43u8, 238u8, 7u8, 8u8, 174u8, 185u8, 252u8, 225u8, 20u8, 72u8, 181u8, 199u8, 236u8, 184u8, 17u8, 174u8, 35u8, 190u8, 31u8, 242u8, 250u8, 138u8, 8u8, 98u8, 170u8, 34u8, 179u8, 202u8, 16u8, 12u8, 19u8, 129u8, 224u8, 99u8, 50u8, 194u8, 0u8, 44u8, 239u8, 43u8, 119u8, 224u8, 49u8, 8u8, 144u8, 215u8, 80u8, 35u8, 55u8, 207u8, 41u8, 233u8, 250u8, 192u8, 7u8, 52u8, 54u8, 55u8, 21u8, 108u8, 86u8, 237u8, 3u8, 228u8, 204u8, 72u8, 241u8, 99u8, 247u8, 231u8, 128u8, 0u8, 0u8, 3u8, 83u8, 109u8, 111u8, 111u8, 118u8, 0u8, 0u8, 0u8, 108u8, 109u8, 118u8, 104u8, 100u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8, 232u8, 0u8, 0u8, 3u8, 232u8, 0u8, 1u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 64u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 0u8, 0u8, 2u8, 126u8, 116u8, 114u8, 97u8, 107u8, 0u8, 0u8, 0u8, 92u8, 116u8, 107u8, 104u8, 100u8, 0u8, 0u8, 0u8, 3u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8, 232u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 64u8, 0u8, 0u8, 0u8, 0u8, 96u8, 0u8, 0u8, 0u8, 64u8, 0u8, 0u8, 0u8, 0u8, 0u8, 36u8, 101u8, 100u8, 116u8, 115u8, 0u8, 0u8, 0u8, 28u8, 101u8, 108u8, 115u8, 116u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 3u8, 232u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 1u8, 246u8, 109u8, 100u8, 105u8, 97u8, 0u8, 0u8, 0u8, 32u8, 109u8, 100u8, 104u8, 100u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 48u8, 0u8, 0u8, 0u8, 48u8, 0u8, 85u8, 196u8, 0u8, 0u8, 0u8, 0u8, 0u8, 45u8, 104u8, 100u8, 108u8, 114u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 118u8, 105u8, 100u8, 101u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 86u8, 105u8, 100u8, 101u8, 111u8, 72u8, 97u8, 110u8, 100u8, 108u8, 101u8, 114u8, 0u8, 0u8, 0u8, 1u8, 161u8, 109u8, 105u8, 110u8, 102u8, 0u8, 0u8, 0u8, 20u8, 118u8, 109u8, 104u8, 100u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 36u8, 100u8, 105u8, 110u8, 102u8, 0u8, 0u8, 0u8, 28u8, 100u8, 114u8, 101u8, 102u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 12u8, 117u8, 114u8, 108u8, 32u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 1u8, 97u8, 115u8, 116u8, 98u8, 108u8, 0u8, 0u8, 0u8, 185u8, 115u8, 116u8, 115u8, 100u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 169u8, 97u8, 118u8, 99u8, 49u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 96u8, 0u8, 64u8, 0u8, 72u8, 0u8, 0u8, 0u8, 72u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 21u8, 76u8, 97u8, 118u8, 99u8, 54u8, 50u8, 46u8, 49u8, 49u8, 46u8, 49u8, 48u8, 48u8, 32u8, 108u8, 105u8, 98u8, 120u8, 50u8, 54u8, 52u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 24u8, 255u8, 255u8, 0u8, 0u8, 0u8, 47u8, 97u8, 118u8, 99u8, 67u8, 1u8, 66u8, 192u8, 10u8, 255u8, 225u8, 0u8, 23u8, 103u8, 66u8, 192u8, 10u8, 217u8, 6u8, 38u8, 192u8, 68u8, 0u8, 0u8, 3u8, 0u8, 4u8, 0u8, 0u8, 3u8, 0u8, 96u8, 60u8, 72u8, 153u8, 32u8, 1u8, 0u8, 5u8, 104u8, 203u8, 131u8, 203u8, 32u8, 0u8, 0u8, 0u8, 16u8, 112u8, 97u8, 115u8, 112u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 20u8, 98u8, 116u8, 114u8, 116u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 223u8, 72u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 24u8, 115u8, 116u8, 116u8, 115u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 12u8, 0u8, 0u8, 4u8, 0u8, 0u8, 0u8, 0u8, 20u8, 115u8, 116u8, 115u8, 115u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 28u8, 115u8, 116u8, 115u8, 99u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 12u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 68u8, 115u8, 116u8, 115u8, 122u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 12u8, 0u8, 0u8, 9u8, 70u8, 0u8, 0u8, 1u8, 206u8, 0u8, 0u8, 1u8, 224u8, 0u8, 0u8, 1u8, 163u8, 0u8, 0u8, 1u8, 139u8, 0u8, 0u8, 1u8, 172u8, 0u8, 0u8, 1u8, 183u8, 0u8, 0u8, 1u8, 34u8, 0u8, 0u8, 1u8, 200u8, 0u8, 0u8, 1u8, 182u8, 0u8, 0u8, 1u8, 255u8, 0u8, 0u8, 1u8, 197u8, 0u8, 0u8, 0u8, 20u8, 115u8, 116u8, 99u8, 111u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 48u8, 0u8, 0u8, 0u8, 97u8, 117u8, 100u8, 116u8, 97u8, 0u8, 0u8, 0u8, 89u8, 109u8, 101u8, 116u8, 97u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 33u8, 104u8, 100u8, 108u8, 114u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 109u8, 100u8, 105u8, 114u8, 97u8, 112u8, 112u8, 108u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 44u8, 105u8, 108u8, 115u8, 116u8, 0u8, 0u8, 0u8, 36u8, 169u8, 116u8, 111u8, 111u8, 0u8, 0u8, 0u8, 28u8, 100u8, 97u8, 116u8, 97u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 76u8, 97u8, 118u8, 102u8, 54u8, 50u8, 46u8, 51u8, 46u8, 49u8, 48u8, 48u8)
+var private h264_file_all__sample_mp4_bytes : uint8[8044] = fixed_array(0u8, 0u8, 0u8, 32u8, 102u8, 116u8, 121u8, 112u8, 105u8, 115u8, 111u8, 109u8, 0u8, 0u8,
+        2u8, 0u8, 105u8, 115u8, 111u8, 109u8, 105u8, 115u8, 111u8, 50u8, 97u8, 118u8, 99u8, 49u8, 109u8, 112u8, 52u8, 49u8, 0u8, 0u8, 0u8, 8u8, 102u8, 114u8,
+        101u8, 101u8, 0u8, 0u8, 27u8, 241u8, 109u8, 100u8, 97u8, 116u8, 0u8, 0u8, 2u8, 113u8, 6u8, 5u8, 255u8, 255u8, 109u8, 220u8, 69u8, 233u8, 189u8, 230u8,
+        217u8, 72u8, 183u8, 150u8, 44u8, 216u8, 32u8, 217u8, 35u8, 238u8, 239u8, 120u8, 50u8, 54u8, 52u8, 32u8, 45u8, 32u8, 99u8, 111u8, 114u8, 101u8, 32u8,
+        49u8, 54u8, 53u8, 32u8, 114u8, 51u8, 50u8, 50u8, 50u8, 32u8, 98u8, 51u8, 53u8, 54u8, 48u8, 53u8, 97u8, 32u8, 45u8, 32u8, 72u8, 46u8, 50u8, 54u8, 52u8,
+        47u8, 77u8, 80u8, 69u8, 71u8, 45u8, 52u8, 32u8, 65u8, 86u8, 67u8, 32u8, 99u8, 111u8, 100u8, 101u8, 99u8, 32u8, 45u8, 32u8, 67u8, 111u8, 112u8, 121u8,
+        108u8, 101u8, 102u8, 116u8, 32u8, 50u8, 48u8, 48u8, 51u8, 45u8, 50u8, 48u8, 50u8, 53u8, 32u8, 45u8, 32u8, 104u8, 116u8, 116u8, 112u8, 58u8, 47u8, 47u8,
+        119u8, 119u8, 119u8, 46u8, 118u8, 105u8, 100u8, 101u8, 111u8, 108u8, 97u8, 110u8, 46u8, 111u8, 114u8, 103u8, 47u8, 120u8, 50u8, 54u8, 52u8, 46u8, 104u8,
+        116u8, 109u8, 108u8, 32u8, 45u8, 32u8, 111u8, 112u8, 116u8, 105u8, 111u8, 110u8, 115u8, 58u8, 32u8, 99u8, 97u8, 98u8, 97u8, 99u8, 61u8, 48u8, 32u8,
+        114u8, 101u8, 102u8, 61u8, 51u8, 32u8, 100u8, 101u8, 98u8, 108u8, 111u8, 99u8, 107u8, 61u8, 49u8, 58u8, 48u8, 58u8, 48u8, 32u8, 97u8, 110u8, 97u8,
+        108u8, 121u8, 115u8, 101u8, 61u8, 48u8, 120u8, 49u8, 58u8, 48u8, 120u8, 49u8, 49u8, 49u8, 32u8, 109u8, 101u8, 61u8, 104u8, 101u8, 120u8, 32u8, 115u8,
+        117u8, 98u8, 109u8, 101u8, 61u8, 55u8, 32u8, 112u8, 115u8, 121u8, 61u8, 49u8, 32u8, 112u8, 115u8, 121u8, 95u8, 114u8, 100u8, 61u8, 49u8, 46u8, 48u8,
+        48u8, 58u8, 48u8, 46u8, 48u8, 48u8, 32u8, 109u8, 105u8, 120u8, 101u8, 100u8, 95u8, 114u8, 101u8, 102u8, 61u8, 49u8, 32u8, 109u8, 101u8, 95u8, 114u8,
+        97u8, 110u8, 103u8, 101u8, 61u8, 49u8, 54u8, 32u8, 99u8, 104u8, 114u8, 111u8, 109u8, 97u8, 95u8, 109u8, 101u8, 61u8, 49u8, 32u8, 116u8, 114u8, 101u8,
+        108u8, 108u8, 105u8, 115u8, 61u8, 49u8, 32u8, 56u8, 120u8, 56u8, 100u8, 99u8, 116u8, 61u8, 48u8, 32u8, 99u8, 113u8, 109u8, 61u8, 48u8, 32u8, 100u8,
+        101u8, 97u8, 100u8, 122u8, 111u8, 110u8, 101u8, 61u8, 50u8, 49u8, 44u8, 49u8, 49u8, 32u8, 102u8, 97u8, 115u8, 116u8, 95u8, 112u8, 115u8, 107u8, 105u8,
+        112u8, 61u8, 49u8, 32u8, 99u8, 104u8, 114u8, 111u8, 109u8, 97u8, 95u8, 113u8, 112u8, 95u8, 111u8, 102u8, 102u8, 115u8, 101u8, 116u8, 61u8, 45u8, 50u8,
+        32u8, 116u8, 104u8, 114u8, 101u8, 97u8, 100u8, 115u8, 61u8, 50u8, 32u8, 108u8, 111u8, 111u8, 107u8, 97u8, 104u8, 101u8, 97u8, 100u8, 95u8, 116u8, 104u8,
+        114u8, 101u8, 97u8, 100u8, 115u8, 61u8, 49u8, 32u8, 115u8, 108u8, 105u8, 99u8, 101u8, 100u8, 95u8, 116u8, 104u8, 114u8, 101u8, 97u8, 100u8, 115u8, 61u8,
+        48u8, 32u8, 110u8, 114u8, 61u8, 48u8, 32u8, 100u8, 101u8, 99u8, 105u8, 109u8, 97u8, 116u8, 101u8, 61u8, 49u8, 32u8, 105u8, 110u8, 116u8, 101u8, 114u8,
+        108u8, 97u8, 99u8, 101u8, 100u8, 61u8, 48u8, 32u8, 98u8, 108u8, 117u8, 114u8, 97u8, 121u8, 95u8, 99u8, 111u8, 109u8, 112u8, 97u8, 116u8, 61u8, 48u8,
+        32u8, 99u8, 111u8, 110u8, 115u8, 116u8, 114u8, 97u8, 105u8, 110u8, 101u8, 100u8, 95u8, 105u8, 110u8, 116u8, 114u8, 97u8, 61u8, 48u8, 32u8, 98u8, 102u8,
+        114u8, 97u8, 109u8, 101u8, 115u8, 61u8, 48u8, 32u8, 119u8, 101u8, 105u8, 103u8, 104u8, 116u8, 112u8, 61u8, 48u8, 32u8, 107u8, 101u8, 121u8, 105u8,
+        110u8, 116u8, 61u8, 50u8, 53u8, 48u8, 32u8, 107u8, 101u8, 121u8, 105u8, 110u8, 116u8, 95u8, 109u8, 105u8, 110u8, 61u8, 49u8, 50u8, 32u8, 115u8, 99u8,
+        101u8, 110u8, 101u8, 99u8, 117u8, 116u8, 61u8, 52u8, 48u8, 32u8, 105u8, 110u8, 116u8, 114u8, 97u8, 95u8, 114u8, 101u8, 102u8, 114u8, 101u8, 115u8,
+        104u8, 61u8, 48u8, 32u8, 114u8, 99u8, 95u8, 108u8, 111u8, 111u8, 107u8, 97u8, 104u8, 101u8, 97u8, 100u8, 61u8, 52u8, 48u8, 32u8, 114u8, 99u8, 61u8,
+        99u8, 114u8, 102u8, 32u8, 109u8, 98u8, 116u8, 114u8, 101u8, 101u8, 61u8, 49u8, 32u8, 99u8, 114u8, 102u8, 61u8, 50u8, 51u8, 46u8, 48u8, 32u8, 113u8,
+        99u8, 111u8, 109u8, 112u8, 61u8, 48u8, 46u8, 54u8, 48u8, 32u8, 113u8, 112u8, 109u8, 105u8, 110u8, 61u8, 48u8, 32u8, 113u8, 112u8, 109u8, 97u8, 120u8,
+        61u8, 54u8, 57u8, 32u8, 113u8, 112u8, 115u8, 116u8, 101u8, 112u8, 61u8, 52u8, 32u8, 105u8, 112u8, 95u8, 114u8, 97u8, 116u8, 105u8, 111u8, 61u8, 49u8,
+        46u8, 52u8, 48u8, 32u8, 97u8, 113u8, 61u8, 49u8, 58u8, 49u8, 46u8, 48u8, 48u8, 0u8, 128u8, 0u8, 0u8, 6u8, 205u8, 101u8, 136u8, 132u8, 55u8, 196u8, 34u8,
+        42u8, 224u8, 192u8, 133u8, 248u8, 8u8, 83u8, 34u8, 0u8, 1u8, 0u8, 154u8, 212u8, 24u8, 96u8, 0u8, 241u8, 120u8, 206u8, 140u8, 104u8, 232u8, 23u8, 221u8,
+        255u8, 226u8, 103u8, 220u8, 153u8, 17u8, 138u8, 191u8, 176u8, 111u8, 254u8, 210u8, 94u8, 97u8, 162u8, 50u8, 176u8, 246u8, 207u8, 251u8, 8u8, 252u8,
+        69u8, 150u8, 100u8, 62u8, 206u8, 66u8, 95u8, 246u8, 11u8, 52u8, 184u8, 169u8, 4u8, 178u8, 39u8, 251u8, 107u8, 141u8, 67u8, 19u8, 147u8, 229u8, 225u8,
+        234u8, 245u8, 43u8, 140u8, 26u8, 50u8, 132u8, 221u8, 94u8, 160u8, 117u8, 153u8, 180u8, 112u8, 95u8, 143u8, 239u8, 148u8, 28u8, 84u8, 93u8, 84u8, 19u8,
+        55u8, 251u8, 224u8, 64u8, 0u8, 88u8, 0u8, 193u8, 77u8, 132u8, 0u8, 9u8, 120u8, 0u8, 8u8, 4u8, 0u8, 9u8, 243u8, 48u8, 171u8, 49u8, 208u8, 33u8, 23u8,
+        202u8, 155u8, 7u8, 134u8, 185u8, 209u8, 164u8, 247u8, 32u8, 56u8, 159u8, 255u8, 180u8, 224u8, 87u8, 49u8, 37u8, 136u8, 210u8, 0u8, 55u8, 92u8, 81u8,
+        85u8, 133u8, 69u8, 160u8, 2u8, 13u8, 42u8, 116u8, 189u8, 86u8, 192u8, 35u8, 13u8, 255u8, 251u8, 199u8, 1u8, 78u8, 229u8, 178u8, 35u8, 74u8, 34u8, 160u8,
+        35u8, 241u8, 118u8, 166u8, 80u8, 56u8, 128u8, 64u8, 51u8, 47u8, 249u8, 50u8, 18u8, 147u8, 188u8, 117u8, 131u8, 7u8, 192u8, 1u8, 226u8, 240u8, 206u8,
+        140u8, 108u8, 84u8, 11u8, 229u8, 127u8, 250u8, 227u8, 80u8, 198u8, 228u8, 249u8, 104u8, 61u8, 94u8, 6u8, 173u8, 98u8, 86u8, 43u8, 20u8, 33u8, 234u8,
+        244u8, 128u8, 53u8, 153u8, 146u8, 56u8, 63u8, 191u8, 191u8, 245u8, 194u8, 50u8, 43u8, 57u8, 74u8, 131u8, 168u8, 7u8, 235u8, 120u8, 179u8, 103u8, 124u8,
+        93u8, 148u8, 89u8, 102u8, 131u8, 169u8, 143u8, 33u8, 239u8, 244u8, 224u8, 134u8, 116u8, 33u8, 76u8, 232u8, 58u8, 172u8, 26u8, 124u8, 84u8, 176u8, 37u8,
+        186u8, 127u8, 190u8, 3u8, 3u8, 120u8, 72u8, 0u8, 8u8, 24u8, 160u8, 0u8, 8u8, 19u8, 134u8, 194u8, 236u8, 128u8, 51u8, 240u8, 122u8, 108u8, 85u8, 152u8,
+        6u8, 45u8, 3u8, 216u8, 75u8, 38u8, 82u8, 5u8, 165u8, 127u8, 223u8, 96u8, 212u8, 102u8, 122u8, 3u8, 214u8, 183u8, 239u8, 130u8, 108u8, 6u8, 214u8, 20u8,
+        160u8, 63u8, 39u8, 213u8, 80u8, 26u8, 248u8, 199u8, 1u8, 117u8, 62u8, 193u8, 184u8, 200u8, 217u8, 128u8, 253u8, 134u8, 253u8, 246u8, 4u8, 188u8, 140u8,
+        215u8, 40u8, 37u8, 194u8, 127u8, 252u8, 136u8, 171u8, 136u8, 168u8, 19u8, 101u8, 97u8, 224u8, 113u8, 0u8, 128u8, 102u8, 95u8, 242u8, 100u8, 152u8, 93u8,
+        226u8, 252u8, 55u8, 17u8, 120u8, 203u8, 152u8, 145u8, 240u8, 254u8, 239u8, 255u8, 127u8, 201u8, 145u8, 24u8, 93u8, 239u8, 249u8, 3u8, 184u8, 212u8,
+        49u8, 185u8, 62u8, 90u8, 143u8, 87u8, 182u8, 82u8, 57u8, 32u8, 123u8, 59u8, 51u8, 255u8, 168u8, 15u8, 144u8, 140u8, 152u8, 160u8, 47u8, 223u8, 247u8,
+        203u8, 3u8, 206u8, 71u8, 74u8, 80u8, 36u8, 102u8, 255u8, 125u8, 113u8, 168u8, 99u8, 114u8, 124u8, 190u8, 61u8, 94u8, 6u8, 186u8, 197u8, 216u8, 172u8,
+        86u8, 61u8, 94u8, 160u8, 107u8, 146u8, 145u8, 7u8, 151u8, 239u8, 251u8, 211u8, 145u8, 147u8, 179u8, 151u8, 160u8, 234u8, 14u8, 96u8, 6u8, 4u8, 128u8,
+        72u8, 0u8, 6u8, 105u8, 1u8, 212u8, 10u8, 88u8, 218u8, 152u8, 108u8, 0u8, 249u8, 112u8, 57u8, 246u8, 15u8, 48u8, 5u8, 241u8, 13u8, 184u8, 218u8, 158u8,
+        9u8, 50u8, 52u8, 136u8, 41u8, 58u8, 254u8, 243u8, 62u8, 208u8, 37u8, 27u8, 83u8, 26u8, 248u8, 197u8, 159u8, 93u8, 140u8, 12u8, 215u8, 193u8, 101u8,
+        241u8, 189u8, 57u8, 129u8, 252u8, 232u8, 189u8, 69u8, 153u8, 174u8, 253u8, 236u8, 113u8, 21u8, 123u8, 36u8, 191u8, 6u8, 144u8, 0u8, 16u8, 53u8, 101u8,
+        224u8, 0u8, 240u8, 189u8, 56u8, 188u8, 167u8, 82u8, 248u8, 213u8, 157u8, 255u8, 239u8, 205u8, 72u8, 50u8, 51u8, 137u8, 107u8, 157u8, 218u8, 238u8, 33u8,
+        122u8, 113u8, 121u8, 78u8, 165u8, 241u8, 235u8, 59u8, 255u8, 192u8, 174u8, 47u8, 204u8, 198u8, 17u8, 78u8, 81u8, 234u8, 247u8, 59u8, 9u8, 31u8, 35u8,
+        15u8, 156u8, 182u8, 43u8, 255u8, 214u8, 28u8, 22u8, 31u8, 85u8, 156u8, 222u8, 151u8, 127u8, 172u8, 13u8, 186u8, 11u8, 211u8, 6u8, 105u8, 215u8, 253u8,
+        245u8, 168u8, 123u8, 28u8, 17u8, 77u8, 88u8, 222u8, 30u8, 175u8, 91u8, 133u8, 241u8, 193u8, 84u8, 197u8, 140u8, 233u8, 234u8, 244u8, 128u8, 0u8, 243u8,
+        24u8, 205u8, 142u8, 0u8, 171u8, 127u8, 127u8, 237u8, 0u8, 120u8, 230u8, 59u8, 115u8, 128u8, 34u8, 151u8, 253u8, 240u8, 32u8, 64u8, 0u8, 64u8, 33u8,
+        128u8, 0u8, 160u8, 136u8, 6u8, 91u8, 147u8, 176u8, 9u8, 180u8, 229u8, 16u8, 42u8, 196u8, 196u8, 192u8, 9u8, 149u8, 128u8, 12u8, 54u8, 167u8, 128u8,
+        217u8, 14u8, 83u8, 169u8, 0u8, 185u8, 54u8, 239u8, 223u8, 48u8, 0u8, 4u8, 142u8, 193u8, 132u8, 82u8, 99u8, 106u8, 115u8, 86u8, 248u8, 131u8, 243u8,
+        236u8, 206u8, 53u8, 200u8, 56u8, 218u8, 158u8, 5u8, 251u8, 35u8, 101u8, 9u8, 113u8, 9u8, 253u8, 243u8, 0u8, 2u8, 202u8, 41u8, 55u8, 3u8, 106u8, 113u8,
+        21u8, 1u8, 31u8, 109u8, 141u8, 51u8, 1u8, 208u8, 32u8, 102u8, 95u8, 114u8, 100u8, 152u8, 187u8, 175u8, 198u8, 255u8, 224u8, 248u8, 0u8, 82u8, 241u8,
+        190u8, 98u8, 71u8, 194u8, 251u8, 191u8, 253u8, 75u8, 163u8, 4u8, 142u8, 161u8, 85u8, 171u8, 199u8, 157u8, 7u8, 230u8, 100u8, 135u8, 226u8, 207u8, 246u8,
+        192u8, 229u8, 198u8, 200u8, 74u8, 233u8, 171u8, 203u8, 105u8, 78u8, 80u8, 27u8, 16u8, 226u8, 111u8, 244u8, 9u8, 101u8, 180u8, 159u8, 165u8, 84u8, 30u8,
+        185u8, 210u8, 195u8, 113u8, 191u8, 190u8, 192u8, 193u8, 167u8, 10u8, 0u8, 11u8, 129u8, 131u8, 16u8, 31u8, 42u8, 32u8, 75u8, 79u8, 171u8, 96u8, 116u8,
+        170u8, 129u8, 41u8, 62u8, 194u8, 45u8, 28u8, 161u8, 25u8, 41u8, 127u8, 252u8, 211u8, 22u8, 95u8, 245u8, 97u8, 242u8, 169u8, 15u8, 255u8, 21u8, 54u8,
+        4u8, 36u8, 79u8, 10u8, 30u8, 2u8, 18u8, 103u8, 128u8, 110u8, 115u8, 45u8, 227u8, 58u8, 194u8, 127u8, 249u8, 133u8, 229u8, 144u8, 210u8, 201u8, 143u8,
+        212u8, 69u8, 92u8, 69u8, 65u8, 220u8, 164u8, 62u8, 96u8, 58u8, 33u8, 153u8, 123u8, 197u8, 90u8, 219u8, 226u8, 223u8, 224u8, 40u8, 137u8, 200u8, 167u8,
+        15u8, 183u8, 127u8, 176u8, 26u8, 90u8, 76u8, 183u8, 186u8, 255u8, 237u8, 200u8, 156u8, 138u8, 112u8, 251u8, 119u8, 250u8, 185u8, 98u8, 77u8, 159u8,
+        151u8, 236u8, 84u8, 234u8, 58u8, 105u8, 95u8, 245u8, 15u8, 73u8, 83u8, 3u8, 251u8, 251u8, 229u8, 14u8, 105u8, 219u8, 2u8, 223u8, 251u8, 229u8, 106u8,
+        197u8, 151u8, 159u8, 106u8, 245u8, 102u8, 199u8, 147u8, 155u8, 234u8, 244u8, 131u8, 164u8, 169u8, 129u8, 247u8, 247u8, 254u8, 208u8, 230u8, 157u8,
+        176u8, 44u8, 191u8, 223u8, 4u8, 8u8, 116u8, 32u8, 0u8, 8u8, 1u8, 128u8, 14u8, 154u8, 74u8, 240u8, 67u8, 106u8, 100u8, 165u8, 120u8, 33u8, 181u8, 54u8,
+        2u8, 185u8, 137u8, 40u8, 218u8, 152u8, 128u8, 174u8, 98u8, 74u8, 54u8, 166u8, 76u8, 3u8, 231u8, 14u8, 54u8, 166u8, 76u8, 3u8, 231u8, 14u8, 54u8, 166u8,
+        192u8, 10u8, 114u8, 158u8, 193u8, 181u8, 49u8, 0u8, 41u8, 202u8, 123u8, 6u8, 212u8, 224u8, 0u8, 2u8, 53u8, 8u8, 125u8, 134u8, 133u8, 185u8, 123u8, 55u8,
+        192u8, 31u8, 183u8, 130u8, 39u8, 213u8, 117u8, 3u8, 32u8, 48u8, 0u8, 129u8, 89u8, 0u8, 12u8, 72u8, 14u8, 5u8, 128u8, 124u8, 71u8, 128u8, 112u8, 28u8,
+        3u8, 96u8, 32u8, 138u8, 11u8, 64u8, 5u8, 96u8, 104u8, 226u8, 80u8, 28u8, 1u8, 176u8, 226u8, 32u8, 28u8, 48u8, 241u8, 197u8, 231u8, 182u8, 76u8, 203u8,
+        243u8, 223u8, 124u8, 12u8, 1u8, 57u8, 3u8, 8u8, 16u8, 0u8, 148u8, 93u8, 248u8, 63u8, 104u8, 100u8, 212u8, 249u8, 192u8, 252u8, 155u8, 255u8, 235u8,
+        133u8, 13u8, 55u8, 127u8, 243u8, 254u8, 40u8, 28u8, 13u8, 6u8, 16u8, 52u8, 52u8, 125u8, 246u8, 15u8, 248u8, 135u8, 163u8, 158u8, 127u8, 128u8, 147u8,
+        225u8, 196u8, 127u8, 70u8, 187u8, 154u8, 239u8, 38u8, 62u8, 35u8, 254u8, 131u8, 66u8, 76u8, 251u8, 117u8, 127u8, 252u8, 129u8, 94u8, 155u8, 32u8, 78u8,
+        203u8, 206u8, 244u8, 195u8, 2u8, 112u8, 26u8, 32u8, 0u8, 128u8, 150u8, 183u8, 73u8, 136u8, 151u8, 225u8, 111u8, 61u8, 225u8, 31u8, 255u8, 162u8, 53u8,
+        137u8, 126u8, 43u8, 84u8, 157u8, 88u8, 174u8, 59u8, 195u8, 30u8, 187u8, 160u8, 0u8, 79u8, 134u8, 176u8, 169u8, 217u8, 37u8, 240u8, 206u8, 51u8, 104u8,
+        63u8, 156u8, 186u8, 146u8, 195u8, 0u8, 20u8, 5u8, 132u8, 1u8, 87u8, 1u8, 155u8, 56u8, 104u8, 101u8, 17u8, 197u8, 104u8, 216u8, 60u8, 230u8, 92u8, 46u8,
+        202u8, 13u8, 33u8, 57u8, 91u8, 247u8, 119u8, 31u8, 52u8, 140u8, 93u8, 142u8, 80u8, 26u8, 122u8, 103u8, 56u8, 120u8, 96u8, 22u8, 4u8, 198u8, 30u8, 126u8,
+        171u8, 254u8, 160u8, 1u8, 75u8, 204u8, 121u8, 26u8, 46u8, 58u8, 147u8, 255u8, 218u8, 135u8, 125u8, 164u8, 167u8, 65u8, 163u8, 20u8, 219u8, 239u8, 86u8,
+        11u8, 107u8, 70u8, 160u8, 185u8, 175u8, 246u8, 193u8, 8u8, 1u8, 41u8, 128u8, 192u8, 3u8, 192u8, 14u8, 24u8, 204u8, 109u8, 180u8, 129u8, 236u8, 23u8,
+        146u8, 54u8, 226u8, 13u8, 13u8, 255u8, 251u8, 192u8, 195u8, 34u8, 248u8, 147u8, 105u8, 240u8, 2u8, 29u8, 93u8, 124u8, 7u8, 29u8, 194u8, 51u8, 22u8,
+        159u8, 41u8, 31u8, 206u8, 88u8, 97u8, 128u8, 127u8, 193u8, 88u8, 156u8, 4u8, 200u8, 157u8, 137u8, 90u8, 187u8, 3u8, 128u8, 1u8, 12u8, 3u8, 132u8, 16u8,
+        0u8, 118u8, 128u8, 10u8, 0u8, 202u8, 109u8, 158u8, 100u8, 96u8, 68u8, 100u8, 150u8, 30u8, 0u8, 66u8, 104u8, 208u8, 106u8, 132u8, 27u8, 156u8, 89u8,
+        68u8, 0u8, 8u8, 97u8, 50u8, 195u8, 248u8, 6u8, 0u8, 28u8, 3u8, 97u8, 178u8, 96u8, 114u8, 3u8, 6u8, 101u8, 226u8, 128u8, 60u8, 72u8, 0u8, 104u8, 72u8,
+        0u8, 8u8, 1u8, 160u8, 228u8, 24u8, 146u8, 195u8, 144u8, 98u8, 75u8, 28u8, 32u8, 118u8, 7u8, 4u8, 12u8, 192u8, 112u8, 138u8, 68u8, 176u8, 225u8, 20u8,
+        137u8, 99u8, 128u8, 64u8, 43u8, 3u8, 128u8, 32u8, 17u8, 142u8, 1u8, 0u8, 255u8, 193u8, 89u8, 48u8, 60u8, 24u8, 102u8, 88u8, 72u8, 16u8, 192u8, 240u8,
+        128u8, 64u8, 10u8, 192u8, 12u8, 14u8, 19u8, 141u8, 44u8, 128u8, 156u8, 105u8, 127u8, 174u8, 235u8, 190u8, 64u8, 1u8, 128u8, 127u8, 176u8, 86u8, 80u8,
+        21u8, 99u8, 14u8, 100u8, 74u8, 178u8, 40u8, 41u8, 149u8, 134u8, 0u8, 2u8, 2u8, 108u8, 0u8, 2u8, 4u8, 144u8, 200u8, 180u8, 28u8, 1u8, 16u8, 250u8, 160u8,
+        28u8, 4u8, 99u8, 98u8, 137u8, 145u8, 65u8, 73u8, 43u8, 122u8, 105u8, 158u8, 3u8, 128u8, 67u8, 190u8, 73u8, 48u8, 60u8, 6u8, 51u8, 35u8, 129u8, 35u8,
+        134u8, 204u8, 131u8, 182u8, 95u8, 162u8, 123u8, 224u8, 96u8, 3u8, 67u8, 132u8, 128u8, 0u8, 128u8, 139u8, 0u8, 0u8, 128u8, 0u8, 24u8, 240u8, 86u8, 207u8,
+        8u8, 66u8, 178u8, 207u8, 2u8, 206u8, 0u8, 153u8, 0u8, 150u8, 102u8, 88u8, 216u8, 233u8, 187u8, 74u8, 60u8, 65u8, 221u8, 156u8, 181u8, 102u8, 115u8,
+        157u8, 192u8, 32u8, 16u8, 130u8, 225u8, 39u8, 196u8, 241u8, 254u8, 92u8, 123u8, 138u8, 0u8, 7u8, 160u8, 9u8, 237u8, 41u8, 85u8, 175u8, 159u8, 216u8,
+        66u8, 5u8, 134u8, 8u8, 0u8, 10u8, 0u8, 135u8, 135u8, 154u8, 135u8, 217u8, 202u8, 73u8, 164u8, 184u8, 85u8, 32u8, 209u8, 54u8, 16u8, 32u8, 150u8, 89u8,
+        2u8, 9u8, 229u8, 128u8, 172u8, 36u8, 206u8, 47u8, 163u8, 119u8, 179u8, 192u8, 35u8, 116u8, 100u8, 50u8, 24u8, 124u8, 41u8, 227u8, 17u8, 221u8, 163u8,
+        65u8, 44u8, 99u8, 24u8, 255u8, 240u8, 195u8, 176u8, 84u8, 9u8, 4u8, 0u8, 2u8, 128u8, 168u8, 64u8, 0u8, 52u8, 2u8, 172u8, 28u8, 64u8, 9u8, 128u8, 114u8,
+        0u8, 108u8, 96u8, 224u8, 32u8, 102u8, 1u8, 192u8, 129u8, 216u8, 51u8, 4u8, 113u8, 172u8, 96u8, 3u8, 195u8, 0u8, 255u8, 216u8, 43u8, 131u8, 145u8, 255u8,
+        68u8, 148u8, 92u8, 92u8, 92u8, 92u8, 92u8, 92u8, 92u8, 95u8, 12u8, 3u8, 255u8, 96u8, 174u8, 47u8, 196u8, 0u8, 18u8, 68u8, 0u8, 8u8, 145u8, 89u8, 108u8,
+        86u8, 43u8, 17u8, 96u8, 128u8, 4u8, 186u8, 225u8, 214u8, 3u8, 128u8, 37u8, 215u8, 32u8, 28u8, 63u8, 246u8, 10u8, 226u8, 191u8, 196u8, 0u8, 1u8, 6u8,
+        80u8, 0u8, 16u8, 68u8, 136u8, 0u8, 2u8, 60u8, 0u8, 0u8, 35u8, 147u8, 45u8, 25u8, 96u8, 16u8, 0u8, 16u8, 49u8, 96u8, 84u8, 99u8, 128u8, 64u8, 0u8, 64u8,
+        197u8, 130u8, 0u8, 151u8, 92u8, 32u8, 0u8, 4u8, 35u8, 232u8, 0u8, 8u8, 200u8, 92u8, 14u8, 4u8, 186u8, 224u8, 112u8, 0u8, 16u8, 143u8, 160u8, 0u8, 35u8,
+        33u8, 114u8, 0u8, 0u8, 1u8, 202u8, 65u8, 154u8, 56u8, 111u8, 227u8, 97u8, 110u8, 34u8, 31u8, 127u8, 2u8, 20u8, 241u8, 202u8, 12u8, 156u8, 247u8, 153u8,
+        35u8, 13u8, 60u8, 189u8, 247u8, 191u8, 132u8, 0u8, 6u8, 65u8, 196u8, 162u8, 16u8, 1u8, 17u8, 72u8, 0u8, 10u8, 72u8, 136u8, 129u8, 145u8, 133u8, 45u8,
+        5u8, 158u8, 123u8, 120u8, 189u8, 36u8, 210u8, 215u8, 126u8, 150u8, 219u8, 87u8, 141u8, 82u8, 169u8, 112u8, 0u8, 103u8, 23u8, 137u8, 122u8, 17u8, 76u8,
+        35u8, 35u8, 159u8, 252u8, 186u8, 195u8, 121u8, 254u8, 22u8, 47u8, 33u8, 76u8, 195u8, 47u8, 8u8, 214u8, 151u8, 69u8, 127u8, 253u8, 59u8, 249u8, 226u8,
+        95u8, 218u8, 95u8, 225u8, 142u8, 18u8, 81u8, 175u8, 4u8, 93u8, 26u8, 171u8, 137u8, 151u8, 4u8, 126u8, 79u8, 222u8, 1u8, 15u8, 151u8, 57u8, 234u8, 94u8,
+        127u8, 111u8, 52u8, 104u8, 206u8, 0u8, 21u8, 232u8, 148u8, 220u8, 126u8, 87u8, 221u8, 26u8, 166u8, 141u8, 124u8, 231u8, 187u8, 246u8, 110u8, 50u8, 40u8,
+        251u8, 246u8, 244u8, 9u8, 90u8, 53u8, 238u8, 118u8, 83u8, 250u8, 94u8, 100u8, 207u8, 1u8, 56u8, 227u8, 230u8, 6u8, 220u8, 53u8, 248u8, 163u8, 131u8,
+        84u8, 195u8, 197u8, 104u8, 186u8, 187u8, 162u8, 76u8, 246u8, 56u8, 191u8, 168u8, 10u8, 220u8, 18u8, 72u8, 195u8, 169u8, 119u8, 221u8, 75u8, 188u8, 45u8,
+        226u8, 254u8, 66u8, 162u8, 120u8, 125u8, 45u8, 231u8, 6u8, 165u8, 223u8, 106u8, 93u8, 232u8, 201u8, 127u8, 3u8, 34u8, 98u8, 134u8, 203u8, 63u8, 231u8,
+        120u8, 84u8, 90u8, 137u8, 231u8, 131u8, 73u8, 50u8, 23u8, 11u8, 22u8, 64u8, 173u8, 8u8, 180u8, 31u8, 245u8, 132u8, 154u8, 195u8, 208u8, 236u8, 120u8,
+        88u8, 248u8, 233u8, 98u8, 186u8, 90u8, 69u8, 242u8, 125u8, 207u8, 208u8, 66u8, 18u8, 130u8, 243u8, 96u8, 245u8, 159u8, 15u8, 120u8, 113u8, 128u8, 184u8,
+        74u8, 83u8, 107u8, 188u8, 255u8, 137u8, 69u8, 46u8, 120u8, 9u8, 127u8, 165u8, 242u8, 248u8, 75u8, 139u8, 225u8, 83u8, 129u8, 8u8, 36u8, 77u8, 4u8,
+        145u8, 163u8, 58u8, 92u8, 207u8, 3u8, 7u8, 28u8, 133u8, 184u8, 149u8, 209u8, 96u8, 220u8, 215u8, 239u8, 36u8, 191u8, 143u8, 161u8, 61u8, 247u8, 245u8,
+        137u8, 8u8, 133u8, 120u8, 48u8, 68u8, 203u8, 151u8, 250u8, 8u8, 129u8, 222u8, 63u8, 192u8, 70u8, 90u8, 107u8, 188u8, 255u8, 203u8, 248u8, 156u8, 34u8,
+        23u8, 8u8, 135u8, 6u8, 64u8, 5u8, 249u8, 214u8, 195u8, 65u8, 183u8, 183u8, 104u8, 62u8, 108u8, 93u8, 81u8, 244u8, 92u8, 226u8, 161u8, 119u8, 248u8, 4u8,
+        167u8, 159u8, 15u8, 159u8, 192u8, 20u8, 21u8, 233u8, 49u8, 201u8, 132u8, 32u8, 140u8, 114u8, 43u8, 113u8, 51u8, 152u8, 227u8, 224u8, 142u8, 189u8,
+        159u8, 4u8, 139u8, 182u8, 123u8, 9u8, 97u8, 0u8, 74u8, 112u8, 85u8, 92u8, 152u8, 247u8, 242u8, 97u8, 32u8, 116u8, 117u8, 112u8, 140u8, 32u8, 30u8,
+        224u8, 192u8, 89u8, 144u8, 120u8, 102u8, 101u8, 202u8, 129u8, 199u8, 30u8, 77u8, 206u8, 16u8, 81u8, 152u8, 52u8, 166u8, 7u8, 4u8, 98u8, 229u8, 252u8,
+        56u8, 227u8, 69u8, 128u8, 19u8, 190u8, 247u8, 63u8, 189u8, 82u8, 8u8, 3u8, 8u8, 32u8, 52u8, 185u8, 102u8, 170u8, 171u8, 123u8, 132u8, 32u8, 241u8,
+        129u8, 10u8, 213u8, 247u8, 32u8, 35u8, 181u8, 220u8, 60u8, 59u8, 105u8, 77u8, 221u8, 231u8, 250u8, 97u8, 8u8, 70u8, 190u8, 145u8, 224u8, 196u8, 35u8,
+        128u8, 0u8, 0u8, 1u8, 220u8, 65u8, 154u8, 84u8, 27u8, 252u8, 110u8, 164u8, 254u8, 50u8, 166u8, 14u8, 177u8, 185u8, 62u8, 197u8, 81u8, 75u8, 77u8, 234u8,
+        248u8, 59u8, 177u8, 50u8, 0u8, 29u8, 203u8, 170u8, 92u8, 135u8, 192u8, 247u8, 167u8, 145u8, 133u8, 183u8, 111u8, 229u8, 19u8, 218u8, 220u8, 132u8,
+        191u8, 99u8, 130u8, 243u8, 211u8, 225u8, 141u8, 247u8, 155u8, 157u8, 239u8, 165u8, 65u8, 254u8, 11u8, 187u8, 218u8, 255u8, 13u8, 240u8, 223u8, 167u8,
+        147u8, 248u8, 79u8, 229u8, 250u8, 47u8, 226u8, 120u8, 92u8, 34u8, 28u8, 34u8, 128u8, 11u8, 243u8, 172u8, 195u8, 97u8, 181u8, 27u8, 176u8, 0u8, 231u8,
+        70u8, 136u8, 106u8, 137u8, 171u8, 210u8, 77u8, 139u8, 170u8, 23u8, 69u8, 206u8, 1u8, 4u8, 203u8, 128u8, 38u8, 107u8, 209u8, 223u8, 215u8, 196u8, 96u8,
+        0u8, 59u8, 255u8, 205u8, 55u8, 233u8, 210u8, 123u8, 136u8, 154u8, 244u8, 52u8, 152u8, 0u8, 151u8, 77u8, 15u8, 53u8, 211u8, 189u8, 190u8, 252u8, 2u8,
+        90u8, 49u8, 87u8, 154u8, 162u8, 224u8, 255u8, 5u8, 158u8, 36u8, 0u8, 71u8, 109u8, 14u8, 117u8, 189u8, 61u8, 254u8, 133u8, 43u8, 202u8, 185u8, 141u8,
+        184u8, 214u8, 254u8, 141u8, 123u8, 228u8, 239u8, 107u8, 4u8, 78u8, 89u8, 210u8, 8u8, 133u8, 142u8, 249u8, 154u8, 239u8, 248u8, 127u8, 135u8, 221u8,
+        127u8, 75u8, 22u8, 164u8, 11u8, 141u8, 252u8, 3u8, 16u8, 75u8, 29u8, 249u8, 21u8, 229u8, 210u8, 10u8, 179u8, 216u8, 27u8, 220u8, 255u8, 59u8, 169u8,
+        101u8, 146u8, 105u8, 47u8, 87u8, 22u8, 196u8, 123u8, 214u8, 230u8, 3u8, 150u8, 181u8, 32u8, 38u8, 158u8, 254u8, 244u8, 162u8, 112u8, 254u8, 235u8,
+        234u8, 186u8, 79u8, 220u8, 37u8, 225u8, 16u8, 168u8, 182u8, 115u8, 102u8, 15u8, 89u8, 131u8, 1u8, 70u8, 89u8, 210u8, 13u8, 151u8, 124u8, 103u8, 189u8,
+        98u8, 186u8, 47u8, 35u8, 175u8, 51u8, 10u8, 240u8, 233u8, 238u8, 60u8, 176u8, 29u8, 89u8, 80u8, 172u8, 140u8, 14u8, 116u8, 4u8, 191u8, 155u8, 13u8, 6u8,
+        27u8, 157u8, 126u8, 254u8, 4u8, 185u8, 215u8, 236u8, 84u8, 53u8, 35u8, 82u8, 252u8, 191u8, 229u8, 240u8, 69u8, 252u8, 42u8, 92u8, 4u8, 194u8, 70u8,
+        85u8, 106u8, 45u8, 89u8, 131u8, 73u8, 178u8, 127u8, 1u8, 102u8, 47u8, 144u8, 118u8, 62u8, 102u8, 175u8, 231u8, 196u8, 221u8, 216u8, 255u8, 175u8, 56u8,
+        68u8, 51u8, 47u8, 254u8, 71u8, 254u8, 1u8, 159u8, 63u8, 170u8, 28u8, 31u8, 232u8, 21u8, 18u8, 9u8, 195u8, 131u8, 32u8, 2u8, 39u8, 167u8, 169u8, 247u8,
+        191u8, 208u8, 68u8, 109u8, 180u8, 154u8, 220u8, 239u8, 190u8, 126u8, 234u8, 93u8, 242u8, 47u8, 143u8, 143u8, 62u8, 212u8, 187u8, 228u8, 38u8, 207u8,
+        143u8, 19u8, 194u8, 16u8, 184u8, 75u8, 207u8, 13u8, 24u8, 248u8, 248u8, 11u8, 0u8, 151u8, 5u8, 106u8, 125u8, 237u8, 143u8, 189u8, 124u8, 190u8, 16u8,
+        234u8, 38u8, 21u8, 18u8, 170u8, 6u8, 221u8, 197u8, 105u8, 150u8, 15u8, 7u8, 132u8, 145u8, 55u8, 142u8, 132u8, 90u8, 110u8, 132u8, 167u8, 231u8, 67u8,
+        139u8, 5u8, 108u8, 158u8, 207u8, 172u8, 193u8, 8u8, 68u8, 18u8, 85u8, 116u8, 202u8, 95u8, 195u8, 88u8, 68u8, 176u8, 174u8, 29u8, 247u8, 203u8, 18u8,
+        197u8, 197u8, 136u8, 41u8, 199u8, 3u8, 179u8, 187u8, 103u8, 0u8, 12u8, 94u8, 238u8, 211u8, 116u8, 33u8, 71u8, 162u8, 105u8, 90u8, 15u8, 180u8, 95u8,
+        4u8, 1u8, 144u8, 66u8, 17u8, 130u8, 104u8, 38u8, 71u8, 74u8, 151u8, 17u8, 208u8, 129u8, 193u8, 121u8, 108u8, 46u8, 220u8, 147u8, 183u8, 61u8, 64u8, 0u8,
+        0u8, 1u8, 159u8, 65u8, 154u8, 96u8, 223u8, 225u8, 254u8, 121u8, 75u8, 58u8, 220u8, 38u8, 255u8, 215u8, 6u8, 124u8, 0u8, 78u8, 105u8, 121u8, 244u8, 96u8,
+        191u8, 235u8, 94u8, 142u8, 21u8, 111u8, 50u8, 240u8, 96u8, 64u8, 255u8, 206u8, 239u8, 102u8, 110u8, 151u8, 240u8, 222u8, 222u8, 124u8, 201u8, 80u8,
+        127u8, 227u8, 214u8, 183u8, 180u8, 190u8, 23u8, 39u8, 0u8, 6u8, 156u8, 66u8, 93u8, 149u8, 115u8, 250u8, 72u8, 190u8, 98u8, 215u8, 95u8, 209u8, 185u8,
+        184u8, 92u8, 78u8, 0u8, 113u8, 199u8, 165u8, 192u8, 205u8, 58u8, 225u8, 133u8, 128u8, 155u8, 124u8, 191u8, 23u8, 192u8, 204u8, 41u8, 98u8, 247u8, 101u8,
+        218u8, 183u8, 0u8, 40u8, 205u8, 23u8, 99u8, 250u8, 254u8, 79u8, 91u8, 198u8, 215u8, 26u8, 76u8, 48u8, 3u8, 23u8, 239u8, 171u8, 238u8, 218u8, 189u8,
+        224u8, 105u8, 91u8, 47u8, 198u8, 252u8, 217u8, 35u8, 174u8, 188u8, 245u8, 160u8, 190u8, 237u8, 47u8, 27u8, 44u8, 159u8, 217u8, 67u8, 177u8, 106u8,
+        122u8, 190u8, 255u8, 154u8, 35u8, 230u8, 50u8, 189u8, 123u8, 103u8, 5u8, 48u8, 138u8, 251u8, 140u8, 214u8, 239u8, 131u8, 125u8, 128u8, 242u8, 179u8,
+        28u8, 31u8, 239u8, 136u8, 164u8, 33u8, 105u8, 117u8, 227u8, 247u8, 151u8, 202u8, 117u8, 172u8, 118u8, 183u8, 172u8, 13u8, 181u8, 99u8, 121u8, 52u8,
+        216u8, 9u8, 254u8, 111u8, 147u8, 242u8, 243u8, 220u8, 20u8, 141u8, 243u8, 3u8, 9u8, 244u8, 19u8, 123u8, 239u8, 201u8, 63u8, 124u8, 158u8, 17u8, 4u8,
+        34u8, 196u8, 122u8, 146u8, 114u8, 29u8, 89u8, 192u8, 118u8, 181u8, 242u8, 248u8, 46u8, 242u8, 225u8, 168u8, 158u8, 98u8, 56u8, 32u8, 61u8, 1u8, 250u8,
+        38u8, 129u8, 96u8, 244u8, 27u8, 151u8, 192u8, 192u8, 115u8, 133u8, 175u8, 151u8, 193u8, 135u8, 225u8, 16u8, 86u8, 47u8, 4u8, 109u8, 36u8, 189u8, 238u8,
+        247u8, 115u8, 43u8, 95u8, 133u8, 255u8, 146u8, 47u8, 181u8, 164u8, 255u8, 0u8, 11u8, 231u8, 93u8, 223u8, 219u8, 131u8, 252u8, 159u8, 215u8, 227u8, 66u8,
+        33u8, 192u8, 132u8, 1u8, 10u8, 215u8, 61u8, 15u8, 237u8, 130u8, 150u8, 20u8, 46u8, 246u8, 10u8, 237u8, 253u8, 133u8, 171u8, 127u8, 224u8, 3u8, 32u8,
+        171u8, 231u8, 148u8, 63u8, 224u8, 1u8, 183u8, 167u8, 214u8, 72u8, 242u8, 159u8, 8u8, 118u8, 208u8, 32u8, 132u8, 73u8, 147u8, 215u8, 2u8, 135u8, 8u8,
+        240u8, 201u8, 143u8, 143u8, 128u8, 177u8, 22u8, 160u8, 118u8, 109u8, 121u8, 210u8, 141u8, 53u8, 242u8, 248u8, 91u8, 8u8, 112u8, 136u8, 100u8, 74u8,
+        168u8, 2u8, 22u8, 144u8, 34u8, 156u8, 106u8, 212u8, 210u8, 76u8, 52u8, 51u8, 230u8, 9u8, 109u8, 132u8, 183u8, 129u8, 41u8, 154u8, 200u8, 255u8, 83u8,
+        255u8, 128u8, 202u8, 99u8, 147u8, 43u8, 250u8, 223u8, 254u8, 179u8, 4u8, 20u8, 20u8, 107u8, 85u8, 93u8, 50u8, 172u8, 24u8, 112u8, 175u8, 54u8, 47u8,
+        224u8, 210u8, 76u8, 128u8, 192u8, 98u8, 1u8, 153u8, 129u8, 212u8, 57u8, 104u8, 251u8, 172u8, 95u8, 13u8, 139u8, 126u8, 164u8, 206u8, 191u8, 94u8, 17u8,
+        239u8, 253u8, 120u8, 67u8, 123u8, 162u8, 29u8, 48u8, 0u8, 0u8, 1u8, 135u8, 65u8, 154u8, 128u8, 223u8, 225u8, 254u8, 25u8, 123u8, 217u8, 77u8, 156u8,
+        9u8, 174u8, 217u8, 218u8, 87u8, 205u8, 9u8, 109u8, 52u8, 84u8, 7u8, 31u8, 20u8, 32u8, 2u8, 239u8, 249u8, 210u8, 12u8, 252u8, 107u8, 73u8, 159u8, 122u8,
+        56u8, 245u8, 183u8, 31u8, 248u8, 94u8, 31u8, 158u8, 177u8, 215u8, 8u8, 133u8, 250u8, 126u8, 223u8, 127u8, 4u8, 126u8, 251u8, 202u8, 215u8, 0u8, 10u8,
+        252u8, 56u8, 72u8, 0u8, 58u8, 99u8, 202u8, 196u8, 147u8, 185u8, 118u8, 189u8, 230u8, 154u8, 65u8, 36u8, 52u8, 149u8, 202u8, 63u8, 252u8, 6u8, 120u8,
+        4u8, 120u8, 0u8, 215u8, 229u8, 87u8, 191u8, 62u8, 224u8, 7u8, 239u8, 114u8, 149u8, 235u8, 111u8, 13u8, 147u8, 93u8, 38u8, 156u8, 24u8, 88u8, 167u8,
+        95u8, 239u8, 128u8, 98u8, 165u8, 226u8, 150u8, 209u8, 95u8, 206u8, 124u8, 124u8, 172u8, 199u8, 7u8, 250u8, 248u8, 140u8, 174u8, 90u8, 212u8, 18u8,
+        209u8, 5u8, 77u8, 224u8, 230u8, 156u8, 96u8, 59u8, 209u8, 123u8, 111u8, 48u8, 62u8, 176u8, 85u8, 102u8, 178u8, 1u8, 76u8, 169u8, 237u8, 190u8, 190u8,
+        17u8, 12u8, 137u8, 103u8, 241u8, 122u8, 233u8, 252u8, 187u8, 79u8, 227u8, 184u8, 252u8, 190u8, 35u8, 160u8, 142u8, 27u8, 62u8, 95u8, 127u8, 234u8,
+        111u8, 47u8, 130u8, 239u8, 146u8, 21u8, 35u8, 87u8, 181u8, 17u8, 193u8, 60u8, 3u8, 12u8, 96u8, 114u8, 210u8, 96u8, 14u8, 142u8, 76u8, 164u8, 124u8,
+        191u8, 1u8, 164u8, 227u8, 120u8, 39u8, 203u8, 225u8, 14u8, 112u8, 140u8, 34u8, 81u8, 165u8, 199u8, 119u8, 175u8, 195u8, 38u8, 159u8, 254u8, 255u8, 0u8,
+        33u8, 31u8, 239u8, 175u8, 251u8, 248u8, 127u8, 147u8, 211u8, 241u8, 60u8, 76u8, 56u8, 42u8, 0u8, 100u8, 2u8, 191u8, 160u8, 47u8, 20u8, 238u8, 148u8,
+        62u8, 210u8, 99u8, 35u8, 129u8, 246u8, 195u8, 130u8, 101u8, 133u8, 61u8, 126u8, 0u8, 31u8, 101u8, 177u8, 146u8, 217u8, 186u8, 127u8, 175u8, 192u8, 5u8,
+        231u8, 33u8, 22u8, 111u8, 226u8, 239u8, 170u8, 225u8, 0u8, 134u8, 150u8, 225u8, 24u8, 84u8, 67u8, 190u8, 243u8, 224u8, 52u8, 134u8, 200u8, 36u8, 153u8,
+        5u8, 52u8, 99u8, 179u8, 64u8, 26u8, 156u8, 56u8, 200u8, 119u8, 251u8, 95u8, 154u8, 192u8, 13u8, 152u8, 177u8, 246u8, 79u8, 181u8, 250u8, 194u8, 1u8,
+        0u8, 128u8, 68u8, 24u8, 9u8, 207u8, 225u8, 176u8, 81u8, 191u8, 144u8, 223u8, 255u8, 197u8, 47u8, 211u8, 173u8, 4u8, 20u8, 17u8, 241u8, 172u8, 73u8,
+        80u8, 218u8, 172u8, 24u8, 4u8, 18u8, 10u8, 241u8, 60u8, 95u8, 192u8, 225u8, 5u8, 57u8, 144u8, 129u8, 68u8, 16u8, 18u8, 144u8, 160u8, 210u8, 28u8, 185u8,
+        208u8, 185u8, 4u8, 127u8, 246u8, 190u8, 83u8, 5u8, 198u8, 35u8, 152u8, 38u8, 158u8, 72u8, 132u8, 55u8, 107u8, 245u8, 225u8, 29u8, 47u8, 250u8, 132u8,
+        54u8, 185u8, 100u8, 8u8, 132u8, 219u8, 205u8, 254u8, 218u8, 11u8, 29u8, 48u8, 0u8, 0u8, 1u8, 168u8, 65u8, 154u8, 160u8, 222u8, 171u8, 195u8, 16u8, 53u8,
+        109u8, 37u8, 19u8, 170u8, 6u8, 190u8, 224u8, 176u8, 152u8, 112u8, 128u8, 76u8, 217u8, 67u8, 70u8, 250u8, 4u8, 21u8, 89u8, 97u8, 19u8, 71u8, 48u8, 33u8,
+        181u8, 107u8, 192u8, 127u8, 57u8, 100u8, 219u8, 174u8, 122u8, 28u8, 78u8, 24u8, 33u8, 172u8, 196u8, 112u8, 254u8, 27u8, 243u8, 118u8, 112u8, 174u8,
+        191u8, 255u8, 193u8, 54u8, 71u8, 253u8, 110u8, 219u8, 120u8, 152u8, 96u8, 150u8, 231u8, 234u8, 0u8, 29u8, 40u8, 140u8, 235u8, 234u8, 241u8, 112u8, 87u8,
+        127u8, 128u8, 36u8, 58u8, 172u8, 153u8, 63u8, 124u8, 189u8, 243u8, 165u8, 211u8, 59u8, 212u8, 192u8, 68u8, 195u8, 158u8, 0u8, 1u8, 246u8, 155u8, 81u8,
+        162u8, 131u8, 221u8, 216u8, 30u8, 221u8, 192u8, 8u8, 107u8, 73u8, 211u8, 119u8, 239u8, 231u8, 182u8, 241u8, 81u8, 166u8, 1u8, 6u8, 146u8, 143u8, 7u8,
+        252u8, 0u8, 115u8, 181u8, 29u8, 169u8, 102u8, 129u8, 176u8, 147u8, 235u8, 174u8, 250u8, 252u8, 8u8, 125u8, 182u8, 0u8, 170u8, 35u8, 173u8, 175u8, 122u8,
+        254u8, 183u8, 52u8, 80u8, 237u8, 196u8, 113u8, 174u8, 183u8, 117u8, 83u8, 158u8, 153u8, 2u8, 204u8, 151u8, 251u8, 251u8, 33u8, 250u8, 70u8, 52u8, 69u8,
+        222u8, 176u8, 166u8, 50u8, 53u8, 129u8, 140u8, 197u8, 101u8, 160u8, 53u8, 92u8, 59u8, 87u8, 105u8, 58u8, 241u8, 233u8, 192u8, 1u8, 221u8, 223u8, 159u8,
+        189u8, 155u8, 13u8, 131u8, 86u8, 81u8, 68u8, 25u8, 40u8, 210u8, 168u8, 116u8, 92u8, 191u8, 136u8, 194u8, 40u8, 34u8, 9u8, 133u8, 206u8, 78u8, 178u8,
+        185u8, 226u8, 242u8, 188u8, 68u8, 42u8, 124u8, 75u8, 155u8, 191u8, 19u8, 175u8, 71u8, 31u8, 229u8, 240u8, 93u8, 241u8, 97u8, 16u8, 247u8, 49u8, 18u8,
+        199u8, 19u8, 197u8, 115u8, 17u8, 197u8, 104u8, 21u8, 66u8, 216u8, 17u8, 22u8, 78u8, 215u8, 224u8, 21u8, 180u8, 107u8, 163u8, 242u8, 255u8, 194u8, 48u8,
+        152u8, 43u8, 23u8, 203u8, 143u8, 110u8, 238u8, 231u8, 165u8, 182u8, 79u8, 174u8, 32u8, 78u8, 17u8, 116u8, 71u8, 221u8, 10u8, 184u8, 92u8, 33u8, 252u8,
+        0u8, 41u8, 126u8, 83u8, 229u8, 233u8, 127u8, 253u8, 189u8, 81u8, 177u8, 43u8, 12u8, 67u8, 245u8, 240u8, 16u8, 66u8, 238u8, 208u8, 67u8, 122u8, 128u8,
+        116u8, 98u8, 53u8, 102u8, 191u8, 50u8, 35u8, 231u8, 255u8, 212u8, 2u8, 226u8, 181u8, 91u8, 244u8, 255u8, 190u8, 174u8, 16u8, 8u8, 104u8, 191u8, 133u8,
+        2u8, 1u8, 28u8, 34u8, 21u8, 17u8, 184u8, 45u8, 125u8, 138u8, 63u8, 72u8, 0u8, 64u8, 238u8, 192u8, 8u8, 217u8, 190u8, 38u8, 223u8, 124u8, 12u8, 78u8,
+        186u8, 118u8, 135u8, 248u8, 0u8, 200u8, 189u8, 41u8, 181u8, 126u8, 248u8, 25u8, 119u8, 109u8, 53u8, 143u8, 250u8, 208u8, 67u8, 5u8, 2u8, 220u8, 67u8,
+        157u8, 222u8, 218u8, 208u8, 64u8, 208u8, 74u8, 89u8, 51u8, 166u8, 211u8, 73u8, 21u8, 96u8, 186u8, 120u8, 100u8, 70u8, 108u8, 129u8, 181u8, 192u8, 149u8,
+        78u8, 176u8, 63u8, 255u8, 175u8, 8u8, 233u8, 127u8, 240u8, 65u8, 244u8, 32u8, 104u8, 118u8, 79u8, 216u8, 75u8, 140u8, 203u8, 255u8, 208u8, 225u8, 109u8,
+        128u8, 0u8, 0u8, 1u8, 179u8, 65u8, 154u8, 192u8, 223u8, 225u8, 184u8, 25u8, 111u8, 183u8, 250u8, 9u8, 134u8, 226u8, 65u8, 50u8, 204u8, 178u8, 7u8,
+        192u8, 44u8, 230u8, 221u8, 243u8, 9u8, 184u8, 200u8, 208u8, 106u8, 62u8, 27u8, 128u8, 155u8, 95u8, 30u8, 249u8, 107u8, 110u8, 216u8, 13u8, 112u8, 151u8,
+        181u8, 126u8, 180u8, 223u8, 145u8, 253u8, 31u8, 45u8, 186u8, 240u8, 65u8, 224u8, 0u8, 203u8, 217u8, 17u8, 185u8, 54u8, 201u8, 19u8, 151u8, 147u8, 125u8,
+        236u8, 161u8, 169u8, 20u8, 67u8, 4u8, 63u8, 93u8, 184u8, 74u8, 38u8, 34u8, 134u8, 0u8, 66u8, 247u8, 221u8, 110u8, 240u8, 236u8, 228u8, 136u8, 226u8,
+        46u8, 221u8, 219u8, 242u8, 26u8, 151u8, 72u8, 74u8, 92u8, 126u8, 3u8, 206u8, 155u8, 19u8, 221u8, 143u8, 122u8, 79u8, 164u8, 205u8, 23u8, 241u8, 162u8,
+        58u8, 95u8, 22u8, 141u8, 27u8, 127u8, 95u8, 104u8, 51u8, 229u8, 55u8, 203u8, 25u8, 133u8, 189u8, 104u8, 238u8, 139u8, 210u8, 238u8, 90u8, 11u8, 59u8,
+        151u8, 75u8, 121u8, 155u8, 97u8, 233u8, 134u8, 35u8, 223u8, 239u8, 4u8, 51u8, 35u8, 172u8, 21u8, 52u8, 109u8, 172u8, 217u8, 104u8, 50u8, 55u8, 195u8,
+        177u8, 187u8, 224u8, 223u8, 128u8, 113u8, 29u8, 206u8, 15u8, 247u8, 196u8, 180u8, 34u8, 144u8, 104u8, 64u8, 154u8, 54u8, 144u8, 211u8, 37u8, 111u8,
+        192u8, 107u8, 62u8, 19u8, 91u8, 238u8, 203u8, 178u8, 233u8, 217u8, 96u8, 54u8, 108u8, 91u8, 169u8, 23u8, 172u8, 127u8, 202u8, 174u8, 152u8, 111u8,
+        180u8, 222u8, 250u8, 190u8, 17u8, 26u8, 37u8, 98u8, 14u8, 86u8, 32u8, 144u8, 30u8, 211u8, 224u8, 240u8, 221u8, 151u8, 147u8, 80u8, 78u8, 146u8, 212u8,
+        156u8, 37u8, 59u8, 210u8, 2u8, 187u8, 175u8, 246u8, 66u8, 227u8, 97u8, 247u8, 151u8, 94u8, 188u8, 66u8, 12u8, 149u8, 4u8, 125u8, 233u8, 93u8, 192u8,
+        218u8, 58u8, 220u8, 105u8, 84u8, 162u8, 142u8, 126u8, 130u8, 90u8, 87u8, 229u8, 240u8, 109u8, 229u8, 18u8, 17u8, 13u8, 231u8, 143u8, 220u8, 17u8, 251u8,
+        219u8, 194u8, 47u8, 15u8, 125u8, 126u8, 81u8, 239u8, 119u8, 248u8, 100u8, 68u8, 30u8, 253u8, 208u8, 0u8, 255u8, 129u8, 9u8, 201u8, 163u8, 70u8, 120u8,
+        63u8, 201u8, 233u8, 248u8, 159u8, 97u8, 192u8, 132u8, 0u8, 217u8, 44u8, 237u8, 43u8, 165u8, 111u8, 16u8, 68u8, 99u8, 85u8, 32u8, 17u8, 0u8, 255u8,
+        240u8, 2u8, 105u8, 249u8, 165u8, 95u8, 158u8, 255u8, 128u8, 18u8, 181u8, 17u8, 207u8, 255u8, 42u8, 225u8, 0u8, 132u8, 152u8, 119u8, 223u8, 137u8, 32u8,
+        100u8, 172u8, 197u8, 248u8, 1u8, 240u8, 193u8, 128u8, 255u8, 47u8, 129u8, 4u8, 140u8, 32u8, 62u8, 16u8, 8u8, 134u8, 77u8, 169u8, 176u8, 41u8, 17u8,
+        112u8, 180u8, 222u8, 31u8, 253u8, 100u8, 8u8, 96u8, 160u8, 162u8, 183u8, 119u8, 63u8, 63u8, 45u8, 191u8, 154u8, 101u8, 47u8, 142u8, 230u8, 225u8, 146u8,
+        147u8, 21u8, 223u8, 47u8, 133u8, 47u8, 87u8, 30u8, 245u8, 131u8, 9u8, 194u8, 40u8, 197u8, 77u8, 120u8, 71u8, 75u8, 254u8, 240u8, 208u8, 118u8, 3u8,
+        169u8, 174u8, 237u8, 248u8, 0u8, 135u8, 238u8, 231u8, 89u8, 249u8, 124u8, 225u8, 19u8, 125u8, 4u8, 146u8, 42u8, 198u8, 112u8, 208u8, 169u8, 188u8,
+        222u8, 181u8, 135u8, 240u8, 15u8, 128u8, 0u8, 0u8, 1u8, 30u8, 65u8, 154u8, 224u8, 71u8, 248u8, 111u8, 128u8, 160u8, 189u8, 170u8, 74u8, 114u8, 155u8,
+        156u8, 116u8, 57u8, 14u8, 55u8, 252u8, 55u8, 88u8, 113u8, 237u8, 112u8, 32u8, 255u8, 110u8, 231u8, 255u8, 4u8, 111u8, 143u8, 59u8, 144u8, 159u8, 118u8,
+        34u8, 39u8, 225u8, 99u8, 96u8, 1u8, 118u8, 251u8, 171u8, 254u8, 254u8, 239u8, 240u8, 1u8, 127u8, 25u8, 20u8, 125u8, 251u8, 122u8, 6u8, 164u8, 107u8,
+        220u8, 236u8, 171u8, 238u8, 142u8, 174u8, 18u8, 61u8, 119u8, 172u8, 243u8, 9u8, 96u8, 140u8, 250u8, 254u8, 79u8, 47u8, 227u8, 176u8, 138u8, 133u8, 68u8,
+        233u8, 249u8, 193u8, 160u8, 74u8, 203u8, 130u8, 150u8, 10u8, 93u8, 128u8, 228u8, 232u8, 198u8, 189u8, 243u8, 124u8, 239u8, 8u8, 42u8, 199u8, 86u8,
+        117u8, 255u8, 12u8, 209u8, 148u8, 14u8, 149u8, 238u8, 22u8, 73u8, 219u8, 246u8, 222u8, 245u8, 145u8, 31u8, 243u8, 59u8, 212u8, 181u8, 255u8, 151u8,
+        253u8, 132u8, 225u8, 16u8, 80u8, 115u8, 17u8, 93u8, 109u8, 107u8, 95u8, 130u8, 0u8, 138u8, 61u8, 203u8, 232u8, 174u8, 250u8, 59u8, 252u8, 103u8, 180u8,
+        79u8, 107u8, 252u8, 34u8, 8u8, 122u8, 195u8, 65u8, 192u8, 105u8, 38u8, 72u8, 64u8, 247u8, 192u8, 2u8, 98u8, 93u8, 240u8, 84u8, 97u8, 254u8, 72u8, 100u8,
+        167u8, 243u8, 83u8, 137u8, 23u8, 173u8, 107u8, 62u8, 95u8, 132u8, 5u8, 4u8, 6u8, 20u8, 88u8, 68u8, 54u8, 104u8, 6u8, 188u8, 140u8, 46u8, 101u8, 184u8,
+        0u8, 115u8, 180u8, 213u8, 223u8, 110u8, 252u8, 0u8, 100u8, 178u8, 220u8, 209u8, 45u8, 255u8, 187u8, 151u8, 197u8, 4u8, 56u8, 68u8, 208u8, 70u8, 113u8,
+        88u8, 172u8, 119u8, 5u8, 188u8, 128u8, 198u8, 95u8, 21u8, 127u8, 10u8, 205u8, 154u8, 90u8, 170u8, 69u8, 227u8, 173u8, 87u8, 119u8, 215u8, 156u8, 34u8,
+        9u8, 13u8, 195u8, 126u8, 139u8, 175u8, 175u8, 175u8, 107u8, 156u8, 34u8, 26u8, 9u8, 159u8, 13u8, 244u8, 5u8, 192u8, 143u8, 85u8, 95u8, 136u8, 239u8,
+        240u8, 168u8, 133u8, 90u8, 75u8, 89u8, 208u8, 148u8, 191u8, 142u8, 172u8, 255u8, 130u8, 113u8, 78u8, 239u8, 89u8, 190u8, 59u8, 152u8, 0u8, 0u8, 1u8,
+        196u8, 65u8, 155u8, 0u8, 71u8, 248u8, 111u8, 128u8, 180u8, 153u8, 213u8, 98u8, 198u8, 101u8, 141u8, 96u8, 5u8, 29u8, 127u8, 39u8, 195u8, 214u8, 27u8,
+        248u8, 201u8, 195u8, 96u8, 248u8, 111u8, 134u8, 60u8, 133u8, 229u8, 204u8, 162u8, 154u8, 77u8, 15u8, 157u8, 248u8, 12u8, 70u8, 229u8, 249u8, 236u8,
+        191u8, 139u8, 248u8, 92u8, 156u8, 0u8, 62u8, 91u8, 250u8, 186u8, 223u8, 187u8, 232u8, 198u8, 115u8, 33u8, 162u8, 118u8, 173u8, 232u8, 136u8, 67u8, 86u8,
+        160u8, 17u8, 10u8, 218u8, 224u8, 7u8, 151u8, 237u8, 42u8, 170u8, 220u8, 0u8, 160u8, 170u8, 139u8, 155u8, 87u8, 242u8, 122u8, 118u8, 42u8, 187u8, 141u8,
+        38u8, 30u8, 89u8, 233u8, 38u8, 109u8, 77u8, 248u8, 33u8, 252u8, 254u8, 170u8, 7u8, 0u8, 16u8, 107u8, 235u8, 245u8, 115u8, 254u8, 227u8, 83u8, 70u8,
+        14u8, 186u8, 251u8, 251u8, 240u8, 70u8, 41u8, 10u8, 163u8, 221u8, 215u8, 213u8, 123u8, 150u8, 127u8, 2u8, 154u8, 30u8, 156u8, 253u8, 24u8, 0u8, 215u8,
+        252u8, 85u8, 228u8, 254u8, 176u8, 65u8, 133u8, 68u8, 67u8, 162u8, 118u8, 208u8, 49u8, 156u8, 140u8, 255u8, 128u8, 246u8, 190u8, 103u8, 86u8, 121u8,
+        11u8, 204u8, 14u8, 90u8, 140u8, 49u8, 149u8, 175u8, 26u8, 151u8, 142u8, 255u8, 215u8, 210u8, 205u8, 175u8, 147u8, 245u8, 8u8, 255u8, 12u8, 252u8, 160u8,
+        134u8, 201u8, 56u8, 60u8, 21u8, 36u8, 197u8, 69u8, 106u8, 249u8, 95u8, 175u8, 249u8, 235u8, 71u8, 235u8, 225u8, 16u8, 192u8, 209u8, 165u8, 158u8, 179u8,
+        17u8, 39u8, 108u8, 165u8, 129u8, 23u8, 207u8, 172u8, 178u8, 184u8, 143u8, 175u8, 198u8, 135u8, 67u8, 197u8, 202u8, 113u8, 177u8, 91u8, 169u8, 67u8,
+        41u8, 144u8, 156u8, 207u8, 106u8, 45u8, 127u8, 92u8, 173u8, 2u8, 207u8, 24u8, 30u8, 15u8, 236u8, 57u8, 38u8, 87u8, 127u8, 27u8, 249u8, 38u8, 64u8,
+        156u8, 62u8, 99u8, 154u8, 104u8, 75u8, 30u8, 47u8, 58u8, 240u8, 248u8, 134u8, 203u8, 36u8, 5u8, 93u8, 226u8, 58u8, 185u8, 172u8, 50u8, 30u8, 75u8,
+        239u8, 253u8, 0u8, 193u8, 234u8, 127u8, 236u8, 15u8, 255u8, 244u8, 144u8, 142u8, 28u8, 25u8, 0u8, 11u8, 233u8, 154u8, 190u8, 166u8, 219u8, 235u8, 90u8,
+        46u8, 171u8, 67u8, 217u8, 41u8, 136u8, 93u8, 81u8, 67u8, 110u8, 171u8, 133u8, 2u8, 48u8, 175u8, 6u8, 211u8, 46u8, 80u8, 73u8, 146u8, 99u8, 218u8, 95u8,
+        29u8, 0u8, 67u8, 241u8, 191u8, 159u8, 191u8, 240u8, 207u8, 179u8, 1u8, 210u8, 196u8, 0u8, 248u8, 8u8, 134u8, 159u8, 117u8, 47u8, 252u8, 190u8, 40u8,
+        33u8, 8u8, 4u8, 10u8, 44u8, 34u8, 24u8, 33u8, 239u8, 0u8, 79u8, 213u8, 174u8, 181u8, 125u8, 208u8, 22u8, 242u8, 248u8, 0u8, 62u8, 169u8, 180u8, 190u8,
+        95u8, 135u8, 128u8, 5u8, 207u8, 210u8, 250u8, 106u8, 79u8, 254u8, 250u8, 200u8, 16u8, 52u8, 18u8, 156u8, 52u8, 243u8, 243u8, 221u8, 189u8, 155u8, 212u8,
+        240u8, 175u8, 38u8, 3u8, 137u8, 102u8, 108u8, 241u8, 66u8, 188u8, 213u8, 0u8, 136u8, 106u8, 125u8, 210u8, 215u8, 127u8, 75u8, 194u8, 40u8, 197u8, 23u8,
+        125u8, 60u8, 33u8, 63u8, 207u8, 10u8, 139u8, 159u8, 49u8, 42u8, 133u8, 233u8, 196u8, 154u8, 74u8, 127u8, 91u8, 8u8, 194u8, 193u8, 158u8, 26u8, 73u8,
+        76u8, 246u8, 176u8, 133u8, 185u8, 255u8, 11u8, 138u8, 173u8, 93u8, 98u8, 124u8, 22u8, 169u8, 252u8, 94u8, 176u8, 0u8, 0u8, 1u8, 178u8, 65u8, 155u8,
+        32u8, 87u8, 87u8, 134u8, 235u8, 12u8, 123u8, 238u8, 2u8, 22u8, 166u8, 215u8, 251u8, 39u8, 223u8, 248u8, 68u8, 16u8, 135u8, 49u8, 112u8, 3u8, 20u8,
+        209u8, 13u8, 89u8, 53u8, 123u8, 192u8, 68u8, 37u8, 39u8, 192u8, 35u8, 220u8, 180u8, 95u8, 239u8, 128u8, 1u8, 255u8, 92u8, 168u8, 225u8, 39u8, 170u8,
+        106u8, 63u8, 110u8, 52u8, 152u8, 1u8, 247u8, 20u8, 105u8, 164u8, 189u8, 140u8, 127u8, 233u8, 199u8, 14u8, 111u8, 196u8, 40u8, 80u8, 122u8, 65u8, 26u8,
+        212u8, 7u8, 159u8, 147u8, 99u8, 124u8, 236u8, 204u8, 191u8, 140u8, 189u8, 231u8, 140u8, 165u8, 5u8, 148u8, 23u8, 239u8, 33u8, 86u8, 204u8, 103u8, 122u8,
+        246u8, 206u8, 10u8, 97u8, 21u8, 247u8, 25u8, 173u8, 223u8, 6u8, 251u8, 1u8, 229u8, 102u8, 56u8, 63u8, 223u8, 13u8, 52u8, 132u8, 232u8, 4u8, 47u8, 119u8,
+        187u8, 135u8, 51u8, 235u8, 51u8, 27u8, 94u8, 248u8, 54u8, 213u8, 141u8, 228u8, 211u8, 96u8, 4u8, 127u8, 157u8, 82u8, 15u8, 57u8, 59u8, 226u8, 19u8,
+        79u8, 224u8, 75u8, 122u8, 9u8, 191u8, 187u8, 223u8, 124u8, 58u8, 112u8, 32u8, 5u8, 230u8, 134u8, 69u8, 207u8, 57u8, 156u8, 24u8, 11u8, 178u8, 28u8,
+        23u8, 130u8, 197u8, 228u8, 16u8, 63u8, 147u8, 0u8, 35u8, 103u8, 205u8, 26u8, 111u8, 247u8, 194u8, 151u8, 168u8, 72u8, 207u8, 117u8, 106u8, 254u8, 79u8,
+        92u8, 16u8, 255u8, 12u8, 248u8, 160u8, 0u8, 70u8, 40u8, 0u8, 48u8, 130u8, 204u8, 65u8, 67u8, 18u8, 3u8, 51u8, 255u8, 201u8, 235u8, 146u8, 19u8, 160u8,
+        136u8, 68u8, 62u8, 22u8, 8u8, 227u8, 213u8, 74u8, 124u8, 103u8, 252u8, 254u8, 9u8, 94u8, 94u8, 125u8, 181u8, 85u8, 10u8, 135u8, 2u8, 80u8, 0u8, 111u8,
+        232u8, 98u8, 42u8, 46u8, 213u8, 63u8, 17u8, 212u8, 202u8, 140u8, 214u8, 102u8, 38u8, 175u8, 255u8, 47u8, 252u8, 1u8, 50u8, 157u8, 180u8, 248u8, 254u8,
+        255u8, 224u8, 2u8, 89u8, 167u8, 73u8, 245u8, 223u8, 233u8, 127u8, 25u8, 194u8, 48u8, 169u8, 0u8, 122u8, 133u8, 199u8, 243u8, 248u8, 60u8, 176u8, 2u8,
+        110u8, 155u8, 21u8, 60u8, 1u8, 8u8, 189u8, 182u8, 26u8, 227u8, 246u8, 195u8, 141u8, 55u8, 173u8, 112u8, 200u8, 190u8, 10u8, 28u8, 52u8, 179u8, 206u8,
+        33u8, 101u8, 24u8, 159u8, 4u8, 34u8, 63u8, 0u8, 217u8, 101u8, 141u8, 138u8, 223u8, 107u8, 255u8, 92u8, 32u8, 22u8, 8u8, 130u8, 241u8, 82u8, 101u8,
+        194u8, 17u8, 127u8, 222u8, 3u8, 98u8, 230u8, 101u8, 30u8, 178u8, 147u8, 145u8, 74u8, 112u8, 20u8, 238u8, 176u8, 0u8, 109u8, 156u8, 86u8, 82u8, 255u8,
+        15u8, 4u8, 123u8, 216u8, 0u8, 199u8, 34u8, 22u8, 70u8, 187u8, 190u8, 31u8, 52u8, 42u8, 81u8, 44u8, 31u8, 203u8, 226u8, 31u8, 18u8, 15u8, 227u8, 19u8,
+        135u8, 47u8, 130u8, 107u8, 148u8, 34u8, 224u8, 146u8, 170u8, 182u8, 240u8, 97u8, 57u8, 12u8, 159u8, 135u8, 116u8, 87u8, 254u8, 255u8, 240u8, 135u8,
+        120u8, 66u8, 112u8, 137u8, 202u8, 190u8, 25u8, 181u8, 127u8, 249u8, 124u8, 225u8, 18u8, 124u8, 18u8, 148u8, 60u8, 41u8, 23u8, 206u8, 191u8, 137u8, 21u8,
+        100u8, 210u8, 225u8, 172u8, 20u8, 236u8, 46u8, 33u8, 239u8, 171u8, 169u8, 83u8, 249u8, 161u8, 88u8, 0u8, 0u8, 1u8, 251u8, 65u8, 155u8, 64u8, 103u8,
+        41u8, 63u8, 173u8, 252u8, 47u8, 224u8, 7u8, 169u8, 234u8, 189u8, 63u8, 135u8, 1u8, 61u8, 38u8, 213u8, 245u8, 55u8, 25u8, 2u8, 175u8, 14u8, 195u8, 253u8,
+        224u8, 9u8, 95u8, 250u8, 113u8, 57u8, 39u8, 182u8, 154u8, 254u8, 22u8, 38u8, 4u8, 229u8, 71u8, 53u8, 228u8, 235u8, 251u8, 189u8, 100u8, 23u8, 102u8,
+        46u8, 144u8, 120u8, 12u8, 116u8, 29u8, 132u8, 17u8, 187u8, 189u8, 106u8, 23u8, 32u8, 5u8, 13u8, 220u8, 175u8, 8u8, 102u8, 241u8, 47u8, 235u8, 255u8,
+        223u8, 121u8, 235u8, 130u8, 53u8, 61u8, 64u8, 211u8, 35u8, 127u8, 247u8, 223u8, 47u8, 224u8, 219u8, 194u8, 33u8, 99u8, 128u8, 158u8, 145u8, 157u8,
+        106u8, 243u8, 233u8, 73u8, 148u8, 19u8, 101u8, 167u8, 217u8, 225u8, 1u8, 86u8, 112u8, 145u8, 116u8, 45u8, 140u8, 92u8, 188u8, 56u8, 194u8, 223u8, 250u8,
+        93u8, 126u8, 25u8, 131u8, 105u8, 144u8, 245u8, 156u8, 7u8, 64u8, 116u8, 58u8, 99u8, 151u8, 240u8, 106u8, 28u8, 190u8, 45u8, 224u8, 64u8, 227u8, 65u8,
+        56u8, 31u8, 166u8, 82u8, 95u8, 3u8, 244u8, 202u8, 75u8, 225u8, 147u8, 145u8, 220u8, 201u8, 197u8, 223u8, 208u8, 156u8, 142u8, 230u8, 78u8, 46u8, 254u8,
+        54u8, 135u8, 192u8, 16u8, 147u8, 83u8, 213u8, 127u8, 176u8, 244u8, 154u8, 158u8, 171u8, 253u8, 165u8, 28u8, 135u8, 106u8, 82u8, 142u8, 67u8, 181u8,
+        32u8, 23u8, 21u8, 201u8, 253u8, 50u8, 113u8, 92u8, 159u8, 211u8, 50u8, 223u8, 187u8, 226u8, 59u8, 126u8, 239u8, 134u8, 168u8, 78u8, 134u8, 130u8, 143u8,
+        192u8, 8u8, 143u8, 194u8, 142u8, 236u8, 126u8, 108u8, 49u8, 90u8, 70u8, 200u8, 181u8, 123u8, 225u8, 85u8, 25u8, 164u8, 64u8, 198u8, 92u8, 232u8, 62u8,
+        217u8, 26u8, 70u8, 12u8, 101u8, 206u8, 48u8, 132u8, 98u8, 38u8, 0u8, 26u8, 156u8, 26u8, 246u8, 219u8, 201u8, 184u8, 31u8, 108u8, 137u8, 35u8, 4u8, 34u8,
+        231u8, 80u8, 204u8, 189u8, 106u8, 126u8, 253u8, 194u8, 16u8, 208u8, 128u8, 145u8, 1u8, 69u8, 234u8, 183u8, 209u8, 87u8, 71u8, 84u8, 130u8, 194u8, 245u8,
+        24u8, 241u8, 240u8, 239u8, 164u8, 17u8, 175u8, 226u8, 182u8, 233u8, 175u8, 220u8, 228u8, 156u8, 160u8, 253u8, 64u8, 198u8, 110u8, 112u8, 86u8, 55u8,
+        223u8, 210u8, 254u8, 12u8, 130u8, 24u8, 70u8, 30u8, 134u8, 166u8, 68u8, 107u8, 228u8, 30u8, 177u8, 85u8, 25u8, 226u8, 137u8, 50u8, 192u8, 93u8, 52u8,
+        25u8, 142u8, 106u8, 213u8, 241u8, 22u8, 131u8, 5u8, 59u8, 13u8, 225u8, 127u8, 128u8, 8u8, 141u8, 221u8, 175u8, 128u8, 140u8, 85u8, 118u8, 86u8, 114u8,
+        252u8, 0u8, 40u8, 181u8, 145u8, 204u8, 153u8, 151u8, 6u8, 124u8, 190u8, 110u8, 18u8, 8u8, 216u8, 47u8, 196u8, 39u8, 137u8, 222u8, 238u8, 31u8, 48u8,
+        15u8, 210u8, 93u8, 192u8, 241u8, 121u8, 192u8, 159u8, 203u8, 201u8, 114u8, 190u8, 159u8, 175u8, 112u8, 85u8, 27u8, 91u8, 183u8, 203u8, 137u8, 67u8,
+        79u8, 123u8, 50u8, 249u8, 34u8, 236u8, 34u8, 231u8, 233u8, 151u8, 241u8, 123u8, 176u8, 117u8, 7u8, 12u8, 57u8, 192u8, 64u8, 143u8, 182u8, 173u8, 90u8,
+        196u8, 47u8, 193u8, 41u8, 63u8, 224u8, 4u8, 94u8, 186u8, 61u8, 62u8, 251u8, 248u8, 0u8, 81u8, 50u8, 26u8, 35u8, 147u8, 185u8, 28u8, 143u8, 194u8, 58u8,
+        120u8, 46u8, 148u8, 120u8, 34u8, 196u8, 57u8, 225u8, 238u8, 21u8, 43u8, 138u8, 231u8, 199u8, 191u8, 168u8, 1u8, 34u8, 54u8, 175u8, 242u8, 249u8, 42u8,
+        94u8, 190u8, 201u8, 239u8, 96u8, 150u8, 10u8, 230u8, 8u8, 140u8, 97u8, 114u8, 123u8, 115u8, 113u8, 15u8, 63u8, 192u8, 27u8, 197u8, 216u8, 175u8, 68u8,
+        138u8, 178u8, 89u8, 135u8, 211u8, 1u8, 45u8, 204u8, 175u8, 238u8, 225u8, 192u8, 1u8, 243u8, 70u8, 37u8, 236u8, 92u8, 133u8, 202u8, 36u8, 0u8, 0u8, 1u8,
+        193u8, 65u8, 155u8, 96u8, 33u8, 203u8, 225u8, 204u8, 1u8, 144u8, 100u8, 201u8, 190u8, 212u8, 40u8, 180u8, 154u8, 96u8, 197u8, 237u8, 0u8, 112u8, 17u8,
+        224u8, 6u8, 108u8, 157u8, 249u8, 206u8, 0u8, 59u8, 47u8, 205u8, 114u8, 222u8, 253u8, 118u8, 234u8, 55u8, 154u8, 32u8, 0u8, 217u8, 122u8, 49u8, 248u8,
+        141u8, 162u8, 252u8, 251u8, 155u8, 112u8, 69u8, 238u8, 157u8, 244u8, 110u8, 204u8, 54u8, 91u8, 109u8, 98u8, 103u8, 105u8, 149u8, 101u8, 24u8, 245u8,
+        201u8, 95u8, 238u8, 176u8, 155u8, 101u8, 98u8, 179u8, 22u8, 75u8, 185u8, 233u8, 144u8, 40u8, 201u8, 239u8, 239u8, 236u8, 135u8, 121u8, 16u8, 106u8,
+        171u8, 235u8, 175u8, 20u8, 176u8, 158u8, 130u8, 110u8, 252u8, 255u8, 142u8, 231u8, 52u8, 59u8, 217u8, 193u8, 72u8, 22u8, 113u8, 103u8, 252u8, 195u8,
+        107u8, 209u8, 206u8, 168u8, 111u8, 122u8, 248u8, 68u8, 16u8, 240u8, 20u8, 23u8, 156u8, 200u8, 123u8, 200u8, 144u8, 214u8, 225u8, 24u8, 116u8, 72u8,
+        58u8, 88u8, 14u8, 172u8, 7u8, 175u8, 224u8, 196u8, 208u8, 96u8, 218u8, 65u8, 219u8, 132u8, 15u8, 117u8, 7u8, 5u8, 192u8, 3u8, 96u8, 203u8, 242u8, 95u8,
+        73u8, 183u8, 54u8, 185u8, 237u8, 255u8, 128u8, 37u8, 55u8, 164u8, 125u8, 125u8, 26u8, 251u8, 60u8, 98u8, 29u8, 182u8, 205u8, 60u8, 27u8, 126u8, 62u8,
+        240u8, 247u8, 191u8, 80u8, 185u8, 191u8, 0u8, 11u8, 212u8, 153u8, 158u8, 74u8, 190u8, 161u8, 63u8, 72u8, 208u8, 64u8, 191u8, 191u8, 80u8, 52u8, 177u8,
+        110u8, 221u8, 133u8, 173u8, 125u8, 216u8, 3u8, 129u8, 95u8, 213u8, 2u8, 184u8, 2u8, 93u8, 87u8, 48u8, 143u8, 63u8, 255u8, 244u8, 7u8, 229u8, 5u8, 112u8,
+        5u8, 233u8, 61u8, 205u8, 3u8, 38u8, 191u8, 253u8, 201u8, 250u8, 194u8, 8u8, 33u8, 194u8, 33u8, 157u8, 64u8, 58u8, 193u8, 83u8, 22u8, 64u8, 57u8, 0u8,
+        232u8, 105u8, 2u8, 125u8, 132u8, 182u8, 192u8, 34u8, 25u8, 108u8, 175u8, 252u8, 254u8, 28u8, 1u8, 150u8, 229u8, 177u8, 95u8, 254u8, 127u8, 15u8, 194u8,
+        16u8, 220u8, 14u8, 132u8, 68u8, 25u8, 223u8, 10u8, 152u8, 194u8, 167u8, 224u8, 113u8, 12u8, 91u8, 159u8, 192u8, 26u8, 216u8, 246u8, 47u8, 61u8, 245u8,
+        226u8, 225u8, 89u8, 49u8, 117u8, 193u8, 246u8, 3u8, 45u8, 9u8, 144u8, 149u8, 40u8, 28u8, 228u8, 215u8, 134u8, 12u8, 237u8, 107u8, 95u8, 147u8, 223u8,
+        6u8, 159u8, 56u8, 68u8, 51u8, 120u8, 85u8, 209u8, 41u8, 218u8, 253u8, 171u8, 99u8, 93u8, 95u8, 130u8, 141u8, 86u8, 181u8, 246u8, 95u8, 240u8, 97u8,
+        132u8, 14u8, 76u8, 63u8, 4u8, 223u8, 217u8, 255u8, 84u8, 120u8, 84u8, 224u8, 245u8, 224u8, 245u8, 240u8, 117u8, 120u8, 58u8, 184u8, 128u8, 37u8, 66u8,
+        0u8, 9u8, 208u8, 113u8, 12u8, 91u8, 129u8, 200u8, 102u8, 185u8, 228u8, 2u8, 43u8, 238u8, 7u8, 8u8, 174u8, 185u8, 252u8, 225u8, 20u8, 72u8, 181u8, 199u8,
+        236u8, 184u8, 17u8, 174u8, 35u8, 190u8, 31u8, 242u8, 250u8, 138u8, 8u8, 98u8, 170u8, 34u8, 179u8, 202u8, 16u8, 12u8, 19u8, 129u8, 224u8, 99u8, 50u8,
+        194u8, 0u8, 44u8, 239u8, 43u8, 119u8, 224u8, 49u8, 8u8, 144u8, 215u8, 80u8, 35u8, 55u8, 207u8, 41u8, 233u8, 250u8, 192u8, 7u8, 52u8, 54u8, 55u8, 21u8,
+        108u8, 86u8, 237u8, 3u8, 228u8, 204u8, 72u8, 241u8, 99u8, 247u8, 231u8, 128u8, 0u8, 0u8, 3u8, 83u8, 109u8, 111u8, 111u8, 118u8, 0u8, 0u8, 0u8, 108u8,
+        109u8, 118u8, 104u8, 100u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8, 232u8, 0u8, 0u8, 3u8, 232u8, 0u8, 1u8, 0u8, 0u8,
+        1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 64u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 2u8, 0u8, 0u8, 2u8, 126u8, 116u8, 114u8, 97u8, 107u8, 0u8, 0u8, 0u8, 92u8,
+        116u8, 107u8, 104u8, 100u8, 0u8, 0u8, 0u8, 3u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 3u8, 232u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 64u8, 0u8, 0u8, 0u8, 0u8, 96u8, 0u8, 0u8, 0u8, 64u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 36u8, 101u8, 100u8, 116u8, 115u8, 0u8, 0u8, 0u8, 28u8, 101u8, 108u8, 115u8, 116u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 3u8,
+        232u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 1u8, 246u8, 109u8, 100u8, 105u8, 97u8, 0u8, 0u8, 0u8, 32u8, 109u8, 100u8, 104u8, 100u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 48u8, 0u8, 0u8, 0u8, 48u8, 0u8, 85u8, 196u8, 0u8, 0u8, 0u8, 0u8, 0u8, 45u8, 104u8,
+        100u8, 108u8, 114u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 118u8, 105u8, 100u8, 101u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        86u8, 105u8, 100u8, 101u8, 111u8, 72u8, 97u8, 110u8, 100u8, 108u8, 101u8, 114u8, 0u8, 0u8, 0u8, 1u8, 161u8, 109u8, 105u8, 110u8, 102u8, 0u8, 0u8, 0u8,
+        20u8, 118u8, 109u8, 104u8, 100u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 36u8, 100u8, 105u8, 110u8, 102u8, 0u8, 0u8,
+        0u8, 28u8, 100u8, 114u8, 101u8, 102u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 12u8, 117u8, 114u8, 108u8, 32u8, 0u8, 0u8, 0u8, 1u8, 0u8,
+        0u8, 1u8, 97u8, 115u8, 116u8, 98u8, 108u8, 0u8, 0u8, 0u8, 185u8, 115u8, 116u8, 115u8, 100u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8,
+        169u8, 97u8, 118u8, 99u8, 49u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 96u8, 0u8, 64u8, 0u8, 72u8, 0u8, 0u8, 0u8, 72u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 21u8, 76u8, 97u8, 118u8, 99u8, 54u8, 50u8, 46u8, 49u8,
+        49u8, 46u8, 49u8, 48u8, 48u8, 32u8, 108u8, 105u8, 98u8, 120u8, 50u8, 54u8, 52u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 24u8, 255u8,
+        255u8, 0u8, 0u8, 0u8, 47u8, 97u8, 118u8, 99u8, 67u8, 1u8, 66u8, 192u8, 10u8, 255u8, 225u8, 0u8, 23u8, 103u8, 66u8, 192u8, 10u8, 217u8, 6u8, 38u8, 192u8,
+        68u8, 0u8, 0u8, 3u8, 0u8, 4u8, 0u8, 0u8, 3u8, 0u8, 96u8, 60u8, 72u8, 153u8, 32u8, 1u8, 0u8, 5u8, 104u8, 203u8, 131u8, 203u8, 32u8, 0u8, 0u8, 0u8, 16u8,
+        112u8, 97u8, 115u8, 112u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 20u8, 98u8, 116u8, 114u8, 116u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 223u8,
+        72u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 24u8, 115u8, 116u8, 116u8, 115u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 12u8, 0u8, 0u8, 4u8,
+        0u8, 0u8, 0u8, 0u8, 20u8, 115u8, 116u8, 115u8, 115u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 28u8, 115u8, 116u8,
+        115u8, 99u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 12u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 68u8, 115u8, 116u8,
+        115u8, 122u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 12u8, 0u8, 0u8, 9u8, 70u8, 0u8, 0u8, 1u8, 206u8, 0u8, 0u8, 1u8, 224u8, 0u8, 0u8,
+        1u8, 163u8, 0u8, 0u8, 1u8, 139u8, 0u8, 0u8, 1u8, 172u8, 0u8, 0u8, 1u8, 183u8, 0u8, 0u8, 1u8, 34u8, 0u8, 0u8, 1u8, 200u8, 0u8, 0u8, 1u8, 182u8, 0u8, 0u8,
+        1u8, 255u8, 0u8, 0u8, 1u8, 197u8, 0u8, 0u8, 0u8, 20u8, 115u8, 116u8, 99u8, 111u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 1u8, 0u8, 0u8, 0u8, 48u8, 0u8, 0u8,
+        0u8, 97u8, 117u8, 100u8, 116u8, 97u8, 0u8, 0u8, 0u8, 89u8, 109u8, 101u8, 116u8, 97u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 33u8, 104u8, 100u8, 108u8,
+        114u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 109u8, 100u8, 105u8, 114u8, 97u8, 112u8, 112u8, 108u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 44u8, 105u8, 108u8, 115u8, 116u8, 0u8, 0u8, 0u8, 36u8, 169u8, 116u8, 111u8, 111u8, 0u8, 0u8, 0u8, 28u8, 100u8, 97u8, 116u8, 97u8, 0u8, 0u8,
+        0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 76u8, 97u8, 118u8, 102u8, 54u8, 50u8, 46u8, 51u8, 46u8, 49u8, 48u8, 48u8)
 var private h264_file_all__host_bytes : uint8? = null
 var private h264_file_all__host_length : int = 0
 var private h264_file_all__host_picture : uint8? = null
@@ -1532,7 +2280,7 @@ def realloc1(var ptr : void?; size : uint64) : void? {
     var old_size : uint64 = 0ul
     var copy_size : uint64 = 0ul
     var aligned_header : uint64 = (uint64(typeinfo sizeof(type<HeapHeader>)) + uint64(7u)) & ~uint64(7u)
-    if (!(result != null)) {
+    if (result == null) {
         return null
     }
     if (ptr != null) {
@@ -1552,7 +2300,7 @@ def realloc1(var ptr : void?; size : uint64) : void? {
 def calloc1(count : uint64; size : uint64) : void? {
     var total : uint64 = count * size
     var result : void? = malloc1(total)
-    if (!(result != null)) {
+    if (result == null) {
         return null
     }
     for (i in urange64(total)) {
@@ -1607,7 +2355,7 @@ def memcmp1(var lhs : void?; var rhs : void?; count : uint64) : int {
     var left : uint8? = reinterpret<uint8?>(lhs)
     var right : uint8? = reinterpret<uint8?>(rhs)
     for (i in urange64(count)) {
-        if (int(left[i]) != int(right[i])) {
+        if (left[i] != right[i]) {
             return int(left[i]) - int(right[i])
         }
     }
@@ -1618,7 +2366,7 @@ def memcmp1(var lhs : void?; var rhs : void?; count : uint64) : int {
 def memchr1(var src : void?; value : int; count : uint64) : void? {
     var bytes : uint8? = reinterpret<uint8?>(src)
     for (i in urange64(count)) {
-        if (int(bytes[i]) == int(uint8(value))) {
+        if (bytes[i] == uint8(value)) {
             return reinterpret<void?>(bytes + i)
         }
     }
@@ -1628,7 +2376,7 @@ def memchr1(var src : void?; value : int; count : uint64) : void? {
 [c_function]
 def strlen1(var src : uint8?) : uint64 {
     var count : uint64 = 0ul
-    while (int(src[count]) != '\0') {
+    while (src[count] != '\0') {
         count += 1ul
     }
     return count
@@ -1638,7 +2386,7 @@ def strlen1(var src : uint8?) : uint64 {
 def strdup(var src : uint8?) : uint8? {
     var length : uint64 = strlen1(src)
     var copy : uint8? = reinterpret<uint8?>(malloc1(length + uint64(1u)))
-    if (!(copy != null)) {
+    if (copy == null) {
         return null
     }
     for (index in urange64(length)) {
@@ -1667,7 +2415,7 @@ def h264bsdExtractNalUnit(var pByteStream : uint8?; len : uint; var pStrmData : 
     var writePtr : uint8?
     // Code
     // byte stream format if starts with 0x000001 or 0x000000
-    if (len > 3u && int(pByteStream[0]) == 0 && int(pByteStream[1]) == 0 && (int(pByteStream[2]) & 254) == 0) {
+    if (len > 3u && pByteStream[0] == 0 && pByteStream[1] == 0 && (int(pByteStream[2]) & 254) == 0) {
         // search for NAL unit start point, i.e. point after first start code
         // prefix in the stream
         byteCount = 2u
@@ -1676,17 +2424,17 @@ def h264bsdExtractNalUnit(var pByteStream : uint8?; len : uint; var pStrmData : 
         // lint -e(716) while(1) used consciously
         while (1 != 0) {
             var _t0 = readPtr
-            readPtr = readPtr + 1
-            byte = deref(_t0)
+            readPtr++
+            byte = *_t0
             byteCount++
             if (byteCount == len) {
                 // no start code prefix found -> error
-                deref(readBytes) = len
+                *readBytes = len
                 return uint(HANTRO_NOK)
             }
-            if (!(byte != 0)) {
+            if (byte == 0) {
                 zeroCount++
-            } elif ((int(byte) == 1) && (zeroCount >= 2u)) {
+            } elif ((byte == 1) && (zeroCount >= 2u)) {
                 break
             } else {
                 zeroCount = 0u
@@ -1699,16 +2447,16 @@ def h264bsdExtractNalUnit(var pByteStream : uint8?; len : uint; var pStrmData : 
         // lint -e(716) while(1) used consciously
         while (1 != 0) {
             var _t1 = readPtr
-            readPtr = readPtr + 1
-            byte = deref(_t1)
+            readPtr++
+            byte = *_t1
             byteCount++
-            if (!(byte != 0)) {
+            if (byte == 0) {
                 zeroCount++
             }
-            if ((int(byte) == 3) && (zeroCount == 2u)) {
+            if ((byte == 3) && (zeroCount == 2u)) {
                 hasEmulation = uint(HANTRO_TRUE)
             }
-            if ((int(byte) == 1) && (zeroCount >= 2u)) {
+            if ((byte == 1) && (zeroCount >= 2u)) {
                 pStrmData.strmBuffSize = byteCount - initByteCount - zeroCount - 1u
                 zeroCount -= zeroCount < 3u ? zeroCount : 3u
                 break
@@ -1735,7 +2483,7 @@ def h264bsdExtractNalUnit(var pByteStream : uint8?; len : uint; var pStrmData : 
     pStrmData.bitPosInWord = 0u
     pStrmData.strmBuffReadBits = 0u
     // return number of bytes "consumed"
-    deref(readBytes) = pStrmData.strmBuffSize + initByteCount + zeroCount
+    *readBytes = pStrmData.strmBuffSize + initByteCount + zeroCount
     if (invalidStream != 0) {
         return uint(HANTRO_NOK)
     }
@@ -1749,10 +2497,10 @@ def h264bsdExtractNalUnit(var pByteStream : uint8?; len : uint; var pStrmData : 
         while (true) {
             let _t2 = i
             i--
-            if (!(_t2 != 0)) {
+            if (_t2 == 0) {
                 break
             }
-            if ((zeroCount == 2u) && (int(deref(readPtr)) == 3)) {
+            if ((zeroCount == 2u) && (*readPtr == 3)) {
                 // emulation prevention byte shall be followed by one of the
                 // following bytes: 0x00, 0x01, 0x02, 0x03. This implies that
                 // emulation prevention 0x03 byte shall not be the last byte
@@ -1761,24 +2509,24 @@ def h264bsdExtractNalUnit(var pByteStream : uint8?; len : uint; var pStrmData : 
                     return uint(HANTRO_NOK)
                 }
                 // do not write emulation prevention byte
-                readPtr = readPtr + 1
+                readPtr++
                 zeroCount = 0u
             } else {
                 // NAL unit shall not contain byte sequences 0x000000,
                 // 0x000001 or 0x000002
-                if ((zeroCount == 2u) && (int(deref(readPtr)) <= 2)) {
+                if ((zeroCount == 2u) && (int(*readPtr) <= 2)) {
                     return uint(HANTRO_NOK)
                 }
-                if (int(deref(readPtr)) == 0) {
+                if (*readPtr == 0) {
                     zeroCount++
                 } else {
                     zeroCount = 0u
                 }
                 var _t3 = writePtr
-                writePtr = writePtr + 1
+                writePtr++
                 var _t4 = readPtr
-                readPtr = readPtr + 1
-                deref(_t3) = deref(_t4)
+                readPtr++
+                *_t3 = *_t4
             }
         }
         // (readPtr - writePtr) indicates number of "removed" emulation
@@ -1818,14 +2566,14 @@ def private h264_file_all__DecodeCoeffToken(bits : uint; nc : uint) : uint {
         }
     } elif (nc < 8u) {
         value = uint(h264_file_all__coeffToken4_0[bits >> 10u])
-        if (!(value != 0)) {
+        if (value == 0) {
             value = uint(h264_file_all__coeffToken4_1[bits >> 6u])
         }
     } elif (nc <= 16u) {
         value = uint(h264_file_all__coeffToken8[bits >> 10u])
     } else {
         value = uint(h264_file_all__coeffTokenMinus1_0[bits >> 13u])
-        if (!(value != 0)) {
+        if (value == 0) {
             value = uint(h264_file_all__coeffTokenMinus1_1[bits >> 8u])
         }
     }
@@ -1879,42 +2627,72 @@ def private h264_file_all__DecodeTotalZeros(var bits : uint; totalCoeff : uint; 
     // Variables
     var value : uint = 0u
     // Code
-    if (!(isChromaDC != 0)) {
-        let _cond = totalCoeff
-        if (_cond == 1u) {
-            value = uint(h264_file_all__totalZeros_1_0[bits >> 4u])
-            if (!(value != 0)) {
-                value = uint(h264_file_all__totalZeros_1_1[bits])
+    if (isChromaDC == 0) {
+        c_switch(totalCoeff) {
+            case(1u) {
+                value = uint(h264_file_all__totalZeros_1_0[bits >> 4u])
+                if (value == 0) {
+                    value = uint(h264_file_all__totalZeros_1_1[bits])
+                }
+                break
             }
-        } elif (_cond == 2u) {
-            value = uint(h264_file_all__totalZeros_2[bits >> 3u])
-        } elif (_cond == 3u) {
-            value = uint(h264_file_all__totalZeros_3[bits >> 3u])
-        } elif (_cond == 4u) {
-            value = uint(h264_file_all__totalZeros_4[bits >> 4u])
-        } elif (_cond == 5u) {
-            value = uint(h264_file_all__totalZeros_5[bits >> 4u])
-        } elif (_cond == 6u) {
-            value = uint(h264_file_all__totalZeros_6[bits >> 3u])
-        } elif (_cond == 7u) {
-            value = uint(h264_file_all__totalZeros_7[bits >> 3u])
-        } elif (_cond == 8u) {
-            value = uint(h264_file_all__totalZeros_8[bits >> 3u])
-        } elif (_cond == 9u) {
-            value = uint(h264_file_all__totalZeros_9[bits >> 3u])
-        } elif (_cond == 10u) {
-            value = uint(h264_file_all__totalZeros_10[bits >> 4u])
-        } elif (_cond == 11u) {
-            value = uint(h264_file_all__totalZeros_11[bits >> 5u])
-        } elif (_cond == 12u) {
-            value = uint(h264_file_all__totalZeros_12[bits >> 5u])
-        } elif (_cond == 13u) {
-            value = uint(h264_file_all__totalZeros_13[bits >> 6u])
-        } elif (_cond == 14u) {
-            value = uint(h264_file_all__totalZeros_14[bits >> 7u])
-        } else {
-            // case 15
-            value = uint((bits >> 8u) != 0 ? 17 : 1)
+            case(2u) {
+                value = uint(h264_file_all__totalZeros_2[bits >> 3u])
+                break
+            }
+            case(3u) {
+                value = uint(h264_file_all__totalZeros_3[bits >> 3u])
+                break
+            }
+            case(4u) {
+                value = uint(h264_file_all__totalZeros_4[bits >> 4u])
+                break
+            }
+            case(5u) {
+                value = uint(h264_file_all__totalZeros_5[bits >> 4u])
+                break
+            }
+            case(6u) {
+                value = uint(h264_file_all__totalZeros_6[bits >> 3u])
+                break
+            }
+            case(7u) {
+                value = uint(h264_file_all__totalZeros_7[bits >> 3u])
+                break
+            }
+            case(8u) {
+                value = uint(h264_file_all__totalZeros_8[bits >> 3u])
+                break
+            }
+            case(9u) {
+                value = uint(h264_file_all__totalZeros_9[bits >> 3u])
+                break
+            }
+            case(10u) {
+                value = uint(h264_file_all__totalZeros_10[bits >> 4u])
+                break
+            }
+            case(11u) {
+                value = uint(h264_file_all__totalZeros_11[bits >> 5u])
+                break
+            }
+            case(12u) {
+                value = uint(h264_file_all__totalZeros_12[bits >> 5u])
+                break
+            }
+            case(13u) {
+                value = uint(h264_file_all__totalZeros_13[bits >> 6u])
+                break
+            }
+            case(14u) {
+                value = uint(h264_file_all__totalZeros_14[bits >> 7u])
+                break
+            }
+            case(_) {
+                // case 15
+                value = uint((bits >> 8u) != 0 ? 17 : 1)
+                break
+            }
         }
     } else {
         bits >>= 6u
@@ -1941,41 +2719,55 @@ def private h264_file_all__DecodeRunBefore(bits : uint; zerosLeft : uint) : uint
     // Variables
     var value : uint = 0u
     // Code
-    let _cond = zerosLeft
-    if (_cond == 1u) {
-        value = uint(h264_file_all__runBefore_1[bits >> 10u])
-    } elif (_cond == 2u) {
-        value = uint(h264_file_all__runBefore_2[bits >> 9u])
-    } elif (_cond == 3u) {
-        value = uint(h264_file_all__runBefore_3[bits >> 9u])
-    } elif (_cond == 4u) {
-        value = uint(h264_file_all__runBefore_4[bits >> 8u])
-    } elif (_cond == 5u) {
-        value = uint(h264_file_all__runBefore_5[bits >> 8u])
-    } elif (_cond == 6u) {
-        value = uint(h264_file_all__runBefore_6[bits >> 8u])
-    } else {
-        if (bits >= 256u) {
-            value = ((7u - (bits >> 8u)) << 4u) + 3u
-        } elif (bits >= 128u) {
-            value = 116u
-        } elif (bits >= 64u) {
-            value = 133u
-        } elif (bits >= 32u) {
-            value = 150u
-        } elif (bits >= 16u) {
-            value = 167u
-        } elif (bits >= 8u) {
-            value = 184u
-        } elif (bits >= 4u) {
-            value = 201u
-        } elif (bits >= 2u) {
-            value = 218u
-        } elif (bits != 0) {
-            value = 235u
+    c_switch(zerosLeft) {
+        case(1u) {
+            value = uint(h264_file_all__runBefore_1[bits >> 10u])
+            break
         }
-        if (((value >> 4u) & 15u) > zerosLeft) {
-            value = 0u
+        case(2u) {
+            value = uint(h264_file_all__runBefore_2[bits >> 9u])
+            break
+        }
+        case(3u) {
+            value = uint(h264_file_all__runBefore_3[bits >> 9u])
+            break
+        }
+        case(4u) {
+            value = uint(h264_file_all__runBefore_4[bits >> 8u])
+            break
+        }
+        case(5u) {
+            value = uint(h264_file_all__runBefore_5[bits >> 8u])
+            break
+        }
+        case(6u) {
+            value = uint(h264_file_all__runBefore_6[bits >> 8u])
+            break
+        }
+        case(_) {
+            if (bits >= 256u) {
+                value = ((7u - (bits >> 8u)) << 4u) + 3u
+            } elif (bits >= 128u) {
+                value = 116u
+            } elif (bits >= 64u) {
+                value = 133u
+            } elif (bits >= 32u) {
+                value = 150u
+            } elif (bits >= 16u) {
+                value = 167u
+            } elif (bits >= 8u) {
+                value = 184u
+            } elif (bits >= 4u) {
+                value = 201u
+            } elif (bits >= 2u) {
+                value = 218u
+            } elif (bits != 0) {
+                value = 235u
+            }
+            if (((value >> 4u) & 15u) > zerosLeft) {
+                value = 0u
+            }
+            break
         }
     }
     return value
@@ -2013,7 +2805,7 @@ def h264bsdDecodeResidualBlockCavlc(var pStrmData : strmData_t?; var coeffLevel 
     bit = bufferValue >> uint(32 - 16)
     // lint +e774
     tmp = h264_file_all__DecodeCoeffToken(bit, uint(nc))
-    if (!(tmp != 0)) {
+    if (tmp == 0) {
         return uint(HANTRO_NOK)
     }
     bufferValue <<= tmp & 31u
@@ -2073,7 +2865,7 @@ def h264bsdDecodeResidualBlockCavlc(var pStrmData : strmData_t?; var coeffLevel 
                 // setting suffixLength to 1 here corresponds to adding 15
                 // to levelCode value if levelPrefix == 15 and
                 // suffixLength == 0
-                if (!(suffixLength != 0)) {
+                if (suffixLength == 0) {
                     suffixLength = 1u
                 }
                 tmp = 12u
@@ -2120,8 +2912,8 @@ def h264bsdDecodeResidualBlockCavlc(var pStrmData : strmData_t?; var coeffLevel 
                 bufferBits = 32u
             }
             bit = bufferValue >> uint(32 - 9)
-            zerosLeft = h264_file_all__DecodeTotalZeros(bit, totalCoeff, uint((maxNumCoeff == 4u) ? 1 : 0))
-            if (!(zerosLeft != 0)) {
+            zerosLeft = h264_file_all__DecodeTotalZeros(bit, totalCoeff, uint(int_of(maxNumCoeff == 4u)))
+            if (zerosLeft == 0) {
                 return uint(HANTRO_NOK)
             }
             bufferValue <<= zerosLeft & 15u
@@ -2141,7 +2933,7 @@ def h264bsdDecodeResidualBlockCavlc(var pStrmData : strmData_t?; var coeffLevel 
                 }
                 bit = bufferValue >> uint(32 - 11)
                 tmp = h264_file_all__DecodeRunBefore(bit, zerosLeft)
-                if (!(tmp != 0)) {
+                if (tmp == 0) {
                     return uint(HANTRO_NOK)
                 }
                 bufferValue <<= tmp & 15u
@@ -2164,7 +2956,7 @@ def h264bsdDecodeResidualBlockCavlc(var pStrmData : strmData_t?; var coeffLevel 
         while (true) {
             let _t1 = i
             i--
-            if (!(_t1 != 0)) {
+            if (_t1 == 0) {
                 break
             }
             tmp += run[i]
@@ -2196,15 +2988,12 @@ def h264bsdConceal(var pStorage : storage?; var currImage : image_t?; sliceType 
     height = currImage.height
     refData = null
     // use reference picture with smallest available index
-    if (sliceType == uint(int(anon_104.P_SLICE)) || sliceType == uint(int(anon_104.P_SLICE) + 5) || (pStorage.intraConcealmentFlag != 0u)) {
+    if (sliceType == uint(anon_104.P_SLICE) || sliceType == uint(int(anon_104.P_SLICE) + 5) || (pStorage.intraConcealmentFlag != 0u)) {
         i = 0u
-        while (true) {
+        c_do_while(refData == null) {
             refData = h264bsdGetRefPicData(addr(pStorage.dpb[0]), i)
             i++
             if (i >= 16u) {
-                break
-            }
-            if (!(refData == null)) {
                 break
             }
         }
@@ -2213,7 +3002,7 @@ def h264bsdConceal(var pStorage : storage?; var currImage : image_t?; sliceType 
     row = col
     i = row
     // find first properly decoded macroblock -> start point for concealment
-    while (i < pStorage.picSizeInMbs && !(pStorage.mb[i].decoded != 0)) {
+    while (i < pStorage.picSizeInMbs && pStorage.mb[i].decoded == 0) {
         i++
         col++
         if (col == width) {
@@ -2223,7 +3012,8 @@ def h264bsdConceal(var pStorage : storage?; var currImage : image_t?; sliceType 
     }
     // whole picture lost -> copy previous or set grey
     if (i == pStorage.picSizeInMbs) {
-        if (((sliceType == uint(int(anon_104.I_SLICE)) || sliceType == uint(int(anon_104.I_SLICE) + 5)) && (pStorage.intraConcealmentFlag == 0u)) || refData == null) {
+        if (((sliceType == uint(anon_104.I_SLICE) || sliceType == uint(int(anon_104.I_SLICE) + 5)) && (pStorage.intraConcealmentFlag == 0u)) ||
+                refData == null) {
             memset1(reinterpret<void?>(currImage.data), 128, uint64(width * height * 384u))
         } else {
             memcpy1(reinterpret<void?>(currImage.data), reinterpret<void?>(refData), uint64(width * height * 384u))
@@ -2244,7 +3034,7 @@ def h264bsdConceal(var pStorage : storage?; var currImage : image_t?; sliceType 
     while (true) {
         let _t0 = j
         j--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         h264_file_all__ConcealMb(mb + j, currImage, row, j, sliceType, refData)
@@ -2252,7 +3042,7 @@ def h264bsdConceal(var pStorage : storage?; var currImage : image_t?; sliceType 
         pStorage.numConcealedMbs++
     }
     for (j1 in urange(col + 1u, width)) {
-        if (!(mb[j1].decoded != 0)) {
+        if (mb[j1].decoded == 0) {
             h264_file_all__ConcealMb(mb + j1, currImage, row, j1, sliceType, refData)
             mb[j1].decoded = 1u
             pStorage.numConcealedMbs++
@@ -2267,10 +3057,10 @@ def h264bsdConceal(var pStorage : storage?; var currImage : image_t?; sliceType 
                 h264_file_all__ConcealMb(mb, currImage, i, j1, sliceType, refData)
                 mb.decoded = 1u
                 pStorage.numConcealedMbs++
-                mb = mb - width
+                mb -= width
                 let _t1 = i
                 i--
-                if (!(_t1 != 0)) {
+                if (_t1 == 0) {
                     break
                 }
             }
@@ -2280,7 +3070,7 @@ def h264bsdConceal(var pStorage : storage?; var currImage : image_t?; sliceType 
     for (i1 in urange(row + 1u, height)) {
         mb = pStorage.mb + i1 * width
         for (j1 in urange(width)) {
-            if (!(mb[j1].decoded != 0)) {
+            if (mb[j1].decoded == 0) {
                 h264_file_all__ConcealMb(mb + j1, currImage, i1, j1, sliceType, refData)
                 mb[j1].decoded = 1u
                 pStorage.numConcealedMbs++
@@ -2334,7 +3124,7 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
     pMb.filterOffsetA = 0
     pMb.filterOffsetB = 0
     pMb.chromaQpIndexOffset = 0
-    if (sliceType == uint(int(anon_104.I_SLICE)) || sliceType == uint(int(anon_104.I_SLICE) + 5)) {
+    if (sliceType == uint(anon_104.I_SLICE) || sliceType == uint(int(anon_104.I_SLICE) + 5)) {
         memset1(reinterpret<void?>(addr(data[0])), 0, uint64(typeinfo sizeof(type<uint8[384]>)))
     } else {
         var mv : mv_t = mv_t(hor = int16(0), ver = int16(0))
@@ -2359,53 +3149,53 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
         A = uint(HANTRO_TRUE)
         pData = mbPos - width * 16u
         var _t0 = pData
-        pData = pData + 1
-        a[0] = int(deref(_t0))
+        pData++
+        a[0] = int(*_t0)
         var _t1 = pData
-        pData = pData + 1
-        a[0] += int(deref(_t1))
+        pData++
+        a[0] += int(*_t1)
         var _t2 = pData
-        pData = pData + 1
-        a[0] += int(deref(_t2))
+        pData++
+        a[0] += int(*_t2)
         var _t3 = pData
-        pData = pData + 1
-        a[0] += int(deref(_t3))
+        pData++
+        a[0] += int(*_t3)
         var _t4 = pData
-        pData = pData + 1
-        a[1] = int(deref(_t4))
+        pData++
+        a[1] = int(*_t4)
         var _t5 = pData
-        pData = pData + 1
-        a[1] += int(deref(_t5))
+        pData++
+        a[1] += int(*_t5)
         var _t6 = pData
-        pData = pData + 1
-        a[1] += int(deref(_t6))
+        pData++
+        a[1] += int(*_t6)
         var _t7 = pData
-        pData = pData + 1
-        a[1] += int(deref(_t7))
+        pData++
+        a[1] += int(*_t7)
         var _t8 = pData
-        pData = pData + 1
-        a[2] = int(deref(_t8))
+        pData++
+        a[2] = int(*_t8)
         var _t9 = pData
-        pData = pData + 1
-        a[2] += int(deref(_t9))
+        pData++
+        a[2] += int(*_t9)
         var _t10 = pData
-        pData = pData + 1
-        a[2] += int(deref(_t10))
+        pData++
+        a[2] += int(*_t10)
         var _t11 = pData
-        pData = pData + 1
-        a[2] += int(deref(_t11))
+        pData++
+        a[2] += int(*_t11)
         var _t12 = pData
-        pData = pData + 1
-        a[3] = int(deref(_t12))
+        pData++
+        a[3] = int(*_t12)
         var _t13 = pData
-        pData = pData + 1
-        a[3] += int(deref(_t13))
+        pData++
+        a[3] += int(*_t13)
         var _t14 = pData
-        pData = pData + 1
-        a[3] += int(deref(_t14))
+        pData++
+        a[3] += int(*_t14)
         var _t15 = pData
-        pData = pData + 1
-        a[3] += int(deref(_t15))
+        pData++
+        a[3] += int(*_t15)
         j++
         hor++
         firstPhase[0] += a[0] + a[1] + a[2] + a[3]
@@ -2415,53 +3205,53 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
         B = uint(HANTRO_TRUE)
         pData = mbPos + 16u * width * 16u
         var _t16 = pData
-        pData = pData + 1
-        b[0] = int(deref(_t16))
+        pData++
+        b[0] = int(*_t16)
         var _t17 = pData
-        pData = pData + 1
-        b[0] += int(deref(_t17))
+        pData++
+        b[0] += int(*_t17)
         var _t18 = pData
-        pData = pData + 1
-        b[0] += int(deref(_t18))
+        pData++
+        b[0] += int(*_t18)
         var _t19 = pData
-        pData = pData + 1
-        b[0] += int(deref(_t19))
+        pData++
+        b[0] += int(*_t19)
         var _t20 = pData
-        pData = pData + 1
-        b[1] = int(deref(_t20))
+        pData++
+        b[1] = int(*_t20)
         var _t21 = pData
-        pData = pData + 1
-        b[1] += int(deref(_t21))
+        pData++
+        b[1] += int(*_t21)
         var _t22 = pData
-        pData = pData + 1
-        b[1] += int(deref(_t22))
+        pData++
+        b[1] += int(*_t22)
         var _t23 = pData
-        pData = pData + 1
-        b[1] += int(deref(_t23))
+        pData++
+        b[1] += int(*_t23)
         var _t24 = pData
-        pData = pData + 1
-        b[2] = int(deref(_t24))
+        pData++
+        b[2] = int(*_t24)
         var _t25 = pData
-        pData = pData + 1
-        b[2] += int(deref(_t25))
+        pData++
+        b[2] += int(*_t25)
         var _t26 = pData
-        pData = pData + 1
-        b[2] += int(deref(_t26))
+        pData++
+        b[2] += int(*_t26)
         var _t27 = pData
-        pData = pData + 1
-        b[2] += int(deref(_t27))
+        pData++
+        b[2] += int(*_t27)
         var _t28 = pData
-        pData = pData + 1
-        b[3] = int(deref(_t28))
+        pData++
+        b[3] = int(*_t28)
         var _t29 = pData
-        pData = pData + 1
-        b[3] += int(deref(_t29))
+        pData++
+        b[3] += int(*_t29)
         var _t30 = pData
-        pData = pData + 1
-        b[3] += int(deref(_t30))
+        pData++
+        b[3] += int(*_t30)
         var _t31 = pData
-        pData = pData + 1
-        b[3] += int(deref(_t31))
+        pData++
+        b[3] += int(*_t31)
         j++
         hor++
         firstPhase[0] += b[0] + b[1] + b[2] + b[3]
@@ -2474,17 +3264,17 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
         l[0] += int(pData[16u * width])
         l[0] += int(pData[32u * width])
         l[0] += int(pData[48u * width])
-        pData = pData + 64u * width
+        pData += 64u * width
         l[1] = int(pData[0])
         l[1] += int(pData[16u * width])
         l[1] += int(pData[32u * width])
         l[1] += int(pData[48u * width])
-        pData = pData + 64u * width
+        pData += 64u * width
         l[2] = int(pData[0])
         l[2] += int(pData[16u * width])
         l[2] += int(pData[32u * width])
         l[2] += int(pData[48u * width])
-        pData = pData + 64u * width
+        pData += 64u * width
         l[3] = int(pData[0])
         l[3] += int(pData[16u * width])
         l[3] += int(pData[32u * width])
@@ -2501,17 +3291,17 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
         r[0] += int(pData[16u * width])
         r[0] += int(pData[32u * width])
         r[0] += int(pData[48u * width])
-        pData = pData + 64u * width
+        pData += 64u * width
         r[1] = int(pData[0])
         r[1] += int(pData[16u * width])
         r[1] += int(pData[32u * width])
         r[1] += int(pData[48u * width])
-        pData = pData + 64u * width
+        pData += 64u * width
         r[2] = int(pData[0])
         r[2] += int(pData[16u * width])
         r[2] += int(pData[32u * width])
         r[2] += int(pData[48u * width])
-        pData = pData + 64u * width
+        pData += 64u * width
         r[3] = int(pData[0])
         r[3] += int(pData[16u * width])
         r[3] += int(pData[32u * width])
@@ -2523,27 +3313,35 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
     }
     // at least one properly decoded neighbour available
     // lint -esym(644,l,r,a,b) variable initialized above
-    if (!(hor != 0) && L != 0 && R != 0) {
+    if (hor == 0 && L != 0 && R != 0) {
         firstPhase[1] = (l[0] + l[1] + l[2] + l[3] - r[0] - r[1] - r[2] - r[3]) >> 5
     } elif (hor != 0) {
         firstPhase[1] >>= int(3u + hor)
     }
-    if (!(ver != 0) && A != 0 && B != 0) {
+    if (ver == 0 && A != 0 && B != 0) {
         firstPhase[4] = (a[0] + a[1] + a[2] + a[3] - b[0] - b[1] - b[2] - b[3]) >> 5
     } elif (ver != 0) {
         firstPhase[4] >>= int(3u + ver)
     }
-    let _cond = j
-    if (_cond == 1u) {
-        firstPhase[0] >>= 4
-    } elif (_cond == 2u) {
-        firstPhase[0] >>= 5
-    } elif (_cond == 3u) {
-        // approximate (firstPhase[0]*4/3)>>6
-        firstPhase[0] = (21 * firstPhase[0]) >> 10
-    } else {
-        // 4
-        firstPhase[0] >>= 6
+    c_switch(j) {
+        case(1u) {
+            firstPhase[0] >>= 4
+            break
+        }
+        case(2u) {
+            firstPhase[0] >>= 5
+            break
+        }
+        case(3u) {
+            // approximate (firstPhase[0]*4/3)>>6
+            firstPhase[0] = (21 * firstPhase[0]) >> 10
+            break
+        }
+        case(_) {
+            // 4
+            firstPhase[0] >>= 6
+            break
+        }
     }
     h264_file_all__Transform(addr(firstPhase[0]))
     i = 0u
@@ -2553,12 +3351,12 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
         tmp = pTmp[(i & 15u) >> 2u]
         // lint -e734 CLIP1 macro results in value that fits into 8 bits
         var _t32 = pData
-        pData = pData + 1
-        deref(_t32) = uint8(tmp < 0 ? 0 : (tmp > 255 ? 255 : tmp))
+        pData++
+        *_t32 = uint8(tmp < 0 ? 0 : (tmp > 255 ? 255 : tmp))
         // lint +e734
         i++
-        if (!((i & 63u) != 0)) {
-            pTmp = pTmp + 4
+        if ((i & 63u) == 0) {
+            pTmp += 4
         }
     }
     // chroma components
@@ -2572,29 +3370,29 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
         if (A != 0) {
             pData = mbPos - width * 8u
             var _t33 = pData
-            pData = pData + 1
-            a[0] = int(deref(_t33))
+            pData++
+            a[0] = int(*_t33)
             var _t34 = pData
-            pData = pData + 1
-            a[0] += int(deref(_t34))
+            pData++
+            a[0] += int(*_t34)
             var _t35 = pData
-            pData = pData + 1
-            a[1] = int(deref(_t35))
+            pData++
+            a[1] = int(*_t35)
             var _t36 = pData
-            pData = pData + 1
-            a[1] += int(deref(_t36))
+            pData++
+            a[1] += int(*_t36)
             var _t37 = pData
-            pData = pData + 1
-            a[2] = int(deref(_t37))
+            pData++
+            a[2] = int(*_t37)
             var _t38 = pData
-            pData = pData + 1
-            a[2] += int(deref(_t38))
+            pData++
+            a[2] += int(*_t38)
             var _t39 = pData
-            pData = pData + 1
-            a[3] = int(deref(_t39))
+            pData++
+            a[3] = int(*_t39)
             var _t40 = pData
-            pData = pData + 1
-            a[3] += int(deref(_t40))
+            pData++
+            a[3] += int(*_t40)
             j++
             hor++
             firstPhase[0] += a[0] + a[1] + a[2] + a[3]
@@ -2603,29 +3401,29 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
         if (B != 0) {
             pData = mbPos + 8u * width * 8u
             var _t41 = pData
-            pData = pData + 1
-            b[0] = int(deref(_t41))
+            pData++
+            b[0] = int(*_t41)
             var _t42 = pData
-            pData = pData + 1
-            b[0] += int(deref(_t42))
+            pData++
+            b[0] += int(*_t42)
             var _t43 = pData
-            pData = pData + 1
-            b[1] = int(deref(_t43))
+            pData++
+            b[1] = int(*_t43)
             var _t44 = pData
-            pData = pData + 1
-            b[1] += int(deref(_t44))
+            pData++
+            b[1] += int(*_t44)
             var _t45 = pData
-            pData = pData + 1
-            b[2] = int(deref(_t45))
+            pData++
+            b[2] = int(*_t45)
             var _t46 = pData
-            pData = pData + 1
-            b[2] += int(deref(_t46))
+            pData++
+            b[2] += int(*_t46)
             var _t47 = pData
-            pData = pData + 1
-            b[3] = int(deref(_t47))
+            pData++
+            b[3] = int(*_t47)
             var _t48 = pData
-            pData = pData + 1
-            b[3] += int(deref(_t48))
+            pData++
+            b[3] += int(*_t48)
             j++
             hor++
             firstPhase[0] += b[0] + b[1] + b[2] + b[3]
@@ -2635,13 +3433,13 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
             pData = mbPos - 1
             l[0] = int(pData[0])
             l[0] += int(pData[8u * width])
-            pData = pData + 16u * width
+            pData += 16u * width
             l[1] = int(pData[0])
             l[1] += int(pData[8u * width])
-            pData = pData + 16u * width
+            pData += 16u * width
             l[2] = int(pData[0])
             l[2] += int(pData[8u * width])
-            pData = pData + 16u * width
+            pData += 16u * width
             l[3] = int(pData[0])
             l[3] += int(pData[8u * width])
             j++
@@ -2653,13 +3451,13 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
             pData = mbPos + 8
             r[0] = int(pData[0])
             r[0] += int(pData[8u * width])
-            pData = pData + 16u * width
+            pData += 16u * width
             r[1] = int(pData[0])
             r[1] += int(pData[8u * width])
-            pData = pData + 16u * width
+            pData += 16u * width
             r[2] = int(pData[0])
             r[2] += int(pData[8u * width])
-            pData = pData + 16u * width
+            pData += 16u * width
             r[3] = int(pData[0])
             r[3] += int(pData[8u * width])
             j++
@@ -2667,27 +3465,35 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
             firstPhase[0] += r[0] + r[1] + r[2] + r[3]
             firstPhase[4] += r[0] + r[1] - r[2] - r[3]
         }
-        if (!(hor != 0) && L != 0 && R != 0) {
+        if (hor == 0 && L != 0 && R != 0) {
             firstPhase[1] = (l[0] + l[1] + l[2] + l[3] - r[0] - r[1] - r[2] - r[3]) >> 4
         } elif (hor != 0) {
             firstPhase[1] >>= int(2u + hor)
         }
-        if (!(ver != 0) && A != 0 && B != 0) {
+        if (ver == 0 && A != 0 && B != 0) {
             firstPhase[4] = (a[0] + a[1] + a[2] + a[3] - b[0] - b[1] - b[2] - b[3]) >> 4
         } elif (ver != 0) {
             firstPhase[4] >>= int(2u + ver)
         }
-        let _cond2 = j
-        if (_cond2 == 1u) {
-            firstPhase[0] >>= 3
-        } elif (_cond2 == 2u) {
-            firstPhase[0] >>= 4
-        } elif (_cond2 == 3u) {
-            // approximate (firstPhase[0]*4/3)>>5
-            firstPhase[0] = (21 * firstPhase[0]) >> 9
-        } else {
-            // 4
-            firstPhase[0] >>= 5
+        c_switch(j) {
+            case(1u) {
+                firstPhase[0] >>= 3
+                break
+            }
+            case(2u) {
+                firstPhase[0] >>= 4
+                break
+            }
+            case(3u) {
+                // approximate (firstPhase[0]*4/3)>>5
+                firstPhase[0] = (21 * firstPhase[0]) >> 9
+                break
+            }
+            case(_) {
+                // 4
+                firstPhase[0] >>= 5
+                break
+            }
         }
         h264_file_all__Transform(addr(firstPhase[0]))
         pData = addr(data[0]) + 256 + comp * 64u
@@ -2697,16 +3503,16 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
             tmp = pTmp[(i & 7u) >> 1u]
             // lint -e734 CLIP1 macro results in value that fits into 8 bits
             var _t49 = pData
-            pData = pData + 1
-            deref(_t49) = uint8(tmp < 0 ? 0 : (tmp > 255 ? 255 : tmp))
+            pData++
+            *_t49 = uint8(tmp < 0 ? 0 : (tmp > 255 ? 255 : tmp))
             // lint +e734
             i++
-            if (!((i & 15u) != 0)) {
-                pTmp = pTmp + 4
+            if ((i & 15u) == 0) {
+                pTmp += 4
             }
         }
         // increment pointers for cr
-        mbPos = mbPos + width * height * 64u
+        mbPos += width * height * 64u
     }
     h264bsdWriteMacroblock(currImage, addr(data[0]))
     return uint(HANTRO_OK)
@@ -2717,7 +3523,7 @@ def private h264_file_all__Transform(var data : int?) {
     var col : uint
     var tmp0 : int
     var tmp1 : int
-    if (!(data[1] != 0) && !(data[4] != 0)) {
+    if (data[1] == 0 && data[4] == 0) {
         data[15] = data[0]
         data[14] = data[15]
         data[13] = data[14]
@@ -2751,7 +3557,7 @@ def private h264_file_all__Transform(var data : int?) {
     while (true) {
         let _t0 = col
         col--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         tmp0 = data[0]
@@ -2760,7 +3566,7 @@ def private h264_file_all__Transform(var data : int?) {
         data[4] = tmp0 + (tmp1 >> 1)
         data[8] = tmp0 - (tmp1 >> 1)
         data[12] = tmp0 - tmp1
-        data = data + 1
+        data++
     }
 }
 
@@ -2812,11 +3618,11 @@ def private h264_file_all__GetMbFilteringFlags(var mb : mbStorage?) : uint {
     if (mb.disableDeblockingFilterIdc != 1u) {
         flags |= uint(FILTER_INNER_EDGE)
         // filterLeftMbEdgeFlag, left mb is MB_A
-        if (mb.mbA != null && ((mb.disableDeblockingFilterIdc != 2u) || !(h264_file_all__IsSliceBoundaryOnLeft(mb) != 0))) {
+        if (mb.mbA != null && ((mb.disableDeblockingFilterIdc != 2u) || h264_file_all__IsSliceBoundaryOnLeft(mb) == 0)) {
             flags |= uint(FILTER_LEFT_EDGE)
         }
         // filterTopMbEdgeFlag
-        if (mb.mbB != null && ((mb.disableDeblockingFilterIdc != 2u) || !(h264_file_all__IsSliceBoundaryOnTop(mb) != 0))) {
+        if (mb.mbB != null && ((mb.disableDeblockingFilterIdc != 2u) || h264_file_all__IsSliceBoundaryOnTop(mb) == 0)) {
             flags |= uint(FILTER_TOP_EDGE)
         }
     }
@@ -2845,7 +3651,8 @@ def private h264_file_all__InnerBoundaryStrength(var mb1 : mbStorage?; ind1 : ui
     mv4 = int(mb1.mv[ind2].ver)
     if (tmp1 != 0 || tmp2 != 0) {
         return 2u
-    } elif ((uint(mv1 - mv2 < 0 ? -(mv1 - mv2) : mv1 - mv2) >= 4u) || (uint(mv3 - mv4 < 0 ? -(mv3 - mv4) : mv3 - mv4) >= 4u) || (intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb1.refAddr[ind2 >> 2u]))) {
+    } elif ((uint(mv1 - mv2 < 0 ? -(mv1 - mv2) : mv1 - mv2) >= 4u) || (uint(mv3 - mv4 < 0 ? -(mv3 - mv4) : mv3 - mv4) >= 4u) ||
+            (intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb1.refAddr[ind2 >> 2u]))) {
         return 1u
     } else {
         return 0u
@@ -2868,7 +3675,8 @@ def InnerBoundaryStrength2(var mb1 : mbStorage?; ind1 : uint; ind2 : uint) : uin
     tmp2 = int(mb1.mv[ind2].hor)
     tmp3 = int(mb1.mv[ind1].ver)
     tmp4 = int(mb1.mv[ind2].ver)
-    if ((uint(tmp1 - tmp2 < 0 ? -(tmp1 - tmp2) : tmp1 - tmp2) >= 4u) || (uint(tmp3 - tmp4 < 0 ? -(tmp3 - tmp4) : tmp3 - tmp4) >= 4u) || (intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb1.refAddr[ind2 >> 2u]))) {
+    if ((uint(tmp1 - tmp2 < 0 ? -(tmp1 - tmp2) : tmp1 - tmp2) >= 4u) || (uint(tmp3 - tmp4 < 0 ? -(tmp3 - tmp4) : tmp3 - tmp4) >= 4u) ||
+            (intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb1.refAddr[ind2 >> 2u]))) {
         return 1u
     } else {
         return 0u
@@ -2885,7 +3693,13 @@ def InnerBoundaryStrength2(var mb1 : mbStorage?; ind1 : uint; ind2 : uint) : uin
 def private h264_file_all__EdgeBoundaryStrength(var mb1 : mbStorage?; var mb2 : mbStorage?; ind1 : uint; ind2 : uint) : uint {
     if (mb1.totalCoeff[ind1] != 0 || mb2.totalCoeff[ind2] != 0) {
         return 2u
-    } elif ((intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb2.refAddr[ind2 >> 2u])) || (uint(int(mb1.mv[ind1].hor) - int(mb2.mv[ind2].hor) < 0 ? -(int(mb1.mv[ind1].hor) - int(mb2.mv[ind2].hor)) : int(mb1.mv[ind1].hor) - int(mb2.mv[ind2].hor)) >= 4u) || (uint(int(mb1.mv[ind1].ver) - int(mb2.mv[ind2].ver) < 0 ? -(int(mb1.mv[ind1].ver) - int(mb2.mv[ind2].ver)) : int(mb1.mv[ind1].ver) - int(mb2.mv[ind2].ver)) >= 4u)) {
+    } elif ((intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb2.refAddr[ind2 >> 2u])) ||
+            (uint(int(mb1.mv[ind1].hor) - int(mb2.mv[ind2].hor) < 0 ? -(int(mb1.mv[ind1].hor) - int(mb2.mv[ind2].hor)) :
+                    int(mb1.mv[ind1].hor) - int(mb2.mv[ind2].hor)) >=
+                4u) ||
+            (uint(int(mb1.mv[ind1].ver) - int(mb2.mv[ind2].ver) < 0 ? -(int(mb1.mv[ind1].ver) - int(mb2.mv[ind2].ver)) :
+                    int(mb1.mv[ind1].ver) - int(mb2.mv[ind2].ver)) >=
+                4u)) {
         return 1u
     } else {
         return 0u
@@ -2950,7 +3764,7 @@ def h264bsdFilterPicture(var image : image_t?; var mb : mbStorage?) {
             mbCol = 0u
             mbRow++
         }
-        pMb = pMb + 1
+        pMb++
     }
 }
 
@@ -2987,7 +3801,8 @@ def private h264_file_all__FilterVerLumaEdge(var data : uint8?; bS : uint; var t
             p0 = int(data[-1])
             q0 = int(data[0])
             q1 = int(data[1])
-            if ((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha) && (uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta) && (uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta)) {
+            if ((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha) && (uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta) &&
+                    (uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta)) {
                 p2 = int(data[-3])
                 q2 = int(data[2])
                 if (uint(p2 - p0 < 0 ? -(p2 - p0) : p2 - p0) < beta) {
@@ -3009,7 +3824,7 @@ def private h264_file_all__FilterVerLumaEdge(var data : uint8?; bS : uint; var t
                 data[0] = uint8(q0)
             }
             i--
-            data = data + imageWidth
+            data += imageWidth
         }
     } else {
         // hashA += data[-2] + data[-1] + data[0] + data[1];
@@ -3019,7 +3834,8 @@ def private h264_file_all__FilterVerLumaEdge(var data : uint8?; bS : uint; var t
             p0 = int(data[-1])
             q0 = int(data[0])
             q1 = int(data[1])
-            if ((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha) && (uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta) && (uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta)) {
+            if ((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha) && (uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta) &&
+                    (uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta)) {
                 tmpFlag = uint((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < ((alpha >> 2u) + 2u)) ? HANTRO_TRUE : HANTRO_FALSE)
                 p2 = int(data[-3])
                 q2 = int(data[2])
@@ -3041,7 +3857,7 @@ def private h264_file_all__FilterVerLumaEdge(var data : uint8?; bS : uint; var t
                 }
             }
             i--
-            data = data + imageWidth
+            data += imageWidth
         }
     }
 }
@@ -3078,7 +3894,9 @@ def private h264_file_all__FilterHorLumaEdge(var data : uint8?; bS : uint; var t
         p0 = data[-imageWidth]
         q0 = data[0]
         q1 = data[imageWidth]
-        if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) && (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) && (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
+        if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) &&
+                (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) &&
+                (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
             p2 = data[-imageWidth * 3]
             if (uint(int(p2) - int(p0) < 0 ? -(int(p2) - int(p0)) : int(p2) - int(p0)) < thresholds.beta) {
                 val = (int(p2) + ((int(p0) + int(q0) + 1) >> 1) - (int(p1) << 1)) >> 1
@@ -3100,7 +3918,7 @@ def private h264_file_all__FilterHorLumaEdge(var data : uint8?; bS : uint; var t
             data[0] = q0
         }
         i--
-        data = data + 1
+        data++
     }
 }
 
@@ -3141,7 +3959,8 @@ def private h264_file_all__FilterHorLuma(var data : uint8?; bS : uint; var thres
             p0 = int(data[-imageWidth])
             q0 = int(data[0])
             q1 = int(data[imageWidth])
-            if ((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha) && (uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta) && (uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta)) {
+            if ((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha) && (uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta) &&
+                    (uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta)) {
                 p2 = int(data[-imageWidth * 3])
                 if (uint(p2 - p0 < 0 ? -(p2 - p0) : p2 - p0) < beta) {
                     val = (p2 + ((p0 + q0 + 1) >> 1) - (p1 << 1)) >> 1
@@ -3163,7 +3982,7 @@ def private h264_file_all__FilterHorLuma(var data : uint8?; bS : uint; var thres
                 data[0] = uint8(q0)
             }
             i--
-            data = data + 1
+            data++
         }
     } else {
         i = 16u
@@ -3172,7 +3991,8 @@ def private h264_file_all__FilterHorLuma(var data : uint8?; bS : uint; var thres
             p0 = int(data[-imageWidth])
             q0 = int(data[0])
             q1 = int(data[imageWidth])
-            if ((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha) && (uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta) && (uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta)) {
+            if ((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha) && (uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta) &&
+                    (uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta)) {
                 tmpFlag = uint((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < ((alpha >> 2u) + 2u)) ? HANTRO_TRUE : HANTRO_FALSE)
                 p2 = int(data[-imageWidth * 3])
                 q2 = int(data[imageWidth * 2])
@@ -3194,7 +4014,7 @@ def private h264_file_all__FilterHorLuma(var data : uint8?; bS : uint; var thres
                 }
             }
             i--
-            data = data + 1
+            data++
         }
     }
 }
@@ -3219,10 +4039,13 @@ def private h264_file_all__FilterVerChromaEdge(var data : uint8?; bS : uint; var
     p0 = data[-1]
     q0 = data[0]
     q1 = data[1]
-    if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) && (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) && (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
+    if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) &&
+            (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) &&
+            (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
         if (bS < 4u) {
             tc = int(thresholds.tc0[bS - 1u]) + 1
-            delta = ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) < -tc ? -tc : (((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) > tc ? tc : ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3))
+            delta = ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) < -tc ? -tc : (((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) > tc ?
+                    tc : ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3))
             p0 = clp[int(p0) + delta]
             q0 = clp[int(q0) - delta]
             data[-1] = p0
@@ -3232,15 +4055,18 @@ def private h264_file_all__FilterVerChromaEdge(var data : uint8?; bS : uint; var
             data[0] = uint8((2 * int(q1) + int(q0) + int(p1) + 2) >> 2)
         }
     }
-    data = data + width
+    data += width
     p1 = data[-2]
     p0 = data[-1]
     q0 = data[0]
     q1 = data[1]
-    if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) && (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) && (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
+    if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) &&
+            (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) &&
+            (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
         if (bS < 4u) {
             tc = int(thresholds.tc0[bS - 1u]) + 1
-            delta = ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) < -tc ? -tc : (((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) > tc ? tc : ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3))
+            delta = ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) < -tc ? -tc : (((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) > tc ?
+                    tc : ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3))
             p0 = clp[int(p0) + delta]
             q0 = clp[int(q0) - delta]
             data[-1] = p0
@@ -3276,15 +4102,18 @@ def private h264_file_all__FilterHorChromaEdge(var data : uint8?; bS : uint; var
         p0 = data[-width]
         q0 = data[0]
         q1 = data[width]
-        if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) && (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) && (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
-            delta = ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) < -tc ? -tc : (((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) > tc ? tc : ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3))
+        if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) &&
+                (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) &&
+                (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
+            delta = ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) < -tc ? -tc : (((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) > tc ?
+                    tc : ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3))
             p0 = clp[int(p0) + delta]
             q0 = clp[int(q0) - delta]
             data[-width] = p0
             data[0] = q0
         }
         i--
-        data = data + 1
+        data++
     }
 }
 
@@ -3314,15 +4143,19 @@ def private h264_file_all__FilterHorChroma(var data : uint8?; bS : uint; var thr
             p0 = data[-width]
             q0 = data[0]
             q1 = data[width]
-            if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) && (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) && (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
-                delta = ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) < -tc ? -tc : (((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) > tc ? tc : ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3))
+            if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) &&
+                    (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) &&
+                    (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
+                delta = ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) < -tc ? -tc : (((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) >
+                            tc ?
+                        tc : ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3))
                 p0 = clp[int(p0) + delta]
                 q0 = clp[int(q0) - delta]
                 data[-width] = p0
                 data[0] = q0
             }
             i--
-            data = data + 1
+            data++
         }
     } else {
         i = 8u
@@ -3331,12 +4164,14 @@ def private h264_file_all__FilterHorChroma(var data : uint8?; bS : uint; var thr
             p0 = data[-width]
             q0 = data[0]
             q1 = data[width]
-            if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) && (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) && (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
+            if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) &&
+                    (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) &&
+                    (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
                 data[-width] = uint8((2 * int(p1) + int(p0) + int(q1) + 2) >> 2)
                 data[0] = uint8((2 * int(q1) + int(q0) + int(p1) + 2) >> 2)
             }
             i--
-            data = data + 1
+            data++
         }
     }
 }
@@ -3388,7 +4223,7 @@ def private h264_file_all__GetBoundaryStrengths(var mb : mbStorage?; var bS : bS
     // }
     // top edges
     if ((flags & uint(FILTER_TOP_EDGE)) != 0) {
-        if (uint(int(mb.mbType)) > 5u || uint(int(mb.mbB.mbType)) > 5u) {
+        if (uint(mb.mbType) > 5u || uint(mb.mbB.mbType) > 5u) {
             bS[3].top = 4u
             bS[2].top = bS[3].top
             bS[1].top = bS[2].top
@@ -3411,7 +4246,7 @@ def private h264_file_all__GetBoundaryStrengths(var mb : mbStorage?; var bS : bS
     }
     // left edges
     if ((flags & uint(FILTER_LEFT_EDGE)) != 0) {
-        if (uint(int(mb.mbType)) > 5u || uint(int(mb.mbA.mbType)) > 5u) {
+        if (uint(mb.mbType) > 5u || uint(mb.mbA.mbType) > 5u) {
             bS[12].left = 4u
             bS[8].left = bS[12].left
             bS[4].left = bS[8].left
@@ -3422,7 +4257,7 @@ def private h264_file_all__GetBoundaryStrengths(var mb : mbStorage?; var bS : bS
             bS[4].left = h264_file_all__EdgeBoundaryStrength(mb, mb.mbA, 2u, 7u)
             bS[8].left = h264_file_all__EdgeBoundaryStrength(mb, mb.mbA, 8u, 13u)
             bS[12].left = h264_file_all__EdgeBoundaryStrength(mb, mb.mbA, 10u, 15u)
-            if (!(nonZeroBs != 0) && (bS[0].left != 0 || bS[4].left != 0 || bS[8].left != 0 || bS[12].left != 0)) {
+            if (nonZeroBs == 0 && (bS[0].left != 0 || bS[4].left != 0 || bS[8].left != 0 || bS[12].left != 0)) {
                 nonZeroBs = uint(HANTRO_TRUE)
             }
         }
@@ -3433,7 +4268,7 @@ def private h264_file_all__GetBoundaryStrengths(var mb : mbStorage?; var bS : bS
         bS[0].left = bS[4].left
     }
     // inner edges
-    if (uint(int(mb.mbType)) > 5u) {
+    if (uint(mb.mbType) > 5u) {
         bS[15].top = 3u
         bS[14].top = bS[15].top
         bS[13].top = bS[14].top
@@ -3548,7 +4383,11 @@ def private h264_file_all__GetBoundaryStrengths(var mb : mbStorage?; var bS : bS
             bS[14].left = h264_file_all__InnerBoundaryStrength(mb, h264_file_all__mb4x4Index[14], h264_file_all__mb4x4Index[13])
             bS[15].left = h264_file_all__InnerBoundaryStrength(mb, h264_file_all__mb4x4Index[15], h264_file_all__mb4x4Index[14])
         }
-        if (!(nonZeroBs != 0) && (bS[4].top != 0 || bS[5].top != 0 || bS[6].top != 0 || bS[7].top != 0 || bS[8].top != 0 || bS[9].top != 0 || bS[10].top != 0 || bS[11].top != 0 || bS[12].top != 0 || bS[13].top != 0 || bS[14].top != 0 || bS[15].top != 0 || bS[1].left != 0 || bS[2].left != 0 || bS[3].left != 0 || bS[5].left != 0 || bS[6].left != 0 || bS[7].left != 0 || bS[9].left != 0 || bS[10].left != 0 || bS[11].left != 0 || bS[13].left != 0 || bS[14].left != 0 || bS[15].left != 0)) {
+        if (nonZeroBs == 0 &&
+                (bS[4].top != 0 || bS[5].top != 0 || bS[6].top != 0 || bS[7].top != 0 || bS[8].top != 0 || bS[9].top != 0 || bS[10].top != 0 ||
+                    bS[11].top != 0 || bS[12].top != 0 || bS[13].top != 0 || bS[14].top != 0 || bS[15].top != 0 || bS[1].left != 0 || bS[2].left != 0 ||
+                    bS[3].left != 0 || bS[5].left != 0 || bS[6].left != 0 || bS[7].left != 0 || bS[9].left != 0 || bS[10].left != 0 || bS[11].left != 0 ||
+                    bS[13].left != 0 || bS[14].left != 0 || bS[15].left != 0)) {
             nonZeroBs = uint(HANTRO_TRUE)
         }
     }
@@ -3679,14 +4518,14 @@ def private h264_file_all__FilterLuma(var data : uint8?; var bS : bS_t?; var thr
     // Code
     ptr = data
     tmp = bS
-    offset = uint(int(anon_245.TOP))
+    offset = uint(anon_245.TOP)
     // loop block rows, perform filtering for all vertical edges of the block
     // row first, then filter each horizontal edge of the row
     vblock = 4u
     while (true) {
         let _t0 = vblock
         vblock--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         // only perform filtering if bS is non-zero, first of the four
@@ -3727,9 +4566,9 @@ def private h264_file_all__FilterLuma(var data : uint8?; var bS : bS_t?; var thr
             }
         }
         // four pixel rows ahead, i.e. next row of 4x4-blocks
-        ptr = ptr + width * 4u
-        tmp = tmp + 4
-        offset = uint(int(anon_245.INNER))
+        ptr += width * 4u
+        tmp += 4
+        offset = uint(anon_245.INNER)
     }
 }
 
@@ -3745,7 +4584,7 @@ def private h264_file_all__FilterChroma(var dataCb : uint8?; var dataCr : uint8?
     var offset : uint
     // Code
     tmp = bS
-    offset = uint(int(anon_245.TOP))
+    offset = uint(anon_245.TOP)
     // loop block rows, perform filtering for all vertical edges of the block
     // row first, then filter each horizontal edge of the row
     for (vblock in urange(2u)) {
@@ -3797,10 +4636,10 @@ def private h264_file_all__FilterChroma(var dataCb : uint8?; var dataCr : uint8?
                 h264_file_all__FilterHorChromaEdge(dataCr + 6, tmp[3].top, thresholds + offset, int(width))
             }
         }
-        tmp = tmp + 8
-        dataCb = dataCb + width * 4u
-        dataCr = dataCr + width * 4u
-        offset = uint(int(anon_245.INNER))
+        tmp += 8
+        dataCb += width * 4u
+        dataCr += width * 4u
+        offset = uint(anon_245.INNER)
     }
 }
 
@@ -3814,7 +4653,7 @@ def h264bsdInit(var pStorage : storage?; noOutputReordering : uint) : uint {
     // specific NEON optimized "memset" for clearing the structure
     size = uint((uint64(typeinfo sizeof(type<macroblockLayer_t>)) + 63ul) & uint64(~63))
     pStorage.mbLayer = reinterpret<macroblockLayer_t?>(malloc1(uint64(size)))
-    if (!(pStorage.mbLayer != null)) {
+    if (pStorage.mbLayer == null) {
         return uint(HANTRO_NOK)
     }
     if (noOutputReordering != 0) {
@@ -3844,32 +4683,32 @@ def h264bsdDecode(var pStorage : storage?; var byteStrm : uint8?; len : uint; pi
         strm.pStrmCurrPos = strm.pStrmBuffStart
         strm.bitPosInWord = 0u
         strm.strmBuffReadBits = strm.bitPosInWord
-        deref(readBytes) = pStorage.prevBytesConsumed
+        *readBytes = pStorage.prevBytesConsumed
     } else {
         tmp = h264bsdExtractNalUnit(byteStrm, len, addr(strm), readBytes)
         if (tmp != uint(HANTRO_OK)) {
-            return uint(int(anon_277.H264BSD_ERROR))
+            return uint(anon_277.H264BSD_ERROR)
         }
         // store stream
         pStorage.strm[0] = strm
-        pStorage.prevBytesConsumed = deref(readBytes)
+        pStorage.prevBytesConsumed = *readBytes
         pStorage.prevBufPointer = byteStrm
     }
     pStorage.prevBufNotFinished = uint(HANTRO_FALSE)
     tmp = h264bsdDecodeNalUnit(addr(strm), addr(nalUnit))
     if (tmp != uint(HANTRO_OK)) {
-        return uint(int(anon_277.H264BSD_ERROR))
+        return uint(anon_277.H264BSD_ERROR)
     }
     // Discard unspecified, reserved, SPS extension and auxiliary picture slices
-    if (uint(int(nalUnit.nalUnitType)) == 0u || uint(int(nalUnit.nalUnitType)) >= 13u) {
-        return uint(int(anon_277.H264BSD_RDY))
+    if (uint(nalUnit.nalUnitType) == 0u || uint(nalUnit.nalUnitType) >= 13u) {
+        return uint(anon_277.H264BSD_RDY)
     }
     tmp = h264bsdCheckAccessUnitBoundary(addr(strm), addr(nalUnit), pStorage, addr(accessUnitBoundaryFlag))
     if (tmp != uint(HANTRO_OK)) {
         if (tmp == uint(PARAM_SET_ERROR)) {
-            return uint(int(anon_277.H264BSD_PARAM_SET_ERROR))
+            return uint(anon_277.H264BSD_PARAM_SET_ERROR)
         } else {
-            return uint(int(anon_277.H264BSD_ERROR))
+            return uint(anon_277.H264BSD_ERROR)
         }
     }
     if (accessUnitBoundaryFlag != 0) {
@@ -3878,141 +4717,155 @@ def h264bsdDecode(var pStorage : storage?; var byteStrm : uint8?; len : uint; pi
             // return error if second phase of
             // initialization is not completed
             if (pStorage.pendingActivation != 0) {
-                return uint(int(anon_277.H264BSD_ERROR))
+                return uint(anon_277.H264BSD_ERROR)
             }
-            if (!(pStorage.validSliceInAccessUnit != 0)) {
+            if (pStorage.validSliceInAccessUnit == 0) {
                 addr(pStorage.currImage[0]).data = h264bsdAllocateDpbImage(addr(pStorage.dpb[0]))
                 h264bsdInitRefPicList(addr(pStorage.dpb[0]))
-                tmp = h264bsdConceal(pStorage, addr(pStorage.currImage[0]), uint(int(anon_104.P_SLICE)))
+                tmp = h264bsdConceal(pStorage, addr(pStorage.currImage[0]), uint(anon_104.P_SLICE))
             } else {
                 tmp = h264bsdConceal(pStorage, addr(pStorage.currImage[0]), addr(pStorage.sliceHeader[0]).sliceType)
             }
             picReady = uint(HANTRO_TRUE)
             // current NAL unit should be decoded on next activation -> set
             // readBytes to 0
-            deref(readBytes) = 0u
+            *readBytes = 0u
             pStorage.prevBufNotFinished = uint(HANTRO_TRUE)
         } else {
             pStorage.validSliceInAccessUnit = uint(HANTRO_FALSE)
         }
         pStorage.skipRedundantSlices = uint(HANTRO_FALSE)
     }
-    if (!(picReady != 0)) {
-        let _cond = nalUnit.nalUnitType
-        if (_cond == nalUnitType_e.NAL_SEQ_PARAM_SET) {
-            tmp = h264bsdDecodeSeqParamSet(addr(strm), addr(seqParamSet))
-            if (tmp != uint(HANTRO_OK)) {
-                free1(reinterpret<void?>(seqParamSet.offsetForRefFrame))
-                seqParamSet.offsetForRefFrame = null
-                free1(reinterpret<void?>(seqParamSet.vuiParameters))
-                seqParamSet.vuiParameters = null
-                return uint(int(anon_277.H264BSD_ERROR))
-            }
-            tmp = h264bsdStoreSeqParamSet(pStorage, addr(seqParamSet))
-        } elif (_cond == nalUnitType_e.NAL_PIC_PARAM_SET) {
-            tmp = h264bsdDecodePicParamSet(addr(strm), addr(picParamSet))
-            if (tmp != uint(HANTRO_OK)) {
-                free1(reinterpret<void?>(picParamSet.runLength))
-                picParamSet.runLength = null
-                free1(reinterpret<void?>(picParamSet.topLeft))
-                picParamSet.topLeft = null
-                free1(reinterpret<void?>(picParamSet.bottomRight))
-                picParamSet.bottomRight = null
-                free1(reinterpret<void?>(picParamSet.sliceGroupId))
-                picParamSet.sliceGroupId = null
-                return uint(int(anon_277.H264BSD_ERROR))
-            }
-            tmp = h264bsdStorePicParamSet(pStorage, addr(picParamSet))
-        } elif (_cond == nalUnitType_e.NAL_CODED_SLICE_IDR || _cond == nalUnitType_e.NAL_CODED_SLICE) {
-            // fall through
-            // picture successfully finished and still decoding same old
-            // access unit -> no need to decode redundant slices
-            if (pStorage.skipRedundantSlices != 0) {
-                return uint(int(anon_277.H264BSD_RDY))
-            }
-            pStorage.picStarted = uint(HANTRO_TRUE)
-            if (h264bsdIsStartOfPicture(pStorage) != 0) {
-                pStorage.numConcealedMbs = 0u
-                pStorage.currentPicId = picId
-                tmp = h264bsdCheckPpsId(addr(strm), addr(ppsId))
-                // store old activeSpsId and return headers ready
-                // indication if activeSps changes
-                spsId = pStorage.activeSpsId
-                tmp = h264bsdActivateParamSets(pStorage, ppsId, uint(addr(nalUnit).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR ? HANTRO_TRUE : HANTRO_FALSE))
+    if (picReady == 0) {
+        c_switch(nalUnit.nalUnitType) {
+            case(nalUnitType_e.NAL_SEQ_PARAM_SET) {
+                tmp = h264bsdDecodeSeqParamSet(addr(strm), addr(seqParamSet))
                 if (tmp != uint(HANTRO_OK)) {
-                    pStorage.activePpsId = uint(MAX_NUM_PIC_PARAM_SETS)
-                    pStorage.activePps = null
-                    pStorage.activeSpsId = uint(MAX_NUM_SEQ_PARAM_SETS)
-                    pStorage.activeSps = null
-                    pStorage.pendingActivation = uint(HANTRO_FALSE)
-                    if (tmp == uint(MEMORY_ALLOCATION_ERROR)) {
-                        return uint(int(anon_277.H264BSD_MEMALLOC_ERROR))
-                    } else {
-                        return uint(int(anon_277.H264BSD_PARAM_SET_ERROR))
-                    }
+                    free1(reinterpret<void?>(seqParamSet.offsetForRefFrame))
+                    seqParamSet.offsetForRefFrame = null
+                    free1(reinterpret<void?>(seqParamSet.vuiParameters))
+                    seqParamSet.vuiParameters = null
+                    return uint(anon_277.H264BSD_ERROR)
                 }
-                if (spsId != pStorage.activeSpsId) {
-                    var oldSPS : seqParamSet_t? = null
-                    var newSPS : seqParamSet_t? = pStorage.activeSps
-                    var noOutputOfPriorPicsFlag : uint = 1u
-                    if (pStorage.oldSpsId < uint(MAX_NUM_SEQ_PARAM_SETS)) {
-                        oldSPS = pStorage.sps[pStorage.oldSpsId]
-                    }
-                    deref(readBytes) = 0u
-                    pStorage.prevBufNotFinished = uint(HANTRO_TRUE)
-                    if (nalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
-                        tmp = h264bsdCheckPriorPicsFlag(addr(noOutputOfPriorPicsFlag), addr(strm), newSPS, pStorage.activePps, nalUnit.nalUnitType)
-                    } else {
-                        tmp = uint(HANTRO_NOK)
-                    }
-                    if ((tmp != uint(HANTRO_OK)) || (noOutputOfPriorPicsFlag != 0u) || addr(pStorage.dpb[0]).noReordering != 0 || (oldSPS == null) || (oldSPS.picWidthInMbs != newSPS.picWidthInMbs) || (oldSPS.picHeightInMbs != newSPS.picHeightInMbs) || (oldSPS.maxDpbSize != newSPS.maxDpbSize)) {
-                        addr(pStorage.dpb[0]).flushed = 0u
-                    } else {
-                        h264bsdFlushDpb(addr(pStorage.dpb[0]))
-                    }
-                    pStorage.oldSpsId = pStorage.activeSpsId
-                    return uint(int(anon_277.H264BSD_HDRS_RDY))
+                tmp = h264bsdStoreSeqParamSet(pStorage, addr(seqParamSet))
+                break
+            }
+            case(nalUnitType_e.NAL_PIC_PARAM_SET) {
+                tmp = h264bsdDecodePicParamSet(addr(strm), addr(picParamSet))
+                if (tmp != uint(HANTRO_OK)) {
+                    free1(reinterpret<void?>(picParamSet.runLength))
+                    picParamSet.runLength = null
+                    free1(reinterpret<void?>(picParamSet.topLeft))
+                    picParamSet.topLeft = null
+                    free1(reinterpret<void?>(picParamSet.bottomRight))
+                    picParamSet.bottomRight = null
+                    free1(reinterpret<void?>(picParamSet.sliceGroupId))
+                    picParamSet.sliceGroupId = null
+                    return uint(anon_277.H264BSD_ERROR)
                 }
+                tmp = h264bsdStorePicParamSet(pStorage, addr(picParamSet))
+                break
             }
-            // return error if second phase of
-            // initialization is not completed
-            if (pStorage.pendingActivation != 0) {
-                return uint(int(anon_277.H264BSD_ERROR))
-            }
-            tmp = h264bsdDecodeSliceHeader(addr(strm), addr(pStorage.sliceHeader[0]) + 1, pStorage.activeSps, pStorage.activePps, addr(nalUnit))
-            if (tmp != uint(HANTRO_OK)) {
-                return uint(int(anon_277.H264BSD_ERROR))
-            }
-            if (h264bsdIsStartOfPicture(pStorage) != 0) {
-                if (!(addr(nalUnit).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR)) {
-                    tmp = h264bsdCheckGapsInFrameNum(addr(pStorage.dpb[0]), pStorage.sliceHeader[1].frameNum, uint(nalUnit.nalRefIdc != 0u ? HANTRO_TRUE : HANTRO_FALSE), pStorage.activeSps.gapsInFrameNumValueAllowedFlag)
+            case(nalUnitType_e.NAL_CODED_SLICE_IDR, nalUnitType_e.NAL_CODED_SLICE) {
+                // fall through
+                // picture successfully finished and still decoding same old
+                // access unit -> no need to decode redundant slices
+                if (pStorage.skipRedundantSlices != 0) {
+                    return uint(anon_277.H264BSD_RDY)
+                }
+                pStorage.picStarted = uint(HANTRO_TRUE)
+                if (h264bsdIsStartOfPicture(pStorage) != 0) {
+                    pStorage.numConcealedMbs = 0u
+                    pStorage.currentPicId = picId
+                    tmp = h264bsdCheckPpsId(addr(strm), addr(ppsId))
+                    // store old activeSpsId and return headers ready
+                    // indication if activeSps changes
+                    spsId = pStorage.activeSpsId
+                    tmp = h264bsdActivateParamSets(pStorage, ppsId,
+                            uint(addr(nalUnit).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR ? HANTRO_TRUE : HANTRO_FALSE))
                     if (tmp != uint(HANTRO_OK)) {
-                        return uint(int(anon_277.H264BSD_ERROR))
+                        pStorage.activePpsId = uint(MAX_NUM_PIC_PARAM_SETS)
+                        pStorage.activePps = null
+                        pStorage.activeSpsId = uint(MAX_NUM_SEQ_PARAM_SETS)
+                        pStorage.activeSps = null
+                        pStorage.pendingActivation = uint(HANTRO_FALSE)
+                        if (tmp == uint(MEMORY_ALLOCATION_ERROR)) {
+                            return uint(anon_277.H264BSD_MEMALLOC_ERROR)
+                        } else {
+                            return uint(anon_277.H264BSD_PARAM_SET_ERROR)
+                        }
+                    }
+                    if (spsId != pStorage.activeSpsId) {
+                        var oldSPS : seqParamSet_t? = null
+                        var newSPS : seqParamSet_t? = pStorage.activeSps
+                        var noOutputOfPriorPicsFlag : uint = 1u
+                        if (pStorage.oldSpsId < uint(MAX_NUM_SEQ_PARAM_SETS)) {
+                            oldSPS = pStorage.sps[pStorage.oldSpsId]
+                        }
+                        *readBytes = 0u
+                        pStorage.prevBufNotFinished = uint(HANTRO_TRUE)
+                        if (nalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
+                            tmp = h264bsdCheckPriorPicsFlag(addr(noOutputOfPriorPicsFlag), addr(strm), newSPS, pStorage.activePps, nalUnit.nalUnitType)
+                        } else {
+                            tmp = uint(HANTRO_NOK)
+                        }
+                        if ((tmp != uint(HANTRO_OK)) || (noOutputOfPriorPicsFlag != 0u) || addr(pStorage.dpb[0]).noReordering != 0 || (oldSPS == null) ||
+                                (oldSPS.picWidthInMbs != newSPS.picWidthInMbs) || (oldSPS.picHeightInMbs != newSPS.picHeightInMbs) ||
+                                (oldSPS.maxDpbSize != newSPS.maxDpbSize)) {
+                            addr(pStorage.dpb[0]).flushed = 0u
+                        } else {
+                            h264bsdFlushDpb(addr(pStorage.dpb[0]))
+                        }
+                        pStorage.oldSpsId = pStorage.activeSpsId
+                        return uint(anon_277.H264BSD_HDRS_RDY)
                     }
                 }
-                addr(pStorage.currImage[0]).data = h264bsdAllocateDpbImage(addr(pStorage.dpb[0]))
+                // return error if second phase of
+                // initialization is not completed
+                if (pStorage.pendingActivation != 0) {
+                    return uint(anon_277.H264BSD_ERROR)
+                }
+                tmp = h264bsdDecodeSliceHeader(addr(strm), addr(pStorage.sliceHeader[0]) + 1, pStorage.activeSps, pStorage.activePps, addr(nalUnit))
+                if (tmp != uint(HANTRO_OK)) {
+                    return uint(anon_277.H264BSD_ERROR)
+                }
+                if (h264bsdIsStartOfPicture(pStorage) != 0) {
+                    if (!(addr(nalUnit).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR)) {
+                        tmp = h264bsdCheckGapsInFrameNum(addr(pStorage.dpb[0]), pStorage.sliceHeader[1].frameNum,
+                                uint(nalUnit.nalRefIdc != 0u ? HANTRO_TRUE : HANTRO_FALSE), pStorage.activeSps.gapsInFrameNumValueAllowedFlag)
+                        if (tmp != uint(HANTRO_OK)) {
+                            return uint(anon_277.H264BSD_ERROR)
+                        }
+                    }
+                    addr(pStorage.currImage[0]).data = h264bsdAllocateDpbImage(addr(pStorage.dpb[0]))
+                }
+                // store slice header to storage if successfully decoded
+                pStorage.sliceHeader[0] = pStorage.sliceHeader[1]
+                pStorage.validSliceInAccessUnit = uint(HANTRO_TRUE)
+                pStorage.prevNalUnit[0] = nalUnit
+                h264bsdComputeSliceGroupMap(pStorage, addr(pStorage.sliceHeader[0]).sliceGroupChangeCycle)
+                h264bsdInitRefPicList(addr(pStorage.dpb[0]))
+                tmp = h264bsdReorderRefPicList(addr(pStorage.dpb[0]), addr(addr(pStorage.sliceHeader[0]).refPicListReordering),
+                        addr(pStorage.sliceHeader[0]).frameNum, addr(pStorage.sliceHeader[0]).numRefIdxL0Active)
+                if (tmp != uint(HANTRO_OK)) {
+                    return uint(anon_277.H264BSD_ERROR)
+                }
+                tmp = h264bsdDecodeSliceData(addr(strm), pStorage, addr(pStorage.currImage[0]), addr(pStorage.sliceHeader[0]))
+                if (tmp != uint(HANTRO_OK)) {
+                    h264bsdMarkSliceCorrupted(pStorage, addr(pStorage.sliceHeader[0]).firstMbInSlice)
+                    return uint(anon_277.H264BSD_ERROR)
+                }
+                if (h264bsdIsEndOfPicture(pStorage) != 0) {
+                    picReady = uint(HANTRO_TRUE)
+                    pStorage.skipRedundantSlices = uint(HANTRO_TRUE)
+                }
+                break
             }
-            // store slice header to storage if successfully decoded
-            pStorage.sliceHeader[0] = pStorage.sliceHeader[1]
-            pStorage.validSliceInAccessUnit = uint(HANTRO_TRUE)
-            pStorage.prevNalUnit[0] = nalUnit
-            h264bsdComputeSliceGroupMap(pStorage, addr(pStorage.sliceHeader[0]).sliceGroupChangeCycle)
-            h264bsdInitRefPicList(addr(pStorage.dpb[0]))
-            tmp = h264bsdReorderRefPicList(addr(pStorage.dpb[0]), addr(addr(pStorage.sliceHeader[0]).refPicListReordering), addr(pStorage.sliceHeader[0]).frameNum, addr(pStorage.sliceHeader[0]).numRefIdxL0Active)
-            if (tmp != uint(HANTRO_OK)) {
-                return uint(int(anon_277.H264BSD_ERROR))
+            case(nalUnitType_e.NAL_SEI) {
+                break
             }
-            tmp = h264bsdDecodeSliceData(addr(strm), pStorage, addr(pStorage.currImage[0]), addr(pStorage.sliceHeader[0]))
-            if (tmp != uint(HANTRO_OK)) {
-                h264bsdMarkSliceCorrupted(pStorage, addr(pStorage.sliceHeader[0]).firstMbInSlice)
-                return uint(int(anon_277.H264BSD_ERROR))
+            case(_) {
             }
-            if (h264bsdIsEndOfPicture(pStorage) != 0) {
-                picReady = uint(HANTRO_TRUE)
-                pStorage.skipRedundantSlices = uint(HANTRO_TRUE)
-            }
-        } elif (_cond == nalUnitType_e.NAL_SEI) {
-        } else {
         }
     }
     if (picReady != 0) {
@@ -4021,18 +4874,23 @@ def h264bsdDecode(var pStorage : storage?; var byteStrm : uint8?; len : uint; pi
         picOrderCnt = h264bsdDecodePicOrderCnt(addr(pStorage.poc[0]), pStorage.activeSps, addr(pStorage.sliceHeader[0]), addr(pStorage.prevNalUnit[0]))
         if (pStorage.validSliceInAccessUnit != 0) {
             if (addr(pStorage.prevNalUnit[0]).nalRefIdc != 0) {
-                tmp = h264bsdMarkDecRefPic(addr(pStorage.dpb[0]), addr(addr(pStorage.sliceHeader[0]).decRefPicMarking), addr(pStorage.currImage[0]), addr(pStorage.sliceHeader[0]).frameNum, picOrderCnt, uint(addr(pStorage.prevNalUnit[0]).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR ? HANTRO_TRUE : HANTRO_FALSE), pStorage.currentPicId, pStorage.numConcealedMbs)
+                tmp = h264bsdMarkDecRefPic(addr(pStorage.dpb[0]), addr(addr(pStorage.sliceHeader[0]).decRefPicMarking), addr(pStorage.currImage[0]),
+                        addr(pStorage.sliceHeader[0]).frameNum, picOrderCnt,
+                        uint(addr(pStorage.prevNalUnit[0]).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR ? HANTRO_TRUE : HANTRO_FALSE),
+                        pStorage.currentPicId, pStorage.numConcealedMbs)
             } else {
                 // non-reference picture, just store for possible display
                 // reordering
-                tmp = h264bsdMarkDecRefPic(addr(pStorage.dpb[0]), null, addr(pStorage.currImage[0]), addr(pStorage.sliceHeader[0]).frameNum, picOrderCnt, uint(addr(pStorage.prevNalUnit[0]).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR ? HANTRO_TRUE : HANTRO_FALSE), pStorage.currentPicId, pStorage.numConcealedMbs)
+                tmp = h264bsdMarkDecRefPic(addr(pStorage.dpb[0]), null, addr(pStorage.currImage[0]), addr(pStorage.sliceHeader[0]).frameNum, picOrderCnt,
+                        uint(addr(pStorage.prevNalUnit[0]).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR ? HANTRO_TRUE : HANTRO_FALSE),
+                        pStorage.currentPicId, pStorage.numConcealedMbs)
             }
         }
         pStorage.picStarted = uint(HANTRO_FALSE)
         pStorage.validSliceInAccessUnit = uint(HANTRO_FALSE)
-        return uint(int(anon_277.H264BSD_PIC_RDY))
+        return uint(anon_277.H264BSD_PIC_RDY)
     } else {
-        return uint(int(anon_277.H264BSD_RDY))
+        return uint(anon_277.H264BSD_RDY)
     }
 }
 
@@ -4084,9 +4942,9 @@ def h264bsdNextOutputPicture(var pStorage : storage?; var picId : uint?; var isI
     // Code
     pOut = h264bsdDpbOutputPicture(addr(pStorage.dpb[0]))
     if (pOut != null) {
-        deref(picId) = pOut.picId
-        deref(isIdrPic) = pOut.isIdr
-        deref(numErrMbs) = pOut.numErrMbs
+        *picId = pOut.picId
+        *isIdrPic = pOut.isIdr
+        *numErrMbs = pOut.numErrMbs
         return pOut.data
     } else {
         return null
@@ -4237,7 +5095,8 @@ def h264bsdCheckValidParamSets(var pStorage : storage?) : uint {
 def h264bsdVideoRange(var pStorage : storage?) : uint {
     // Variables
     // Code
-    if (pStorage.activeSps != null && pStorage.activeSps.vuiParametersPresentFlag != 0 && pStorage.activeSps.vuiParameters != null && pStorage.activeSps.vuiParameters.videoSignalTypePresentFlag != 0 && pStorage.activeSps.vuiParameters.videoFullRangeFlag != 0) {
+    if (pStorage.activeSps != null && pStorage.activeSps.vuiParametersPresentFlag != 0 && pStorage.activeSps.vuiParameters != null &&
+            pStorage.activeSps.vuiParameters.videoSignalTypePresentFlag != 0 && pStorage.activeSps.vuiParameters.videoFullRangeFlag != 0) {
         return 1u
     } else {
         // default value of video_full_range_flag is 0
@@ -4248,7 +5107,8 @@ def h264bsdVideoRange(var pStorage : storage?) : uint {
 def h264bsdMatrixCoefficients(var pStorage : storage?) : uint {
     // Variables
     // Code
-    if (pStorage.activeSps != null && pStorage.activeSps.vuiParametersPresentFlag != 0 && pStorage.activeSps.vuiParameters != null && pStorage.activeSps.vuiParameters.videoSignalTypePresentFlag != 0 && pStorage.activeSps.vuiParameters.colourDescriptionPresentFlag != 0) {
+    if (pStorage.activeSps != null && pStorage.activeSps.vuiParametersPresentFlag != 0 && pStorage.activeSps.vuiParameters != null &&
+            pStorage.activeSps.vuiParameters.videoSignalTypePresentFlag != 0 && pStorage.activeSps.vuiParameters.colourDescriptionPresentFlag != 0) {
         return pStorage.activeSps.vuiParameters.matrixCoefficients
     } else {
         // default unspecified
@@ -4257,21 +5117,22 @@ def h264bsdMatrixCoefficients(var pStorage : storage?) : uint {
 }
 
 [c_function]
-def h264bsdCroppingParams(var pStorage : storage?; var croppingFlag : uint?; var leftOffset : uint?; var width : uint?; var topOffset : uint?; var height : uint?) {
+def h264bsdCroppingParams(var pStorage : storage?; var croppingFlag : uint?; var leftOffset : uint?; var width : uint?; var topOffset : uint?;
+                          var height : uint?) {
     // Variables
     // Code
     if (pStorage.activeSps != null && pStorage.activeSps.frameCroppingFlag != 0) {
-        deref(croppingFlag) = 1u
-        deref(leftOffset) = 2u * pStorage.activeSps.frameCropLeftOffset
-        deref(width) = 16u * pStorage.activeSps.picWidthInMbs - 2u * (pStorage.activeSps.frameCropLeftOffset + pStorage.activeSps.frameCropRightOffset)
-        deref(topOffset) = 2u * pStorage.activeSps.frameCropTopOffset
-        deref(height) = 16u * pStorage.activeSps.picHeightInMbs - 2u * (pStorage.activeSps.frameCropTopOffset + pStorage.activeSps.frameCropBottomOffset)
+        *croppingFlag = 1u
+        *leftOffset = 2u * pStorage.activeSps.frameCropLeftOffset
+        *width = 16u * pStorage.activeSps.picWidthInMbs - 2u * (pStorage.activeSps.frameCropLeftOffset + pStorage.activeSps.frameCropRightOffset)
+        *topOffset = 2u * pStorage.activeSps.frameCropTopOffset
+        *height = 16u * pStorage.activeSps.picHeightInMbs - 2u * (pStorage.activeSps.frameCropTopOffset + pStorage.activeSps.frameCropBottomOffset)
     } else {
-        deref(croppingFlag) = 0u
-        deref(leftOffset) = 0u
-        deref(width) = 0u
-        deref(topOffset) = 0u
-        deref(height) = 0u
+        *croppingFlag = 0u
+        *leftOffset = 0u
+        *width = 0u
+        *topOffset = 0u
+        *height = 0u
     }
 }
 
@@ -4281,65 +5142,98 @@ def h264bsdSampleAspectRatio(var pStorage : storage?; var sarWidth : uint?; var 
     var w : uint = 1u
     var h : uint = 1u
     // Code
-    if (pStorage.activeSps != null && pStorage.activeSps.vuiParametersPresentFlag != 0 && pStorage.activeSps.vuiParameters != null && pStorage.activeSps.vuiParameters.aspectRatioPresentFlag != 0) {
-        let _cond = pStorage.activeSps.vuiParameters.aspectRatioIdc
-        if (_cond == 0u) {
-            w = 0u
-            h = 0u
-        } elif (_cond == 1u) {
-            w = 1u
-            h = 1u
-        } elif (_cond == 2u) {
-            w = 12u
-            h = 11u
-        } elif (_cond == 3u) {
-            w = 10u
-            h = 11u
-        } elif (_cond == 4u) {
-            w = 16u
-            h = 11u
-        } elif (_cond == 5u) {
-            w = 40u
-            h = 33u
-        } elif (_cond == 6u) {
-            w = 24u
-            h = 11u
-        } elif (_cond == 7u) {
-            w = 20u
-            h = 11u
-        } elif (_cond == 8u) {
-            w = 32u
-            h = 11u
-        } elif (_cond == 9u) {
-            w = 80u
-            h = 33u
-        } elif (_cond == 10u) {
-            w = 18u
-            h = 11u
-        } elif (_cond == 11u) {
-            w = 15u
-            h = 11u
-        } elif (_cond == 12u) {
-            w = 64u
-            h = 33u
-        } elif (_cond == 13u) {
-            w = 160u
-            h = 99u
-        } elif (_cond == 255u) {
-            w = pStorage.activeSps.vuiParameters.sarWidth
-            h = pStorage.activeSps.vuiParameters.sarHeight
-            if ((w == 0u) || (h == 0u)) {
+    if (pStorage.activeSps != null && pStorage.activeSps.vuiParametersPresentFlag != 0 && pStorage.activeSps.vuiParameters != null &&
+            pStorage.activeSps.vuiParameters.aspectRatioPresentFlag != 0) {
+        c_switch(pStorage.activeSps.vuiParameters.aspectRatioIdc) {
+            case(0u) {
+                w = 0u
                 h = 0u
-                w = h
+                break
             }
-        } else {
-            w = 0u
-            h = 0u
+            case(1u) {
+                w = 1u
+                h = 1u
+                break
+            }
+            case(2u) {
+                w = 12u
+                h = 11u
+                break
+            }
+            case(3u) {
+                w = 10u
+                h = 11u
+                break
+            }
+            case(4u) {
+                w = 16u
+                h = 11u
+                break
+            }
+            case(5u) {
+                w = 40u
+                h = 33u
+                break
+            }
+            case(6u) {
+                w = 24u
+                h = 11u
+                break
+            }
+            case(7u) {
+                w = 20u
+                h = 11u
+                break
+            }
+            case(8u) {
+                w = 32u
+                h = 11u
+                break
+            }
+            case(9u) {
+                w = 80u
+                h = 33u
+                break
+            }
+            case(10u) {
+                w = 18u
+                h = 11u
+                break
+            }
+            case(11u) {
+                w = 15u
+                h = 11u
+                break
+            }
+            case(12u) {
+                w = 64u
+                h = 33u
+                break
+            }
+            case(13u) {
+                w = 160u
+                h = 99u
+                break
+            }
+            case(255u) {
+                w = pStorage.activeSps.vuiParameters.sarWidth
+                h = pStorage.activeSps.vuiParameters.sarHeight
+                if ((w == 0u) || (h == 0u)) {
+                    h = 0u
+                    w = h
+                }
+                break
+            }
+            case(_) {
+                w = 0u
+                h = 0u
+                break
+            }
         }
     }
     // set aspect ratio
-    deref(sarWidth) = w
-    deref(sarHeight) = h
+    *sarWidth = w
+    *sarHeight = h
 }
 
 // ------------------------------------------------------------------------------
@@ -4382,23 +5276,24 @@ def h264bsdConvertToRGBA(width : uint; height : uint; var data : uint8?; var pOu
     var cr : uint8? = data + ySize + cbSize
     var rgba : uint? = pOutput
     while (y < h) {
-        var c : int = int(deref(luma)) - 16
-        var d : int = int(deref(cb)) - 128
-        var e : int = int(deref(cr)) - 128
+        var c : int = int(*luma) - 16
+        var d : int = int(*cb) - 128
+        var e : int = int(*cr) - 128
         var r : uint = uint((298 * c + 409 * e + 128 >> 8) < 0 ? 0 : ((298 * c + 409 * e + 128 >> 8) > 255 ? 255 : (298 * c + 409 * e + 128 >> 8)))
-        var g : uint = uint((298 * c - 100 * d - 208 * e + 128 >> 8) < 0 ? 0 : ((298 * c - 100 * d - 208 * e + 128 >> 8) > 255 ? 255 : (298 * c - 100 * d - 208 * e + 128 >> 8)))
+        var g : uint = uint((298 * c - 100 * d - 208 * e + 128 >> 8) < 0 ? 0 :
+                ((298 * c - 100 * d - 208 * e + 128 >> 8) > 255 ? 255 : (298 * c - 100 * d - 208 * e + 128 >> 8)))
         var b : uint = uint((298 * c + 516 * d + 128 >> 8) < 0 ? 0 : ((298 * c + 516 * d + 128 >> 8) > 255 ? 255 : (298 * c + 516 * d + 128 >> 8)))
         var pixel : uint = 255u
         pixel = (pixel << 8u) + b
         pixel = (pixel << 8u) + g
         pixel = (pixel << 8u) + r
-        deref(rgba) = pixel
+        *rgba = pixel
         x++
-        rgba = rgba + 1
-        luma = luma + 1
-        if (!((x & 1) != 0)) {
-            cb = cb + 1
-            cr = cr + 1
+        rgba++
+        luma++
+        if ((x & 1) == 0) {
+            cb++
+            cr++
         }
         if (x < w) {
             continue
@@ -4406,8 +5301,8 @@ def h264bsdConvertToRGBA(width : uint; height : uint; var data : uint8?; var pOu
         x = 0
         y++
         if ((y & 1) != 0) {
-            cb = cb - w / 2
-            cr = cr - w / 2
+            cb -= w / 2
+            cr -= w / 2
         }
     }
 }
@@ -4425,23 +5320,24 @@ def h264bsdConvertToBGRA(width : uint; height : uint; var data : uint8?; var pOu
     var cr : uint8? = data + ySize + cbSize
     var bgra : uint? = pOutput
     while (y < h) {
-        var c : int = int(deref(luma)) - 16
-        var d : int = int(deref(cb)) - 128
-        var e : int = int(deref(cr)) - 128
+        var c : int = int(*luma) - 16
+        var d : int = int(*cb) - 128
+        var e : int = int(*cr) - 128
         var r : uint = uint((298 * c + 409 * e + 128 >> 8) < 0 ? 0 : ((298 * c + 409 * e + 128 >> 8) > 255 ? 255 : (298 * c + 409 * e + 128 >> 8)))
-        var g : uint = uint((298 * c - 100 * d - 208 * e + 128 >> 8) < 0 ? 0 : ((298 * c - 100 * d - 208 * e + 128 >> 8) > 255 ? 255 : (298 * c - 100 * d - 208 * e + 128 >> 8)))
+        var g : uint = uint((298 * c - 100 * d - 208 * e + 128 >> 8) < 0 ? 0 :
+                ((298 * c - 100 * d - 208 * e + 128 >> 8) > 255 ? 255 : (298 * c - 100 * d - 208 * e + 128 >> 8)))
         var b : uint = uint((298 * c + 516 * d + 128 >> 8) < 0 ? 0 : ((298 * c + 516 * d + 128 >> 8) > 255 ? 255 : (298 * c + 516 * d + 128 >> 8)))
         var pixel : uint = 255u
         pixel = (pixel << 8u) + r
         pixel = (pixel << 8u) + g
         pixel = (pixel << 8u) + b
-        deref(bgra) = pixel
+        *bgra = pixel
         x++
-        bgra = bgra + 1
-        luma = luma + 1
-        if (!((x & 1) != 0)) {
-            cb = cb + 1
-            cr = cr + 1
+        bgra++
+        luma++
+        if ((x & 1) == 0) {
+            cb++
+            cr++
         }
         if (x < w) {
             continue
@@ -4449,8 +5345,8 @@ def h264bsdConvertToBGRA(width : uint; height : uint; var data : uint8?; var pOu
         x = 0
         y++
         if ((y & 1) != 0) {
-            cb = cb - w / 2
-            cr = cr - w / 2
+            cb -= w / 2
+            cr -= w / 2
         }
     }
 }
@@ -4469,16 +5365,16 @@ def h264bsdConvertToYCbCrA(width : uint; height : uint; var data : uint8?; var p
     var yCbCr : uint? = pOutput
     while (y < h) {
         var pixel : uint = 255u
-        pixel = (pixel << 8u) + uint(deref(cr))
-        pixel = (pixel << 8u) + uint(deref(cb))
-        pixel = (pixel << 8u) + uint(deref(luma))
-        deref(yCbCr) = pixel
+        pixel = (pixel << 8u) + uint(*cr)
+        pixel = (pixel << 8u) + uint(*cb)
+        pixel = (pixel << 8u) + uint(*luma)
+        *yCbCr = pixel
         x++
-        yCbCr = yCbCr + 1
-        luma = luma + 1
-        if (!((x & 1) != 0)) {
-            cb = cb + 1
-            cr = cr + 1
+        yCbCr++
+        luma++
+        if ((x & 1) == 0) {
+            cb++
+            cr++
         }
         if (x < w) {
             continue
@@ -4486,8 +5382,8 @@ def h264bsdConvertToYCbCrA(width : uint; height : uint; var data : uint8?; var p
         x = 0
         y++
         if ((y & 1) != 0) {
-            cb = cb - w / 2
-            cr = cr - w / 2
+            cb -= w / 2
+            cr -= w / 2
         }
     }
 }
@@ -4501,21 +5397,22 @@ def private h264_file_all__ComparePictures(var ptr1 : void?; var ptr2 : void?) :
     pic1 = reinterpret<dpbPicture_t?>(ptr1)
     pic2 = reinterpret<dpbPicture_t?>(ptr2)
     // both are non-reference pictures, check if needed for display
-    if (!(int(pic1.status) != 0) && !(int(pic2.status) != 0)) {
-        if (pic1.toBeDisplayed != 0 && !(pic2.toBeDisplayed != 0)) {
+    if (int(pic1.status) == 0 && int(pic2.status) == 0) {
+        if (pic1.toBeDisplayed != 0 && pic2.toBeDisplayed == 0) {
             return -1
-        } elif (!(pic1.toBeDisplayed != 0) && pic2.toBeDisplayed != 0) {
+        } elif (pic1.toBeDisplayed == 0 && pic2.toBeDisplayed != 0) {
             return 1
         } else {
             return 0
         }
-    } elif (!(int(pic2.status) != 0)) {
+    } elif (int(pic2.status) == 0) {
         // only pic 1 needed for reference -> greater
         return -1
-    } elif (!(int(pic1.status) != 0)) {
+    } elif (int(pic1.status) == 0) {
         // only pic 2 needed for reference -> greater
         return 1
-    } elif ((pic1.status == dpbPictureStatus_e.NON_EXISTING || pic1.status == dpbPictureStatus_e.SHORT_TERM) && (pic2.status == dpbPictureStatus_e.NON_EXISTING || pic2.status == dpbPictureStatus_e.SHORT_TERM)) {
+    } elif ((pic1.status == dpbPictureStatus_e.NON_EXISTING || pic1.status == dpbPictureStatus_e.SHORT_TERM) &&
+            (pic2.status == dpbPictureStatus_e.NON_EXISTING || pic2.status == dpbPictureStatus_e.SHORT_TERM)) {
         // both are short term reference pictures -> check picNum
         if (pic1.picNum > pic2.picNum) {
             return -1
@@ -4558,7 +5455,7 @@ def h264bsdReorderRefPicList(var dpb : dpbStorage_t?; var order : refPicListReor
     // Code
     // set dpb picture numbers for sorting
     h264_file_all__SetPicNums(dpb, currFrameNum)
-    if (!(order.refPicListReorderingFlagL0 != 0)) {
+    if (order.refPicListReorderingFlagL0 == 0) {
         return uint(HANTRO_OK)
     }
     refIdx = 0u
@@ -4591,7 +5488,7 @@ def h264bsdReorderRefPicList(var dpb : dpbStorage_t?; var order : refPicListReor
         }
         // find corresponding picture from dpb
         index = h264_file_all__FindDpbPic(dpb, picNum, isShortTerm)
-        if (index < 0 || !(uint(int(dpb.buffer[index].status)) > uint(int(dpbPictureStatus_e.NON_EXISTING)))) {
+        if (index < 0 || !(uint(dpb.buffer[index].status) > uint(dpbPictureStatus_e.NON_EXISTING))) {
             return uint(HANTRO_NOK)
         }
         // shift pictures
@@ -4633,7 +5530,7 @@ def private h264_file_all__Mmcop1(var dpb : dpbStorage_t?; currPicNum : uint; di
     }
     dpb.buffer[index].status = dpbPictureStatus_e.UNUSED
     dpb.numRefFrames--
-    if (!(dpb.buffer[index].toBeDisplayed != 0)) {
+    if (dpb.buffer[index].toBeDisplayed == 0) {
         dpb.fullness--
     }
     return uint(HANTRO_OK)
@@ -4650,7 +5547,7 @@ def private h264_file_all__Mmcop2(var dpb : dpbStorage_t?; longTermPicNum : uint
     }
     dpb.buffer[index].status = dpbPictureStatus_e.UNUSED
     dpb.numRefFrames--
-    if (!(dpb.buffer[index].toBeDisplayed != 0)) {
+    if (dpb.buffer[index].toBeDisplayed == 0) {
         dpb.fullness--
     }
     return uint(HANTRO_OK)
@@ -4663,7 +5560,7 @@ def private h264_file_all__Mmcop3(var dpb : dpbStorage_t?; currPicNum : uint; di
     var picNum : int
     var i : uint
     // Code
-    if ((dpb.maxLongTermFrameIdx == uint(int(anon_105.NO_LONG_TERM_FRAME_INDICES))) || (longTermFrameIdx > dpb.maxLongTermFrameIdx)) {
+    if ((dpb.maxLongTermFrameIdx == uint(anon_105.NO_LONG_TERM_FRAME_INDICES)) || (longTermFrameIdx > dpb.maxLongTermFrameIdx)) {
         return uint(HANTRO_NOK)
     }
     // check if a long term picture with the same longTermFrameIdx already
@@ -4673,7 +5570,7 @@ def private h264_file_all__Mmcop3(var dpb : dpbStorage_t?; currPicNum : uint; di
         if (dpb.buffer[i].status == dpbPictureStatus_e.LONG_TERM && uint(dpb.buffer[i].picNum) == longTermFrameIdx) {
             dpb.buffer[i].status = dpbPictureStatus_e.UNUSED
             dpb.numRefFrames--
-            if (!(dpb.buffer[i].toBeDisplayed != 0)) {
+            if (dpb.buffer[i].toBeDisplayed == 0) {
                 dpb.fullness--
             }
             break
@@ -4685,7 +5582,7 @@ def private h264_file_all__Mmcop3(var dpb : dpbStorage_t?; currPicNum : uint; di
     if (index < 0) {
         return uint(HANTRO_NOK)
     }
-    if (!(uint(int(dpb.buffer[index].status)) > uint(int(dpbPictureStatus_e.NON_EXISTING)))) {
+    if (!(uint(dpb.buffer[index].status) > uint(dpbPictureStatus_e.NON_EXISTING))) {
         return uint(HANTRO_NOK)
     }
     dpb.buffer[index].status = dpbPictureStatus_e.LONG_TERM
@@ -4701,10 +5598,11 @@ def private h264_file_all__Mmcop4(var dpb : dpbStorage_t?; maxLongTermFrameIdx :
     dpb.maxLongTermFrameIdx = maxLongTermFrameIdx
     i = 0u
     while (i < dpb.maxRefFrames) {
-        if (dpb.buffer[i].status == dpbPictureStatus_e.LONG_TERM && ((uint(dpb.buffer[i].picNum) > maxLongTermFrameIdx) || (dpb.maxLongTermFrameIdx == uint(int(anon_105.NO_LONG_TERM_FRAME_INDICES))))) {
+        if (dpb.buffer[i].status == dpbPictureStatus_e.LONG_TERM &&
+                ((uint(dpb.buffer[i].picNum) > maxLongTermFrameIdx) || (dpb.maxLongTermFrameIdx == uint(anon_105.NO_LONG_TERM_FRAME_INDICES)))) {
             dpb.buffer[i].status = dpbPictureStatus_e.UNUSED
             dpb.numRefFrames--
-            if (!(dpb.buffer[i].toBeDisplayed != 0)) {
+            if (dpb.buffer[i].toBeDisplayed == 0) {
                 dpb.fullness--
             }
         }
@@ -4720,7 +5618,7 @@ def private h264_file_all__Mmcop5(var dpb : dpbStorage_t?) : uint {
     for (i in urange(16u)) {
         if (int(dpb.buffer[i].status) != 0) {
             dpb.buffer[i].status = dpbPictureStatus_e.UNUSED
-            if (!(dpb.buffer[i].toBeDisplayed != 0)) {
+            if (dpb.buffer[i].toBeDisplayed == 0) {
                 dpb.fullness--
             }
         }
@@ -4729,7 +5627,7 @@ def private h264_file_all__Mmcop5(var dpb : dpbStorage_t?) : uint {
     while (h264_file_all__OutputPicture(dpb) == uint(HANTRO_OK)) {
     }
     dpb.numRefFrames = 0u
-    dpb.maxLongTermFrameIdx = uint(int(anon_105.NO_LONG_TERM_FRAME_INDICES))
+    dpb.maxLongTermFrameIdx = uint(anon_105.NO_LONG_TERM_FRAME_INDICES)
     dpb.prevRefFrameNum = 0u
     return uint(HANTRO_OK)
 }
@@ -4739,7 +5637,7 @@ def private h264_file_all__Mmcop6(var dpb : dpbStorage_t?; frameNum : uint; picO
     // Variables
     var i : uint
     // Code
-    if ((dpb.maxLongTermFrameIdx == uint(int(anon_105.NO_LONG_TERM_FRAME_INDICES))) || (longTermFrameIdx > dpb.maxLongTermFrameIdx)) {
+    if ((dpb.maxLongTermFrameIdx == uint(anon_105.NO_LONG_TERM_FRAME_INDICES)) || (longTermFrameIdx > dpb.maxLongTermFrameIdx)) {
         return uint(HANTRO_NOK)
     }
     // check if a long term picture with the same longTermFrameIdx already
@@ -4749,7 +5647,7 @@ def private h264_file_all__Mmcop6(var dpb : dpbStorage_t?; frameNum : uint; picO
         if (dpb.buffer[i].status == dpbPictureStatus_e.LONG_TERM && uint(dpb.buffer[i].picNum) == longTermFrameIdx) {
             dpb.buffer[i].status = dpbPictureStatus_e.UNUSED
             dpb.numRefFrames--
-            if (!(dpb.buffer[i].toBeDisplayed != 0)) {
+            if (dpb.buffer[i].toBeDisplayed == 0) {
                 dpb.fullness--
             }
             break
@@ -4776,7 +5674,8 @@ def private h264_file_all__Mmcop6(var dpb : dpbStorage_t?; frameNum : uint; picO
 }
 
 [c_function]
-def h264bsdMarkDecRefPic(var dpb : dpbStorage_t?; var mark : decRefPicMarking_t?; var image : image_t?; var frameNum : uint; picOrderCnt : int; isIdr : uint; currentPicId : uint; numErrMbs : uint) : uint {
+def h264bsdMarkDecRefPic(var dpb : dpbStorage_t?; var mark : decRefPicMarking_t?; var image : image_t?; var frameNum : uint; picOrderCnt : int; isIdr : uint;
+                         currentPicId : uint; numErrMbs : uint) : uint {
     // Variables
     var i : uint
     var status : uint
@@ -4796,7 +5695,7 @@ def h264bsdMarkDecRefPic(var dpb : dpbStorage_t?; var mark : decRefPicMarking_t?
         dpb.currentOut.picNum = int(frameNum)
         dpb.currentOut.picOrderCnt = picOrderCnt
         dpb.currentOut.toBeDisplayed = toBeDisplayed
-        if (!(dpb.noReordering != 0)) {
+        if (dpb.noReordering == 0) {
             dpb.fullness++
         }
     } elif (isIdr != 0) {
@@ -4818,7 +5717,7 @@ def h264bsdMarkDecRefPic(var dpb : dpbStorage_t?; var mark : decRefPicMarking_t?
             dpb.maxLongTermFrameIdx = 0u
         } else {
             dpb.currentOut.status = dpbPictureStatus_e.SHORT_TERM
-            dpb.maxLongTermFrameIdx = uint(int(anon_105.NO_LONG_TERM_FRAME_INDICES))
+            dpb.maxLongTermFrameIdx = uint(anon_105.NO_LONG_TERM_FRAME_INDICES)
         }
         dpb.currentOut.frameNum = 0u
         dpb.currentOut.picNum = 0
@@ -4832,27 +5731,41 @@ def h264bsdMarkDecRefPic(var dpb : dpbStorage_t?; var mark : decRefPicMarking_t?
         if (mark.adaptiveRefPicMarkingModeFlag != 0) {
             i = 0u
             while (mark.operation[i].memoryManagementControlOperation != 0) {
-                let _cond = mark.operation[i].memoryManagementControlOperation
-                if (_cond == 1u) {
-                    status = h264_file_all__Mmcop1(dpb, frameNum, mark.operation[i].differenceOfPicNums)
-                } elif (_cond == 2u) {
-                    status = h264_file_all__Mmcop2(dpb, mark.operation[i].longTermPicNum)
-                } elif (_cond == 3u) {
-                    status = h264_file_all__Mmcop3(dpb, frameNum, mark.operation[i].differenceOfPicNums, mark.operation[i].longTermFrameIdx)
-                } elif (_cond == 4u) {
-                    status = h264_file_all__Mmcop4(dpb, mark.operation[i].maxLongTermFrameIdx)
-                } elif (_cond == 5u) {
-                    status = h264_file_all__Mmcop5(dpb)
-                    dpb.lastContainsMmco5 = uint(HANTRO_TRUE)
-                    frameNum = 0u
-                } elif (_cond == 6u) {
-                    status = h264_file_all__Mmcop6(dpb, frameNum, picOrderCnt, mark.operation[i].longTermFrameIdx)
-                    if (status == uint(HANTRO_OK)) {
-                        markedAsLongTerm = uint(HANTRO_TRUE)
+                c_switch(mark.operation[i].memoryManagementControlOperation) {
+                    case(1u) {
+                        status = h264_file_all__Mmcop1(dpb, frameNum, mark.operation[i].differenceOfPicNums)
+                        break
                     }
-                } else {
-                    // invalid memory management control operation
-                    status = uint(HANTRO_NOK)
+                    case(2u) {
+                        status = h264_file_all__Mmcop2(dpb, mark.operation[i].longTermPicNum)
+                        break
+                    }
+                    case(3u) {
+                        status = h264_file_all__Mmcop3(dpb, frameNum, mark.operation[i].differenceOfPicNums, mark.operation[i].longTermFrameIdx)
+                        break
+                    }
+                    case(4u) {
+                        status = h264_file_all__Mmcop4(dpb, mark.operation[i].maxLongTermFrameIdx)
+                        break
+                    }
+                    case(5u) {
+                        status = h264_file_all__Mmcop5(dpb)
+                        dpb.lastContainsMmco5 = uint(HANTRO_TRUE)
+                        frameNum = 0u
+                        break
+                    }
+                    case(6u) {
+                        status = h264_file_all__Mmcop6(dpb, frameNum, picOrderCnt, mark.operation[i].longTermFrameIdx)
+                        if (status == uint(HANTRO_OK)) {
+                            markedAsLongTerm = uint(HANTRO_TRUE)
+                        }
+                        break
+                    }
+                    case(_) {
+                        // invalid memory management control operation
+                        status = uint(HANTRO_NOK)
+                        break
+                    }
                 }
                 if (status != uint(HANTRO_OK)) {
                     break
@@ -4865,7 +5778,7 @@ def h264bsdMarkDecRefPic(var dpb : dpbStorage_t?; var mark : decRefPicMarking_t?
         // if current picture was not marked as long-term reference by
         // memory management control operation 6 -> mark current as short
         // term and insert it into dpb (if there is room)
-        if (!(markedAsLongTerm != 0)) {
+        if (markedAsLongTerm == 0) {
             if (dpb.numRefFrames < dpb.maxRefFrames) {
                 dpb.currentOut.frameNum = frameNum
                 dpb.currentOut.picNum = int(frameNum)
@@ -4908,7 +5821,7 @@ def h264bsdGetRefPicData(var dpb : dpbStorage_t?; index : uint) : uint8? {
     // Code
     if (index > 16u || dpb.list[index] == null) {
         return null
-    } elif (!(uint(int(dpb.list[index].status)) > uint(int(dpbPictureStatus_e.NON_EXISTING)))) {
+    } elif (!(uint(dpb.list[index].status) > uint(dpbPictureStatus_e.NON_EXISTING))) {
         return null
     } else {
         return dpb.list[index].data
@@ -4949,7 +5862,7 @@ def private h264_file_all__SlidingWindowRefPicMarking(var dpb : dpbStorage_t?) :
         if (index >= 0) {
             dpb.buffer[index].status = dpbPictureStatus_e.UNUSED
             dpb.numRefFrames--
-            if (!(dpb.buffer[index].toBeDisplayed != 0)) {
+            if (dpb.buffer[index].toBeDisplayed == 0) {
                 dpb.fullness--
             }
             return uint(HANTRO_OK)
@@ -4963,7 +5876,7 @@ def h264bsdInitDpb(var dpb : dpbStorage_t?; picSizeInMbs : uint; dpbSize : uint;
     // Variables
     var i : uint
     // Code
-    dpb.maxLongTermFrameIdx = uint(int(anon_105.NO_LONG_TERM_FRAME_INDICES))
+    dpb.maxLongTermFrameIdx = uint(anon_105.NO_LONG_TERM_FRAME_INDICES)
     dpb.maxRefFrames = maxRefFrames > 1u ? maxRefFrames : 1u
     if (noReordering != 0) {
         dpb.dpbSize = dpb.maxRefFrames
@@ -4991,7 +5904,8 @@ def h264bsdInitDpb(var dpb : dpbStorage_t?; picSizeInMbs : uint; dpbSize : uint;
         if (dpb.buffer[i].pAllocatedData == null) {
             return uint(MEMORY_ALLOCATION_ERROR)
         }
-        dpb.buffer[i].data = dpb.buffer[i].pAllocatedData + (16ul - uint64(intptr(dpb.buffer[i].pAllocatedData)) & uint64(16 - 1)) / uint64(typeinfo sizeof(type<uint8>))
+        dpb.buffer[i].data = dpb.buffer[i].pAllocatedData + (16ul - uint64(intptr(dpb.buffer[i].pAllocatedData)) &
+                uint64(16 - 1)) / uint64(typeinfo sizeof(type<uint8>))
         i++
     }
     dpb.list = reinterpret<dpbPicture_t ??>(malloc1(uint64(MAX_NUM_REF_IDX_L0_ACTIVE + 1) * uint64(typeinfo sizeof(type<dpbPicture_t?>))))
@@ -5030,15 +5944,16 @@ def private h264_file_all__FindDpbPic(var dpb : dpbStorage_t?; picNum : int; isS
     var found : uint = uint(HANTRO_FALSE)
     // Code
     if (isShortTerm != 0) {
-        while (i < dpb.maxRefFrames && !(found != 0)) {
-            if ((dpb.buffer[i].status == dpbPictureStatus_e.NON_EXISTING || dpb.buffer[i].status == dpbPictureStatus_e.SHORT_TERM) && dpb.buffer[i].picNum == picNum) {
+        while (i < dpb.maxRefFrames && found == 0) {
+            if ((dpb.buffer[i].status == dpbPictureStatus_e.NON_EXISTING || dpb.buffer[i].status == dpbPictureStatus_e.SHORT_TERM) &&
+                    dpb.buffer[i].picNum == picNum) {
                 found = uint(HANTRO_TRUE)
             } else {
                 i++
             }
         }
     } else {
-        while (i < dpb.maxRefFrames && !(found != 0)) {
+        while (i < dpb.maxRefFrames && found == 0) {
             if (dpb.buffer[i].status == dpbPictureStatus_e.LONG_TERM && dpb.buffer[i].picNum == picNum) {
                 found = uint(HANTRO_TRUE)
             } else {
@@ -5081,7 +5996,7 @@ def h264bsdCheckGapsInFrameNum(var dpb : dpbStorage_t?; frameNum : uint; isRefPi
     // Code
     dpb.numOut = 0u
     dpb.outIndex = 0u
-    if (!(gapsAllowed != 0)) {
+    if (gapsAllowed == 0) {
         return uint(HANTRO_OK)
     }
     if ((frameNum != dpb.prevRefFrameNum) && (frameNum != ((dpb.prevRefFrameNum + 1u) % dpb.maxFrameNum))) {
@@ -5091,7 +6006,7 @@ def h264bsdCheckGapsInFrameNum(var dpb : dpbStorage_t?; frameNum : uint; isRefPi
         // contains data pointer located in outBuf (buffer placed in the output
         // shall not be overwritten by the current picture)
         tmp = dpb.buffer[dpb.dpbSize].data
-        while (true) {
+        c_do_while(unUsedShortTermFrameNum != frameNum) {
             h264_file_all__SetPicNums(dpb, unUsedShortTermFrameNum)
             if (h264_file_all__SlidingWindowRefPicMarking(dpb) != uint(HANTRO_OK)) {
                 return uint(HANTRO_NOK)
@@ -5111,9 +6026,6 @@ def h264bsdCheckGapsInFrameNum(var dpb : dpbStorage_t?; frameNum : uint; isRefPi
             // sort the buffer
             h264_file_all__ShellSort(dpb.buffer, dpb.dpbSize + 1u)
             unUsedShortTermFrameNum = (unUsedShortTermFrameNum + 1u) % dpb.maxFrameNum
-            if (!(unUsedShortTermFrameNum != frameNum)) {
-                break
-            }
         }
         // pictures placed in output buffer -> check that 'data' in
         // buffer position dpbSize is not in the output buffer (this will be
@@ -5195,7 +6107,7 @@ def private h264_file_all__OutputPicture(var dpb : dpbStorage_t?) : uint {
     dpb.outBuf[dpb.numOut].numErrMbs = tmp.numErrMbs
     dpb.numOut++
     tmp.toBeDisplayed = uint(HANTRO_FALSE)
-    if (!(int(tmp.status) != 0)) {
+    if (int(tmp.status) == 0) {
         dpb.fullness--
     }
     return uint(HANTRO_OK)
@@ -5301,65 +6213,65 @@ def h264bsdWriteMacroblock(var image : image_t?; var data : uint8?) {
     i = 16u
     while (i != 0) {
         var _t0 = ptr
-        ptr = ptr + 1
-        tmp1 = deref(_t0)
+        ptr++
+        tmp1 = *_t0
         var _t1 = ptr
-        ptr = ptr + 1
-        tmp2 = deref(_t1)
+        ptr++
+        tmp2 = *_t1
         var _t2 = lum
-        lum = lum + 1
-        deref(_t2) = tmp1
+        lum++
+        *_t2 = tmp1
         var _t3 = lum
-        lum = lum + 1
-        deref(_t3) = tmp2
+        lum++
+        *_t3 = tmp2
         var _t4 = ptr
-        ptr = ptr + 1
-        tmp1 = deref(_t4)
+        ptr++
+        tmp1 = *_t4
         var _t5 = ptr
-        ptr = ptr + 1
-        tmp2 = deref(_t5)
+        ptr++
+        tmp2 = *_t5
         var _t6 = lum
-        lum = lum + 1
-        deref(_t6) = tmp1
+        lum++
+        *_t6 = tmp1
         var _t7 = lum
-        lum = lum + 1
-        deref(_t7) = tmp2
-        lum = lum + (width - 4u)
+        lum++
+        *_t7 = tmp2
+        lum += width - 4u
         i--
     }
     width >>= 1u
     i = 8u
     while (i != 0) {
         var _t8 = ptr
-        ptr = ptr + 1
-        tmp1 = deref(_t8)
+        ptr++
+        tmp1 = *_t8
         var _t9 = ptr
-        ptr = ptr + 1
-        tmp2 = deref(_t9)
+        ptr++
+        tmp2 = *_t9
         var _t10 = cb
-        cb = cb + 1
-        deref(_t10) = tmp1
+        cb++
+        *_t10 = tmp1
         var _t11 = cb
-        cb = cb + 1
-        deref(_t11) = tmp2
-        cb = cb + (width - 2u)
+        cb++
+        *_t11 = tmp2
+        cb += width - 2u
         i--
     }
     i = 8u
     while (i != 0) {
         var _t12 = ptr
-        ptr = ptr + 1
-        tmp1 = deref(_t12)
+        ptr++
+        tmp1 = *_t12
         var _t13 = ptr
-        ptr = ptr + 1
-        tmp2 = deref(_t13)
+        ptr++
+        tmp2 = *_t13
         var _t14 = cr
-        cr = cr + 1
-        deref(_t14) = tmp1
+        cr++
+        *_t14 = tmp1
         var _t15 = cr
-        cr = cr + 1
-        deref(_t15) = tmp2
-        cr = cr + (width - 2u)
+        cr++
+        *_t15 = tmp2
+        cr += width - 2u
         i--
     }
 }
@@ -5408,20 +6320,20 @@ def h264bsdWriteOutputBlocks(var image : image_t?; mbNum : uint; var data : uint
             var in32 : int? = reinterpret<int?>(tmp)
             var out32 : int? = reinterpret<int?>(imageBlock)
             // Residual is zero => copy prediction block to output
-            tmp1 = deref(in32)
-            in32 = in32 + 4
-            tmp2 = deref(in32)
-            in32 = in32 + 4
-            deref(out32) = tmp1
-            out32 = out32 + picWidth / 4u
-            deref(out32) = tmp2
-            out32 = out32 + picWidth / 4u
-            tmp1 = deref(in32)
-            in32 = in32 + 4
-            tmp2 = deref(in32)
-            deref(out32) = tmp1
-            out32 = out32 + picWidth / 4u
-            deref(out32) = tmp2
+            tmp1 = *in32
+            in32 += 4
+            tmp2 = *in32
+            in32 += 4
+            *out32 = tmp1
+            out32 += picWidth / 4u
+            *out32 = tmp2
+            out32 += picWidth / 4u
+            tmp1 = *in32
+            in32 += 4
+            tmp2 = *in32
+            *out32 = tmp1
+            out32 += picWidth / 4u
+            *out32 = tmp2
         } else {
             // Calculate image = prediction + residual
             // Process four pixels in a loop
@@ -5429,30 +6341,30 @@ def h264bsdWriteOutputBlocks(var image : image_t?; mbNum : uint; var data : uint
             while (i != 0) {
                 tmp1 = int(tmp[0])
                 var _t0 = pRes
-                pRes = pRes + 1
-                tmp2 = deref(_t0)
+                pRes++
+                tmp2 = *_t0
                 tmp3 = int(tmp[1])
                 tmp1 = int(clp[tmp1 + tmp2])
                 var _t1 = pRes
-                pRes = pRes + 1
-                tmp4 = deref(_t1)
+                pRes++
+                tmp4 = *_t1
                 imageBlock[0] = uint8(tmp1)
                 tmp3 = int(clp[tmp3 + tmp4])
                 tmp1 = int(tmp[2])
                 var _t2 = pRes
-                pRes = pRes + 1
-                tmp2 = deref(_t2)
+                pRes++
+                tmp2 = *_t2
                 imageBlock[1] = uint8(tmp3)
                 tmp1 = int(clp[tmp1 + tmp2])
                 tmp3 = int(tmp[3])
                 var _t3 = pRes
-                pRes = pRes + 1
-                tmp4 = deref(_t3)
+                pRes++
+                tmp4 = *_t3
                 imageBlock[2] = uint8(tmp1)
                 tmp3 = int(clp[tmp3 + tmp4])
-                tmp = tmp + 16
+                tmp += 16
                 imageBlock[3] = uint8(tmp3)
-                imageBlock = imageBlock + picWidth
+                imageBlock += picWidth
                 i--
             }
         }
@@ -5467,58 +6379,58 @@ def h264bsdWriteOutputBlocks(var image : image_t?; mbNum : uint; var data : uint
         imageBlock = cb
         if (_c_block >= 20u) {
             imageBlock = cr
-            tmp = tmp + 64
+            tmp += 64
         }
-        tmp = tmp + (y * 8u + x)
-        imageBlock = imageBlock + (y * picWidth + x)
+        tmp += y * 8u + x
+        imageBlock += y * picWidth + x
         if (pRes[0] == EMPTY_RESIDUAL_INDICATOR) {
             // lint -e826
             var in32 : int? = reinterpret<int?>(tmp)
             var out32 : int? = reinterpret<int?>(imageBlock)
             // Residual is zero => copy prediction block to output
-            tmp1 = deref(in32)
-            in32 = in32 + 2
-            tmp2 = deref(in32)
-            in32 = in32 + 2
-            deref(out32) = tmp1
-            out32 = out32 + picWidth / 4u
-            deref(out32) = tmp2
-            out32 = out32 + picWidth / 4u
-            tmp1 = deref(in32)
-            in32 = in32 + 2
-            tmp2 = deref(in32)
-            deref(out32) = tmp1
-            out32 = out32 + picWidth / 4u
-            deref(out32) = tmp2
+            tmp1 = *in32
+            in32 += 2
+            tmp2 = *in32
+            in32 += 2
+            *out32 = tmp1
+            out32 += picWidth / 4u
+            *out32 = tmp2
+            out32 += picWidth / 4u
+            tmp1 = *in32
+            in32 += 2
+            tmp2 = *in32
+            *out32 = tmp1
+            out32 += picWidth / 4u
+            *out32 = tmp2
         } else {
             i = 4u
             while (i != 0) {
                 tmp1 = int(tmp[0])
                 var _t4 = pRes
-                pRes = pRes + 1
-                tmp2 = deref(_t4)
+                pRes++
+                tmp2 = *_t4
                 tmp3 = int(tmp[1])
                 tmp1 = int(clp[tmp1 + tmp2])
                 var _t5 = pRes
-                pRes = pRes + 1
-                tmp4 = deref(_t5)
+                pRes++
+                tmp4 = *_t5
                 imageBlock[0] = uint8(tmp1)
                 tmp3 = int(clp[tmp3 + tmp4])
                 tmp1 = int(tmp[2])
                 var _t6 = pRes
-                pRes = pRes + 1
-                tmp2 = deref(_t6)
+                pRes++
+                tmp2 = *_t6
                 imageBlock[1] = uint8(tmp3)
                 tmp1 = int(clp[tmp1 + tmp2])
                 tmp3 = int(tmp[3])
                 var _t7 = pRes
-                pRes = pRes + 1
-                tmp4 = deref(_t7)
+                pRes++
+                tmp4 = *_t7
                 imageBlock[2] = uint8(tmp1)
                 tmp3 = int(clp[tmp3 + tmp4])
-                tmp = tmp + 8
+                tmp += 8
                 imageBlock[3] = uint8(tmp3)
-                imageBlock = imageBlock + picWidth
+                imageBlock += picWidth
                 i--
             }
         }
@@ -5548,7 +6460,8 @@ def h264bsdWriteOutputBlocks(var image : image_t?; mbNum : uint; var data : uint
 // HANTRO_NOK error in motion vector prediction
 // ------------------------------------------------------------------------------
 [c_function]
-def h264bsdInterPrediction(var pMb : mbStorage?; var pMbLayer : macroblockLayer_t?; var dpb : dpbStorage_t?; mbNum : uint; var currImage : image_t?; var data : uint8?) : uint {
+def h264bsdInterPrediction(var pMb : mbStorage?; var pMbLayer : macroblockLayer_t?; var dpb : dpbStorage_t?; mbNum : uint; var currImage : image_t?;
+                           var data : uint8?) : uint {
     // Variables
     var i : uint
     var x : uint
@@ -5564,56 +6477,72 @@ def h264bsdInterPrediction(var pMb : mbStorage?; var pMbLayer : macroblockLayer_
     col *= 16u
     refImage.width = currImage.width
     refImage.height = currImage.height
-    let _cond = pMb.mbType
-    if (_cond == mbType_e.P_Skip || _cond == mbType_e.P_L0_16x16) {
-        if (h264_file_all__MvPrediction16x16(pMb, addr(pMbLayer.mbPred), dpb) != uint(HANTRO_OK)) {
-            return uint(HANTRO_NOK)
-        }
-        refImage.data = pMb.refAddr[0]
-        h264bsdPredictSamples(data, addr(pMb.mv[0]), addr(refImage), col, row, 0u, 0u, 16u, 16u)
-    } elif (_cond == mbType_e.P_L0_L0_16x8) {
-        if (h264_file_all__MvPrediction16x8(pMb, addr(pMbLayer.mbPred), dpb) != uint(HANTRO_OK)) {
-            return uint(HANTRO_NOK)
-        }
-        refImage.data = pMb.refAddr[0]
-        h264bsdPredictSamples(data, addr(pMb.mv[0]), addr(refImage), col, row, 0u, 0u, 16u, 8u)
-        refImage.data = pMb.refAddr[2]
-        h264bsdPredictSamples(data, addr(pMb.mv[0]) + 8, addr(refImage), col, row, 0u, 8u, 16u, 8u)
-    } elif (_cond == mbType_e.P_L0_L0_8x16) {
-        if (h264_file_all__MvPrediction8x16(pMb, addr(pMbLayer.mbPred), dpb) != uint(HANTRO_OK)) {
-            return uint(HANTRO_NOK)
-        }
-        refImage.data = pMb.refAddr[0]
-        h264bsdPredictSamples(data, addr(pMb.mv[0]), addr(refImage), col, row, 0u, 0u, 8u, 16u)
-        refImage.data = pMb.refAddr[1]
-        h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4, addr(refImage), col, row, 8u, 0u, 8u, 16u)
-    } else {
-        // P_8x8 and P_8x8ref0
-        if (h264_file_all__MvPrediction8x8(pMb, addr(pMbLayer.subMbPred), dpb) != uint(HANTRO_OK)) {
-            return uint(HANTRO_NOK)
-        }
-        i = 0u
-        while (i < 4u) {
-            refImage.data = pMb.refAddr[i]
-            subPartMode = h264bsdSubMbPartMode(pMbLayer.subMbPred.subMbType[i])
-            x = uint((i & 1u) != 0 ? 8 : 0)
-            y = uint(i < 2u ? 0 : 8)
-            let _cond2 = subPartMode
-            if (_cond2 == subMbPartMode_e.MB_SP_8x8) {
-                h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i, addr(refImage), col, row, x, y, 8u, 8u)
-            } elif (_cond2 == subMbPartMode_e.MB_SP_8x4) {
-                h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i, addr(refImage), col, row, x, y, 8u, 4u)
-                h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i + 2, addr(refImage), col, row, x, y + 4u, 8u, 4u)
-            } elif (_cond2 == subMbPartMode_e.MB_SP_4x8) {
-                h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i, addr(refImage), col, row, x, y, 4u, 8u)
-                h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i + 1, addr(refImage), col, row, x + 4u, y, 4u, 8u)
-            } else {
-                h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i, addr(refImage), col, row, x, y, 4u, 4u)
-                h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i + 1, addr(refImage), col, row, x + 4u, y, 4u, 4u)
-                h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i + 2, addr(refImage), col, row, x, y + 4u, 4u, 4u)
-                h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i + 3, addr(refImage), col, row, x + 4u, y + 4u, 4u, 4u)
+    c_switch(pMb.mbType) {
+        case(mbType_e.P_Skip, mbType_e.P_L0_16x16) {
+            if (h264_file_all__MvPrediction16x16(pMb, addr(pMbLayer.mbPred), dpb) != uint(HANTRO_OK)) {
+                return uint(HANTRO_NOK)
             }
-            i++
+            refImage.data = pMb.refAddr[0]
+            h264bsdPredictSamples(data, addr(pMb.mv[0]), addr(refImage), col, row, 0u, 0u, 16u, 16u)
+            break
+        }
+        case(mbType_e.P_L0_L0_16x8) {
+            if (h264_file_all__MvPrediction16x8(pMb, addr(pMbLayer.mbPred), dpb) != uint(HANTRO_OK)) {
+                return uint(HANTRO_NOK)
+            }
+            refImage.data = pMb.refAddr[0]
+            h264bsdPredictSamples(data, addr(pMb.mv[0]), addr(refImage), col, row, 0u, 0u, 16u, 8u)
+            refImage.data = pMb.refAddr[2]
+            h264bsdPredictSamples(data, addr(pMb.mv[0]) + 8, addr(refImage), col, row, 0u, 8u, 16u, 8u)
+            break
+        }
+        case(mbType_e.P_L0_L0_8x16) {
+            if (h264_file_all__MvPrediction8x16(pMb, addr(pMbLayer.mbPred), dpb) != uint(HANTRO_OK)) {
+                return uint(HANTRO_NOK)
+            }
+            refImage.data = pMb.refAddr[0]
+            h264bsdPredictSamples(data, addr(pMb.mv[0]), addr(refImage), col, row, 0u, 0u, 8u, 16u)
+            refImage.data = pMb.refAddr[1]
+            h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4, addr(refImage), col, row, 8u, 0u, 8u, 16u)
+            break
+        }
+        case(_) {
+            // P_8x8 and P_8x8ref0
+            if (h264_file_all__MvPrediction8x8(pMb, addr(pMbLayer.subMbPred), dpb) != uint(HANTRO_OK)) {
+                return uint(HANTRO_NOK)
+            }
+            i = 0u
+            while (i < 4u) {
+                refImage.data = pMb.refAddr[i]
+                subPartMode = h264bsdSubMbPartMode(pMbLayer.subMbPred.subMbType[i])
+                x = uint((i & 1u) != 0 ? 8 : 0)
+                y = uint(i < 2u ? 0 : 8)
+                c_switch(subPartMode) {
+                    case(subMbPartMode_e.MB_SP_8x8) {
+                        h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i, addr(refImage), col, row, x, y, 8u, 8u)
+                        break
+                    }
+                    case(subMbPartMode_e.MB_SP_8x4) {
+                        h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i, addr(refImage), col, row, x, y, 8u, 4u)
+                        h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i + 2, addr(refImage), col, row, x, y + 4u, 8u, 4u)
+                        break
+                    }
+                    case(subMbPartMode_e.MB_SP_4x8) {
+                        h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i, addr(refImage), col, row, x, y, 4u, 8u)
+                        h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i + 1, addr(refImage), col, row, x + 4u, y, 4u, 8u)
+                        break
+                    }
+                    case(_) {
+                        h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i, addr(refImage), col, row, x, y, 4u, 4u)
+                        h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i + 1, addr(refImage), col, row, x + 4u, y, 4u, 4u)
+                        h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i + 2, addr(refImage), col, row, x, y + 4u, 4u, 4u)
+                        h264bsdPredictSamples(data, addr(pMb.mv[0]) + 4u * i + 3, addr(refImage), col, row, x + 4u, y + 4u, 4u, 4u)
+                        break
+                    }
+                }
+                i++
+            }
+            break
         }
     }
     // if decoded flag > 1 -> mb has already been successfully decoded and
@@ -5650,13 +6579,14 @@ def private h264_file_all__MvPrediction16x16(var pMb : mbStorage?; var mbPred : 
     // lint --e(740)
     // i.e. a[0].mv.hor == 0 && a[0].mv.ver == 0
     tmpMv2 = reinterpret<uint?>(addr(a[1].mv))
-    if (pMb.mbType == mbType_e.P_Skip && (!(a[0].available != 0) || !(a[1].available != 0) || (a[0].refIndex == 0u && (deref(tmpMv1) == 0u)) || (a[1].refIndex == 0u && (deref(tmpMv2) == 0u)))) {
+    if (pMb.mbType == mbType_e.P_Skip &&
+            (a[0].available == 0 || a[1].available == 0 || (a[0].refIndex == 0u && ((*tmpMv1) == 0u)) || (a[1].refIndex == 0u && ((*tmpMv2) == 0u)))) {
         mv.ver = int16(0)
         mv.hor = mv.ver
     } else {
         mv = mbPred.mvdL0[0]
         h264_file_all__GetInterNeighbour(pMb.sliceId, pMb.mbC, addr(a[0]) + 2, 10u)
-        if (!(a[2].available != 0)) {
+        if (a[2].available == 0) {
             h264_file_all__GetInterNeighbour(pMb.sliceId, pMb.mbD, addr(a[0]) + 2, 15u)
         }
         h264_file_all__GetPredictionMv(addr(mvPred), addr(a[0]), refIndex)
@@ -5721,7 +6651,7 @@ def private h264_file_all__MvPrediction16x8(var pMb : mbStorage?; var mbPred : m
     } else {
         h264_file_all__GetInterNeighbour(pMb.sliceId, pMb.mbA, addr(a[0]), 5u)
         h264_file_all__GetInterNeighbour(pMb.sliceId, pMb.mbC, addr(a[0]) + 2, 10u)
-        if (!(a[2].available != 0)) {
+        if (a[2].available == 0) {
             h264_file_all__GetInterNeighbour(pMb.sliceId, pMb.mbD, addr(a[0]) + 2, 15u)
         }
         h264_file_all__GetPredictionMv(addr(mvPred), addr(a[0]), refIndex)
@@ -5812,7 +6742,7 @@ def private h264_file_all__MvPrediction8x16(var pMb : mbStorage?; var mbPred : m
     } else {
         h264_file_all__GetInterNeighbour(pMb.sliceId, pMb.mbB, addr(a[0]) + 1, 10u)
         h264_file_all__GetInterNeighbour(pMb.sliceId, pMb.mbB, addr(a[0]) + 2, 14u)
-        if (!(a[2].available != 0)) {
+        if (a[2].available == 0) {
             h264_file_all__GetInterNeighbour(pMb.sliceId, pMb.mbD, addr(a[0]) + 2, 15u)
         }
         h264_file_all__GetPredictionMv(addr(mvPred), addr(a[0]), refIndex)
@@ -5846,7 +6776,7 @@ def private h264_file_all__MvPrediction8x16(var pMb : mbStorage?; var mbPred : m
     mv = mbPred.mvdL0[1]
     refIndex = mbPred.refIdxL0[1]
     h264_file_all__GetInterNeighbour(pMb.sliceId, pMb.mbC, addr(a[0]) + 2, 10u)
-    if (!(a[2].available != 0)) {
+    if (a[2].available == 0) {
         h264_file_all__GetInterNeighbour(pMb.sliceId, pMb.mbB, addr(a[0]) + 2, 11u)
     }
     if (a[2].refIndex == refIndex) {
@@ -5932,7 +6862,7 @@ def private h264_file_all__MvPrediction(var pMb : mbStorage?; var subMbPred : su
     n = addr(h264_file_all__N_C_SUB_PART[mbPartIdx][int(subMbPartMode)][0]) + subMbPartIdx
     nMb = h264bsdGetNeighbourMb(pMb, n.mb)
     h264_file_all__GetInterNeighbour(pMb.sliceId, nMb, addr(a[0]) + 2, uint(n.index))
-    if (!(a[2].available != 0)) {
+    if (a[2].available == 0) {
         n = addr(h264_file_all__N_D_SUB_PART[mbPartIdx][int(subMbPartMode)][0]) + subMbPartIdx
         nMb = h264bsdGetNeighbourMb(pMb, n.mb)
         h264_file_all__GetInterNeighbour(pMb.sliceId, nMb, addr(a[0]) + 2, uint(n.index))
@@ -5948,20 +6878,28 @@ def private h264_file_all__MvPrediction(var pMb : mbStorage?; var subMbPred : su
     if (uint(int(mv.ver) + 2048) >= 4096u) {
         return uint(HANTRO_NOK)
     }
-    let _cond = subMbPartMode
-    if (_cond == subMbPartMode_e.MB_SP_8x8) {
-        pMb.mv[4u * mbPartIdx] = mv
-        pMb.mv[4u * mbPartIdx + 1u] = mv
-        pMb.mv[4u * mbPartIdx + 2u] = mv
-        pMb.mv[4u * mbPartIdx + 3u] = mv
-    } elif (_cond == subMbPartMode_e.MB_SP_8x4) {
-        pMb.mv[4u * mbPartIdx + 2u * subMbPartIdx] = mv
-        pMb.mv[4u * mbPartIdx + 2u * subMbPartIdx + 1u] = mv
-    } elif (_cond == subMbPartMode_e.MB_SP_4x8) {
-        pMb.mv[4u * mbPartIdx + subMbPartIdx] = mv
-        pMb.mv[4u * mbPartIdx + subMbPartIdx + 2u] = mv
-    } elif (_cond == subMbPartMode_e.MB_SP_4x4) {
-        pMb.mv[4u * mbPartIdx + subMbPartIdx] = mv
+    c_switch(subMbPartMode) {
+        case(subMbPartMode_e.MB_SP_8x8) {
+            pMb.mv[4u * mbPartIdx] = mv
+            pMb.mv[4u * mbPartIdx + 1u] = mv
+            pMb.mv[4u * mbPartIdx + 2u] = mv
+            pMb.mv[4u * mbPartIdx + 3u] = mv
+            break
+        }
+        case(subMbPartMode_e.MB_SP_8x4) {
+            pMb.mv[4u * mbPartIdx + 2u * subMbPartIdx] = mv
+            pMb.mv[4u * mbPartIdx + 2u * subMbPartIdx + 1u] = mv
+            break
+        }
+        case(subMbPartMode_e.MB_SP_4x8) {
+            pMb.mv[4u * mbPartIdx + subMbPartIdx] = mv
+            pMb.mv[4u * mbPartIdx + subMbPartIdx + 2u] = mv
+            break
+        }
+        case(subMbPartMode_e.MB_SP_4x4) {
+            pMb.mv[4u * mbPartIdx + subMbPartIdx] = mv
+            break
+        }
     }
     return uint(HANTRO_OK)
 }
@@ -5998,10 +6936,10 @@ def private h264_file_all__GetInterNeighbour(sliceId : uint; var nMb : mbStorage
     if (nMb != null && (sliceId == nMb.sliceId)) {
         var tmp : uint
         var tmpMv : mv_t
-        tmp = uint(int(nMb.mbType))
+        tmp = uint(nMb.mbType)
         n.available = uint(HANTRO_TRUE)
         // MbPartPredMode "inlined"
-        if (tmp <= uint(int(mbType_e.P_8x8ref0))) {
+        if (tmp <= uint(mbType_e.P_8x8ref0)) {
             tmpMv = nMb.mv[index]
             tmp = nMb.refPic[index >> 2u]
             n.refIndex = tmp
@@ -6012,7 +6950,7 @@ def private h264_file_all__GetInterNeighbour(sliceId : uint; var nMb : mbStorage
 
 [c_function]
 def private h264_file_all__GetPredictionMv(var mv : mv_t?; var a : interNeighbour_t?; refIndex : uint) {
-    if (a[1].available != 0 || a[2].available != 0 || !(a[0].available != 0)) {
+    if (a[1].available != 0 || a[2].available != 0 || a[0].available == 0) {
         var isA : uint
         var isB : uint
         var isC : uint
@@ -6023,14 +6961,14 @@ def private h264_file_all__GetPredictionMv(var mv : mv_t?; var a : interNeighbou
             mv.hor = int16(h264_file_all__MedianFilter(int(a[0].mv.hor), int(a[1].mv.hor), int(a[2].mv.hor)))
             mv.ver = int16(h264_file_all__MedianFilter(int(a[0].mv.ver), int(a[1].mv.ver), int(a[2].mv.ver)))
         } elif (isA != 0) {
-            deref(mv) = a[0].mv
+            *mv = a[0].mv
         } elif (isB != 0) {
-            deref(mv) = a[1].mv
+            *mv = a[1].mv
         } else {
-            deref(mv) = a[2].mv
+            *mv = a[2].mv
         }
     } else {
-        deref(mv) = a[0].mv
+        *mv = a[0].mv
     }
 }
 
@@ -6062,7 +7000,8 @@ def get_h264bsdClip : uint8? {
 // HANTRO_NOK error in intra prediction
 // ------------------------------------------------------------------------------
 [c_function]
-def h264bsdIntraPrediction(var pMb : mbStorage?; var mbLayer : macroblockLayer_t?; var image : image_t?; mbNum : uint; constrainedIntraPred : uint; var data : uint8?) : uint {
+def h264bsdIntraPrediction(var pMb : mbStorage?; var mbLayer : macroblockLayer_t?; var image : image_t?; mbNum : uint; constrainedIntraPred : uint;
+                           var data : uint8?) : uint {
     // Variables
     // pelAbove and pelLeft contain samples above and left to the current
     // macroblock. Above array contains also sample above-left to the current
@@ -6086,7 +7025,8 @@ def h264bsdIntraPrediction(var pMb : mbStorage?; var mbLayer : macroblockLayer_t
             return tmp
         }
     }
-    tmp = h264bsdIntraChromaPrediction(pMb, data + 256, addr(mbLayer.residual.level[0]) + 16, addr(pelAbove[0]) + 21, addr(pelLeft[0]) + 16, mbLayer.mbPred.intraChromaPredMode, constrainedIntraPred)
+    tmp = h264bsdIntraChromaPrediction(pMb, data + 256, addr(mbLayer.residual.level[0]) + 16, addr(pelAbove[0]) + 21, addr(pelLeft[0]) + 16,
+            mbLayer.mbPred.intraChromaPredMode, constrainedIntraPred)
     if (tmp != uint(HANTRO_OK)) {
         return tmp
     }
@@ -6110,7 +7050,7 @@ def h264bsdGetNeighbourPels(var image : image_t?; var above : uint8?; var left :
     var row : uint
     var col : uint
     // Code
-    if (!(mbNum != 0)) {
+    if (mbNum == 0) {
         return
     }
     width = image.width
@@ -6130,29 +7070,29 @@ def h264bsdGetNeighbourPels(var image : image_t?; var above : uint8?; var left :
         while (true) {
             let _t0 = i
             i--
-            if (!(_t0 != 0)) {
+            if (_t0 == 0) {
                 break
             }
             var _t1 = above
-            above = above + 1
+            above++
             var _t2 = tmp
-            tmp = tmp + 1
-            deref(_t1) = deref(_t2)
+            tmp++
+            *_t1 = *_t2
         }
     }
     if (col != 0) {
-        ptr = ptr - 1
+        ptr--
         i = 16u
         while (true) {
             let _t3 = i
             i--
-            if (!(_t3 != 0)) {
+            if (_t3 == 0) {
                 break
             }
             var _t4 = left
-            left = left + 1
-            deref(_t4) = deref(ptr)
-            ptr = ptr + width
+            left++
+            *_t4 = *ptr
+            ptr += width
         }
     }
     width >>= 1u
@@ -6163,62 +7103,63 @@ def h264bsdGetNeighbourPels(var image : image_t?; var above : uint8?; var left :
         while (true) {
             let _t5 = i
             i--
-            if (!(_t5 != 0)) {
+            if (_t5 == 0) {
                 break
             }
             var _t6 = above
-            above = above + 1
+            above++
             var _t7 = tmp
-            tmp = tmp + 1
-            deref(_t6) = deref(_t7)
+            tmp++
+            *_t6 = *_t7
         }
-        tmp = tmp + ((picSize * 64u) - 9u)
+        tmp += (picSize * 64u) - 9u
         i = 9u
         while (true) {
             let _t8 = i
             i--
-            if (!(_t8 != 0)) {
+            if (_t8 == 0) {
                 break
             }
             var _t9 = above
-            above = above + 1
+            above++
             var _t10 = tmp
-            tmp = tmp + 1
-            deref(_t9) = deref(_t10)
+            tmp++
+            *_t9 = *_t10
         }
     }
     if (col != 0) {
-        ptr = ptr - 1
+        ptr--
         i = 8u
         while (true) {
             let _t11 = i
             i--
-            if (!(_t11 != 0)) {
+            if (_t11 == 0) {
                 break
             }
             var _t12 = left
-            left = left + 1
-            deref(_t12) = deref(ptr)
-            ptr = ptr + width
+            left++
+            *_t12 = *ptr
+            ptr += width
         }
-        ptr = ptr + ((picSize * 64u) - 8u * width)
+        ptr += (picSize * 64u) - 8u * width
         i = 8u
         while (true) {
             let _t13 = i
             i--
-            if (!(_t13 != 0)) {
+            if (_t13 == 0) {
                 break
             }
             var _t14 = left
-            left = left + 1
-            deref(_t14) = deref(ptr)
-            ptr = ptr + width
+            left++
+            *_t14 = *ptr
+            ptr += width
         }
     }
 }
 
 [c_function]
-def h264bsdIntra16x16Prediction(var pMb : mbStorage?; var data : uint8?; var residual : int[16]?; var above : uint8?; var left : uint8?; constrainedIntraPred : uint) : uint {
+def h264bsdIntra16x16Prediction(var pMb : mbStorage?; var data : uint8?; var residual : int[16]?; var above : uint8?; var left : uint8?;
+                                constrainedIntraPred : uint) : uint {
     // Variables
     var availableA : uint
     var availableB : uint
@@ -6236,28 +7177,36 @@ def h264bsdIntra16x16Prediction(var pMb : mbStorage?; var data : uint8?; var res
     if (availableD != 0 && constrainedIntraPred != 0 && (h264bsdMbPartPredMode(pMb.mbD.mbType) == mbPartPredMode_e.PRED_MODE_INTER)) {
         availableD = uint(HANTRO_FALSE)
     }
-    let _cond = h264bsdPredModeIntra16x16(pMb.mbType)
-    if (_cond == 0u) {
-        // Intra_16x16_Vertical
-        if (!(availableB != 0)) {
-            return uint(HANTRO_NOK)
+    c_switch(h264bsdPredModeIntra16x16(pMb.mbType)) {
+        case(0u) {
+            // Intra_16x16_Vertical
+            if (availableB == 0) {
+                return uint(HANTRO_NOK)
+            }
+            h264_file_all__Intra16x16VerticalPrediction(data, above + 1)
+            break
         }
-        h264_file_all__Intra16x16VerticalPrediction(data, above + 1)
-    } elif (_cond == 1u) {
-        // Intra_16x16_Horizontal
-        if (!(availableA != 0)) {
-            return uint(HANTRO_NOK)
+        case(1u) {
+            // Intra_16x16_Horizontal
+            if (availableA == 0) {
+                return uint(HANTRO_NOK)
+            }
+            h264_file_all__Intra16x16HorizontalPrediction(data, left)
+            break
         }
-        h264_file_all__Intra16x16HorizontalPrediction(data, left)
-    } elif (_cond == 2u) {
-        // Intra_16x16_DC
-        h264_file_all__Intra16x16DcPrediction(data, above + 1, left, availableA, availableB)
-    } else {
-        // case 3: Intra_16x16_Plane
-        if (!(availableA != 0) || !(availableB != 0) || !(availableD != 0)) {
-            return uint(HANTRO_NOK)
+        case(2u) {
+            // Intra_16x16_DC
+            h264_file_all__Intra16x16DcPrediction(data, above + 1, left, availableA, availableB)
+            break
         }
-        h264_file_all__Intra16x16PlanePrediction(data, above + 1, left)
+        case(_) {
+            // case 3: Intra_16x16_Plane
+            if (availableA == 0 || availableB == 0 || availableD == 0) {
+                return uint(HANTRO_NOK)
+            }
+            h264_file_all__Intra16x16PlanePrediction(data, above + 1, left)
+            break
+        }
     }
     // add residual
     for (i in urange(16u)) {
@@ -6267,7 +7216,8 @@ def h264bsdIntra16x16Prediction(var pMb : mbStorage?; var data : uint8?; var res
 }
 
 [c_function]
-def h264bsdIntra4x4Prediction(var pMb : mbStorage?; var data : uint8?; var mbLayer : macroblockLayer_t?; var above : uint8?; var left : uint8?; constrainedIntraPred : uint) : uint {
+def h264bsdIntra4x4Prediction(var pMb : mbStorage?; var data : uint8?; var mbLayer : macroblockLayer_t?; var above : uint8?; var left : uint8?;
+                              constrainedIntraPred : uint) : uint {
     // Variables
     var mode : uint
     var neighbour : neighbour_t
@@ -6283,97 +7233,116 @@ def h264bsdIntra4x4Prediction(var pMb : mbStorage?; var data : uint8?; var mbLay
     var availableD : uint
     // Code
     for (_c_block in urange(16u)) {
-        neighbour = deref(h264bsdNeighbour4x4BlockA(_c_block))
+        neighbour = *h264bsdNeighbour4x4BlockA(_c_block)
         nMb = h264bsdGetNeighbourMb(pMb, neighbour.mb)
         availableA = h264bsdIsNeighbourAvailable(pMb, nMb)
         if (availableA != 0 && constrainedIntraPred != 0 && (h264bsdMbPartPredMode(nMb.mbType) == mbPartPredMode_e.PRED_MODE_INTER)) {
             availableA = uint(HANTRO_FALSE)
         }
-        neighbourB = deref(h264bsdNeighbour4x4BlockB(_c_block))
+        neighbourB = *h264bsdNeighbour4x4BlockB(_c_block)
         nMb2 = h264bsdGetNeighbourMb(pMb, neighbourB.mb)
         availableB = h264bsdIsNeighbourAvailable(pMb, nMb2)
         if (availableB != 0 && constrainedIntraPred != 0 && (h264bsdMbPartPredMode(nMb2.mbType) == mbPartPredMode_e.PRED_MODE_INTER)) {
             availableB = uint(HANTRO_FALSE)
         }
-        mode = h264_file_all__DetermineIntra4x4PredMode(mbLayer, uint((availableA != 0 && availableB != 0) ? 1 : 0), addr(neighbour), addr(neighbourB), _c_block, nMb, nMb2)
+        mode = h264_file_all__DetermineIntra4x4PredMode(mbLayer, uint(int_of(availableA != 0 && availableB != 0)), addr(neighbour), addr(neighbourB), _c_block,
+                nMb, nMb2)
         pMb.intra4x4PredMode[_c_block] = uint8(mode)
-        neighbour = deref(h264bsdNeighbour4x4BlockC(_c_block))
+        neighbour = *h264bsdNeighbour4x4BlockC(_c_block)
         nMb = h264bsdGetNeighbourMb(pMb, neighbour.mb)
         availableC = h264bsdIsNeighbourAvailable(pMb, nMb)
         if (availableC != 0 && constrainedIntraPred != 0 && (h264bsdMbPartPredMode(nMb.mbType) == mbPartPredMode_e.PRED_MODE_INTER)) {
             availableC = uint(HANTRO_FALSE)
         }
-        neighbour = deref(h264bsdNeighbour4x4BlockD(_c_block))
+        neighbour = *h264bsdNeighbour4x4BlockD(_c_block)
         nMb = h264bsdGetNeighbourMb(pMb, neighbour.mb)
         availableD = h264bsdIsNeighbourAvailable(pMb, nMb)
         if (availableD != 0 && constrainedIntraPred != 0 && (h264bsdMbPartPredMode(nMb.mbType) == mbPartPredMode_e.PRED_MODE_INTER)) {
             availableD = uint(HANTRO_FALSE)
         }
         h264_file_all__Get4x4NeighbourPels(addr(a[0]), addr(l[0]), data, above, left, _c_block)
-        let _cond = mode
-        if (_cond == 0u) {
-            // Intra_4x4_Vertical
-            if (!(availableB != 0)) {
-                return uint(HANTRO_NOK)
+        c_switch(mode) {
+            case(0u) {
+                // Intra_4x4_Vertical
+                if (availableB == 0) {
+                    return uint(HANTRO_NOK)
+                }
+                h264_file_all__Intra4x4VerticalPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1)
+                break
             }
-            h264_file_all__Intra4x4VerticalPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1)
-        } elif (_cond == 1u) {
-            // Intra_4x4_Horizontal
-            if (!(availableA != 0)) {
-                return uint(HANTRO_NOK)
+            case(1u) {
+                // Intra_4x4_Horizontal
+                if (availableA == 0) {
+                    return uint(HANTRO_NOK)
+                }
+                h264_file_all__Intra4x4HorizontalPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(l[0]) + 1)
+                break
             }
-            h264_file_all__Intra4x4HorizontalPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(l[0]) + 1)
-        } elif (_cond == 2u) {
-            // Intra_4x4_DC
-            h264_file_all__Intra4x4DcPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1, addr(l[0]) + 1, availableA, availableB)
-        } elif (_cond == 3u) {
-            // Intra_4x4_Diagonal_Down_Left
-            if (!(availableB != 0)) {
-                return uint(HANTRO_NOK)
+            case(2u) {
+                // Intra_4x4_DC
+                h264_file_all__Intra4x4DcPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1, addr(l[0]) + 1, availableA, availableB)
+                break
             }
-            if (!(availableC != 0)) {
-                a[8] = a[4]
-                a[7] = a[8]
-                a[6] = a[7]
-                a[5] = a[6]
+            case(3u) {
+                // Intra_4x4_Diagonal_Down_Left
+                if (availableB == 0) {
+                    return uint(HANTRO_NOK)
+                }
+                if (availableC == 0) {
+                    a[8] = a[4]
+                    a[7] = a[8]
+                    a[6] = a[7]
+                    a[5] = a[6]
+                }
+                h264_file_all__Intra4x4DiagonalDownLeftPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1)
+                break
             }
-            h264_file_all__Intra4x4DiagonalDownLeftPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1)
-        } elif (_cond == 4u) {
-            // Intra_4x4_Diagonal_Down_Right
-            if (!(availableA != 0) || !(availableB != 0) || !(availableD != 0)) {
-                return uint(HANTRO_NOK)
+            case(4u) {
+                // Intra_4x4_Diagonal_Down_Right
+                if (availableA == 0 || availableB == 0 || availableD == 0) {
+                    return uint(HANTRO_NOK)
+                }
+                h264_file_all__Intra4x4DiagonalDownRightPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1, addr(l[0]) + 1)
+                break
             }
-            h264_file_all__Intra4x4DiagonalDownRightPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1, addr(l[0]) + 1)
-        } elif (_cond == 5u) {
-            // Intra_4x4_Vertical_Right
-            if (!(availableA != 0) || !(availableB != 0) || !(availableD != 0)) {
-                return uint(HANTRO_NOK)
+            case(5u) {
+                // Intra_4x4_Vertical_Right
+                if (availableA == 0 || availableB == 0 || availableD == 0) {
+                    return uint(HANTRO_NOK)
+                }
+                h264_file_all__Intra4x4VerticalRightPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1, addr(l[0]) + 1)
+                break
             }
-            h264_file_all__Intra4x4VerticalRightPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1, addr(l[0]) + 1)
-        } elif (_cond == 6u) {
-            // Intra_4x4_Horizontal_Down
-            if (!(availableA != 0) || !(availableB != 0) || !(availableD != 0)) {
-                return uint(HANTRO_NOK)
+            case(6u) {
+                // Intra_4x4_Horizontal_Down
+                if (availableA == 0 || availableB == 0 || availableD == 0) {
+                    return uint(HANTRO_NOK)
+                }
+                h264_file_all__Intra4x4HorizontalDownPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1, addr(l[0]) + 1)
+                break
             }
-            h264_file_all__Intra4x4HorizontalDownPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1, addr(l[0]) + 1)
-        } elif (_cond == 7u) {
-            // Intra_4x4_Vertical_Left
-            if (!(availableB != 0)) {
-                return uint(HANTRO_NOK)
+            case(7u) {
+                // Intra_4x4_Vertical_Left
+                if (availableB == 0) {
+                    return uint(HANTRO_NOK)
+                }
+                if (availableC == 0) {
+                    a[8] = a[4]
+                    a[7] = a[8]
+                    a[6] = a[7]
+                    a[5] = a[6]
+                }
+                h264_file_all__Intra4x4VerticalLeftPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1)
+                break
             }
-            if (!(availableC != 0)) {
-                a[8] = a[4]
-                a[7] = a[8]
-                a[6] = a[7]
-                a[5] = a[6]
+            case(_) {
+                // case 8 Intra_4x4_Horizontal_Up
+                if (availableA == 0) {
+                    return uint(HANTRO_NOK)
+                }
+                h264_file_all__Intra4x4HorizontalUpPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(l[0]) + 1)
+                break
             }
-            h264_file_all__Intra4x4VerticalLeftPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(a[0]) + 1)
-        } else {
-            // case 8 Intra_4x4_Horizontal_Up
-            if (!(availableA != 0)) {
-                return uint(HANTRO_NOK)
-            }
-            h264_file_all__Intra4x4HorizontalUpPrediction(reinterpret<uint8?>(addr(data4x4[0])), addr(l[0]) + 1)
         }
         h264_file_all__Write4x4To16x16(data, reinterpret<uint8?>(addr(data4x4[0])), _c_block)
         h264bsdAddResidual(data, addr(mbLayer.residual.level[_c_block][0]), _c_block)
@@ -6382,7 +7351,8 @@ def h264bsdIntra4x4Prediction(var pMb : mbStorage?; var data : uint8?; var mbLay
 }
 
 [c_function]
-def h264bsdIntraChromaPrediction(var pMb : mbStorage?; var data : uint8?; var residual : int[16]?; var above : uint8?; var left : uint8?; predMode : uint; constrainedIntraPred : uint) : uint {
+def h264bsdIntraChromaPrediction(var pMb : mbStorage?; var data : uint8?; var residual : int[16]?; var above : uint8?; var left : uint8?; predMode : uint;
+                                 constrainedIntraPred : uint) : uint {
     // Variables
     var i : uint
     var comp : uint
@@ -6406,28 +7376,36 @@ def h264bsdIntraChromaPrediction(var pMb : mbStorage?; var data : uint8?; var re
     comp = 0u
     _c_block = 16u
     while (comp < 2u) {
-        let _cond = predMode
-        if (_cond == 0u) {
-            // Intra_Chroma_DC
-            h264_file_all__IntraChromaDcPrediction(data, above + 1, left, availableA, availableB)
-        } elif (_cond == 1u) {
-            // Intra_Chroma_Horizontal
-            if (!(availableA != 0)) {
-                return uint(HANTRO_NOK)
+        c_switch(predMode) {
+            case(0u) {
+                // Intra_Chroma_DC
+                h264_file_all__IntraChromaDcPrediction(data, above + 1, left, availableA, availableB)
+                break
             }
-            h264_file_all__IntraChromaHorizontalPrediction(data, left)
-        } elif (_cond == 2u) {
-            // Intra_Chroma_Vertical
-            if (!(availableB != 0)) {
-                return uint(HANTRO_NOK)
+            case(1u) {
+                // Intra_Chroma_Horizontal
+                if (availableA == 0) {
+                    return uint(HANTRO_NOK)
+                }
+                h264_file_all__IntraChromaHorizontalPrediction(data, left)
+                break
             }
-            h264_file_all__IntraChromaVerticalPrediction(data, above + 1)
-        } else {
-            // case 3: Intra_Chroma_Plane
-            if (!(availableA != 0) || !(availableB != 0) || !(availableD != 0)) {
-                return uint(HANTRO_NOK)
+            case(2u) {
+                // Intra_Chroma_Vertical
+                if (availableB == 0) {
+                    return uint(HANTRO_NOK)
+                }
+                h264_file_all__IntraChromaVerticalPrediction(data, above + 1)
+                break
             }
-            h264_file_all__IntraChromaPlanePrediction(data, above + 1, left)
+            case(_) {
+                // case 3: Intra_Chroma_Plane
+                if (availableA == 0 || availableB == 0 || availableD == 0) {
+                    return uint(HANTRO_NOK)
+                }
+                h264_file_all__IntraChromaPlanePrediction(data, above + 1, left)
+                break
+            }
         }
         i = 0u
         while (i < 4u) {
@@ -6436,10 +7414,10 @@ def h264bsdIntraChromaPrediction(var pMb : mbStorage?; var data : uint8?; var re
             _c_block++
         }
         // advance pointers
-        data = data + 64
-        above = above + 9
-        left = left + 8
-        residual = residual + 4
+        data += 64
+        above += 9
+        left += 8
+        residual += 4
         comp++
     }
     return uint(HANTRO_OK)
@@ -6481,28 +7459,28 @@ def h264bsdAddResidual(var data : uint8?; var residual : int?; blockNum : uint) 
     i = 4u
     while (i != 0) {
         var _t0 = residual
-        residual = residual + 1
-        tmp1 = deref(_t0)
+        residual++
+        tmp1 = *_t0
         tmp2 = int(tmp[0])
         var _t1 = residual
-        residual = residual + 1
-        tmp3 = deref(_t1)
+        residual++
+        tmp3 = *_t1
         tmp4 = int(tmp[1])
         tmp[0] = clp[tmp1 + tmp2]
         var _t2 = residual
-        residual = residual + 1
-        tmp1 = deref(_t2)
+        residual++
+        tmp1 = *_t2
         tmp2 = int(tmp[2])
         tmp[1] = clp[tmp3 + tmp4]
         var _t3 = residual
-        residual = residual + 1
-        tmp3 = deref(_t3)
+        residual++
+        tmp3 = *_t3
         tmp4 = int(tmp[3])
         tmp1 = int(clp[tmp1 + tmp2])
         tmp3 = int(clp[tmp3 + tmp4])
         tmp[2] = uint8(tmp1)
         tmp[3] = uint8(tmp3)
-        tmp = tmp + width
+        tmp += width
         i--
     }
 }
@@ -6514,8 +7492,8 @@ def private h264_file_all__Intra16x16VerticalPrediction(var data : uint8?; var a
     for (i in urange(16u)) {
         for (j in urange(16u)) {
             var _t0 = data
-            data = data + 1
-            deref(_t0) = above[j]
+            data++
+            *_t0 = above[j]
         }
     }
 }
@@ -6527,8 +7505,8 @@ def private h264_file_all__Intra16x16HorizontalPrediction(var data : uint8?; var
     for (i in urange(16u)) {
         for (j in urange(16u)) {
             var _t0 = data
-            data = data + 1
-            deref(_t0) = left[i]
+            data++
+            *_t0 = left[i]
         }
     }
 }
@@ -6633,33 +7611,33 @@ def private h264_file_all__IntraChromaDcPrediction(var data : uint8?; var above 
     while (true) {
         let _t0 = i
         i--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         var _t1 = data
-        data = data + 1
-        deref(_t1) = uint8(tmp1)
+        data++
+        *_t1 = uint8(tmp1)
         var _t2 = data
-        data = data + 1
-        deref(_t2) = uint8(tmp1)
+        data++
+        *_t2 = uint8(tmp1)
         var _t3 = data
-        data = data + 1
-        deref(_t3) = uint8(tmp1)
+        data++
+        *_t3 = uint8(tmp1)
         var _t4 = data
-        data = data + 1
-        deref(_t4) = uint8(tmp1)
+        data++
+        *_t4 = uint8(tmp1)
         var _t5 = data
-        data = data + 1
-        deref(_t5) = uint8(tmp2)
+        data++
+        *_t5 = uint8(tmp2)
         var _t6 = data
-        data = data + 1
-        deref(_t6) = uint8(tmp2)
+        data++
+        *_t6 = uint8(tmp2)
         var _t7 = data
-        data = data + 1
-        deref(_t7) = uint8(tmp2)
+        data++
+        *_t7 = uint8(tmp2)
         var _t8 = data
-        data = data + 1
-        deref(_t8) = uint8(tmp2)
+        data++
+        *_t8 = uint8(tmp2)
     }
     // y = 4...7
     if (availableA != 0) {
@@ -6681,33 +7659,33 @@ def private h264_file_all__IntraChromaDcPrediction(var data : uint8?; var above 
     while (true) {
         let _t9 = i
         i--
-        if (!(_t9 != 0)) {
+        if (_t9 == 0) {
             break
         }
         var _t10 = data
-        data = data + 1
-        deref(_t10) = uint8(tmp1)
+        data++
+        *_t10 = uint8(tmp1)
         var _t11 = data
-        data = data + 1
-        deref(_t11) = uint8(tmp1)
+        data++
+        *_t11 = uint8(tmp1)
         var _t12 = data
-        data = data + 1
-        deref(_t12) = uint8(tmp1)
+        data++
+        *_t12 = uint8(tmp1)
         var _t13 = data
-        data = data + 1
-        deref(_t13) = uint8(tmp1)
+        data++
+        *_t13 = uint8(tmp1)
         var _t14 = data
-        data = data + 1
-        deref(_t14) = uint8(tmp2)
+        data++
+        *_t14 = uint8(tmp2)
         var _t15 = data
-        data = data + 1
-        deref(_t15) = uint8(tmp2)
+        data++
+        *_t15 = uint8(tmp2)
         var _t16 = data
-        data = data + 1
-        deref(_t16) = uint8(tmp2)
+        data++
+        *_t16 = uint8(tmp2)
         var _t17 = data
-        data = data + 1
-        deref(_t17) = uint8(tmp2)
+        data++
+        *_t17 = uint8(tmp2)
     }
 }
 
@@ -6720,35 +7698,35 @@ def private h264_file_all__IntraChromaHorizontalPrediction(var data : uint8?; va
     while (true) {
         let _t0 = i
         i--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         var _t1 = data
-        data = data + 1
-        deref(_t1) = deref(left)
+        data++
+        *_t1 = *left
         var _t2 = data
-        data = data + 1
-        deref(_t2) = deref(left)
+        data++
+        *_t2 = *left
         var _t3 = data
-        data = data + 1
-        deref(_t3) = deref(left)
+        data++
+        *_t3 = *left
         var _t4 = data
-        data = data + 1
-        deref(_t4) = deref(left)
+        data++
+        *_t4 = *left
         var _t5 = data
-        data = data + 1
-        deref(_t5) = deref(left)
+        data++
+        *_t5 = *left
         var _t6 = data
-        data = data + 1
-        deref(_t6) = deref(left)
+        data++
+        *_t6 = *left
         var _t7 = data
-        data = data + 1
-        deref(_t7) = deref(left)
+        data++
+        *_t7 = *left
         var _t8 = data
-        data = data + 1
+        data++
         var _t9 = left
-        left = left + 1
-        deref(_t8) = deref(_t9)
+        left++
+        *_t8 = *_t9
     }
 }
 
@@ -6762,20 +7740,20 @@ def private h264_file_all__IntraChromaVerticalPrediction(var data : uint8?; var 
     while (true) {
         let _t0 = i
         i--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
-        data[0] = deref(above)
-        data[8] = deref(above)
-        data[16] = deref(above)
-        data[24] = deref(above)
-        data[32] = deref(above)
-        data[40] = deref(above)
-        data[48] = deref(above)
+        data[0] = *above
+        data[8] = *above
+        data[16] = *above
+        data[24] = *above
+        data[32] = *above
+        data[40] = *above
+        data[48] = *above
         var _t1 = above
-        above = above + 1
-        data[56] = deref(_t1)
-        data = data + 1
+        above++
+        data[56] = *_t1
+        data++
     }
 }
 
@@ -6801,41 +7779,41 @@ def private h264_file_all__IntraChromaPlanePrediction(var data : uint8?; var abo
     while (true) {
         let _t0 = i
         i--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         tmp = a - 3 * b
         var _t1 = data
-        data = data + 1
-        deref(_t1) = clp[tmp >> 5]
+        data++
+        *_t1 = clp[tmp >> 5]
         tmp += b
         var _t2 = data
-        data = data + 1
-        deref(_t2) = clp[tmp >> 5]
+        data++
+        *_t2 = clp[tmp >> 5]
         tmp += b
         var _t3 = data
-        data = data + 1
-        deref(_t3) = clp[tmp >> 5]
+        data++
+        *_t3 = clp[tmp >> 5]
         tmp += b
         var _t4 = data
-        data = data + 1
-        deref(_t4) = clp[tmp >> 5]
+        data++
+        *_t4 = clp[tmp >> 5]
         tmp += b
         var _t5 = data
-        data = data + 1
-        deref(_t5) = clp[tmp >> 5]
+        data++
+        *_t5 = clp[tmp >> 5]
         tmp += b
         var _t6 = data
-        data = data + 1
-        deref(_t6) = clp[tmp >> 5]
+        data++
+        *_t6 = clp[tmp >> 5]
         tmp += b
         var _t7 = data
-        data = data + 1
-        deref(_t7) = clp[tmp >> 5]
+        data++
+        *_t7 = clp[tmp >> 5]
         tmp += b
         var _t8 = data
-        data = data + 1
-        deref(_t8) = clp[tmp >> 5]
+        data++
+        *_t8 = clp[tmp >> 5]
         a += c
     }
 }
@@ -7171,33 +8149,34 @@ def private h264_file_all__Write4x4To16x16(var data : uint8?; var data4x4 : uint
     // Code
     x = h264bsdBlockX[blockNum]
     y = h264bsdBlockY[blockNum]
-    data = data + (y * 16u + x)
+    data += y * 16u + x
     // lint --e(826)
     out32 = reinterpret<uint?>(data)
     // lint --e(826)
     in32 = reinterpret<uint?>(data4x4)
     var _t0 = in32
-    in32 = in32 + 1
-    out32[0] = deref(_t0)
+    in32++
+    out32[0] = *_t0
     var _t1 = in32
-    in32 = in32 + 1
-    out32[4] = deref(_t1)
+    in32++
+    out32[4] = *_t1
     var _t2 = in32
-    in32 = in32 + 1
-    out32[8] = deref(_t2)
+    in32++
+    out32[8] = *_t2
     var _t3 = in32
-    in32 = in32 + 1
-    out32[12] = deref(_t3)
+    in32++
+    out32[12] = *_t3
 }
 
-def private h264_file_all__DetermineIntra4x4PredMode(var pMbLayer : macroblockLayer_t?; available : uint; var nA : neighbour_t?; var nB : neighbour_t?; index : uint; var nMbA : mbStorage?; var nMbB : mbStorage?) : uint {
+def private h264_file_all__DetermineIntra4x4PredMode(var pMbLayer : macroblockLayer_t?; available : uint; var nA : neighbour_t?; var nB : neighbour_t?;
+                                                     index : uint; var nMbA : mbStorage?; var nMbB : mbStorage?) : uint {
     // Variables
     var mode1 : uint
     var mode2 : uint
     var pMb : mbStorage?
     // Code
     // dc only prediction?
-    if (!(available != 0)) {
+    if (available == 0) {
         mode1 = 2u
     } else {
         pMb = nMbA
@@ -7214,7 +8193,7 @@ def private h264_file_all__DetermineIntra4x4PredMode(var pMbLayer : macroblockLa
         }
         mode1 = mode1 < mode2 ? mode1 : mode2
     }
-    if (!(pMbLayer.mbPred.prevIntra4x4PredModeFlag[index] != 0)) {
+    if (pMbLayer.mbPred.prevIntra4x4PredModeFlag[index] == 0) {
         if (pMbLayer.mbPred.remIntra4x4PredMode[index] < mode1) {
             mode1 = pMbLayer.mbPred.remIntra4x4PredMode[index]
         } else {
@@ -7225,7 +8204,8 @@ def private h264_file_all__DetermineIntra4x4PredMode(var pMbLayer : macroblockLa
 }
 
 [c_function]
-def h264bsdDecodeMacroblockLayer(var pStrmData : strmData_t?; var pMbLayer : macroblockLayer_t?; var pMb : mbStorage?; sliceType : uint; numRefIdxActive : uint) : uint {
+def h264bsdDecodeMacroblockLayer(var pStrmData : strmData_t?; var pMbLayer : macroblockLayer_t?; var pMb : mbStorage?; sliceType : uint;
+                                 numRefIdxActive : uint) : uint {
     // Variables
     var tmp : uint
     var value : uint
@@ -7234,7 +8214,7 @@ def h264bsdDecodeMacroblockLayer(var pStrmData : strmData_t?; var pMbLayer : mac
     // Code
     memset1(reinterpret<void?>(pMbLayer), 0, uint64(typeinfo sizeof(type<macroblockLayer_t>)))
     tmp = h264bsdDecodeExpGolombUnsigned(pStrmData, addr(value))
-    if (sliceType == uint(int(anon_104.I_SLICE)) || sliceType == uint(int(anon_104.I_SLICE) + 5)) {
+    if (sliceType == uint(anon_104.I_SLICE) || sliceType == uint(int(anon_104.I_SLICE) + 5)) {
         if ((value + 6u) > 31u || tmp != uint(HANTRO_OK)) {
             return uint(HANTRO_NOK)
         }
@@ -7247,7 +8227,7 @@ def h264bsdDecodeMacroblockLayer(var pStrmData : strmData_t?; var pMbLayer : mac
     }
     if (pMbLayer.mbType == mbType_e.I_PCM) {
         var level : int?
-        while (!(h264bsdIsByteAligned(pStrmData) != 0)) {
+        while (h264bsdIsByteAligned(pStrmData) == 0) {
             // pcm_alignment_zero_bit
             tmp = h264bsdGetBits(pStrmData, 1u)
             if (tmp != 0) {
@@ -7261,8 +8241,8 @@ def h264bsdDecodeMacroblockLayer(var pStrmData : strmData_t?; var pMbLayer : mac
                 return uint(HANTRO_NOK)
             }
             var _t0 = level
-            level = level + 1
-            deref(_t0) = int(value)
+            level++
+            *_t0 = int(value)
         }
     } else {
         partMode = h264bsdMbPartPredMode(pMbLayer.mbType)
@@ -7275,7 +8255,7 @@ def h264bsdDecodeMacroblockLayer(var pStrmData : strmData_t?; var pMbLayer : mac
             return tmp
         }
         if (partMode != mbPartPredMode_e.PRED_MODE_INTRA16x16) {
-            tmp = h264bsdDecodeExpGolombMapped(pStrmData, addr(value), uint((partMode == mbPartPredMode_e.PRED_MODE_INTRA4x4) ? 1 : 0))
+            tmp = h264bsdDecodeExpGolombMapped(pStrmData, addr(value), uint(int_of(partMode == mbPartPredMode_e.PRED_MODE_INTRA4x4)))
             if (tmp != uint(HANTRO_OK)) {
                 return tmp
             }
@@ -7302,7 +8282,7 @@ def h264bsdDecodeMacroblockLayer(var pStrmData : strmData_t?; var pMbLayer : mac
 def h264bsdMbPartPredMode(mbType : mbType_e) : mbPartPredMode_e {
     // Variables
     // Code
-    if (uint(int(mbType)) <= uint(int(mbType_e.P_8x8ref0))) {
+    if (uint(mbType) <= uint(mbType_e.P_8x8ref0)) {
         return mbPartPredMode_e.PRED_MODE_INTER
     } elif (mbType == mbType_e.I_4x4) {
         return mbPartPredMode_e.PRED_MODE_INTRA4x4
@@ -7314,28 +8294,34 @@ def h264bsdMbPartPredMode(mbType : mbType_e) : mbPartPredMode_e {
 def h264bsdNumMbPart(mbType : mbType_e) : uint {
     // Variables
     // Code
-    let _cond = mbType
-    if (_cond == mbType_e.P_L0_16x16 || _cond == mbType_e.P_Skip) {
-        return 1u
-    } elif (_cond == mbType_e.P_L0_L0_16x8 || _cond == mbType_e.P_L0_L0_8x16) {
-        return 2u
-    } else {
-        // P_8x8 or P_8x8ref0
-        return 4u
+    c_switch(mbType) {
+        case(mbType_e.P_L0_16x16, mbType_e.P_Skip) {
+            return 1u
+        }
+        case(mbType_e.P_L0_L0_16x8, mbType_e.P_L0_L0_8x16) {
+            return 2u
+        }
+        case(_) {
+            // P_8x8 or P_8x8ref0
+            return 4u
+        }
     }
 }
 
 def h264bsdNumSubMbPart(subMbType : subMbType_e) : uint {
     // Variables
     // Code
-    let _cond = subMbType
-    if (_cond == subMbType_e.P_L0_8x8) {
-        return 1u
-    } elif (_cond == subMbType_e.P_L0_8x4 || _cond == subMbType_e.P_L0_4x8) {
-        return 2u
-    } else {
-        // P_L0_4x4
-        return 4u
+    c_switch(subMbType) {
+        case(subMbType_e.P_L0_8x8) {
+            return 1u
+        }
+        case(subMbType_e.P_L0_8x4, subMbType_e.P_L0_4x8) {
+            return 2u
+        }
+        case(_) {
+            // P_L0_4x4
+            return 4u
+        }
     }
 }
 
@@ -7348,10 +8334,8 @@ def private h264_file_all__DecodeMbPred(var pStrmData : strmData_t?; var pMbPred
     var value : uint
     var itmp : int
     // Code
-    let _cond = h264bsdMbPartPredMode(mbType)
-    while (true) {
-        var _flag = false
-        if (_cond == mbPartPredMode_e.PRED_MODE_INTER) {
+    c_switch(h264bsdMbPartPredMode(mbType)) {
+        case(mbPartPredMode_e.PRED_MODE_INTER) {
             // PRED_MODE_INTER
             if (numRefIdxActive > 1u) {
                 i = h264bsdNumMbPart(mbType)
@@ -7359,10 +8343,10 @@ def private h264_file_all__DecodeMbPred(var pStrmData : strmData_t?; var pMbPred
                 while (true) {
                     let _t0 = i
                     i--
-                    if (!(_t0 != 0)) {
+                    if (_t0 == 0) {
                         break
                     }
-                    tmp = h264bsdDecodeExpGolombTruncated(pStrmData, addr(value), uint((numRefIdxActive > 2u) ? 1 : 0))
+                    tmp = h264bsdDecodeExpGolombTruncated(pStrmData, addr(value), uint(int_of(numRefIdxActive > 2u)))
                     if (tmp != uint(HANTRO_OK) || value >= numRefIdxActive) {
                         return uint(HANTRO_NOK)
                     }
@@ -7375,7 +8359,7 @@ def private h264_file_all__DecodeMbPred(var pStrmData : strmData_t?; var pMbPred
             while (true) {
                 let _t1 = i
                 i--
-                if (!(_t1 != 0)) {
+                if (_t1 == 0) {
                     break
                 }
                 tmp = h264bsdDecodeExpGolombSigned(pStrmData, addr(itmp))
@@ -7392,8 +8376,7 @@ def private h264_file_all__DecodeMbPred(var pStrmData : strmData_t?; var pMbPred
             }
             break
         }
-        _flag ||= _cond == mbPartPredMode_e.PRED_MODE_INTRA4x4
-        if (_flag) {
+        case(mbPartPredMode_e.PRED_MODE_INTRA4x4) {
             itmp = 0
             i = 0u
             while (itmp < 2) {
@@ -7403,12 +8386,12 @@ def private h264_file_all__DecodeMbPred(var pStrmData : strmData_t?; var pMbPred
                 while (true) {
                     let _t2 = j
                     j--
-                    if (!(_t2 != 0)) {
+                    if (_t2 == 0) {
                         break
                     }
                     pMbPred.prevIntra4x4PredModeFlag[i] = uint((value & 2147483648u) != 0 ? HANTRO_TRUE : HANTRO_FALSE)
                     value <<= 1u
-                    if (!(pMbPred.prevIntra4x4PredModeFlag[i] != 0)) {
+                    if (pMbPred.prevIntra4x4PredModeFlag[i] == 0) {
                         pMbPred.remIntra4x4PredMode[i] = value >> 29u
                         value <<= 3u
                         tmp++
@@ -7421,8 +8404,7 @@ def private h264_file_all__DecodeMbPred(var pStrmData : strmData_t?; var pMbPred
                 itmp++
             }
         }
-        _flag ||= _cond == mbPartPredMode_e.PRED_MODE_INTRA16x16
-        if (_flag) {
+        case(mbPartPredMode_e.PRED_MODE_INTRA16x16) {
             // fall-through
             tmp = h264bsdDecodeExpGolombUnsigned(pStrmData, addr(value))
             if (tmp != uint(HANTRO_OK) || value > 3u) {
@@ -7431,7 +8413,6 @@ def private h264_file_all__DecodeMbPred(var pStrmData : strmData_t?; var pMbPred
             pMbPred.intraChromaPredMode = value
             break
         }
-        break
     }
     return uint(HANTRO_OK)
 }
@@ -7453,7 +8434,7 @@ def private h264_file_all__DecodeSubMbPred(var pStrmData : strmData_t?; var pSub
     }
     if ((numRefIdxActive > 1u) && (mbType != mbType_e.P_8x8ref0)) {
         for (i in urange(4u)) {
-            tmp = h264bsdDecodeExpGolombTruncated(pStrmData, addr(value), uint((numRefIdxActive > 2u) ? 1 : 0))
+            tmp = h264bsdDecodeExpGolombTruncated(pStrmData, addr(value), uint(int_of(numRefIdxActive > 2u)))
             if (tmp != uint(HANTRO_OK) || value >= numRefIdxActive) {
                 return uint(HANTRO_NOK)
             }
@@ -7466,7 +8447,7 @@ def private h264_file_all__DecodeSubMbPred(var pStrmData : strmData_t?; var pSub
         while (true) {
             let _t0 = value
             value--
-            if (!(_t0 != 0)) {
+            if (_t0 == 0) {
                 break
             }
             tmp = h264bsdDecodeExpGolombSigned(pStrmData, addr(itmp))
@@ -7486,7 +8467,8 @@ def private h264_file_all__DecodeSubMbPred(var pStrmData : strmData_t?; var pSub
 }
 
 [c_function]
-def private h264_file_all__DecodeResidual(var pStrmData : strmData_t?; var pResidual : residual_t?; var pMb : mbStorage?; mbType : mbType_e; var codedBlockPattern : uint) : uint {
+def private h264_file_all__DecodeResidual(var pStrmData : strmData_t?; var pResidual : residual_t?; var pMb : mbStorage?; mbType : mbType_e;
+                                          var codedBlockPattern : uint) : uint {
     // Variables
     var i : uint
     var j : uint
@@ -7515,7 +8497,7 @@ def private h264_file_all__DecodeResidual(var pStrmData : strmData_t?; var pResi
     while (true) {
         let _t0 = i
         i--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         // luma cbp in bits 0-3
@@ -7526,7 +8508,7 @@ def private h264_file_all__DecodeResidual(var pStrmData : strmData_t?; var pResi
             while (true) {
                 let _t1 = j
                 j--
-                if (!(_t1 != 0)) {
+                if (_t1 == 0) {
                     break
                 }
                 nc = int(h264_file_all__DetermineNc(pMb, blockIndex, addr(pResidual.totalCoeff[0])))
@@ -7568,7 +8550,7 @@ def private h264_file_all__DecodeResidual(var pStrmData : strmData_t?; var pResi
         while (true) {
             let _t2 = i
             i--
-            if (!(_t2 != 0)) {
+            if (_t2 == 0) {
                 break
             }
             nc = int(h264_file_all__DetermineNc(pMb, blockIndex, addr(pResidual.totalCoeff[0])))
@@ -7636,7 +8618,7 @@ def private h264_file_all__CbpIntra16x16(mbType : mbType_e) : uint {
     var cbp : uint
     var tmp : uint
     // Code
-    if (uint(int(mbType)) >= uint(int(mbType_e.I_16x16_0_0_1))) {
+    if (uint(mbType) >= uint(mbType_e.I_16x16_0_0_1)) {
         cbp = 15u
     } else {
         cbp = 0u
@@ -7644,7 +8626,7 @@ def private h264_file_all__CbpIntra16x16(mbType : mbType_e) : uint {
     // tmp is 0 for I_16x16_0_0_0 mb type
     // ignore lint warning on arithmetic on enum's
     // lint -e(656)
-    tmp = (uint(int(mbType)) - uint(int(mbType_e.I_16x16_0_0_0))) >> 2u
+    tmp = (uint(mbType) - uint(mbType_e.I_16x16_0_0_0)) >> 2u
     if (tmp > 2u) {
         tmp -= 3u
     }
@@ -7659,12 +8641,13 @@ def h264bsdPredModeIntra16x16(mbType : mbType_e) : uint {
     // tmp is 0 for I_16x16_0_0_0 mb type
     // ignore lint warning on arithmetic on enum's
     // lint -e(656)
-    tmp = uint(int(mbType)) - uint(int(mbType_e.I_16x16_0_0_0))
+    tmp = uint(mbType) - uint(mbType_e.I_16x16_0_0_0)
     return tmp & 3u
 }
 
 [c_function]
-def h264bsdDecodeMacroblock(var pMb : mbStorage?; var pMbLayer : macroblockLayer_t?; var currImage : image_t?; var dpb : dpbStorage_t?; var qpY : int?; mbNum : uint; constrainedIntraPredFlag : uint; var data : uint8?) : uint {
+def h264bsdDecodeMacroblock(var pMb : mbStorage?; var pMbLayer : macroblockLayer_t?; var currImage : image_t?; var dpb : dpbStorage_t?; var qpY : int?;
+                            mbNum : uint; constrainedIntraPredFlag : uint; var data : uint8?) : uint {
     // Variables
     var i : uint
     var tmp : uint
@@ -7686,12 +8669,12 @@ def h264bsdDecodeMacroblock(var pMb : mbStorage?; var pMbLayer : macroblockLayer
             while (true) {
                 let _t0 = i
                 i--
-                if (!(_t0 != 0)) {
+                if (_t0 == 0) {
                     break
                 }
                 var _t1 = tot
-                tot = tot + 1
-                deref(_t1) = int16(16)
+                tot++
+                *_t1 = int16(16)
             }
             return uint(HANTRO_OK)
         }
@@ -7699,48 +8682,49 @@ def h264bsdDecodeMacroblock(var pMb : mbStorage?; var pMbLayer : macroblockLayer
         while (true) {
             let _t2 = i
             i--
-            if (!(_t2 != 0)) {
+            if (_t2 == 0) {
                 break
             }
             var _t3 = tot
-            tot = tot + 1
-            deref(_t3) = int16(16)
+            tot++
+            *_t3 = int16(16)
             tmp = 16u
             while (true) {
                 let _t4 = tmp
                 tmp--
-                if (!(_t4 != 0)) {
+                if (_t4 == 0) {
                     break
                 }
                 var _t5 = pData
-                pData = pData + 1
+                pData++
                 var _t6 = lev
-                lev = lev + 1
-                deref(_t5) = uint8(deref(_t6))
+                lev++
+                *_t5 = uint8(*_t6)
             }
         }
         h264bsdWriteMacroblock(currImage, data)
         return uint(HANTRO_OK)
     } else {
         if (mbType != mbType_e.P_Skip) {
-            memcpy1(reinterpret<void?>(addr(pMb.totalCoeff[0])), reinterpret<void?>(addr(pMbLayer.residual.totalCoeff[0])), 27ul * uint64(typeinfo sizeof(type<int16>)))
+            memcpy1(reinterpret<void?>(addr(pMb.totalCoeff[0])), reinterpret<void?>(addr(pMbLayer.residual.totalCoeff[0])),
+                    27ul * uint64(typeinfo sizeof(type<int16>)))
             // update qpY
             if (pMbLayer.mbQpDelta != 0) {
-                deref(qpY) += pMbLayer.mbQpDelta
-                if (deref(qpY) < 0) {
-                    deref(qpY) += 52
-                } elif (deref(qpY) >= 52) {
-                    deref(qpY) -= 52
+                *qpY += pMbLayer.mbQpDelta
+                if (*qpY < 0) {
+                    *qpY += 52
+                } elif (*qpY >= 52) {
+                    *qpY -= 52
                 }
             }
-            pMb.qpY = uint(deref(qpY))
+            pMb.qpY = uint(*qpY)
             tmp = h264_file_all__ProcessResidual(pMb, addr(pMbLayer.residual.level[0]), addr(pMbLayer.residual.coeffMap[0]))
             if (tmp != uint(HANTRO_OK)) {
                 return tmp
             }
         } else {
             memset1(reinterpret<void?>(addr(pMb.totalCoeff[0])), 0, 27ul * uint64(typeinfo sizeof(type<int16>)))
-            pMb.qpY = uint(deref(qpY))
+            pMb.qpY = uint(*qpY)
         }
         // if decoded flag > 1 -> mb has already been successfully decoded and
         // written to output -> do not write again
@@ -7776,53 +8760,54 @@ def private h264_file_all__ProcessResidual(var pMb : mbStorage?; var residualLev
     totalCoeff = addr(pMb.totalCoeff[0])
     if (h264bsdMbPartPredMode(pMb.mbType) == mbPartPredMode_e.PRED_MODE_INTRA16x16) {
         if (totalCoeff[24] != 0) {
-            h264bsdProcessLumaDc(addr(deref(blockDc)[0]), pMb.qpY)
+            h264bsdProcessLumaDc(addr((*blockDc)[0]), pMb.qpY)
         }
         dcCoeffIdx = addr(h264_file_all__dcCoeffIndex[0])
         i = 16u
         while (true) {
             let _t0 = i
             i--
-            if (!(_t0 != 0)) {
+            if (_t0 == 0) {
                 break
             }
             // set dc coefficient of luma block
             var _t1 = dcCoeffIdx
-            dcCoeffIdx = dcCoeffIdx + 1
-            deref(blockData)[0] = deref(blockDc)[deref(_t1)]
-            if (deref(blockData)[0] != 0 || deref(totalCoeff) != 0) {
-                if (h264bsdProcessBlock(addr(deref(blockData)[0]), pMb.qpY, 1u, deref(coeffMap)) != uint(HANTRO_OK)) {
+            dcCoeffIdx++
+            (*blockData)[0] = (*blockDc)[*_t1]
+            if ((*blockData)[0] != 0 || *totalCoeff != 0) {
+                if (h264bsdProcessBlock(addr((*blockData)[0]), pMb.qpY, 1u, *coeffMap) != uint(HANTRO_OK)) {
                     return uint(HANTRO_NOK)
                 }
             } else {
-                deref(blockData)[0] = EMPTY_RESIDUAL_INDICATOR
+                (*blockData)[0] = EMPTY_RESIDUAL_INDICATOR
             }
-            blockData = blockData + 1
-            totalCoeff = totalCoeff + 1
-            coeffMap = coeffMap + 1
+            blockData++
+            totalCoeff++
+            coeffMap++
         }
     } else {
         i = 16u
         while (true) {
             let _t2 = i
             i--
-            if (!(_t2 != 0)) {
+            if (_t2 == 0) {
                 break
             }
-            if (deref(totalCoeff) != 0) {
-                if (h264bsdProcessBlock(addr(deref(blockData)[0]), pMb.qpY, 0u, deref(coeffMap)) != uint(HANTRO_OK)) {
+            if (*totalCoeff != 0) {
+                if (h264bsdProcessBlock(addr((*blockData)[0]), pMb.qpY, 0u, *coeffMap) != uint(HANTRO_OK)) {
                     return uint(HANTRO_NOK)
                 }
             } else {
-                deref(blockData)[0] = EMPTY_RESIDUAL_INDICATOR
+                (*blockData)[0] = EMPTY_RESIDUAL_INDICATOR
             }
-            blockData = blockData + 1
-            totalCoeff = totalCoeff + 1
-            coeffMap = coeffMap + 1
+            blockData++
+            totalCoeff++
+            coeffMap++
         }
     }
     // chroma DC processing. First chroma dc block is block with index 25
-    chromaQp = h264bsdQpC[int(pMb.qpY) + pMb.chromaQpIndexOffset < 0 ? 0 : (int(pMb.qpY) + pMb.chromaQpIndexOffset > 51 ? 51 : int(pMb.qpY) + pMb.chromaQpIndexOffset)]
+    chromaQp = h264bsdQpC[int(pMb.qpY) + pMb.chromaQpIndexOffset < 0 ? 0 : (int(pMb.qpY) + pMb.chromaQpIndexOffset > 51 ? 51 :
+            int(pMb.qpY) + pMb.chromaQpIndexOffset)]
     if (pMb.totalCoeff[25] != 0 || pMb.totalCoeff[26] != 0) {
         h264bsdProcessChromaDc(addr(residualLevel[25][0]), chromaQp)
     }
@@ -7831,23 +8816,23 @@ def private h264_file_all__ProcessResidual(var pMb : mbStorage?; var residualLev
     while (true) {
         let _t3 = i
         i--
-        if (!(_t3 != 0)) {
+        if (_t3 == 0) {
             break
         }
         // set dc coefficient of chroma block
         var _t4 = chromaDc
-        chromaDc = chromaDc + 1
-        deref(blockData)[0] = deref(_t4)
-        if (deref(blockData)[0] != 0 || deref(totalCoeff) != 0) {
-            if (h264bsdProcessBlock(addr(deref(blockData)[0]), chromaQp, 1u, deref(coeffMap)) != uint(HANTRO_OK)) {
+        chromaDc++
+        (*blockData)[0] = *_t4
+        if ((*blockData)[0] != 0 || *totalCoeff != 0) {
+            if (h264bsdProcessBlock(addr((*blockData)[0]), chromaQp, 1u, *coeffMap) != uint(HANTRO_OK)) {
                 return uint(HANTRO_NOK)
             }
         } else {
-            deref(blockData)[0] = EMPTY_RESIDUAL_INDICATOR
+            (*blockData)[0] = EMPTY_RESIDUAL_INDICATOR
         }
-        blockData = blockData + 1
-        totalCoeff = totalCoeff + 1
-        coeffMap = coeffMap + 1
+        blockData++
+        totalCoeff++
+        coeffMap++
     }
     return uint(HANTRO_OK)
 }
@@ -7878,9 +8863,14 @@ def h264bsdDecodeNalUnit(var pStrmData : strmData_t?; var pNalUnit : nalUnit_t?)
         return uint(HANTRO_NOK)
     }
     // nal_ref_idc shall not be zero for these nal_unit_types
-    if (((tmp == uint(int(nalUnitType_e.NAL_SEQ_PARAM_SET))) || (tmp == uint(int(nalUnitType_e.NAL_PIC_PARAM_SET))) || (tmp == uint(int(nalUnitType_e.NAL_CODED_SLICE_IDR)))) && (pNalUnit.nalRefIdc == 0u)) {
+    if (((tmp == uint(nalUnitType_e.NAL_SEQ_PARAM_SET)) || (tmp == uint(nalUnitType_e.NAL_PIC_PARAM_SET)) ||
+                (tmp == uint(nalUnitType_e.NAL_CODED_SLICE_IDR))) &&
+            (pNalUnit.nalRefIdc == 0u)) {
         return uint(HANTRO_NOK)
-    } elif (((tmp == uint(int(nalUnitType_e.NAL_SEI))) || (tmp == uint(int(nalUnitType_e.NAL_ACCESS_UNIT_DELIMITER))) || (tmp == uint(int(nalUnitType_e.NAL_END_OF_SEQUENCE))) || (tmp == uint(int(nalUnitType_e.NAL_END_OF_STREAM))) || (tmp == uint(int(nalUnitType_e.NAL_FILLER_DATA)))) && (pNalUnit.nalRefIdc != 0u)) {
+    } elif (((tmp == uint(nalUnitType_e.NAL_SEI)) || (tmp == uint(nalUnitType_e.NAL_ACCESS_UNIT_DELIMITER)) ||
+                (tmp == uint(nalUnitType_e.NAL_END_OF_SEQUENCE)) || (tmp == uint(nalUnitType_e.NAL_END_OF_STREAM)) ||
+                (tmp == uint(nalUnitType_e.NAL_FILLER_DATA))) &&
+            (pNalUnit.nalRefIdc != 0u)) {
         // nal_ref_idc shall be zero for these nal_unit_types
         return uint(HANTRO_NOK)
     }
@@ -8015,153 +9005,161 @@ def h264bsdDecodePicOrderCnt(var poc : pocStorage_t?; var sps : seqParamSet_t?; 
             i++
         }
     }
-    let _cond = sps.picOrderCntType
-    if (_cond == 0u) {
-        // set prevPicOrderCnt values for IDR frame
-        if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
-            poc.prevPicOrderCntMsb = 0
-            poc.prevPicOrderCntLsb = 0u
-        }
-        // compute picOrderCntMsb (stored in picOrderCnt variable)
-        if ((pSliceHeader.picOrderCntLsb < poc.prevPicOrderCntLsb) && ((poc.prevPicOrderCntLsb - pSliceHeader.picOrderCntLsb) >= sps.maxPicOrderCntLsb / 2u)) {
-            picOrderCnt = poc.prevPicOrderCntMsb + int(sps.maxPicOrderCntLsb)
-        } elif ((pSliceHeader.picOrderCntLsb > poc.prevPicOrderCntLsb) && ((pSliceHeader.picOrderCntLsb - poc.prevPicOrderCntLsb) > sps.maxPicOrderCntLsb / 2u)) {
-            picOrderCnt = poc.prevPicOrderCntMsb - int(sps.maxPicOrderCntLsb)
-        } else {
-            picOrderCnt = poc.prevPicOrderCntMsb
-        }
-        // standard specifies that prevPicOrderCntMsb is from previous
-        // rererence frame -> replace old value only if current frame is
-        // rererence frame
-        if (pNalUnit.nalRefIdc != 0) {
-            poc.prevPicOrderCntMsb = picOrderCnt
-        }
-        // compute top field order cnt (stored in picOrderCnt)
-        picOrderCnt += int(pSliceHeader.picOrderCntLsb)
-        // if delta for bottom field is negative -> bottom will be the
-        // minimum pic order count
-        if (pSliceHeader.deltaPicOrderCntBottom < 0) {
-            picOrderCnt += pSliceHeader.deltaPicOrderCntBottom
-        }
-        // standard specifies that prevPicOrderCntLsb is from previous
-        // rererence frame -> replace old value only if current frame is
-        // rererence frame
-        if (pNalUnit.nalRefIdc != 0) {
-            // if current frame contains mmco5 -> modify values to be
-            // stored
-            if (containsMmco5 != 0) {
+    c_switch(sps.picOrderCntType) {
+        case(0u) {
+            // set prevPicOrderCnt values for IDR frame
+            if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
                 poc.prevPicOrderCntMsb = 0
-                // prevPicOrderCntLsb should be the top field picOrderCnt
-                // if previous frame included mmco5. Top field picOrderCnt
-                // for frames containing mmco5 is obtained by subtracting
-                // the picOrderCnt from original top field order count ->
-                // value is zero if top field was the minimum, i.e. delta
-                // for bottom was positive, otherwise value is
-                // -deltaPicOrderCntBottom
-                if (pSliceHeader.deltaPicOrderCntBottom < 0) {
-                    poc.prevPicOrderCntLsb = uint(-pSliceHeader.deltaPicOrderCntBottom)
-                } else {
-                    poc.prevPicOrderCntLsb = 0u
-                }
-                picOrderCnt = 0
-            } else {
-                poc.prevPicOrderCntLsb = pSliceHeader.picOrderCntLsb
+                poc.prevPicOrderCntLsb = 0u
             }
+            // compute picOrderCntMsb (stored in picOrderCnt variable)
+            if ((pSliceHeader.picOrderCntLsb < poc.prevPicOrderCntLsb) &&
+                    ((poc.prevPicOrderCntLsb - pSliceHeader.picOrderCntLsb) >= sps.maxPicOrderCntLsb / 2u)) {
+                picOrderCnt = poc.prevPicOrderCntMsb + int(sps.maxPicOrderCntLsb)
+            } elif ((pSliceHeader.picOrderCntLsb > poc.prevPicOrderCntLsb) &&
+                    ((pSliceHeader.picOrderCntLsb - poc.prevPicOrderCntLsb) > sps.maxPicOrderCntLsb / 2u)) {
+                picOrderCnt = poc.prevPicOrderCntMsb - int(sps.maxPicOrderCntLsb)
+            } else {
+                picOrderCnt = poc.prevPicOrderCntMsb
+            }
+            // standard specifies that prevPicOrderCntMsb is from previous
+            // rererence frame -> replace old value only if current frame is
+            // rererence frame
+            if (pNalUnit.nalRefIdc != 0) {
+                poc.prevPicOrderCntMsb = picOrderCnt
+            }
+            // compute top field order cnt (stored in picOrderCnt)
+            picOrderCnt += int(pSliceHeader.picOrderCntLsb)
+            // if delta for bottom field is negative -> bottom will be the
+            // minimum pic order count
+            if (pSliceHeader.deltaPicOrderCntBottom < 0) {
+                picOrderCnt += pSliceHeader.deltaPicOrderCntBottom
+            }
+            // standard specifies that prevPicOrderCntLsb is from previous
+            // rererence frame -> replace old value only if current frame is
+            // rererence frame
+            if (pNalUnit.nalRefIdc != 0) {
+                // if current frame contains mmco5 -> modify values to be
+                // stored
+                if (containsMmco5 != 0) {
+                    poc.prevPicOrderCntMsb = 0
+                    // prevPicOrderCntLsb should be the top field picOrderCnt
+                    // if previous frame included mmco5. Top field picOrderCnt
+                    // for frames containing mmco5 is obtained by subtracting
+                    // the picOrderCnt from original top field order count ->
+                    // value is zero if top field was the minimum, i.e. delta
+                    // for bottom was positive, otherwise value is
+                    // -deltaPicOrderCntBottom
+                    if (pSliceHeader.deltaPicOrderCntBottom < 0) {
+                        poc.prevPicOrderCntLsb = uint(-pSliceHeader.deltaPicOrderCntBottom)
+                    } else {
+                        poc.prevPicOrderCntLsb = 0u
+                    }
+                    picOrderCnt = 0
+                } else {
+                    poc.prevPicOrderCntLsb = pSliceHeader.picOrderCntLsb
+                }
+            }
+            break
         }
-    } elif (_cond == 1u) {
-        // step 1 (in the description in the standard)
-        if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
-            frameNumOffset = 0u
-        } elif (poc.prevFrameNum > pSliceHeader.frameNum) {
-            frameNumOffset = poc.prevFrameNumOffset + sps.maxFrameNum
-        } else {
-            frameNumOffset = poc.prevFrameNumOffset
-        }
-        // step 2
-        if (sps.numRefFramesInPicOrderCntCycle != 0) {
-            absFrameNum = frameNumOffset + pSliceHeader.frameNum
-        } else {
-            absFrameNum = 0u
-        }
-        if (pNalUnit.nalRefIdc == 0u && absFrameNum > 0u) {
-            absFrameNum -= 1u
-        }
-        // step 3
-        if (absFrameNum > 0u) {
-            picOrderCntCycleCnt = (absFrameNum - 1u) / sps.numRefFramesInPicOrderCntCycle
-            frameNumInPicOrderCntCycle = (absFrameNum - 1u) % sps.numRefFramesInPicOrderCntCycle
-        }
-        // step 4
-        expectedDeltaPicOrderCntCycle = 0
-        i = 0u
-        while (i < sps.numRefFramesInPicOrderCntCycle) {
-            expectedDeltaPicOrderCntCycle += sps.offsetForRefFrame[i]
-            i++
-        }
-        // step 5 (picOrderCnt used to store expectedPicOrderCnt)
-        // lint -esym(644,picOrderCntCycleCnt) always initialized
-        // lint -esym(644,frameNumInPicOrderCntCycle) always initialized
-        if (absFrameNum > 0u) {
-            picOrderCnt = int(picOrderCntCycleCnt) * expectedDeltaPicOrderCntCycle
+        case(1u) {
+            // step 1 (in the description in the standard)
+            if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
+                frameNumOffset = 0u
+            } elif (poc.prevFrameNum > pSliceHeader.frameNum) {
+                frameNumOffset = poc.prevFrameNumOffset + sps.maxFrameNum
+            } else {
+                frameNumOffset = poc.prevFrameNumOffset
+            }
+            // step 2
+            if (sps.numRefFramesInPicOrderCntCycle != 0) {
+                absFrameNum = frameNumOffset + pSliceHeader.frameNum
+            } else {
+                absFrameNum = 0u
+            }
+            if (pNalUnit.nalRefIdc == 0u && absFrameNum > 0u) {
+                absFrameNum -= 1u
+            }
+            // step 3
+            if (absFrameNum > 0u) {
+                picOrderCntCycleCnt = (absFrameNum - 1u) / sps.numRefFramesInPicOrderCntCycle
+                frameNumInPicOrderCntCycle = (absFrameNum - 1u) % sps.numRefFramesInPicOrderCntCycle
+            }
+            // step 4
+            expectedDeltaPicOrderCntCycle = 0
             i = 0u
-            while (i <= frameNumInPicOrderCntCycle) {
-                picOrderCnt += sps.offsetForRefFrame[i]
+            while (i < sps.numRefFramesInPicOrderCntCycle) {
+                expectedDeltaPicOrderCntCycle += sps.offsetForRefFrame[i]
                 i++
             }
-        } else {
-            picOrderCnt = 0
+            // step 5 (picOrderCnt used to store expectedPicOrderCnt)
+            // lint -esym(644,picOrderCntCycleCnt) always initialized
+            // lint -esym(644,frameNumInPicOrderCntCycle) always initialized
+            if (absFrameNum > 0u) {
+                picOrderCnt = int(picOrderCntCycleCnt) * expectedDeltaPicOrderCntCycle
+                i = 0u
+                while (i <= frameNumInPicOrderCntCycle) {
+                    picOrderCnt += sps.offsetForRefFrame[i]
+                    i++
+                }
+            } else {
+                picOrderCnt = 0
+            }
+            if (pNalUnit.nalRefIdc == 0u) {
+                picOrderCnt += sps.offsetForNonRefPic
+            }
+            // step 6 (picOrderCnt is top field order cnt if delta for bottom
+            // is positive, otherwise it is bottom field order cnt)
+            picOrderCnt += pSliceHeader.deltaPicOrderCnt[0]
+            if ((sps.offsetForTopToBottomField + pSliceHeader.deltaPicOrderCnt[1]) < 0) {
+                picOrderCnt += sps.offsetForTopToBottomField + pSliceHeader.deltaPicOrderCnt[1]
+            }
+            // if current picture contains mmco5 -> set prevFrameNumOffset and
+            // prevFrameNum to 0 for computation of picOrderCnt of next
+            // frame, otherwise store frameNum and frameNumOffset to poc
+            // structure
+            if (containsMmco5 == 0) {
+                poc.prevFrameNumOffset = frameNumOffset
+                poc.prevFrameNum = pSliceHeader.frameNum
+            } else {
+                poc.prevFrameNumOffset = 0u
+                poc.prevFrameNum = 0u
+                picOrderCnt = 0
+            }
+            break
         }
-        if (pNalUnit.nalRefIdc == 0u) {
-            picOrderCnt += sps.offsetForNonRefPic
-        }
-        // step 6 (picOrderCnt is top field order cnt if delta for bottom
-        // is positive, otherwise it is bottom field order cnt)
-        picOrderCnt += pSliceHeader.deltaPicOrderCnt[0]
-        if ((sps.offsetForTopToBottomField + pSliceHeader.deltaPicOrderCnt[1]) < 0) {
-            picOrderCnt += sps.offsetForTopToBottomField + pSliceHeader.deltaPicOrderCnt[1]
-        }
-        // if current picture contains mmco5 -> set prevFrameNumOffset and
-        // prevFrameNum to 0 for computation of picOrderCnt of next
-        // frame, otherwise store frameNum and frameNumOffset to poc
-        // structure
-        if (!(containsMmco5 != 0)) {
-            poc.prevFrameNumOffset = frameNumOffset
-            poc.prevFrameNum = pSliceHeader.frameNum
-        } else {
-            poc.prevFrameNumOffset = 0u
-            poc.prevFrameNum = 0u
-            picOrderCnt = 0
-        }
-    } else {
-        // case 2
-        // derive frameNumOffset
-        if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
-            frameNumOffset = 0u
-        } elif (poc.prevFrameNum > pSliceHeader.frameNum) {
-            frameNumOffset = poc.prevFrameNumOffset + sps.maxFrameNum
-        } else {
-            frameNumOffset = poc.prevFrameNumOffset
-        }
-        // derive picOrderCnt (type 2 has same value for top and bottom
-        // field order cnts)
-        if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
-            picOrderCnt = 0
-        } elif (pNalUnit.nalRefIdc == 0u) {
-            picOrderCnt = 2 * int(frameNumOffset + pSliceHeader.frameNum) - 1
-        } else {
-            picOrderCnt = 2 * int(frameNumOffset + pSliceHeader.frameNum)
-        }
-        // if current picture contains mmco5 -> set prevFrameNumOffset and
-        // prevFrameNum to 0 for computation of picOrderCnt of next
-        // frame, otherwise store frameNum and frameNumOffset to poc
-        // structure
-        if (!(containsMmco5 != 0)) {
-            poc.prevFrameNumOffset = frameNumOffset
-            poc.prevFrameNum = pSliceHeader.frameNum
-        } else {
-            poc.prevFrameNumOffset = 0u
-            poc.prevFrameNum = 0u
-            picOrderCnt = 0
+        case(_) {
+            // case 2
+            // derive frameNumOffset
+            if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
+                frameNumOffset = 0u
+            } elif (poc.prevFrameNum > pSliceHeader.frameNum) {
+                frameNumOffset = poc.prevFrameNumOffset + sps.maxFrameNum
+            } else {
+                frameNumOffset = poc.prevFrameNumOffset
+            }
+            // derive picOrderCnt (type 2 has same value for top and bottom
+            // field order cnts)
+            if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
+                picOrderCnt = 0
+            } elif (pNalUnit.nalRefIdc == 0u) {
+                picOrderCnt = 2 * int(frameNumOffset + pSliceHeader.frameNum) - 1
+            } else {
+                picOrderCnt = 2 * int(frameNumOffset + pSliceHeader.frameNum)
+            }
+            // if current picture contains mmco5 -> set prevFrameNumOffset and
+            // prevFrameNum to 0 for computation of picOrderCnt of next
+            // frame, otherwise store frameNum and frameNumOffset to poc
+            // structure
+            if (containsMmco5 == 0) {
+                poc.prevFrameNumOffset = frameNumOffset
+                poc.prevFrameNum = pSliceHeader.frameNum
+            } else {
+                poc.prevFrameNumOffset = 0u
+                poc.prevFrameNum = 0u
+                picOrderCnt = 0
+            }
+            break
         }
     }
     // lint -esym(644,picOrderCnt) always initialized
@@ -8382,7 +9380,8 @@ def h264bsdDecodePicParamSet(var pStrmData : strmData_t?; var pPicParamSet : pic
 // predPartChroma pointer where predicted part is written
 // ------------------------------------------------------------------------------
 [c_function]
-def h264bsdInterpolateChromaHor(var pRef : uint8?; var predPartChroma : uint8?; var x0 : int; var y0 : int; var width : uint; var height : uint; xFrac : uint; chromaPartWidth : uint; chromaPartHeight : uint) {
+def h264bsdInterpolateChromaHor(var pRef : uint8?; var predPartChroma : uint8?; var x0 : int; var y0 : int; var width : uint; var height : uint; xFrac : uint;
+                                chromaPartWidth : uint; chromaPartHeight : uint) {
     // Variables
     var x : uint
     var y : uint
@@ -8399,8 +9398,9 @@ def h264bsdInterpolateChromaHor(var pRef : uint8?; var predPartChroma : uint8?; 
     // Code
     if ((x0 < 0) || (uint(x0) + chromaPartWidth + 1u > width) || (y0 < 0) || (uint(y0) + chromaPartHeight > height)) {
         h264bsdFillBlock(pRef, addr(_c_block[0]), x0, y0, width, height, chromaPartWidth + 1u, chromaPartHeight, chromaPartWidth + 1u)
-        pRef = pRef + width * height
-        h264bsdFillBlock(pRef, addr(_c_block[0]) + (chromaPartWidth + 1u) * chromaPartHeight, x0, y0, width, height, chromaPartWidth + 1u, chromaPartHeight, chromaPartWidth + 1u)
+        pRef += width * height
+        h264bsdFillBlock(pRef, addr(_c_block[0]) + (chromaPartWidth + 1u) * chromaPartHeight, x0, y0, width, height, chromaPartWidth + 1u, chromaPartHeight,
+                chromaPartWidth + 1u)
         pRef = addr(_c_block[0])
         x0 = 0
         y0 = 0
@@ -8420,34 +9420,34 @@ def h264bsdInterpolateChromaHor(var pRef : uint8?; var predPartChroma : uint8?; 
             while (x != 0) {
                 tmp1 = uint(ptrA[width])
                 var _t0 = ptrA
-                ptrA = ptrA + 1
-                tmp2 = uint(deref(_t0))
+                ptrA++
+                tmp2 = uint(*_t0)
                 tmp3 = uint(ptrA[width])
                 var _t1 = ptrA
-                ptrA = ptrA + 1
-                tmp4 = uint(deref(_t1))
+                ptrA++
+                tmp4 = uint(*_t1)
                 c = ((val * tmp1 + xFrac * tmp3) << 3u) + 32u
                 c >>= 6u
                 cbr[8] = uint8(c)
                 c = ((val * tmp2 + xFrac * tmp4) << 3u) + 32u
                 c >>= 6u
                 var _t2 = cbr
-                cbr = cbr + 1
-                deref(_t2) = uint8(c)
+                cbr++
+                *_t2 = uint8(c)
                 tmp1 = uint(ptrA[width])
-                tmp2 = uint(deref(ptrA))
+                tmp2 = uint(*ptrA)
                 c = ((val * tmp3 + xFrac * tmp1) << 3u) + 32u
                 c >>= 6u
                 cbr[8] = uint8(c)
                 c = ((val * tmp4 + xFrac * tmp2) << 3u) + 32u
                 c >>= 6u
                 var _t3 = cbr
-                cbr = cbr + 1
-                deref(_t3) = uint8(c)
+                cbr++
+                *_t3 = uint8(c)
                 x--
             }
-            cbr = cbr + (uint(2 * 8) - chromaPartWidth)
-            ptrA = ptrA + (2u * width - chromaPartWidth)
+            cbr += uint(2 * 8) - chromaPartWidth
+            ptrA += 2u * width - chromaPartWidth
             y--
         }
         comp++
@@ -8455,7 +9455,8 @@ def h264bsdInterpolateChromaHor(var pRef : uint8?; var predPartChroma : uint8?; 
 }
 
 [c_function]
-def h264bsdInterpolateChromaVer(var pRef : uint8?; var predPartChroma : uint8?; var x0 : int; var y0 : int; var width : uint; var height : uint; yFrac : uint; chromaPartWidth : uint; chromaPartHeight : uint) {
+def h264bsdInterpolateChromaVer(var pRef : uint8?; var predPartChroma : uint8?; var x0 : int; var y0 : int; var width : uint; var height : uint; yFrac : uint;
+                                chromaPartWidth : uint; chromaPartHeight : uint) {
     // Variables
     var x : uint
     var y : uint
@@ -8471,8 +9472,9 @@ def h264bsdInterpolateChromaVer(var pRef : uint8?; var predPartChroma : uint8?; 
     // Code
     if ((x0 < 0) || (uint(x0) + chromaPartWidth > width) || (y0 < 0) || (uint(y0) + chromaPartHeight + 1u > height)) {
         h264bsdFillBlock(pRef, addr(_c_block[0]), x0, y0, width, height, chromaPartWidth, chromaPartHeight + 1u, chromaPartWidth)
-        pRef = pRef + width * height
-        h264bsdFillBlock(pRef, addr(_c_block[0]) + chromaPartWidth * (chromaPartHeight + 1u), x0, y0, width, height, chromaPartWidth, chromaPartHeight + 1u, chromaPartWidth)
+        pRef += width * height
+        h264bsdFillBlock(pRef, addr(_c_block[0]) + chromaPartWidth * (chromaPartHeight + 1u), x0, y0, width, height, chromaPartWidth, chromaPartHeight + 1u,
+                chromaPartWidth)
         pRef = addr(_c_block[0])
         x0 = 0
         y0 = 0
@@ -8493,33 +9495,33 @@ def h264bsdInterpolateChromaVer(var pRef : uint8?; var predPartChroma : uint8?; 
                 tmp3 = uint(ptrA[width * 2u])
                 tmp2 = uint(ptrA[width])
                 var _t0 = ptrA
-                ptrA = ptrA + 1
-                tmp1 = uint(deref(_t0))
+                ptrA++
+                tmp1 = uint(*_t0)
                 c = ((val * tmp2 + yFrac * tmp3) << 3u) + 32u
                 c >>= 6u
                 cbr[8] = uint8(c)
                 c = ((val * tmp1 + yFrac * tmp2) << 3u) + 32u
                 c >>= 6u
                 var _t1 = cbr
-                cbr = cbr + 1
-                deref(_t1) = uint8(c)
+                cbr++
+                *_t1 = uint8(c)
                 tmp3 = uint(ptrA[width * 2u])
                 tmp2 = uint(ptrA[width])
                 var _t2 = ptrA
-                ptrA = ptrA + 1
-                tmp1 = uint(deref(_t2))
+                ptrA++
+                tmp1 = uint(*_t2)
                 c = ((val * tmp2 + yFrac * tmp3) << 3u) + 32u
                 c >>= 6u
                 cbr[8] = uint8(c)
                 c = ((val * tmp1 + yFrac * tmp2) << 3u) + 32u
                 c >>= 6u
                 var _t3 = cbr
-                cbr = cbr + 1
-                deref(_t3) = uint8(c)
+                cbr++
+                *_t3 = uint8(c)
                 x--
             }
-            cbr = cbr + (uint(2 * 8) - chromaPartWidth)
-            ptrA = ptrA + (2u * width - chromaPartWidth)
+            cbr += uint(2 * 8) - chromaPartWidth
+            ptrA += 2u * width - chromaPartWidth
             y--
         }
         comp++
@@ -8527,7 +9529,8 @@ def h264bsdInterpolateChromaVer(var pRef : uint8?; var predPartChroma : uint8?; 
 }
 
 [c_function]
-def h264bsdInterpolateChromaHorVer(var ref : uint8?; var predPartChroma : uint8?; var x0 : int; var y0 : int; var width : uint; var height : uint; xFrac : uint; yFrac : uint; chromaPartWidth : uint; chromaPartHeight : uint) {
+def h264bsdInterpolateChromaHorVer(var ref : uint8?; var predPartChroma : uint8?; var x0 : int; var y0 : int; var width : uint; var height : uint; xFrac : uint;
+                                   yFrac : uint; chromaPartWidth : uint; chromaPartHeight : uint) {
     var _c_block : uint8[162]
     var x : uint
     var y : uint
@@ -8546,8 +9549,9 @@ def h264bsdInterpolateChromaHorVer(var ref : uint8?; var predPartChroma : uint8?
     // Code
     if ((x0 < 0) || (uint(x0) + chromaPartWidth + 1u > width) || (y0 < 0) || (uint(y0) + chromaPartHeight + 1u > height)) {
         h264bsdFillBlock(ref, addr(_c_block[0]), x0, y0, width, height, chromaPartWidth + 1u, chromaPartHeight + 1u, chromaPartWidth + 1u)
-        ref = ref + width * height
-        h264bsdFillBlock(ref, addr(_c_block[0]) + (chromaPartWidth + 1u) * (chromaPartHeight + 1u), x0, y0, width, height, chromaPartWidth + 1u, chromaPartHeight + 1u, chromaPartWidth + 1u)
+        ref += width * height
+        h264bsdFillBlock(ref, addr(_c_block[0]) + (chromaPartWidth + 1u) * (chromaPartHeight + 1u), x0, y0, width, height, chromaPartWidth + 1u,
+                chromaPartHeight + 1u, chromaPartWidth + 1u)
         ref = addr(_c_block[0])
         x0 = 0
         y0 = 0
@@ -8564,7 +9568,7 @@ def h264bsdInterpolateChromaHorVer(var ref : uint8?; var predPartChroma : uint8?
         // bilinear vertical and horizontal interpolation
         y = chromaPartHeight >> 1u
         while (y != 0) {
-            tmp1 = uint(deref(ptrA))
+            tmp1 = uint(*ptrA)
             tmp3 = uint(ptrA[width])
             tmp5 = uint(ptrA[width * 2u])
             tmp1 *= valY
@@ -8573,8 +9577,8 @@ def h264bsdInterpolateChromaHorVer(var ref : uint8?; var predPartChroma : uint8?
             tmp3 += tmp5 * yFrac
             x = chromaPartWidth >> 1u
             while (x != 0) {
-                ptrA = ptrA + 1
-                tmp2 = uint(deref(ptrA))
+                ptrA++
+                tmp2 = uint(*ptrA)
                 tmp4 = uint(ptrA[width])
                 tmp6 = uint(ptrA[width * 2u])
                 tmp2 *= valY
@@ -8589,10 +9593,10 @@ def h264bsdInterpolateChromaHorVer(var ref : uint8?; var predPartChroma : uint8?
                 tmp3 >>= 6u
                 cbr[8] = uint8(tmp3)
                 var _t0 = cbr
-                cbr = cbr + 1
-                deref(_t0) = uint8(tmp1)
-                ptrA = ptrA + 1
-                tmp1 = uint(deref(ptrA))
+                cbr++
+                *_t0 = uint8(tmp1)
+                ptrA++
+                tmp1 = uint(*ptrA)
                 tmp3 = uint(ptrA[width])
                 tmp5 = uint(ptrA[width * 2u])
                 tmp1 *= valY
@@ -8607,12 +9611,12 @@ def h264bsdInterpolateChromaHorVer(var ref : uint8?; var predPartChroma : uint8?
                 tmp4 >>= 6u
                 cbr[8] = uint8(tmp4)
                 var _t1 = cbr
-                cbr = cbr + 1
-                deref(_t1) = uint8(tmp2)
+                cbr++
+                *_t1 = uint8(tmp2)
                 x--
             }
-            cbr = cbr + (uint(2 * 8) - chromaPartWidth)
-            ptrA = ptrA + (2u * width - chromaPartWidth)
+            cbr += uint(2 * 8) - chromaPartWidth
+            ptrA += 2u * width - chromaPartWidth
             y--
         }
         comp++
@@ -8620,7 +9624,8 @@ def h264bsdInterpolateChromaHorVer(var ref : uint8?; var predPartChroma : uint8?
 }
 
 [c_function]
-def private h264_file_all__PredictChroma(var mbPartChroma : uint8?; xAL : uint; yAL : uint; partWidth : uint; partHeight : uint; var mv : mv_t?; var refPic : image_t?) {
+def private h264_file_all__PredictChroma(var mbPartChroma : uint8?; xAL : uint; yAL : uint; partWidth : uint; partHeight : uint; var mv : mv_t?;
+                                         var refPic : image_t?) {
     // Variables
     var xFrac : uint
     var yFrac : uint
@@ -8649,7 +9654,7 @@ def private h264_file_all__PredictChroma(var mbPartChroma : uint8?; xAL : uint; 
         h264bsdInterpolateChromaVer(ref, mbPartChroma, xInt, yInt, width, height, yFrac, chromaPartWidth, chromaPartHeight)
     } else {
         h264bsdFillBlock(ref, mbPartChroma, xInt, yInt, width, height, chromaPartWidth, chromaPartHeight, 8u)
-        ref = ref + width * height
+        ref += width * height
         h264bsdFillBlock(ref, mbPartChroma + 8 * 8, xInt, yInt, width, height, chromaPartWidth, chromaPartHeight, 8u)
     }
 }
@@ -8663,7 +9668,8 @@ def private h264_file_all__PredictChroma(var mbPartChroma : uint8?; xAL : uint; 
 // is written to macroblock array (mb)
 // ------------------------------------------------------------------------------
 [c_function]
-def h264bsdInterpolateVerHalf(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint; partHeight : uint) {
+def h264bsdInterpolateVerHalf(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint;
+                              partHeight : uint) {
     var p1 : uint[111]
     var i : uint
     var j : uint
@@ -8685,7 +9691,7 @@ def h264bsdInterpolateVerHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
         ref = reinterpret<uint8?>(addr(p1[0]))
         width = partWidth
     }
-    ref = ref + (uint(y0) * width + uint(x0))
+    ref += uint(y0) * width + uint(x0)
     ptrC = ref + width
     ptrV = ptrC + 5u * width
     // 4 pixels per iteration, interpolate using 5 vertical samples
@@ -8699,8 +9705,8 @@ def h264bsdInterpolateVerHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp1 = int(ptrV[width])
             tmp2 = int(ptrV[width * 2u])
             var _t0 = ptrV
-            ptrV = ptrV + 1
-            tmp6 = int(deref(_t0))
+            ptrV++
+            tmp6 = int(*_t0)
             tmp7 = tmp4 + tmp1
             tmp2 -= tmp7 << 2
             tmp2 -= tmp7
@@ -8728,7 +9734,7 @@ def h264bsdInterpolateVerHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp6 -= tmp7 << 2
             tmp6 -= tmp7
             tmp7 = tmp4 + tmp3
-            tmp1 = int(deref(ptrC))
+            tmp1 = int(*ptrC)
             tmp6 += tmp7 << 4
             tmp6 += tmp7 << 2
             tmp6 += tmp1
@@ -8745,20 +9751,21 @@ def h264bsdInterpolateVerHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp5 += tmp6
             tmp5 = int(clp[tmp5 >> 5])
             var _t1 = mb
-            mb = mb + 1
-            deref(_t1) = uint8(tmp5)
-            ptrC = ptrC + 1
+            mb++
+            *_t1 = uint8(tmp5)
+            ptrC++
             j--
         }
-        ptrC = ptrC + (4u * width - partWidth)
-        ptrV = ptrV + (4u * width - partWidth)
-        mb = mb + (uint(4 * 16) - partWidth)
+        ptrC += 4u * width - partWidth
+        ptrV += 4u * width - partWidth
+        mb += uint(4 * 16) - partWidth
         i--
     }
 }
 
 [c_function]
-def h264bsdInterpolateVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint; partHeight : uint; verOffset : uint) {
+def h264bsdInterpolateVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint;
+                                 partHeight : uint; verOffset : uint) {
     // 0 for pixel d, 1 for pixel n
     var p1 : uint[111]
     var i : uint
@@ -8782,7 +9789,7 @@ def h264bsdInterpolateVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : int
         ref = reinterpret<uint8?>(addr(p1[0]))
         width = partWidth
     }
-    ref = ref + (uint(y0) * width + uint(x0))
+    ref += uint(y0) * width + uint(x0)
     ptrC = ref + width
     ptrV = ptrC + 5u * width
     // Pointer to integer sample position, either M or R
@@ -8800,8 +9807,8 @@ def h264bsdInterpolateVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : int
             tmp1 = int(ptrV[width])
             tmp2 = int(ptrV[width * 2u])
             var _t0 = ptrV
-            ptrV = ptrV + 1
-            tmp6 = int(deref(_t0))
+            ptrV++
+            tmp6 = int(*_t0)
             tmp7 = tmp4 + tmp1
             tmp2 -= tmp7 << 2
             tmp2 -= tmp7
@@ -8833,12 +9840,12 @@ def h264bsdInterpolateVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : int
             tmp6 -= tmp7 << 2
             tmp6 -= tmp7
             tmp7 = tmp4 + tmp3
-            tmp1 = int(deref(ptrC))
+            tmp1 = int(*ptrC)
             tmp6 += tmp7 << 4
             tmp6 += tmp7 << 2
             tmp6 += tmp1
             tmp6 = int(clp[tmp6 >> 5])
-            tmp7 = int(deref(ptrInt))
+            tmp7 = int(*ptrInt)
             tmp5 += 16
             tmp6++
             mb[16] = uint8((tmp6 + tmp7) >> 1)
@@ -8854,22 +9861,23 @@ def h264bsdInterpolateVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : int
             tmp7 = int(ptrInt[-int(width)])
             tmp5++
             var _t1 = mb
-            mb = mb + 1
-            deref(_t1) = uint8((tmp5 + tmp7) >> 1)
-            ptrC = ptrC + 1
-            ptrInt = ptrInt + 1
+            mb++
+            *_t1 = uint8((tmp5 + tmp7) >> 1)
+            ptrC++
+            ptrInt++
             j--
         }
-        ptrC = ptrC + (4u * width - partWidth)
-        ptrV = ptrV + (4u * width - partWidth)
-        ptrInt = ptrInt + (4u * width - partWidth)
-        mb = mb + (uint(4 * 16) - partWidth)
+        ptrC += 4u * width - partWidth
+        ptrV += 4u * width - partWidth
+        ptrInt += 4u * width - partWidth
+        mb += uint(4 * 16) - partWidth
         i--
     }
 }
 
 [c_function]
-def h264bsdInterpolateHorHalf(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint; partHeight : uint) {
+def h264bsdInterpolateHorHalf(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint;
+                              partHeight : uint) {
     var p1 : uint[111]
     var ptrJ : uint8?
     var x : uint
@@ -8890,15 +9898,15 @@ def h264bsdInterpolateHorHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
         ref = reinterpret<uint8?>(addr(p1[0]))
         width = partWidth + 5u
     }
-    ref = ref + (uint(y0) * width + uint(x0))
+    ref += uint(y0) * width + uint(x0)
     ptrJ = ref + 5
     y = partHeight
     while (y != 0) {
-        tmp6 = int(deref(ptrJ - 5))
-        tmp5 = int(deref(ptrJ - 4))
-        tmp4 = int(deref(ptrJ - 3))
-        tmp3 = int(deref(ptrJ - 2))
-        tmp2 = int(deref(ptrJ - 1))
+        tmp6 = int(*(ptrJ - 5))
+        tmp5 = int(*(ptrJ - 4))
+        tmp4 = int(*(ptrJ - 3))
+        tmp3 = int(*(ptrJ - 2))
+        tmp2 = int(*(ptrJ - 1))
         // calculate 4 pels per iteration
         x = partWidth >> 2u
         while (x != 0) {
@@ -8909,8 +9917,8 @@ def h264bsdInterpolateHorHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp6 += tmp7 << 2
             tmp7 = tmp2 + tmp5
             var _t0 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp1 = int(deref(_t0))
+            ptrJ++
+            tmp1 = int(*_t0)
             tmp6 -= tmp7 << 2
             tmp6 -= tmp7
             tmp6 += tmp1
@@ -8919,14 +9927,14 @@ def h264bsdInterpolateHorHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp5 += 16
             tmp7 = tmp2 + tmp3
             var _t1 = mb
-            mb = mb + 1
-            deref(_t1) = uint8(tmp6)
+            mb++
+            *_t1 = uint8(tmp6)
             tmp5 += tmp7 << 4
             tmp5 += tmp7 << 2
             tmp7 = tmp1 + tmp4
             var _t2 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp6 = int(deref(_t2))
+            ptrJ++
+            tmp6 = int(*_t2)
             tmp5 -= tmp7 << 2
             tmp5 -= tmp7
             tmp5 += tmp6
@@ -8935,14 +9943,14 @@ def h264bsdInterpolateHorHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp4 += 16
             tmp7 = tmp1 + tmp2
             var _t3 = mb
-            mb = mb + 1
-            deref(_t3) = uint8(tmp5)
+            mb++
+            *_t3 = uint8(tmp5)
             tmp4 += tmp7 << 4
             tmp4 += tmp7 << 2
             tmp7 = tmp6 + tmp3
             var _t4 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp5 = int(deref(_t4))
+            ptrJ++
+            tmp5 = int(*_t4)
             tmp4 -= tmp7 << 2
             tmp4 -= tmp7
             tmp4 += tmp5
@@ -8951,14 +9959,14 @@ def h264bsdInterpolateHorHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp3 += 16
             tmp7 = tmp6 + tmp1
             var _t5 = mb
-            mb = mb + 1
-            deref(_t5) = uint8(tmp4)
+            mb++
+            *_t5 = uint8(tmp4)
             tmp3 += tmp7 << 4
             tmp3 += tmp7 << 2
             tmp7 = tmp5 + tmp2
             var _t6 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp4 = int(deref(_t6))
+            ptrJ++
+            tmp4 = int(*_t6)
             tmp3 -= tmp7 << 2
             tmp3 -= tmp7
             tmp3 += tmp4
@@ -8968,20 +9976,21 @@ def h264bsdInterpolateHorHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp6 = tmp2
             tmp2 = tmp7
             var _t7 = mb
-            mb = mb + 1
-            deref(_t7) = uint8(tmp3)
+            mb++
+            *_t7 = uint8(tmp3)
             tmp3 = tmp5
             tmp5 = tmp1
             x--
         }
-        ptrJ = ptrJ + (width - partWidth)
-        mb = mb + (16u - partWidth)
+        ptrJ += width - partWidth
+        mb += 16u - partWidth
         y--
     }
 }
 
 [c_function]
-def h264bsdInterpolateHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint; partHeight : uint; horOffset : uint) {
+def h264bsdInterpolateHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint;
+                                 partHeight : uint; horOffset : uint) {
     // 0 for pixel a, 1 for pixel c
     var p1 : uint[111]
     var ptrJ : uint8?
@@ -9003,15 +10012,15 @@ def h264bsdInterpolateHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : int
         ref = reinterpret<uint8?>(addr(p1[0]))
         width = partWidth + 5u
     }
-    ref = ref + (uint(y0) * width + uint(x0))
+    ref += uint(y0) * width + uint(x0)
     ptrJ = ref + 5
     y = partHeight
     while (y != 0) {
-        tmp6 = int(deref(ptrJ - 5))
-        tmp5 = int(deref(ptrJ - 4))
-        tmp4 = int(deref(ptrJ - 3))
-        tmp3 = int(deref(ptrJ - 2))
-        tmp2 = int(deref(ptrJ - 1))
+        tmp6 = int(*(ptrJ - 5))
+        tmp5 = int(*(ptrJ - 4))
+        tmp4 = int(*(ptrJ - 3))
+        tmp3 = int(*(ptrJ - 2))
+        tmp2 = int(*(ptrJ - 1))
         // calculate 4 pels per iteration
         x = partWidth >> 2u
         while (x != 0) {
@@ -9022,83 +10031,83 @@ def h264bsdInterpolateHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : int
             tmp6 += tmp7 << 2
             tmp7 = tmp2 + tmp5
             var _t0 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp1 = int(deref(_t0))
+            ptrJ++
+            tmp1 = int(*_t0)
             tmp6 -= tmp7 << 2
             tmp6 -= tmp7
             tmp6 += tmp1
             tmp6 = int(clp[tmp6 >> 5])
             tmp5 += 16
-            if (!(horOffset != 0)) {
+            if (horOffset == 0) {
                 tmp6 += tmp4
             } else {
                 tmp6 += tmp3
             }
             var _t1 = mb
-            mb = mb + 1
-            deref(_t1) = uint8((tmp6 + 1) >> 1)
+            mb++
+            *_t1 = uint8((tmp6 + 1) >> 1)
             // Second pixel
             tmp7 = tmp2 + tmp3
             tmp5 += tmp7 << 4
             tmp5 += tmp7 << 2
             tmp7 = tmp1 + tmp4
             var _t2 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp6 = int(deref(_t2))
+            ptrJ++
+            tmp6 = int(*_t2)
             tmp5 -= tmp7 << 2
             tmp5 -= tmp7
             tmp5 += tmp6
             tmp5 = int(clp[tmp5 >> 5])
             tmp4 += 16
-            if (!(horOffset != 0)) {
+            if (horOffset == 0) {
                 tmp5 += tmp3
             } else {
                 tmp5 += tmp2
             }
             var _t3 = mb
-            mb = mb + 1
-            deref(_t3) = uint8((tmp5 + 1) >> 1)
+            mb++
+            *_t3 = uint8((tmp5 + 1) >> 1)
             // Third pixel
             tmp7 = tmp1 + tmp2
             tmp4 += tmp7 << 4
             tmp4 += tmp7 << 2
             tmp7 = tmp6 + tmp3
             var _t4 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp5 = int(deref(_t4))
+            ptrJ++
+            tmp5 = int(*_t4)
             tmp4 -= tmp7 << 2
             tmp4 -= tmp7
             tmp4 += tmp5
             tmp4 = int(clp[tmp4 >> 5])
             tmp3 += 16
-            if (!(horOffset != 0)) {
+            if (horOffset == 0) {
                 tmp4 += tmp2
             } else {
                 tmp4 += tmp1
             }
             var _t5 = mb
-            mb = mb + 1
-            deref(_t5) = uint8((tmp4 + 1) >> 1)
+            mb++
+            *_t5 = uint8((tmp4 + 1) >> 1)
             // Fourth pixel
             tmp7 = tmp6 + tmp1
             tmp3 += tmp7 << 4
             tmp3 += tmp7 << 2
             tmp7 = tmp5 + tmp2
             var _t6 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp4 = int(deref(_t6))
+            ptrJ++
+            tmp4 = int(*_t6)
             tmp3 -= tmp7 << 2
             tmp3 -= tmp7
             tmp3 += tmp4
             tmp3 = int(clp[tmp3 >> 5])
-            if (!(horOffset != 0)) {
+            if (horOffset == 0) {
                 tmp3 += tmp1
             } else {
                 tmp3 += tmp6
             }
             var _t7 = mb
-            mb = mb + 1
-            deref(_t7) = uint8((tmp3 + 1) >> 1)
+            mb++
+            *_t7 = uint8((tmp3 + 1) >> 1)
             tmp3 = tmp5
             tmp5 = tmp1
             tmp7 = tmp4
@@ -9107,14 +10116,15 @@ def h264bsdInterpolateHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : int
             tmp2 = tmp7
             x--
         }
-        ptrJ = ptrJ + (width - partWidth)
-        mb = mb + (16u - partWidth)
+        ptrJ += width - partWidth
+        mb += 16u - partWidth
         y--
     }
 }
 
 [c_function]
-def h264bsdInterpolateHorVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint; partHeight : uint; horVerOffset : uint) {
+def h264bsdInterpolateHorVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint;
+                                    partHeight : uint; horVerOffset : uint) {
     // 0 for pixel e, 1 for pixel g,
     // 2 for pixel p, 3 for pixel r
     var p1 : uint[111]
@@ -9140,18 +10150,18 @@ def h264bsdInterpolateHorVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
         width = partWidth + 5u
     }
     // Ref points to G + (-2, -2)
-    ref = ref + (uint(y0) * width + uint(x0))
+    ref += uint(y0) * width + uint(x0)
     // ptrJ points to either J or Q, depending on vertical offset
     ptrJ = ref + (((horVerOffset & 2u) >> 1u) + 2u) * width + 5
     // ptrC points to either C or D, depending on horizontal offset
     ptrC = ref + width + 2 + (horVerOffset & 1u)
     y = partHeight
     while (y != 0) {
-        tmp6 = int(deref(ptrJ - 5))
-        tmp5 = int(deref(ptrJ - 4))
-        tmp4 = int(deref(ptrJ - 3))
-        tmp3 = int(deref(ptrJ - 2))
-        tmp2 = int(deref(ptrJ - 1))
+        tmp6 = int(*(ptrJ - 5))
+        tmp5 = int(*(ptrJ - 4))
+        tmp4 = int(*(ptrJ - 3))
+        tmp3 = int(*(ptrJ - 2))
+        tmp2 = int(*(ptrJ - 1))
         // Horizontal interpolation, calculate 4 pels per iteration
         x = partWidth >> 2u
         while (x != 0) {
@@ -9162,8 +10172,8 @@ def h264bsdInterpolateHorVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp6 += tmp7 << 2
             tmp7 = tmp2 + tmp5
             var _t0 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp1 = int(deref(_t0))
+            ptrJ++
+            tmp1 = int(*_t0)
             tmp6 -= tmp7 << 2
             tmp6 -= tmp7
             tmp6 += tmp1
@@ -9172,14 +10182,14 @@ def h264bsdInterpolateHorVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp5 += 16
             tmp7 = tmp2 + tmp3
             var _t1 = mb
-            mb = mb + 1
-            deref(_t1) = uint8(tmp6)
+            mb++
+            *_t1 = uint8(tmp6)
             tmp5 += tmp7 << 4
             tmp5 += tmp7 << 2
             tmp7 = tmp1 + tmp4
             var _t2 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp6 = int(deref(_t2))
+            ptrJ++
+            tmp6 = int(*_t2)
             tmp5 -= tmp7 << 2
             tmp5 -= tmp7
             tmp5 += tmp6
@@ -9188,14 +10198,14 @@ def h264bsdInterpolateHorVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp4 += 16
             tmp7 = tmp1 + tmp2
             var _t3 = mb
-            mb = mb + 1
-            deref(_t3) = uint8(tmp5)
+            mb++
+            *_t3 = uint8(tmp5)
             tmp4 += tmp7 << 4
             tmp4 += tmp7 << 2
             tmp7 = tmp6 + tmp3
             var _t4 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp5 = int(deref(_t4))
+            ptrJ++
+            tmp5 = int(*_t4)
             tmp4 -= tmp7 << 2
             tmp4 -= tmp7
             tmp4 += tmp5
@@ -9204,14 +10214,14 @@ def h264bsdInterpolateHorVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp3 += 16
             tmp7 = tmp6 + tmp1
             var _t5 = mb
-            mb = mb + 1
-            deref(_t5) = uint8(tmp4)
+            mb++
+            *_t5 = uint8(tmp4)
             tmp3 += tmp7 << 4
             tmp3 += tmp7 << 2
             tmp7 = tmp5 + tmp2
             var _t6 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp4 = int(deref(_t6))
+            ptrJ++
+            tmp4 = int(*_t6)
             tmp3 -= tmp7 << 2
             tmp3 -= tmp7
             tmp3 += tmp4
@@ -9221,17 +10231,17 @@ def h264bsdInterpolateHorVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp6 = tmp2
             tmp2 = tmp7
             var _t7 = mb
-            mb = mb + 1
-            deref(_t7) = uint8(tmp3)
+            mb++
+            *_t7 = uint8(tmp3)
             tmp3 = tmp5
             tmp5 = tmp1
             x--
         }
-        ptrJ = ptrJ + (width - partWidth)
-        mb = mb + (16u - partWidth)
+        ptrJ += width - partWidth
+        mb += 16u - partWidth
         y--
     }
-    mb = mb - 16u * partHeight
+    mb -= 16u * partHeight
     ptrV = ptrC + 5u * width
     y = partHeight >> 2u
     while (y != 0) {
@@ -9243,8 +10253,8 @@ def h264bsdInterpolateHorVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp1 = int(ptrV[width])
             tmp2 = int(ptrV[width * 2u])
             var _t8 = ptrV
-            ptrV = ptrV + 1
-            tmp6 = int(deref(_t8))
+            ptrV++
+            tmp6 = int(*_t8)
             tmp7 = tmp4 + tmp1
             tmp2 -= tmp7 << 2
             tmp2 -= tmp7
@@ -9272,7 +10282,7 @@ def h264bsdInterpolateHorVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp6 += 16
             tmp7++
             mb[32] = uint8((tmp1 + tmp7) >> 1)
-            tmp1 = int(deref(ptrC))
+            tmp1 = int(*ptrC)
             tmp7 = tmp2 + tmp5
             tmp6 -= tmp7 << 2
             tmp6 -= tmp7
@@ -9294,23 +10304,24 @@ def h264bsdInterpolateHorVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp5 += tmp3 << 2
             tmp5 += tmp6
             tmp7 = int(clp[tmp5 >> 5])
-            tmp5 = int(deref(mb))
+            tmp5 = int(*mb)
             tmp7++
             var _t9 = mb
-            mb = mb + 1
-            deref(_t9) = uint8((tmp5 + tmp7) >> 1)
-            ptrC = ptrC + 1
+            mb++
+            *_t9 = uint8((tmp5 + tmp7) >> 1)
+            ptrC++
             x--
         }
-        ptrC = ptrC + (4u * width - partWidth)
-        ptrV = ptrV + (4u * width - partWidth)
-        mb = mb + (uint(4 * 16) - partWidth)
+        ptrC += 4u * width - partWidth
+        ptrV += 4u * width - partWidth
+        mb += uint(4 * 16) - partWidth
         y--
     }
 }
 
 [c_function]
-def h264bsdInterpolateMidHalf(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint; partHeight : uint) {
+def h264bsdInterpolateMidHalf(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint;
+                              partHeight : uint) {
     var p1 : uint[111]
     var x : uint
     var y : uint
@@ -9335,18 +10346,18 @@ def h264bsdInterpolateMidHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
         ref = reinterpret<uint8?>(addr(p1[0]))
         width = partWidth + 5u
     }
-    ref = ref + (uint(y0) * width + uint(x0))
+    ref += uint(y0) * width + uint(x0)
     b1 = addr(_c_table[0])
     ptrJ = ref + 5
     // First step: calculate intermediate values for
     // horizontal interpolation
     y = partHeight + 5u
     while (y != 0) {
-        tmp6 = int(deref(ptrJ - 5))
-        tmp5 = int(deref(ptrJ - 4))
-        tmp4 = int(deref(ptrJ - 3))
-        tmp3 = int(deref(ptrJ - 2))
-        tmp2 = int(deref(ptrJ - 1))
+        tmp6 = int(*(ptrJ - 5))
+        tmp5 = int(*(ptrJ - 4))
+        tmp4 = int(*(ptrJ - 3))
+        tmp3 = int(*(ptrJ - 2))
+        tmp2 = int(*(ptrJ - 1))
         // 4 pels per iteration
         x = partWidth >> 2u
         while (x != 0) {
@@ -9356,56 +10367,56 @@ def h264bsdInterpolateMidHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp6 += tmp7 << 2
             tmp7 = tmp2 + tmp5
             var _t0 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp1 = int(deref(_t0))
+            ptrJ++
+            tmp1 = int(*_t0)
             tmp6 -= tmp7 << 2
             tmp6 -= tmp7
             tmp6 += tmp1
             var _t1 = b1
-            b1 = b1 + 1
-            deref(_t1) = tmp6
+            b1++
+            *_t1 = tmp6
             // Second pixel
             tmp7 = tmp2 + tmp3
             tmp5 += tmp7 << 4
             tmp5 += tmp7 << 2
             tmp7 = tmp1 + tmp4
             var _t2 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp6 = int(deref(_t2))
+            ptrJ++
+            tmp6 = int(*_t2)
             tmp5 -= tmp7 << 2
             tmp5 -= tmp7
             tmp5 += tmp6
             var _t3 = b1
-            b1 = b1 + 1
-            deref(_t3) = tmp5
+            b1++
+            *_t3 = tmp5
             // Third pixel
             tmp7 = tmp1 + tmp2
             tmp4 += tmp7 << 4
             tmp4 += tmp7 << 2
             tmp7 = tmp6 + tmp3
             var _t4 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp5 = int(deref(_t4))
+            ptrJ++
+            tmp5 = int(*_t4)
             tmp4 -= tmp7 << 2
             tmp4 -= tmp7
             tmp4 += tmp5
             var _t5 = b1
-            b1 = b1 + 1
-            deref(_t5) = tmp4
+            b1++
+            *_t5 = tmp4
             // Fourth pixel
             tmp7 = tmp6 + tmp1
             tmp3 += tmp7 << 4
             tmp3 += tmp7 << 2
             tmp7 = tmp5 + tmp2
             var _t6 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp4 = int(deref(_t6))
+            ptrJ++
+            tmp4 = int(*_t6)
             tmp3 -= tmp7 << 2
             tmp3 -= tmp7
             tmp3 += tmp4
             var _t7 = b1
-            b1 = b1 + 1
-            deref(_t7) = tmp3
+            b1++
+            *_t7 = tmp3
             tmp7 = tmp4
             tmp4 = tmp6
             tmp6 = tmp2
@@ -9414,7 +10425,7 @@ def h264bsdInterpolateMidHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp5 = tmp1
             x--
         }
-        ptrJ = ptrJ + (width - partWidth)
+        ptrJ += width - partWidth
         y--
     }
     // Second step: calculate vertical interpolation
@@ -9430,8 +10441,8 @@ def h264bsdInterpolateMidHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp1 = ptrV[partWidth]
             tmp2 = ptrV[partWidth * 2u]
             var _t8 = ptrV
-            ptrV = ptrV + 1
-            tmp6 = deref(_t8)
+            ptrV++
+            tmp6 = *_t8
             tmp7 = tmp4 + tmp1
             tmp2 -= tmp7 << 2
             tmp2 -= tmp7
@@ -9455,7 +10466,7 @@ def h264bsdInterpolateMidHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp7 = int(clp[tmp1 >> 10])
             tmp6 += 512
             mb[32] = uint8(tmp7)
-            tmp1 = deref(ptrC)
+            tmp1 = *ptrC
             tmp7 = tmp2 + tmp5
             tmp6 -= tmp7 << 2
             tmp6 -= tmp7
@@ -9476,20 +10487,21 @@ def h264bsdInterpolateMidHalf(var ref : uint8?; var mb : uint8?; var x0 : int; v
             tmp5 += tmp6
             tmp7 = int(clp[tmp5 >> 10])
             var _t9 = mb
-            mb = mb + 1
-            deref(_t9) = uint8(tmp7)
-            ptrC = ptrC + 1
+            mb++
+            *_t9 = uint8(tmp7)
+            ptrC++
             x--
         }
-        mb = mb + (uint(4 * 16) - partWidth)
-        ptrC = ptrC + 3u * partWidth
-        ptrV = ptrV + 3u * partWidth
+        mb += uint(4 * 16) - partWidth
+        ptrC += 3u * partWidth
+        ptrV += 3u * partWidth
         y--
     }
 }
 
 [c_function]
-def h264bsdInterpolateMidVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint; partHeight : uint; verOffset : uint) {
+def h264bsdInterpolateMidVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint;
+                                    partHeight : uint; verOffset : uint) {
     // 0 for pixel f, 1 for pixel q
     var p1 : uint[111]
     var x : uint
@@ -9516,18 +10528,18 @@ def h264bsdInterpolateMidVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
         ref = reinterpret<uint8?>(addr(p1[0]))
         width = partWidth + 5u
     }
-    ref = ref + (uint(y0) * width + uint(x0))
+    ref += uint(y0) * width + uint(x0)
     b1 = addr(_c_table[0])
     ptrJ = ref + 5
     // First step: calculate intermediate values for
     // horizontal interpolation
     y = partHeight + 5u
     while (y != 0) {
-        tmp6 = int(deref(ptrJ - 5))
-        tmp5 = int(deref(ptrJ - 4))
-        tmp4 = int(deref(ptrJ - 3))
-        tmp3 = int(deref(ptrJ - 2))
-        tmp2 = int(deref(ptrJ - 1))
+        tmp6 = int(*(ptrJ - 5))
+        tmp5 = int(*(ptrJ - 4))
+        tmp4 = int(*(ptrJ - 3))
+        tmp3 = int(*(ptrJ - 2))
+        tmp2 = int(*(ptrJ - 1))
         x = partWidth >> 2u
         while (x != 0) {
             // First pixel
@@ -9536,56 +10548,56 @@ def h264bsdInterpolateMidVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp6 += tmp7 << 2
             tmp7 = tmp2 + tmp5
             var _t0 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp1 = int(deref(_t0))
+            ptrJ++
+            tmp1 = int(*_t0)
             tmp6 -= tmp7 << 2
             tmp6 -= tmp7
             tmp6 += tmp1
             var _t1 = b1
-            b1 = b1 + 1
-            deref(_t1) = tmp6
+            b1++
+            *_t1 = tmp6
             // Second pixel
             tmp7 = tmp2 + tmp3
             tmp5 += tmp7 << 4
             tmp5 += tmp7 << 2
             tmp7 = tmp1 + tmp4
             var _t2 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp6 = int(deref(_t2))
+            ptrJ++
+            tmp6 = int(*_t2)
             tmp5 -= tmp7 << 2
             tmp5 -= tmp7
             tmp5 += tmp6
             var _t3 = b1
-            b1 = b1 + 1
-            deref(_t3) = tmp5
+            b1++
+            *_t3 = tmp5
             // Third pixel
             tmp7 = tmp1 + tmp2
             tmp4 += tmp7 << 4
             tmp4 += tmp7 << 2
             tmp7 = tmp6 + tmp3
             var _t4 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp5 = int(deref(_t4))
+            ptrJ++
+            tmp5 = int(*_t4)
             tmp4 -= tmp7 << 2
             tmp4 -= tmp7
             tmp4 += tmp5
             var _t5 = b1
-            b1 = b1 + 1
-            deref(_t5) = tmp4
+            b1++
+            *_t5 = tmp4
             // Fourth pixel
             tmp7 = tmp6 + tmp1
             tmp3 += tmp7 << 4
             tmp3 += tmp7 << 2
             tmp7 = tmp5 + tmp2
             var _t6 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp4 = int(deref(_t6))
+            ptrJ++
+            tmp4 = int(*_t6)
             tmp3 -= tmp7 << 2
             tmp3 -= tmp7
             tmp3 += tmp4
             var _t7 = b1
-            b1 = b1 + 1
-            deref(_t7) = tmp3
+            b1++
+            *_t7 = tmp3
             tmp7 = tmp4
             tmp4 = tmp6
             tmp6 = tmp2
@@ -9594,7 +10606,7 @@ def h264bsdInterpolateMidVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp5 = tmp1
             x--
         }
-        ptrJ = ptrJ + (width - partWidth)
+        ptrJ += width - partWidth
         y--
     }
     // Second step: calculate vertical interpolation and average
@@ -9611,8 +10623,8 @@ def h264bsdInterpolateMidVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp1 = ptrV[partWidth]
             tmp2 = ptrV[partWidth * 2u]
             var _t8 = ptrV
-            ptrV = ptrV + 1
-            tmp6 = deref(_t8)
+            ptrV++
+            tmp6 = *_t8
             tmp7 = tmp4 + tmp1
             tmp2 -= tmp7 << 2
             tmp2 -= tmp7
@@ -9644,14 +10656,14 @@ def h264bsdInterpolateMidVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp6 += 512
             tmp1++
             mb[32] = uint8((tmp7 + tmp1) >> 1)
-            tmp1 = deref(ptrC)
+            tmp1 = *ptrC
             tmp7 = tmp2 + tmp5
             tmp6 -= tmp7 << 2
             tmp6 -= tmp7
             tmp7 = tmp4 + tmp3
             tmp6 += tmp7 << 4
             tmp6 += tmp7 << 2
-            tmp7 = deref(ptrInt)
+            tmp7 = *ptrInt
             tmp6 += tmp1
             tmp6 = int(clp[tmp6 >> 10])
             tmp7 += 16
@@ -9673,22 +10685,23 @@ def h264bsdInterpolateMidVerQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp7 = int(clp[tmp7 >> 5])
             tmp5++
             var _t9 = mb
-            mb = mb + 1
-            deref(_t9) = uint8((tmp7 + tmp5) >> 1)
-            ptrC = ptrC + 1
-            ptrInt = ptrInt + 1
+            mb++
+            *_t9 = uint8((tmp7 + tmp5) >> 1)
+            ptrC++
+            ptrInt++
             x--
         }
-        mb = mb + (uint(4 * 16) - partWidth)
-        ptrC = ptrC + 3u * partWidth
-        ptrV = ptrV + 3u * partWidth
-        ptrInt = ptrInt + 3u * partWidth
+        mb += uint(4 * 16) - partWidth
+        ptrC += 3u * partWidth
+        ptrV += 3u * partWidth
+        ptrInt += 3u * partWidth
         y--
     }
 }
 
 [c_function]
-def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint; partHeight : uint; horOffset : uint) {
+def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : int; var y0 : int; var width : uint; height : uint; partWidth : uint;
+                                    partHeight : uint; horOffset : uint) {
     // 0 for pixel i, 1 for pixel k
     var p1 : uint[111]
     var x : uint
@@ -9716,7 +10729,7 @@ def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
         ref = reinterpret<uint8?>(addr(p1[0]))
         width = partWidth + 5u
     }
-    ref = ref + (uint(y0) * width + uint(x0))
+    ref += uint(y0) * width + uint(x0)
     h1 = addr(_c_table[0]) + tableWidth
     ptrC = ref + width
     ptrV = ptrC + 5u * width
@@ -9731,8 +10744,8 @@ def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp1 = int(ptrV[width])
             tmp2 = int(ptrV[width * 2u])
             var _t0 = ptrV
-            ptrV = ptrV + 1
-            tmp6 = int(deref(_t0))
+            ptrV++
+            tmp6 = int(*_t0)
             tmp7 = tmp4 + tmp1
             tmp2 -= tmp7 << 2
             tmp2 -= tmp7
@@ -9751,7 +10764,7 @@ def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp1 += tmp7 << 2
             tmp1 += tmp2
             h1[tableWidth] = tmp1
-            tmp1 = int(deref(ptrC))
+            tmp1 = int(*ptrC)
             tmp7 = tmp2 + tmp5
             tmp6 -= tmp7 << 2
             tmp6 -= tmp7
@@ -9759,7 +10772,7 @@ def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp6 += tmp7 << 4
             tmp6 += tmp7 << 2
             tmp6 += tmp1
-            deref(h1) = tmp6
+            *h1 = tmp6
             tmp6 = int(ptrC[-int(width)])
             tmp1 += tmp4
             tmp5 -= tmp1 << 2
@@ -9769,13 +10782,13 @@ def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp5 += tmp3 << 2
             tmp5 += tmp6
             h1[-tableWidth] = tmp5
-            h1 = h1 + 1
-            ptrC = ptrC + 1
+            h1++
+            ptrC++
             x--
         }
-        ptrC = ptrC + (4u * width - partWidth - 5u)
-        ptrV = ptrV + (4u * width - partWidth - 5u)
-        h1 = h1 + 3 * tableWidth
+        ptrC += 4u * width - partWidth - 5u
+        ptrV += 4u * width - partWidth - 5u
+        h1 += 3 * tableWidth
         y--
     }
     // Second step: calculate horizontal interpolation and average
@@ -9784,11 +10797,11 @@ def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
     ptrInt = addr(_c_table[0]) + 2 + horOffset
     y = partHeight
     while (y != 0) {
-        tmp6 = deref(ptrJ - 5)
-        tmp5 = deref(ptrJ - 4)
-        tmp4 = deref(ptrJ - 3)
-        tmp3 = deref(ptrJ - 2)
-        tmp2 = deref(ptrJ - 1)
+        tmp6 = *(ptrJ - 5)
+        tmp5 = *(ptrJ - 4)
+        tmp4 = *(ptrJ - 3)
+        tmp3 = *(ptrJ - 2)
+        tmp2 = *(ptrJ - 1)
         x = partWidth >> 2u
         while (x != 0) {
             // First pixel
@@ -9798,13 +10811,13 @@ def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp6 += tmp7 << 2
             tmp7 = tmp2 + tmp5
             var _t1 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp1 = deref(_t1)
+            ptrJ++
+            tmp1 = *_t1
             tmp6 -= tmp7 << 2
             tmp6 -= tmp7
             var _t2 = ptrInt
-            ptrInt = ptrInt + 1
-            tmp7 = deref(_t2)
+            ptrInt++
+            tmp7 = *_t2
             tmp6 += tmp1
             tmp6 = int(clp[tmp6 >> 10])
             tmp7 += 16
@@ -9812,21 +10825,21 @@ def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp5 += 512
             tmp6++
             var _t3 = mb
-            mb = mb + 1
-            deref(_t3) = uint8((tmp6 + tmp7) >> 1)
+            mb++
+            *_t3 = uint8((tmp6 + tmp7) >> 1)
             // Second pixel
             tmp7 = tmp2 + tmp3
             tmp5 += tmp7 << 4
             tmp5 += tmp7 << 2
             tmp7 = tmp1 + tmp4
             var _t4 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp6 = deref(_t4)
+            ptrJ++
+            tmp6 = *_t4
             tmp5 -= tmp7 << 2
             tmp5 -= tmp7
             var _t5 = ptrInt
-            ptrInt = ptrInt + 1
-            tmp7 = deref(_t5)
+            ptrInt++
+            tmp7 = *_t5
             tmp5 += tmp6
             tmp5 = int(clp[tmp5 >> 10])
             tmp7 += 16
@@ -9834,21 +10847,21 @@ def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp4 += 512
             tmp5++
             var _t6 = mb
-            mb = mb + 1
-            deref(_t6) = uint8((tmp5 + tmp7) >> 1)
+            mb++
+            *_t6 = uint8((tmp5 + tmp7) >> 1)
             // Third pixel
             tmp7 = tmp1 + tmp2
             tmp4 += tmp7 << 4
             tmp4 += tmp7 << 2
             tmp7 = tmp6 + tmp3
             var _t7 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp5 = deref(_t7)
+            ptrJ++
+            tmp5 = *_t7
             tmp4 -= tmp7 << 2
             tmp4 -= tmp7
             var _t8 = ptrInt
-            ptrInt = ptrInt + 1
-            tmp7 = deref(_t8)
+            ptrInt++
+            tmp7 = *_t8
             tmp4 += tmp5
             tmp4 = int(clp[tmp4 >> 10])
             tmp7 += 16
@@ -9856,29 +10869,29 @@ def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp3 += 512
             tmp4++
             var _t9 = mb
-            mb = mb + 1
-            deref(_t9) = uint8((tmp4 + tmp7) >> 1)
+            mb++
+            *_t9 = uint8((tmp4 + tmp7) >> 1)
             // Fourth pixel
             tmp7 = tmp6 + tmp1
             tmp3 += tmp7 << 4
             tmp3 += tmp7 << 2
             tmp7 = tmp5 + tmp2
             var _t10 = ptrJ
-            ptrJ = ptrJ + 1
-            tmp4 = deref(_t10)
+            ptrJ++
+            tmp4 = *_t10
             tmp3 -= tmp7 << 2
             tmp3 -= tmp7
             var _t11 = ptrInt
-            ptrInt = ptrInt + 1
-            tmp7 = deref(_t11)
+            ptrInt++
+            tmp7 = *_t11
             tmp3 += tmp4
             tmp3 = int(clp[tmp3 >> 10])
             tmp7 += 16
             tmp7 = int(clp[tmp7 >> 5])
             tmp3++
             var _t12 = mb
-            mb = mb + 1
-            deref(_t12) = uint8((tmp3 + tmp7) >> 1)
+            mb++
+            *_t12 = uint8((tmp3 + tmp7) >> 1)
             tmp3 = tmp5
             tmp5 = tmp1
             tmp7 = tmp4
@@ -9887,15 +10900,16 @@ def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
             tmp2 = tmp7
             x--
         }
-        ptrJ = ptrJ + 5
-        ptrInt = ptrInt + 5
-        mb = mb + (16u - partWidth)
+        ptrJ += 5
+        ptrInt += 5
+        mb += 16u - partWidth
         y--
     }
 }
 
 [c_function]
-def h264bsdPredictSamples(var data : uint8?; var mv : mv_t?; var refPic : image_t?; xA : uint; yA : uint; partX : uint; partY : uint; partWidth : uint; partHeight : uint) {
+def h264bsdPredictSamples(var data : uint8?; var mv : mv_t?; var refPic : image_t?; xA : uint; yA : uint; partX : uint; partY : uint; partWidth : uint;
+                          partHeight : uint) {
     // Variables
     var xFrac : uint
     var yFrac : uint
@@ -9913,55 +10927,87 @@ def h264bsdPredictSamples(var data : uint8?; var mv : mv_t?; var refPic : image_
     height = 16u * refPic.height
     xInt = int(xA) + int(partX) + (int(mv.hor) >> 2)
     yInt = int(yA) + int(partY) + (int(mv.ver) >> 2)
-    let _cond = h264_file_all__lumaFracPos[xFrac][yFrac]
-    if (_cond == 0u) {
-        // G
-        h264bsdFillBlock(refPic.data, lumaPartData, xInt, yInt, width, height, partWidth, partHeight, 16u)
-    } elif (_cond == 1u) {
-        // d
-        h264bsdInterpolateVerQuarter(refPic.data, lumaPartData, xInt, yInt - 2, width, height, partWidth, partHeight, 0u)
-    } elif (_cond == 2u) {
-        // h
-        h264bsdInterpolateVerHalf(refPic.data, lumaPartData, xInt, yInt - 2, width, height, partWidth, partHeight)
-    } elif (_cond == 3u) {
-        // n
-        h264bsdInterpolateVerQuarter(refPic.data, lumaPartData, xInt, yInt - 2, width, height, partWidth, partHeight, 1u)
-    } elif (_cond == 4u) {
-        // a
-        h264bsdInterpolateHorQuarter(refPic.data, lumaPartData, xInt - 2, yInt, width, height, partWidth, partHeight, 0u)
-    } elif (_cond == 5u) {
-        // e
-        h264bsdInterpolateHorVerQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 0u)
-    } elif (_cond == 6u) {
-        // i
-        h264bsdInterpolateMidHorQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 0u)
-    } elif (_cond == 7u) {
-        // p
-        h264bsdInterpolateHorVerQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 2u)
-    } elif (_cond == 8u) {
-        // b
-        h264bsdInterpolateHorHalf(refPic.data, lumaPartData, xInt - 2, yInt, width, height, partWidth, partHeight)
-    } elif (_cond == 9u) {
-        // f
-        h264bsdInterpolateMidVerQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 0u)
-    } elif (_cond == 10u) {
-        // j
-        h264bsdInterpolateMidHalf(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight)
-    } elif (_cond == 11u) {
-        // q
-        h264bsdInterpolateMidVerQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 1u)
-    } elif (_cond == 12u) {
-        // c
-        h264bsdInterpolateHorQuarter(refPic.data, lumaPartData, xInt - 2, yInt, width, height, partWidth, partHeight, 1u)
-    } elif (_cond == 13u) {
-        // g
-        h264bsdInterpolateHorVerQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 1u)
-    } elif (_cond == 14u) {
-        // k
-        h264bsdInterpolateMidHorQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 1u)
-    } else {
-        // case 15, r
-        h264bsdInterpolateHorVerQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 3u)
+    c_switch(h264_file_all__lumaFracPos[xFrac][yFrac]) {
+        case(0u) {
+            // G
+            h264bsdFillBlock(refPic.data, lumaPartData, xInt, yInt, width, height, partWidth, partHeight, 16u)
+            break
+        }
+        case(1u) {
+            // d
+            h264bsdInterpolateVerQuarter(refPic.data, lumaPartData, xInt, yInt - 2, width, height, partWidth, partHeight, 0u)
+            break
+        }
+        case(2u) {
+            // h
+            h264bsdInterpolateVerHalf(refPic.data, lumaPartData, xInt, yInt - 2, width, height, partWidth, partHeight)
+            break
+        }
+        case(3u) {
+            // n
+            h264bsdInterpolateVerQuarter(refPic.data, lumaPartData, xInt, yInt - 2, width, height, partWidth, partHeight, 1u)
+            break
+        }
+        case(4u) {
+            // a
+            h264bsdInterpolateHorQuarter(refPic.data, lumaPartData, xInt - 2, yInt, width, height, partWidth, partHeight, 0u)
+            break
+        }
+        case(5u) {
+            // e
+            h264bsdInterpolateHorVerQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 0u)
+            break
+        }
+        case(6u) {
+            // i
+            h264bsdInterpolateMidHorQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 0u)
+            break
+        }
+        case(7u) {
+            // p
+            h264bsdInterpolateHorVerQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 2u)
+            break
+        }
+        case(8u) {
+            // b
+            h264bsdInterpolateHorHalf(refPic.data, lumaPartData, xInt - 2, yInt, width, height, partWidth, partHeight)
+            break
+        }
+        case(9u) {
+            // f
+            h264bsdInterpolateMidVerQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 0u)
+            break
+        }
+        case(10u) {
+            // j
+            h264bsdInterpolateMidHalf(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight)
+            break
+        }
+        case(11u) {
+            // q
+            h264bsdInterpolateMidVerQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 1u)
+            break
+        }
+        case(12u) {
+            // c
+            h264bsdInterpolateHorQuarter(refPic.data, lumaPartData, xInt - 2, yInt, width, height, partWidth, partHeight, 1u)
+            break
+        }
+        case(13u) {
+            // g
+            h264bsdInterpolateHorVerQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 1u)
+            break
+        }
+        case(14u) {
+            // k
+            h264bsdInterpolateMidHorQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 1u)
+            break
+        }
+        case(_) {
+            // case 15, r
+            h264bsdInterpolateHorVerQuarter(refPic.data, lumaPartData, xInt - 2, yInt - 2, width, height, partWidth, partHeight, 3u)
+            break
+        }
     }
     // chroma
     h264_file_all__PredictChroma(data + 16 * 16 + (partY >> 1u) * 8u + (partX >> 1u), xA + partX, yA + partY, partWidth, partHeight, mv, refPic)
@@ -9990,21 +11036,21 @@ def private h264_file_all__FillRow1(var ref : uint8?; var fill : uint8?; left : 
 def h264bsdFillRow7(var ref : uint8?; var fill : uint8?; var left : int; var center : int; var right : int) {
     var tmp : uint8 = uint8('\0')
     if (left != 0) {
-        tmp = deref(ref)
+        tmp = *ref
     }
     while (left != 0) {
         // lint -esym(644,tmp) tmp is initialized if used
         var _t0 = fill
-        fill = fill + 1
-        deref(_t0) = tmp
+        fill++
+        *_t0 = tmp
         left--
     }
     while (center != 0) {
         var _t1 = fill
-        fill = fill + 1
+        fill++
         var _t2 = ref
-        ref = ref + 1
-        deref(_t1) = deref(_t2)
+        ref++
+        *_t1 = *_t2
         center--
     }
     if (right != 0) {
@@ -10013,14 +11059,15 @@ def h264bsdFillRow7(var ref : uint8?; var fill : uint8?; var left : int; var cen
     while (right != 0) {
         // lint -esym(644,tmp) tmp is initialized if used
         var _t3 = fill
-        fill = fill + 1
-        deref(_t3) = tmp
+        fill++
+        *_t3 = tmp
         right--
     }
 }
 
 [c_function]
-def h264bsdFillBlock(var ref : uint8?; var fill : uint8?; var x0 : int; var y0 : int; width : uint; height : uint; blockWidth : uint; blockHeight : uint; fillScanLength : uint) {
+def h264bsdFillBlock(var ref : uint8?; var fill : uint8?; var x0 : int; var y0 : int; width : uint; height : uint; blockWidth : uint; blockHeight : uint;
+                     fillScanLength : uint) {
     // Variables
     var xstop : int
     var ystop : int
@@ -10056,10 +11103,10 @@ def h264bsdFillBlock(var ref : uint8?; var fill : uint8?; var x0 : int; var y0 :
     xstop = x0 + int(blockWidth)
     ystop = y0 + int(blockHeight)
     if (x0 > 0) {
-        ref = ref + x0
+        ref += x0
     }
     if (y0 > 0) {
-        ref = ref + y0 * int(width)
+        ref += y0 * int(width)
     }
     left = x0 < 0 ? -x0 : 0
     right = xstop > int(width) ? xstop - int(width) : 0
@@ -10070,7 +11117,7 @@ def h264bsdFillBlock(var ref : uint8?; var fill : uint8?; var x0 : int; var y0 :
     if (x0 >= 0 && xstop <= int(width)) {
         while (top != 0) {
             h264_file_all__FillRow1(ref, fill, left, x, right)
-            fill = fill + fillScanLength
+            fill += fillScanLength
             top--
         }
         while (top != 0) {
@@ -10079,14 +11126,14 @@ def h264bsdFillBlock(var ref : uint8?; var fill : uint8?; var x0 : int; var y0 :
         }
         while (y != 0) {
             h264_file_all__FillRow1(ref, fill, left, x, right)
-            ref = ref + width
-            fill = fill + fillScanLength
+            ref += width
+            fill += fillScanLength
             y--
         }
     } else {
         while (top != 0) {
             h264bsdFillRow7(ref, fill, left, x, right)
-            fill = fill + fillScanLength
+            fill += fillScanLength
             top--
         }
         while (top != 0) {
@@ -10095,14 +11142,14 @@ def h264bsdFillBlock(var ref : uint8?; var fill : uint8?; var x0 : int; var y0 :
         }
         while (y != 0) {
             h264bsdFillRow7(ref, fill, left, x, right)
-            ref = ref + width
-            fill = fill + fillScanLength
+            ref += width
+            fill += fillScanLength
             y--
         }
     }
     // Top-overfilling
     // Lines inside reference image
-    ref = ref - width
+    ref -= width
     // Bottom-overfilling
     while (bottom != 0) {
         // (*fp)(ref, fill, left, x, right);
@@ -10111,7 +11158,7 @@ def h264bsdFillBlock(var ref : uint8?; var fill : uint8?; var x0 : int; var y0 :
         } else {
             h264bsdFillRow7(ref, fill, left, x, right)
         }
-        fill = fill + fillScanLength
+        fill += fillScanLength
         bottom--
     }
 }
@@ -10125,7 +11172,7 @@ def h264bsdDecodeSeiMessage(var pStrmData : strmData_t?; var pSeqParamSet : seqP
     var status : uint
     // Code
     memset1(reinterpret<void?>(pSeiMessage), 0, uint64(typeinfo sizeof(type<seiMessage_t>)))
-    while (true) {
+    c_do_while(h264bsdMoreRbspData(pStrmData) != 0) {
         payloadType = 0u
         while (true) {
             tmp = h264bsdGetBits(pStrmData, 8u)
@@ -10151,71 +11198,116 @@ def h264bsdDecodeSeiMessage(var pStrmData : strmData_t?; var pSeqParamSet : seqP
         }
         payloadSize += tmp
         pSeiMessage.payloadType = payloadType
-        let _cond = payloadType
-        if (_cond == 0u) {
-            status = h264_file_all__DecodeBufferingPeriod(pStrmData, addr(pSeiMessage.bufferingPeriod), pSeqParamSet.vuiParameters.vclHrdParameters.cpbCnt, pSeqParamSet.vuiParameters.vclHrdParameters.initialCpbRemovalDelayLength, pSeqParamSet.vuiParameters.nalHrdParametersPresentFlag, pSeqParamSet.vuiParameters.vclHrdParametersPresentFlag)
-        } elif (_cond == 1u) {
-            status = h264_file_all__DecodePictureTiming(pStrmData, addr(pSeiMessage.picTiming), pSeqParamSet.vuiParameters.vclHrdParameters.cpbRemovalDelayLength, pSeqParamSet.vuiParameters.vclHrdParameters.dpbOutputDelayLength, pSeqParamSet.vuiParameters.vclHrdParameters.timeOffsetLength, uint(pSeqParamSet.vuiParameters.nalHrdParametersPresentFlag != 0 || pSeqParamSet.vuiParameters.vclHrdParametersPresentFlag != 0 ? HANTRO_TRUE : HANTRO_FALSE), pSeqParamSet.vuiParameters.picStructPresentFlag)
-        } elif (_cond == 2u) {
-            status = h264_file_all__DecodePanScanRectangle(pStrmData, addr(pSeiMessage.panScanRect))
-        } elif (_cond == 3u) {
-            status = h264_file_all__DecodeFillerPayload(pStrmData, payloadSize)
-        } elif (_cond == 4u) {
-            status = h264_file_all__DecodeUserDataRegisteredITuTT35(pStrmData, addr(pSeiMessage.userDataRegisteredItuTT35), payloadSize)
-        } elif (_cond == 5u) {
-            status = h264_file_all__DecodeUserDataUnregistered(pStrmData, addr(pSeiMessage.userDataUnregistered), payloadSize)
-        } elif (_cond == 6u) {
-            status = h264_file_all__DecodeRecoveryPoint(pStrmData, addr(pSeiMessage.recoveryPoint))
-        } elif (_cond == 7u) {
-            status = h264_file_all__DecodeDecRefPicMarkingRepetition(pStrmData, addr(pSeiMessage.decRefPicMarkingRepetition), pSeqParamSet.numRefFrames)
-        } elif (_cond == 8u) {
-            status = h264_file_all__DecodeSparePic(pStrmData, addr(pSeiMessage.sparePic), pSeqParamSet.picWidthInMbs * pSeqParamSet.picHeightInMbs)
-        } elif (_cond == 9u) {
-            status = h264_file_all__DecodeSceneInfo(pStrmData, addr(pSeiMessage.sceneInfo))
-        } elif (_cond == 10u) {
-            status = h264_file_all__DecodeSubSeqInfo(pStrmData, addr(pSeiMessage.subSeqInfo))
-        } elif (_cond == 11u) {
-            status = h264_file_all__DecodeSubSeqLayerCharacteristics(pStrmData, addr(pSeiMessage.subSeqLayerCharacteristics))
-        } elif (_cond == 12u) {
-            status = h264_file_all__DecodeSubSeqCharacteristics(pStrmData, addr(pSeiMessage.subSeqCharacteristics))
-        } elif (_cond == 13u) {
-            status = h264_file_all__DecodeFullFrameFreeze(pStrmData, addr(pSeiMessage.fullFrameFreeze))
-        } elif (_cond == 14u) {
-            // This SEI does not contain data, what to do ???
-            status = uint(HANTRO_OK)
-        } elif (_cond == 15u) {
-            status = h264_file_all__DecodeFullFrameSnapshot(pStrmData, addr(pSeiMessage.fullFrameSnapshot))
-        } elif (_cond == 16u) {
-            status = h264_file_all__DecodeProgressiveRefinementSegmentStart(pStrmData, addr(pSeiMessage.progressiveRefinementSegmentStart))
-        } elif (_cond == 17u) {
-            status = h264_file_all__DecodeProgressiveRefinementSegmentEnd(pStrmData, addr(pSeiMessage.progressiveRefinementSegmentEnd))
-        } elif (_cond == 18u) {
-            status = h264_file_all__DecodeMotionConstrainedSliceGroupSet(pStrmData, addr(pSeiMessage.motionConstrainedSliceGroupSet), numSliceGroups)
-        } else {
-            status = h264_file_all__DecodeReservedSeiMessage(pStrmData, addr(pSeiMessage.reservedSeiMessage), payloadSize)
+        c_switch(payloadType) {
+            case(0u) {
+                status = h264_file_all__DecodeBufferingPeriod(pStrmData, addr(pSeiMessage.bufferingPeriod), pSeqParamSet.vuiParameters.vclHrdParameters.cpbCnt,
+                        pSeqParamSet.vuiParameters.vclHrdParameters.initialCpbRemovalDelayLength, pSeqParamSet.vuiParameters.nalHrdParametersPresentFlag,
+                        pSeqParamSet.vuiParameters.vclHrdParametersPresentFlag)
+                break
+            }
+            case(1u) {
+                status = h264_file_all__DecodePictureTiming(pStrmData, addr(pSeiMessage.picTiming),
+                        pSeqParamSet.vuiParameters.vclHrdParameters.cpbRemovalDelayLength, pSeqParamSet.vuiParameters.vclHrdParameters.dpbOutputDelayLength,
+                        pSeqParamSet.vuiParameters.vclHrdParameters.timeOffsetLength,
+                        uint(pSeqParamSet.vuiParameters.nalHrdParametersPresentFlag != 0 || pSeqParamSet.vuiParameters.vclHrdParametersPresentFlag != 0 ?
+                            HANTRO_TRUE : HANTRO_FALSE),
+                        pSeqParamSet.vuiParameters.picStructPresentFlag)
+                break
+            }
+            case(2u) {
+                status = h264_file_all__DecodePanScanRectangle(pStrmData, addr(pSeiMessage.panScanRect))
+                break
+            }
+            case(3u) {
+                status = h264_file_all__DecodeFillerPayload(pStrmData, payloadSize)
+                break
+            }
+            case(4u) {
+                status = h264_file_all__DecodeUserDataRegisteredITuTT35(pStrmData, addr(pSeiMessage.userDataRegisteredItuTT35), payloadSize)
+                break
+            }
+            case(5u) {
+                status = h264_file_all__DecodeUserDataUnregistered(pStrmData, addr(pSeiMessage.userDataUnregistered), payloadSize)
+                break
+            }
+            case(6u) {
+                status = h264_file_all__DecodeRecoveryPoint(pStrmData, addr(pSeiMessage.recoveryPoint))
+                break
+            }
+            case(7u) {
+                status = h264_file_all__DecodeDecRefPicMarkingRepetition(pStrmData, addr(pSeiMessage.decRefPicMarkingRepetition), pSeqParamSet.numRefFrames)
+                break
+            }
+            case(8u) {
+                status = h264_file_all__DecodeSparePic(pStrmData, addr(pSeiMessage.sparePic), pSeqParamSet.picWidthInMbs * pSeqParamSet.picHeightInMbs)
+                break
+            }
+            case(9u) {
+                status = h264_file_all__DecodeSceneInfo(pStrmData, addr(pSeiMessage.sceneInfo))
+                break
+            }
+            case(10u) {
+                status = h264_file_all__DecodeSubSeqInfo(pStrmData, addr(pSeiMessage.subSeqInfo))
+                break
+            }
+            case(11u) {
+                status = h264_file_all__DecodeSubSeqLayerCharacteristics(pStrmData, addr(pSeiMessage.subSeqLayerCharacteristics))
+                break
+            }
+            case(12u) {
+                status = h264_file_all__DecodeSubSeqCharacteristics(pStrmData, addr(pSeiMessage.subSeqCharacteristics))
+                break
+            }
+            case(13u) {
+                status = h264_file_all__DecodeFullFrameFreeze(pStrmData, addr(pSeiMessage.fullFrameFreeze))
+                break
+            }
+            case(14u) {
+                // This SEI does not contain data, what to do ???
+                status = uint(HANTRO_OK)
+                break
+            }
+            case(15u) {
+                status = h264_file_all__DecodeFullFrameSnapshot(pStrmData, addr(pSeiMessage.fullFrameSnapshot))
+                break
+            }
+            case(16u) {
+                status = h264_file_all__DecodeProgressiveRefinementSegmentStart(pStrmData, addr(pSeiMessage.progressiveRefinementSegmentStart))
+                break
+            }
+            case(17u) {
+                status = h264_file_all__DecodeProgressiveRefinementSegmentEnd(pStrmData, addr(pSeiMessage.progressiveRefinementSegmentEnd))
+                break
+            }
+            case(18u) {
+                status = h264_file_all__DecodeMotionConstrainedSliceGroupSet(pStrmData, addr(pSeiMessage.motionConstrainedSliceGroupSet), numSliceGroups)
+                break
+            }
+            case(_) {
+                status = h264_file_all__DecodeReservedSeiMessage(pStrmData, addr(pSeiMessage.reservedSeiMessage), payloadSize)
+                break
+            }
         }
         if (status != uint(HANTRO_OK)) {
             return status
         }
-        while (!(h264bsdIsByteAligned(pStrmData) != 0)) {
+        while (h264bsdIsByteAligned(pStrmData) == 0) {
             if (h264bsdGetBits(pStrmData, 1u) != 1u) {
                 return uint(HANTRO_NOK)
             }
-            while (!(h264bsdIsByteAligned(pStrmData) != 0)) {
+            while (h264bsdIsByteAligned(pStrmData) == 0) {
                 if (h264bsdGetBits(pStrmData, 1u) != 0u) {
                     return uint(HANTRO_NOK)
                 }
             }
-        }
-        if (!(h264bsdMoreRbspData(pStrmData) != 0)) {
-            break
         }
     }
     return h264bsdRbspTrailingBits(pStrmData)
 }
 
 [c_function]
-def private h264_file_all__DecodeBufferingPeriod(var pStrmData : strmData_t?; var pBufferingPeriod : seiBufferingPeriod_t?; cpbCnt : uint; initialCpbRemovalDelayLength : uint; nalHrdBpPresentFlag : uint; vclHrdBpPresentFlag : uint) : uint {
+def private h264_file_all__DecodeBufferingPeriod(var pStrmData : strmData_t?; var pBufferingPeriod : seiBufferingPeriod_t?; cpbCnt : uint;
+                                                 initialCpbRemovalDelayLength : uint; nalHrdBpPresentFlag : uint; vclHrdBpPresentFlag : uint) : uint {
     // Variables
     var tmp : uint
     // Code
@@ -10260,7 +11352,8 @@ def private h264_file_all__DecodeBufferingPeriod(var pStrmData : strmData_t?; va
     return uint(HANTRO_OK)
 }
 
-def private h264_file_all__DecodePictureTiming(var pStrmData : strmData_t?; var pPicTiming : seiPicTiming_t?; cpbRemovalDelayLength : uint; dpbOutputDelayLength : uint; timeOffsetLength : uint; cpbDpbDelaysPresentFlag : uint; picStructPresentFlag : uint) : uint {
+def private h264_file_all__DecodePictureTiming(var pStrmData : strmData_t?; var pPicTiming : seiPicTiming_t?; cpbRemovalDelayLength : uint;
+                                               dpbOutputDelayLength : uint; timeOffsetLength : uint; cpbDpbDelaysPresentFlag : uint; picStructPresentFlag : uint) : uint {
     // Variables
     var tmp : uint
     var i : uint
@@ -10443,7 +11536,7 @@ def private h264_file_all__DecodePanScanRectangle(var pStrmData : strmData_t?; v
         return uint(HANTRO_NOK)
     }
     pPanScanRectangle.panScanRectCancelFlag = uint(tmp == 1u ? HANTRO_TRUE : HANTRO_FALSE)
-    if (!(pPanScanRectangle.panScanRectCancelFlag != 0)) {
+    if (pPanScanRectangle.panScanRectCancelFlag == 0) {
         tmp = h264bsdDecodeExpGolombUnsigned(pStrmData, addr(pPanScanRectangle.panScanCnt))
         if (tmp != uint(HANTRO_OK)) {
             return tmp
@@ -10498,7 +11591,8 @@ def private h264_file_all__DecodeFillerPayload(var pStrmData : strmData_t?; payl
 }
 
 [c_function]
-def private h264_file_all__DecodeUserDataRegisteredITuTT35(var pStrmData : strmData_t?; var pUserDataRegisteredItuTT35 : seiUserDataRegisteredItuTT35_t?; payloadSize : uint) : uint {
+def private h264_file_all__DecodeUserDataRegisteredITuTT35(var pStrmData : strmData_t?; var pUserDataRegisteredItuTT35 : seiUserDataRegisteredItuTT35_t?;
+                                                           payloadSize : uint) : uint {
     // Variables
     var tmp : uint
     var i : uint
@@ -10526,7 +11620,7 @@ def private h264_file_all__DecodeUserDataRegisteredITuTT35(var pStrmData : strmD
         return uint(MEMORY_ALLOCATION_ERROR)
     }
     j = 0u
-    while (true) {
+    c_do_while(i < payloadSize) {
         tmp = h264bsdGetBits(pStrmData, 8u)
         if (tmp == END_OF_STREAM) {
             return uint(HANTRO_NOK)
@@ -10534,15 +11628,13 @@ def private h264_file_all__DecodeUserDataRegisteredITuTT35(var pStrmData : strmD
         pUserDataRegisteredItuTT35.ituTT35PayloadByte[j] = uint8(tmp)
         i++
         j++
-        if (!(i < payloadSize)) {
-            break
-        }
     }
     return uint(HANTRO_OK)
 }
 
 [c_function]
-def private h264_file_all__DecodeUserDataUnregistered(var pStrmData : strmData_t?; var pUserDataUnregistered : seiUserDataUnregistered_t?; payloadSize : uint) : uint {
+def private h264_file_all__DecodeUserDataUnregistered(var pStrmData : strmData_t?; var pUserDataUnregistered : seiUserDataUnregistered_t?;
+                                                      payloadSize : uint) : uint {
     // Variables
     var tmp : uint
     // Code
@@ -10599,7 +11691,8 @@ def private h264_file_all__DecodeRecoveryPoint(var pStrmData : strmData_t?; var 
 }
 
 [c_function]
-def private h264_file_all__DecodeDecRefPicMarkingRepetition(var pStrmData : strmData_t?; var pDecRefPicMarkingRepetition : seiDecRefPicMarkingRepetition_t?; numRefFrames : uint) : uint {
+def private h264_file_all__DecodeDecRefPicMarkingRepetition(var pStrmData : strmData_t?; var pDecRefPicMarkingRepetition : seiDecRefPicMarkingRepetition_t?;
+                                                            numRefFrames : uint) : uint {
     // Variables
     var tmp : uint
     // Code
@@ -10787,7 +11880,8 @@ def private h264_file_all__DecodeSubSeqInfo(var pStrmData : strmData_t?; var pSu
 }
 
 [c_function]
-def private h264_file_all__DecodeSubSeqLayerCharacteristics(var pStrmData : strmData_t?; var pSubSeqLayerCharacteristics : seiSubSeqLayerCharacteristics_t?) : uint {
+def private h264_file_all__DecodeSubSeqLayerCharacteristics(var pStrmData : strmData_t?;
+                                                            var pSubSeqLayerCharacteristics : seiSubSeqLayerCharacteristics_t?) : uint {
     // Variables
     var tmp : uint
     var i : uint
@@ -10930,7 +12024,8 @@ def private h264_file_all__DecodeFullFrameSnapshot(var pStrmData : strmData_t?; 
 }
 
 [c_function]
-def private h264_file_all__DecodeProgressiveRefinementSegmentStart(var pStrmData : strmData_t?; var pProgressiveRefinementSegmentStart : seiProgressiveRefinementSegmentStart_t?) : uint {
+def private h264_file_all__DecodeProgressiveRefinementSegmentStart(var pStrmData : strmData_t?;
+                                                                   var pProgressiveRefinementSegmentStart : seiProgressiveRefinementSegmentStart_t?) : uint {
     // Variables
     var tmp : uint
     // Code
@@ -10947,7 +12042,8 @@ def private h264_file_all__DecodeProgressiveRefinementSegmentStart(var pStrmData
 }
 
 [c_function]
-def private h264_file_all__DecodeProgressiveRefinementSegmentEnd(var pStrmData : strmData_t?; var pProgressiveRefinementSegmentEnd : seiProgressiveRefinementSegmentEnd_t?) : uint {
+def private h264_file_all__DecodeProgressiveRefinementSegmentEnd(var pStrmData : strmData_t?;
+                                                                 var pProgressiveRefinementSegmentEnd : seiProgressiveRefinementSegmentEnd_t?) : uint {
     // Variables
     var tmp : uint
     // Code
@@ -10959,7 +12055,8 @@ def private h264_file_all__DecodeProgressiveRefinementSegmentEnd(var pStrmData :
 }
 
 [c_function]
-def private h264_file_all__DecodeMotionConstrainedSliceGroupSet(var pStrmData : strmData_t?; var pMotionConstrainedSliceGroupSet : seiMotionConstrainedSliceGroupSet_t?; numSliceGroups : uint) : uint {
+def private h264_file_all__DecodeMotionConstrainedSliceGroupSet(var pStrmData : strmData_t?;
+                                                                var pMotionConstrainedSliceGroupSet : seiMotionConstrainedSliceGroupSet_t?; numSliceGroups : uint) : uint {
     // Variables
     var tmp : uint
     var i : uint
@@ -11004,7 +12101,8 @@ def private h264_file_all__DecodeMotionConstrainedSliceGroupSet(var pStrmData : 
 }
 
 [c_function]
-def private h264_file_all__DecodeReservedSeiMessage(var pStrmData : strmData_t?; var pReservedSeiMessage : seiReservedSeiMessage_t?; payloadSize : uint) : uint {
+def private h264_file_all__DecodeReservedSeiMessage(var pStrmData : strmData_t?; var pReservedSeiMessage : seiReservedSeiMessage_t?;
+                                                    payloadSize : uint) : uint {
     // Variables
     var tmp : uint
     // Code
@@ -11119,7 +12217,8 @@ def h264bsdDecodeSeqParamSet(var pStrmData : strmData_t?; var pSeqParamSet : seq
         }
         if (pSeqParamSet.numRefFramesInPicOrderCntCycle != 0) {
             // NOTE: This has to be freed somewhere!
-            pSeqParamSet.offsetForRefFrame = reinterpret<int?>(malloc1(uint64(pSeqParamSet.numRefFramesInPicOrderCntCycle) * uint64(typeinfo sizeof(type<int>))))
+            pSeqParamSet.offsetForRefFrame = reinterpret<int?>(malloc1(uint64(pSeqParamSet.numRefFramesInPicOrderCntCycle) *
+                    uint64(typeinfo sizeof(type<int>))))
             if (pSeqParamSet.offsetForRefFrame == null) {
                 return uint(MEMORY_ALLOCATION_ERROR)
             }
@@ -11162,7 +12261,7 @@ def h264bsdDecodeSeqParamSet(var pStrmData : strmData_t?; var pSeqParamSet : seq
     if (tmp == END_OF_STREAM) {
         return uint(HANTRO_NOK)
     }
-    if (!(tmp != 0)) {
+    if (tmp == 0) {
         return uint(HANTRO_NOK)
     }
     // direct_8x8_inference_flag
@@ -11194,14 +12293,15 @@ def h264bsdDecodeSeqParamSet(var pStrmData : strmData_t?; var pSeqParamSet : seq
         }
         // check that frame cropping params are valid, parameters shall
         // specify non-negative area within the original picture
-        if ((int(pSeqParamSet.frameCropLeftOffset) > (8 * int(pSeqParamSet.picWidthInMbs) - (int(pSeqParamSet.frameCropRightOffset) + 1))) || (int(pSeqParamSet.frameCropTopOffset) > (8 * int(pSeqParamSet.picHeightInMbs) - (int(pSeqParamSet.frameCropBottomOffset) + 1)))) {
+        if ((int(pSeqParamSet.frameCropLeftOffset) > (8 * int(pSeqParamSet.picWidthInMbs) - (int(pSeqParamSet.frameCropRightOffset) + 1))) ||
+                (int(pSeqParamSet.frameCropTopOffset) > (8 * int(pSeqParamSet.picHeightInMbs) - (int(pSeqParamSet.frameCropBottomOffset) + 1)))) {
             return uint(HANTRO_NOK)
         }
     }
     // check that image dimensions and levelIdc match
     tmp = pSeqParamSet.picWidthInMbs * pSeqParamSet.picHeightInMbs
     value = h264_file_all__GetDpbSize(tmp, pSeqParamSet.levelIdc)
-    if (value == uint(int(anon_544.INVALID_DPB_SIZE)) || pSeqParamSet.numRefFrames > value) {
+    if (value == uint(anon_544.INVALID_DPB_SIZE) || pSeqParamSet.numRefFrames > value) {
         value = pSeqParamSet.numRefFrames
     }
     pSeqParamSet.maxDpbSize = value
@@ -11222,7 +12322,9 @@ def h264bsdDecodeSeqParamSet(var pStrmData : strmData_t?; var pSeqParamSet : seq
         }
         // check numReorderFrames and maxDecFrameBuffering
         if (pSeqParamSet.vuiParameters.bitstreamRestrictionFlag != 0) {
-            if (pSeqParamSet.vuiParameters.numReorderFrames > pSeqParamSet.vuiParameters.maxDecFrameBuffering || pSeqParamSet.vuiParameters.maxDecFrameBuffering < pSeqParamSet.numRefFrames || pSeqParamSet.vuiParameters.maxDecFrameBuffering > pSeqParamSet.maxDpbSize) {
+            if (pSeqParamSet.vuiParameters.numReorderFrames > pSeqParamSet.vuiParameters.maxDecFrameBuffering ||
+                    pSeqParamSet.vuiParameters.maxDecFrameBuffering < pSeqParamSet.numRefFrames ||
+                    pSeqParamSet.vuiParameters.maxDecFrameBuffering > pSeqParamSet.maxDpbSize) {
                 return uint(HANTRO_NOK)
             }
             // standard says that "the sequence shall not require a DPB with
@@ -11242,61 +12344,92 @@ def private h264_file_all__GetDpbSize(picSizeInMbs : uint; levelIdc : uint) : ui
     // Code
     // use tmp as the size of the DPB in bytes, computes as 1024 * MaxDPB
     // (from table A-1 in Annex A)
-    let _cond = levelIdc
-    if (_cond == 10u) {
-        tmp = 152064u
-        maxPicSizeInMbs = 99u
-    } elif (_cond == 11u) {
-        tmp = 345600u
-        maxPicSizeInMbs = 396u
-    } elif (_cond == 12u) {
-        tmp = 912384u
-        maxPicSizeInMbs = 396u
-    } elif (_cond == 13u) {
-        tmp = 912384u
-        maxPicSizeInMbs = 396u
-    } elif (_cond == 20u) {
-        tmp = 912384u
-        maxPicSizeInMbs = 396u
-    } elif (_cond == 21u) {
-        tmp = 1824768u
-        maxPicSizeInMbs = 792u
-    } elif (_cond == 22u) {
-        tmp = 3110400u
-        maxPicSizeInMbs = 1620u
-    } elif (_cond == 30u) {
-        tmp = 3110400u
-        maxPicSizeInMbs = 1620u
-    } elif (_cond == 31u) {
-        tmp = 6912000u
-        maxPicSizeInMbs = 3600u
-    } elif (_cond == 32u) {
-        tmp = 7864320u
-        maxPicSizeInMbs = 5120u
-    } elif (_cond == 40u) {
-        tmp = 12582912u
-        maxPicSizeInMbs = 8192u
-    } elif (_cond == 41u) {
-        tmp = 12582912u
-        maxPicSizeInMbs = 8192u
-    } elif (_cond == 42u) {
-        tmp = uint(34816 * 384)
-        maxPicSizeInMbs = 8704u
-    } elif (_cond == 50u) {
-        // standard says 42301440 here, but corrigendum "corrects" this to
-        // 42393600
-        tmp = 42393600u
-        maxPicSizeInMbs = 22080u
-    } elif (_cond == 51u) {
-        tmp = 70778880u
-        maxPicSizeInMbs = 36864u
-    } else {
-        return uint(int(anon_544.INVALID_DPB_SIZE))
+    c_switch(levelIdc) {
+        case(10u) {
+            tmp = 152064u
+            maxPicSizeInMbs = 99u
+            break
+        }
+        case(11u) {
+            tmp = 345600u
+            maxPicSizeInMbs = 396u
+            break
+        }
+        case(12u) {
+            tmp = 912384u
+            maxPicSizeInMbs = 396u
+            break
+        }
+        case(13u) {
+            tmp = 912384u
+            maxPicSizeInMbs = 396u
+            break
+        }
+        case(20u) {
+            tmp = 912384u
+            maxPicSizeInMbs = 396u
+            break
+        }
+        case(21u) {
+            tmp = 1824768u
+            maxPicSizeInMbs = 792u
+            break
+        }
+        case(22u) {
+            tmp = 3110400u
+            maxPicSizeInMbs = 1620u
+            break
+        }
+        case(30u) {
+            tmp = 3110400u
+            maxPicSizeInMbs = 1620u
+            break
+        }
+        case(31u) {
+            tmp = 6912000u
+            maxPicSizeInMbs = 3600u
+            break
+        }
+        case(32u) {
+            tmp = 7864320u
+            maxPicSizeInMbs = 5120u
+            break
+        }
+        case(40u) {
+            tmp = 12582912u
+            maxPicSizeInMbs = 8192u
+            break
+        }
+        case(41u) {
+            tmp = 12582912u
+            maxPicSizeInMbs = 8192u
+            break
+        }
+        case(42u) {
+            tmp = uint(34816 * 384)
+            maxPicSizeInMbs = 8704u
+            break
+        }
+        case(50u) {
+            // standard says 42301440 here, but corrigendum "corrects" this to
+            // 42393600
+            tmp = 42393600u
+            maxPicSizeInMbs = 22080u
+            break
+        }
+        case(51u) {
+            tmp = 70778880u
+            maxPicSizeInMbs = 36864u
+            break
+        }
+        case(_) {
+            return uint(anon_544.INVALID_DPB_SIZE)
+        }
     }
     // this is not "correct" return value! However, it results in error in
     // decoding and this was easiest place to check picture size
     if (picSizeInMbs > maxPicSizeInMbs) {
-        return uint(int(anon_544.INVALID_DPB_SIZE))
+        return uint(anon_544.INVALID_DPB_SIZE)
     }
     tmp /= picSizeInMbs * 384u
     return tmp < 16u ? tmp : 16u
@@ -11309,13 +12442,19 @@ def h264bsdCompareSeqParamSets(var pSps1 : seqParamSet_t?; var pSps2 : seqParamS
     // Code
     // first compare parameters whose existence does not depend on other
     // parameters and only compare the rest of the params if these are equal
-    if (pSps1.profileIdc == pSps2.profileIdc && pSps1.levelIdc == pSps2.levelIdc && pSps1.maxFrameNum == pSps2.maxFrameNum && pSps1.picOrderCntType == pSps2.picOrderCntType && pSps1.numRefFrames == pSps2.numRefFrames && pSps1.gapsInFrameNumValueAllowedFlag == pSps2.gapsInFrameNumValueAllowedFlag && pSps1.picWidthInMbs == pSps2.picWidthInMbs && pSps1.picHeightInMbs == pSps2.picHeightInMbs && pSps1.frameCroppingFlag == pSps2.frameCroppingFlag && pSps1.vuiParametersPresentFlag == pSps2.vuiParametersPresentFlag) {
+    if (pSps1.profileIdc == pSps2.profileIdc && pSps1.levelIdc == pSps2.levelIdc && pSps1.maxFrameNum == pSps2.maxFrameNum &&
+            pSps1.picOrderCntType == pSps2.picOrderCntType && pSps1.numRefFrames == pSps2.numRefFrames &&
+            pSps1.gapsInFrameNumValueAllowedFlag == pSps2.gapsInFrameNumValueAllowedFlag && pSps1.picWidthInMbs == pSps2.picWidthInMbs &&
+            pSps1.picHeightInMbs == pSps2.picHeightInMbs && pSps1.frameCroppingFlag == pSps2.frameCroppingFlag &&
+            pSps1.vuiParametersPresentFlag == pSps2.vuiParametersPresentFlag) {
         if (pSps1.picOrderCntType == 0u) {
             if (pSps1.maxPicOrderCntLsb != pSps2.maxPicOrderCntLsb) {
                 return 1u
             }
         } elif (pSps1.picOrderCntType == 1u) {
-            if (pSps1.deltaPicOrderAlwaysZeroFlag != pSps2.deltaPicOrderAlwaysZeroFlag || pSps1.offsetForNonRefPic != pSps2.offsetForNonRefPic || pSps1.offsetForTopToBottomField != pSps2.offsetForTopToBottomField || pSps1.numRefFramesInPicOrderCntCycle != pSps2.numRefFramesInPicOrderCntCycle) {
+            if (pSps1.deltaPicOrderAlwaysZeroFlag != pSps2.deltaPicOrderAlwaysZeroFlag || pSps1.offsetForNonRefPic != pSps2.offsetForNonRefPic ||
+                    pSps1.offsetForTopToBottomField != pSps2.offsetForTopToBottomField ||
+                    pSps1.numRefFramesInPicOrderCntCycle != pSps2.numRefFramesInPicOrderCntCycle) {
                 return 1u
             } else {
                 i = 0u
@@ -11328,7 +12467,8 @@ def h264bsdCompareSeqParamSets(var pSps1 : seqParamSet_t?; var pSps2 : seqParamS
             }
         }
         if (pSps1.frameCroppingFlag != 0) {
-            if (pSps1.frameCropLeftOffset != pSps2.frameCropLeftOffset || pSps1.frameCropRightOffset != pSps2.frameCropRightOffset || pSps1.frameCropTopOffset != pSps2.frameCropTopOffset || pSps1.frameCropBottomOffset != pSps2.frameCropBottomOffset) {
+            if (pSps1.frameCropLeftOffset != pSps2.frameCropLeftOffset || pSps1.frameCropRightOffset != pSps2.frameCropRightOffset ||
+                    pSps1.frameCropTopOffset != pSps2.frameCropTopOffset || pSps1.frameCropBottomOffset != pSps2.frameCropBottomOffset) {
                 return 1u
             }
         }
@@ -11367,14 +12507,14 @@ def h264bsdDecodeSliceData(var pStrmData : strmData_t?; var pStorage : storage?;
     // initial quantization parameter for the slice is obtained as the sum of
     // initial QP for the picture and sliceQpDelta for the current slice
     qpY = int(pStorage.activePps.picInitQp) + pSliceHeader.sliceQpDelta
-    while (true) {
+    c_do_while(moreMbs != 0) {
         // primary picture and already decoded macroblock -> error
-        if (!(pSliceHeader.redundantPicCnt != 0) && pStorage.mb[currMbAddr].decoded != 0) {
+        if (pSliceHeader.redundantPicCnt == 0 && pStorage.mb[currMbAddr].decoded != 0) {
             return uint(HANTRO_NOK)
         }
         h264_file_all__SetMbParams(pStorage.mb + currMbAddr, pSliceHeader, addr(pStorage.slice[0]).sliceId, pStorage.activePps.chromaQpIndexOffset)
-        if (!(pSliceHeader.sliceType == uint(int(anon_104.I_SLICE)) || pSliceHeader.sliceType == uint(int(anon_104.I_SLICE) + 5))) {
-            if (!(prevSkipped != 0)) {
+        if (!(pSliceHeader.sliceType == uint(anon_104.I_SLICE) || pSliceHeader.sliceType == uint(int(anon_104.I_SLICE) + 5))) {
+            if (prevSkipped == 0) {
                 tmp = h264bsdDecodeExpGolombUnsigned(pStrmData, addr(skipRun))
                 if (tmp != uint(HANTRO_OK)) {
                     return tmp
@@ -11401,7 +12541,8 @@ def h264bsdDecodeSliceData(var pStrmData : strmData_t?; var pStorage : storage?;
                 return tmp
             }
         }
-        tmp = h264bsdDecodeMacroblock(pStorage.mb + currMbAddr, mbLayer, currImage, addr(pStorage.dpb[0]), addr(qpY), currMbAddr, pStorage.activePps.constrainedIntraPredFlag, data)
+        tmp = h264bsdDecodeMacroblock(pStorage.mb + currMbAddr, mbLayer, currImage, addr(pStorage.dpb[0]), addr(qpY), currMbAddr,
+                pStorage.activePps.constrainedIntraPredFlag, data)
         if (tmp != uint(HANTRO_OK)) {
             return tmp
         }
@@ -11416,17 +12557,14 @@ def h264bsdDecodeSliceData(var pStrmData : strmData_t?; var pStorage : storage?;
         moreMbs = uint((h264bsdMoreRbspData(pStrmData) != 0 || skipRun != 0) ? HANTRO_TRUE : HANTRO_FALSE)
         // lastMbAddr is only updated for intra slices (all macroblocks of
         // inter slices will be lost in case of an error)
-        if (pSliceHeader.sliceType == uint(int(anon_104.I_SLICE)) || pSliceHeader.sliceType == uint(int(anon_104.I_SLICE) + 5)) {
+        if (pSliceHeader.sliceType == uint(anon_104.I_SLICE) || pSliceHeader.sliceType == uint(int(anon_104.I_SLICE) + 5)) {
             addr(pStorage.slice[0]).lastMbAddr = currMbAddr
         }
         currMbAddr = h264bsdNextMbAddress(pStorage.sliceGroupMap, pStorage.picSizeInMbs, currMbAddr)
         // data left in the buffer but no more macroblocks for current slice
         // group -> error
-        if (moreMbs != 0 && !(currMbAddr != 0)) {
+        if (moreMbs != 0 && currMbAddr == 0) {
             return uint(HANTRO_NOK)
-        }
-        if (!(moreMbs != 0)) {
-            break
         }
     }
     if ((addr(pStorage.slice[0]).numDecodedMbs + mbCount) > pStorage.picSizeInMbs) {
@@ -11478,16 +12616,13 @@ def h264bsdMarkSliceCorrupted(var pStorage : storage?; firstMbInSlice : uint) {
         }
         currMbAddr = i
     }
-    while (true) {
+    c_do_while(currMbAddr != 0) {
         if ((pStorage.mb[currMbAddr].sliceId == sliceId) && pStorage.mb[currMbAddr].decoded != 0) {
             pStorage.mb[currMbAddr].decoded--
         } else {
             break
         }
         currMbAddr = h264bsdNextMbAddress(pStorage.sliceGroupMap, pStorage.picSizeInMbs, currMbAddr)
-        if (!(currMbAddr != 0)) {
-            break
-        }
     }
 }
 
@@ -11499,7 +12634,7 @@ def private h264_file_all__DecodeInterleavedMap(var map : uint?; numSliceGroups 
     var group : uint
     // Code
     i = 0u
-    while (true) {
+    c_do_while(i < picSize) {
         group = 0u
         while (group < numSliceGroups && i < picSize) {
             j = 0u
@@ -11510,9 +12645,6 @@ def private h264_file_all__DecodeInterleavedMap(var map : uint?; numSliceGroups 
             let _t0 = group
             group++
             i += runLength[_t0]
-        }
-        if (!(i < picSize)) {
-            break
         }
     }
 }
@@ -11529,7 +12661,8 @@ def private h264_file_all__DecodeDispersedMap(var map : uint?; numSliceGroups : 
 }
 
 [c_function]
-def private h264_file_all__DecodeForegroundLeftOverMap(var map : uint?; numSliceGroups : uint; var topLeft : uint?; var bottomRight : uint?; picWidth : uint; picHeight : uint) {
+def private h264_file_all__DecodeForegroundLeftOverMap(var map : uint?; numSliceGroups : uint; var topLeft : uint?; var bottomRight : uint?; picWidth : uint;
+                                                       picHeight : uint) {
     // Variables
     var y : uint
     var x : uint
@@ -11548,7 +12681,7 @@ def private h264_file_all__DecodeForegroundLeftOverMap(var map : uint?; numSlice
     while (true) {
         let _t0 = group
         group--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         yTopLeft = topLeft[group] / picWidth
@@ -11568,7 +12701,8 @@ def private h264_file_all__DecodeForegroundLeftOverMap(var map : uint?; numSlice
 }
 
 [c_function]
-def private h264_file_all__DecodeBoxOutMap(var map : uint?; sliceGroupChangeDirectionFlag : uint; unitsInSliceGroup0 : uint; picWidth : uint; picHeight : uint) {
+def private h264_file_all__DecodeBoxOutMap(var map : uint?; sliceGroupChangeDirectionFlag : uint; unitsInSliceGroup0 : uint; picWidth : uint;
+                                           picHeight : uint) {
     // Variables
     var k : uint
     var picSize : uint
@@ -11642,7 +12776,8 @@ def private h264_file_all__DecodeRasterScanMap(var map : uint?; sliceGroupChange
 }
 
 [c_function]
-def private h264_file_all__DecodeWipeMap(var map : uint?; sliceGroupChangeDirectionFlag : uint; sizeOfUpperLeftGroup : uint; picWidth : uint; picHeight : uint) {
+def private h264_file_all__DecodeWipeMap(var map : uint?; sliceGroupChangeDirectionFlag : uint; sizeOfUpperLeftGroup : uint; picWidth : uint;
+                                         picHeight : uint) {
     // Variables
     var k : uint
     // Code
@@ -11680,30 +12815,45 @@ def h264bsdDecodeSliceGroupMap(var map : uint?; var pps : picParamSet_t?; sliceG
             sizeOfUpperLeftGroup = pps.sliceGroupChangeDirectionFlag != 0 ? (picSize - unitsInSliceGroup0) : unitsInSliceGroup0
         }
     }
-    let _cond = pps.sliceGroupMapType
-    if (_cond == 0u) {
-        h264_file_all__DecodeInterleavedMap(map, pps.numSliceGroups, pps.runLength, picSize)
-    } elif (_cond == 1u) {
-        h264_file_all__DecodeDispersedMap(map, pps.numSliceGroups, picWidth, picHeight)
-    } elif (_cond == 2u) {
-        h264_file_all__DecodeForegroundLeftOverMap(map, pps.numSliceGroups, pps.topLeft, pps.bottomRight, picWidth, picHeight)
-    } elif (_cond == 3u) {
-        h264_file_all__DecodeBoxOutMap(map, pps.sliceGroupChangeDirectionFlag, unitsInSliceGroup0, picWidth, picHeight)
-    } elif (_cond == 4u) {
-        h264_file_all__DecodeRasterScanMap(map, pps.sliceGroupChangeDirectionFlag, sizeOfUpperLeftGroup, picSize)
-    } elif (_cond == 5u) {
-        h264_file_all__DecodeWipeMap(map, pps.sliceGroupChangeDirectionFlag, sizeOfUpperLeftGroup, picWidth, picHeight)
-    } else {
-        i = 0u
-        while (i < picSize) {
-            map[i] = pps.sliceGroupId[i]
-            i++
+    c_switch(pps.sliceGroupMapType) {
+        case(0u) {
+            h264_file_all__DecodeInterleavedMap(map, pps.numSliceGroups, pps.runLength, picSize)
+            break
+        }
+        case(1u) {
+            h264_file_all__DecodeDispersedMap(map, pps.numSliceGroups, picWidth, picHeight)
+            break
+        }
+        case(2u) {
+            h264_file_all__DecodeForegroundLeftOverMap(map, pps.numSliceGroups, pps.topLeft, pps.bottomRight, picWidth, picHeight)
+            break
+        }
+        case(3u) {
+            h264_file_all__DecodeBoxOutMap(map, pps.sliceGroupChangeDirectionFlag, unitsInSliceGroup0, picWidth, picHeight)
+            break
+        }
+        case(4u) {
+            h264_file_all__DecodeRasterScanMap(map, pps.sliceGroupChangeDirectionFlag, sizeOfUpperLeftGroup, picSize)
+            break
+        }
+        case(5u) {
+            h264_file_all__DecodeWipeMap(map, pps.sliceGroupChangeDirectionFlag, sizeOfUpperLeftGroup, picWidth, picHeight)
+            break
+        }
+        case(_) {
+            i = 0u
+            while (i < picSize) {
+                map[i] = pps.sliceGroupId[i]
+                i++
+            }
+            break
         }
     }
 }
 
 [c_function]
-def h264bsdDecodeSliceHeader(var pStrmData : strmData_t?; var pSliceHeader : sliceHeader_t?; var pSeqParamSet : seqParamSet_t?; var pPicParamSet : picParamSet_t?; var pNalUnit : nalUnit_t?) : uint {
+def h264bsdDecodeSliceHeader(var pStrmData : strmData_t?; var pSliceHeader : sliceHeader_t?; var pSeqParamSet : seqParamSet_t?;
+                             var pPicParamSet : picParamSet_t?; var pNalUnit : nalUnit_t?) : uint {
     // Variables
     var tmp : uint
     var i : uint
@@ -11728,7 +12878,9 @@ def h264bsdDecodeSliceHeader(var pStrmData : strmData_t?; var pSliceHeader : sli
     pSliceHeader.sliceType = value
     // slice type has to be either I or P slice. P slice is not allowed when
     // current NAL unit is an IDR NAL unit or num_ref_frames is 0
-    if (!(pSliceHeader.sliceType == uint(int(anon_104.I_SLICE)) || pSliceHeader.sliceType == uint(int(anon_104.I_SLICE) + 5)) && (!(pSliceHeader.sliceType == uint(int(anon_104.P_SLICE)) || pSliceHeader.sliceType == uint(int(anon_104.P_SLICE) + 5)) || pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR || !(pSeqParamSet.numRefFrames != 0))) {
+    if (!(pSliceHeader.sliceType == uint(anon_104.I_SLICE) || pSliceHeader.sliceType == uint(int(anon_104.I_SLICE) + 5)) &&
+            (!(pSliceHeader.sliceType == uint(anon_104.P_SLICE) || pSliceHeader.sliceType == uint(int(anon_104.P_SLICE) + 5)) ||
+                pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR || pSeqParamSet.numRefFrames == 0)) {
         return uint(HANTRO_NOK)
     }
     tmp = h264bsdDecodeExpGolombUnsigned(pStrmData, addr(value))
@@ -11784,11 +12936,15 @@ def h264bsdDecodeSliceHeader(var pStrmData : strmData_t?; var pSliceHeader : sli
         }
         // check that picOrderCnt for IDR picture will be zero. See
         // DecodePicOrderCnt function to understand the logic here
-        if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR && ((pSliceHeader.picOrderCntLsb > pSeqParamSet.maxPicOrderCntLsb / 2u) || (int(pSliceHeader.picOrderCntLsb) < int(pSliceHeader.picOrderCntLsb) + pSliceHeader.deltaPicOrderCntBottom ? int(pSliceHeader.picOrderCntLsb) : int(pSliceHeader.picOrderCntLsb) + pSliceHeader.deltaPicOrderCntBottom) != 0)) {
+        if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR &&
+                ((pSliceHeader.picOrderCntLsb > pSeqParamSet.maxPicOrderCntLsb / 2u) ||
+                    (int(pSliceHeader.picOrderCntLsb) < int(pSliceHeader.picOrderCntLsb) + pSliceHeader.deltaPicOrderCntBottom ?
+                            int(pSliceHeader.picOrderCntLsb) : int(pSliceHeader.picOrderCntLsb) + pSliceHeader.deltaPicOrderCntBottom) !=
+                        0)) {
             return uint(HANTRO_NOK)
         }
     }
-    if ((pSeqParamSet.picOrderCntType == 1u) && !(pSeqParamSet.deltaPicOrderAlwaysZeroFlag != 0)) {
+    if ((pSeqParamSet.picOrderCntType == 1u) && pSeqParamSet.deltaPicOrderAlwaysZeroFlag == 0) {
         tmp = h264bsdDecodeExpGolombSigned(pStrmData, addr(itmp))
         if (tmp != uint(HANTRO_OK)) {
             return tmp
@@ -11803,7 +12959,12 @@ def h264bsdDecodeSliceHeader(var pStrmData : strmData_t?; var pSliceHeader : sli
         }
         // check that picOrderCnt for IDR picture will be zero. See
         // DecodePicOrderCnt function to understand the logic here
-        if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR && (pSliceHeader.deltaPicOrderCnt[0] < pSliceHeader.deltaPicOrderCnt[0] + pSeqParamSet.offsetForTopToBottomField + pSliceHeader.deltaPicOrderCnt[1] ? pSliceHeader.deltaPicOrderCnt[0] : pSliceHeader.deltaPicOrderCnt[0] + pSeqParamSet.offsetForTopToBottomField + pSliceHeader.deltaPicOrderCnt[1]) != 0) {
+        if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR &&
+                (pSliceHeader.deltaPicOrderCnt[0] < pSliceHeader.deltaPicOrderCnt[0] + pSeqParamSet.offsetForTopToBottomField +
+                            pSliceHeader.deltaPicOrderCnt[1] ?
+                        pSliceHeader.deltaPicOrderCnt[0] :
+                        pSliceHeader.deltaPicOrderCnt[0] + pSeqParamSet.offsetForTopToBottomField + pSliceHeader.deltaPicOrderCnt[1]) !=
+                    0) {
             return uint(HANTRO_NOK)
         }
     }
@@ -11817,7 +12978,7 @@ def h264bsdDecodeSliceHeader(var pStrmData : strmData_t?; var pSliceHeader : sli
             return uint(HANTRO_NOK)
         }
     }
-    if (pSliceHeader.sliceType == uint(int(anon_104.P_SLICE)) || pSliceHeader.sliceType == uint(int(anon_104.P_SLICE) + 5)) {
+    if (pSliceHeader.sliceType == uint(anon_104.P_SLICE) || pSliceHeader.sliceType == uint(int(anon_104.P_SLICE) + 5)) {
         tmp = h264bsdGetBits(pStrmData, 1u)
         if (tmp == END_OF_STREAM) {
             return uint(HANTRO_NOK)
@@ -11842,7 +13003,7 @@ def h264bsdDecodeSliceHeader(var pStrmData : strmData_t?; var pSliceHeader : sli
             pSliceHeader.numRefIdxL0Active = pPicParamSet.numRefIdxL0Active
         }
     }
-    if (pSliceHeader.sliceType == uint(int(anon_104.P_SLICE)) || pSliceHeader.sliceType == uint(int(anon_104.P_SLICE) + 5)) {
+    if (pSliceHeader.sliceType == uint(anon_104.P_SLICE) || pSliceHeader.sliceType == uint(int(anon_104.P_SLICE) + 5)) {
         tmp = h264_file_all__RefPicListReordering(pStrmData, addr(pSliceHeader.refPicListReordering), pSliceHeader.numRefIdxL0Active, pSeqParamSet.maxFrameNum)
         if (tmp != uint(HANTRO_OK)) {
             return tmp
@@ -11928,7 +13089,7 @@ def private h264_file_all__NumSliceGroupChangeCycleBits(picSizeInMbs : uint; sli
     // set numBits to position of right-most non-zero bit
     while (true) {
         numBits++
-        if (!((tmp & (mask << numBits)) != 0)) {
+        if ((tmp & (mask << numBits)) == 0) {
             break
         }
     }
@@ -11941,7 +13102,8 @@ def private h264_file_all__NumSliceGroupChangeCycleBits(picSizeInMbs : uint; sli
 }
 
 [c_function]
-def private h264_file_all__RefPicListReordering(var pStrmData : strmData_t?; var pRefPicListReordering : refPicListReordering_t?; numRefIdxActive : uint; maxPicNum : uint) : uint {
+def private h264_file_all__RefPicListReordering(var pStrmData : strmData_t?; var pRefPicListReordering : refPicListReordering_t?; numRefIdxActive : uint;
+                                                maxPicNum : uint) : uint {
     // Variables
     var tmp : uint
     var value : uint
@@ -11955,7 +13117,7 @@ def private h264_file_all__RefPicListReordering(var pStrmData : strmData_t?; var
     pRefPicListReordering.refPicListReorderingFlagL0 = tmp
     if (pRefPicListReordering.refPicListReorderingFlagL0 != 0) {
         i = 0u
-        while (true) {
+        c_do_while(command != 3u) {
             if (i > numRefIdxActive) {
                 return uint(HANTRO_NOK)
             }
@@ -11984,9 +13146,6 @@ def private h264_file_all__RefPicListReordering(var pStrmData : strmData_t?; var
                 pRefPicListReordering.command[i].longTermPicNum = value
             }
             i++
-            if (!(command != 3u)) {
-                break
-            }
         }
         // there shall be at least one reordering command if
         // refPicListReorderingFlagL0 was set
@@ -11998,7 +13157,8 @@ def private h264_file_all__RefPicListReordering(var pStrmData : strmData_t?; var
 }
 
 [c_function]
-def private h264_file_all__DecRefPicMarking(var pStrmData : strmData_t?; var pDecRefPicMarking : decRefPicMarking_t?; nalUnitType : nalUnitType_e; numRefFrames : uint) : uint {
+def private h264_file_all__DecRefPicMarking(var pStrmData : strmData_t?; var pDecRefPicMarking : decRefPicMarking_t?; nalUnitType : nalUnitType_e;
+                                            numRefFrames : uint) : uint {
     // Variables
     var tmp : uint
     var value : uint
@@ -12022,7 +13182,7 @@ def private h264_file_all__DecRefPicMarking(var pStrmData : strmData_t?; var pDe
             return uint(HANTRO_NOK)
         }
         pDecRefPicMarking.longTermReferenceFlag = tmp
-        if (!(numRefFrames != 0) && pDecRefPicMarking.longTermReferenceFlag != 0) {
+        if (numRefFrames == 0 && pDecRefPicMarking.longTermReferenceFlag != 0) {
             return uint(HANTRO_NOK)
         }
     } else {
@@ -12033,7 +13193,7 @@ def private h264_file_all__DecRefPicMarking(var pStrmData : strmData_t?; var pDe
         pDecRefPicMarking.adaptiveRefPicMarkingModeFlag = tmp
         if (pDecRefPicMarking.adaptiveRefPicMarkingModeFlag != 0) {
             i = 0u
-            while (true) {
+            c_do_while(operation != 0u) {
                 // see explanation of the MAX_NUM_MMC_OPERATIONS in
                 // slice_header.h
                 if (i > (2u * numRefFrames + 2u)) {
@@ -12078,7 +13238,7 @@ def private h264_file_all__DecRefPicMarking(var pStrmData : strmData_t?; var pDe
                         return uint(HANTRO_NOK)
                     }
                     if (value == 0u) {
-                        pDecRefPicMarking.operation[i].maxLongTermFrameIdx = uint(int(anon_105.NO_LONG_TERM_FRAME_INDICES))
+                        pDecRefPicMarking.operation[i].maxLongTermFrameIdx = uint(anon_105.NO_LONG_TERM_FRAME_INDICES)
                     } else {
                         pDecRefPicMarking.operation[i].maxLongTermFrameIdx = value - 1u
                     }
@@ -12094,9 +13254,6 @@ def private h264_file_all__DecRefPicMarking(var pStrmData : strmData_t?; var pDe
                     num6++
                 }
                 i++
-                if (!(operation != 0u)) {
-                    break
-                }
             }
             // error checking
             if (num4 > 1u || num5 > 1u || num6 > 1u || (num1to3 != 0 && num5 != 0)) {
@@ -12115,7 +13272,7 @@ def h264bsdCheckPpsId(var pStrmData : strmData_t?; var picParamSetId : uint?) : 
     var tmpStrmData : strmData_t[1]
     // Code
     // don't touch original stream position params
-    deref(addr(tmpStrmData[0])) = deref(pStrmData)
+    *addr(tmpStrmData[0]) = *pStrmData
     // first_mb_in_slice
     tmp = h264bsdDecodeExpGolombUnsigned(addr(tmpStrmData[0]), addr(value))
     if (tmp != uint(HANTRO_OK)) {
@@ -12133,7 +13290,7 @@ def h264bsdCheckPpsId(var pStrmData : strmData_t?; var picParamSetId : uint?) : 
     if (value >= uint(MAX_NUM_PIC_PARAM_SETS)) {
         return uint(HANTRO_NOK)
     }
-    deref(picParamSetId) = value
+    *picParamSetId = value
     return uint(HANTRO_OK)
 }
 
@@ -12146,7 +13303,7 @@ def h264bsdCheckFrameNum(var pStrmData : strmData_t?; maxFrameNum : uint; var fr
     var tmpStrmData : strmData_t[1]
     // Code
     // don't touch original stream position params
-    deref(addr(tmpStrmData[0])) = deref(pStrmData)
+    *addr(tmpStrmData[0]) = *pStrmData
     // skip first_mb_in_slice
     tmp = h264bsdDecodeExpGolombUnsigned(addr(tmpStrmData[0]), addr(value))
     if (tmp != uint(HANTRO_OK)) {
@@ -12173,7 +13330,7 @@ def h264bsdCheckFrameNum(var pStrmData : strmData_t?; maxFrameNum : uint; var fr
     if (tmp == END_OF_STREAM) {
         return uint(HANTRO_NOK)
     }
-    deref(frameNum) = tmp
+    *frameNum = tmp
     return uint(HANTRO_OK)
 }
 
@@ -12191,7 +13348,7 @@ def h264bsdCheckIdrPicId(var pStrmData : strmData_t?; maxFrameNum : uint; nalUni
         return uint(HANTRO_NOK)
     }
     // don't touch original stream position params
-    deref(addr(tmpStrmData[0])) = deref(pStrmData)
+    *addr(tmpStrmData[0]) = *pStrmData
     // skip first_mb_in_slice
     tmp = h264bsdDecodeExpGolombUnsigned(addr(tmpStrmData[0]), addr(value))
     if (tmp != uint(HANTRO_OK)) {
@@ -12236,7 +13393,7 @@ def h264bsdCheckPicOrderCntLsb(var pStrmData : strmData_t?; var pSeqParamSet : s
     // Code
     // picOrderCntType must be equal to 0
     // don't touch original stream position params
-    deref(addr(tmpStrmData[0])) = deref(pStrmData)
+    *addr(tmpStrmData[0]) = *pStrmData
     // skip first_mb_in_slice
     tmp = h264bsdDecodeExpGolombUnsigned(addr(tmpStrmData[0]), addr(value))
     if (tmp != uint(HANTRO_OK)) {
@@ -12281,12 +13438,13 @@ def h264bsdCheckPicOrderCntLsb(var pStrmData : strmData_t?; var pSeqParamSet : s
     if (tmp == END_OF_STREAM) {
         return uint(HANTRO_NOK)
     }
-    deref(picOrderCntLsb) = tmp
+    *picOrderCntLsb = tmp
     return uint(HANTRO_OK)
 }
 
 [c_function]
-def h264bsdCheckDeltaPicOrderCntBottom(var pStrmData : strmData_t?; var pSeqParamSet : seqParamSet_t?; nalUnitType : nalUnitType_e; var deltaPicOrderCntBottom : int?) : uint {
+def h264bsdCheckDeltaPicOrderCntBottom(var pStrmData : strmData_t?; var pSeqParamSet : seqParamSet_t?; nalUnitType : nalUnitType_e;
+                                       var deltaPicOrderCntBottom : int?) : uint {
     // Variables
     var tmp : uint
     var value : uint
@@ -12295,7 +13453,7 @@ def h264bsdCheckDeltaPicOrderCntBottom(var pStrmData : strmData_t?; var pSeqPara
     // Code
     // picOrderCntType must be equal to 0 and picOrderPresentFlag must be TRUE
     // don't touch original stream position params
-    deref(addr(tmpStrmData[0])) = deref(pStrmData)
+    *addr(tmpStrmData[0]) = *pStrmData
     // skip first_mb_in_slice
     tmp = h264bsdDecodeExpGolombUnsigned(addr(tmpStrmData[0]), addr(value))
     if (tmp != uint(HANTRO_OK)) {
@@ -12349,7 +13507,8 @@ def h264bsdCheckDeltaPicOrderCntBottom(var pStrmData : strmData_t?; var pSeqPara
 }
 
 [c_function]
-def h264bsdCheckDeltaPicOrderCnt(var pStrmData : strmData_t?; var pSeqParamSet : seqParamSet_t?; nalUnitType : nalUnitType_e; picOrderPresentFlag : uint; var deltaPicOrderCnt : int?) : uint {
+def h264bsdCheckDeltaPicOrderCnt(var pStrmData : strmData_t?; var pSeqParamSet : seqParamSet_t?; nalUnitType : nalUnitType_e; picOrderPresentFlag : uint;
+                                 var deltaPicOrderCnt : int?) : uint {
     // Variables
     var tmp : uint
     var value : uint
@@ -12359,7 +13518,7 @@ def h264bsdCheckDeltaPicOrderCnt(var pStrmData : strmData_t?; var pSeqParamSet :
     // picOrderCntType must be equal to 1 and deltaPicOrderAlwaysZeroFlag must
     // be FALSE
     // don't touch original stream position params
-    deref(addr(tmpStrmData[0])) = deref(pStrmData)
+    *addr(tmpStrmData[0]) = *pStrmData
     // skip first_mb_in_slice
     tmp = h264bsdDecodeExpGolombUnsigned(addr(tmpStrmData[0]), addr(value))
     if (tmp != uint(HANTRO_OK)) {
@@ -12409,7 +13568,8 @@ def h264bsdCheckDeltaPicOrderCnt(var pStrmData : strmData_t?; var pSeqParamSet :
 }
 
 [c_function]
-def h264bsdCheckRedundantPicCnt(var pStrmData : strmData_t?; var pSeqParamSet : seqParamSet_t?; var pPicParamSet : picParamSet_t?; nalUnitType : nalUnitType_e; var redundantPicCnt : uint?) : uint {
+def h264bsdCheckRedundantPicCnt(var pStrmData : strmData_t?; var pSeqParamSet : seqParamSet_t?; var pPicParamSet : picParamSet_t?; nalUnitType : nalUnitType_e;
+                                var redundantPicCnt : uint?) : uint {
     // Variables
     var tmp : uint
     var value : uint
@@ -12419,7 +13579,7 @@ def h264bsdCheckRedundantPicCnt(var pStrmData : strmData_t?; var pSeqParamSet : 
     // Code
     // redundant_pic_cnt_flag must be TRUE
     // don't touch original stream position params
-    deref(addr(tmpStrmData[0])) = deref(pStrmData)
+    *addr(tmpStrmData[0]) = *pStrmData
     // skip first_mb_in_slice
     tmp = h264bsdDecodeExpGolombUnsigned(addr(tmpStrmData[0]), addr(value))
     if (tmp != uint(HANTRO_OK)) {
@@ -12473,7 +13633,7 @@ def h264bsdCheckRedundantPicCnt(var pStrmData : strmData_t?; var pSeqParamSet : 
             }
         }
     }
-    if (pSeqParamSet.picOrderCntType == 1u && !(pSeqParamSet.deltaPicOrderAlwaysZeroFlag != 0)) {
+    if (pSeqParamSet.picOrderCntType == 1u && pSeqParamSet.deltaPicOrderAlwaysZeroFlag == 0) {
         // delta_pic_order_cnt[0]
         tmp = h264bsdDecodeExpGolombSigned(addr(tmpStrmData[0]), addr(ivalue))
         if (tmp != uint(HANTRO_OK)) {
@@ -12515,7 +13675,8 @@ def h264bsdCheckRedundantPicCnt(var pStrmData : strmData_t?; var pSeqParamSet : 
 // ------------------------------------------------------------------------------
 // lint -e715 disable lint info nalUnitType not referenced
 [c_function]
-def h264bsdCheckPriorPicsFlag(var noOutputOfPriorPicsFlag : uint?; var pStrmData : strmData_t?; var pSeqParamSet : seqParamSet_t?; var pPicParamSet : picParamSet_t?; nalUnitType : nalUnitType_e) : uint {
+def h264bsdCheckPriorPicsFlag(var noOutputOfPriorPicsFlag : uint?; var pStrmData : strmData_t?; var pSeqParamSet : seqParamSet_t?;
+                              var pPicParamSet : picParamSet_t?; nalUnitType : nalUnitType_e) : uint {
     // Variables
     var tmp : uint
     var value : uint
@@ -12525,7 +13686,7 @@ def h264bsdCheckPriorPicsFlag(var noOutputOfPriorPicsFlag : uint?; var pStrmData
     // Code
     // must be IDR lsice
     // don't touch original stream position params
-    deref(addr(tmpStrmData[0])) = deref(pStrmData)
+    *addr(tmpStrmData[0]) = *pStrmData
     // skip first_mb_in_slice
     tmp = h264bsdDecodeExpGolombUnsigned(addr(tmpStrmData[0]), addr(value))
     if (tmp != uint(HANTRO_OK)) {
@@ -12577,7 +13738,7 @@ def h264bsdCheckPriorPicsFlag(var noOutputOfPriorPicsFlag : uint?; var pStrmData
             }
         }
     }
-    if (pSeqParamSet.picOrderCntType == 1u && !(pSeqParamSet.deltaPicOrderAlwaysZeroFlag != 0)) {
+    if (pSeqParamSet.picOrderCntType == 1u && pSeqParamSet.deltaPicOrderAlwaysZeroFlag == 0) {
         // skip delta_pic_order_cnt[0]
         tmp = h264bsdDecodeExpGolombSigned(addr(tmpStrmData[0]), addr(ivalue))
         if (tmp != uint(HANTRO_OK)) {
@@ -12598,8 +13759,8 @@ def h264bsdCheckPriorPicsFlag(var noOutputOfPriorPicsFlag : uint?; var pStrmData
             return tmp
         }
     }
-    deref(noOutputOfPriorPicsFlag) = h264bsdGetBits(addr(tmpStrmData[0]), 1u)
-    if (deref(noOutputOfPriorPicsFlag) == END_OF_STREAM) {
+    *noOutputOfPriorPicsFlag = h264bsdGetBits(addr(tmpStrmData[0]), 1u)
+    if (*noOutputOfPriorPicsFlag == END_OF_STREAM) {
         return uint(HANTRO_NOK)
     }
     return uint(HANTRO_OK)
@@ -12659,7 +13820,7 @@ def h264bsdStoreSeqParamSet(var pStorage : storage?; var pSeqParamSet : seqParam
         free1(reinterpret<void?>(pStorage.sps[id].vuiParameters))
         pStorage.sps[id].vuiParameters = null
     }
-    deref(pStorage.sps[id]) = deref(pSeqParamSet)
+    *pStorage.sps[id] = *pSeqParamSet
     return uint(HANTRO_OK)
 }
 
@@ -12704,7 +13865,7 @@ def h264bsdStorePicParamSet(var pStorage : storage?; var pPicParamSet : picParam
         free1(reinterpret<void?>(pStorage.pps[id].sliceGroupId))
         pStorage.pps[id].sliceGroupId = null
     }
-    deref(pStorage.pps[id]) = deref(pPicParamSet)
+    *pStorage.pps[id] = *pPicParamSet
     return uint(HANTRO_OK)
 }
 
@@ -12751,12 +13912,15 @@ def h264bsdActivateParamSets(var pStorage : storage?; ppsId : uint; isIdr : uint
         // 1) application set noReordering flag
         // 2) POC type equal to 2
         // 3) num_reorder_frames in vui equal to 0
-        if (pStorage.noReordering != 0 || pStorage.activeSps.picOrderCntType == 2u || (pStorage.activeSps.vuiParametersPresentFlag != 0 && pStorage.activeSps.vuiParameters.bitstreamRestrictionFlag != 0 && !(pStorage.activeSps.vuiParameters.numReorderFrames != 0))) {
+        if (pStorage.noReordering != 0 || pStorage.activeSps.picOrderCntType == 2u ||
+                (pStorage.activeSps.vuiParametersPresentFlag != 0 && pStorage.activeSps.vuiParameters.bitstreamRestrictionFlag != 0 &&
+                    pStorage.activeSps.vuiParameters.numReorderFrames == 0)) {
             flag = uint(HANTRO_TRUE)
         } else {
             flag = uint(HANTRO_FALSE)
         }
-        tmp = h264bsdResetDpb(addr(pStorage.dpb[0]), pStorage.activeSps.picWidthInMbs * pStorage.activeSps.picHeightInMbs, pStorage.activeSps.maxDpbSize, pStorage.activeSps.numRefFrames, pStorage.activeSps.maxFrameNum, flag)
+        tmp = h264bsdResetDpb(addr(pStorage.dpb[0]), pStorage.activeSps.picWidthInMbs * pStorage.activeSps.picHeightInMbs, pStorage.activeSps.maxDpbSize,
+                pStorage.activeSps.numRefFrames, pStorage.activeSps.maxFrameNum, flag)
         if (tmp != uint(HANTRO_OK)) {
             return tmp
         }
@@ -12815,7 +13979,7 @@ def h264bsdIsEndOfPicture(var pStorage : storage?) : uint {
     var tmp : uint
     // Code
     // primary picture
-    if (!(pStorage.sliceHeader[0].redundantPicCnt != 0)) {
+    if (pStorage.sliceHeader[0].redundantPicCnt == 0) {
         if (addr(pStorage.slice[0]).numDecodedMbs == pStorage.picSizeInMbs) {
             return uint(HANTRO_TRUE)
         }
@@ -12836,7 +14000,8 @@ def h264bsdIsEndOfPicture(var pStorage : storage?) : uint {
 def h264bsdComputeSliceGroupMap(var pStorage : storage?; sliceGroupChangeCycle : uint) {
     // Variables
     // Code
-    h264bsdDecodeSliceGroupMap(pStorage.sliceGroupMap, pStorage.activePps, sliceGroupChangeCycle, pStorage.activeSps.picWidthInMbs, pStorage.activeSps.picHeightInMbs)
+    h264bsdDecodeSliceGroupMap(pStorage.sliceGroupMap, pStorage.activePps, sliceGroupChangeCycle, pStorage.activeSps.picWidthInMbs,
+            pStorage.activeSps.picHeightInMbs)
 }
 
 [c_function]
@@ -12853,16 +14018,16 @@ def h264bsdCheckAccessUnitBoundary(var strm : strmData_t?; var nuNext : nalUnit_
     var pps : picParamSet_t?
     // Code
     // initialize default output to FALSE
-    deref(accessUnitBoundaryFlag) = uint(HANTRO_FALSE)
-    if (((uint(int(nuNext.nalUnitType)) > 5u) && (uint(int(nuNext.nalUnitType)) < 12u)) || ((uint(int(nuNext.nalUnitType)) > 12u) && (uint(int(nuNext.nalUnitType)) <= 18u))) {
-        deref(accessUnitBoundaryFlag) = uint(HANTRO_TRUE)
+    *accessUnitBoundaryFlag = uint(HANTRO_FALSE)
+    if (((uint(nuNext.nalUnitType) > 5u) && (uint(nuNext.nalUnitType) < 12u)) || ((uint(nuNext.nalUnitType) > 12u) && (uint(nuNext.nalUnitType) <= 18u))) {
+        *accessUnitBoundaryFlag = uint(HANTRO_TRUE)
         return uint(HANTRO_OK)
     } elif (nuNext.nalUnitType != nalUnitType_e.NAL_CODED_SLICE && nuNext.nalUnitType != nalUnitType_e.NAL_CODED_SLICE_IDR) {
         return uint(HANTRO_OK)
     }
     // check if this is the very first call to this function
     if (addr(storage.aub[0]).firstCallFlag != 0) {
-        deref(accessUnitBoundaryFlag) = uint(HANTRO_TRUE)
+        *accessUnitBoundaryFlag = uint(HANTRO_TRUE)
         addr(storage.aub[0]).firstCallFlag = uint(HANTRO_FALSE)
     }
     // get picture parameter set id
@@ -12872,15 +14037,20 @@ def h264bsdCheckAccessUnitBoundary(var strm : strmData_t?; var nuNext : nalUnit_
     }
     // store sps and pps in separate pointers just to make names shorter
     pps = storage.pps[ppsId]
-    if (pps == null || storage.sps[pps.seqParameterSetId] == null || (storage.activeSpsId != uint(MAX_NUM_SEQ_PARAM_SETS) && pps.seqParameterSetId != storage.activeSpsId && nuNext.nalUnitType != nalUnitType_e.NAL_CODED_SLICE_IDR)) {
+    if (pps == null || storage.sps[pps.seqParameterSetId] == null ||
+            (storage.activeSpsId != uint(MAX_NUM_SEQ_PARAM_SETS) && pps.seqParameterSetId != storage.activeSpsId &&
+                nuNext.nalUnitType != nalUnitType_e.NAL_CODED_SLICE_IDR)) {
         return uint(PARAM_SET_ERROR)
     }
     sps = storage.sps[pps.seqParameterSetId]
-    if (addr(addr(storage.aub[0]).nuPrev[0]).nalRefIdc != nuNext.nalRefIdc && (addr(addr(storage.aub[0]).nuPrev[0]).nalRefIdc == 0u || nuNext.nalRefIdc == 0u)) {
-        deref(accessUnitBoundaryFlag) = uint(HANTRO_TRUE)
+    if (addr(addr(storage.aub[0]).nuPrev[0]).nalRefIdc != nuNext.nalRefIdc &&
+            (addr(addr(storage.aub[0]).nuPrev[0]).nalRefIdc == 0u || nuNext.nalRefIdc == 0u)) {
+        *accessUnitBoundaryFlag = uint(HANTRO_TRUE)
     }
-    if ((addr(addr(storage.aub[0]).nuPrev[0]).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR && nuNext.nalUnitType != nalUnitType_e.NAL_CODED_SLICE_IDR) || (addr(addr(storage.aub[0]).nuPrev[0]).nalUnitType != nalUnitType_e.NAL_CODED_SLICE_IDR && nuNext.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR)) {
-        deref(accessUnitBoundaryFlag) = uint(HANTRO_TRUE)
+    if ((addr(addr(storage.aub[0]).nuPrev[0]).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR && nuNext.nalUnitType != nalUnitType_e.NAL_CODED_SLICE_IDR) ||
+            (addr(addr(storage.aub[0]).nuPrev[0]).nalUnitType != nalUnitType_e.NAL_CODED_SLICE_IDR &&
+                nuNext.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR)) {
+        *accessUnitBoundaryFlag = uint(HANTRO_TRUE)
     }
     tmp = h264bsdCheckFrameNum(strm, sps.maxFrameNum, addr(frameNum))
     if (tmp != uint(HANTRO_OK)) {
@@ -12888,7 +14058,7 @@ def h264bsdCheckAccessUnitBoundary(var strm : strmData_t?; var nuNext : nalUnit_
     }
     if (addr(storage.aub[0]).prevFrameNum != frameNum) {
         addr(storage.aub[0]).prevFrameNum = frameNum
-        deref(accessUnitBoundaryFlag) = uint(HANTRO_TRUE)
+        *accessUnitBoundaryFlag = uint(HANTRO_TRUE)
     }
     if (nuNext.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
         tmp = h264bsdCheckIdrPicId(strm, sps.maxFrameNum, nuNext.nalUnitType, addr(idrPicId))
@@ -12896,7 +14066,7 @@ def h264bsdCheckAccessUnitBoundary(var strm : strmData_t?; var nuNext : nalUnit_
             return uint(HANTRO_NOK)
         }
         if (addr(addr(storage.aub[0]).nuPrev[0]).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR && addr(storage.aub[0]).prevIdrPicId != idrPicId) {
-            deref(accessUnitBoundaryFlag) = uint(HANTRO_TRUE)
+            *accessUnitBoundaryFlag = uint(HANTRO_TRUE)
         }
         addr(storage.aub[0]).prevIdrPicId = idrPicId
     }
@@ -12907,7 +14077,7 @@ def h264bsdCheckAccessUnitBoundary(var strm : strmData_t?; var nuNext : nalUnit_
         }
         if (addr(storage.aub[0]).prevPicOrderCntLsb != picOrderCntLsb) {
             addr(storage.aub[0]).prevPicOrderCntLsb = picOrderCntLsb
-            deref(accessUnitBoundaryFlag) = uint(HANTRO_TRUE)
+            *accessUnitBoundaryFlag = uint(HANTRO_TRUE)
         }
         if (pps.picOrderPresentFlag != 0) {
             tmp = h264bsdCheckDeltaPicOrderCntBottom(strm, sps, nuNext.nalUnitType, addr(deltaPicOrderCntBottom))
@@ -12916,26 +14086,26 @@ def h264bsdCheckAccessUnitBoundary(var strm : strmData_t?; var nuNext : nalUnit_
             }
             if (addr(storage.aub[0]).prevDeltaPicOrderCntBottom != deltaPicOrderCntBottom) {
                 addr(storage.aub[0]).prevDeltaPicOrderCntBottom = deltaPicOrderCntBottom
-                deref(accessUnitBoundaryFlag) = uint(HANTRO_TRUE)
+                *accessUnitBoundaryFlag = uint(HANTRO_TRUE)
             }
         }
-    } elif (sps.picOrderCntType == 1u && !(sps.deltaPicOrderAlwaysZeroFlag != 0)) {
+    } elif (sps.picOrderCntType == 1u && sps.deltaPicOrderAlwaysZeroFlag == 0) {
         tmp = h264bsdCheckDeltaPicOrderCnt(strm, sps, nuNext.nalUnitType, pps.picOrderPresentFlag, addr(deltaPicOrderCnt[0]))
         if (tmp != uint(HANTRO_OK)) {
             return tmp
         }
         if (addr(storage.aub[0]).prevDeltaPicOrderCnt[0] != deltaPicOrderCnt[0]) {
             addr(storage.aub[0]).prevDeltaPicOrderCnt[0] = deltaPicOrderCnt[0]
-            deref(accessUnitBoundaryFlag) = uint(HANTRO_TRUE)
+            *accessUnitBoundaryFlag = uint(HANTRO_TRUE)
         }
         if (pps.picOrderPresentFlag != 0) {
             if (addr(storage.aub[0]).prevDeltaPicOrderCnt[1] != deltaPicOrderCnt[1]) {
                 addr(storage.aub[0]).prevDeltaPicOrderCnt[1] = deltaPicOrderCnt[1]
-                deref(accessUnitBoundaryFlag) = uint(HANTRO_TRUE)
+                *accessUnitBoundaryFlag = uint(HANTRO_TRUE)
             }
         }
     }
-    deref(addr(addr(storage.aub[0]).nuPrev[0])) = deref(nuNext)
+    *addr(addr(storage.aub[0]).nuPrev[0]) = *nuNext
     return uint(HANTRO_OK)
 }
 
@@ -12995,7 +14165,8 @@ def h264bsdValidParamSets(var pStorage : storage?) : uint {
     // Variables
     // Code
     for (i in urange(uint(MAX_NUM_PIC_PARAM_SETS))) {
-        if (pStorage.pps[i] != null && pStorage.sps[pStorage.pps[i].seqParameterSetId] != null && h264_file_all__CheckPps(pStorage.pps[i], pStorage.sps[pStorage.pps[i].seqParameterSetId]) == uint(HANTRO_OK)) {
+        if (pStorage.pps[i] != null && pStorage.sps[pStorage.pps[i].seqParameterSetId] != null &&
+                h264_file_all__CheckPps(pStorage.pps[i], pStorage.sps[pStorage.pps[i].seqParameterSetId]) == uint(HANTRO_OK)) {
             return uint(HANTRO_OK)
         }
     }
@@ -13036,14 +14207,14 @@ def h264bsdShowBits32(var pStrmData : strmData_t?) : uint {
         // at least one bit in the buffer
         shift = int(24u + pStrmData.bitPosInWord)
         var _t0 = pStrm
-        pStrm = pStrm + 1
-        out = uint(deref(_t0)) << uint(shift)
+        pStrm++
+        out = uint(*_t0) << uint(shift)
         bits -= int(8u - pStrmData.bitPosInWord)
         while (bits > 0) {
             shift -= 8
             var _t1 = pStrm
-            pStrm = pStrm + 1
-            out |= uint(deref(_t1)) << uint(shift)
+            pStrm++
+            out |= uint(*_t1) << uint(shift)
             bits -= 8
         }
         return out
@@ -13080,7 +14251,7 @@ def h264bsdFlushBits(var pStrmData : strmData_t?; numBits : uint) : uint {
 def h264bsdIsByteAligned(var pStrmData : strmData_t?) : uint {
     // Variables
     // Code
-    if (!(pStrmData.bitPosInWord != 0)) {
+    if (pStrmData.bitPosInWord == 0) {
         return uint(HANTRO_TRUE)
     } else {
         return uint(HANTRO_FALSE)
@@ -13124,7 +14295,7 @@ def h264bsdProcessBlock(var data : int?; qp : uint; skip : uint; coeffMap : uint
     tmp1 = h264_file_all__levelScale[int(h264_file_all__qpMod6[qp])][0] << int(qpDiv)
     tmp2 = h264_file_all__levelScale[int(h264_file_all__qpMod6[qp])][1] << int(qpDiv)
     tmp3 = h264_file_all__levelScale[int(h264_file_all__qpMod6[qp])][2] << int(qpDiv)
-    if (!(skip != 0)) {
+    if (skip == 0) {
         data[0] *= tmp1
     }
     // at least one of the rows 1, 2 or 3 contain non-zero coeffs, mask takes
@@ -13168,7 +14339,7 @@ def h264bsdProcessBlock(var data : int?; qp : uint; skip : uint; coeffMap : uint
         while (true) {
             let _t0 = row
             row--
-            if (!(_t0 != 0)) {
+            if (_t0 == 0) {
                 break
             }
             tmp0 = ptr[0] + ptr[2]
@@ -13179,7 +14350,7 @@ def h264bsdProcessBlock(var data : int?; qp : uint; skip : uint; coeffMap : uint
             ptr[1] = tmp1 + tmp2
             ptr[2] = tmp1 - tmp2
             ptr[3] = tmp0 - tmp3
-            ptr = ptr + 4
+            ptr += 4
         }
         // lint +e661 +e662
         // then vertical transform
@@ -13187,7 +14358,7 @@ def h264bsdProcessBlock(var data : int?; qp : uint; skip : uint; coeffMap : uint
         while (true) {
             let _t1 = col
             col--
-            if (!(_t1 != 0)) {
+            if (_t1 == 0) {
                 break
             }
             tmp0 = data[0] + data[8]
@@ -13202,7 +14373,7 @@ def h264bsdProcessBlock(var data : int?; qp : uint; skip : uint; coeffMap : uint
             if ((uint(data[0] + 512) > 1023u) || (uint(data[4] + 512) > 1023u) || (uint(data[8] + 512) > 1023u) || (uint(data[12] + 512) > 1023u)) {
                 return uint(HANTRO_NOK)
             }
-            data = data + 1
+            data++
         }
     } else {
         // rows 1, 2 and 3 are zero
@@ -13315,7 +14486,7 @@ def h264bsdProcessLumaDc(var data : int?; qp : uint) {
     while (true) {
         let _t0 = row
         row--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         tmp0 = ptr[0] + ptr[2]
@@ -13326,7 +14497,7 @@ def h264bsdProcessLumaDc(var data : int?; qp : uint) {
         ptr[1] = tmp1 + tmp2
         ptr[2] = tmp1 - tmp2
         ptr[3] = tmp0 - tmp3
-        ptr = ptr + 4
+        ptr += 4
     }
     // lint +e661 +e662
     // then vertical transform and inverse scaling
@@ -13337,7 +14508,7 @@ def h264bsdProcessLumaDc(var data : int?; qp : uint) {
         while (true) {
             let _t1 = col
             col--
-            if (!(_t1 != 0)) {
+            if (_t1 == 0) {
                 break
             }
             tmp0 = data[0] + data[8]
@@ -13348,7 +14519,7 @@ def h264bsdProcessLumaDc(var data : int?; qp : uint) {
             data[4] = (tmp1 + tmp2) * levScale
             data[8] = (tmp1 - tmp2) * levScale
             data[12] = (tmp0 - tmp3) * levScale
-            data = data + 1
+            data++
         }
     } else {
         var tmp : int
@@ -13357,7 +14528,7 @@ def h264bsdProcessLumaDc(var data : int?; qp : uint) {
         while (true) {
             let _t2 = col
             col--
-            if (!(_t2 != 0)) {
+            if (_t2 == 0) {
                 break
             }
             tmp0 = data[0] + data[8]
@@ -13368,7 +14539,7 @@ def h264bsdProcessLumaDc(var data : int?; qp : uint) {
             data[4] = ((tmp1 + tmp2) * levScale + tmp) >> int(2u - qpDiv)
             data[8] = ((tmp1 - tmp2) * levScale + tmp) >> int(2u - qpDiv)
             data[12] = ((tmp0 - tmp3) * levScale + tmp) >> int(2u - qpDiv)
-            data = data + 1
+            data++
         }
     }
 }
@@ -13441,7 +14612,7 @@ def h264bsdCountLeadingZeros(value : uint; length : uint) : uint {
     var zeros : uint = 0u
     var mask : uint = uint(1 << int(length - 1u))
     // Code
-    while (mask != 0 && !((value & mask) != 0)) {
+    while (mask != 0 && (value & mask) == 0) {
         zeros++
         mask >>= 1u
     }
@@ -13538,35 +14709,35 @@ def h264bsdDecodeExpGolombUnsigned(var pStrmData : strmData_t?; var codeNum : ui
     // first bit is 1 -> code length 1
     if (bits >= 2147483648u) {
         h264bsdFlushBits(pStrmData, 1u)
-        deref(codeNum) = 0u
+        *codeNum = 0u
         return uint(HANTRO_OK)
     } elif (bits >= 1073741824u) {
         // second bit is 1 -> code length 3
         if (h264bsdFlushBits(pStrmData, 3u) == END_OF_STREAM) {
             return uint(HANTRO_NOK)
         }
-        deref(codeNum) = 1u + ((bits >> 29u) & 1u)
+        *codeNum = 1u + ((bits >> 29u) & 1u)
         return uint(HANTRO_OK)
     } elif (bits >= 536870912u) {
         // third bit is 1 -> code length 5
         if (h264bsdFlushBits(pStrmData, 5u) == END_OF_STREAM) {
             return uint(HANTRO_NOK)
         }
-        deref(codeNum) = 3u + ((bits >> 27u) & 3u)
+        *codeNum = 3u + ((bits >> 27u) & 3u)
         return uint(HANTRO_OK)
     } elif (bits >= 268435456u) {
         // fourth bit is 1 -> code length 7
         if (h264bsdFlushBits(pStrmData, 7u) == END_OF_STREAM) {
             return uint(HANTRO_NOK)
         }
-        deref(codeNum) = 7u + ((bits >> 25u) & 7u)
+        *codeNum = 7u + ((bits >> 25u) & 7u)
         return uint(HANTRO_OK)
     } else {
         // other code lengths
         numZeros = 4u + h264bsdCountLeadingZeros(bits, 28u)
         // all 32 bits are zero
         if (numZeros == 32u) {
-            deref(codeNum) = 0u
+            *codeNum = 0u
             h264bsdFlushBits(pStrmData, 32u)
             bits = h264bsdGetBits(pStrmData, 1u)
             // check 33rd bit, must be 1
@@ -13578,12 +14749,12 @@ def h264bsdDecodeExpGolombUnsigned(var pStrmData : strmData_t?; var codeNum : ui
                 }
                 // code num 2^32 - 1, needed for unsigned mapping
                 if (bits == 0u) {
-                    deref(codeNum) = BIG_CODE_NUM
+                    *codeNum = BIG_CODE_NUM
                     return uint(HANTRO_OK)
                 } elif (bits == 1u) {
                     // code num 2^32, needed for unsigned mapping
                     // (results in -2^31)
-                    deref(codeNum) = BIG_CODE_NUM
+                    *codeNum = BIG_CODE_NUM
                     return uint(HANTRO_NOK)
                 }
             }
@@ -13596,7 +14767,7 @@ def h264bsdDecodeExpGolombUnsigned(var pStrmData : strmData_t?; var codeNum : ui
         if (bits == END_OF_STREAM) {
             return uint(HANTRO_NOK)
         }
-        deref(codeNum) = uint((1 << int(numZeros)) - 1) + bits
+        *codeNum = uint((1 << int(numZeros)) - 1) + bits
     }
     return uint(HANTRO_OK)
 }
@@ -13617,7 +14788,7 @@ def h264bsdDecodeExpGolombSigned(var pStrmData : strmData_t?; var value : int?) 
         } else {
             // BIG_CODE_NUM and HANTRO_NOK status means codeNum 2^32 which results
             // in signed integer valued -2^31
-            deref(value) = int(2147483648u)
+            *value = int(2147483648u)
             return uint(HANTRO_OK)
         }
     } elif (status == uint(HANTRO_OK)) {
@@ -13626,7 +14797,7 @@ def h264bsdDecodeExpGolombSigned(var pStrmData : strmData_t?; var value : int?) 
         // (codeNum+1)>>1 when value is positive and as (-codeNum)>>1 for
         // negative value
         // lint -e702
-        deref(value) = (codeNum & 1u) != 0 ? int((codeNum + 1u) >> 1u) : -int((codeNum + 1u) >> 1u)
+        *value = (codeNum & 1u) != 0 ? int((codeNum + 1u) >> 1u) : -int((codeNum + 1u) >> 1u)
         // lint +e702
         return uint(HANTRO_OK)
     }
@@ -13648,9 +14819,9 @@ def h264bsdDecodeExpGolombMapped(var pStrmData : strmData_t?; var value : uint?;
             return uint(HANTRO_NOK)
         }
         if (isIntra != 0) {
-            deref(value) = uint(h264_file_all__codedBlockPatternIntra4x4[codeNum])
+            *value = uint(h264_file_all__codedBlockPatternIntra4x4[codeNum])
         } else {
-            deref(value) = uint(h264_file_all__codedBlockPatternInter[codeNum])
+            *value = uint(h264_file_all__codedBlockPatternInter[codeNum])
         }
         return uint(HANTRO_OK)
     }
@@ -13663,11 +14834,11 @@ def h264bsdDecodeExpGolombTruncated(var pStrmData : strmData_t?; var value : uin
     if (greaterThanOne != 0) {
         return h264bsdDecodeExpGolombUnsigned(pStrmData, value)
     } else {
-        deref(value) = h264bsdGetBits(pStrmData, 1u)
-        if (deref(value) == END_OF_STREAM) {
+        *value = h264bsdGetBits(pStrmData, 1u)
+        if (*value == END_OF_STREAM) {
             return uint(HANTRO_NOK)
         }
-        deref(value) ^= 1u
+        *value ^= 1u
     }
     return uint(HANTRO_OK)
 }
@@ -13689,7 +14860,7 @@ def h264bsdDecodeVuiParameters(var pStrmData : strmData_t?; var pVuiParameters :
             return uint(HANTRO_NOK)
         }
         pVuiParameters.aspectRatioIdc = tmp
-        if (pVuiParameters.aspectRatioIdc == uint(int(anon_81.ASPECT_RATIO_EXTENDED_SAR))) {
+        if (pVuiParameters.aspectRatioIdc == uint(anon_81.ASPECT_RATIO_EXTENDED_SAR)) {
             tmp = h264bsdGetBits(pStrmData, 16u)
             if (tmp == END_OF_STREAM) {
                 return uint(HANTRO_NOK)
@@ -14013,7 +15184,7 @@ def private h264_file_all__minimp4_vector_init(var h : minimp4_vector_t?; capaci
     h.bytes = 0
     h.capacity = capacity
     h.data = capacity != 0 ? reinterpret<uint8?>(malloc1(uint64(capacity))) : null
-    return !(capacity != 0) || !!(h.data != null) ? 1 : 0
+    return int_of(capacity == 0 || h.data != null)
 }
 
 // Deallocates vector memory
@@ -14034,7 +15205,7 @@ def private h264_file_all__minimp4_vector_grow(var h : minimp4_vector_t?; bytes 
         new_size = h.capacity + bytes + 1024
     }
     p = realloc1(reinterpret<void?>(h.data), uint64(new_size))
-    if (!(p != null)) {
+    if (p == null) {
         return 0
     }
     h.data = reinterpret<uint8?>(p)
@@ -14048,10 +15219,10 @@ def private h264_file_all__minimp4_vector_grow(var h : minimp4_vector_t?; bytes 
 [c_function]
 def private h264_file_all__minimp4_vector_alloc_tail(var h : minimp4_vector_t?; bytes : int) : uint8? {
     var p : uint8?
-    if (!(h.data != null) && !(h264_file_all__minimp4_vector_init(h, 2 * bytes + 1024) != 0)) {
+    if (h.data == null && h264_file_all__minimp4_vector_init(h, 2 * bytes + 1024) == 0) {
         return null
     }
-    if ((h.capacity - h.bytes) < bytes && !(h264_file_all__minimp4_vector_grow(h, bytes) != 0)) {
+    if ((h.capacity - h.bytes) < bytes && h264_file_all__minimp4_vector_grow(h, bytes) == 0) {
         return null
     }
     let _t0 = h.data
@@ -14074,23 +15245,24 @@ def private h264_file_all__minimp4_vector_put(var h : minimp4_vector_t?; var buf
 // Allocates and initialize mp4 multiplexer
 // return multiplexor handle on success; NULL on failure
 [c_function]
-def MP4E_open(sequential_mode_flag : int; enable_fragmentation : int; var token : void?; write_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>) : MP4E_mux_tag? {
+def MP4E_open(sequential_mode_flag : int; enable_fragmentation : int; var token : void?;
+              write_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>) : MP4E_mux_tag? {
     // Write fixed header: 'ftyp' box
     if (invoke(write_callback, 0l, reinterpret<void?>(addr(h264_file_all__box_ftyp[0])), uint64(typeinfo sizeof(type<uint8[24]>)), token) != 0) {
         return null
     }
     var mux : MP4E_mux_tag? = reinterpret<MP4E_mux_tag?>(malloc1(uint64(typeinfo sizeof(type<MP4E_mux_tag>))))
-    if (!(mux != null)) {
+    if (mux == null) {
         return mux
     }
-    mux.sequential_mode_flag = sequential_mode_flag != 0 || enable_fragmentation != 0 ? 1 : 0
+    mux.sequential_mode_flag = int_of(sequential_mode_flag != 0 || enable_fragmentation != 0)
     mux.enable_fragmentation = enable_fragmentation
     mux.fragments_count = 0
     mux.write_callback = write_callback
     mux.token = token
     mux.text_comment = null
     mux.write_pos = int64(uint64(typeinfo sizeof(type<uint8[24]>)))
-    if (!(mux.sequential_mode_flag != 0)) {
+    if (mux.sequential_mode_flag == 0) {
         // Write filler, which would be updated later
         if (invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(addr(h264_file_all__box_ftyp[0])), 8ul, mux.token) != 0) {
             free1(reinterpret<void?>(mux))
@@ -14108,16 +15280,16 @@ def MP4E_open(sequential_mode_flag : int; enable_fragmentation : int; var token 
 def MP4E_add_track(var mux : MP4E_mux_tag?; var track_data : MP4E_track_t?) : int {
     var tr : track_t?
     var ntr : int = int(uint64(mux.tracks.bytes) / uint64(typeinfo sizeof(type<track_t>)))
-    if (!(mux != null) || !(track_data != null)) {
+    if (mux == null || track_data == null) {
         return MP4E_STATUS_BAD_ARGUMENTS
     }
-    tr = reinterpret<track_t?>(h264_file_all__minimp4_vector_alloc_tail(addr(mux.tracks), int(uint64(typeinfo sizeof(type<track_t>)))))
-    if (!(tr != null)) {
+    tr = reinterpret<track_t?>(h264_file_all__minimp4_vector_alloc_tail(addr(mux.tracks), typeinfo sizeof(type<track_t>)))
+    if (tr == null) {
         return MP4E_STATUS_NO_MEMORY
     }
     memset1(reinterpret<void?>(tr), 0, uint64(typeinfo sizeof(type<track_t>)))
     memcpy1(reinterpret<void?>(addr(tr.info)), reinterpret<void?>(track_data), uint64(typeinfo sizeof(type<MP4E_track_t>)))
-    if (!(h264_file_all__minimp4_vector_init(addr(tr.smpl), 256) != 0)) {
+    if (h264_file_all__minimp4_vector_init(addr(tr.smpl), 256) == 0) {
         return MP4E_STATUS_NO_MEMORY
     }
     h264_file_all__minimp4_vector_init(addr(tr.vsps), 0)
@@ -14129,7 +15301,7 @@ def MP4E_add_track(var mux : MP4E_mux_tag?; var track_data : MP4E_track_t?) : in
 [c_function]
 def private h264_file_all__next_dsi(var p : uint8?; var end : uint8?; var bytes : int?) : uint8? {
     if (intptr(p) < intptr(end + 2)) {
-        deref(bytes) = int(p[0]) * 256 + int(p[1])
+        *bytes = int(p[0]) * 256 + int(p[1])
         return p + 2
     } else {
         return null
@@ -14144,14 +15316,15 @@ def private h264_file_all__append_mem(var v : minimp4_vector_t?; var mem : void?
     i = 0
     while (i + 2 < v.bytes) {
         var cb : int = int(p[i]) * 256 + int(p[i + 1])
-        if (cb == bytes && !(memcmp1(reinterpret<void?>(p + i + 2), mem, uint64(cb)) != 0)) {
+        if (cb == bytes && memcmp1(reinterpret<void?>(p + i + 2), mem, uint64(cb)) == 0) {
             return 1
         }
         i += 2 + cb
     }
     size[0] = uint8(bytes >> 8)
     size[1] = uint8(bytes)
-    return h264_file_all__minimp4_vector_put(v, reinterpret<void?>(addr(size[0])), 2) != null && h264_file_all__minimp4_vector_put(v, mem, bytes) != null ? 1 : 0
+    return int_of(h264_file_all__minimp4_vector_put(v, reinterpret<void?>(addr(size[0])), 2) != null &&
+            h264_file_all__minimp4_vector_put(v, mem, bytes) != null)
 }
 
 [c_function]
@@ -14226,29 +15399,29 @@ def private h264_file_all__write_pending_data(var mux : MP4E_mux_tag?; var tr : 
         // Separate atom needed for sequential_mode only
         let _t1 = mux.sequential_mode_flag
         var _t2 = p
-        p = p + 1
-        deref(_t2) = uint8(tr.pending_sample.bytes + 8 >> 8 * 3)
+        p++
+        *_t2 = uint8(tr.pending_sample.bytes + 8 >> 8 * 3)
         var _t3 = p
-        p = p + 1
-        deref(_t3) = uint8(tr.pending_sample.bytes + 8 >> 8 * 2)
+        p++
+        *_t3 = uint8(tr.pending_sample.bytes + 8 >> 8 * 2)
         var _t4 = p
-        p = p + 1
-        deref(_t4) = uint8(tr.pending_sample.bytes + 8 >> 8 * 1)
+        p++
+        *_t4 = uint8(tr.pending_sample.bytes + 8 >> 8 * 1)
         var _t5 = p
-        p = p + 1
-        deref(_t5) = uint8(tr.pending_sample.bytes + 8 >> 8 * 0)
+        p++
+        *_t5 = uint8(tr.pending_sample.bytes + 8 >> 8 * 0)
         var _t6 = p
-        p = p + 1
-        deref(_t6) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 3))
+        p++
+        *_t6 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 3))
         var _t7 = p
-        p = p + 1
-        deref(_t7) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 2))
+        p++
+        *_t7 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 2))
         var _t8 = p
-        p = p + 1
-        deref(_t8) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 1))
+        p++
+        *_t8 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 1))
         var _t9 = p
-        p = p + 1
-        deref(_t9) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 0))
+        p++
+        *_t9 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 0))
         {
             var err : int = invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(addr(base[0])), uint64(int64(p - addr(base[0]))), mux.token)
             if (err != 0) {
@@ -14280,8 +15453,8 @@ def private h264_file_all__add_sample_descriptor(var mux : MP4E_mux_tag?; var tr
     smp.size = uint64(data_bytes)
     smp.offset = uint64(mux.write_pos)
     smp.duration = duration != 0 ? uint(duration) : tr.info.default_duration
-    smp.flag_random_access = uint((kind == MP4E_SAMPLE_RANDOM_ACCESS) ? 1 : 0)
-    return h264_file_all__minimp4_vector_put(addr(tr.smpl), reinterpret<void?>(addr(smp)), int(uint64(typeinfo sizeof(type<sample_t>)))) != null ? 1 : 0
+    smp.flag_random_access = uint(int_of(kind == MP4E_SAMPLE_RANDOM_ACCESS))
+    return int_of(h264_file_all__minimp4_vector_put(addr(tr.smpl), reinterpret<void?>(addr(smp)), typeinfo sizeof(type<sample_t>)) != null)
 }
 
 // Write Movie Fragment: 'moof' box
@@ -14297,83 +15470,83 @@ def private h264_file_all__mp4e_write_fragment_header(var mux : MP4E_mux_tag?; t
     var e : anon_673
     var tr : track_t? = reinterpret<track_t?>(mux.tracks.data) + track_num
     var _t0 = stack
-    stack = stack + 1
-    deref(_t0) = p
-    p = p + 4
+    stack++
+    *_t0 = p
+    p += 4
     var _t1 = p
-    p = p + 1
-    deref(_t1) = uint8(uint(int(anon_644.BOX_moof)) >> uint(8 * 3))
+    p++
+    *_t1 = uint8(uint(anon_644.BOX_moof) >> uint(8 * 3))
     var _t2 = p
-    p = p + 1
-    deref(_t2) = uint8(uint(int(anon_644.BOX_moof)) >> uint(8 * 2))
+    p++
+    *_t2 = uint8(uint(anon_644.BOX_moof) >> uint(8 * 2))
     var _t3 = p
-    p = p + 1
-    deref(_t3) = uint8(uint(int(anon_644.BOX_moof)) >> uint(8 * 1))
+    p++
+    *_t3 = uint8(uint(anon_644.BOX_moof) >> uint(8 * 1))
     var _t4 = p
-    p = p + 1
-    deref(_t4) = uint8(uint(int(anon_644.BOX_moof)) >> uint(8 * 0))
+    p++
+    *_t4 = uint8(uint(anon_644.BOX_moof) >> uint(8 * 0))
     var _t5 = stack
-    stack = stack + 1
-    deref(_t5) = p
-    p = p + 4
+    stack++
+    *_t5 = p
+    p += 4
     var _t6 = p
-    p = p + 1
-    deref(_t6) = uint8(uint(int(anon_644.BOX_mfhd)) >> uint(8 * 3))
+    p++
+    *_t6 = uint8(uint(anon_644.BOX_mfhd) >> uint(8 * 3))
     var _t7 = p
-    p = p + 1
-    deref(_t7) = uint8(uint(int(anon_644.BOX_mfhd)) >> uint(8 * 2))
+    p++
+    *_t7 = uint8(uint(anon_644.BOX_mfhd) >> uint(8 * 2))
     var _t8 = p
-    p = p + 1
-    deref(_t8) = uint8(uint(int(anon_644.BOX_mfhd)) >> uint(8 * 1))
+    p++
+    *_t8 = uint8(uint(anon_644.BOX_mfhd) >> uint(8 * 1))
     var _t9 = p
-    p = p + 1
-    deref(_t9) = uint8(uint(int(anon_644.BOX_mfhd)) >> uint(8 * 0))
+    p++
+    *_t9 = uint8(uint(anon_644.BOX_mfhd) >> uint(8 * 0))
     var _t10 = p
-    p = p + 1
-    deref(_t10) = uint8(0 >> 8 * 3)
+    p++
+    *_t10 = uint8(0 >> 8 * 3)
     var _t11 = p
-    p = p + 1
-    deref(_t11) = uint8(0 >> 8 * 2)
+    p++
+    *_t11 = uint8(0 >> 8 * 2)
     var _t12 = p
-    p = p + 1
-    deref(_t12) = uint8(0 >> 8 * 1)
+    p++
+    *_t12 = uint8(0 >> 8 * 1)
     var _t13 = p
-    p = p + 1
-    deref(_t13) = uint8(0 >> 8 * 0)
+    p++
+    *_t13 = uint8(0 >> 8 * 0)
     // start from 1
     var _t14 = p
-    p = p + 1
-    deref(_t14) = uint8(mux.fragments_count >> 8 * 3)
+    p++
+    *_t14 = uint8(mux.fragments_count >> 8 * 3)
     var _t15 = p
-    p = p + 1
-    deref(_t15) = uint8(mux.fragments_count >> 8 * 2)
+    p++
+    *_t15 = uint8(mux.fragments_count >> 8 * 2)
     var _t16 = p
-    p = p + 1
-    deref(_t16) = uint8(mux.fragments_count >> 8 * 1)
+    p++
+    *_t16 = uint8(mux.fragments_count >> 8 * 1)
     var _t17 = p
-    p = p + 1
-    deref(_t17) = uint8(mux.fragments_count >> 8 * 0)
-    stack = stack - 1
-    deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-    deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-    deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-    deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+    p++
+    *_t17 = uint8(mux.fragments_count >> 8 * 0)
+    stack--
+    (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+    (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+    (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+    (*stack)[3] = uint8(int64(p - *stack))
     var _t18 = stack
-    stack = stack + 1
-    deref(_t18) = p
-    p = p + 4
+    stack++
+    *_t18 = p
+    p += 4
     var _t19 = p
-    p = p + 1
-    deref(_t19) = uint8(uint(int(anon_644.BOX_traf)) >> uint(8 * 3))
+    p++
+    *_t19 = uint8(uint(anon_644.BOX_traf) >> uint(8 * 3))
     var _t20 = p
-    p = p + 1
-    deref(_t20) = uint8(uint(int(anon_644.BOX_traf)) >> uint(8 * 2))
+    p++
+    *_t20 = uint8(uint(anon_644.BOX_traf) >> uint(8 * 2))
     var _t21 = p
-    p = p + 1
-    deref(_t21) = uint8(uint(int(anon_644.BOX_traf)) >> uint(8 * 1))
+    p++
+    *_t21 = uint8(uint(anon_644.BOX_traf) >> uint(8 * 1))
     var _t22 = p
-    p = p + 1
-    deref(_t22) = uint8(uint(int(anon_644.BOX_traf)) >> uint(8 * 0))
+    p++
+    *_t22 = uint8(uint(anon_644.BOX_traf) >> uint(8 * 0))
     flags = 0u
     if (tr.info.track_media_kind == track_media_kind_t.e_video) {
         // default-sample-flags-present
@@ -14384,79 +15557,79 @@ def private h264_file_all__mp4e_write_fragment_header(var mux : MP4E_mux_tag?; t
     }
     flags = uint((tr.info.track_media_kind == track_media_kind_t.e_video) ? 131104 : 131080)
     var _t23 = stack
-    stack = stack + 1
-    deref(_t23) = p
-    p = p + 4
+    stack++
+    *_t23 = p
+    p += 4
     var _t24 = p
-    p = p + 1
-    deref(_t24) = uint8(uint(int(anon_644.BOX_tfhd)) >> uint(8 * 3))
+    p++
+    *_t24 = uint8(uint(anon_644.BOX_tfhd) >> uint(8 * 3))
     var _t25 = p
-    p = p + 1
-    deref(_t25) = uint8(uint(int(anon_644.BOX_tfhd)) >> uint(8 * 2))
+    p++
+    *_t25 = uint8(uint(anon_644.BOX_tfhd) >> uint(8 * 2))
     var _t26 = p
-    p = p + 1
-    deref(_t26) = uint8(uint(int(anon_644.BOX_tfhd)) >> uint(8 * 1))
+    p++
+    *_t26 = uint8(uint(anon_644.BOX_tfhd) >> uint(8 * 1))
     var _t27 = p
-    p = p + 1
-    deref(_t27) = uint8(uint(int(anon_644.BOX_tfhd)) >> uint(8 * 0))
+    p++
+    *_t27 = uint8(uint(anon_644.BOX_tfhd) >> uint(8 * 0))
     var _t28 = p
-    p = p + 1
-    deref(_t28) = uint8(flags >> uint(8 * 3))
+    p++
+    *_t28 = uint8(flags >> uint(8 * 3))
     var _t29 = p
-    p = p + 1
-    deref(_t29) = uint8(flags >> uint(8 * 2))
+    p++
+    *_t29 = uint8(flags >> uint(8 * 2))
     var _t30 = p
-    p = p + 1
-    deref(_t30) = uint8(flags >> uint(8 * 1))
+    p++
+    *_t30 = uint8(flags >> uint(8 * 1))
     var _t31 = p
-    p = p + 1
-    deref(_t31) = uint8(flags >> uint(8 * 0))
+    p++
+    *_t31 = uint8(flags >> uint(8 * 0))
     // track_ID
     var _t32 = p
-    p = p + 1
-    deref(_t32) = uint8(track_num + 1 >> 8 * 3)
+    p++
+    *_t32 = uint8(track_num + 1 >> 8 * 3)
     var _t33 = p
-    p = p + 1
-    deref(_t33) = uint8(track_num + 1 >> 8 * 2)
+    p++
+    *_t33 = uint8(track_num + 1 >> 8 * 2)
     var _t34 = p
-    p = p + 1
-    deref(_t34) = uint8(track_num + 1 >> 8 * 1)
+    p++
+    *_t34 = uint8(track_num + 1 >> 8 * 1)
     var _t35 = p
-    p = p + 1
-    deref(_t35) = uint8(track_num + 1 >> 8 * 0)
+    p++
+    *_t35 = uint8(track_num + 1 >> 8 * 0)
     if (tr.info.track_media_kind == track_media_kind_t.e_video) {
         // default_sample_flags
         var _t36 = p
-        p = p + 1
-        deref(_t36) = uint8(16842752 >> 8 * 3)
+        p++
+        *_t36 = uint8(16842752 >> 8 * 3)
         var _t37 = p
-        p = p + 1
-        deref(_t37) = uint8(16842752 >> 8 * 2)
+        p++
+        *_t37 = uint8(16842752 >> 8 * 2)
         var _t38 = p
-        p = p + 1
-        deref(_t38) = uint8(16842752 >> 8 * 1)
+        p++
+        *_t38 = uint8(16842752 >> 8 * 1)
         var _t39 = p
-        p = p + 1
-        deref(_t39) = uint8(16842752 >> 8 * 0)
+        p++
+        *_t39 = uint8(16842752 >> 8 * 0)
     } else {
         var _t40 = p
-        p = p + 1
-        deref(_t40) = uint8(duration >> 8 * 3)
+        p++
+        *_t40 = uint8(duration >> 8 * 3)
         var _t41 = p
-        p = p + 1
-        deref(_t41) = uint8(duration >> 8 * 2)
+        p++
+        *_t41 = uint8(duration >> 8 * 2)
         var _t42 = p
-        p = p + 1
-        deref(_t42) = uint8(duration >> 8 * 1)
+        p++
+        *_t42 = uint8(duration >> 8 * 1)
         var _t43 = p
-        p = p + 1
-        deref(_t43) = uint8(duration >> 8 * 0)
+        p++
+        *_t43 = uint8(duration >> 8 * 0)
     }
-    stack = stack - 1
-    deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-    deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-    deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-    deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+    stack--
+    (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+    (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+    (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+    (*stack)[3] = uint8(int64(p - *stack))
     // version 1
     // upper timestamp
     // lower timestamp
@@ -14467,67 +15640,67 @@ def private h264_file_all__mp4e_write_fragment_header(var mux : MP4E_mux_tag?; t
         // sample-size-present
         flags |= 512u
         var _t44 = stack
-        stack = stack + 1
-        deref(_t44) = p
-        p = p + 4
+        stack++
+        *_t44 = p
+        p += 4
         var _t45 = p
-        p = p + 1
-        deref(_t45) = uint8(uint(int(anon_644.BOX_trun)) >> uint(8 * 3))
+        p++
+        *_t45 = uint8(uint(anon_644.BOX_trun) >> uint(8 * 3))
         var _t46 = p
-        p = p + 1
-        deref(_t46) = uint8(uint(int(anon_644.BOX_trun)) >> uint(8 * 2))
+        p++
+        *_t46 = uint8(uint(anon_644.BOX_trun) >> uint(8 * 2))
         var _t47 = p
-        p = p + 1
-        deref(_t47) = uint8(uint(int(anon_644.BOX_trun)) >> uint(8 * 1))
+        p++
+        *_t47 = uint8(uint(anon_644.BOX_trun) >> uint(8 * 1))
         var _t48 = p
-        p = p + 1
-        deref(_t48) = uint8(uint(int(anon_644.BOX_trun)) >> uint(8 * 0))
+        p++
+        *_t48 = uint8(uint(anon_644.BOX_trun) >> uint(8 * 0))
         var _t49 = p
-        p = p + 1
-        deref(_t49) = uint8(flags >> uint(8 * 3))
+        p++
+        *_t49 = uint8(flags >> uint(8 * 3))
         var _t50 = p
-        p = p + 1
-        deref(_t50) = uint8(flags >> uint(8 * 2))
+        p++
+        *_t50 = uint8(flags >> uint(8 * 2))
         var _t51 = p
-        p = p + 1
-        deref(_t51) = uint8(flags >> uint(8 * 1))
+        p++
+        *_t51 = uint8(flags >> uint(8 * 1))
         var _t52 = p
-        p = p + 1
-        deref(_t52) = uint8(flags >> uint(8 * 0))
+        p++
+        *_t52 = uint8(flags >> uint(8 * 0))
         // sample_count
         var _t53 = p
-        p = p + 1
-        deref(_t53) = uint8(1 >> 8 * 3)
+        p++
+        *_t53 = uint8(1 >> 8 * 3)
         var _t54 = p
-        p = p + 1
-        deref(_t54) = uint8(1 >> 8 * 2)
+        p++
+        *_t54 = uint8(1 >> 8 * 2)
         var _t55 = p
-        p = p + 1
-        deref(_t55) = uint8(1 >> 8 * 1)
+        p++
+        *_t55 = uint8(1 >> 8 * 1)
         var _t56 = p
-        p = p + 1
-        deref(_t56) = uint8(1 >> 8 * 0)
+        p++
+        *_t56 = uint8(1 >> 8 * 0)
         // save ptr to data_offset
         pdata_offset = p
-        p = p + 4
+        p += 4
         // sample_size
         var _t57 = p
-        p = p + 1
-        deref(_t57) = uint8(data_bytes >> 8 * 3)
+        p++
+        *_t57 = uint8(data_bytes >> 8 * 3)
         var _t58 = p
-        p = p + 1
-        deref(_t58) = uint8(data_bytes >> 8 * 2)
+        p++
+        *_t58 = uint8(data_bytes >> 8 * 2)
         var _t59 = p
-        p = p + 1
-        deref(_t59) = uint8(data_bytes >> 8 * 1)
+        p++
+        *_t59 = uint8(data_bytes >> 8 * 1)
         var _t60 = p
-        p = p + 1
-        deref(_t60) = uint8(data_bytes >> 8 * 0)
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        p++
+        *_t60 = uint8(data_bytes >> 8 * 0)
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
     } elif (kind == MP4E_SAMPLE_RANDOM_ACCESS) {
         flags = 0u
         // data-offset-present
@@ -14539,93 +15712,93 @@ def private h264_file_all__mp4e_write_fragment_header(var mux : MP4E_mux_tag?; t
         // sample-size-present
         flags |= 512u
         var _t61 = stack
-        stack = stack + 1
-        deref(_t61) = p
-        p = p + 4
+        stack++
+        *_t61 = p
+        p += 4
         var _t62 = p
-        p = p + 1
-        deref(_t62) = uint8(uint(int(anon_644.BOX_trun)) >> uint(8 * 3))
+        p++
+        *_t62 = uint8(uint(anon_644.BOX_trun) >> uint(8 * 3))
         var _t63 = p
-        p = p + 1
-        deref(_t63) = uint8(uint(int(anon_644.BOX_trun)) >> uint(8 * 2))
+        p++
+        *_t63 = uint8(uint(anon_644.BOX_trun) >> uint(8 * 2))
         var _t64 = p
-        p = p + 1
-        deref(_t64) = uint8(uint(int(anon_644.BOX_trun)) >> uint(8 * 1))
+        p++
+        *_t64 = uint8(uint(anon_644.BOX_trun) >> uint(8 * 1))
         var _t65 = p
-        p = p + 1
-        deref(_t65) = uint8(uint(int(anon_644.BOX_trun)) >> uint(8 * 0))
+        p++
+        *_t65 = uint8(uint(anon_644.BOX_trun) >> uint(8 * 0))
         var _t66 = p
-        p = p + 1
-        deref(_t66) = uint8(flags >> uint(8 * 3))
+        p++
+        *_t66 = uint8(flags >> uint(8 * 3))
         var _t67 = p
-        p = p + 1
-        deref(_t67) = uint8(flags >> uint(8 * 2))
+        p++
+        *_t67 = uint8(flags >> uint(8 * 2))
         var _t68 = p
-        p = p + 1
-        deref(_t68) = uint8(flags >> uint(8 * 1))
+        p++
+        *_t68 = uint8(flags >> uint(8 * 1))
         var _t69 = p
-        p = p + 1
-        deref(_t69) = uint8(flags >> uint(8 * 0))
+        p++
+        *_t69 = uint8(flags >> uint(8 * 0))
         // sample_count
         var _t70 = p
-        p = p + 1
-        deref(_t70) = uint8(1 >> 8 * 3)
+        p++
+        *_t70 = uint8(1 >> 8 * 3)
         var _t71 = p
-        p = p + 1
-        deref(_t71) = uint8(1 >> 8 * 2)
+        p++
+        *_t71 = uint8(1 >> 8 * 2)
         var _t72 = p
-        p = p + 1
-        deref(_t72) = uint8(1 >> 8 * 1)
+        p++
+        *_t72 = uint8(1 >> 8 * 1)
         var _t73 = p
-        p = p + 1
-        deref(_t73) = uint8(1 >> 8 * 0)
+        p++
+        *_t73 = uint8(1 >> 8 * 0)
         // save ptr to data_offset
         pdata_offset = p
-        p = p + 4
+        p += 4
         // first_sample_flags
         var _t74 = p
-        p = p + 1
-        deref(_t74) = uint8(33554432 >> 8 * 3)
+        p++
+        *_t74 = uint8(33554432 >> 8 * 3)
         var _t75 = p
-        p = p + 1
-        deref(_t75) = uint8(33554432 >> 8 * 2)
+        p++
+        *_t75 = uint8(33554432 >> 8 * 2)
         var _t76 = p
-        p = p + 1
-        deref(_t76) = uint8(33554432 >> 8 * 1)
+        p++
+        *_t76 = uint8(33554432 >> 8 * 1)
         var _t77 = p
-        p = p + 1
-        deref(_t77) = uint8(33554432 >> 8 * 0)
+        p++
+        *_t77 = uint8(33554432 >> 8 * 0)
         // sample_duration
         var _t78 = p
-        p = p + 1
-        deref(_t78) = uint8(duration >> 8 * 3)
+        p++
+        *_t78 = uint8(duration >> 8 * 3)
         var _t79 = p
-        p = p + 1
-        deref(_t79) = uint8(duration >> 8 * 2)
+        p++
+        *_t79 = uint8(duration >> 8 * 2)
         var _t80 = p
-        p = p + 1
-        deref(_t80) = uint8(duration >> 8 * 1)
+        p++
+        *_t80 = uint8(duration >> 8 * 1)
         var _t81 = p
-        p = p + 1
-        deref(_t81) = uint8(duration >> 8 * 0)
+        p++
+        *_t81 = uint8(duration >> 8 * 0)
         // sample_size
         var _t82 = p
-        p = p + 1
-        deref(_t82) = uint8(data_bytes >> 8 * 3)
+        p++
+        *_t82 = uint8(data_bytes >> 8 * 3)
         var _t83 = p
-        p = p + 1
-        deref(_t83) = uint8(data_bytes >> 8 * 2)
+        p++
+        *_t83 = uint8(data_bytes >> 8 * 2)
         var _t84 = p
-        p = p + 1
-        deref(_t84) = uint8(data_bytes >> 8 * 1)
+        p++
+        *_t84 = uint8(data_bytes >> 8 * 1)
         var _t85 = p
-        p = p + 1
-        deref(_t85) = uint8(data_bytes >> 8 * 0)
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        p++
+        *_t85 = uint8(data_bytes >> 8 * 0)
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
     } else {
         flags = 0u
         // data-offset-present
@@ -14635,95 +15808,95 @@ def private h264_file_all__mp4e_write_fragment_header(var mux : MP4E_mux_tag?; t
         // sample-size-present
         flags |= 512u
         var _t86 = stack
-        stack = stack + 1
-        deref(_t86) = p
-        p = p + 4
+        stack++
+        *_t86 = p
+        p += 4
         var _t87 = p
-        p = p + 1
-        deref(_t87) = uint8(uint(int(anon_644.BOX_trun)) >> uint(8 * 3))
+        p++
+        *_t87 = uint8(uint(anon_644.BOX_trun) >> uint(8 * 3))
         var _t88 = p
-        p = p + 1
-        deref(_t88) = uint8(uint(int(anon_644.BOX_trun)) >> uint(8 * 2))
+        p++
+        *_t88 = uint8(uint(anon_644.BOX_trun) >> uint(8 * 2))
         var _t89 = p
-        p = p + 1
-        deref(_t89) = uint8(uint(int(anon_644.BOX_trun)) >> uint(8 * 1))
+        p++
+        *_t89 = uint8(uint(anon_644.BOX_trun) >> uint(8 * 1))
         var _t90 = p
-        p = p + 1
-        deref(_t90) = uint8(uint(int(anon_644.BOX_trun)) >> uint(8 * 0))
+        p++
+        *_t90 = uint8(uint(anon_644.BOX_trun) >> uint(8 * 0))
         var _t91 = p
-        p = p + 1
-        deref(_t91) = uint8(flags >> uint(8 * 3))
+        p++
+        *_t91 = uint8(flags >> uint(8 * 3))
         var _t92 = p
-        p = p + 1
-        deref(_t92) = uint8(flags >> uint(8 * 2))
+        p++
+        *_t92 = uint8(flags >> uint(8 * 2))
         var _t93 = p
-        p = p + 1
-        deref(_t93) = uint8(flags >> uint(8 * 1))
+        p++
+        *_t93 = uint8(flags >> uint(8 * 1))
         var _t94 = p
-        p = p + 1
-        deref(_t94) = uint8(flags >> uint(8 * 0))
+        p++
+        *_t94 = uint8(flags >> uint(8 * 0))
         // sample_count
         var _t95 = p
-        p = p + 1
-        deref(_t95) = uint8(1 >> 8 * 3)
+        p++
+        *_t95 = uint8(1 >> 8 * 3)
         var _t96 = p
-        p = p + 1
-        deref(_t96) = uint8(1 >> 8 * 2)
+        p++
+        *_t96 = uint8(1 >> 8 * 2)
         var _t97 = p
-        p = p + 1
-        deref(_t97) = uint8(1 >> 8 * 1)
+        p++
+        *_t97 = uint8(1 >> 8 * 1)
         var _t98 = p
-        p = p + 1
-        deref(_t98) = uint8(1 >> 8 * 0)
+        p++
+        *_t98 = uint8(1 >> 8 * 0)
         // save ptr to data_offset
         pdata_offset = p
-        p = p + 4
+        p += 4
         // sample_duration
         var _t99 = p
-        p = p + 1
-        deref(_t99) = uint8(duration >> 8 * 3)
+        p++
+        *_t99 = uint8(duration >> 8 * 3)
         var _t100 = p
-        p = p + 1
-        deref(_t100) = uint8(duration >> 8 * 2)
+        p++
+        *_t100 = uint8(duration >> 8 * 2)
         var _t101 = p
-        p = p + 1
-        deref(_t101) = uint8(duration >> 8 * 1)
+        p++
+        *_t101 = uint8(duration >> 8 * 1)
         var _t102 = p
-        p = p + 1
-        deref(_t102) = uint8(duration >> 8 * 0)
+        p++
+        *_t102 = uint8(duration >> 8 * 0)
         // sample_size
         var _t103 = p
-        p = p + 1
-        deref(_t103) = uint8(data_bytes >> 8 * 3)
+        p++
+        *_t103 = uint8(data_bytes >> 8 * 3)
         var _t104 = p
-        p = p + 1
-        deref(_t104) = uint8(data_bytes >> 8 * 2)
+        p++
+        *_t104 = uint8(data_bytes >> 8 * 2)
         var _t105 = p
-        p = p + 1
-        deref(_t105) = uint8(data_bytes >> 8 * 1)
+        p++
+        *_t105 = uint8(data_bytes >> 8 * 1)
         var _t106 = p
-        p = p + 1
-        deref(_t106) = uint8(data_bytes >> 8 * 0)
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        p++
+        *_t106 = uint8(data_bytes >> 8 * 0)
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
     }
-    stack = stack - 1
-    deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-    deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-    deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-    deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-    stack = stack - 1
-    deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-    deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-    deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-    deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-    pdata_offset[0] = uint8(uint8(int64(p - addr(base[0])) + 8l >> int64(8 * 3)))
-    pdata_offset[1] = uint8(uint8(int64(p - addr(base[0])) + 8l >> int64(8 * 2)))
-    pdata_offset[2] = uint8(uint8(int64(p - addr(base[0])) + 8l >> int64(8 * 1)))
-    pdata_offset[3] = uint8(uint8(int64(p - addr(base[0])) + 8l))
+    stack--
+    (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+    (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+    (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+    (*stack)[3] = uint8(int64(p - *stack))
+    stack--
+    (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+    (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+    (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+    (*stack)[3] = uint8(int64(p - *stack))
+    pdata_offset[0] = uint8(int64(p - addr(base[0])) + 8l >> int64(8 * 3))
+    pdata_offset[1] = uint8(int64(p - addr(base[0])) + 8l >> int64(8 * 2))
+    pdata_offset[2] = uint8(int64(p - addr(base[0])) + 8l >> int64(8 * 1))
+    pdata_offset[3] = uint8(int64(p - addr(base[0])) + 8l)
     {
         var err : int = invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(addr(base[0])), uint64(int64(p - addr(base[0]))), mux.token)
         if (err != 0) {
@@ -14739,29 +15912,29 @@ def private h264_file_all__mp4e_write_mdat_box(var mux : MP4E_mux_tag?; size : u
     var base : uint8[8]
     var p : uint8? = addr(base[0])
     var _t0 = p
-    p = p + 1
-    deref(_t0) = uint8(size >> uint(8 * 3))
+    p++
+    *_t0 = uint8(size >> uint(8 * 3))
     var _t1 = p
-    p = p + 1
-    deref(_t1) = uint8(size >> uint(8 * 2))
+    p++
+    *_t1 = uint8(size >> uint(8 * 2))
     var _t2 = p
-    p = p + 1
-    deref(_t2) = uint8(size >> uint(8 * 1))
+    p++
+    *_t2 = uint8(size >> uint(8 * 1))
     var _t3 = p
-    p = p + 1
-    deref(_t3) = uint8(size >> uint(8 * 0))
+    p++
+    *_t3 = uint8(size >> uint(8 * 0))
     var _t4 = p
-    p = p + 1
-    deref(_t4) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 3))
+    p++
+    *_t4 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 3))
     var _t5 = p
-    p = p + 1
-    deref(_t5) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 2))
+    p++
+    *_t5 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 2))
     var _t6 = p
-    p = p + 1
-    deref(_t6) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 1))
+    p++
+    *_t6 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 1))
     var _t7 = p
-    p = p + 1
-    deref(_t7) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 0))
+    p++
+    *_t7 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 0))
     {
         var err : int = invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(addr(base[0])), uint64(int64(p - addr(base[0]))), mux.token)
         if (err != 0) {
@@ -14776,7 +15949,7 @@ def private h264_file_all__mp4e_write_mdat_box(var mux : MP4E_mux_tag?; size : u
 [c_function]
 def MP4E_put_sample(var mux : MP4E_mux_tag?; track_num : int; var data : void?; data_bytes : int; duration : int; kind : int) : int {
     var tr : track_t?
-    if (!(mux != null) || !(data != null)) {
+    if (mux == null || data == null) {
         return MP4E_STATUS_BAD_ARGUMENTS
     }
     tr = reinterpret<track_t?>(mux.tracks.data) + track_num
@@ -14784,7 +15957,7 @@ def MP4E_put_sample(var mux : MP4E_mux_tag?; track_num : int; var data : void?; 
         // NOTE: assume a constant `duration` to calculate current timestamp
         let _t0 = mux.fragments_count
         mux.fragments_count++
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             // write file headers before 1st sample
             var err : int = h264_file_all__mp4e_flush_index(mux)
             if (err != 0) {
@@ -14821,11 +15994,11 @@ def MP4E_put_sample(var mux : MP4E_mux_tag?; track_num : int; var data : void?; 
                 return err
             }
         }
-        if (!(h264_file_all__add_sample_descriptor(mux, tr, data_bytes, duration, kind) != 0)) {
+        if (h264_file_all__add_sample_descriptor(mux, tr, data_bytes, duration, kind) == 0) {
             return MP4E_STATUS_NO_MEMORY
         }
     } else {
-        if (!(mux.sequential_mode_flag != 0)) {
+        if (mux.sequential_mode_flag == 0) {
             var smpl_desc : sample_t?
             if (uint64(tr.smpl.bytes) < uint64(typeinfo sizeof(type<sample_t>))) {
                 // write continuation, but there are no samples in the index
@@ -14837,7 +16010,7 @@ def MP4E_put_sample(var mux : MP4E_mux_tag?; track_num : int; var data : void?; 
         }
     }
     if (mux.sequential_mode_flag != 0) {
-        if (!(h264_file_all__minimp4_vector_put(addr(tr.pending_sample), data, data_bytes) != null)) {
+        if (h264_file_all__minimp4_vector_put(addr(tr.pending_sample), data, data_bytes) == null) {
             return MP4E_STATUS_NO_MEMORY
         }
     } else {
@@ -14870,14 +16043,14 @@ def private h264_file_all__od_size_of_size(size : int) : int {
 // note that ISO did not specify comment format.
 [c_function]
 def MP4E_set_text_comment(var mux : MP4E_mux_tag?; var comment : uint8?) : int {
-    if (!(mux != null) || !(comment != null)) {
+    if (mux == null || comment == null) {
         return MP4E_STATUS_BAD_ARGUMENTS
     }
     if (mux.text_comment != null) {
         free1(reinterpret<void?>(mux.text_comment))
     }
     mux.text_comment = strdup(comment)
-    if (!(mux.text_comment != null)) {
+    if (mux.text_comment == null) {
         return MP4E_STATUS_NO_MEMORY
     }
     return MP4E_STATUS_OK
@@ -14910,7 +16083,8 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
         // fixed amount (implementation-dependent)
         index_bytes += uint(TRACK_HEADER_BYTES)
         // may need extra 4 bytes for duration field + 4 bytes for worst-case random access box
-        index_bytes = uint(uint64(index_bytes) + uint64(tr.smpl.bytes) * (uint64(typeinfo sizeof(type<sample_t>)) + 4ul + 4ul) / uint64(typeinfo sizeof(type<sample_t>)))
+        index_bytes = uint(uint64(index_bytes) + uint64(tr.smpl.bytes) * (uint64(typeinfo sizeof(type<sample_t>)) + 4ul + 4ul) /
+                uint64(typeinfo sizeof(type<sample_t>)))
         index_bytes += uint(tr.vsps.bytes)
         index_bytes += uint(tr.vpps.bytes)
         {
@@ -14921,11 +16095,11 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
         }
     }
     base = reinterpret<uint8?>(malloc1(uint64(index_bytes)))
-    if (!(base != null)) {
+    if (base == null) {
         return MP4E_STATUS_NO_MEMORY
     }
     p = base
-    if (!(mux.sequential_mode_flag != 0)) {
+    if (mux.sequential_mode_flag == 0) {
         // update size of mdat box.
         // One of 2 points, which requires random file access.
         // Second is optional duration update at beginning of file in fragmentation mode.
@@ -14935,105 +16109,106 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
         var size_limit : int64 = int64(uint64(4294967294u))
         if (size > size_limit) {
             var _t0 = p
-            p = p + 1
-            deref(_t0) = uint8(1 >> 8 * 3)
+            p++
+            *_t0 = uint8(1 >> 8 * 3)
             var _t1 = p
-            p = p + 1
-            deref(_t1) = uint8(1 >> 8 * 2)
+            p++
+            *_t1 = uint8(1 >> 8 * 2)
             var _t2 = p
-            p = p + 1
-            deref(_t2) = uint8(1 >> 8 * 1)
+            p++
+            *_t2 = uint8(1 >> 8 * 1)
             var _t3 = p
-            p = p + 1
-            deref(_t3) = uint8(1 >> 8 * 0)
+            p++
+            *_t3 = uint8(1 >> 8 * 0)
             var _t4 = p
-            p = p + 1
-            deref(_t4) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 3))
+            p++
+            *_t4 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 3))
             var _t5 = p
-            p = p + 1
-            deref(_t5) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 2))
+            p++
+            *_t5 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 2))
             var _t6 = p
-            p = p + 1
-            deref(_t6) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 1))
+            p++
+            *_t6 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 1))
             var _t7 = p
-            p = p + 1
-            deref(_t7) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 0))
+            p++
+            *_t7 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 0))
             var _t8 = p
-            p = p + 1
-            deref(_t8) = uint8(((size >> 32l) & int64(4294967295u)) >> int64(8 * 3))
+            p++
+            *_t8 = uint8(((size >> 32l) & int64(4294967295u)) >> int64(8 * 3))
             var _t9 = p
-            p = p + 1
-            deref(_t9) = uint8(((size >> 32l) & int64(4294967295u)) >> int64(8 * 2))
+            p++
+            *_t9 = uint8(((size >> 32l) & int64(4294967295u)) >> int64(8 * 2))
             var _t10 = p
-            p = p + 1
-            deref(_t10) = uint8(((size >> 32l) & int64(4294967295u)) >> int64(8 * 1))
+            p++
+            *_t10 = uint8(((size >> 32l) & int64(4294967295u)) >> int64(8 * 1))
             var _t11 = p
-            p = p + 1
-            deref(_t11) = uint8(((size >> 32l) & int64(4294967295u)) >> int64(8 * 0))
+            p++
+            *_t11 = uint8(((size >> 32l) & int64(4294967295u)) >> int64(8 * 0))
             var _t12 = p
-            p = p + 1
-            deref(_t12) = uint8((size & int64(4294967295u)) >> int64(8 * 3))
+            p++
+            *_t12 = uint8((size & int64(4294967295u)) >> int64(8 * 3))
             var _t13 = p
-            p = p + 1
-            deref(_t13) = uint8((size & int64(4294967295u)) >> int64(8 * 2))
+            p++
+            *_t13 = uint8((size & int64(4294967295u)) >> int64(8 * 2))
             var _t14 = p
-            p = p + 1
-            deref(_t14) = uint8((size & int64(4294967295u)) >> int64(8 * 1))
+            p++
+            *_t14 = uint8((size & int64(4294967295u)) >> int64(8 * 1))
             var _t15 = p
-            p = p + 1
-            deref(_t15) = uint8((size & int64(4294967295u)) >> int64(8 * 0))
+            p++
+            *_t15 = uint8((size & int64(4294967295u)) >> int64(8 * 0))
         } else {
             var _t16 = p
-            p = p + 1
-            deref(_t16) = uint8(8 >> 8 * 3)
+            p++
+            *_t16 = uint8(8 >> 8 * 3)
             var _t17 = p
-            p = p + 1
-            deref(_t17) = uint8(8 >> 8 * 2)
+            p++
+            *_t17 = uint8(8 >> 8 * 2)
             var _t18 = p
-            p = p + 1
-            deref(_t18) = uint8(8 >> 8 * 1)
+            p++
+            *_t18 = uint8(8 >> 8 * 1)
             var _t19 = p
-            p = p + 1
-            deref(_t19) = uint8(8 >> 8 * 0)
+            p++
+            *_t19 = uint8(8 >> 8 * 0)
             var _t20 = p
-            p = p + 1
-            deref(_t20) = uint8(uint(int(anon_644.BOX_free)) >> uint(8 * 3))
+            p++
+            *_t20 = uint8(uint(anon_644.BOX_free) >> uint(8 * 3))
             var _t21 = p
-            p = p + 1
-            deref(_t21) = uint8(uint(int(anon_644.BOX_free)) >> uint(8 * 2))
+            p++
+            *_t21 = uint8(uint(anon_644.BOX_free) >> uint(8 * 2))
             var _t22 = p
-            p = p + 1
-            deref(_t22) = uint8(uint(int(anon_644.BOX_free)) >> uint(8 * 1))
+            p++
+            *_t22 = uint8(uint(anon_644.BOX_free) >> uint(8 * 1))
             var _t23 = p
-            p = p + 1
-            deref(_t23) = uint8(uint(int(anon_644.BOX_free)) >> uint(8 * 0))
+            p++
+            *_t23 = uint8(uint(anon_644.BOX_free) >> uint(8 * 0))
             var _t24 = p
-            p = p + 1
-            deref(_t24) = uint8(size - 8l >> int64(8 * 3))
+            p++
+            *_t24 = uint8(size - 8l >> int64(8 * 3))
             var _t25 = p
-            p = p + 1
-            deref(_t25) = uint8(size - 8l >> int64(8 * 2))
+            p++
+            *_t25 = uint8(size - 8l >> int64(8 * 2))
             var _t26 = p
-            p = p + 1
-            deref(_t26) = uint8(size - 8l >> int64(8 * 1))
+            p++
+            *_t26 = uint8(size - 8l >> int64(8 * 1))
             var _t27 = p
-            p = p + 1
-            deref(_t27) = uint8(size - 8l >> int64(8 * 0))
+            p++
+            *_t27 = uint8(size - 8l >> int64(8 * 0))
             var _t28 = p
-            p = p + 1
-            deref(_t28) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 3))
+            p++
+            *_t28 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 3))
             var _t29 = p
-            p = p + 1
-            deref(_t29) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 2))
+            p++
+            *_t29 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 2))
             var _t30 = p
-            p = p + 1
-            deref(_t30) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 1))
+            p++
+            *_t30 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 1))
             var _t31 = p
-            p = p + 1
-            deref(_t31) = uint8(uint(int(anon_644.BOX_mdat)) >> uint(8 * 0))
+            p++
+            *_t31 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 0))
         }
         {
-            var err2 : int = invoke(mux.write_callback, int64(uint64(typeinfo sizeof(type<uint8[24]>))), reinterpret<void?>(base), uint64(int64(p - base)), mux.token)
+            var err2 : int = invoke(mux.write_callback, int64(uint64(typeinfo sizeof(type<uint8[24]>))), reinterpret<void?>(base), uint64(int64(p - base)),
+                    mux.token)
             if (err2 != 0) {
                 return err2
             }
@@ -15042,75 +16217,75 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
     }
     // Write index atoms; order taken from Table 1 of [1]
     var _t32 = stack
-    stack = stack + 1
-    deref(_t32) = p
-    p = p + 4
+    stack++
+    *_t32 = p
+    p += 4
     var _t33 = p
-    p = p + 1
-    deref(_t33) = uint8(uint(int(anon_644.BOX_moov)) >> uint(8 * 3))
+    p++
+    *_t33 = uint8(uint(anon_644.BOX_moov) >> uint(8 * 3))
     var _t34 = p
-    p = p + 1
-    deref(_t34) = uint8(uint(int(anon_644.BOX_moov)) >> uint(8 * 2))
+    p++
+    *_t34 = uint8(uint(anon_644.BOX_moov) >> uint(8 * 2))
     var _t35 = p
-    p = p + 1
-    deref(_t35) = uint8(uint(int(anon_644.BOX_moov)) >> uint(8 * 1))
+    p++
+    *_t35 = uint8(uint(anon_644.BOX_moov) >> uint(8 * 1))
     var _t36 = p
-    p = p + 1
-    deref(_t36) = uint8(uint(int(anon_644.BOX_moov)) >> uint(8 * 0))
+    p++
+    *_t36 = uint8(uint(anon_644.BOX_moov) >> uint(8 * 0))
     var _t37 = stack
-    stack = stack + 1
-    deref(_t37) = p
-    p = p + 4
+    stack++
+    *_t37 = p
+    p += 4
     var _t38 = p
-    p = p + 1
-    deref(_t38) = uint8(uint(int(anon_644.BOX_mvhd)) >> uint(8 * 3))
+    p++
+    *_t38 = uint8(uint(anon_644.BOX_mvhd) >> uint(8 * 3))
     var _t39 = p
-    p = p + 1
-    deref(_t39) = uint8(uint(int(anon_644.BOX_mvhd)) >> uint(8 * 2))
+    p++
+    *_t39 = uint8(uint(anon_644.BOX_mvhd) >> uint(8 * 2))
     var _t40 = p
-    p = p + 1
-    deref(_t40) = uint8(uint(int(anon_644.BOX_mvhd)) >> uint(8 * 1))
+    p++
+    *_t40 = uint8(uint(anon_644.BOX_mvhd) >> uint(8 * 1))
     var _t41 = p
-    p = p + 1
-    deref(_t41) = uint8(uint(int(anon_644.BOX_mvhd)) >> uint(8 * 0))
+    p++
+    *_t41 = uint8(uint(anon_644.BOX_mvhd) >> uint(8 * 0))
     var _t42 = p
-    p = p + 1
-    deref(_t42) = uint8(0 >> 8 * 3)
+    p++
+    *_t42 = uint8(0 >> 8 * 3)
     var _t43 = p
-    p = p + 1
-    deref(_t43) = uint8(0 >> 8 * 2)
+    p++
+    *_t43 = uint8(0 >> 8 * 2)
     var _t44 = p
-    p = p + 1
-    deref(_t44) = uint8(0 >> 8 * 1)
+    p++
+    *_t44 = uint8(0 >> 8 * 1)
     var _t45 = p
-    p = p + 1
-    deref(_t45) = uint8(0 >> 8 * 0)
+    p++
+    *_t45 = uint8(0 >> 8 * 0)
     // creation_time
     var _t46 = p
-    p = p + 1
-    deref(_t46) = uint8(0 >> 8 * 3)
+    p++
+    *_t46 = uint8(0 >> 8 * 3)
     var _t47 = p
-    p = p + 1
-    deref(_t47) = uint8(0 >> 8 * 2)
+    p++
+    *_t47 = uint8(0 >> 8 * 2)
     var _t48 = p
-    p = p + 1
-    deref(_t48) = uint8(0 >> 8 * 1)
+    p++
+    *_t48 = uint8(0 >> 8 * 1)
     var _t49 = p
-    p = p + 1
-    deref(_t49) = uint8(0 >> 8 * 0)
+    p++
+    *_t49 = uint8(0 >> 8 * 0)
     // modification_time
     var _t50 = p
-    p = p + 1
-    deref(_t50) = uint8(0 >> 8 * 3)
+    p++
+    *_t50 = uint8(0 >> 8 * 3)
     var _t51 = p
-    p = p + 1
-    deref(_t51) = uint8(0 >> 8 * 2)
+    p++
+    *_t51 = uint8(0 >> 8 * 2)
     var _t52 = p
-    p = p + 1
-    deref(_t52) = uint8(0 >> 8 * 1)
+    p++
+    *_t52 = uint8(0 >> 8 * 1)
     var _t53 = p
-    p = p + 1
-    deref(_t53) = uint8(0 >> 8 * 0)
+    p++
+    *_t53 = uint8(0 >> 8 * 0)
     if (ntracks != 0) {
         // take 1st track
         var tr : track_t? = reinterpret<track_t?>(mux.tracks.data) + 0
@@ -15118,286 +16293,286 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
         duration = uint(int64(duration) * 1l * int64(MOOV_TIMESCALE) / int64(tr.info.time_scale))
         // duration
         var _t54 = p
-        p = p + 1
-        deref(_t54) = uint8(MOOV_TIMESCALE >> 8 * 3)
+        p++
+        *_t54 = uint8(MOOV_TIMESCALE >> 8 * 3)
         var _t55 = p
-        p = p + 1
-        deref(_t55) = uint8(MOOV_TIMESCALE >> 8 * 2)
+        p++
+        *_t55 = uint8(MOOV_TIMESCALE >> 8 * 2)
         var _t56 = p
-        p = p + 1
-        deref(_t56) = uint8(MOOV_TIMESCALE >> 8 * 1)
+        p++
+        *_t56 = uint8(MOOV_TIMESCALE >> 8 * 1)
         var _t57 = p
-        p = p + 1
-        deref(_t57) = uint8(MOOV_TIMESCALE >> 8 * 0)
+        p++
+        *_t57 = uint8(MOOV_TIMESCALE >> 8 * 0)
         // duration
         var _t58 = p
-        p = p + 1
-        deref(_t58) = uint8(duration >> uint(8 * 3))
+        p++
+        *_t58 = uint8(duration >> uint(8 * 3))
         var _t59 = p
-        p = p + 1
-        deref(_t59) = uint8(duration >> uint(8 * 2))
+        p++
+        *_t59 = uint8(duration >> uint(8 * 2))
         var _t60 = p
-        p = p + 1
-        deref(_t60) = uint8(duration >> uint(8 * 1))
+        p++
+        *_t60 = uint8(duration >> uint(8 * 1))
         var _t61 = p
-        p = p + 1
-        deref(_t61) = uint8(duration >> uint(8 * 0))
+        p++
+        *_t61 = uint8(duration >> uint(8 * 0))
     }
     // rate
     var _t62 = p
-    p = p + 1
-    deref(_t62) = uint8(65536 >> 8 * 3)
+    p++
+    *_t62 = uint8(65536 >> 8 * 3)
     var _t63 = p
-    p = p + 1
-    deref(_t63) = uint8(65536 >> 8 * 2)
+    p++
+    *_t63 = uint8(65536 >> 8 * 2)
     var _t64 = p
-    p = p + 1
-    deref(_t64) = uint8(65536 >> 8 * 1)
+    p++
+    *_t64 = uint8(65536 >> 8 * 1)
     var _t65 = p
-    p = p + 1
-    deref(_t65) = uint8(65536 >> 8 * 0)
+    p++
+    *_t65 = uint8(65536 >> 8 * 0)
     // volume
     var _t66 = p
-    p = p + 1
-    deref(_t66) = uint8(256 >> 8 * 1)
+    p++
+    *_t66 = uint8(256 >> 8 * 1)
     var _t67 = p
-    p = p + 1
-    deref(_t67) = uint8(256 >> 8 * 0)
+    p++
+    *_t67 = uint8(256 >> 8 * 0)
     // reserved
     var _t68 = p
-    p = p + 1
-    deref(_t68) = uint8(0 >> 8 * 1)
+    p++
+    *_t68 = uint8(0 >> 8 * 1)
     var _t69 = p
-    p = p + 1
-    deref(_t69) = uint8(0 >> 8 * 0)
+    p++
+    *_t69 = uint8(0 >> 8 * 0)
     // reserved
     var _t70 = p
-    p = p + 1
-    deref(_t70) = uint8(0 >> 8 * 3)
+    p++
+    *_t70 = uint8(0 >> 8 * 3)
     var _t71 = p
-    p = p + 1
-    deref(_t71) = uint8(0 >> 8 * 2)
+    p++
+    *_t71 = uint8(0 >> 8 * 2)
     var _t72 = p
-    p = p + 1
-    deref(_t72) = uint8(0 >> 8 * 1)
+    p++
+    *_t72 = uint8(0 >> 8 * 1)
     var _t73 = p
-    p = p + 1
-    deref(_t73) = uint8(0 >> 8 * 0)
+    p++
+    *_t73 = uint8(0 >> 8 * 0)
     // reserved
     var _t74 = p
-    p = p + 1
-    deref(_t74) = uint8(0 >> 8 * 3)
+    p++
+    *_t74 = uint8(0 >> 8 * 3)
     var _t75 = p
-    p = p + 1
-    deref(_t75) = uint8(0 >> 8 * 2)
+    p++
+    *_t75 = uint8(0 >> 8 * 2)
     var _t76 = p
-    p = p + 1
-    deref(_t76) = uint8(0 >> 8 * 1)
+    p++
+    *_t76 = uint8(0 >> 8 * 1)
     var _t77 = p
-    p = p + 1
-    deref(_t77) = uint8(0 >> 8 * 0)
+    p++
+    *_t77 = uint8(0 >> 8 * 0)
     // matrix[9]
     var _t78 = p
-    p = p + 1
-    deref(_t78) = uint8(65536 >> 8 * 3)
+    p++
+    *_t78 = uint8(65536 >> 8 * 3)
     var _t79 = p
-    p = p + 1
-    deref(_t79) = uint8(65536 >> 8 * 2)
+    p++
+    *_t79 = uint8(65536 >> 8 * 2)
     var _t80 = p
-    p = p + 1
-    deref(_t80) = uint8(65536 >> 8 * 1)
+    p++
+    *_t80 = uint8(65536 >> 8 * 1)
     var _t81 = p
-    p = p + 1
-    deref(_t81) = uint8(65536 >> 8 * 0)
+    p++
+    *_t81 = uint8(65536 >> 8 * 0)
     var _t82 = p
-    p = p + 1
-    deref(_t82) = uint8(0 >> 8 * 3)
+    p++
+    *_t82 = uint8(0 >> 8 * 3)
     var _t83 = p
-    p = p + 1
-    deref(_t83) = uint8(0 >> 8 * 2)
+    p++
+    *_t83 = uint8(0 >> 8 * 2)
     var _t84 = p
-    p = p + 1
-    deref(_t84) = uint8(0 >> 8 * 1)
+    p++
+    *_t84 = uint8(0 >> 8 * 1)
     var _t85 = p
-    p = p + 1
-    deref(_t85) = uint8(0 >> 8 * 0)
+    p++
+    *_t85 = uint8(0 >> 8 * 0)
     var _t86 = p
-    p = p + 1
-    deref(_t86) = uint8(0 >> 8 * 3)
+    p++
+    *_t86 = uint8(0 >> 8 * 3)
     var _t87 = p
-    p = p + 1
-    deref(_t87) = uint8(0 >> 8 * 2)
+    p++
+    *_t87 = uint8(0 >> 8 * 2)
     var _t88 = p
-    p = p + 1
-    deref(_t88) = uint8(0 >> 8 * 1)
+    p++
+    *_t88 = uint8(0 >> 8 * 1)
     var _t89 = p
-    p = p + 1
-    deref(_t89) = uint8(0 >> 8 * 0)
+    p++
+    *_t89 = uint8(0 >> 8 * 0)
     var _t90 = p
-    p = p + 1
-    deref(_t90) = uint8(0 >> 8 * 3)
+    p++
+    *_t90 = uint8(0 >> 8 * 3)
     var _t91 = p
-    p = p + 1
-    deref(_t91) = uint8(0 >> 8 * 2)
+    p++
+    *_t91 = uint8(0 >> 8 * 2)
     var _t92 = p
-    p = p + 1
-    deref(_t92) = uint8(0 >> 8 * 1)
+    p++
+    *_t92 = uint8(0 >> 8 * 1)
     var _t93 = p
-    p = p + 1
-    deref(_t93) = uint8(0 >> 8 * 0)
+    p++
+    *_t93 = uint8(0 >> 8 * 0)
     var _t94 = p
-    p = p + 1
-    deref(_t94) = uint8(65536 >> 8 * 3)
+    p++
+    *_t94 = uint8(65536 >> 8 * 3)
     var _t95 = p
-    p = p + 1
-    deref(_t95) = uint8(65536 >> 8 * 2)
+    p++
+    *_t95 = uint8(65536 >> 8 * 2)
     var _t96 = p
-    p = p + 1
-    deref(_t96) = uint8(65536 >> 8 * 1)
+    p++
+    *_t96 = uint8(65536 >> 8 * 1)
     var _t97 = p
-    p = p + 1
-    deref(_t97) = uint8(65536 >> 8 * 0)
+    p++
+    *_t97 = uint8(65536 >> 8 * 0)
     var _t98 = p
-    p = p + 1
-    deref(_t98) = uint8(0 >> 8 * 3)
+    p++
+    *_t98 = uint8(0 >> 8 * 3)
     var _t99 = p
-    p = p + 1
-    deref(_t99) = uint8(0 >> 8 * 2)
+    p++
+    *_t99 = uint8(0 >> 8 * 2)
     var _t100 = p
-    p = p + 1
-    deref(_t100) = uint8(0 >> 8 * 1)
+    p++
+    *_t100 = uint8(0 >> 8 * 1)
     var _t101 = p
-    p = p + 1
-    deref(_t101) = uint8(0 >> 8 * 0)
+    p++
+    *_t101 = uint8(0 >> 8 * 0)
     var _t102 = p
-    p = p + 1
-    deref(_t102) = uint8(0 >> 8 * 3)
+    p++
+    *_t102 = uint8(0 >> 8 * 3)
     var _t103 = p
-    p = p + 1
-    deref(_t103) = uint8(0 >> 8 * 2)
+    p++
+    *_t103 = uint8(0 >> 8 * 2)
     var _t104 = p
-    p = p + 1
-    deref(_t104) = uint8(0 >> 8 * 1)
+    p++
+    *_t104 = uint8(0 >> 8 * 1)
     var _t105 = p
-    p = p + 1
-    deref(_t105) = uint8(0 >> 8 * 0)
+    p++
+    *_t105 = uint8(0 >> 8 * 0)
     var _t106 = p
-    p = p + 1
-    deref(_t106) = uint8(0 >> 8 * 3)
+    p++
+    *_t106 = uint8(0 >> 8 * 3)
     var _t107 = p
-    p = p + 1
-    deref(_t107) = uint8(0 >> 8 * 2)
+    p++
+    *_t107 = uint8(0 >> 8 * 2)
     var _t108 = p
-    p = p + 1
-    deref(_t108) = uint8(0 >> 8 * 1)
+    p++
+    *_t108 = uint8(0 >> 8 * 1)
     var _t109 = p
-    p = p + 1
-    deref(_t109) = uint8(0 >> 8 * 0)
+    p++
+    *_t109 = uint8(0 >> 8 * 0)
     var _t110 = p
-    p = p + 1
-    deref(_t110) = uint8(1073741824 >> 8 * 3)
+    p++
+    *_t110 = uint8(1073741824 >> 8 * 3)
     var _t111 = p
-    p = p + 1
-    deref(_t111) = uint8(1073741824 >> 8 * 2)
+    p++
+    *_t111 = uint8(1073741824 >> 8 * 2)
     var _t112 = p
-    p = p + 1
-    deref(_t112) = uint8(1073741824 >> 8 * 1)
+    p++
+    *_t112 = uint8(1073741824 >> 8 * 1)
     var _t113 = p
-    p = p + 1
-    deref(_t113) = uint8(1073741824 >> 8 * 0)
+    p++
+    *_t113 = uint8(1073741824 >> 8 * 0)
     // pre_defined[6]
     var _t114 = p
-    p = p + 1
-    deref(_t114) = uint8(0 >> 8 * 3)
+    p++
+    *_t114 = uint8(0 >> 8 * 3)
     var _t115 = p
-    p = p + 1
-    deref(_t115) = uint8(0 >> 8 * 2)
+    p++
+    *_t115 = uint8(0 >> 8 * 2)
     var _t116 = p
-    p = p + 1
-    deref(_t116) = uint8(0 >> 8 * 1)
+    p++
+    *_t116 = uint8(0 >> 8 * 1)
     var _t117 = p
-    p = p + 1
-    deref(_t117) = uint8(0 >> 8 * 0)
+    p++
+    *_t117 = uint8(0 >> 8 * 0)
     var _t118 = p
-    p = p + 1
-    deref(_t118) = uint8(0 >> 8 * 3)
+    p++
+    *_t118 = uint8(0 >> 8 * 3)
     var _t119 = p
-    p = p + 1
-    deref(_t119) = uint8(0 >> 8 * 2)
+    p++
+    *_t119 = uint8(0 >> 8 * 2)
     var _t120 = p
-    p = p + 1
-    deref(_t120) = uint8(0 >> 8 * 1)
+    p++
+    *_t120 = uint8(0 >> 8 * 1)
     var _t121 = p
-    p = p + 1
-    deref(_t121) = uint8(0 >> 8 * 0)
+    p++
+    *_t121 = uint8(0 >> 8 * 0)
     var _t122 = p
-    p = p + 1
-    deref(_t122) = uint8(0 >> 8 * 3)
+    p++
+    *_t122 = uint8(0 >> 8 * 3)
     var _t123 = p
-    p = p + 1
-    deref(_t123) = uint8(0 >> 8 * 2)
+    p++
+    *_t123 = uint8(0 >> 8 * 2)
     var _t124 = p
-    p = p + 1
-    deref(_t124) = uint8(0 >> 8 * 1)
+    p++
+    *_t124 = uint8(0 >> 8 * 1)
     var _t125 = p
-    p = p + 1
-    deref(_t125) = uint8(0 >> 8 * 0)
+    p++
+    *_t125 = uint8(0 >> 8 * 0)
     var _t126 = p
-    p = p + 1
-    deref(_t126) = uint8(0 >> 8 * 3)
+    p++
+    *_t126 = uint8(0 >> 8 * 3)
     var _t127 = p
-    p = p + 1
-    deref(_t127) = uint8(0 >> 8 * 2)
+    p++
+    *_t127 = uint8(0 >> 8 * 2)
     var _t128 = p
-    p = p + 1
-    deref(_t128) = uint8(0 >> 8 * 1)
+    p++
+    *_t128 = uint8(0 >> 8 * 1)
     var _t129 = p
-    p = p + 1
-    deref(_t129) = uint8(0 >> 8 * 0)
+    p++
+    *_t129 = uint8(0 >> 8 * 0)
     var _t130 = p
-    p = p + 1
-    deref(_t130) = uint8(0 >> 8 * 3)
+    p++
+    *_t130 = uint8(0 >> 8 * 3)
     var _t131 = p
-    p = p + 1
-    deref(_t131) = uint8(0 >> 8 * 2)
+    p++
+    *_t131 = uint8(0 >> 8 * 2)
     var _t132 = p
-    p = p + 1
-    deref(_t132) = uint8(0 >> 8 * 1)
+    p++
+    *_t132 = uint8(0 >> 8 * 1)
     var _t133 = p
-    p = p + 1
-    deref(_t133) = uint8(0 >> 8 * 0)
+    p++
+    *_t133 = uint8(0 >> 8 * 0)
     var _t134 = p
-    p = p + 1
-    deref(_t134) = uint8(0 >> 8 * 3)
+    p++
+    *_t134 = uint8(0 >> 8 * 3)
     var _t135 = p
-    p = p + 1
-    deref(_t135) = uint8(0 >> 8 * 2)
+    p++
+    *_t135 = uint8(0 >> 8 * 2)
     var _t136 = p
-    p = p + 1
-    deref(_t136) = uint8(0 >> 8 * 1)
+    p++
+    *_t136 = uint8(0 >> 8 * 1)
     var _t137 = p
-    p = p + 1
-    deref(_t137) = uint8(0 >> 8 * 0)
+    p++
+    *_t137 = uint8(0 >> 8 * 0)
     // next_track_ID is a non-zero integer that indicates a value to use for the track ID of the next track to be
     // added to this presentation. Zero is not a valid track ID value. The value of next_track_ID shall be
     // larger than the largest track-ID in use.
     var _t138 = p
-    p = p + 1
-    deref(_t138) = uint8(ntracks + 1u >> uint(8 * 3))
+    p++
+    *_t138 = uint8(ntracks + 1u >> uint(8 * 3))
     var _t139 = p
-    p = p + 1
-    deref(_t139) = uint8(ntracks + 1u >> uint(8 * 2))
+    p++
+    *_t139 = uint8(ntracks + 1u >> uint(8 * 2))
     var _t140 = p
-    p = p + 1
-    deref(_t140) = uint8(ntracks + 1u >> uint(8 * 1))
+    p++
+    *_t140 = uint8(ntracks + 1u >> uint(8 * 1))
     var _t141 = p
-    p = p + 1
-    deref(_t141) = uint8(ntracks + 1u >> uint(8 * 0))
-    stack = stack - 1
-    deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-    deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-    deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-    deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+    p++
+    *_t141 = uint8(ntracks + 1u >> uint(8 * 0))
+    stack--
+    (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+    (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+    (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+    (*stack)[3] = uint8(int64(p - *stack))
     for (ntr in urange(ntracks)) {
         var tr : track_t? = reinterpret<track_t?>(mux.tracks.data) + ntr
         var duration : uint = h264_file_all__get_duration(tr)
@@ -15411,557 +16586,564 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
             // skip empty track
             continue
         }
-        let _cond = tr.info.track_media_kind
-        if (_cond == track_media_kind_t.e_audio) {
-            handler_type = uint(MP4E_HANDLER_TYPE_SOUN)
-            handler_ascii = cstr("SoundHandler")
-        } elif (_cond == track_media_kind_t.e_video) {
-            handler_type = uint(MP4E_HANDLER_TYPE_VIDE)
-            handler_ascii = cstr("VideoHandler")
-        } elif (_cond == track_media_kind_t.e_private) {
-            handler_type = uint(MP4E_HANDLER_TYPE_GESM)
-        } else {
-            return MP4E_STATUS_BAD_ARGUMENTS
+        c_switch(tr.info.track_media_kind) {
+            case(track_media_kind_t.e_audio) {
+                handler_type = uint(MP4E_HANDLER_TYPE_SOUN)
+                handler_ascii = cstr("SoundHandler")
+                break
+            }
+            case(track_media_kind_t.e_video) {
+                handler_type = uint(MP4E_HANDLER_TYPE_VIDE)
+                handler_ascii = cstr("VideoHandler")
+                break
+            }
+            case(track_media_kind_t.e_private) {
+                handler_type = uint(MP4E_HANDLER_TYPE_GESM)
+                break
+            }
+            case(_) {
+                return MP4E_STATUS_BAD_ARGUMENTS
+            }
         }
         var _t142 = stack
-        stack = stack + 1
-        deref(_t142) = p
-        p = p + 4
+        stack++
+        *_t142 = p
+        p += 4
         var _t143 = p
-        p = p + 1
-        deref(_t143) = uint8(uint(int(anon_644.BOX_trak)) >> uint(8 * 3))
+        p++
+        *_t143 = uint8(uint(anon_644.BOX_trak) >> uint(8 * 3))
         var _t144 = p
-        p = p + 1
-        deref(_t144) = uint8(uint(int(anon_644.BOX_trak)) >> uint(8 * 2))
+        p++
+        *_t144 = uint8(uint(anon_644.BOX_trak) >> uint(8 * 2))
         var _t145 = p
-        p = p + 1
-        deref(_t145) = uint8(uint(int(anon_644.BOX_trak)) >> uint(8 * 1))
+        p++
+        *_t145 = uint8(uint(anon_644.BOX_trak) >> uint(8 * 1))
         var _t146 = p
-        p = p + 1
-        deref(_t146) = uint8(uint(int(anon_644.BOX_trak)) >> uint(8 * 0))
+        p++
+        *_t146 = uint8(uint(anon_644.BOX_trak) >> uint(8 * 0))
         // flag: 1=trak enabled; 2=track in movie; 4=track in preview
         var _t147 = stack
-        stack = stack + 1
-        deref(_t147) = p
-        p = p + 4
+        stack++
+        *_t147 = p
+        p += 4
         var _t148 = p
-        p = p + 1
-        deref(_t148) = uint8(uint(int(anon_644.BOX_tkhd)) >> uint(8 * 3))
+        p++
+        *_t148 = uint8(uint(anon_644.BOX_tkhd) >> uint(8 * 3))
         var _t149 = p
-        p = p + 1
-        deref(_t149) = uint8(uint(int(anon_644.BOX_tkhd)) >> uint(8 * 2))
+        p++
+        *_t149 = uint8(uint(anon_644.BOX_tkhd) >> uint(8 * 2))
         var _t150 = p
-        p = p + 1
-        deref(_t150) = uint8(uint(int(anon_644.BOX_tkhd)) >> uint(8 * 1))
+        p++
+        *_t150 = uint8(uint(anon_644.BOX_tkhd) >> uint(8 * 1))
         var _t151 = p
-        p = p + 1
-        deref(_t151) = uint8(uint(int(anon_644.BOX_tkhd)) >> uint(8 * 0))
+        p++
+        *_t151 = uint8(uint(anon_644.BOX_tkhd) >> uint(8 * 0))
         var _t152 = p
-        p = p + 1
-        deref(_t152) = uint8(7 >> 8 * 3)
+        p++
+        *_t152 = uint8(7 >> 8 * 3)
         var _t153 = p
-        p = p + 1
-        deref(_t153) = uint8(7 >> 8 * 2)
+        p++
+        *_t153 = uint8(7 >> 8 * 2)
         var _t154 = p
-        p = p + 1
-        deref(_t154) = uint8(7 >> 8 * 1)
+        p++
+        *_t154 = uint8(7 >> 8 * 1)
         var _t155 = p
-        p = p + 1
-        deref(_t155) = uint8(7 >> 8 * 0)
+        p++
+        *_t155 = uint8(7 >> 8 * 0)
         // creation_time
         var _t156 = p
-        p = p + 1
-        deref(_t156) = uint8(0 >> 8 * 3)
+        p++
+        *_t156 = uint8(0 >> 8 * 3)
         var _t157 = p
-        p = p + 1
-        deref(_t157) = uint8(0 >> 8 * 2)
+        p++
+        *_t157 = uint8(0 >> 8 * 2)
         var _t158 = p
-        p = p + 1
-        deref(_t158) = uint8(0 >> 8 * 1)
+        p++
+        *_t158 = uint8(0 >> 8 * 1)
         var _t159 = p
-        p = p + 1
-        deref(_t159) = uint8(0 >> 8 * 0)
+        p++
+        *_t159 = uint8(0 >> 8 * 0)
         // modification_time
         var _t160 = p
-        p = p + 1
-        deref(_t160) = uint8(0 >> 8 * 3)
+        p++
+        *_t160 = uint8(0 >> 8 * 3)
         var _t161 = p
-        p = p + 1
-        deref(_t161) = uint8(0 >> 8 * 2)
+        p++
+        *_t161 = uint8(0 >> 8 * 2)
         var _t162 = p
-        p = p + 1
-        deref(_t162) = uint8(0 >> 8 * 1)
+        p++
+        *_t162 = uint8(0 >> 8 * 1)
         var _t163 = p
-        p = p + 1
-        deref(_t163) = uint8(0 >> 8 * 0)
+        p++
+        *_t163 = uint8(0 >> 8 * 0)
         // track_ID
         var _t164 = p
-        p = p + 1
-        deref(_t164) = uint8(ntr + 1u >> uint(8 * 3))
+        p++
+        *_t164 = uint8(ntr + 1u >> uint(8 * 3))
         var _t165 = p
-        p = p + 1
-        deref(_t165) = uint8(ntr + 1u >> uint(8 * 2))
+        p++
+        *_t165 = uint8(ntr + 1u >> uint(8 * 2))
         var _t166 = p
-        p = p + 1
-        deref(_t166) = uint8(ntr + 1u >> uint(8 * 1))
+        p++
+        *_t166 = uint8(ntr + 1u >> uint(8 * 1))
         var _t167 = p
-        p = p + 1
-        deref(_t167) = uint8(ntr + 1u >> uint(8 * 0))
+        p++
+        *_t167 = uint8(ntr + 1u >> uint(8 * 0))
         // reserved
         var _t168 = p
-        p = p + 1
-        deref(_t168) = uint8(0 >> 8 * 3)
+        p++
+        *_t168 = uint8(0 >> 8 * 3)
         var _t169 = p
-        p = p + 1
-        deref(_t169) = uint8(0 >> 8 * 2)
+        p++
+        *_t169 = uint8(0 >> 8 * 2)
         var _t170 = p
-        p = p + 1
-        deref(_t170) = uint8(0 >> 8 * 1)
+        p++
+        *_t170 = uint8(0 >> 8 * 1)
         var _t171 = p
-        p = p + 1
-        deref(_t171) = uint8(0 >> 8 * 0)
+        p++
+        *_t171 = uint8(0 >> 8 * 0)
         var _t172 = p
-        p = p + 1
-        deref(_t172) = uint8(uint(int64(duration) * 1l * int64(MOOV_TIMESCALE) / int64(tr.info.time_scale)) >> uint(8 * 3))
+        p++
+        *_t172 = uint8(uint(int64(duration) * 1l * int64(MOOV_TIMESCALE) / int64(tr.info.time_scale)) >> uint(8 * 3))
         var _t173 = p
-        p = p + 1
-        deref(_t173) = uint8(uint(int64(duration) * 1l * int64(MOOV_TIMESCALE) / int64(tr.info.time_scale)) >> uint(8 * 2))
+        p++
+        *_t173 = uint8(uint(int64(duration) * 1l * int64(MOOV_TIMESCALE) / int64(tr.info.time_scale)) >> uint(8 * 2))
         var _t174 = p
-        p = p + 1
-        deref(_t174) = uint8(uint(int64(duration) * 1l * int64(MOOV_TIMESCALE) / int64(tr.info.time_scale)) >> uint(8 * 1))
+        p++
+        *_t174 = uint8(uint(int64(duration) * 1l * int64(MOOV_TIMESCALE) / int64(tr.info.time_scale)) >> uint(8 * 1))
         var _t175 = p
-        p = p + 1
-        deref(_t175) = uint8(uint(int64(duration) * 1l * int64(MOOV_TIMESCALE) / int64(tr.info.time_scale)) >> uint(8 * 0))
+        p++
+        *_t175 = uint8(uint(int64(duration) * 1l * int64(MOOV_TIMESCALE) / int64(tr.info.time_scale)) >> uint(8 * 0))
         // reserved[2]
         var _t176 = p
-        p = p + 1
-        deref(_t176) = uint8(0 >> 8 * 3)
+        p++
+        *_t176 = uint8(0 >> 8 * 3)
         var _t177 = p
-        p = p + 1
-        deref(_t177) = uint8(0 >> 8 * 2)
+        p++
+        *_t177 = uint8(0 >> 8 * 2)
         var _t178 = p
-        p = p + 1
-        deref(_t178) = uint8(0 >> 8 * 1)
+        p++
+        *_t178 = uint8(0 >> 8 * 1)
         var _t179 = p
-        p = p + 1
-        deref(_t179) = uint8(0 >> 8 * 0)
+        p++
+        *_t179 = uint8(0 >> 8 * 0)
         var _t180 = p
-        p = p + 1
-        deref(_t180) = uint8(0 >> 8 * 3)
+        p++
+        *_t180 = uint8(0 >> 8 * 3)
         var _t181 = p
-        p = p + 1
-        deref(_t181) = uint8(0 >> 8 * 2)
+        p++
+        *_t181 = uint8(0 >> 8 * 2)
         var _t182 = p
-        p = p + 1
-        deref(_t182) = uint8(0 >> 8 * 1)
+        p++
+        *_t182 = uint8(0 >> 8 * 1)
         var _t183 = p
-        p = p + 1
-        deref(_t183) = uint8(0 >> 8 * 0)
+        p++
+        *_t183 = uint8(0 >> 8 * 0)
         // layer
         var _t184 = p
-        p = p + 1
-        deref(_t184) = uint8(0 >> 8 * 1)
+        p++
+        *_t184 = uint8(0 >> 8 * 1)
         var _t185 = p
-        p = p + 1
-        deref(_t185) = uint8(0 >> 8 * 0)
+        p++
+        *_t185 = uint8(0 >> 8 * 0)
         // alternate_group
         var _t186 = p
-        p = p + 1
-        deref(_t186) = uint8(0 >> 8 * 1)
+        p++
+        *_t186 = uint8(0 >> 8 * 1)
         var _t187 = p
-        p = p + 1
-        deref(_t187) = uint8(0 >> 8 * 0)
+        p++
+        *_t187 = uint8(0 >> 8 * 0)
         // volume {if track_is_audio 0x0100 else 0};
         var _t188 = p
-        p = p + 1
-        deref(_t188) = uint8(256 >> 8 * 1)
+        p++
+        *_t188 = uint8(256 >> 8 * 1)
         var _t189 = p
-        p = p + 1
-        deref(_t189) = uint8(256 >> 8 * 0)
+        p++
+        *_t189 = uint8(256 >> 8 * 0)
         // reserved
         var _t190 = p
-        p = p + 1
-        deref(_t190) = uint8(0 >> 8 * 1)
+        p++
+        *_t190 = uint8(0 >> 8 * 1)
         var _t191 = p
-        p = p + 1
-        deref(_t191) = uint8(0 >> 8 * 0)
+        p++
+        *_t191 = uint8(0 >> 8 * 0)
         // matrix[9]
         var _t192 = p
-        p = p + 1
-        deref(_t192) = uint8(65536 >> 8 * 3)
+        p++
+        *_t192 = uint8(65536 >> 8 * 3)
         var _t193 = p
-        p = p + 1
-        deref(_t193) = uint8(65536 >> 8 * 2)
+        p++
+        *_t193 = uint8(65536 >> 8 * 2)
         var _t194 = p
-        p = p + 1
-        deref(_t194) = uint8(65536 >> 8 * 1)
+        p++
+        *_t194 = uint8(65536 >> 8 * 1)
         var _t195 = p
-        p = p + 1
-        deref(_t195) = uint8(65536 >> 8 * 0)
+        p++
+        *_t195 = uint8(65536 >> 8 * 0)
         var _t196 = p
-        p = p + 1
-        deref(_t196) = uint8(0 >> 8 * 3)
+        p++
+        *_t196 = uint8(0 >> 8 * 3)
         var _t197 = p
-        p = p + 1
-        deref(_t197) = uint8(0 >> 8 * 2)
+        p++
+        *_t197 = uint8(0 >> 8 * 2)
         var _t198 = p
-        p = p + 1
-        deref(_t198) = uint8(0 >> 8 * 1)
+        p++
+        *_t198 = uint8(0 >> 8 * 1)
         var _t199 = p
-        p = p + 1
-        deref(_t199) = uint8(0 >> 8 * 0)
+        p++
+        *_t199 = uint8(0 >> 8 * 0)
         var _t200 = p
-        p = p + 1
-        deref(_t200) = uint8(0 >> 8 * 3)
+        p++
+        *_t200 = uint8(0 >> 8 * 3)
         var _t201 = p
-        p = p + 1
-        deref(_t201) = uint8(0 >> 8 * 2)
+        p++
+        *_t201 = uint8(0 >> 8 * 2)
         var _t202 = p
-        p = p + 1
-        deref(_t202) = uint8(0 >> 8 * 1)
+        p++
+        *_t202 = uint8(0 >> 8 * 1)
         var _t203 = p
-        p = p + 1
-        deref(_t203) = uint8(0 >> 8 * 0)
+        p++
+        *_t203 = uint8(0 >> 8 * 0)
         var _t204 = p
-        p = p + 1
-        deref(_t204) = uint8(0 >> 8 * 3)
+        p++
+        *_t204 = uint8(0 >> 8 * 3)
         var _t205 = p
-        p = p + 1
-        deref(_t205) = uint8(0 >> 8 * 2)
+        p++
+        *_t205 = uint8(0 >> 8 * 2)
         var _t206 = p
-        p = p + 1
-        deref(_t206) = uint8(0 >> 8 * 1)
+        p++
+        *_t206 = uint8(0 >> 8 * 1)
         var _t207 = p
-        p = p + 1
-        deref(_t207) = uint8(0 >> 8 * 0)
+        p++
+        *_t207 = uint8(0 >> 8 * 0)
         var _t208 = p
-        p = p + 1
-        deref(_t208) = uint8(65536 >> 8 * 3)
+        p++
+        *_t208 = uint8(65536 >> 8 * 3)
         var _t209 = p
-        p = p + 1
-        deref(_t209) = uint8(65536 >> 8 * 2)
+        p++
+        *_t209 = uint8(65536 >> 8 * 2)
         var _t210 = p
-        p = p + 1
-        deref(_t210) = uint8(65536 >> 8 * 1)
+        p++
+        *_t210 = uint8(65536 >> 8 * 1)
         var _t211 = p
-        p = p + 1
-        deref(_t211) = uint8(65536 >> 8 * 0)
+        p++
+        *_t211 = uint8(65536 >> 8 * 0)
         var _t212 = p
-        p = p + 1
-        deref(_t212) = uint8(0 >> 8 * 3)
+        p++
+        *_t212 = uint8(0 >> 8 * 3)
         var _t213 = p
-        p = p + 1
-        deref(_t213) = uint8(0 >> 8 * 2)
+        p++
+        *_t213 = uint8(0 >> 8 * 2)
         var _t214 = p
-        p = p + 1
-        deref(_t214) = uint8(0 >> 8 * 1)
+        p++
+        *_t214 = uint8(0 >> 8 * 1)
         var _t215 = p
-        p = p + 1
-        deref(_t215) = uint8(0 >> 8 * 0)
+        p++
+        *_t215 = uint8(0 >> 8 * 0)
         var _t216 = p
-        p = p + 1
-        deref(_t216) = uint8(0 >> 8 * 3)
+        p++
+        *_t216 = uint8(0 >> 8 * 3)
         var _t217 = p
-        p = p + 1
-        deref(_t217) = uint8(0 >> 8 * 2)
+        p++
+        *_t217 = uint8(0 >> 8 * 2)
         var _t218 = p
-        p = p + 1
-        deref(_t218) = uint8(0 >> 8 * 1)
+        p++
+        *_t218 = uint8(0 >> 8 * 1)
         var _t219 = p
-        p = p + 1
-        deref(_t219) = uint8(0 >> 8 * 0)
+        p++
+        *_t219 = uint8(0 >> 8 * 0)
         var _t220 = p
-        p = p + 1
-        deref(_t220) = uint8(0 >> 8 * 3)
+        p++
+        *_t220 = uint8(0 >> 8 * 3)
         var _t221 = p
-        p = p + 1
-        deref(_t221) = uint8(0 >> 8 * 2)
+        p++
+        *_t221 = uint8(0 >> 8 * 2)
         var _t222 = p
-        p = p + 1
-        deref(_t222) = uint8(0 >> 8 * 1)
+        p++
+        *_t222 = uint8(0 >> 8 * 1)
         var _t223 = p
-        p = p + 1
-        deref(_t223) = uint8(0 >> 8 * 0)
+        p++
+        *_t223 = uint8(0 >> 8 * 0)
         var _t224 = p
-        p = p + 1
-        deref(_t224) = uint8(1073741824 >> 8 * 3)
+        p++
+        *_t224 = uint8(1073741824 >> 8 * 3)
         var _t225 = p
-        p = p + 1
-        deref(_t225) = uint8(1073741824 >> 8 * 2)
+        p++
+        *_t225 = uint8(1073741824 >> 8 * 2)
         var _t226 = p
-        p = p + 1
-        deref(_t226) = uint8(1073741824 >> 8 * 1)
+        p++
+        *_t226 = uint8(1073741824 >> 8 * 1)
         var _t227 = p
-        p = p + 1
-        deref(_t227) = uint8(1073741824 >> 8 * 0)
+        p++
+        *_t227 = uint8(1073741824 >> 8 * 0)
         if (tr.info.track_media_kind == track_media_kind_t.e_audio || tr.info.track_media_kind == track_media_kind_t.e_private) {
             // width
             var _t228 = p
-            p = p + 1
-            deref(_t228) = uint8(0 >> 8 * 3)
+            p++
+            *_t228 = uint8(0 >> 8 * 3)
             var _t229 = p
-            p = p + 1
-            deref(_t229) = uint8(0 >> 8 * 2)
+            p++
+            *_t229 = uint8(0 >> 8 * 2)
             var _t230 = p
-            p = p + 1
-            deref(_t230) = uint8(0 >> 8 * 1)
+            p++
+            *_t230 = uint8(0 >> 8 * 1)
             var _t231 = p
-            p = p + 1
-            deref(_t231) = uint8(0 >> 8 * 0)
+            p++
+            *_t231 = uint8(0 >> 8 * 0)
             // height
             var _t232 = p
-            p = p + 1
-            deref(_t232) = uint8(0 >> 8 * 3)
+            p++
+            *_t232 = uint8(0 >> 8 * 3)
             var _t233 = p
-            p = p + 1
-            deref(_t233) = uint8(0 >> 8 * 2)
+            p++
+            *_t233 = uint8(0 >> 8 * 2)
             var _t234 = p
-            p = p + 1
-            deref(_t234) = uint8(0 >> 8 * 1)
+            p++
+            *_t234 = uint8(0 >> 8 * 1)
             var _t235 = p
-            p = p + 1
-            deref(_t235) = uint8(0 >> 8 * 0)
+            p++
+            *_t235 = uint8(0 >> 8 * 0)
         } else {
             // width
             var _t236 = p
-            p = p + 1
-            deref(_t236) = uint8(tr.info.u.v.width * 65536 >> 8 * 3)
+            p++
+            *_t236 = uint8(tr.info.u.v.width * 65536 >> 8 * 3)
             var _t237 = p
-            p = p + 1
-            deref(_t237) = uint8(tr.info.u.v.width * 65536 >> 8 * 2)
+            p++
+            *_t237 = uint8(tr.info.u.v.width * 65536 >> 8 * 2)
             var _t238 = p
-            p = p + 1
-            deref(_t238) = uint8(tr.info.u.v.width * 65536 >> 8 * 1)
+            p++
+            *_t238 = uint8(tr.info.u.v.width * 65536 >> 8 * 1)
             var _t239 = p
-            p = p + 1
-            deref(_t239) = uint8(tr.info.u.v.width * 65536 >> 8 * 0)
+            p++
+            *_t239 = uint8(tr.info.u.v.width * 65536 >> 8 * 0)
             // height
             var _t240 = p
-            p = p + 1
-            deref(_t240) = uint8(tr.info.u.v.height * 65536 >> 8 * 3)
+            p++
+            *_t240 = uint8(tr.info.u.v.height * 65536 >> 8 * 3)
             var _t241 = p
-            p = p + 1
-            deref(_t241) = uint8(tr.info.u.v.height * 65536 >> 8 * 2)
+            p++
+            *_t241 = uint8(tr.info.u.v.height * 65536 >> 8 * 2)
             var _t242 = p
-            p = p + 1
-            deref(_t242) = uint8(tr.info.u.v.height * 65536 >> 8 * 1)
+            p++
+            *_t242 = uint8(tr.info.u.v.height * 65536 >> 8 * 1)
             var _t243 = p
-            p = p + 1
-            deref(_t243) = uint8(tr.info.u.v.height * 65536 >> 8 * 0)
+            p++
+            *_t243 = uint8(tr.info.u.v.height * 65536 >> 8 * 0)
         }
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
         var _t244 = stack
-        stack = stack + 1
-        deref(_t244) = p
-        p = p + 4
+        stack++
+        *_t244 = p
+        p += 4
         var _t245 = p
-        p = p + 1
-        deref(_t245) = uint8(uint(int(anon_644.BOX_mdia)) >> uint(8 * 3))
+        p++
+        *_t245 = uint8(uint(anon_644.BOX_mdia) >> uint(8 * 3))
         var _t246 = p
-        p = p + 1
-        deref(_t246) = uint8(uint(int(anon_644.BOX_mdia)) >> uint(8 * 2))
+        p++
+        *_t246 = uint8(uint(anon_644.BOX_mdia) >> uint(8 * 2))
         var _t247 = p
-        p = p + 1
-        deref(_t247) = uint8(uint(int(anon_644.BOX_mdia)) >> uint(8 * 1))
+        p++
+        *_t247 = uint8(uint(anon_644.BOX_mdia) >> uint(8 * 1))
         var _t248 = p
-        p = p + 1
-        deref(_t248) = uint8(uint(int(anon_644.BOX_mdia)) >> uint(8 * 0))
+        p++
+        *_t248 = uint8(uint(anon_644.BOX_mdia) >> uint(8 * 0))
         var _t249 = stack
-        stack = stack + 1
-        deref(_t249) = p
-        p = p + 4
+        stack++
+        *_t249 = p
+        p += 4
         var _t250 = p
-        p = p + 1
-        deref(_t250) = uint8(uint(int(anon_644.BOX_mdhd)) >> uint(8 * 3))
+        p++
+        *_t250 = uint8(uint(anon_644.BOX_mdhd) >> uint(8 * 3))
         var _t251 = p
-        p = p + 1
-        deref(_t251) = uint8(uint(int(anon_644.BOX_mdhd)) >> uint(8 * 2))
+        p++
+        *_t251 = uint8(uint(anon_644.BOX_mdhd) >> uint(8 * 2))
         var _t252 = p
-        p = p + 1
-        deref(_t252) = uint8(uint(int(anon_644.BOX_mdhd)) >> uint(8 * 1))
+        p++
+        *_t252 = uint8(uint(anon_644.BOX_mdhd) >> uint(8 * 1))
         var _t253 = p
-        p = p + 1
-        deref(_t253) = uint8(uint(int(anon_644.BOX_mdhd)) >> uint(8 * 0))
+        p++
+        *_t253 = uint8(uint(anon_644.BOX_mdhd) >> uint(8 * 0))
         var _t254 = p
-        p = p + 1
-        deref(_t254) = uint8(0 >> 8 * 3)
+        p++
+        *_t254 = uint8(0 >> 8 * 3)
         var _t255 = p
-        p = p + 1
-        deref(_t255) = uint8(0 >> 8 * 2)
+        p++
+        *_t255 = uint8(0 >> 8 * 2)
         var _t256 = p
-        p = p + 1
-        deref(_t256) = uint8(0 >> 8 * 1)
+        p++
+        *_t256 = uint8(0 >> 8 * 1)
         var _t257 = p
-        p = p + 1
-        deref(_t257) = uint8(0 >> 8 * 0)
+        p++
+        *_t257 = uint8(0 >> 8 * 0)
         // creation_time
         var _t258 = p
-        p = p + 1
-        deref(_t258) = uint8(0 >> 8 * 3)
+        p++
+        *_t258 = uint8(0 >> 8 * 3)
         var _t259 = p
-        p = p + 1
-        deref(_t259) = uint8(0 >> 8 * 2)
+        p++
+        *_t259 = uint8(0 >> 8 * 2)
         var _t260 = p
-        p = p + 1
-        deref(_t260) = uint8(0 >> 8 * 1)
+        p++
+        *_t260 = uint8(0 >> 8 * 1)
         var _t261 = p
-        p = p + 1
-        deref(_t261) = uint8(0 >> 8 * 0)
+        p++
+        *_t261 = uint8(0 >> 8 * 0)
         // modification_time
         var _t262 = p
-        p = p + 1
-        deref(_t262) = uint8(0 >> 8 * 3)
+        p++
+        *_t262 = uint8(0 >> 8 * 3)
         var _t263 = p
-        p = p + 1
-        deref(_t263) = uint8(0 >> 8 * 2)
+        p++
+        *_t263 = uint8(0 >> 8 * 2)
         var _t264 = p
-        p = p + 1
-        deref(_t264) = uint8(0 >> 8 * 1)
+        p++
+        *_t264 = uint8(0 >> 8 * 1)
         var _t265 = p
-        p = p + 1
-        deref(_t265) = uint8(0 >> 8 * 0)
+        p++
+        *_t265 = uint8(0 >> 8 * 0)
         var _t266 = p
-        p = p + 1
-        deref(_t266) = uint8(tr.info.time_scale >> uint(8 * 3))
+        p++
+        *_t266 = uint8(tr.info.time_scale >> uint(8 * 3))
         var _t267 = p
-        p = p + 1
-        deref(_t267) = uint8(tr.info.time_scale >> uint(8 * 2))
+        p++
+        *_t267 = uint8(tr.info.time_scale >> uint(8 * 2))
         var _t268 = p
-        p = p + 1
-        deref(_t268) = uint8(tr.info.time_scale >> uint(8 * 1))
+        p++
+        *_t268 = uint8(tr.info.time_scale >> uint(8 * 1))
         var _t269 = p
-        p = p + 1
-        deref(_t269) = uint8(tr.info.time_scale >> uint(8 * 0))
+        p++
+        *_t269 = uint8(tr.info.time_scale >> uint(8 * 0))
         // duration
         var _t270 = p
-        p = p + 1
-        deref(_t270) = uint8(duration >> uint(8 * 3))
+        p++
+        *_t270 = uint8(duration >> uint(8 * 3))
         var _t271 = p
-        p = p + 1
-        deref(_t271) = uint8(duration >> uint(8 * 2))
+        p++
+        *_t271 = uint8(duration >> uint(8 * 2))
         var _t272 = p
-        p = p + 1
-        deref(_t272) = uint8(duration >> uint(8 * 1))
+        p++
+        *_t272 = uint8(duration >> uint(8 * 1))
         var _t273 = p
-        p = p + 1
-        deref(_t273) = uint8(duration >> uint(8 * 0))
+        p++
+        *_t273 = uint8(duration >> uint(8 * 0))
         {
             var lang_code : int = ((int(tr.info.language[0]) & 31) << 10) | ((int(tr.info.language[1]) & 31) << 5) | (int(tr.info.language[2]) & 31)
             // language
             var _t274 = p
-            p = p + 1
-            deref(_t274) = uint8(lang_code >> 8 * 1)
+            p++
+            *_t274 = uint8(lang_code >> 8 * 1)
             var _t275 = p
-            p = p + 1
-            deref(_t275) = uint8(lang_code >> 8 * 0)
+            p++
+            *_t275 = uint8(lang_code >> 8 * 0)
         }
         // pre_defined
         var _t276 = p
-        p = p + 1
-        deref(_t276) = uint8(0 >> 8 * 1)
+        p++
+        *_t276 = uint8(0 >> 8 * 1)
         var _t277 = p
-        p = p + 1
-        deref(_t277) = uint8(0 >> 8 * 0)
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        p++
+        *_t277 = uint8(0 >> 8 * 0)
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
         var _t278 = stack
-        stack = stack + 1
-        deref(_t278) = p
-        p = p + 4
+        stack++
+        *_t278 = p
+        p += 4
         var _t279 = p
-        p = p + 1
-        deref(_t279) = uint8(uint(int(anon_644.BOX_hdlr)) >> uint(8 * 3))
+        p++
+        *_t279 = uint8(uint(anon_644.BOX_hdlr) >> uint(8 * 3))
         var _t280 = p
-        p = p + 1
-        deref(_t280) = uint8(uint(int(anon_644.BOX_hdlr)) >> uint(8 * 2))
+        p++
+        *_t280 = uint8(uint(anon_644.BOX_hdlr) >> uint(8 * 2))
         var _t281 = p
-        p = p + 1
-        deref(_t281) = uint8(uint(int(anon_644.BOX_hdlr)) >> uint(8 * 1))
+        p++
+        *_t281 = uint8(uint(anon_644.BOX_hdlr) >> uint(8 * 1))
         var _t282 = p
-        p = p + 1
-        deref(_t282) = uint8(uint(int(anon_644.BOX_hdlr)) >> uint(8 * 0))
+        p++
+        *_t282 = uint8(uint(anon_644.BOX_hdlr) >> uint(8 * 0))
         var _t283 = p
-        p = p + 1
-        deref(_t283) = uint8(0 >> 8 * 3)
+        p++
+        *_t283 = uint8(0 >> 8 * 3)
         var _t284 = p
-        p = p + 1
-        deref(_t284) = uint8(0 >> 8 * 2)
+        p++
+        *_t284 = uint8(0 >> 8 * 2)
         var _t285 = p
-        p = p + 1
-        deref(_t285) = uint8(0 >> 8 * 1)
+        p++
+        *_t285 = uint8(0 >> 8 * 1)
         var _t286 = p
-        p = p + 1
-        deref(_t286) = uint8(0 >> 8 * 0)
+        p++
+        *_t286 = uint8(0 >> 8 * 0)
         // pre_defined
         var _t287 = p
-        p = p + 1
-        deref(_t287) = uint8(0 >> 8 * 3)
+        p++
+        *_t287 = uint8(0 >> 8 * 3)
         var _t288 = p
-        p = p + 1
-        deref(_t288) = uint8(0 >> 8 * 2)
+        p++
+        *_t288 = uint8(0 >> 8 * 2)
         var _t289 = p
-        p = p + 1
-        deref(_t289) = uint8(0 >> 8 * 1)
+        p++
+        *_t289 = uint8(0 >> 8 * 1)
         var _t290 = p
-        p = p + 1
-        deref(_t290) = uint8(0 >> 8 * 0)
+        p++
+        *_t290 = uint8(0 >> 8 * 0)
         // handler_type
         var _t291 = p
-        p = p + 1
-        deref(_t291) = uint8(handler_type >> uint(8 * 3))
+        p++
+        *_t291 = uint8(handler_type >> uint(8 * 3))
         var _t292 = p
-        p = p + 1
-        deref(_t292) = uint8(handler_type >> uint(8 * 2))
+        p++
+        *_t292 = uint8(handler_type >> uint(8 * 2))
         var _t293 = p
-        p = p + 1
-        deref(_t293) = uint8(handler_type >> uint(8 * 1))
+        p++
+        *_t293 = uint8(handler_type >> uint(8 * 1))
         var _t294 = p
-        p = p + 1
-        deref(_t294) = uint8(handler_type >> uint(8 * 0))
+        p++
+        *_t294 = uint8(handler_type >> uint(8 * 0))
         // reserved[3]
         var _t295 = p
-        p = p + 1
-        deref(_t295) = uint8(0 >> 8 * 3)
+        p++
+        *_t295 = uint8(0 >> 8 * 3)
         var _t296 = p
-        p = p + 1
-        deref(_t296) = uint8(0 >> 8 * 2)
+        p++
+        *_t296 = uint8(0 >> 8 * 2)
         var _t297 = p
-        p = p + 1
-        deref(_t297) = uint8(0 >> 8 * 1)
+        p++
+        *_t297 = uint8(0 >> 8 * 1)
         var _t298 = p
-        p = p + 1
-        deref(_t298) = uint8(0 >> 8 * 0)
+        p++
+        *_t298 = uint8(0 >> 8 * 0)
         var _t299 = p
-        p = p + 1
-        deref(_t299) = uint8(0 >> 8 * 3)
+        p++
+        *_t299 = uint8(0 >> 8 * 3)
         var _t300 = p
-        p = p + 1
-        deref(_t300) = uint8(0 >> 8 * 2)
+        p++
+        *_t300 = uint8(0 >> 8 * 2)
         var _t301 = p
-        p = p + 1
-        deref(_t301) = uint8(0 >> 8 * 1)
+        p++
+        *_t301 = uint8(0 >> 8 * 1)
         var _t302 = p
-        p = p + 1
-        deref(_t302) = uint8(0 >> 8 * 0)
+        p++
+        *_t302 = uint8(0 >> 8 * 0)
         var _t303 = p
-        p = p + 1
-        deref(_t303) = uint8(0 >> 8 * 3)
+        p++
+        *_t303 = uint8(0 >> 8 * 3)
         var _t304 = p
-        p = p + 1
-        deref(_t304) = uint8(0 >> 8 * 2)
+        p++
+        *_t304 = uint8(0 >> 8 * 2)
         var _t305 = p
-        p = p + 1
-        deref(_t305) = uint8(0 >> 8 * 1)
+        p++
+        *_t305 = uint8(0 >> 8 * 1)
         var _t306 = p
-        p = p + 1
-        deref(_t306) = uint8(0 >> 8 * 0)
+        p++
+        *_t306 = uint8(0 >> 8 * 0)
         // name is a null-terminated string in UTF-8 characters which gives a human-readable name for the track type (for debugging and inspection purposes).
         // set mdia hdlr name field to what quicktime uses.
         // Sony smartphone may fail to decode short files w/o handler name
@@ -15969,478 +17151,478 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
             i = 0
             while (i < int(strlen1(handler_ascii)) + 1) {
                 var _t307 = p
-                p = p + 1
-                deref(_t307) = uint8(int(handler_ascii[i]) >> 8 * 0)
+                p++
+                *_t307 = uint8(int(handler_ascii[i]) >> 8 * 0)
                 i++
             }
         } else {
             var _t308 = p
-            p = p + 1
-            deref(_t308) = uint8(0 >> 8 * 3)
+            p++
+            *_t308 = uint8(0 >> 8 * 3)
             var _t309 = p
-            p = p + 1
-            deref(_t309) = uint8(0 >> 8 * 2)
+            p++
+            *_t309 = uint8(0 >> 8 * 2)
             var _t310 = p
-            p = p + 1
-            deref(_t310) = uint8(0 >> 8 * 1)
+            p++
+            *_t310 = uint8(0 >> 8 * 1)
             var _t311 = p
-            p = p + 1
-            deref(_t311) = uint8(0 >> 8 * 0)
+            p++
+            *_t311 = uint8(0 >> 8 * 0)
         }
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
         var _t312 = stack
-        stack = stack + 1
-        deref(_t312) = p
-        p = p + 4
+        stack++
+        *_t312 = p
+        p += 4
         var _t313 = p
-        p = p + 1
-        deref(_t313) = uint8(uint(int(anon_644.BOX_minf)) >> uint(8 * 3))
+        p++
+        *_t313 = uint8(uint(anon_644.BOX_minf) >> uint(8 * 3))
         var _t314 = p
-        p = p + 1
-        deref(_t314) = uint8(uint(int(anon_644.BOX_minf)) >> uint(8 * 2))
+        p++
+        *_t314 = uint8(uint(anon_644.BOX_minf) >> uint(8 * 2))
         var _t315 = p
-        p = p + 1
-        deref(_t315) = uint8(uint(int(anon_644.BOX_minf)) >> uint(8 * 1))
+        p++
+        *_t315 = uint8(uint(anon_644.BOX_minf) >> uint(8 * 1))
         var _t316 = p
-        p = p + 1
-        deref(_t316) = uint8(uint(int(anon_644.BOX_minf)) >> uint(8 * 0))
+        p++
+        *_t316 = uint8(uint(anon_644.BOX_minf) >> uint(8 * 0))
         if (tr.info.track_media_kind == track_media_kind_t.e_audio) {
             // Sound Media Header Box
             var _t317 = stack
-            stack = stack + 1
-            deref(_t317) = p
-            p = p + 4
+            stack++
+            *_t317 = p
+            p += 4
             var _t318 = p
-            p = p + 1
-            deref(_t318) = uint8(uint(int(anon_644.BOX_smhd)) >> uint(8 * 3))
+            p++
+            *_t318 = uint8(uint(anon_644.BOX_smhd) >> uint(8 * 3))
             var _t319 = p
-            p = p + 1
-            deref(_t319) = uint8(uint(int(anon_644.BOX_smhd)) >> uint(8 * 2))
+            p++
+            *_t319 = uint8(uint(anon_644.BOX_smhd) >> uint(8 * 2))
             var _t320 = p
-            p = p + 1
-            deref(_t320) = uint8(uint(int(anon_644.BOX_smhd)) >> uint(8 * 1))
+            p++
+            *_t320 = uint8(uint(anon_644.BOX_smhd) >> uint(8 * 1))
             var _t321 = p
-            p = p + 1
-            deref(_t321) = uint8(uint(int(anon_644.BOX_smhd)) >> uint(8 * 0))
+            p++
+            *_t321 = uint8(uint(anon_644.BOX_smhd) >> uint(8 * 0))
             var _t322 = p
-            p = p + 1
-            deref(_t322) = uint8(0 >> 8 * 3)
+            p++
+            *_t322 = uint8(0 >> 8 * 3)
             var _t323 = p
-            p = p + 1
-            deref(_t323) = uint8(0 >> 8 * 2)
+            p++
+            *_t323 = uint8(0 >> 8 * 2)
             var _t324 = p
-            p = p + 1
-            deref(_t324) = uint8(0 >> 8 * 1)
+            p++
+            *_t324 = uint8(0 >> 8 * 1)
             var _t325 = p
-            p = p + 1
-            deref(_t325) = uint8(0 >> 8 * 0)
+            p++
+            *_t325 = uint8(0 >> 8 * 0)
             // balance
             var _t326 = p
-            p = p + 1
-            deref(_t326) = uint8(0 >> 8 * 1)
+            p++
+            *_t326 = uint8(0 >> 8 * 1)
             var _t327 = p
-            p = p + 1
-            deref(_t327) = uint8(0 >> 8 * 0)
+            p++
+            *_t327 = uint8(0 >> 8 * 0)
             // reserved
             var _t328 = p
-            p = p + 1
-            deref(_t328) = uint8(0 >> 8 * 1)
+            p++
+            *_t328 = uint8(0 >> 8 * 1)
             var _t329 = p
-            p = p + 1
-            deref(_t329) = uint8(0 >> 8 * 0)
-            stack = stack - 1
-            deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-            deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-            deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-            deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+            p++
+            *_t329 = uint8(0 >> 8 * 0)
+            stack--
+            (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+            (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+            (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+            (*stack)[3] = uint8(int64(p - *stack))
         }
         if (tr.info.track_media_kind == track_media_kind_t.e_video) {
             // mandatory Video Media Header Box
             var _t330 = stack
-            stack = stack + 1
-            deref(_t330) = p
-            p = p + 4
+            stack++
+            *_t330 = p
+            p += 4
             var _t331 = p
-            p = p + 1
-            deref(_t331) = uint8(uint(int(anon_644.BOX_vmhd)) >> uint(8 * 3))
+            p++
+            *_t331 = uint8(uint(anon_644.BOX_vmhd) >> uint(8 * 3))
             var _t332 = p
-            p = p + 1
-            deref(_t332) = uint8(uint(int(anon_644.BOX_vmhd)) >> uint(8 * 2))
+            p++
+            *_t332 = uint8(uint(anon_644.BOX_vmhd) >> uint(8 * 2))
             var _t333 = p
-            p = p + 1
-            deref(_t333) = uint8(uint(int(anon_644.BOX_vmhd)) >> uint(8 * 1))
+            p++
+            *_t333 = uint8(uint(anon_644.BOX_vmhd) >> uint(8 * 1))
             var _t334 = p
-            p = p + 1
-            deref(_t334) = uint8(uint(int(anon_644.BOX_vmhd)) >> uint(8 * 0))
+            p++
+            *_t334 = uint8(uint(anon_644.BOX_vmhd) >> uint(8 * 0))
             var _t335 = p
-            p = p + 1
-            deref(_t335) = uint8(1 >> 8 * 3)
+            p++
+            *_t335 = uint8(1 >> 8 * 3)
             var _t336 = p
-            p = p + 1
-            deref(_t336) = uint8(1 >> 8 * 2)
+            p++
+            *_t336 = uint8(1 >> 8 * 2)
             var _t337 = p
-            p = p + 1
-            deref(_t337) = uint8(1 >> 8 * 1)
+            p++
+            *_t337 = uint8(1 >> 8 * 1)
             var _t338 = p
-            p = p + 1
-            deref(_t338) = uint8(1 >> 8 * 0)
+            p++
+            *_t338 = uint8(1 >> 8 * 0)
             // graphicsmode
             var _t339 = p
-            p = p + 1
-            deref(_t339) = uint8(0 >> 8 * 1)
+            p++
+            *_t339 = uint8(0 >> 8 * 1)
             var _t340 = p
-            p = p + 1
-            deref(_t340) = uint8(0 >> 8 * 0)
+            p++
+            *_t340 = uint8(0 >> 8 * 0)
             // opcolor[3]
             var _t341 = p
-            p = p + 1
-            deref(_t341) = uint8(0 >> 8 * 1)
+            p++
+            *_t341 = uint8(0 >> 8 * 1)
             var _t342 = p
-            p = p + 1
-            deref(_t342) = uint8(0 >> 8 * 0)
+            p++
+            *_t342 = uint8(0 >> 8 * 0)
             var _t343 = p
-            p = p + 1
-            deref(_t343) = uint8(0 >> 8 * 1)
+            p++
+            *_t343 = uint8(0 >> 8 * 1)
             var _t344 = p
-            p = p + 1
-            deref(_t344) = uint8(0 >> 8 * 0)
+            p++
+            *_t344 = uint8(0 >> 8 * 0)
             var _t345 = p
-            p = p + 1
-            deref(_t345) = uint8(0 >> 8 * 1)
+            p++
+            *_t345 = uint8(0 >> 8 * 1)
             var _t346 = p
-            p = p + 1
-            deref(_t346) = uint8(0 >> 8 * 0)
-            stack = stack - 1
-            deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-            deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-            deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-            deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+            p++
+            *_t346 = uint8(0 >> 8 * 0)
+            stack--
+            (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+            (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+            (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+            (*stack)[3] = uint8(int64(p - *stack))
         }
         var _t347 = stack
-        stack = stack + 1
-        deref(_t347) = p
-        p = p + 4
+        stack++
+        *_t347 = p
+        p += 4
         var _t348 = p
-        p = p + 1
-        deref(_t348) = uint8(uint(int(anon_644.BOX_dinf)) >> uint(8 * 3))
+        p++
+        *_t348 = uint8(uint(anon_644.BOX_dinf) >> uint(8 * 3))
         var _t349 = p
-        p = p + 1
-        deref(_t349) = uint8(uint(int(anon_644.BOX_dinf)) >> uint(8 * 2))
+        p++
+        *_t349 = uint8(uint(anon_644.BOX_dinf) >> uint(8 * 2))
         var _t350 = p
-        p = p + 1
-        deref(_t350) = uint8(uint(int(anon_644.BOX_dinf)) >> uint(8 * 1))
+        p++
+        *_t350 = uint8(uint(anon_644.BOX_dinf) >> uint(8 * 1))
         var _t351 = p
-        p = p + 1
-        deref(_t351) = uint8(uint(int(anon_644.BOX_dinf)) >> uint(8 * 0))
+        p++
+        *_t351 = uint8(uint(anon_644.BOX_dinf) >> uint(8 * 0))
         var _t352 = stack
-        stack = stack + 1
-        deref(_t352) = p
-        p = p + 4
+        stack++
+        *_t352 = p
+        p += 4
         var _t353 = p
-        p = p + 1
-        deref(_t353) = uint8(uint(int(anon_644.BOX_dref)) >> uint(8 * 3))
+        p++
+        *_t353 = uint8(uint(anon_644.BOX_dref) >> uint(8 * 3))
         var _t354 = p
-        p = p + 1
-        deref(_t354) = uint8(uint(int(anon_644.BOX_dref)) >> uint(8 * 2))
+        p++
+        *_t354 = uint8(uint(anon_644.BOX_dref) >> uint(8 * 2))
         var _t355 = p
-        p = p + 1
-        deref(_t355) = uint8(uint(int(anon_644.BOX_dref)) >> uint(8 * 1))
+        p++
+        *_t355 = uint8(uint(anon_644.BOX_dref) >> uint(8 * 1))
         var _t356 = p
-        p = p + 1
-        deref(_t356) = uint8(uint(int(anon_644.BOX_dref)) >> uint(8 * 0))
+        p++
+        *_t356 = uint8(uint(anon_644.BOX_dref) >> uint(8 * 0))
         var _t357 = p
-        p = p + 1
-        deref(_t357) = uint8(0 >> 8 * 3)
+        p++
+        *_t357 = uint8(0 >> 8 * 3)
         var _t358 = p
-        p = p + 1
-        deref(_t358) = uint8(0 >> 8 * 2)
+        p++
+        *_t358 = uint8(0 >> 8 * 2)
         var _t359 = p
-        p = p + 1
-        deref(_t359) = uint8(0 >> 8 * 1)
+        p++
+        *_t359 = uint8(0 >> 8 * 1)
         var _t360 = p
-        p = p + 1
-        deref(_t360) = uint8(0 >> 8 * 0)
+        p++
+        *_t360 = uint8(0 >> 8 * 0)
         // entry_count
         var _t361 = p
-        p = p + 1
-        deref(_t361) = uint8(1 >> 8 * 3)
+        p++
+        *_t361 = uint8(1 >> 8 * 3)
         var _t362 = p
-        p = p + 1
-        deref(_t362) = uint8(1 >> 8 * 2)
+        p++
+        *_t362 = uint8(1 >> 8 * 2)
         var _t363 = p
-        p = p + 1
-        deref(_t363) = uint8(1 >> 8 * 1)
+        p++
+        *_t363 = uint8(1 >> 8 * 1)
         var _t364 = p
-        p = p + 1
-        deref(_t364) = uint8(1 >> 8 * 0)
+        p++
+        *_t364 = uint8(1 >> 8 * 0)
         // If the flag is set indicating that the data is in the same file as this box, then no string (not even an empty one)
         // shall be supplied in the entry field.
         // ASP the correct way to avoid supply the string, is to use flag 1
         // otherwise ISO reference demux crashes
         var _t365 = stack
-        stack = stack + 1
-        deref(_t365) = p
-        p = p + 4
+        stack++
+        *_t365 = p
+        p += 4
         var _t366 = p
-        p = p + 1
-        deref(_t366) = uint8(uint(int(anon_644.BOX_url)) >> uint(8 * 3))
+        p++
+        *_t366 = uint8(uint(anon_644.BOX_url) >> uint(8 * 3))
         var _t367 = p
-        p = p + 1
-        deref(_t367) = uint8(uint(int(anon_644.BOX_url)) >> uint(8 * 2))
+        p++
+        *_t367 = uint8(uint(anon_644.BOX_url) >> uint(8 * 2))
         var _t368 = p
-        p = p + 1
-        deref(_t368) = uint8(uint(int(anon_644.BOX_url)) >> uint(8 * 1))
+        p++
+        *_t368 = uint8(uint(anon_644.BOX_url) >> uint(8 * 1))
         var _t369 = p
-        p = p + 1
-        deref(_t369) = uint8(uint(int(anon_644.BOX_url)) >> uint(8 * 0))
+        p++
+        *_t369 = uint8(uint(anon_644.BOX_url) >> uint(8 * 0))
         var _t370 = p
-        p = p + 1
-        deref(_t370) = uint8(1 >> 8 * 3)
+        p++
+        *_t370 = uint8(1 >> 8 * 3)
         var _t371 = p
-        p = p + 1
-        deref(_t371) = uint8(1 >> 8 * 2)
+        p++
+        *_t371 = uint8(1 >> 8 * 2)
         var _t372 = p
-        p = p + 1
-        deref(_t372) = uint8(1 >> 8 * 1)
+        p++
+        *_t372 = uint8(1 >> 8 * 1)
         var _t373 = p
-        p = p + 1
-        deref(_t373) = uint8(1 >> 8 * 0)
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        p++
+        *_t373 = uint8(1 >> 8 * 0)
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
         var _t374 = stack
-        stack = stack + 1
-        deref(_t374) = p
-        p = p + 4
+        stack++
+        *_t374 = p
+        p += 4
         var _t375 = p
-        p = p + 1
-        deref(_t375) = uint8(uint(int(anon_644.BOX_stbl)) >> uint(8 * 3))
+        p++
+        *_t375 = uint8(uint(anon_644.BOX_stbl) >> uint(8 * 3))
         var _t376 = p
-        p = p + 1
-        deref(_t376) = uint8(uint(int(anon_644.BOX_stbl)) >> uint(8 * 2))
+        p++
+        *_t376 = uint8(uint(anon_644.BOX_stbl) >> uint(8 * 2))
         var _t377 = p
-        p = p + 1
-        deref(_t377) = uint8(uint(int(anon_644.BOX_stbl)) >> uint(8 * 1))
+        p++
+        *_t377 = uint8(uint(anon_644.BOX_stbl) >> uint(8 * 1))
         var _t378 = p
-        p = p + 1
-        deref(_t378) = uint8(uint(int(anon_644.BOX_stbl)) >> uint(8 * 0))
+        p++
+        *_t378 = uint8(uint(anon_644.BOX_stbl) >> uint(8 * 0))
         var _t379 = stack
-        stack = stack + 1
-        deref(_t379) = p
-        p = p + 4
+        stack++
+        *_t379 = p
+        p += 4
         var _t380 = p
-        p = p + 1
-        deref(_t380) = uint8(uint(int(anon_644.BOX_stsd)) >> uint(8 * 3))
+        p++
+        *_t380 = uint8(uint(anon_644.BOX_stsd) >> uint(8 * 3))
         var _t381 = p
-        p = p + 1
-        deref(_t381) = uint8(uint(int(anon_644.BOX_stsd)) >> uint(8 * 2))
+        p++
+        *_t381 = uint8(uint(anon_644.BOX_stsd) >> uint(8 * 2))
         var _t382 = p
-        p = p + 1
-        deref(_t382) = uint8(uint(int(anon_644.BOX_stsd)) >> uint(8 * 1))
+        p++
+        *_t382 = uint8(uint(anon_644.BOX_stsd) >> uint(8 * 1))
         var _t383 = p
-        p = p + 1
-        deref(_t383) = uint8(uint(int(anon_644.BOX_stsd)) >> uint(8 * 0))
+        p++
+        *_t383 = uint8(uint(anon_644.BOX_stsd) >> uint(8 * 0))
         var _t384 = p
-        p = p + 1
-        deref(_t384) = uint8(0 >> 8 * 3)
+        p++
+        *_t384 = uint8(0 >> 8 * 3)
         var _t385 = p
-        p = p + 1
-        deref(_t385) = uint8(0 >> 8 * 2)
+        p++
+        *_t385 = uint8(0 >> 8 * 2)
         var _t386 = p
-        p = p + 1
-        deref(_t386) = uint8(0 >> 8 * 1)
+        p++
+        *_t386 = uint8(0 >> 8 * 1)
         var _t387 = p
-        p = p + 1
-        deref(_t387) = uint8(0 >> 8 * 0)
+        p++
+        *_t387 = uint8(0 >> 8 * 0)
         // entry_count;
         var _t388 = p
-        p = p + 1
-        deref(_t388) = uint8(1 >> 8 * 3)
+        p++
+        *_t388 = uint8(1 >> 8 * 3)
         var _t389 = p
-        p = p + 1
-        deref(_t389) = uint8(1 >> 8 * 2)
+        p++
+        *_t389 = uint8(1 >> 8 * 2)
         var _t390 = p
-        p = p + 1
-        deref(_t390) = uint8(1 >> 8 * 1)
+        p++
+        *_t390 = uint8(1 >> 8 * 1)
         var _t391 = p
-        p = p + 1
-        deref(_t391) = uint8(1 >> 8 * 0)
+        p++
+        *_t391 = uint8(1 >> 8 * 0)
         if (tr.info.track_media_kind == track_media_kind_t.e_audio || tr.info.track_media_kind == track_media_kind_t.e_private) {
             // AudioSampleEntry() assume MP4E_HANDLER_TYPE_SOUN
             if (tr.info.track_media_kind == track_media_kind_t.e_audio) {
                 var _t392 = stack
-                stack = stack + 1
-                deref(_t392) = p
-                p = p + 4
+                stack++
+                *_t392 = p
+                p += 4
                 var _t393 = p
-                p = p + 1
-                deref(_t393) = uint8(uint(int(anon_644.BOX_mp4a)) >> uint(8 * 3))
+                p++
+                *_t393 = uint8(uint(anon_644.BOX_mp4a) >> uint(8 * 3))
                 var _t394 = p
-                p = p + 1
-                deref(_t394) = uint8(uint(int(anon_644.BOX_mp4a)) >> uint(8 * 2))
+                p++
+                *_t394 = uint8(uint(anon_644.BOX_mp4a) >> uint(8 * 2))
                 var _t395 = p
-                p = p + 1
-                deref(_t395) = uint8(uint(int(anon_644.BOX_mp4a)) >> uint(8 * 1))
+                p++
+                *_t395 = uint8(uint(anon_644.BOX_mp4a) >> uint(8 * 1))
                 var _t396 = p
-                p = p + 1
-                deref(_t396) = uint8(uint(int(anon_644.BOX_mp4a)) >> uint(8 * 0))
+                p++
+                *_t396 = uint8(uint(anon_644.BOX_mp4a) >> uint(8 * 0))
             } else {
                 var _t397 = stack
-                stack = stack + 1
-                deref(_t397) = p
-                p = p + 4
+                stack++
+                *_t397 = p
+                p += 4
                 var _t398 = p
-                p = p + 1
-                deref(_t398) = uint8(uint(int(anon_644.BOX_mp4s)) >> uint(8 * 3))
+                p++
+                *_t398 = uint8(uint(anon_644.BOX_mp4s) >> uint(8 * 3))
                 var _t399 = p
-                p = p + 1
-                deref(_t399) = uint8(uint(int(anon_644.BOX_mp4s)) >> uint(8 * 2))
+                p++
+                *_t399 = uint8(uint(anon_644.BOX_mp4s) >> uint(8 * 2))
                 var _t400 = p
-                p = p + 1
-                deref(_t400) = uint8(uint(int(anon_644.BOX_mp4s)) >> uint(8 * 1))
+                p++
+                *_t400 = uint8(uint(anon_644.BOX_mp4s) >> uint(8 * 1))
                 var _t401 = p
-                p = p + 1
-                deref(_t401) = uint8(uint(int(anon_644.BOX_mp4s)) >> uint(8 * 0))
+                p++
+                *_t401 = uint8(uint(anon_644.BOX_mp4s) >> uint(8 * 0))
             }
             // SampleEntry
             // reserved[6]
             var _t402 = p
-            p = p + 1
-            deref(_t402) = uint8(0 >> 8 * 3)
+            p++
+            *_t402 = uint8(0 >> 8 * 3)
             var _t403 = p
-            p = p + 1
-            deref(_t403) = uint8(0 >> 8 * 2)
+            p++
+            *_t403 = uint8(0 >> 8 * 2)
             var _t404 = p
-            p = p + 1
-            deref(_t404) = uint8(0 >> 8 * 1)
+            p++
+            *_t404 = uint8(0 >> 8 * 1)
             var _t405 = p
-            p = p + 1
-            deref(_t405) = uint8(0 >> 8 * 0)
+            p++
+            *_t405 = uint8(0 >> 8 * 0)
             var _t406 = p
-            p = p + 1
-            deref(_t406) = uint8(0 >> 8 * 1)
+            p++
+            *_t406 = uint8(0 >> 8 * 1)
             var _t407 = p
-            p = p + 1
-            deref(_t407) = uint8(0 >> 8 * 0)
+            p++
+            *_t407 = uint8(0 >> 8 * 0)
             // data_reference_index; - this is a tag for descriptor below
             var _t408 = p
-            p = p + 1
-            deref(_t408) = uint8(1 >> 8 * 1)
+            p++
+            *_t408 = uint8(1 >> 8 * 1)
             var _t409 = p
-            p = p + 1
-            deref(_t409) = uint8(1 >> 8 * 0)
+            p++
+            *_t409 = uint8(1 >> 8 * 0)
             if (tr.info.track_media_kind == track_media_kind_t.e_audio) {
                 // AudioSampleEntry
                 // reserved[2]
                 var _t410 = p
-                p = p + 1
-                deref(_t410) = uint8(0 >> 8 * 3)
+                p++
+                *_t410 = uint8(0 >> 8 * 3)
                 var _t411 = p
-                p = p + 1
-                deref(_t411) = uint8(0 >> 8 * 2)
+                p++
+                *_t411 = uint8(0 >> 8 * 2)
                 var _t412 = p
-                p = p + 1
-                deref(_t412) = uint8(0 >> 8 * 1)
+                p++
+                *_t412 = uint8(0 >> 8 * 1)
                 var _t413 = p
-                p = p + 1
-                deref(_t413) = uint8(0 >> 8 * 0)
+                p++
+                *_t413 = uint8(0 >> 8 * 0)
                 var _t414 = p
-                p = p + 1
-                deref(_t414) = uint8(0 >> 8 * 3)
+                p++
+                *_t414 = uint8(0 >> 8 * 3)
                 var _t415 = p
-                p = p + 1
-                deref(_t415) = uint8(0 >> 8 * 2)
+                p++
+                *_t415 = uint8(0 >> 8 * 2)
                 var _t416 = p
-                p = p + 1
-                deref(_t416) = uint8(0 >> 8 * 1)
+                p++
+                *_t416 = uint8(0 >> 8 * 1)
                 var _t417 = p
-                p = p + 1
-                deref(_t417) = uint8(0 >> 8 * 0)
+                p++
+                *_t417 = uint8(0 >> 8 * 0)
                 // channelcount
                 var _t418 = p
-                p = p + 1
-                deref(_t418) = uint8(tr.info.u.a.channelcount >> uint(8 * 1))
+                p++
+                *_t418 = uint8(tr.info.u.a.channelcount >> uint(8 * 1))
                 var _t419 = p
-                p = p + 1
-                deref(_t419) = uint8(tr.info.u.a.channelcount >> uint(8 * 0))
+                p++
+                *_t419 = uint8(tr.info.u.a.channelcount >> uint(8 * 0))
                 // samplesize
                 var _t420 = p
-                p = p + 1
-                deref(_t420) = uint8(16 >> 8 * 1)
+                p++
+                *_t420 = uint8(16 >> 8 * 1)
                 var _t421 = p
-                p = p + 1
-                deref(_t421) = uint8(16 >> 8 * 0)
+                p++
+                *_t421 = uint8(16 >> 8 * 0)
                 // pre_defined+reserved
                 var _t422 = p
-                p = p + 1
-                deref(_t422) = uint8(0 >> 8 * 3)
+                p++
+                *_t422 = uint8(0 >> 8 * 3)
                 var _t423 = p
-                p = p + 1
-                deref(_t423) = uint8(0 >> 8 * 2)
+                p++
+                *_t423 = uint8(0 >> 8 * 2)
                 var _t424 = p
-                p = p + 1
-                deref(_t424) = uint8(0 >> 8 * 1)
+                p++
+                *_t424 = uint8(0 >> 8 * 1)
                 var _t425 = p
-                p = p + 1
-                deref(_t425) = uint8(0 >> 8 * 0)
+                p++
+                *_t425 = uint8(0 >> 8 * 0)
                 // samplerate == = {timescale of media}<<16;
                 var _t426 = p
-                p = p + 1
-                deref(_t426) = uint8((tr.info.time_scale << 16u) >> uint(8 * 3))
+                p++
+                *_t426 = uint8((tr.info.time_scale << 16u) >> uint(8 * 3))
                 var _t427 = p
-                p = p + 1
-                deref(_t427) = uint8((tr.info.time_scale << 16u) >> uint(8 * 2))
+                p++
+                *_t427 = uint8((tr.info.time_scale << 16u) >> uint(8 * 2))
                 var _t428 = p
-                p = p + 1
-                deref(_t428) = uint8((tr.info.time_scale << 16u) >> uint(8 * 1))
+                p++
+                *_t428 = uint8((tr.info.time_scale << 16u) >> uint(8 * 1))
                 var _t429 = p
-                p = p + 1
-                deref(_t429) = uint8((tr.info.time_scale << 16u) >> uint(8 * 0))
+                p++
+                *_t429 = uint8((tr.info.time_scale << 16u) >> uint(8 * 0))
             }
             var _t430 = stack
-            stack = stack + 1
-            deref(_t430) = p
-            p = p + 4
+            stack++
+            *_t430 = p
+            p += 4
             var _t431 = p
-            p = p + 1
-            deref(_t431) = uint8(uint(int(anon_644.BOX_esds)) >> uint(8 * 3))
+            p++
+            *_t431 = uint8(uint(anon_644.BOX_esds) >> uint(8 * 3))
             var _t432 = p
-            p = p + 1
-            deref(_t432) = uint8(uint(int(anon_644.BOX_esds)) >> uint(8 * 2))
+            p++
+            *_t432 = uint8(uint(anon_644.BOX_esds) >> uint(8 * 2))
             var _t433 = p
-            p = p + 1
-            deref(_t433) = uint8(uint(int(anon_644.BOX_esds)) >> uint(8 * 1))
+            p++
+            *_t433 = uint8(uint(anon_644.BOX_esds) >> uint(8 * 1))
             var _t434 = p
-            p = p + 1
-            deref(_t434) = uint8(uint(int(anon_644.BOX_esds)) >> uint(8 * 0))
+            p++
+            *_t434 = uint8(uint(anon_644.BOX_esds) >> uint(8 * 0))
             var _t435 = p
-            p = p + 1
-            deref(_t435) = uint8(0 >> 8 * 3)
+            p++
+            *_t435 = uint8(0 >> 8 * 3)
             var _t436 = p
-            p = p + 1
-            deref(_t436) = uint8(0 >> 8 * 2)
+            p++
+            *_t436 = uint8(0 >> 8 * 2)
             var _t437 = p
-            p = p + 1
-            deref(_t437) = uint8(0 >> 8 * 1)
+            p++
+            *_t437 = uint8(0 >> 8 * 1)
             var _t438 = p
-            p = p + 1
-            deref(_t438) = uint8(0 >> 8 * 0)
+            p++
+            *_t438 = uint8(0 >> 8 * 0)
             if (tr.vsps.bytes > 0) {
                 // - two bytes size field
                 var dsi_bytes : int = tr.vsps.bytes - 2
@@ -16450,1498 +17632,1490 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
                 var esd_bytes : int = dcd_bytes + dcd_size_size + 1 + 3
                 // OD_ESD
                 var _t439 = p
-                p = p + 1
-                deref(_t439) = uint8(3 >> 8 * 0)
+                p++
+                *_t439 = uint8(3 >> 8 * 0)
                 if (esd_bytes > 127) {
-                    while (true) {
+                    c_do_while(esd_bytes > 127) {
                         esd_bytes -= 127
                         var _t440 = p
-                        p = p + 1
-                        deref(_t440) = uint8(255 >> 8 * 0)
-                        if (!(esd_bytes > 127)) {
-                            break
-                        }
+                        p++
+                        *_t440 = uint8(255 >> 8 * 0)
                     }
                 }
                 var _t441 = p
-                p = p + 1
-                deref(_t441) = uint8(esd_bytes >> 8 * 0)
+                p++
+                *_t441 = uint8(esd_bytes >> 8 * 0)
                 // ES_ID(2) // TODO - what is this?
                 var _t442 = p
-                p = p + 1
-                deref(_t442) = uint8(0 >> 8 * 1)
+                p++
+                *_t442 = uint8(0 >> 8 * 1)
                 var _t443 = p
-                p = p + 1
-                deref(_t443) = uint8(0 >> 8 * 0)
+                p++
+                *_t443 = uint8(0 >> 8 * 0)
                 // flags(1)
                 var _t444 = p
-                p = p + 1
-                deref(_t444) = uint8(0 >> 8 * 0)
+                p++
+                *_t444 = uint8(0 >> 8 * 0)
                 // OD_DCD
                 var _t445 = p
-                p = p + 1
-                deref(_t445) = uint8(4 >> 8 * 0)
+                p++
+                *_t445 = uint8(4 >> 8 * 0)
                 if (dcd_bytes > 127) {
-                    while (true) {
+                    c_do_while(dcd_bytes > 127) {
                         dcd_bytes -= 127
                         var _t446 = p
-                        p = p + 1
-                        deref(_t446) = uint8(255 >> 8 * 0)
-                        if (!(dcd_bytes > 127)) {
-                            break
-                        }
+                        p++
+                        *_t446 = uint8(255 >> 8 * 0)
                     }
                 }
                 var _t447 = p
-                p = p + 1
-                deref(_t447) = uint8(dcd_bytes >> 8 * 0)
+                p++
+                *_t447 = uint8(dcd_bytes >> 8 * 0)
                 if (tr.info.track_media_kind == track_media_kind_t.e_audio) {
                     // OD_DCD
                     var _t448 = p
-                    p = p + 1
-                    deref(_t448) = uint8(MP4_OBJECT_TYPE_AUDIO_ISO_IEC_14496_3 >> 8 * 0)
+                    p++
+                    *_t448 = uint8(MP4_OBJECT_TYPE_AUDIO_ISO_IEC_14496_3 >> 8 * 0)
                     // stream_type == AudioStream
                     var _t449 = p
-                    p = p + 1
-                    deref(_t449) = uint8((5 << 2) >> 8 * 0)
+                    p++
+                    *_t449 = uint8((5 << 2) >> 8 * 0)
                 } else {
                     // http://xhelmboyx.tripod.com/formats/mp4-layout.txt
                     // 208 = private video
                     var _t450 = p
-                    p = p + 1
-                    deref(_t450) = uint8(208 >> 8 * 0)
+                    p++
+                    *_t450 = uint8(208 >> 8 * 0)
                     // stream_type == user private
                     var _t451 = p
-                    p = p + 1
-                    deref(_t451) = uint8((32 << 2) >> 8 * 0)
+                    p++
+                    *_t451 = uint8((32 << 2) >> 8 * 0)
                 }
                 // bufferSizeDB in bytes, constant as in reference decoder
                 var _t452 = p
-                p = p + 1
-                deref(_t452) = uint8(tr.info.u.a.channelcount * 6144u / 8u >> uint(8 * 2))
+                p++
+                *_t452 = uint8(tr.info.u.a.channelcount * 6144u / 8u >> uint(8 * 2))
                 var _t453 = p
-                p = p + 1
-                deref(_t453) = uint8(tr.info.u.a.channelcount * 6144u / 8u >> uint(8 * 1))
+                p++
+                *_t453 = uint8(tr.info.u.a.channelcount * 6144u / 8u >> uint(8 * 1))
                 var _t454 = p
-                p = p + 1
-                deref(_t454) = uint8(tr.info.u.a.channelcount * 6144u / 8u >> uint(8 * 0))
+                p++
+                *_t454 = uint8(tr.info.u.a.channelcount * 6144u / 8u >> uint(8 * 0))
                 // maxBitrate TODO
                 var _t455 = p
-                p = p + 1
-                deref(_t455) = uint8(0 >> 8 * 3)
+                p++
+                *_t455 = uint8(0 >> 8 * 3)
                 var _t456 = p
-                p = p + 1
-                deref(_t456) = uint8(0 >> 8 * 2)
+                p++
+                *_t456 = uint8(0 >> 8 * 2)
                 var _t457 = p
-                p = p + 1
-                deref(_t457) = uint8(0 >> 8 * 1)
+                p++
+                *_t457 = uint8(0 >> 8 * 1)
                 var _t458 = p
-                p = p + 1
-                deref(_t458) = uint8(0 >> 8 * 0)
+                p++
+                *_t458 = uint8(0 >> 8 * 0)
                 // avg_bitrate_bps TODO
                 var _t459 = p
-                p = p + 1
-                deref(_t459) = uint8(0 >> 8 * 3)
+                p++
+                *_t459 = uint8(0 >> 8 * 3)
                 var _t460 = p
-                p = p + 1
-                deref(_t460) = uint8(0 >> 8 * 2)
+                p++
+                *_t460 = uint8(0 >> 8 * 2)
                 var _t461 = p
-                p = p + 1
-                deref(_t461) = uint8(0 >> 8 * 1)
+                p++
+                *_t461 = uint8(0 >> 8 * 1)
                 var _t462 = p
-                p = p + 1
-                deref(_t462) = uint8(0 >> 8 * 0)
+                p++
+                *_t462 = uint8(0 >> 8 * 0)
                 // OD_DSI
                 var _t463 = p
-                p = p + 1
-                deref(_t463) = uint8(5 >> 8 * 0)
+                p++
+                *_t463 = uint8(5 >> 8 * 0)
                 if (dsi_bytes > 127) {
-                    while (true) {
+                    c_do_while(dsi_bytes > 127) {
                         dsi_bytes -= 127
                         var _t464 = p
-                        p = p + 1
-                        deref(_t464) = uint8(255 >> 8 * 0)
-                        if (!(dsi_bytes > 127)) {
-                            break
-                        }
+                        p++
+                        *_t464 = uint8(255 >> 8 * 0)
                     }
                 }
                 var _t465 = p
-                p = p + 1
-                deref(_t465) = uint8(dsi_bytes >> 8 * 0)
+                p++
+                *_t465 = uint8(dsi_bytes >> 8 * 0)
                 for (i1 in range(dsi_bytes)) {
                     var _t466 = p
-                    p = p + 1
-                    deref(_t466) = uint8(int(tr.vsps.data[2 + i1]) >> 8 * 0)
+                    p++
+                    *_t466 = uint8(int(tr.vsps.data[2 + i1]) >> 8 * 0)
                 }
             }
-            stack = stack - 1
-            deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-            deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-            deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-            deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-            stack = stack - 1
-            deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-            deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-            deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-            deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+            stack--
+            (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+            (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+            (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+            (*stack)[3] = uint8(int64(p - *stack))
+            stack--
+            (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+            (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+            (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+            (*stack)[3] = uint8(int64(p - *stack))
         }
-        if (tr.info.track_media_kind == track_media_kind_t.e_video && (uint(MP4_OBJECT_TYPE_AVC) == tr.info.object_type_indication || uint(MP4_OBJECT_TYPE_HEVC) == tr.info.object_type_indication)) {
+        if (tr.info.track_media_kind == track_media_kind_t.e_video &&
+                (uint(MP4_OBJECT_TYPE_AVC) == tr.info.object_type_indication || uint(MP4_OBJECT_TYPE_HEVC) == tr.info.object_type_indication)) {
             var numOfSequenceParameterSets : int = h264_file_all__items_count(addr(tr.vsps))
             var numOfPictureParameterSets : int = h264_file_all__items_count(addr(tr.vpps))
             if (uint(MP4_OBJECT_TYPE_AVC) == tr.info.object_type_indication) {
                 var _t467 = stack
-                stack = stack + 1
-                deref(_t467) = p
-                p = p + 4
+                stack++
+                *_t467 = p
+                p += 4
                 var _t468 = p
-                p = p + 1
-                deref(_t468) = uint8(uint(int(anon_644.BOX_avc1)) >> uint(8 * 3))
+                p++
+                *_t468 = uint8(uint(anon_644.BOX_avc1) >> uint(8 * 3))
                 var _t469 = p
-                p = p + 1
-                deref(_t469) = uint8(uint(int(anon_644.BOX_avc1)) >> uint(8 * 2))
+                p++
+                *_t469 = uint8(uint(anon_644.BOX_avc1) >> uint(8 * 2))
                 var _t470 = p
-                p = p + 1
-                deref(_t470) = uint8(uint(int(anon_644.BOX_avc1)) >> uint(8 * 1))
+                p++
+                *_t470 = uint8(uint(anon_644.BOX_avc1) >> uint(8 * 1))
                 var _t471 = p
-                p = p + 1
-                deref(_t471) = uint8(uint(int(anon_644.BOX_avc1)) >> uint(8 * 0))
+                p++
+                *_t471 = uint8(uint(anon_644.BOX_avc1) >> uint(8 * 0))
             } else {
                 var _t472 = stack
-                stack = stack + 1
-                deref(_t472) = p
-                p = p + 4
+                stack++
+                *_t472 = p
+                p += 4
                 var _t473 = p
-                p = p + 1
-                deref(_t473) = uint8(uint(int(anon_644.BOX_hvc1)) >> uint(8 * 3))
+                p++
+                *_t473 = uint8(uint(anon_644.BOX_hvc1) >> uint(8 * 3))
                 var _t474 = p
-                p = p + 1
-                deref(_t474) = uint8(uint(int(anon_644.BOX_hvc1)) >> uint(8 * 2))
+                p++
+                *_t474 = uint8(uint(anon_644.BOX_hvc1) >> uint(8 * 2))
                 var _t475 = p
-                p = p + 1
-                deref(_t475) = uint8(uint(int(anon_644.BOX_hvc1)) >> uint(8 * 1))
+                p++
+                *_t475 = uint8(uint(anon_644.BOX_hvc1) >> uint(8 * 1))
                 var _t476 = p
-                p = p + 1
-                deref(_t476) = uint8(uint(int(anon_644.BOX_hvc1)) >> uint(8 * 0))
+                p++
+                *_t476 = uint8(uint(anon_644.BOX_hvc1) >> uint(8 * 0))
             }
             // VisualSampleEntry 8.16.2
             // extends SampleEntry
             // reserved
             var _t477 = p
-            p = p + 1
-            deref(_t477) = uint8(0 >> 8 * 1)
+            p++
+            *_t477 = uint8(0 >> 8 * 1)
             var _t478 = p
-            p = p + 1
-            deref(_t478) = uint8(0 >> 8 * 0)
+            p++
+            *_t478 = uint8(0 >> 8 * 0)
             // reserved
             var _t479 = p
-            p = p + 1
-            deref(_t479) = uint8(0 >> 8 * 1)
+            p++
+            *_t479 = uint8(0 >> 8 * 1)
             var _t480 = p
-            p = p + 1
-            deref(_t480) = uint8(0 >> 8 * 0)
+            p++
+            *_t480 = uint8(0 >> 8 * 0)
             // reserved
             var _t481 = p
-            p = p + 1
-            deref(_t481) = uint8(0 >> 8 * 1)
+            p++
+            *_t481 = uint8(0 >> 8 * 1)
             var _t482 = p
-            p = p + 1
-            deref(_t482) = uint8(0 >> 8 * 0)
+            p++
+            *_t482 = uint8(0 >> 8 * 0)
             // data_reference_index
             var _t483 = p
-            p = p + 1
-            deref(_t483) = uint8(1 >> 8 * 1)
+            p++
+            *_t483 = uint8(1 >> 8 * 1)
             var _t484 = p
-            p = p + 1
-            deref(_t484) = uint8(1 >> 8 * 0)
+            p++
+            *_t484 = uint8(1 >> 8 * 0)
             // pre_defined
             var _t485 = p
-            p = p + 1
-            deref(_t485) = uint8(0 >> 8 * 1)
+            p++
+            *_t485 = uint8(0 >> 8 * 1)
             var _t486 = p
-            p = p + 1
-            deref(_t486) = uint8(0 >> 8 * 0)
+            p++
+            *_t486 = uint8(0 >> 8 * 0)
             // reserved
             var _t487 = p
-            p = p + 1
-            deref(_t487) = uint8(0 >> 8 * 1)
+            p++
+            *_t487 = uint8(0 >> 8 * 1)
             var _t488 = p
-            p = p + 1
-            deref(_t488) = uint8(0 >> 8 * 0)
+            p++
+            *_t488 = uint8(0 >> 8 * 0)
             // pre_defined
             var _t489 = p
-            p = p + 1
-            deref(_t489) = uint8(0 >> 8 * 3)
+            p++
+            *_t489 = uint8(0 >> 8 * 3)
             var _t490 = p
-            p = p + 1
-            deref(_t490) = uint8(0 >> 8 * 2)
+            p++
+            *_t490 = uint8(0 >> 8 * 2)
             var _t491 = p
-            p = p + 1
-            deref(_t491) = uint8(0 >> 8 * 1)
+            p++
+            *_t491 = uint8(0 >> 8 * 1)
             var _t492 = p
-            p = p + 1
-            deref(_t492) = uint8(0 >> 8 * 0)
+            p++
+            *_t492 = uint8(0 >> 8 * 0)
             // pre_defined
             var _t493 = p
-            p = p + 1
-            deref(_t493) = uint8(0 >> 8 * 3)
+            p++
+            *_t493 = uint8(0 >> 8 * 3)
             var _t494 = p
-            p = p + 1
-            deref(_t494) = uint8(0 >> 8 * 2)
+            p++
+            *_t494 = uint8(0 >> 8 * 2)
             var _t495 = p
-            p = p + 1
-            deref(_t495) = uint8(0 >> 8 * 1)
+            p++
+            *_t495 = uint8(0 >> 8 * 1)
             var _t496 = p
-            p = p + 1
-            deref(_t496) = uint8(0 >> 8 * 0)
+            p++
+            *_t496 = uint8(0 >> 8 * 0)
             // pre_defined
             var _t497 = p
-            p = p + 1
-            deref(_t497) = uint8(0 >> 8 * 3)
+            p++
+            *_t497 = uint8(0 >> 8 * 3)
             var _t498 = p
-            p = p + 1
-            deref(_t498) = uint8(0 >> 8 * 2)
+            p++
+            *_t498 = uint8(0 >> 8 * 2)
             var _t499 = p
-            p = p + 1
-            deref(_t499) = uint8(0 >> 8 * 1)
+            p++
+            *_t499 = uint8(0 >> 8 * 1)
             var _t500 = p
-            p = p + 1
-            deref(_t500) = uint8(0 >> 8 * 0)
+            p++
+            *_t500 = uint8(0 >> 8 * 0)
             var _t501 = p
-            p = p + 1
-            deref(_t501) = uint8(tr.info.u.v.width >> 8 * 1)
+            p++
+            *_t501 = uint8(tr.info.u.v.width >> 8 * 1)
             var _t502 = p
-            p = p + 1
-            deref(_t502) = uint8(tr.info.u.v.width >> 8 * 0)
+            p++
+            *_t502 = uint8(tr.info.u.v.width >> 8 * 0)
             var _t503 = p
-            p = p + 1
-            deref(_t503) = uint8(tr.info.u.v.height >> 8 * 1)
+            p++
+            *_t503 = uint8(tr.info.u.v.height >> 8 * 1)
             var _t504 = p
-            p = p + 1
-            deref(_t504) = uint8(tr.info.u.v.height >> 8 * 0)
+            p++
+            *_t504 = uint8(tr.info.u.v.height >> 8 * 0)
             // horizresolution = 72 dpi
             var _t505 = p
-            p = p + 1
-            deref(_t505) = uint8(4718592 >> 8 * 3)
+            p++
+            *_t505 = uint8(4718592 >> 8 * 3)
             var _t506 = p
-            p = p + 1
-            deref(_t506) = uint8(4718592 >> 8 * 2)
+            p++
+            *_t506 = uint8(4718592 >> 8 * 2)
             var _t507 = p
-            p = p + 1
-            deref(_t507) = uint8(4718592 >> 8 * 1)
+            p++
+            *_t507 = uint8(4718592 >> 8 * 1)
             var _t508 = p
-            p = p + 1
-            deref(_t508) = uint8(4718592 >> 8 * 0)
+            p++
+            *_t508 = uint8(4718592 >> 8 * 0)
             // vertresolution = 72 dpi
             var _t509 = p
-            p = p + 1
-            deref(_t509) = uint8(4718592 >> 8 * 3)
+            p++
+            *_t509 = uint8(4718592 >> 8 * 3)
             var _t510 = p
-            p = p + 1
-            deref(_t510) = uint8(4718592 >> 8 * 2)
+            p++
+            *_t510 = uint8(4718592 >> 8 * 2)
             var _t511 = p
-            p = p + 1
-            deref(_t511) = uint8(4718592 >> 8 * 1)
+            p++
+            *_t511 = uint8(4718592 >> 8 * 1)
             var _t512 = p
-            p = p + 1
-            deref(_t512) = uint8(4718592 >> 8 * 0)
+            p++
+            *_t512 = uint8(4718592 >> 8 * 0)
             // reserved
             var _t513 = p
-            p = p + 1
-            deref(_t513) = uint8(0 >> 8 * 3)
+            p++
+            *_t513 = uint8(0 >> 8 * 3)
             var _t514 = p
-            p = p + 1
-            deref(_t514) = uint8(0 >> 8 * 2)
+            p++
+            *_t514 = uint8(0 >> 8 * 2)
             var _t515 = p
-            p = p + 1
-            deref(_t515) = uint8(0 >> 8 * 1)
+            p++
+            *_t515 = uint8(0 >> 8 * 1)
             var _t516 = p
-            p = p + 1
-            deref(_t516) = uint8(0 >> 8 * 0)
+            p++
+            *_t516 = uint8(0 >> 8 * 0)
             // frame_count
             var _t517 = p
-            p = p + 1
-            deref(_t517) = uint8(1 >> 8 * 1)
+            p++
+            *_t517 = uint8(1 >> 8 * 1)
             var _t518 = p
-            p = p + 1
-            deref(_t518) = uint8(1 >> 8 * 0)
+            p++
+            *_t518 = uint8(1 >> 8 * 0)
             for (i1 in range(32)) {
                 // compressorname
                 var _t519 = p
-                p = p + 1
-                deref(_t519) = uint8(0 >> 8 * 0)
+                p++
+                *_t519 = uint8(0 >> 8 * 0)
             }
             // depth
             var _t520 = p
-            p = p + 1
-            deref(_t520) = uint8(24 >> 8 * 1)
+            p++
+            *_t520 = uint8(24 >> 8 * 1)
             var _t521 = p
-            p = p + 1
-            deref(_t521) = uint8(24 >> 8 * 0)
+            p++
+            *_t521 = uint8(24 >> 8 * 0)
             // pre_defined
             var _t522 = p
-            p = p + 1
-            deref(_t522) = uint8(-1 >> 8 * 1)
+            p++
+            *_t522 = uint8(-1 >> 8 * 1)
             var _t523 = p
-            p = p + 1
-            deref(_t523) = uint8(-1 >> 8 * 0)
+            p++
+            *_t523 = uint8(-1 >> 8 * 0)
             if (uint(MP4_OBJECT_TYPE_AVC) == tr.info.object_type_indication) {
                 var _t524 = stack
-                stack = stack + 1
-                deref(_t524) = p
-                p = p + 4
+                stack++
+                *_t524 = p
+                p += 4
                 var _t525 = p
-                p = p + 1
-                deref(_t525) = uint8(uint(int(anon_644.BOX_avcC)) >> uint(8 * 3))
+                p++
+                *_t525 = uint8(uint(anon_644.BOX_avcC) >> uint(8 * 3))
                 var _t526 = p
-                p = p + 1
-                deref(_t526) = uint8(uint(int(anon_644.BOX_avcC)) >> uint(8 * 2))
+                p++
+                *_t526 = uint8(uint(anon_644.BOX_avcC) >> uint(8 * 2))
                 var _t527 = p
-                p = p + 1
-                deref(_t527) = uint8(uint(int(anon_644.BOX_avcC)) >> uint(8 * 1))
+                p++
+                *_t527 = uint8(uint(anon_644.BOX_avcC) >> uint(8 * 1))
                 var _t528 = p
-                p = p + 1
-                deref(_t528) = uint8(uint(int(anon_644.BOX_avcC)) >> uint(8 * 0))
+                p++
+                *_t528 = uint8(uint(anon_644.BOX_avcC) >> uint(8 * 0))
                 // AVCDecoderConfigurationRecord 5.2.4.1.1
                 // configurationVersion
                 var _t529 = p
-                p = p + 1
-                deref(_t529) = uint8(1 >> 8 * 0)
+                p++
+                *_t529 = uint8(1 >> 8 * 0)
                 var _t530 = p
-                p = p + 1
-                deref(_t530) = uint8(int(tr.vsps.data[2 + 1]) >> 8 * 0)
+                p++
+                *_t530 = uint8(int(tr.vsps.data[2 + 1]) >> 8 * 0)
                 var _t531 = p
-                p = p + 1
-                deref(_t531) = uint8(int(tr.vsps.data[2 + 2]) >> 8 * 0)
+                p++
+                *_t531 = uint8(int(tr.vsps.data[2 + 2]) >> 8 * 0)
                 var _t532 = p
-                p = p + 1
-                deref(_t532) = uint8(int(tr.vsps.data[2 + 3]) >> 8 * 0)
+                p++
+                *_t532 = uint8(int(tr.vsps.data[2 + 3]) >> 8 * 0)
                 // 0xfc + NALU_len - 1
                 var _t533 = p
-                p = p + 1
-                deref(_t533) = uint8(255 >> 8 * 0)
+                p++
+                *_t533 = uint8(255 >> 8 * 0)
                 var _t534 = p
-                p = p + 1
-                deref(_t534) = uint8((224 | numOfSequenceParameterSets) >> 8 * 0)
+                p++
+                *_t534 = uint8((224 | numOfSequenceParameterSets) >> 8 * 0)
                 i = 0
                 while (i < tr.vsps.bytes) {
                     var _t535 = p
-                    p = p + 1
-                    deref(_t535) = uint8(int(tr.vsps.data[i]) >> 8 * 0)
+                    p++
+                    *_t535 = uint8(int(tr.vsps.data[i]) >> 8 * 0)
                     i++
                 }
                 var _t536 = p
-                p = p + 1
-                deref(_t536) = uint8(numOfPictureParameterSets >> 8 * 0)
+                p++
+                *_t536 = uint8(numOfPictureParameterSets >> 8 * 0)
                 i = 0
                 while (i < tr.vpps.bytes) {
                     var _t537 = p
-                    p = p + 1
-                    deref(_t537) = uint8(int(tr.vpps.data[i]) >> 8 * 0)
+                    p++
+                    *_t537 = uint8(int(tr.vpps.data[i]) >> 8 * 0)
                     i++
                 }
             } else {
                 var numOfVPS : int = h264_file_all__items_count(addr(tr.vpps))
                 var _t538 = stack
-                stack = stack + 1
-                deref(_t538) = p
-                p = p + 4
+                stack++
+                *_t538 = p
+                p += 4
                 var _t539 = p
-                p = p + 1
-                deref(_t539) = uint8(uint(int(anon_644.BOX_hvcC)) >> uint(8 * 3))
+                p++
+                *_t539 = uint8(uint(anon_644.BOX_hvcC) >> uint(8 * 3))
                 var _t540 = p
-                p = p + 1
-                deref(_t540) = uint8(uint(int(anon_644.BOX_hvcC)) >> uint(8 * 2))
+                p++
+                *_t540 = uint8(uint(anon_644.BOX_hvcC) >> uint(8 * 2))
                 var _t541 = p
-                p = p + 1
-                deref(_t541) = uint8(uint(int(anon_644.BOX_hvcC)) >> uint(8 * 1))
+                p++
+                *_t541 = uint8(uint(anon_644.BOX_hvcC) >> uint(8 * 1))
                 var _t542 = p
-                p = p + 1
-                deref(_t542) = uint8(uint(int(anon_644.BOX_hvcC)) >> uint(8 * 0))
+                p++
+                *_t542 = uint8(uint(anon_644.BOX_hvcC) >> uint(8 * 0))
                 // TODO: read actual params from stream
                 // configurationVersion
                 var _t543 = p
-                p = p + 1
-                deref(_t543) = uint8(1 >> 8 * 0)
+                p++
+                *_t543 = uint8(1 >> 8 * 0)
                 // Profile Space (2), Tier (1), Profile (5)
                 var _t544 = p
-                p = p + 1
-                deref(_t544) = uint8(1 >> 8 * 0)
+                p++
+                *_t544 = uint8(1 >> 8 * 0)
                 // Profile Compatibility
                 var _t545 = p
-                p = p + 1
-                deref(_t545) = uint8(1610612736 >> 8 * 3)
+                p++
+                *_t545 = uint8(1610612736 >> 8 * 3)
                 var _t546 = p
-                p = p + 1
-                deref(_t546) = uint8(1610612736 >> 8 * 2)
+                p++
+                *_t546 = uint8(1610612736 >> 8 * 2)
                 var _t547 = p
-                p = p + 1
-                deref(_t547) = uint8(1610612736 >> 8 * 1)
+                p++
+                *_t547 = uint8(1610612736 >> 8 * 1)
                 var _t548 = p
-                p = p + 1
-                deref(_t548) = uint8(1610612736 >> 8 * 0)
+                p++
+                *_t548 = uint8(1610612736 >> 8 * 0)
                 // progressive, interlaced, non packed constraint, frame only constraint flags
                 var _t549 = p
-                p = p + 1
-                deref(_t549) = uint8(0 >> 8 * 1)
+                p++
+                *_t549 = uint8(0 >> 8 * 1)
                 var _t550 = p
-                p = p + 1
-                deref(_t550) = uint8(0 >> 8 * 0)
+                p++
+                *_t550 = uint8(0 >> 8 * 0)
                 // constraint indicator flags
                 var _t551 = p
-                p = p + 1
-                deref(_t551) = uint8(0 >> 8 * 3)
+                p++
+                *_t551 = uint8(0 >> 8 * 3)
                 var _t552 = p
-                p = p + 1
-                deref(_t552) = uint8(0 >> 8 * 2)
+                p++
+                *_t552 = uint8(0 >> 8 * 2)
                 var _t553 = p
-                p = p + 1
-                deref(_t553) = uint8(0 >> 8 * 1)
+                p++
+                *_t553 = uint8(0 >> 8 * 1)
                 var _t554 = p
-                p = p + 1
-                deref(_t554) = uint8(0 >> 8 * 0)
+                p++
+                *_t554 = uint8(0 >> 8 * 0)
                 // level_idc
                 var _t555 = p
-                p = p + 1
-                deref(_t555) = uint8(0 >> 8 * 0)
+                p++
+                *_t555 = uint8(0 >> 8 * 0)
                 // Min Spatial Segmentation
                 var _t556 = p
-                p = p + 1
-                deref(_t556) = uint8(61440 >> 8 * 1)
+                p++
+                *_t556 = uint8(61440 >> 8 * 1)
                 var _t557 = p
-                p = p + 1
-                deref(_t557) = uint8(61440 >> 8 * 0)
+                p++
+                *_t557 = uint8(61440 >> 8 * 0)
                 // Parallelism Type
                 var _t558 = p
-                p = p + 1
-                deref(_t558) = uint8(252 >> 8 * 0)
+                p++
+                *_t558 = uint8(252 >> 8 * 0)
                 // Chroma Format
                 var _t559 = p
-                p = p + 1
-                deref(_t559) = uint8(252 >> 8 * 0)
+                p++
+                *_t559 = uint8(252 >> 8 * 0)
                 // Luma Depth
                 var _t560 = p
-                p = p + 1
-                deref(_t560) = uint8(248 >> 8 * 0)
+                p++
+                *_t560 = uint8(248 >> 8 * 0)
                 // Chroma Depth
                 var _t561 = p
-                p = p + 1
-                deref(_t561) = uint8(248 >> 8 * 0)
+                p++
+                *_t561 = uint8(248 >> 8 * 0)
                 // Avg Frame Rate
                 var _t562 = p
-                p = p + 1
-                deref(_t562) = uint8(0 >> 8 * 1)
+                p++
+                *_t562 = uint8(0 >> 8 * 1)
                 var _t563 = p
-                p = p + 1
-                deref(_t563) = uint8(0 >> 8 * 0)
+                p++
+                *_t563 = uint8(0 >> 8 * 0)
                 // ConstantFrameRate (2), NumTemporalLayers (3), TemporalIdNested (1), LengthSizeMinusOne (2)
                 var _t564 = p
-                p = p + 1
-                deref(_t564) = uint8(3 >> 8 * 0)
+                p++
+                *_t564 = uint8(3 >> 8 * 0)
                 // Num Of Arrays
                 var _t565 = p
-                p = p + 1
-                deref(_t565) = uint8(3 >> 8 * 0)
+                p++
+                *_t565 = uint8(3 >> 8 * 0)
                 // Array Completeness + NAL Unit Type
                 var _t566 = p
-                p = p + 1
-                deref(_t566) = uint8(((1 << 7) | (HEVC_NAL_VPS & 63)) >> 8 * 0)
+                p++
+                *_t566 = uint8(((1 << 7) | (HEVC_NAL_VPS & 63)) >> 8 * 0)
                 var _t567 = p
-                p = p + 1
-                deref(_t567) = uint8(numOfVPS >> 8 * 1)
+                p++
+                *_t567 = uint8(numOfVPS >> 8 * 1)
                 var _t568 = p
-                p = p + 1
-                deref(_t568) = uint8(numOfVPS >> 8 * 0)
+                p++
+                *_t568 = uint8(numOfVPS >> 8 * 0)
                 i = 0
                 while (i < tr.vvps.bytes) {
                     var _t569 = p
-                    p = p + 1
-                    deref(_t569) = uint8(int(tr.vvps.data[i]) >> 8 * 0)
+                    p++
+                    *_t569 = uint8(int(tr.vvps.data[i]) >> 8 * 0)
                     i++
                 }
                 var _t570 = p
-                p = p + 1
-                deref(_t570) = uint8(((1 << 7) | (HEVC_NAL_SPS & 63)) >> 8 * 0)
+                p++
+                *_t570 = uint8(((1 << 7) | (HEVC_NAL_SPS & 63)) >> 8 * 0)
                 var _t571 = p
-                p = p + 1
-                deref(_t571) = uint8(numOfSequenceParameterSets >> 8 * 1)
+                p++
+                *_t571 = uint8(numOfSequenceParameterSets >> 8 * 1)
                 var _t572 = p
-                p = p + 1
-                deref(_t572) = uint8(numOfSequenceParameterSets >> 8 * 0)
+                p++
+                *_t572 = uint8(numOfSequenceParameterSets >> 8 * 0)
                 i = 0
                 while (i < tr.vsps.bytes) {
                     var _t573 = p
-                    p = p + 1
-                    deref(_t573) = uint8(int(tr.vsps.data[i]) >> 8 * 0)
+                    p++
+                    *_t573 = uint8(int(tr.vsps.data[i]) >> 8 * 0)
                     i++
                 }
                 var _t574 = p
-                p = p + 1
-                deref(_t574) = uint8(((1 << 7) | (HEVC_NAL_PPS & 63)) >> 8 * 0)
+                p++
+                *_t574 = uint8(((1 << 7) | (HEVC_NAL_PPS & 63)) >> 8 * 0)
                 var _t575 = p
-                p = p + 1
-                deref(_t575) = uint8(numOfPictureParameterSets >> 8 * 1)
+                p++
+                *_t575 = uint8(numOfPictureParameterSets >> 8 * 1)
                 var _t576 = p
-                p = p + 1
-                deref(_t576) = uint8(numOfPictureParameterSets >> 8 * 0)
+                p++
+                *_t576 = uint8(numOfPictureParameterSets >> 8 * 0)
                 i = 0
                 while (i < tr.vpps.bytes) {
                     var _t577 = p
-                    p = p + 1
-                    deref(_t577) = uint8(int(tr.vpps.data[i]) >> 8 * 0)
+                    p++
+                    *_t577 = uint8(int(tr.vpps.data[i]) >> 8 * 0)
                     i++
                 }
             }
-            stack = stack - 1
-            deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-            deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-            deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-            deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-            stack = stack - 1
-            deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-            deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-            deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-            deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+            stack--
+            (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+            (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+            (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+            (*stack)[3] = uint8(int64(p - *stack))
+            stack--
+            (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+            (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+            (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+            (*stack)[3] = uint8(int64(p - *stack))
         }
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
         // indexes
         // Time to Sample Box
         var _t578 = stack
-        stack = stack + 1
-        deref(_t578) = p
-        p = p + 4
+        stack++
+        *_t578 = p
+        p += 4
         var _t579 = p
-        p = p + 1
-        deref(_t579) = uint8(uint(int(anon_644.BOX_stts)) >> uint(8 * 3))
+        p++
+        *_t579 = uint8(uint(anon_644.BOX_stts) >> uint(8 * 3))
         var _t580 = p
-        p = p + 1
-        deref(_t580) = uint8(uint(int(anon_644.BOX_stts)) >> uint(8 * 2))
+        p++
+        *_t580 = uint8(uint(anon_644.BOX_stts) >> uint(8 * 2))
         var _t581 = p
-        p = p + 1
-        deref(_t581) = uint8(uint(int(anon_644.BOX_stts)) >> uint(8 * 1))
+        p++
+        *_t581 = uint8(uint(anon_644.BOX_stts) >> uint(8 * 1))
         var _t582 = p
-        p = p + 1
-        deref(_t582) = uint8(uint(int(anon_644.BOX_stts)) >> uint(8 * 0))
+        p++
+        *_t582 = uint8(uint(anon_644.BOX_stts) >> uint(8 * 0))
         var _t583 = p
-        p = p + 1
-        deref(_t583) = uint8(0 >> 8 * 3)
+        p++
+        *_t583 = uint8(0 >> 8 * 3)
         var _t584 = p
-        p = p + 1
-        deref(_t584) = uint8(0 >> 8 * 2)
+        p++
+        *_t584 = uint8(0 >> 8 * 2)
         var _t585 = p
-        p = p + 1
-        deref(_t585) = uint8(0 >> 8 * 1)
+        p++
+        *_t585 = uint8(0 >> 8 * 1)
         var _t586 = p
-        p = p + 1
-        deref(_t586) = uint8(0 >> 8 * 0)
+        p++
+        *_t586 = uint8(0 >> 8 * 0)
         {
             var pentry_count : uint8? = p
             var cnt : int = 1
             var entry_count : int = 0
             var _t587 = p
-            p = p + 1
-            deref(_t587) = uint8(0 >> 8 * 3)
+            p++
+            *_t587 = uint8(0 >> 8 * 3)
             var _t588 = p
-            p = p + 1
-            deref(_t588) = uint8(0 >> 8 * 2)
+            p++
+            *_t588 = uint8(0 >> 8 * 2)
             var _t589 = p
-            p = p + 1
-            deref(_t589) = uint8(0 >> 8 * 1)
+            p++
+            *_t589 = uint8(0 >> 8 * 1)
             var _t590 = p
-            p = p + 1
-            deref(_t590) = uint8(0 >> 8 * 0)
+            p++
+            *_t590 = uint8(0 >> 8 * 0)
             i = 0
             while (i < samples_count) {
                 if (i == (samples_count - 1) || sample[i].duration != sample[i + 1].duration) {
                     var _t591 = p
-                    p = p + 1
-                    deref(_t591) = uint8(cnt >> 8 * 3)
+                    p++
+                    *_t591 = uint8(cnt >> 8 * 3)
                     var _t592 = p
-                    p = p + 1
-                    deref(_t592) = uint8(cnt >> 8 * 2)
+                    p++
+                    *_t592 = uint8(cnt >> 8 * 2)
                     var _t593 = p
-                    p = p + 1
-                    deref(_t593) = uint8(cnt >> 8 * 1)
+                    p++
+                    *_t593 = uint8(cnt >> 8 * 1)
                     var _t594 = p
-                    p = p + 1
-                    deref(_t594) = uint8(cnt >> 8 * 0)
+                    p++
+                    *_t594 = uint8(cnt >> 8 * 0)
                     var _t595 = p
-                    p = p + 1
-                    deref(_t595) = uint8(sample[i].duration >> uint(8 * 3))
+                    p++
+                    *_t595 = uint8(sample[i].duration >> uint(8 * 3))
                     var _t596 = p
-                    p = p + 1
-                    deref(_t596) = uint8(sample[i].duration >> uint(8 * 2))
+                    p++
+                    *_t596 = uint8(sample[i].duration >> uint(8 * 2))
                     var _t597 = p
-                    p = p + 1
-                    deref(_t597) = uint8(sample[i].duration >> uint(8 * 1))
+                    p++
+                    *_t597 = uint8(sample[i].duration >> uint(8 * 1))
                     var _t598 = p
-                    p = p + 1
-                    deref(_t598) = uint8(sample[i].duration >> uint(8 * 0))
+                    p++
+                    *_t598 = uint8(sample[i].duration >> uint(8 * 0))
                     cnt = 0
                     entry_count++
                 }
                 i++
                 cnt++
             }
-            pentry_count[0] = uint8(uint8(entry_count >> 8 * 3))
-            pentry_count[1] = uint8(uint8(entry_count >> 8 * 2))
-            pentry_count[2] = uint8(uint8(entry_count >> 8 * 1))
-            pentry_count[3] = uint8(uint8(entry_count))
+            pentry_count[0] = uint8(entry_count >> 8 * 3)
+            pentry_count[1] = uint8(entry_count >> 8 * 2)
+            pentry_count[2] = uint8(entry_count >> 8 * 1)
+            pentry_count[3] = uint8(entry_count)
         }
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
         // Sample To Chunk Box
         var _t599 = stack
-        stack = stack + 1
-        deref(_t599) = p
-        p = p + 4
+        stack++
+        *_t599 = p
+        p += 4
         var _t600 = p
-        p = p + 1
-        deref(_t600) = uint8(uint(int(anon_644.BOX_stsc)) >> uint(8 * 3))
+        p++
+        *_t600 = uint8(uint(anon_644.BOX_stsc) >> uint(8 * 3))
         var _t601 = p
-        p = p + 1
-        deref(_t601) = uint8(uint(int(anon_644.BOX_stsc)) >> uint(8 * 2))
+        p++
+        *_t601 = uint8(uint(anon_644.BOX_stsc) >> uint(8 * 2))
         var _t602 = p
-        p = p + 1
-        deref(_t602) = uint8(uint(int(anon_644.BOX_stsc)) >> uint(8 * 1))
+        p++
+        *_t602 = uint8(uint(anon_644.BOX_stsc) >> uint(8 * 1))
         var _t603 = p
-        p = p + 1
-        deref(_t603) = uint8(uint(int(anon_644.BOX_stsc)) >> uint(8 * 0))
+        p++
+        *_t603 = uint8(uint(anon_644.BOX_stsc) >> uint(8 * 0))
         var _t604 = p
-        p = p + 1
-        deref(_t604) = uint8(0 >> 8 * 3)
+        p++
+        *_t604 = uint8(0 >> 8 * 3)
         var _t605 = p
-        p = p + 1
-        deref(_t605) = uint8(0 >> 8 * 2)
+        p++
+        *_t605 = uint8(0 >> 8 * 2)
         var _t606 = p
-        p = p + 1
-        deref(_t606) = uint8(0 >> 8 * 1)
+        p++
+        *_t606 = uint8(0 >> 8 * 1)
         var _t607 = p
-        p = p + 1
-        deref(_t607) = uint8(0 >> 8 * 0)
+        p++
+        *_t607 = uint8(0 >> 8 * 0)
         if (mux.enable_fragmentation != 0) {
             // entry_count
             var _t608 = p
-            p = p + 1
-            deref(_t608) = uint8(0 >> 8 * 3)
+            p++
+            *_t608 = uint8(0 >> 8 * 3)
             var _t609 = p
-            p = p + 1
-            deref(_t609) = uint8(0 >> 8 * 2)
+            p++
+            *_t609 = uint8(0 >> 8 * 2)
             var _t610 = p
-            p = p + 1
-            deref(_t610) = uint8(0 >> 8 * 1)
+            p++
+            *_t610 = uint8(0 >> 8 * 1)
             var _t611 = p
-            p = p + 1
-            deref(_t611) = uint8(0 >> 8 * 0)
+            p++
+            *_t611 = uint8(0 >> 8 * 0)
         } else {
             // entry_count
             var _t612 = p
-            p = p + 1
-            deref(_t612) = uint8(1 >> 8 * 3)
+            p++
+            *_t612 = uint8(1 >> 8 * 3)
             var _t613 = p
-            p = p + 1
-            deref(_t613) = uint8(1 >> 8 * 2)
+            p++
+            *_t613 = uint8(1 >> 8 * 2)
             var _t614 = p
-            p = p + 1
-            deref(_t614) = uint8(1 >> 8 * 1)
+            p++
+            *_t614 = uint8(1 >> 8 * 1)
             var _t615 = p
-            p = p + 1
-            deref(_t615) = uint8(1 >> 8 * 0)
+            p++
+            *_t615 = uint8(1 >> 8 * 0)
             // first_chunk;
             var _t616 = p
-            p = p + 1
-            deref(_t616) = uint8(1 >> 8 * 3)
+            p++
+            *_t616 = uint8(1 >> 8 * 3)
             var _t617 = p
-            p = p + 1
-            deref(_t617) = uint8(1 >> 8 * 2)
+            p++
+            *_t617 = uint8(1 >> 8 * 2)
             var _t618 = p
-            p = p + 1
-            deref(_t618) = uint8(1 >> 8 * 1)
+            p++
+            *_t618 = uint8(1 >> 8 * 1)
             var _t619 = p
-            p = p + 1
-            deref(_t619) = uint8(1 >> 8 * 0)
+            p++
+            *_t619 = uint8(1 >> 8 * 0)
             // samples_per_chunk;
             var _t620 = p
-            p = p + 1
-            deref(_t620) = uint8(1 >> 8 * 3)
+            p++
+            *_t620 = uint8(1 >> 8 * 3)
             var _t621 = p
-            p = p + 1
-            deref(_t621) = uint8(1 >> 8 * 2)
+            p++
+            *_t621 = uint8(1 >> 8 * 2)
             var _t622 = p
-            p = p + 1
-            deref(_t622) = uint8(1 >> 8 * 1)
+            p++
+            *_t622 = uint8(1 >> 8 * 1)
             var _t623 = p
-            p = p + 1
-            deref(_t623) = uint8(1 >> 8 * 0)
+            p++
+            *_t623 = uint8(1 >> 8 * 0)
             // sample_description_index;
             var _t624 = p
-            p = p + 1
-            deref(_t624) = uint8(1 >> 8 * 3)
+            p++
+            *_t624 = uint8(1 >> 8 * 3)
             var _t625 = p
-            p = p + 1
-            deref(_t625) = uint8(1 >> 8 * 2)
+            p++
+            *_t625 = uint8(1 >> 8 * 2)
             var _t626 = p
-            p = p + 1
-            deref(_t626) = uint8(1 >> 8 * 1)
+            p++
+            *_t626 = uint8(1 >> 8 * 1)
             var _t627 = p
-            p = p + 1
-            deref(_t627) = uint8(1 >> 8 * 0)
+            p++
+            *_t627 = uint8(1 >> 8 * 0)
         }
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
         // Sample Size Box
         var _t628 = stack
-        stack = stack + 1
-        deref(_t628) = p
-        p = p + 4
+        stack++
+        *_t628 = p
+        p += 4
         var _t629 = p
-        p = p + 1
-        deref(_t629) = uint8(uint(int(anon_644.BOX_stsz)) >> uint(8 * 3))
+        p++
+        *_t629 = uint8(uint(anon_644.BOX_stsz) >> uint(8 * 3))
         var _t630 = p
-        p = p + 1
-        deref(_t630) = uint8(uint(int(anon_644.BOX_stsz)) >> uint(8 * 2))
+        p++
+        *_t630 = uint8(uint(anon_644.BOX_stsz) >> uint(8 * 2))
         var _t631 = p
-        p = p + 1
-        deref(_t631) = uint8(uint(int(anon_644.BOX_stsz)) >> uint(8 * 1))
+        p++
+        *_t631 = uint8(uint(anon_644.BOX_stsz) >> uint(8 * 1))
         var _t632 = p
-        p = p + 1
-        deref(_t632) = uint8(uint(int(anon_644.BOX_stsz)) >> uint(8 * 0))
+        p++
+        *_t632 = uint8(uint(anon_644.BOX_stsz) >> uint(8 * 0))
         var _t633 = p
-        p = p + 1
-        deref(_t633) = uint8(0 >> 8 * 3)
+        p++
+        *_t633 = uint8(0 >> 8 * 3)
         var _t634 = p
-        p = p + 1
-        deref(_t634) = uint8(0 >> 8 * 2)
+        p++
+        *_t634 = uint8(0 >> 8 * 2)
         var _t635 = p
-        p = p + 1
-        deref(_t635) = uint8(0 >> 8 * 1)
+        p++
+        *_t635 = uint8(0 >> 8 * 1)
         var _t636 = p
-        p = p + 1
-        deref(_t636) = uint8(0 >> 8 * 0)
+        p++
+        *_t636 = uint8(0 >> 8 * 0)
         // sample_size If this field is set to 0, then the samples have different sizes, and those sizes
         var _t637 = p
-        p = p + 1
-        deref(_t637) = uint8(0 >> 8 * 3)
+        p++
+        *_t637 = uint8(0 >> 8 * 3)
         var _t638 = p
-        p = p + 1
-        deref(_t638) = uint8(0 >> 8 * 2)
+        p++
+        *_t638 = uint8(0 >> 8 * 2)
         var _t639 = p
-        p = p + 1
-        deref(_t639) = uint8(0 >> 8 * 1)
+        p++
+        *_t639 = uint8(0 >> 8 * 1)
         var _t640 = p
-        p = p + 1
-        deref(_t640) = uint8(0 >> 8 * 0)
+        p++
+        *_t640 = uint8(0 >> 8 * 0)
         // are stored in the sample size table.
         // sample_count;
         var _t641 = p
-        p = p + 1
-        deref(_t641) = uint8(samples_count >> 8 * 3)
+        p++
+        *_t641 = uint8(samples_count >> 8 * 3)
         var _t642 = p
-        p = p + 1
-        deref(_t642) = uint8(samples_count >> 8 * 2)
+        p++
+        *_t642 = uint8(samples_count >> 8 * 2)
         var _t643 = p
-        p = p + 1
-        deref(_t643) = uint8(samples_count >> 8 * 1)
+        p++
+        *_t643 = uint8(samples_count >> 8 * 1)
         var _t644 = p
-        p = p + 1
-        deref(_t644) = uint8(samples_count >> 8 * 0)
+        p++
+        *_t644 = uint8(samples_count >> 8 * 0)
         for (i1 in range(samples_count)) {
             var _t645 = p
-            p = p + 1
-            deref(_t645) = uint8(sample[i1].size >> uint64(8 * 3))
+            p++
+            *_t645 = uint8(sample[i1].size >> uint64(8 * 3))
             var _t646 = p
-            p = p + 1
-            deref(_t646) = uint8(sample[i1].size >> uint64(8 * 2))
+            p++
+            *_t646 = uint8(sample[i1].size >> uint64(8 * 2))
             var _t647 = p
-            p = p + 1
-            deref(_t647) = uint8(sample[i1].size >> uint64(8 * 1))
+            p++
+            *_t647 = uint8(sample[i1].size >> uint64(8 * 1))
             var _t648 = p
-            p = p + 1
-            deref(_t648) = uint8(sample[i1].size >> uint64(8 * 0))
+            p++
+            *_t648 = uint8(sample[i1].size >> uint64(8 * 0))
         }
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
         // Chunk Offset Box
         var is_64_bit : int = 0
         if (samples_count != 0 && sample[samples_count - 1].offset > uint64(4294967295u)) {
             is_64_bit = 1
         }
-        if (!(is_64_bit != 0)) {
+        if (is_64_bit == 0) {
             var _t649 = stack
-            stack = stack + 1
-            deref(_t649) = p
-            p = p + 4
+            stack++
+            *_t649 = p
+            p += 4
             var _t650 = p
-            p = p + 1
-            deref(_t650) = uint8(uint(int(anon_644.BOX_stco)) >> uint(8 * 3))
+            p++
+            *_t650 = uint8(uint(anon_644.BOX_stco) >> uint(8 * 3))
             var _t651 = p
-            p = p + 1
-            deref(_t651) = uint8(uint(int(anon_644.BOX_stco)) >> uint(8 * 2))
+            p++
+            *_t651 = uint8(uint(anon_644.BOX_stco) >> uint(8 * 2))
             var _t652 = p
-            p = p + 1
-            deref(_t652) = uint8(uint(int(anon_644.BOX_stco)) >> uint(8 * 1))
+            p++
+            *_t652 = uint8(uint(anon_644.BOX_stco) >> uint(8 * 1))
             var _t653 = p
-            p = p + 1
-            deref(_t653) = uint8(uint(int(anon_644.BOX_stco)) >> uint(8 * 0))
+            p++
+            *_t653 = uint8(uint(anon_644.BOX_stco) >> uint(8 * 0))
             var _t654 = p
-            p = p + 1
-            deref(_t654) = uint8(0 >> 8 * 3)
+            p++
+            *_t654 = uint8(0 >> 8 * 3)
             var _t655 = p
-            p = p + 1
-            deref(_t655) = uint8(0 >> 8 * 2)
+            p++
+            *_t655 = uint8(0 >> 8 * 2)
             var _t656 = p
-            p = p + 1
-            deref(_t656) = uint8(0 >> 8 * 1)
+            p++
+            *_t656 = uint8(0 >> 8 * 1)
             var _t657 = p
-            p = p + 1
-            deref(_t657) = uint8(0 >> 8 * 0)
+            p++
+            *_t657 = uint8(0 >> 8 * 0)
             var _t658 = p
-            p = p + 1
-            deref(_t658) = uint8(samples_count >> 8 * 3)
+            p++
+            *_t658 = uint8(samples_count >> 8 * 3)
             var _t659 = p
-            p = p + 1
-            deref(_t659) = uint8(samples_count >> 8 * 2)
+            p++
+            *_t659 = uint8(samples_count >> 8 * 2)
             var _t660 = p
-            p = p + 1
-            deref(_t660) = uint8(samples_count >> 8 * 1)
+            p++
+            *_t660 = uint8(samples_count >> 8 * 1)
             var _t661 = p
-            p = p + 1
-            deref(_t661) = uint8(samples_count >> 8 * 0)
+            p++
+            *_t661 = uint8(samples_count >> 8 * 0)
             for (i1 in range(samples_count)) {
                 var _t662 = p
-                p = p + 1
-                deref(_t662) = uint8(sample[i1].offset >> uint64(8 * 3))
+                p++
+                *_t662 = uint8(sample[i1].offset >> uint64(8 * 3))
                 var _t663 = p
-                p = p + 1
-                deref(_t663) = uint8(sample[i1].offset >> uint64(8 * 2))
+                p++
+                *_t663 = uint8(sample[i1].offset >> uint64(8 * 2))
                 var _t664 = p
-                p = p + 1
-                deref(_t664) = uint8(sample[i1].offset >> uint64(8 * 1))
+                p++
+                *_t664 = uint8(sample[i1].offset >> uint64(8 * 1))
                 var _t665 = p
-                p = p + 1
-                deref(_t665) = uint8(sample[i1].offset >> uint64(8 * 0))
+                p++
+                *_t665 = uint8(sample[i1].offset >> uint64(8 * 0))
             }
         } else {
             var _t666 = stack
-            stack = stack + 1
-            deref(_t666) = p
-            p = p + 4
+            stack++
+            *_t666 = p
+            p += 4
             var _t667 = p
-            p = p + 1
-            deref(_t667) = uint8(uint(int(anon_644.BOX_co64)) >> uint(8 * 3))
+            p++
+            *_t667 = uint8(uint(anon_644.BOX_co64) >> uint(8 * 3))
             var _t668 = p
-            p = p + 1
-            deref(_t668) = uint8(uint(int(anon_644.BOX_co64)) >> uint(8 * 2))
+            p++
+            *_t668 = uint8(uint(anon_644.BOX_co64) >> uint(8 * 2))
             var _t669 = p
-            p = p + 1
-            deref(_t669) = uint8(uint(int(anon_644.BOX_co64)) >> uint(8 * 1))
+            p++
+            *_t669 = uint8(uint(anon_644.BOX_co64) >> uint(8 * 1))
             var _t670 = p
-            p = p + 1
-            deref(_t670) = uint8(uint(int(anon_644.BOX_co64)) >> uint(8 * 0))
+            p++
+            *_t670 = uint8(uint(anon_644.BOX_co64) >> uint(8 * 0))
             var _t671 = p
-            p = p + 1
-            deref(_t671) = uint8(0 >> 8 * 3)
+            p++
+            *_t671 = uint8(0 >> 8 * 3)
             var _t672 = p
-            p = p + 1
-            deref(_t672) = uint8(0 >> 8 * 2)
+            p++
+            *_t672 = uint8(0 >> 8 * 2)
             var _t673 = p
-            p = p + 1
-            deref(_t673) = uint8(0 >> 8 * 1)
+            p++
+            *_t673 = uint8(0 >> 8 * 1)
             var _t674 = p
-            p = p + 1
-            deref(_t674) = uint8(0 >> 8 * 0)
+            p++
+            *_t674 = uint8(0 >> 8 * 0)
             var _t675 = p
-            p = p + 1
-            deref(_t675) = uint8(samples_count >> 8 * 3)
+            p++
+            *_t675 = uint8(samples_count >> 8 * 3)
             var _t676 = p
-            p = p + 1
-            deref(_t676) = uint8(samples_count >> 8 * 2)
+            p++
+            *_t676 = uint8(samples_count >> 8 * 2)
             var _t677 = p
-            p = p + 1
-            deref(_t677) = uint8(samples_count >> 8 * 1)
+            p++
+            *_t677 = uint8(samples_count >> 8 * 1)
             var _t678 = p
-            p = p + 1
-            deref(_t678) = uint8(samples_count >> 8 * 0)
+            p++
+            *_t678 = uint8(samples_count >> 8 * 0)
             for (i1 in range(samples_count)) {
                 var _t679 = p
-                p = p + 1
-                deref(_t679) = uint8(((sample[i1].offset >> 32ul) & uint64(4294967295u)) >> uint64(8 * 3))
+                p++
+                *_t679 = uint8(((sample[i1].offset >> 32ul) & uint64(4294967295u)) >> uint64(8 * 3))
                 var _t680 = p
-                p = p + 1
-                deref(_t680) = uint8(((sample[i1].offset >> 32ul) & uint64(4294967295u)) >> uint64(8 * 2))
+                p++
+                *_t680 = uint8(((sample[i1].offset >> 32ul) & uint64(4294967295u)) >> uint64(8 * 2))
                 var _t681 = p
-                p = p + 1
-                deref(_t681) = uint8(((sample[i1].offset >> 32ul) & uint64(4294967295u)) >> uint64(8 * 1))
+                p++
+                *_t681 = uint8(((sample[i1].offset >> 32ul) & uint64(4294967295u)) >> uint64(8 * 1))
                 var _t682 = p
-                p = p + 1
-                deref(_t682) = uint8(((sample[i1].offset >> 32ul) & uint64(4294967295u)) >> uint64(8 * 0))
+                p++
+                *_t682 = uint8(((sample[i1].offset >> 32ul) & uint64(4294967295u)) >> uint64(8 * 0))
                 var _t683 = p
-                p = p + 1
-                deref(_t683) = uint8((sample[i1].offset & uint64(4294967295u)) >> uint64(8 * 3))
+                p++
+                *_t683 = uint8((sample[i1].offset & uint64(4294967295u)) >> uint64(8 * 3))
                 var _t684 = p
-                p = p + 1
-                deref(_t684) = uint8((sample[i1].offset & uint64(4294967295u)) >> uint64(8 * 2))
+                p++
+                *_t684 = uint8((sample[i1].offset & uint64(4294967295u)) >> uint64(8 * 2))
                 var _t685 = p
-                p = p + 1
-                deref(_t685) = uint8((sample[i1].offset & uint64(4294967295u)) >> uint64(8 * 1))
+                p++
+                *_t685 = uint8((sample[i1].offset & uint64(4294967295u)) >> uint64(8 * 1))
                 var _t686 = p
-                p = p + 1
-                deref(_t686) = uint8((sample[i1].offset & uint64(4294967295u)) >> uint64(8 * 0))
+                p++
+                *_t686 = uint8((sample[i1].offset & uint64(4294967295u)) >> uint64(8 * 0))
             }
         }
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
         {
             // Sync Sample Box
             var ra_count : int = 0
             i = 0
             while (i < samples_count) {
-                ra_count += !!(sample[i].flag_random_access != 0) ? 1 : 0
+                ra_count += int_of(sample[i].flag_random_access != 0)
                 i++
             }
             if (ra_count != samples_count) {
                 // If the sync sample box is not present, every sample is a random access point.
                 var _t687 = stack
-                stack = stack + 1
-                deref(_t687) = p
-                p = p + 4
+                stack++
+                *_t687 = p
+                p += 4
                 var _t688 = p
-                p = p + 1
-                deref(_t688) = uint8(uint(int(anon_644.BOX_stss)) >> uint(8 * 3))
+                p++
+                *_t688 = uint8(uint(anon_644.BOX_stss) >> uint(8 * 3))
                 var _t689 = p
-                p = p + 1
-                deref(_t689) = uint8(uint(int(anon_644.BOX_stss)) >> uint(8 * 2))
+                p++
+                *_t689 = uint8(uint(anon_644.BOX_stss) >> uint(8 * 2))
                 var _t690 = p
-                p = p + 1
-                deref(_t690) = uint8(uint(int(anon_644.BOX_stss)) >> uint(8 * 1))
+                p++
+                *_t690 = uint8(uint(anon_644.BOX_stss) >> uint(8 * 1))
                 var _t691 = p
-                p = p + 1
-                deref(_t691) = uint8(uint(int(anon_644.BOX_stss)) >> uint(8 * 0))
+                p++
+                *_t691 = uint8(uint(anon_644.BOX_stss) >> uint(8 * 0))
                 var _t692 = p
-                p = p + 1
-                deref(_t692) = uint8(0 >> 8 * 3)
+                p++
+                *_t692 = uint8(0 >> 8 * 3)
                 var _t693 = p
-                p = p + 1
-                deref(_t693) = uint8(0 >> 8 * 2)
+                p++
+                *_t693 = uint8(0 >> 8 * 2)
                 var _t694 = p
-                p = p + 1
-                deref(_t694) = uint8(0 >> 8 * 1)
+                p++
+                *_t694 = uint8(0 >> 8 * 1)
                 var _t695 = p
-                p = p + 1
-                deref(_t695) = uint8(0 >> 8 * 0)
+                p++
+                *_t695 = uint8(0 >> 8 * 0)
                 var _t696 = p
-                p = p + 1
-                deref(_t696) = uint8(ra_count >> 8 * 3)
+                p++
+                *_t696 = uint8(ra_count >> 8 * 3)
                 var _t697 = p
-                p = p + 1
-                deref(_t697) = uint8(ra_count >> 8 * 2)
+                p++
+                *_t697 = uint8(ra_count >> 8 * 2)
                 var _t698 = p
-                p = p + 1
-                deref(_t698) = uint8(ra_count >> 8 * 1)
+                p++
+                *_t698 = uint8(ra_count >> 8 * 1)
                 var _t699 = p
-                p = p + 1
-                deref(_t699) = uint8(ra_count >> 8 * 0)
+                p++
+                *_t699 = uint8(ra_count >> 8 * 0)
                 i = 0
                 while (i < samples_count) {
                     if (sample[i].flag_random_access != 0) {
                         var _t700 = p
-                        p = p + 1
-                        deref(_t700) = uint8(i + 1 >> 8 * 3)
+                        p++
+                        *_t700 = uint8(i + 1 >> 8 * 3)
                         var _t701 = p
-                        p = p + 1
-                        deref(_t701) = uint8(i + 1 >> 8 * 2)
+                        p++
+                        *_t701 = uint8(i + 1 >> 8 * 2)
                         var _t702 = p
-                        p = p + 1
-                        deref(_t702) = uint8(i + 1 >> 8 * 1)
+                        p++
+                        *_t702 = uint8(i + 1 >> 8 * 1)
                         var _t703 = p
-                        p = p + 1
-                        deref(_t703) = uint8(i + 1 >> 8 * 0)
+                        p++
+                        *_t703 = uint8(i + 1 >> 8 * 0)
                     }
                     i++
                 }
-                stack = stack - 1
-                deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-                deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-                deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-                deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+                stack--
+                (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+                (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+                (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+                (*stack)[3] = uint8(int64(p - *stack))
             }
         }
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
     }
     // tracks loop
     if (mux.text_comment != null) {
         var _t704 = stack
-        stack = stack + 1
-        deref(_t704) = p
-        p = p + 4
+        stack++
+        *_t704 = p
+        p += 4
         var _t705 = p
-        p = p + 1
-        deref(_t705) = uint8(uint(int(anon_644.BOX_udta)) >> uint(8 * 3))
+        p++
+        *_t705 = uint8(uint(anon_644.BOX_udta) >> uint(8 * 3))
         var _t706 = p
-        p = p + 1
-        deref(_t706) = uint8(uint(int(anon_644.BOX_udta)) >> uint(8 * 2))
+        p++
+        *_t706 = uint8(uint(anon_644.BOX_udta) >> uint(8 * 2))
         var _t707 = p
-        p = p + 1
-        deref(_t707) = uint8(uint(int(anon_644.BOX_udta)) >> uint(8 * 1))
+        p++
+        *_t707 = uint8(uint(anon_644.BOX_udta) >> uint(8 * 1))
         var _t708 = p
-        p = p + 1
-        deref(_t708) = uint8(uint(int(anon_644.BOX_udta)) >> uint(8 * 0))
+        p++
+        *_t708 = uint8(uint(anon_644.BOX_udta) >> uint(8 * 0))
         var _t709 = stack
-        stack = stack + 1
-        deref(_t709) = p
-        p = p + 4
+        stack++
+        *_t709 = p
+        p += 4
         var _t710 = p
-        p = p + 1
-        deref(_t710) = uint8(uint(int(anon_644.BOX_meta)) >> uint(8 * 3))
+        p++
+        *_t710 = uint8(uint(anon_644.BOX_meta) >> uint(8 * 3))
         var _t711 = p
-        p = p + 1
-        deref(_t711) = uint8(uint(int(anon_644.BOX_meta)) >> uint(8 * 2))
+        p++
+        *_t711 = uint8(uint(anon_644.BOX_meta) >> uint(8 * 2))
         var _t712 = p
-        p = p + 1
-        deref(_t712) = uint8(uint(int(anon_644.BOX_meta)) >> uint(8 * 1))
+        p++
+        *_t712 = uint8(uint(anon_644.BOX_meta) >> uint(8 * 1))
         var _t713 = p
-        p = p + 1
-        deref(_t713) = uint8(uint(int(anon_644.BOX_meta)) >> uint(8 * 0))
+        p++
+        *_t713 = uint8(uint(anon_644.BOX_meta) >> uint(8 * 0))
         var _t714 = p
-        p = p + 1
-        deref(_t714) = uint8(0 >> 8 * 3)
+        p++
+        *_t714 = uint8(0 >> 8 * 3)
         var _t715 = p
-        p = p + 1
-        deref(_t715) = uint8(0 >> 8 * 2)
+        p++
+        *_t715 = uint8(0 >> 8 * 2)
         var _t716 = p
-        p = p + 1
-        deref(_t716) = uint8(0 >> 8 * 1)
+        p++
+        *_t716 = uint8(0 >> 8 * 1)
         var _t717 = p
-        p = p + 1
-        deref(_t717) = uint8(0 >> 8 * 0)
+        p++
+        *_t717 = uint8(0 >> 8 * 0)
         var _t718 = stack
-        stack = stack + 1
-        deref(_t718) = p
-        p = p + 4
+        stack++
+        *_t718 = p
+        p += 4
         var _t719 = p
-        p = p + 1
-        deref(_t719) = uint8(uint(int(anon_644.BOX_hdlr)) >> uint(8 * 3))
+        p++
+        *_t719 = uint8(uint(anon_644.BOX_hdlr) >> uint(8 * 3))
         var _t720 = p
-        p = p + 1
-        deref(_t720) = uint8(uint(int(anon_644.BOX_hdlr)) >> uint(8 * 2))
+        p++
+        *_t720 = uint8(uint(anon_644.BOX_hdlr) >> uint(8 * 2))
         var _t721 = p
-        p = p + 1
-        deref(_t721) = uint8(uint(int(anon_644.BOX_hdlr)) >> uint(8 * 1))
+        p++
+        *_t721 = uint8(uint(anon_644.BOX_hdlr) >> uint(8 * 1))
         var _t722 = p
-        p = p + 1
-        deref(_t722) = uint8(uint(int(anon_644.BOX_hdlr)) >> uint(8 * 0))
+        p++
+        *_t722 = uint8(uint(anon_644.BOX_hdlr) >> uint(8 * 0))
         var _t723 = p
-        p = p + 1
-        deref(_t723) = uint8(0 >> 8 * 3)
+        p++
+        *_t723 = uint8(0 >> 8 * 3)
         var _t724 = p
-        p = p + 1
-        deref(_t724) = uint8(0 >> 8 * 2)
+        p++
+        *_t724 = uint8(0 >> 8 * 2)
         var _t725 = p
-        p = p + 1
-        deref(_t725) = uint8(0 >> 8 * 1)
+        p++
+        *_t725 = uint8(0 >> 8 * 1)
         var _t726 = p
-        p = p + 1
-        deref(_t726) = uint8(0 >> 8 * 0)
+        p++
+        *_t726 = uint8(0 >> 8 * 0)
         // pre_defined
         var _t727 = p
-        p = p + 1
-        deref(_t727) = uint8(0 >> 8 * 3)
+        p++
+        *_t727 = uint8(0 >> 8 * 3)
         var _t728 = p
-        p = p + 1
-        deref(_t728) = uint8(0 >> 8 * 2)
+        p++
+        *_t728 = uint8(0 >> 8 * 2)
         var _t729 = p
-        p = p + 1
-        deref(_t729) = uint8(0 >> 8 * 1)
+        p++
+        *_t729 = uint8(0 >> 8 * 1)
         var _t730 = p
-        p = p + 1
-        deref(_t730) = uint8(0 >> 8 * 0)
+        p++
+        *_t730 = uint8(0 >> 8 * 0)
         // handler_type
         var _t731 = p
-        p = p + 1
-        deref(_t731) = uint8(MP4E_HANDLER_TYPE_MDIR >> 8 * 3)
+        p++
+        *_t731 = uint8(MP4E_HANDLER_TYPE_MDIR >> 8 * 3)
         var _t732 = p
-        p = p + 1
-        deref(_t732) = uint8(MP4E_HANDLER_TYPE_MDIR >> 8 * 2)
+        p++
+        *_t732 = uint8(MP4E_HANDLER_TYPE_MDIR >> 8 * 2)
         var _t733 = p
-        p = p + 1
-        deref(_t733) = uint8(MP4E_HANDLER_TYPE_MDIR >> 8 * 1)
+        p++
+        *_t733 = uint8(MP4E_HANDLER_TYPE_MDIR >> 8 * 1)
         var _t734 = p
-        p = p + 1
-        deref(_t734) = uint8(MP4E_HANDLER_TYPE_MDIR >> 8 * 0)
+        p++
+        *_t734 = uint8(MP4E_HANDLER_TYPE_MDIR >> 8 * 0)
         // reserved[3]
         var _t735 = p
-        p = p + 1
-        deref(_t735) = uint8(0 >> 8 * 3)
+        p++
+        *_t735 = uint8(0 >> 8 * 3)
         var _t736 = p
-        p = p + 1
-        deref(_t736) = uint8(0 >> 8 * 2)
+        p++
+        *_t736 = uint8(0 >> 8 * 2)
         var _t737 = p
-        p = p + 1
-        deref(_t737) = uint8(0 >> 8 * 1)
+        p++
+        *_t737 = uint8(0 >> 8 * 1)
         var _t738 = p
-        p = p + 1
-        deref(_t738) = uint8(0 >> 8 * 0)
+        p++
+        *_t738 = uint8(0 >> 8 * 0)
         var _t739 = p
-        p = p + 1
-        deref(_t739) = uint8(0 >> 8 * 3)
+        p++
+        *_t739 = uint8(0 >> 8 * 3)
         var _t740 = p
-        p = p + 1
-        deref(_t740) = uint8(0 >> 8 * 2)
+        p++
+        *_t740 = uint8(0 >> 8 * 2)
         var _t741 = p
-        p = p + 1
-        deref(_t741) = uint8(0 >> 8 * 1)
+        p++
+        *_t741 = uint8(0 >> 8 * 1)
         var _t742 = p
-        p = p + 1
-        deref(_t742) = uint8(0 >> 8 * 0)
+        p++
+        *_t742 = uint8(0 >> 8 * 0)
         var _t743 = p
-        p = p + 1
-        deref(_t743) = uint8(0 >> 8 * 3)
+        p++
+        *_t743 = uint8(0 >> 8 * 3)
         var _t744 = p
-        p = p + 1
-        deref(_t744) = uint8(0 >> 8 * 2)
+        p++
+        *_t744 = uint8(0 >> 8 * 2)
         var _t745 = p
-        p = p + 1
-        deref(_t745) = uint8(0 >> 8 * 1)
+        p++
+        *_t745 = uint8(0 >> 8 * 1)
         var _t746 = p
-        p = p + 1
-        deref(_t746) = uint8(0 >> 8 * 0)
+        p++
+        *_t746 = uint8(0 >> 8 * 0)
         // name is a null-terminated string in UTF-8 characters which gives a human-readable name for the track type (for debugging and inspection purposes).
         var _t747 = p
-        p = p + 1
-        deref(_t747) = uint8(0 >> 8 * 3)
+        p++
+        *_t747 = uint8(0 >> 8 * 3)
         var _t748 = p
-        p = p + 1
-        deref(_t748) = uint8(0 >> 8 * 2)
+        p++
+        *_t748 = uint8(0 >> 8 * 2)
         var _t749 = p
-        p = p + 1
-        deref(_t749) = uint8(0 >> 8 * 1)
+        p++
+        *_t749 = uint8(0 >> 8 * 1)
         var _t750 = p
-        p = p + 1
-        deref(_t750) = uint8(0 >> 8 * 0)
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        p++
+        *_t750 = uint8(0 >> 8 * 0)
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
         var _t751 = stack
-        stack = stack + 1
-        deref(_t751) = p
-        p = p + 4
+        stack++
+        *_t751 = p
+        p += 4
         var _t752 = p
-        p = p + 1
-        deref(_t752) = uint8(uint(int(anon_644.BOX_ilst)) >> uint(8 * 3))
+        p++
+        *_t752 = uint8(uint(anon_644.BOX_ilst) >> uint(8 * 3))
         var _t753 = p
-        p = p + 1
-        deref(_t753) = uint8(uint(int(anon_644.BOX_ilst)) >> uint(8 * 2))
+        p++
+        *_t753 = uint8(uint(anon_644.BOX_ilst) >> uint(8 * 2))
         var _t754 = p
-        p = p + 1
-        deref(_t754) = uint8(uint(int(anon_644.BOX_ilst)) >> uint(8 * 1))
+        p++
+        *_t754 = uint8(uint(anon_644.BOX_ilst) >> uint(8 * 1))
         var _t755 = p
-        p = p + 1
-        deref(_t755) = uint8(uint(int(anon_644.BOX_ilst)) >> uint(8 * 0))
+        p++
+        *_t755 = uint8(uint(anon_644.BOX_ilst) >> uint(8 * 0))
         var _t756 = stack
-        stack = stack + 1
-        deref(_t756) = p
-        p = p + 4
+        stack++
+        *_t756 = p
+        p += 4
         var _t757 = p
-        p = p + 1
-        deref(_t757) = uint8(uint(int(anon_644.BOX_ccmt)) >> uint(8 * 3))
+        p++
+        *_t757 = uint8(uint(anon_644.BOX_ccmt) >> uint(8 * 3))
         var _t758 = p
-        p = p + 1
-        deref(_t758) = uint8(uint(int(anon_644.BOX_ccmt)) >> uint(8 * 2))
+        p++
+        *_t758 = uint8(uint(anon_644.BOX_ccmt) >> uint(8 * 2))
         var _t759 = p
-        p = p + 1
-        deref(_t759) = uint8(uint(int(anon_644.BOX_ccmt)) >> uint(8 * 1))
+        p++
+        *_t759 = uint8(uint(anon_644.BOX_ccmt) >> uint(8 * 1))
         var _t760 = p
-        p = p + 1
-        deref(_t760) = uint8(uint(int(anon_644.BOX_ccmt)) >> uint(8 * 0))
+        p++
+        *_t760 = uint8(uint(anon_644.BOX_ccmt) >> uint(8 * 0))
         var _t761 = stack
-        stack = stack + 1
-        deref(_t761) = p
-        p = p + 4
+        stack++
+        *_t761 = p
+        p += 4
         var _t762 = p
-        p = p + 1
-        deref(_t762) = uint8(uint(int(anon_644.BOX_data)) >> uint(8 * 3))
+        p++
+        *_t762 = uint8(uint(anon_644.BOX_data) >> uint(8 * 3))
         var _t763 = p
-        p = p + 1
-        deref(_t763) = uint8(uint(int(anon_644.BOX_data)) >> uint(8 * 2))
+        p++
+        *_t763 = uint8(uint(anon_644.BOX_data) >> uint(8 * 2))
         var _t764 = p
-        p = p + 1
-        deref(_t764) = uint8(uint(int(anon_644.BOX_data)) >> uint(8 * 1))
+        p++
+        *_t764 = uint8(uint(anon_644.BOX_data) >> uint(8 * 1))
         var _t765 = p
-        p = p + 1
-        deref(_t765) = uint8(uint(int(anon_644.BOX_data)) >> uint(8 * 0))
+        p++
+        *_t765 = uint8(uint(anon_644.BOX_data) >> uint(8 * 0))
         // type
         var _t766 = p
-        p = p + 1
-        deref(_t766) = uint8(1 >> 8 * 3)
+        p++
+        *_t766 = uint8(1 >> 8 * 3)
         var _t767 = p
-        p = p + 1
-        deref(_t767) = uint8(1 >> 8 * 2)
+        p++
+        *_t767 = uint8(1 >> 8 * 2)
         var _t768 = p
-        p = p + 1
-        deref(_t768) = uint8(1 >> 8 * 1)
+        p++
+        *_t768 = uint8(1 >> 8 * 1)
         var _t769 = p
-        p = p + 1
-        deref(_t769) = uint8(1 >> 8 * 0)
+        p++
+        *_t769 = uint8(1 >> 8 * 0)
         // lang
         var _t770 = p
-        p = p + 1
-        deref(_t770) = uint8(0 >> 8 * 3)
+        p++
+        *_t770 = uint8(0 >> 8 * 3)
         var _t771 = p
-        p = p + 1
-        deref(_t771) = uint8(0 >> 8 * 2)
+        p++
+        *_t771 = uint8(0 >> 8 * 2)
         var _t772 = p
-        p = p + 1
-        deref(_t772) = uint8(0 >> 8 * 1)
+        p++
+        *_t772 = uint8(0 >> 8 * 1)
         var _t773 = p
-        p = p + 1
-        deref(_t773) = uint8(0 >> 8 * 0)
+        p++
+        *_t773 = uint8(0 >> 8 * 0)
         i = 0
         while (i < int(strlen1(mux.text_comment)) + 1) {
             var _t774 = p
-            p = p + 1
-            deref(_t774) = uint8(int(mux.text_comment[i]) >> 8 * 0)
+            p++
+            *_t774 = uint8(int(mux.text_comment[i]) >> 8 * 0)
             i++
         }
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
     }
     if (mux.enable_fragmentation != 0) {
         var tr : track_t? = reinterpret<track_t?>(mux.tracks.data) + 0
         var movie_duration : uint = h264_file_all__get_duration(tr)
         var _t775 = stack
-        stack = stack + 1
-        deref(_t775) = p
-        p = p + 4
+        stack++
+        *_t775 = p
+        p += 4
         var _t776 = p
-        p = p + 1
-        deref(_t776) = uint8(uint(int(anon_644.BOX_mvex)) >> uint(8 * 3))
+        p++
+        *_t776 = uint8(uint(anon_644.BOX_mvex) >> uint(8 * 3))
         var _t777 = p
-        p = p + 1
-        deref(_t777) = uint8(uint(int(anon_644.BOX_mvex)) >> uint(8 * 2))
+        p++
+        *_t777 = uint8(uint(anon_644.BOX_mvex) >> uint(8 * 2))
         var _t778 = p
-        p = p + 1
-        deref(_t778) = uint8(uint(int(anon_644.BOX_mvex)) >> uint(8 * 1))
+        p++
+        *_t778 = uint8(uint(anon_644.BOX_mvex) >> uint(8 * 1))
         var _t779 = p
-        p = p + 1
-        deref(_t779) = uint8(uint(int(anon_644.BOX_mvex)) >> uint(8 * 0))
+        p++
+        *_t779 = uint8(uint(anon_644.BOX_mvex) >> uint(8 * 0))
         var _t780 = stack
-        stack = stack + 1
-        deref(_t780) = p
-        p = p + 4
+        stack++
+        *_t780 = p
+        p += 4
         var _t781 = p
-        p = p + 1
-        deref(_t781) = uint8(uint(int(anon_644.BOX_mehd)) >> uint(8 * 3))
+        p++
+        *_t781 = uint8(uint(anon_644.BOX_mehd) >> uint(8 * 3))
         var _t782 = p
-        p = p + 1
-        deref(_t782) = uint8(uint(int(anon_644.BOX_mehd)) >> uint(8 * 2))
+        p++
+        *_t782 = uint8(uint(anon_644.BOX_mehd) >> uint(8 * 2))
         var _t783 = p
-        p = p + 1
-        deref(_t783) = uint8(uint(int(anon_644.BOX_mehd)) >> uint(8 * 1))
+        p++
+        *_t783 = uint8(uint(anon_644.BOX_mehd) >> uint(8 * 1))
         var _t784 = p
-        p = p + 1
-        deref(_t784) = uint8(uint(int(anon_644.BOX_mehd)) >> uint(8 * 0))
+        p++
+        *_t784 = uint8(uint(anon_644.BOX_mehd) >> uint(8 * 0))
         var _t785 = p
-        p = p + 1
-        deref(_t785) = uint8(0 >> 8 * 3)
+        p++
+        *_t785 = uint8(0 >> 8 * 3)
         var _t786 = p
-        p = p + 1
-        deref(_t786) = uint8(0 >> 8 * 2)
+        p++
+        *_t786 = uint8(0 >> 8 * 2)
         var _t787 = p
-        p = p + 1
-        deref(_t787) = uint8(0 >> 8 * 1)
+        p++
+        *_t787 = uint8(0 >> 8 * 1)
         var _t788 = p
-        p = p + 1
-        deref(_t788) = uint8(0 >> 8 * 0)
+        p++
+        *_t788 = uint8(0 >> 8 * 0)
         // duration
         var _t789 = p
-        p = p + 1
-        deref(_t789) = uint8(movie_duration >> uint(8 * 3))
+        p++
+        *_t789 = uint8(movie_duration >> uint(8 * 3))
         var _t790 = p
-        p = p + 1
-        deref(_t790) = uint8(movie_duration >> uint(8 * 2))
+        p++
+        *_t790 = uint8(movie_duration >> uint(8 * 2))
         var _t791 = p
-        p = p + 1
-        deref(_t791) = uint8(movie_duration >> uint(8 * 1))
+        p++
+        *_t791 = uint8(movie_duration >> uint(8 * 1))
         var _t792 = p
-        p = p + 1
-        deref(_t792) = uint8(movie_duration >> uint(8 * 0))
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        p++
+        *_t792 = uint8(movie_duration >> uint(8 * 0))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
         for (ntr in urange(ntracks)) {
             var _t793 = stack
-            stack = stack + 1
-            deref(_t793) = p
-            p = p + 4
+            stack++
+            *_t793 = p
+            p += 4
             var _t794 = p
-            p = p + 1
-            deref(_t794) = uint8(uint(int(anon_644.BOX_trex)) >> uint(8 * 3))
+            p++
+            *_t794 = uint8(uint(anon_644.BOX_trex) >> uint(8 * 3))
             var _t795 = p
-            p = p + 1
-            deref(_t795) = uint8(uint(int(anon_644.BOX_trex)) >> uint(8 * 2))
+            p++
+            *_t795 = uint8(uint(anon_644.BOX_trex) >> uint(8 * 2))
             var _t796 = p
-            p = p + 1
-            deref(_t796) = uint8(uint(int(anon_644.BOX_trex)) >> uint(8 * 1))
+            p++
+            *_t796 = uint8(uint(anon_644.BOX_trex) >> uint(8 * 1))
             var _t797 = p
-            p = p + 1
-            deref(_t797) = uint8(uint(int(anon_644.BOX_trex)) >> uint(8 * 0))
+            p++
+            *_t797 = uint8(uint(anon_644.BOX_trex) >> uint(8 * 0))
             var _t798 = p
-            p = p + 1
-            deref(_t798) = uint8(0 >> 8 * 3)
+            p++
+            *_t798 = uint8(0 >> 8 * 3)
             var _t799 = p
-            p = p + 1
-            deref(_t799) = uint8(0 >> 8 * 2)
+            p++
+            *_t799 = uint8(0 >> 8 * 2)
             var _t800 = p
-            p = p + 1
-            deref(_t800) = uint8(0 >> 8 * 1)
+            p++
+            *_t800 = uint8(0 >> 8 * 1)
             var _t801 = p
-            p = p + 1
-            deref(_t801) = uint8(0 >> 8 * 0)
+            p++
+            *_t801 = uint8(0 >> 8 * 0)
             // track_ID
             var _t802 = p
-            p = p + 1
-            deref(_t802) = uint8(ntr + 1u >> uint(8 * 3))
+            p++
+            *_t802 = uint8(ntr + 1u >> uint(8 * 3))
             var _t803 = p
-            p = p + 1
-            deref(_t803) = uint8(ntr + 1u >> uint(8 * 2))
+            p++
+            *_t803 = uint8(ntr + 1u >> uint(8 * 2))
             var _t804 = p
-            p = p + 1
-            deref(_t804) = uint8(ntr + 1u >> uint(8 * 1))
+            p++
+            *_t804 = uint8(ntr + 1u >> uint(8 * 1))
             var _t805 = p
-            p = p + 1
-            deref(_t805) = uint8(ntr + 1u >> uint(8 * 0))
+            p++
+            *_t805 = uint8(ntr + 1u >> uint(8 * 0))
             // default_sample_description_index
             var _t806 = p
-            p = p + 1
-            deref(_t806) = uint8(1 >> 8 * 3)
+            p++
+            *_t806 = uint8(1 >> 8 * 3)
             var _t807 = p
-            p = p + 1
-            deref(_t807) = uint8(1 >> 8 * 2)
+            p++
+            *_t807 = uint8(1 >> 8 * 2)
             var _t808 = p
-            p = p + 1
-            deref(_t808) = uint8(1 >> 8 * 1)
+            p++
+            *_t808 = uint8(1 >> 8 * 1)
             var _t809 = p
-            p = p + 1
-            deref(_t809) = uint8(1 >> 8 * 0)
+            p++
+            *_t809 = uint8(1 >> 8 * 0)
             // default_sample_duration
             var _t810 = p
-            p = p + 1
-            deref(_t810) = uint8(0 >> 8 * 3)
+            p++
+            *_t810 = uint8(0 >> 8 * 3)
             var _t811 = p
-            p = p + 1
-            deref(_t811) = uint8(0 >> 8 * 2)
+            p++
+            *_t811 = uint8(0 >> 8 * 2)
             var _t812 = p
-            p = p + 1
-            deref(_t812) = uint8(0 >> 8 * 1)
+            p++
+            *_t812 = uint8(0 >> 8 * 1)
             var _t813 = p
-            p = p + 1
-            deref(_t813) = uint8(0 >> 8 * 0)
+            p++
+            *_t813 = uint8(0 >> 8 * 0)
             // default_sample_size
             var _t814 = p
-            p = p + 1
-            deref(_t814) = uint8(0 >> 8 * 3)
+            p++
+            *_t814 = uint8(0 >> 8 * 3)
             var _t815 = p
-            p = p + 1
-            deref(_t815) = uint8(0 >> 8 * 2)
+            p++
+            *_t815 = uint8(0 >> 8 * 2)
             var _t816 = p
-            p = p + 1
-            deref(_t816) = uint8(0 >> 8 * 1)
+            p++
+            *_t816 = uint8(0 >> 8 * 1)
             var _t817 = p
-            p = p + 1
-            deref(_t817) = uint8(0 >> 8 * 0)
+            p++
+            *_t817 = uint8(0 >> 8 * 0)
             // default_sample_flags
             var _t818 = p
-            p = p + 1
-            deref(_t818) = uint8(0 >> 8 * 3)
+            p++
+            *_t818 = uint8(0 >> 8 * 3)
             var _t819 = p
-            p = p + 1
-            deref(_t819) = uint8(0 >> 8 * 2)
+            p++
+            *_t819 = uint8(0 >> 8 * 2)
             var _t820 = p
-            p = p + 1
-            deref(_t820) = uint8(0 >> 8 * 1)
+            p++
+            *_t820 = uint8(0 >> 8 * 1)
             var _t821 = p
-            p = p + 1
-            deref(_t821) = uint8(0 >> 8 * 0)
-            stack = stack - 1
-            deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-            deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-            deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-            deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+            p++
+            *_t821 = uint8(0 >> 8 * 0)
+            stack--
+            (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+            (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+            (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+            (*stack)[3] = uint8(int64(p - *stack))
         }
-        stack = stack - 1
-        deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-        deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-        deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-        deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+        stack--
+        (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+        (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+        (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+        (*stack)[3] = uint8(int64(p - *stack))
     }
     // moov atom
-    stack = stack - 1
-    deref(stack)[0] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 3)))
-    deref(stack)[1] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 2)))
-    deref(stack)[2] = uint8(uint8(int64(p - deref(stack)) >> int64(8 * 1)))
-    deref(stack)[3] = uint8(uint8(int64(p - deref(stack))))
+    stack--
+    (*stack)[0] = uint8(int64(p - *stack) >> int64(8 * 3))
+    (*stack)[1] = uint8(int64(p - *stack) >> int64(8 * 2))
+    (*stack)[2] = uint8(int64(p - *stack) >> int64(8 * 1))
+    (*stack)[3] = uint8(int64(p - *stack))
     let _t822 = uint(int64(p - base)) <= index_bytes
     err = invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(base), uint64(int64(p - base)), mux.token)
     mux.write_pos += int64(p - base)
@@ -17953,10 +19127,10 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
 def MP4E_close(var mux : MP4E_mux_tag?) : int {
     var err : int = MP4E_STATUS_OK
     var ntracks : uint
-    if (!(mux != null)) {
+    if (mux == null) {
         return MP4E_STATUS_BAD_ARGUMENTS
     }
-    if (!(mux.enable_fragmentation != 0)) {
+    if (mux.enable_fragmentation == 0) {
         err = h264_file_all__mp4e_flush_index(mux)
     }
     if (mux.text_comment != null) {
@@ -17988,8 +19162,8 @@ def private h264_file_all__flush_bits(var bs : bit_reader_t?; n : int) {
     bs.cache <<= uint(n)
     bs.cache_free_bits += n
     if (bs.cache_free_bits >= 0) {
-        bs.cache |= uint(int(uint16(int(deref(bs.buf)) << 8)) | (int(deref(bs.buf)) >> 8)) << uint(bs.cache_free_bits)
-        bs.buf = bs.buf + 1
+        bs.cache |= uint(int(uint16(int(*bs.buf) << 8)) | (int(*bs.buf) >> 8)) << uint(bs.cache_free_bits)
+        bs.buf++
         bs.cache_free_bits -= 16
     }
 }
@@ -18037,7 +19211,7 @@ def private h264_file_all__ue_bits(var bs : bit_reader_t?) : int {
     var clz : int
     var val : int
     clz = 0
-    while (!(h264_file_all__get_bits(bs, 1) != 0)) {
+    while (h264_file_all__get_bits(bs, 1) == 0) {
         clz++
     }
     // get_bits(bs, clz + 1);
@@ -18047,15 +19221,15 @@ def private h264_file_all__ue_bits(var bs : bit_reader_t?) : int {
 
 [c_function]
 def private h264_file_all__h264e_bs_put_bits(var bs : bs_t?; n : uint; val : uint) {
-    let _t0 = !((val >> n) != 0)
+    let _t0 = (val >> n) == 0
     bs.shift = int(uint(bs.shift) - n)
     let _t1 = n <= 32u
     if (bs.shift < 0) {
         let _t2 = -bs.shift < 32
         bs.cache |= val >> uint(-bs.shift)
         var _t3 = bs.buf
-        bs.buf = bs.buf + 1
-        deref(_t3) = ((bs.cache >> 24u) & 255u) | ((bs.cache >> 8u) & 65280u) | ((bs.cache << 8u) & 16711680u) | ((bs.cache & 255u) << 24u)
+        bs.buf++
+        *_t3 = ((bs.cache >> 24u) & 255u) | ((bs.cache >> 8u) & 65280u) | ((bs.cache << 8u) & 16711680u) | ((bs.cache & 255u) << 24u)
         bs.shift = 32 + bs.shift
         bs.cache = 0u
     }
@@ -18064,7 +19238,7 @@ def private h264_file_all__h264e_bs_put_bits(var bs : bs_t?; n : uint; val : uin
 
 [c_function]
 def private h264_file_all__h264e_bs_flush(var bs : bs_t?) {
-    deref(bs.buf) = ((bs.cache >> 24u) & 255u) | ((bs.cache >> 8u) & 65280u) | ((bs.cache << 8u) & 16711680u) | ((bs.cache & 255u) << 24u)
+    *bs.buf = ((bs.cache >> 24u) & 255u) | ((bs.cache >> 8u) & 65280u) | ((bs.cache << 8u) & 16711680u) | ((bs.cache & 255u) << 24u)
 }
 
 [c_function]
@@ -18097,7 +19271,7 @@ def private h264_file_all__h264e_bs_put_golomb(var bs : bs_t?; val : uint) {
     while (true) {
         size++
         t >>= 1u
-        if (!(t != 0)) {
+        if (t == 0) {
             break
         }
     }
@@ -18114,17 +19288,17 @@ def private h264_file_all__h264e_bs_init_bits(var bs : bs_t?; var data : void?) 
 
 [c_function]
 def private h264_file_all__find_mem_cache(var cache : void ??; var cache_bytes : int?; cache_size : int; var mem : void?; bytes : int) : int {
-    if (!(bytes != 0)) {
+    if (bytes == 0) {
         return -1
     }
     for (i in range(cache_size)) {
-        if (cache_bytes[i] == bytes && !(memcmp1(mem, cache[i], uint64(bytes)) != 0)) {
+        if (cache_bytes[i] == bytes && memcmp1(mem, cache[i], uint64(bytes)) == 0) {
             // found
             return i
         }
     }
     for (i in range(cache_size)) {
-        if (!(cache_bytes[i] != 0)) {
+        if (cache_bytes[i] == 0) {
             cache[i] = malloc1(uint64(bytes))
             if (cache[i] != null) {
                 memcpy1(cache[i], mem, uint64(bytes))
@@ -18147,7 +19321,7 @@ def private h264_file_all__remove_nal_escapes(var dst : uint8?; var src : uint8?
     j = 0
     while (j < h264_data_bytes) {
         if (zero_cnt == 2 && int(src[j]) <= 3) {
-            if (int(src[j]) == 3) {
+            if (src[j] == 3) {
                 if (j == h264_data_bytes - 1) {
                 } elif (int(src[j + 1]) <= 3) {
                     // cabac_zero_word: no action
@@ -18187,8 +19361,8 @@ def private h264_file_all__nal_put_esc(var d : uint8?; var s : uint8?; n : int) 
     d[3] = 1u8
     for (i in range(n)) {
         var _t0 = s
-        s = s + 1
-        var byte : uint8 = deref(_t0)
+        s++
+        var byte : uint8 = *_t0
         if (cntz == 2 && int(byte) <= 3) {
             let _t1 = j
             j++
@@ -18239,7 +19413,7 @@ def private h264_file_all__change_sps_id(var bs : bit_reader_t?; var bd : bs_t?;
     }
     // max = 31
     sps_id = uint(h264_file_all__ue_bits(bs))
-    deref(old_id) = int(sps_id)
+    *old_id = int(sps_id)
     sps_id = uint(new_id)
     let _t0 = sps_id <= 31u
     h264_file_all__h264e_bs_put_golomb(bd, sps_id)
@@ -18256,7 +19430,7 @@ def private h264_file_all__patch_pps(var h : h264_sps_id_patcher_t?; var bs : bi
     var pps_id : uint = uint(h264_file_all__ue_bits(bs))
     // max = 31
     var sps_id : uint = uint(h264_file_all__ue_bits(bs))
-    deref(old_id) = int(pps_id)
+    *old_id = int(pps_id)
     sps_id = uint(h.map_sps[sps_id])
     pps_id = uint(new_pps_id)
     let _t0 = sps_id <= 31u
@@ -18289,37 +19463,44 @@ def private h264_file_all__transcode_nalu(var h : h264_sps_id_patcher_t?; var sr
     var bs : bit_reader_t[1]
     var bd : bs_t[1]
     var payload_type : int = int(src[0]) & 31
-    deref(dst) = deref(src)
+    *dst = *src
     h264_file_all__h264e_bs_init_bits(addr(bd[0]), reinterpret<void?>(dst + 1))
     h264_file_all__init_bits(addr(bs[0]), reinterpret<void?>(src + 1), uint(nalu_bytes - 1))
     h264_file_all__h264e_bs_init_bits(addr(bdt[0]), reinterpret<void?>(dst + 1))
     h264_file_all__init_bits(addr(bst[0]), reinterpret<void?>(src + 1), uint(nalu_bytes - 1))
-    let _cond = payload_type
-    if (_cond == 7) {
-        {
-            var cb : int = h264_file_all__change_sps_id(addr(bst[0]), addr(bdt[0]), 0, addr(old_id))
-            var id : int = h264_file_all__find_mem_cache(addr(h.sps_cache[0]), addr(h.sps_bytes[0]), MINIMP4_MAX_SPS, reinterpret<void?>(dst + 1), cb)
-            if (id == -1) {
-                return 0
+    c_switch(payload_type) {
+        case(7) {
+            {
+                var cb : int = h264_file_all__change_sps_id(addr(bst[0]), addr(bdt[0]), 0, addr(old_id))
+                var id : int = h264_file_all__find_mem_cache(addr(h.sps_cache[0]), addr(h.sps_bytes[0]), MINIMP4_MAX_SPS, reinterpret<void?>(dst + 1), cb)
+                if (id == -1) {
+                    return 0
+                }
+                h.map_sps[old_id] = id
+                h264_file_all__change_sps_id(addr(bs[0]), addr(bd[0]), id, addr(old_id))
             }
-            h.map_sps[old_id] = id
-            h264_file_all__change_sps_id(addr(bs[0]), addr(bd[0]), id, addr(old_id))
+            break
         }
-    } elif (_cond == 8) {
-        {
-            var cb : int = h264_file_all__patch_pps(h, addr(bst[0]), addr(bdt[0]), 0, addr(old_id))
-            var id : int = h264_file_all__find_mem_cache(addr(h.pps_cache[0]), addr(h.pps_bytes[0]), MINIMP4_MAX_PPS, reinterpret<void?>(dst + 1), cb)
-            if (id == -1) {
-                return 0
+        case(8) {
+            {
+                var cb : int = h264_file_all__patch_pps(h, addr(bst[0]), addr(bdt[0]), 0, addr(old_id))
+                var id : int = h264_file_all__find_mem_cache(addr(h.pps_cache[0]), addr(h.pps_bytes[0]), MINIMP4_MAX_PPS, reinterpret<void?>(dst + 1), cb)
+                if (id == -1) {
+                    return 0
+                }
+                h.map_pps[old_id] = id
+                h264_file_all__patch_pps(h, addr(bs[0]), addr(bd[0]), id, addr(old_id))
             }
-            h.map_pps[old_id] = id
-            h264_file_all__patch_pps(h, addr(bs[0]), addr(bd[0]), id, addr(old_id))
+            break
         }
-    } elif (_cond == 1 || _cond == 2 || _cond == 5) {
-        h264_file_all__patch_slice_header(h, addr(bs[0]), addr(bd[0]))
-    } else {
-        memcpy1(reinterpret<void?>(dst), reinterpret<void?>(src), uint64(nalu_bytes))
-        return nalu_bytes
+        case(1, 2, 5) {
+            h264_file_all__patch_slice_header(h, addr(bs[0]), addr(bd[0]))
+            break
+        }
+        case(_) {
+            memcpy1(reinterpret<void?>(dst), reinterpret<void?>(src), uint64(nalu_bytes))
+            return nalu_bytes
+        }
     }
     nalu_bytes = int(1u + h264_file_all__h264e_bs_byte_align(addr(bd[0])) / 8u)
     h264_file_all__h264e_bs_flush(addr(bd[0]))
@@ -18334,23 +19515,20 @@ def private h264_file_all__transcode_nalu(var h : h264_sps_id_patcher_t?; var sr
 def private h264_file_all__find_start_code(var h264_data : uint8?; h264_data_bytes : int; var zcount : int?) : uint8? {
     var eof : uint8? = h264_data + h264_data_bytes
     var p : uint8? = h264_data
-    while (true) {
+    c_do_while(intptr(p) < intptr(eof)) {
         var zero_cnt : int = 1
         var found : uint8? = reinterpret<uint8?>(memchr1(reinterpret<void?>(p), 0, uint64(int64(eof - p))))
         p = found != null ? found : eof
-        while (intptr(p + zero_cnt) < intptr(eof) && !(p[zero_cnt] != 0)) {
+        while (intptr(p + zero_cnt) < intptr(eof) && p[zero_cnt] == 0) {
             zero_cnt++
         }
-        if (zero_cnt >= 2 && int(p[zero_cnt]) == 1) {
-            deref(zcount) = zero_cnt + 1
+        if (zero_cnt >= 2 && p[zero_cnt] == 1) {
+            *zcount = zero_cnt + 1
             return p + zero_cnt + 1
         }
-        p = p + zero_cnt
-        if (!(intptr(p) < intptr(eof))) {
-            break
-        }
+        p += zero_cnt
     }
-    deref(zcount) = 0
+    *zcount = 0
     return eof
 }
 
@@ -18363,11 +19541,11 @@ def private h264_file_all__find_nal_unit(var h264_data : uint8?; h264_data_bytes
     var stop : uint8? = start
     if (start != null) {
         stop = h264_file_all__find_start_code(start, int(int64(eof - start)), addr(zcount))
-        while (intptr(stop) > intptr(start) && !(stop[-1] != 0)) {
-            stop = stop - 1
+        while (intptr(stop) > intptr(start) && stop[-1] == 0) {
+            stop--
         }
     }
-    deref(pnal_unit_bytes) = int(int64(stop - start) - int64(zcount))
+    *pnal_unit_bytes = int(int64(stop - start) - int64(zcount))
     return start
 }
 
@@ -18414,42 +19592,50 @@ def mp4_h26x_write_close(var h : mp4_h26x_writer_tag?) {
 [c_function]
 def private h264_file_all__mp4_h265_write_nal(var h : mp4_h26x_writer_tag?; var nal : uint8?; sizeof_nal : int; timeStamp90kHz_next : uint) : int {
     var payload_type : int = (int(nal[0]) >> 1) & 63
-    var is_intra : int = payload_type >= HEVC_NAL_BLA_W_LP && payload_type <= HEVC_NAL_CRA_NUT ? 1 : 0
+    var is_intra : int = int_of(payload_type >= HEVC_NAL_BLA_W_LP && payload_type <= HEVC_NAL_CRA_NUT)
     var err : int = MP4E_STATUS_OK
     // printf("payload_type=%d, intra=%d\n", payload_type, is_intra);
-    if (is_intra != 0 && !(h.need_sps != 0) && !(h.need_pps != 0) && !(h.need_vps != 0)) {
+    if (is_intra != 0 && h.need_sps == 0 && h.need_pps == 0 && h.need_vps == 0) {
         h.need_idr = 0
     }
-    let _cond = payload_type
-    if (_cond == 32) {
-        MP4E_set_vps(h.mux, h.mux_track_id, reinterpret<void?>(nal), sizeof_nal)
-        h.need_vps = 0
-    } elif (_cond == 33) {
-        MP4E_set_sps(h.mux, h.mux_track_id, reinterpret<void?>(nal), sizeof_nal)
-        h.need_sps = 0
-    } elif (_cond == 34) {
-        MP4E_set_pps(h.mux, h.mux_track_id, reinterpret<void?>(nal), sizeof_nal)
-        h.need_pps = 0
-    } else {
-        if (h.need_vps != 0 || h.need_sps != 0 || h.need_pps != 0 || h.need_idr != 0) {
-            return MP4E_STATUS_BAD_ARGUMENTS
+    c_switch(payload_type) {
+        case(32) {
+            MP4E_set_vps(h.mux, h.mux_track_id, reinterpret<void?>(nal), sizeof_nal)
+            h.need_vps = 0
+            break
         }
-        {
-            var tmp : uint8? = reinterpret<uint8?>(malloc1(uint64(4 + sizeof_nal)))
-            if (!(tmp != null)) {
-                return MP4E_STATUS_NO_MEMORY
+        case(33) {
+            MP4E_set_sps(h.mux, h.mux_track_id, reinterpret<void?>(nal), sizeof_nal)
+            h.need_sps = 0
+            break
+        }
+        case(34) {
+            MP4E_set_pps(h.mux, h.mux_track_id, reinterpret<void?>(nal), sizeof_nal)
+            h.need_pps = 0
+            break
+        }
+        case(_) {
+            if (h.need_vps != 0 || h.need_sps != 0 || h.need_pps != 0 || h.need_idr != 0) {
+                return MP4E_STATUS_BAD_ARGUMENTS
             }
-            var sample_kind : int = MP4E_SAMPLE_DEFAULT
-            tmp[0] = uint8(sizeof_nal >> 24)
-            tmp[1] = uint8(sizeof_nal >> 16)
-            tmp[2] = uint8(sizeof_nal >> 8)
-            tmp[3] = uint8(sizeof_nal)
-            memcpy1(reinterpret<void?>(tmp + 4), reinterpret<void?>(nal), uint64(sizeof_nal))
-            if (is_intra != 0) {
-                sample_kind = MP4E_SAMPLE_RANDOM_ACCESS
+            {
+                var tmp : uint8? = reinterpret<uint8?>(malloc1(uint64(4 + sizeof_nal)))
+                if (tmp == null) {
+                    return MP4E_STATUS_NO_MEMORY
+                }
+                var sample_kind : int = MP4E_SAMPLE_DEFAULT
+                tmp[0] = uint8(sizeof_nal >> 24)
+                tmp[1] = uint8(sizeof_nal >> 16)
+                tmp[2] = uint8(sizeof_nal >> 8)
+                tmp[3] = uint8(sizeof_nal)
+                memcpy1(reinterpret<void?>(tmp + 4), reinterpret<void?>(nal), uint64(sizeof_nal))
+                if (is_intra != 0) {
+                    sample_kind = MP4E_SAMPLE_RANDOM_ACCESS
+                }
+                err = MP4E_put_sample(h.mux, h.mux_track_id, reinterpret<void?>(tmp), 4 + sizeof_nal, int(timeStamp90kHz_next), sample_kind)
+                free1(reinterpret<void?>(tmp))
             }
-            err = MP4E_put_sample(h.mux, h.mux_track_id, reinterpret<void?>(tmp), 4 + sizeof_nal, int(timeStamp90kHz_next), sample_kind)
-            free1(reinterpret<void?>(tmp))
+            break
         }
     }
     return err
@@ -18465,13 +19651,13 @@ def mp4_h26x_write_nal(var h : mp4_h26x_writer_tag?; var nal : uint8?; length : 
         var _f = false
         while (true) {
             if (_f) {
-                nal = nal + 1
+                nal++
             }
             _f = true
             var nal1 : uint8?
             var nal2 : uint8?
             nal = h264_file_all__find_nal_unit(nal, int(int64(eof - nal)), addr(sizeof_nal))
-            if (!(sizeof_nal != 0)) {
+            if (sizeof_nal == 0) {
                 break
             }
             if (h.is_hevc != 0) {
@@ -18493,16 +19679,16 @@ def mp4_h26x_write_nal(var h : mp4_h26x_writer_tag?; var nal : uint8?; length : 
             // - assign same ID's to equal (except ID) SPS and PPS
             // - save all different SPS and PPS
             nal1 = reinterpret<uint8?>(malloc1(uint64(sizeof_nal * 17 / 16 + 32)))
-            if (!(nal1 != null)) {
+            if (nal1 == null) {
                 return MP4E_STATUS_NO_MEMORY
             }
             nal2 = reinterpret<uint8?>(malloc1(uint64(sizeof_nal * 17 / 16 + 32)))
-            if (!(nal2 != null)) {
+            if (nal2 == null) {
                 free1(reinterpret<void?>(nal1))
                 return MP4E_STATUS_NO_MEMORY
             }
             sizeof_nal = h264_file_all__remove_nal_escapes(nal2, nal, sizeof_nal)
-            if (!(!(sizeof_nal != 0))) {
+            if (sizeof_nal != 0) {
                 goto label 2
             }
             label 1:  // exit_with_free
@@ -18512,15 +19698,13 @@ def mp4_h26x_write_nal(var h : mp4_h26x_writer_tag?; var nal : uint8?; length : 
             label 2:  // end if
             sizeof_nal = h264_file_all__transcode_nalu(addr(h.sps_patcher), nal2, sizeof_nal, nal1)
             sizeof_nal = h264_file_all__nal_put_esc(nal2, nal1, sizeof_nal)
-            let _cond = payload_type
-            while (true) {
-                var _flag = false
-                if (_cond == 7) {
+            c_switch(payload_type) {
+                case(7) {
                     MP4E_set_sps(h.mux, h.mux_track_id, reinterpret<void?>(nal2 + 4), sizeof_nal - 4)
                     h.need_sps = 0
                     break
                 }
-                if (_cond == 8) {
+                case(8) {
                     if (h.need_sps != 0) {
                         goto label 1
                     }
@@ -18528,20 +19712,18 @@ def mp4_h26x_write_nal(var h : mp4_h26x_writer_tag?; var nal : uint8?; length : 
                     h.need_pps = 0
                     break
                 }
-                _flag ||= _cond == 5
-                if (_flag) {
+                case(5) {
                     if (h.need_sps != 0) {
                         goto label 1
                     }
                     h.need_idr = 0
                 }
-                _flag ||= !(_cond == 7 || _cond == 8 || _cond == 5)
-                if (_flag) {
+                case(_) {
                     // flow through
                     if (h.need_sps != 0) {
                         goto label 1
                     }
-                    if (!(h.need_pps != 0) && !(h.need_idr != 0)) {
+                    if (h.need_pps == 0 && h.need_idr == 0) {
                         var bs : bit_reader_t[1]
                         h264_file_all__init_bits(addr(bs[0]), reinterpret<void?>(nal + 1), uint(sizeof_nal - 4 - 1))
                         var first_mb_in_slice : uint = uint(h264_file_all__ue_bits(addr(bs[0])))
@@ -18560,7 +19742,6 @@ def mp4_h26x_write_nal(var h : mp4_h26x_writer_tag?; var nal : uint8?; length : 
                     }
                     break
                 }
-                break
             }
             free1(reinterpret<void?>(nal1))
             free1(reinterpret<void?>(nal2))
@@ -18591,31 +19772,23 @@ def private h264_file_all__minimp4_fgets(var mp4 : MP4D_demux_tag?) : int {
 def private h264_file_all__minimp4_read(var mp4 : MP4D_demux_tag?; nb : int; var eof_flag : int?) : uint {
     var v : uint = 0u
     var last_byte : int
-    let _cond = nb
-    while (true) {
-        var _flag = false
-        _flag ||= _cond == 4
-        if (_flag) {
+    c_switch(nb) {
+        case(4) {
             v = (v << 8u) | uint(h264_file_all__minimp4_fgets(mp4))
         }
-        _flag ||= _cond == 3
-        if (_flag) {
+        case(3) {
             v = (v << 8u) | uint(h264_file_all__minimp4_fgets(mp4))
         }
-        _flag ||= _cond == 2
-        if (_flag) {
+        case(2) {
             v = (v << 8u) | uint(h264_file_all__minimp4_fgets(mp4))
         }
-        _flag ||= _cond == 1
-        _flag ||= !(_cond == 4 || _cond == 3 || _cond == 2 || _cond == 1)
-        if (_flag) {
+        case(1, _) {
             last_byte = h264_file_all__minimp4_fgets(mp4)
             v = (v << 8u) | uint(last_byte)
         }
-        break
     }
     if (last_byte < 0) {
-        deref(eof_flag) = 1
+        *eof_flag = 1
     }
     return v
 }
@@ -18624,11 +19797,11 @@ def private h264_file_all__minimp4_read(var mp4 : MP4D_demux_tag?; nb : int; var
 // Used to read box payload
 [c_function]
 def private h264_file_all__read_payload(var mp4 : MP4D_demux_tag?; var nb : uint; var payload_bytes : uint64?; var eof_flag : int?) : uint {
-    if (deref(payload_bytes) < uint64(nb)) {
-        deref(eof_flag) = 1
-        nb = uint(int(deref(payload_bytes)))
+    if (*payload_bytes < uint64(nb)) {
+        *eof_flag = 1
+        nb = uint(int(*payload_bytes))
     }
-    deref(payload_bytes) -= uint64(nb)
+    *payload_bytes -= uint64(nb)
     return h264_file_all__minimp4_read(mp4, int(nb), eof_flag)
 }
 
@@ -18638,12 +19811,13 @@ def private h264_file_all__read_payload(var mp4 : MP4D_demux_tag?; var nb : uint
 def private h264_file_all__my_fseek(var mp4 : MP4D_demux_tag?; pos : uint64; var eof_flag : int?) {
     mp4.read_pos = int64(uint64(mp4.read_pos) + pos)
     if (mp4.read_pos >= mp4.read_size) {
-        deref(eof_flag) = 1
+        *eof_flag = 1
     }
 }
 
 [c_function]
-def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?; file_size : int64) : int {
+def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?;
+              file_size : int64) : int {
     // box stack size
     var depth : int = 0
     // remaining bytes for box in the stack
@@ -18653,7 +19827,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
     var eof_flag : int = 0
     var i : uint
     var tr : MP4D_track_t? = null
-    if (!(mp4 != null) || !(read_callback != null)) {
+    if (mp4 == null || read_callback == null) {
         return 0
     }
     memset1(reinterpret<void?>(mp4), 0, uint64(typeinfo sizeof(type<MP4D_demux_tag>)))
@@ -18664,7 +19838,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
     stack[0].format = boxtype_t.BOX_ATOM
     // never accessed
     stack[0].bytes = 0ul
-    while (true) {
+    c_do_while(eof_flag == 0) {
         // List of boxes, derived from 'FullBox'
         // ~~~~~~~~~~~~~~~~~~~~~
         // need read version field and check version for these boxes
@@ -18693,7 +19867,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 break
             }
             if (box_bytes >= 2ul && box_bytes < 8ul) {
-                if (!(depth != 0)) {
+                if (depth == 0) {
                     break
                 } else {
                     MP4D_close(mp4)
@@ -18713,7 +19887,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
             if (box_bytes == 1ul) {
                 box_bytes = uint64(h264_file_all__minimp4_read(mp4, 4, addr(eof_flag)))
                 if (box_bytes != 0) {
-                    if (!(depth != 0)) {
+                    if (depth == 0) {
                         break
                     } else {
                         MP4D_close(mp4)
@@ -18722,7 +19896,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 box_bytes = uint64(h264_file_all__minimp4_read(mp4, 4, addr(eof_flag)))
                 if (box_bytes < 16ul) {
-                    if (!(depth != 0)) {
+                    if (depth == 0) {
                         break
                     } else {
                         MP4D_close(mp4)
@@ -18739,10 +19913,10 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                     read_bytes += 4
                     // Fix invalid BOX_meta, found in some Android-produced MP4
                     // This branch is optional: bad box would be skipped
-                    if (box_name == uint(int(anon_644.BOX_meta))) {
+                    if (box_name == uint(anon_644.BOX_meta)) {
                         if (FullAtomVersionAndFlags >= 8u && uint64(FullAtomVersionAndFlags) < payload_bytes) {
                             if (box_bytes > stack[depth].bytes) {
-                                if (!(depth != 0)) {
+                                if (depth == 0) {
                                     break
                                 } else {
                                     MP4D_close(mp4)
@@ -18760,15 +19934,15 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                     }
                     // FIX_BAD_ANDROID_META_BOX
                     if ((FullAtomVersionAndFlags >> 24u) > MP4D_open_g_fullbox[i].max_version) {
-                        if (!(depth != 0)) {
+                        if (depth == 0) {
                             break
                         } else {
                             MP4D_close(mp4)
                             return 0
                         }
                     }
-                    if (MP4D_open_g_fullbox[i].use_track_flag != 0 && !(tr != null)) {
-                        if (!(depth != 0)) {
+                    if (MP4D_open_g_fullbox[i].use_track_flag != 0 && tr == null) {
+                        if (depth == 0) {
                             break
                         } else {
                             MP4D_close(mp4)
@@ -18782,18 +19956,18 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
             // stack[depth].format == BOX_OD
             var val : int
             // 1-byte box type
-            box_name = uint(int(anon_644.OD_BASE)) + h264_file_all__minimp4_read(mp4, 1, addr(eof_flag))
+            box_name = uint(anon_644.OD_BASE) + h264_file_all__minimp4_read(mp4, 1, addr(eof_flag))
             read_bytes += 1
             if (eof_flag != 0) {
                 break
             }
             payload_bytes = 0ul
             box_bytes = 1ul
-            while (true) {
+            c_do_while((val & 128) != 0) {
                 val = int(h264_file_all__minimp4_read(mp4, 1, addr(eof_flag)))
                 read_bytes += 1
                 if (eof_flag != 0) {
-                    if (!(depth != 0)) {
+                    if (depth == 0) {
                         break
                     } else {
                         MP4D_close(mp4)
@@ -18802,9 +19976,6 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 payload_bytes = (payload_bytes << 7ul) | uint64(val & 127)
                 box_bytes++
-                if (!((val & 128) != 0)) {
-                    break
-                }
             }
             box_bytes += payload_bytes
         }
@@ -18820,18 +19991,16 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
             stack[depth].bytes -= box_bytes
         }
         // Read box header
-        let _cond = box_name
-        while (true) {
-            var _flag = false
-            if (_cond == 1937013298u || _cond == 1937011578u) {
+        c_switch(box_name) {
+            case(1937013298u, 1937011578u) {
                 {
                     // ISO/IEC 14496-1 Page 38. Section 8.17.2 - Sample Size Box.
                     var size : int = 0
                     var sample_size : uint = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                     tr.sample_count = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                     tr.entry_size = reinterpret<uint?>(malloc1(uint64(tr.sample_count * 4u)))
-                    if (!(tr.entry_size != null)) {
-                        if (!(depth != 0)) {
+                    if (tr.entry_size == null) {
+                        if (depth == 0) {
                             break
                         } else {
                             MP4D_close(mp4)
@@ -18840,20 +20009,26 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                     }
                     i = 0u
                     while (i < tr.sample_count) {
-                        if (box_name == uint(int(anon_644.BOX_stsz))) {
+                        if (box_name == uint(anon_644.BOX_stsz)) {
                             tr.entry_size[i] = sample_size != 0 ? sample_size : h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                         } else {
-                            let _cond2 = sample_size & 255u
-                            if (_cond2 == 16u) {
-                                tr.entry_size[i] = h264_file_all__read_payload(mp4, 2u, addr(payload_bytes), addr(eof_flag))
-                            } elif (_cond2 == 8u) {
-                                tr.entry_size[i] = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
-                            } elif (_cond2 == 4u) {
-                                if ((i & 1u) != 0) {
-                                    tr.entry_size[i] = uint(size & 15)
-                                } else {
-                                    size = int(h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag)))
-                                    tr.entry_size[i] = uint(size >> 4)
+                            c_switch(sample_size & 255u) {
+                                case(16u) {
+                                    tr.entry_size[i] = h264_file_all__read_payload(mp4, 2u, addr(payload_bytes), addr(eof_flag))
+                                    break
+                                }
+                                case(8u) {
+                                    tr.entry_size[i] = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
+                                    break
+                                }
+                                case(4u) {
+                                    if ((i & 1u) != 0) {
+                                        tr.entry_size[i] = uint(size & 15)
+                                    } else {
+                                        size = int(h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag)))
+                                        tr.entry_size[i] = uint(size >> 4)
+                                    }
+                                    break
                                 }
                             }
                         }
@@ -18862,12 +20037,13 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 break
             }
-            if (_cond == 1937011555u) {
+            case(1937011555u) {
                 // ISO/IEC 14496-12 Page 38. Section 8.18 - Sample To Chunk Box.
                 tr.sample_to_chunk_count = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
-                tr.sample_to_chunk = reinterpret<MP4D_sample_to_chunk_t_tag?>(malloc1(uint64(tr.sample_to_chunk_count) * uint64(typeinfo sizeof(type<MP4D_sample_to_chunk_t_tag>))))
-                if (!(tr.sample_to_chunk != null)) {
-                    if (!(depth != 0)) {
+                tr.sample_to_chunk = reinterpret<MP4D_sample_to_chunk_t_tag?>(malloc1(uint64(tr.sample_to_chunk_count) *
+                        uint64(typeinfo sizeof(type<MP4D_sample_to_chunk_t_tag>))))
+                if (tr.sample_to_chunk == null) {
+                    if (depth == 0) {
                         break
                     } else {
                         MP4D_close(mp4)
@@ -18888,7 +20064,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 break
             }
-            if (_cond == 1937011827u) {
+            case(1937011827u) {
                 {
                     var count : uint = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                     var j : uint
@@ -18896,8 +20072,8 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                     var ts : uint = 0u
                     var ts_count : uint = count
                     tr.timestamp = reinterpret<uint?>(malloc1(uint64(ts_count * 4u)))
-                    if (!(tr.timestamp != null)) {
-                        if (!(depth != 0)) {
+                    if (tr.timestamp == null) {
+                        if (depth == 0) {
                             break
                         } else {
                             MP4D_close(mp4)
@@ -18905,8 +20081,8 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                         }
                     }
                     tr.duration = reinterpret<uint?>(malloc1(uint64(ts_count * 4u)))
-                    if (!(tr.duration != null)) {
-                        if (!(depth != 0)) {
+                    if (tr.duration == null) {
+                        if (depth == 0) {
                             break
                         } else {
                             MP4D_close(mp4)
@@ -18919,7 +20095,8 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                         var d : int = int(h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag)))
                         if (k + sc > ts_count) {
                             ts_count = k + sc
-                            tr.timestamp = reinterpret<uint?>(realloc1(reinterpret<void?>(tr.timestamp), uint64(ts_count) * uint64(typeinfo sizeof(type<uint>))))
+                            tr.timestamp = reinterpret<uint?>(realloc1(reinterpret<void?>(tr.timestamp),
+                                    uint64(ts_count) * uint64(typeinfo sizeof(type<uint>))))
                             tr.duration = reinterpret<uint?>(realloc1(reinterpret<void?>(tr.duration), uint64(ts_count) * uint64(typeinfo sizeof(type<uint>))))
                         }
                         j = 0u
@@ -18936,7 +20113,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 break
             }
-            if (_cond == 1668576371u) {
+            case(1668576371u) {
                 {
                     var count : uint = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                     i = 0u
@@ -18948,12 +20125,12 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 break
             }
-            if (_cond == 1937007471u || _cond == 1668232756u) {
+            case(1937007471u, 1668232756u) {
                 // ISO/IEC 14496-12 Page 39. Section 8.19 - Chunk Offset Box.
                 tr.chunk_count = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                 tr.chunk_offset = reinterpret<uint64?>(malloc1(uint64(tr.chunk_count) * uint64(typeinfo sizeof(type<uint64>))))
-                if (!(tr.chunk_offset != null)) {
-                    if (!(depth != 0)) {
+                if (tr.chunk_offset == null) {
+                    if (depth == 0) {
                         break
                     } else {
                         MP4D_close(mp4)
@@ -18963,9 +20140,9 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 i = 0u
                 while (i < tr.chunk_count) {
                     tr.chunk_offset[i] = uint64(h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag)))
-                    if (box_name == uint(int(anon_644.BOX_co64))) {
+                    if (box_name == uint(anon_644.BOX_co64)) {
                         if (tr.chunk_offset[i] != 0) {
-                            if (!(depth != 0)) {
+                            if (depth == 0) {
                                 break
                             } else {
                                 MP4D_close(mp4)
@@ -18979,9 +20156,10 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 break
             }
-            if (_cond == 1836476516u) {
+            case(1836476516u) {
                 {
-                    var t : uint64 = payload_bytes < uint64((FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 : 4 + 4) ? payload_bytes : uint64((FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 : 4 + 4)
+                    var t : uint64 = payload_bytes < uint64((FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 :
+                            4 + 4) ? payload_bytes : uint64((FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 : 4 + 4)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -18989,15 +20167,17 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 mp4.duration_hi = ((FullAtomVersionAndFlags >> 24u) == 1u) ? h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag)) : 0u
                 mp4.duration_lo = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                 {
-                    var t : uint64 = payload_bytes < uint64(4 + 2 + 2 + 4 * 2 + 4 * 9 + 4 * 6 + 4) ? payload_bytes : uint64(4 + 2 + 2 + 4 * 2 + 4 * 9 + 4 * 6 + 4)
+                    var t : uint64 = payload_bytes < uint64(4 + 2 + 2 + 4 * 2 + 4 * 9 + 4 * 6 + 4) ? payload_bytes : uint64(4 + 2 + 2 + 4 * 2 + 4 * 9 + 4 * 6 +
+                            4)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
                 break
             }
-            if (_cond == 1835296868u) {
+            case(1835296868u) {
                 {
-                    var t : uint64 = payload_bytes < uint64((FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 : 4 + 4) ? payload_bytes : uint64((FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 : 4 + 4)
+                    var t : uint64 = payload_bytes < uint64((FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 :
+                            4 + 4) ? payload_bytes : uint64((FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 : 4 + 4)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -19015,7 +20195,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 // the rest of this box is skipped by default ...
                 break
             }
-            if (_cond == 1751411826u) {
+            case(1751411826u) {
                 // When this box is within 'meta' box, the track may not be avaialable
                 if (tr != null) {
                     {
@@ -19030,9 +20210,9 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 // the rest of this box is skipped by default ...
                 break
             }
-            if (_cond == 1651798644u) {
-                if (!(tr != null)) {
-                    if (!(depth != 0)) {
+            case(1651798644u) {
+                if (tr == null) {
+                    if (depth == 0) {
                         break
                     } else {
                         MP4D_close(mp4)
@@ -19047,32 +20227,32 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 tr.avg_bitrate_bps = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                 break
             }
-            if (_cond == 2841734242u) {
+            case(2841734242u) {
                 // Set pointer to tag to be read...
                 ptag = addr(mp4.tag.album)
                 break
             }
-            if (_cond == 2839630420u) {
+            case(2839630420u) {
                 ptag = addr(mp4.tag.artist)
                 break
             }
-            if (_cond == 2842583405u) {
+            case(2842583405u) {
                 ptag = addr(mp4.tag.title)
                 break
             }
-            if (_cond == 2841928057u) {
+            case(2841928057u) {
                 ptag = addr(mp4.tag.year)
                 break
             }
-            if (_cond == 2841865588u) {
+            case(2841865588u) {
                 ptag = addr(mp4.tag.comment)
                 break
             }
-            if (_cond == 2842125678u) {
+            case(2842125678u) {
                 ptag = addr(mp4.tag.genre)
                 break
             }
-            if (_cond == 1937011556u) {
+            case(1937011556u) {
                 {
                     // entry_count, BOX_mp4a & BOX_mp4v boxes follows immediately
                     var t : uint64 = payload_bytes < 4ul ? payload_bytes : 4ul
@@ -19081,10 +20261,10 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 break
             }
-            if (_cond == 1836070003u) {
+            case(1836070003u) {
                 // private stream
-                if (!(tr != null)) {
-                    if (!(depth != 0)) {
+                if (tr == null) {
+                    if (depth == 0) {
                         break
                     } else {
                         MP4D_close(mp4)
@@ -19099,9 +20279,9 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 break
             }
-            if (_cond == 1836069985u) {
-                if (!(tr != null)) {
-                    if (!(depth != 0)) {
+            case(1836069985u) {
+                if (tr == null) {
+                    if (depth == 0) {
                         break
                     } else {
                         MP4D_close(mp4)
@@ -19124,12 +20304,12 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 tr.SampleDescription.audio.samplerate_hz = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag)) >> 16u
                 break
             }
-            if (_cond == 1635148593u || _cond == 1836070006u) {
+            case(1635148593u, 1836070006u) {
                 // AVCSampleEntry extends VisualSampleEntry
                 // case BOX_avc2: - no test
                 // case BOX_svc1: - no test
-                if (!(tr != null)) {
-                    if (!(depth != 0)) {
+                if (tr == null) {
+                    if (depth == 0) {
                         break
                     } else {
                         MP4D_close(mp4)
@@ -19161,7 +20341,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 // BOX_esds
                 break
             }
-            if (_cond == 1635148611u) {
+            case(1635148611u) {
                 // AVCDecoderConfigurationRecord()
                 // hack: AAC-specific DSI field reused (for it have same purpoose as sps/pps)
                 // TODO: check this hack if BOX_esds co-exist with BOX_avcC
@@ -19180,28 +20360,28 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                     spspps = 0
                     while (spspps < 2) {
                         var numOfSequenceParameterSets : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
-                        if (!(spspps != 0)) {
+                        if (spspps == 0) {
                             // clears 3 msb for SPS
                             numOfSequenceParameterSets &= 31u
                         }
                         var _t2 = p
-                        p = p + 1
-                        deref(_t2) = uint8(numOfSequenceParameterSets)
+                        p++
+                        *_t2 = uint8(numOfSequenceParameterSets)
                         i = 0u
                         while (i < numOfSequenceParameterSets) {
                             var k : uint
                             var sequenceParameterSetLength : uint = h264_file_all__read_payload(mp4, 2u, addr(payload_bytes), addr(eof_flag))
                             var _t3 = p
-                            p = p + 1
-                            deref(_t3) = uint8(sequenceParameterSetLength >> 8u)
+                            p++
+                            *_t3 = uint8(sequenceParameterSetLength >> 8u)
                             var _t4 = p
-                            p = p + 1
-                            deref(_t4) = uint8(sequenceParameterSetLength)
+                            p++
+                            *_t4 = uint8(sequenceParameterSetLength)
                             k = 0u
                             while (k < sequenceParameterSetLength) {
                                 var _t5 = p
-                                p = p + 1
-                                deref(_t5) = uint8(h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag)))
+                                p++
+                                *_t5 = uint8(h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag)))
                                 k++
                             }
                             i++
@@ -19211,7 +20391,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 break
             }
-            if (_cond == 606348339u) {
+            case(606348339u) {
                 {
                     // MP4D_AVC_SUPPORTED
                     // ES_ID(2) + flags(1)
@@ -19247,7 +20427,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                     break
                 }
             }
-            if (_cond == 606348340u) {
+            case(606348340u) {
                 // ISO/IEC 14496-1 Page 28. Section 8.6.5 - DecoderConfigDescriptor.
                 // ensured by g_fullbox[] check
                 tr.object_type_indication = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
@@ -19261,14 +20441,13 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 tr.avg_bitrate_bps = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                 break
             }
-            _flag ||= _cond == 606348341u
-            if (_flag) {
+            case(606348341u) {
                 // ISO/IEC 14496-1 Page 28. Section 8.6.5 - DecoderConfigDescriptor.
                 // ensured by g_fullbox[] check
-                if (!(tr.dsi != null) && payload_bytes != 0) {
+                if (tr.dsi == null && payload_bytes != 0) {
                     tr.dsi = reinterpret<uint8?>(malloc1(uint64(int(payload_bytes))))
-                    if (!(tr.dsi != null)) {
-                        if (!(depth != 0)) {
+                    if (tr.dsi == null) {
+                        if (depth == 0) {
                             break
                         } else {
                             MP4D_close(mp4)
@@ -19286,21 +20465,19 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                     break
                 }
             }
-            _flag ||= !(_cond == 1937013298u || _cond == 1937011578u || _cond == 1937011555u || _cond == 1937011827u || _cond == 1668576371u || _cond == 1937007471u || _cond == 1668232756u || _cond == 1836476516u || _cond == 1835296868u || _cond == 1751411826u || _cond == 1651798644u || _cond == 2841734242u || _cond == 2839630420u || _cond == 2842583405u || _cond == 2841928057u || _cond == 2841865588u || _cond == 2842125678u || _cond == 1937011556u || _cond == 1836070003u || _cond == 1836069985u || _cond == 1635148593u || _cond == 1836070006u || _cond == 1635148611u || _cond == 606348339u || _cond == 606348340u || _cond == 606348341u)
-            if (_flag) {
+            case(_) {
             }
-            break
         }
         // Read tag is tag pointer is set
-        if (ptag != null && !(deref(ptag) != null) && payload_bytes > 16ul) {
+        if (ptag != null && *ptag == null && payload_bytes > 16ul) {
             {
                 var t : uint64 = payload_bytes < uint64(4 + 4 + 4 + 4) ? payload_bytes : uint64(4 + 4 + 4 + 4)
                 h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                 payload_bytes -= t
             }
-            deref(ptag) = reinterpret<uint8?>(malloc1(uint64(uint(payload_bytes) + 1u)))
-            if (!(deref(ptag) != null)) {
-                if (!(depth != 0)) {
+            *ptag = reinterpret<uint8?>(malloc1(uint64(uint(payload_bytes) + 1u)))
+            if (*ptag == null) {
+                if (depth == 0) {
                     break
                 } else {
                     MP4D_close(mp4)
@@ -19309,22 +20486,22 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
             }
             i = 0u
             while (payload_bytes != 0ul) {
-                deref(ptag)[i] = uint8(h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag)))
+                (*ptag)[i] = uint8(h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag)))
                 i++
             }
             // zero-terminated string
-            deref(ptag)[i] = 0u8
+            (*ptag)[i] = 0u8
         }
-        if (box_name == uint(int(anon_644.BOX_trak))) {
+        if (box_name == uint(anon_644.BOX_trak)) {
             // New track found: allocate memory using realloc()
             // Typically there are 1 audio track for AAC audio file,
             // 4 tracks for movie file,
             // 3-5 tracks for scalable audio (CELP+AAC)
             // and up to 50 tracks for BSAC scalable audio
             var mem : void? = realloc1(reinterpret<void?>(mp4.track), uint64(mp4.track_count + 1u) * uint64(typeinfo sizeof(type<MP4D_track_t>)))
-            if (!(mem != null)) {
+            if (mem == null) {
                 // if realloc fails, it does not deallocate old pointer!
-                if (!(depth != 0)) {
+                if (depth == 0) {
                     break
                 } else {
                     MP4D_close(mp4)
@@ -19336,7 +20513,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
             mp4.track_count++
             tr = mp4.track + _t6
             memset1(reinterpret<void?>(tr), 0, uint64(typeinfo sizeof(type<MP4D_track_t>)))
-        } elif (box_name == uint(int(anon_644.BOX_meta))) {
+        } elif (box_name == uint(anon_644.BOX_meta)) {
             // Avoid update of 'hdlr' box, which may contains in the 'meta' box
             tr = null
         }
@@ -19346,7 +20523,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
             if (box_name == MP4D_open_g_envelope_box[i].name) {
                 depth++
                 if (depth >= MAX_CHUNKS_DEPTH) {
-                    if (!(depth != 0)) {
+                    if (depth == 0) {
                         break
                     } else {
                         MP4D_close(mp4)
@@ -19373,14 +20550,11 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
         }
         // remove empty boxes from stack
         // don't touch box with index 0 (which indicates whole file)
-        while (depth > 0 && !(stack[depth].bytes != 0)) {
+        while (depth > 0 && stack[depth].bytes == 0) {
             depth--
         }
-        if (!(!(eof_flag != 0))) {
-            break
-        }
     }
-    if (!(mp4.track_count != 0)) {
+    if (mp4.track_count == 0) {
         MP4D_close(mp4)
         return 0
     }
@@ -19394,7 +20568,7 @@ def private h264_file_all__sample_to_chunk(var tr : MP4D_track_t?; nsample : uin
     var chunk_group : uint = 0u
     var nc : uint
     var sum : uint = 0u
-    deref(nfirst_sample_in_chunk) = 0u
+    *nfirst_sample_in_chunk = 0u
     if (tr.chunk_count <= 1u) {
         return 0
     }
@@ -19411,7 +20585,7 @@ def private h264_file_all__sample_to_chunk(var tr : MP4D_track_t?; nsample : uin
             return int(nc)
         }
         // TODO: this can be calculated once per file
-        deref(nfirst_sample_in_chunk) = sum
+        *nfirst_sample_in_chunk = sum
         nc++
     }
     return -1
@@ -19425,7 +20599,7 @@ def MP4D_frame_offset(var mp4 : MP4D_demux_tag?; ntrack : uint; nsample : uint; 
     var nchunk : int = h264_file_all__sample_to_chunk(tr, nsample, addr(ns))
     var offset : uint64
     if (nchunk < 0) {
-        deref(frame_bytes) = 0u
+        *frame_bytes = 0u
         return 0ul
     }
     offset = tr.chunk_offset[nchunk]
@@ -19433,12 +20607,12 @@ def MP4D_frame_offset(var mp4 : MP4D_demux_tag?; ntrack : uint; nsample : uint; 
         offset += uint64(tr.entry_size[ns])
         ns++
     }
-    deref(frame_bytes) = tr.entry_size[ns]
+    *frame_bytes = tr.entry_size[ns]
     if (timestamp != null) {
-        deref(timestamp) = tr.timestamp[ns]
+        *timestamp = tr.timestamp[ns]
     }
     if (duration != null) {
-        deref(duration) = tr.duration[ns]
+        *duration = tr.duration[ns]
     }
     return offset
 }
@@ -19554,7 +20728,7 @@ def private h264_file_all__MP4D_read_spspps(var mp4 : MP4D_demux_tag?; ntrack : 
         return null
     }
     bytepos += skip_bytes
-    deref(sps_bytes) = int(p[bytepos]) * 256 + int(p[bytepos + 1])
+    *sps_bytes = int(p[bytepos]) * 256 + int(p[bytepos + 1])
     return reinterpret<void?>(p + bytepos + 2)
 }
 
@@ -19567,7 +20741,8 @@ def MP4D_read_pps(var mp4 : MP4D_demux_tag?; ntrack : uint; npps : int; var pps_
 }
 
 [c_function]
-def c2da_probe_minimp4_read4(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?; file_size : int64) : int {
+def c2da_probe_minimp4_read4(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?;
+                             file_size : int64) : int {
     var mp4 : MP4D_demux_tag
     var eof_flag : int = 0
     memset1(reinterpret<void?>(addr(mp4)), 0, uint64(typeinfo sizeof(type<MP4D_demux_tag>)))
@@ -19578,7 +20753,8 @@ def c2da_probe_minimp4_read4(read_callback : function<(a0 : int64; var a1 : void
 }
 
 [c_function]
-def c2da_probe_minimp4_first_box_name(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?; file_size : int64) : int {
+def c2da_probe_minimp4_first_box_name(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?;
+                                      file_size : int64) : int {
     var mp4 : MP4D_demux_tag
     var eof_flag : int = 0
     memset1(reinterpret<void?>(addr(mp4)), 0, uint64(typeinfo sizeof(type<MP4D_demux_tag>)))
@@ -19590,7 +20766,8 @@ def c2da_probe_minimp4_first_box_name(read_callback : function<(a0 : int64; var 
 }
 
 [c_function]
-def c2da_probe_minimp4_first_box_read_pos(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?; file_size : int64) : int {
+def c2da_probe_minimp4_first_box_read_pos(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?;
+                                          file_size : int64) : int {
     var mp4 : MP4D_demux_tag
     var eof_flag : int = 0
     memset1(reinterpret<void?>(addr(mp4)), 0, uint64(typeinfo sizeof(type<MP4D_demux_tag>)))
@@ -19603,7 +20780,8 @@ def c2da_probe_minimp4_first_box_read_pos(read_callback : function<(a0 : int64; 
 }
 
 [c_function]
-def c2da_probe_minimp4_first_box_eof(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?; file_size : int64) : int {
+def c2da_probe_minimp4_first_box_eof(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?;
+                                     file_size : int64) : int {
     var mp4 : MP4D_demux_tag
     var eof_flag : int = 0
     memset1(reinterpret<void?>(addr(mp4)), 0, uint64(typeinfo sizeof(type<MP4D_demux_tag>)))
@@ -19616,7 +20794,8 @@ def c2da_probe_minimp4_first_box_eof(read_callback : function<(a0 : int64; var a
 }
 
 [c_function]
-def c2da_probe_minimp4_second_box_name(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?; file_size : int64) : int {
+def c2da_probe_minimp4_second_box_name(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?;
+                                       file_size : int64) : int {
     var mp4 : MP4D_demux_tag
     var eof_flag : int = 0
     var box_bytes : uint64
@@ -19634,7 +20813,8 @@ def c2da_probe_minimp4_second_box_name(read_callback : function<(a0 : int64; var
 }
 
 [c_function]
-def c2da_probe_minimp4_second_box_read_pos(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?; file_size : int64) : int {
+def c2da_probe_minimp4_second_box_read_pos(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?;
+                                           file_size : int64) : int {
     var mp4 : MP4D_demux_tag
     var eof_flag : int = 0
     var box_bytes : uint64
@@ -19653,7 +20833,8 @@ def c2da_probe_minimp4_second_box_read_pos(read_callback : function<(a0 : int64;
 }
 
 [c_function]
-def c2da_probe_mp4d_open_read_pos(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?; file_size : int64) : int {
+def c2da_probe_mp4d_open_read_pos(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?;
+                                  file_size : int64) : int {
     var mp4 : MP4D_demux_tag
     if (MP4D_open(addr(mp4), read_callback, token, file_size) != 0) {
         MP4D_close(addr(mp4))
@@ -19663,7 +20844,8 @@ def c2da_probe_mp4d_open_read_pos(read_callback : function<(a0 : int64; var a1 :
 }
 
 [c_function]
-def c2da_probe_mp4d_open_track_count(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?; file_size : int64) : int {
+def c2da_probe_mp4d_open_track_count(read_callback : function<(a0 : int64; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var token : void?;
+                                     file_size : int64) : int {
     var mp4 : MP4D_demux_tag
     if (MP4D_open(addr(mp4), read_callback, token, file_size) == 0) {
         return -1
@@ -19904,7 +21086,8 @@ def private h264_file_all__header_annexb_size(var mp4 : MP4D_demux_tag?; track_i
 }
 
 [c_function]
-def private h264_file_all__build_annexb_sample(var mp4 : MP4D_demux_tag?; track_index : int; var sample : uint8?; sample_bytes : int; include_headers : int; var scratch : uint8?; scratch_capacity : int; length_size : int) : int {
+def private h264_file_all__build_annexb_sample(var mp4 : MP4D_demux_tag?; track_index : int; var sample : uint8?; sample_bytes : int; include_headers : int;
+                                               var scratch : uint8?; scratch_capacity : int; length_size : int) : int {
     var out : int = 0
     var bytes : int = 0
     var index : int = 0
@@ -19969,29 +21152,29 @@ def private h264_file_all__build_annexb_sample(var mp4 : MP4D_demux_tag?; track_
 [c_function]
 def private h264_file_all__decode_access_unit(var state : DecoderState?; var bytes : uint8?; length : int; var picture_ready : int?) : int {
     var offset : int = 0
-    deref(picture_ready) = 0
+    *picture_ready = 0
     while (offset < length) {
         var read_bytes : uint = 0u
         var result : uint = h264bsdDecode(state.storage, bytes + offset, uint(length - offset), 0u, addr(read_bytes))
-        if (result == uint(int(anon_277.H264BSD_ERROR)) || result == uint(int(anon_277.H264BSD_PARAM_SET_ERROR)) || result == uint(int(anon_277.H264BSD_MEMALLOC_ERROR))) {
+        if (result == uint(anon_277.H264BSD_ERROR) || result == uint(anon_277.H264BSD_PARAM_SET_ERROR) || result == uint(anon_277.H264BSD_MEMALLOC_ERROR)) {
             return 0
         }
-        if (read_bytes == 0u && result != uint(int(anon_277.H264BSD_HDRS_RDY))) {
+        if (read_bytes == 0u && result != uint(anon_277.H264BSD_HDRS_RDY)) {
             return 0
         }
         offset += int(read_bytes)
-        if (result == uint(int(anon_277.H264BSD_HDRS_RDY))) {
+        if (result == uint(anon_277.H264BSD_HDRS_RDY)) {
             state.width = h264_file_all__output_picture_width(state.storage)
             state.height = h264_file_all__output_picture_height(state.storage)
         }
-        if (result == uint(int(anon_277.H264BSD_PIC_RDY))) {
+        if (result == uint(anon_277.H264BSD_PIC_RDY)) {
             var pic_id : uint = 0u
             var is_idr_pic : uint = 0u
             var num_err_mbs : uint = 0u
             state.picture = h264bsdNextOutputPicture(state.storage, addr(pic_id), addr(is_idr_pic), addr(num_err_mbs))
             state.width = h264_file_all__output_picture_width(state.storage)
             state.height = h264_file_all__output_picture_height(state.storage)
-            deref(picture_ready) = 1
+            *picture_ready = 1
         }
     }
     return 1
@@ -20046,17 +21229,17 @@ def private h264_file_all__decode_summary(var bytes : uint8?; length : int; fram
         sample_index++
     }
     scratch = reinterpret<uint8?>(malloc1(uint64(max_sample_bytes)))
-    if (!(scratch != null)) {
+    if (scratch == null) {
         MP4D_close(addr(mp4))
         return 0
     }
     memset1(reinterpret<void?>(addr(state)), 0, uint64(typeinfo sizeof(type<DecoderState>)))
     state.storage = h264bsdAlloc()
-    if (!(state.storage != null)) {
+    if (state.storage == null) {
         MP4D_close(addr(mp4))
         return 0
     }
-    if (h264bsdInit(state.storage, 0u) != uint(int(anon_277.H264BSD_RDY))) {
+    if (h264bsdInit(state.storage, 0u) != uint(anon_277.H264BSD_RDY)) {
         h264bsdFree(state.storage)
         MP4D_close(addr(mp4))
         return 0
@@ -20066,7 +21249,8 @@ def private h264_file_all__decode_summary(var bytes : uint8?; length : int; fram
     while (sample_index < int(mp4.track[track_index].sample_count)) {
         var frame_bytes : uint = 0u
         var offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
-        var sample_length : int = h264_file_all__build_annexb_sample(addr(mp4), track_index, bytes + offset, int(frame_bytes), sample_index == 0 ? 1 : 0, scratch, max_sample_bytes, track_length_size)
+        var sample_length : int = h264_file_all__build_annexb_sample(addr(mp4), track_index, bytes + offset, int(frame_bytes), int_of(sample_index == 0),
+                scratch, max_sample_bytes, track_length_size)
         var picture_ready : int = 0
         if (sample_length < 0) {
             h264bsdShutdown(state.storage)
@@ -20074,7 +21258,7 @@ def private h264_file_all__decode_summary(var bytes : uint8?; length : int; fram
             MP4D_close(addr(mp4))
             return 0
         }
-        if (!(h264_file_all__decode_access_unit(addr(state), scratch, sample_length, addr(picture_ready)) != 0)) {
+        if (h264_file_all__decode_access_unit(addr(state), scratch, sample_length, addr(picture_ready)) == 0) {
             h264bsdShutdown(state.storage)
             h264bsdFree(state.storage)
             MP4D_close(addr(mp4))
@@ -20107,11 +21291,12 @@ def private h264_file_all__decode_summary(var bytes : uint8?; length : int; fram
     h264bsdShutdown(state.storage)
     h264bsdFree(state.storage)
     MP4D_close(addr(mp4))
-    return summary.frame_count > 0 ? 1 : 0
+    return int_of(summary.frame_count > 0)
 }
 
 [c_function]
-def private h264_file_all__decode_frame_yuv(var bytes : uint8?; length : int; frame_index : int; var picture : uint8 ??; var width : int?; var height : int?) : int {
+def private h264_file_all__decode_frame_yuv(var bytes : uint8?; length : int; frame_index : int; var picture : uint8 ??; var width : int?;
+                                            var height : int?) : int {
     var input : MemoryInput
     var mp4 : MP4D_demux_tag
     var track_index : int = -1
@@ -20154,17 +21339,17 @@ def private h264_file_all__decode_frame_yuv(var bytes : uint8?; length : int; fr
         sample_index++
     }
     scratch = reinterpret<uint8?>(malloc1(uint64(max_sample_bytes)))
-    if (!(scratch != null)) {
+    if (scratch == null) {
         MP4D_close(addr(mp4))
         return 0
     }
     memset1(reinterpret<void?>(addr(state)), 0, uint64(typeinfo sizeof(type<DecoderState>)))
     state.storage = h264bsdAlloc()
-    if (!(state.storage != null)) {
+    if (state.storage == null) {
         MP4D_close(addr(mp4))
         return 0
     }
-    if (h264bsdInit(state.storage, 0u) != uint(int(anon_277.H264BSD_RDY))) {
+    if (h264bsdInit(state.storage, 0u) != uint(anon_277.H264BSD_RDY)) {
         h264bsdFree(state.storage)
         MP4D_close(addr(mp4))
         return 0
@@ -20173,7 +21358,8 @@ def private h264_file_all__decode_frame_yuv(var bytes : uint8?; length : int; fr
     while (sample_index < int(mp4.track[track_index].sample_count)) {
         var frame_bytes : uint = 0u
         var offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
-        var sample_length : int = h264_file_all__build_annexb_sample(addr(mp4), track_index, bytes + offset, int(frame_bytes), sample_index == 0 ? 1 : 0, scratch, max_sample_bytes, track_length_size)
+        var sample_length : int = h264_file_all__build_annexb_sample(addr(mp4), track_index, bytes + offset, int(frame_bytes), int_of(sample_index == 0),
+                scratch, max_sample_bytes, track_length_size)
         var picture_ready : int = 0
         if (sample_length < 0) {
             h264bsdShutdown(state.storage)
@@ -20181,7 +21367,7 @@ def private h264_file_all__decode_frame_yuv(var bytes : uint8?; length : int; fr
             MP4D_close(addr(mp4))
             return 0
         }
-        if (!(h264_file_all__decode_access_unit(addr(state), scratch, sample_length, addr(picture_ready)) != 0)) {
+        if (h264_file_all__decode_access_unit(addr(state), scratch, sample_length, addr(picture_ready)) == 0) {
             h264bsdShutdown(state.storage)
             h264bsdFree(state.storage)
             MP4D_close(addr(mp4))
@@ -20189,9 +21375,9 @@ def private h264_file_all__decode_frame_yuv(var bytes : uint8?; length : int; fr
         }
         if (picture_ready != 0) {
             if (picture_index == frame_index) {
-                deref(picture) = state.picture
-                deref(width) = state.width
-                deref(height) = state.height
+                *picture = state.picture
+                *width = state.width
+                *height = state.height
                 h264bsdShutdown(state.storage)
                 h264bsdFree(state.storage)
                 MP4D_close(addr(mp4))
@@ -20211,7 +21397,7 @@ def private h264_file_all__decode_frame_yuv(var bytes : uint8?; length : int; fr
 def h264mp4_decode_hash(frame_limit : int) : int {
     var summary : DecodeSummary
     shim_reset_heap()
-    if (!(h264_file_all__decode_summary(addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len), frame_limit, addr(summary)) != 0)) {
+    if (h264_file_all__decode_summary(addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len), frame_limit, addr(summary)) == 0) {
         return -1
     }
     return int(summary.combined_hash)
@@ -20221,7 +21407,7 @@ def h264mp4_decode_hash(frame_limit : int) : int {
 def h264mp4_probe_width : int {
     var summary : DecodeSummary
     shim_reset_heap()
-    if (!(h264_file_all__decode_summary(addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len), 1, addr(summary)) != 0)) {
+    if (h264_file_all__decode_summary(addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len), 1, addr(summary)) == 0) {
         return -1
     }
     return summary.width
@@ -20231,7 +21417,7 @@ def h264mp4_probe_width : int {
 def h264mp4_probe_height : int {
     var summary : DecodeSummary
     shim_reset_heap()
-    if (!(h264_file_all__decode_summary(addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len), 1, addr(summary)) != 0)) {
+    if (h264_file_all__decode_summary(addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len), 1, addr(summary)) == 0) {
         return -1
     }
     return summary.height
@@ -20241,7 +21427,7 @@ def h264mp4_probe_height : int {
 def h264mp4_probe_frame_count(frame_limit : int) : int {
     var summary : DecodeSummary
     shim_reset_heap()
-    if (!(h264_file_all__decode_summary(addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len), frame_limit, addr(summary)) != 0)) {
+    if (h264_file_all__decode_summary(addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len), frame_limit, addr(summary)) == 0) {
         return -1
     }
     return summary.frame_count
@@ -20251,7 +21437,7 @@ def h264mp4_probe_frame_count(frame_limit : int) : int {
 def h264mp4_probe_first_frame_hash : int {
     var summary : DecodeSummary
     shim_reset_heap()
-    if (!(h264_file_all__decode_summary(addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len), 1, addr(summary)) != 0)) {
+    if (h264_file_all__decode_summary(addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len), 1, addr(summary)) == 0) {
         return -1
     }
     return int(summary.first_hash)
@@ -20261,7 +21447,7 @@ def h264mp4_probe_first_frame_hash : int {
 def h264mp4_probe_last_frame_hash(frame_limit : int) : int {
     var summary : DecodeSummary
     shim_reset_heap()
-    if (!(h264_file_all__decode_summary(addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len), frame_limit, addr(summary)) != 0)) {
+    if (h264_file_all__decode_summary(addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len), frame_limit, addr(summary)) == 0) {
         return -1
     }
     return int(summary.last_hash)
@@ -20463,7 +21649,7 @@ def h264mp4_probe_dsi_word0 : int {
         return -2
     }
     track_index = h264_file_all__find_avc_track(addr(mp4))
-    if (track_index < 0 || !(mp4.track[track_index].dsi != null) || mp4.track[track_index].dsi_bytes < 4u) {
+    if (track_index < 0 || mp4.track[track_index].dsi == null || mp4.track[track_index].dsi_bytes < 4u) {
         MP4D_close(addr(mp4))
         return -1
     }
@@ -20488,7 +21674,7 @@ def h264mp4_probe_dsi_word1 : int {
         return -2
     }
     track_index = h264_file_all__find_avc_track(addr(mp4))
-    if (track_index < 0 || !(mp4.track[track_index].dsi != null) || mp4.track[track_index].dsi_bytes < 8u) {
+    if (track_index < 0 || mp4.track[track_index].dsi == null || mp4.track[track_index].dsi_bytes < 8u) {
         MP4D_close(addr(mp4))
         return -1
     }
@@ -20524,21 +21710,23 @@ def h264mp4_probe_first_decode_result : int {
         MP4D_close(addr(mp4))
         return -3
     }
-    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len))
+    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]),
+            int(h264_file_all__sample_mp4_len))
     prefix_bytes = h264_file_all__header_annexb_size(addr(mp4), track_index)
     offset = MP4D_frame_offset(addr(mp4), uint(track_index), 0u, addr(frame_bytes), null, null)
     scratch = reinterpret<uint8?>(malloc1(uint64(frame_bytes) + uint64(prefix_bytes) + uint64(64u)))
     storage = h264bsdAlloc()
-    if (!(scratch != null) || !(storage != null)) {
+    if (scratch == null || storage == null) {
         MP4D_close(addr(mp4))
         return -4
     }
-    if (h264bsdInit(storage, 0u) != uint(int(anon_277.H264BSD_RDY))) {
+    if (h264bsdInit(storage, 0u) != uint(anon_277.H264BSD_RDY)) {
         h264bsdFree(storage)
         MP4D_close(addr(mp4))
         return -5
     }
-    sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), 1, scratch, int(frame_bytes) + prefix_bytes + 64, track_length_size)
+    sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), 1, scratch,
+            int(frame_bytes) + prefix_bytes + 64, track_length_size)
     if (sample_length <= 0) {
         h264bsdShutdown(storage)
         h264bsdFree(storage)
@@ -20576,21 +21764,23 @@ def h264mp4_probe_first_decode_bytes : int {
         MP4D_close(addr(mp4))
         return -3
     }
-    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len))
+    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]),
+            int(h264_file_all__sample_mp4_len))
     prefix_bytes = h264_file_all__header_annexb_size(addr(mp4), track_index)
     offset = MP4D_frame_offset(addr(mp4), uint(track_index), 0u, addr(frame_bytes), null, null)
     scratch = reinterpret<uint8?>(malloc1(uint64(frame_bytes) + uint64(prefix_bytes) + uint64(64u)))
     storage = h264bsdAlloc()
-    if (!(scratch != null) || !(storage != null)) {
+    if (scratch == null || storage == null) {
         MP4D_close(addr(mp4))
         return -4
     }
-    if (h264bsdInit(storage, 0u) != uint(int(anon_277.H264BSD_RDY))) {
+    if (h264bsdInit(storage, 0u) != uint(anon_277.H264BSD_RDY)) {
         h264bsdFree(storage)
         MP4D_close(addr(mp4))
         return -5
     }
-    sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), 1, scratch, int(frame_bytes) + prefix_bytes + 64, track_length_size)
+    sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), 1, scratch,
+            int(frame_bytes) + prefix_bytes + 64, track_length_size)
     if (sample_length <= 0) {
         h264bsdShutdown(storage)
         h264bsdFree(storage)
@@ -20630,7 +21820,8 @@ def h264mp4_probe_annexb_byte(byte_index : int) : int {
         MP4D_close(addr(mp4))
         return -3
     }
-    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len))
+    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]),
+            int(h264_file_all__sample_mp4_len))
     prefix_bytes = h264_file_all__header_annexb_size(addr(mp4), track_index)
     offset = MP4D_frame_offset(addr(mp4), uint(track_index), 0u, addr(frame_bytes), null, null)
     scratch = reinterpret<uint8?>(malloc1(uint64(frame_bytes) + uint64(prefix_bytes) + uint64(64u)))
@@ -20638,7 +21829,8 @@ def h264mp4_probe_annexb_byte(byte_index : int) : int {
         MP4D_close(addr(mp4))
         return -4
     }
-    sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), 1, scratch, int(frame_bytes) + prefix_bytes + 64, track_length_size)
+    sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), 1, scratch,
+            int(frame_bytes) + prefix_bytes + 64, track_length_size)
     if (sample_length <= 0 || byte_index >= sample_length) {
         result = -5
     } else {
@@ -20687,7 +21879,8 @@ def h264mp4_probe_h264_stage(field : int) : int {
         MP4D_close(addr(mp4))
         return -3
     }
-    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len))
+    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]),
+            int(h264_file_all__sample_mp4_len))
     prefix_bytes = h264_file_all__header_annexb_size(addr(mp4), track_index)
     offset = MP4D_frame_offset(addr(mp4), uint(track_index), 0u, addr(frame_bytes), null, null)
     scratch = reinterpret<uint8?>(malloc1(uint64(frame_bytes) + uint64(prefix_bytes) + uint64(64u)))
@@ -20695,7 +21888,8 @@ def h264mp4_probe_h264_stage(field : int) : int {
         MP4D_close(addr(mp4))
         return -4
     }
-    sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), 1, scratch, int(frame_bytes) + prefix_bytes + 64, track_length_size)
+    sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), 1, scratch,
+            int(frame_bytes) + prefix_bytes + 64, track_length_size)
     if (sample_length <= 0) {
         MP4D_close(addr(mp4))
         return -5
@@ -20782,15 +21976,17 @@ def h264mp4_probe_sample0_nal_at_offset(nal_offset : int; field : int) : int {
         MP4D_close(addr(mp4))
         return -3
     }
-    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len))
+    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]),
+            int(h264_file_all__sample_mp4_len))
     prefix_bytes = h264_file_all__header_annexb_size(addr(mp4), track_index)
     offset = MP4D_frame_offset(addr(mp4), uint(track_index), 0u, addr(frame_bytes), null, null)
     scratch = reinterpret<uint8?>(malloc1(uint64(frame_bytes) + uint64(prefix_bytes) + uint64(64u)))
-    if (!(scratch != null)) {
+    if (scratch == null) {
         MP4D_close(addr(mp4))
         return -4
     }
-    sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), 1, scratch, int(frame_bytes) + prefix_bytes + 64, track_length_size)
+    sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), 1, scratch,
+            int(frame_bytes) + prefix_bytes + 64, track_length_size)
     MP4D_close(addr(mp4))
     if (sample_length < 0) {
         return -5
@@ -20854,7 +22050,8 @@ def h264mp4_probe_sample0_idr_stage(field : int) : int {
         MP4D_close(addr(mp4))
         return -3
     }
-    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len))
+    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]),
+            int(h264_file_all__sample_mp4_len))
     prefix_bytes = h264_file_all__header_annexb_size(addr(mp4), track_index)
     {
         var sample_index : int = 0
@@ -20862,7 +22059,8 @@ def h264mp4_probe_sample0_idr_stage(field : int) : int {
         while (sample_index < int(mp4.track[track_index].sample_count)) {
             var frame_bytes : uint = 0u
             var sample_offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
-            var annexb_bytes : int = h264_file_all__sample_annexb_size(addr(h264_file_all__sample_mp4_bytes[0]) + sample_offset, int(frame_bytes), track_length_size)
+            var annexb_bytes : int = h264_file_all__sample_annexb_size(addr(h264_file_all__sample_mp4_bytes[0]) + sample_offset, int(frame_bytes),
+                    track_length_size)
             if (annexb_bytes < 0) {
                 MP4D_close(addr(mp4))
                 return -4
@@ -20875,18 +22073,19 @@ def h264mp4_probe_sample0_idr_stage(field : int) : int {
     }
     scratch = reinterpret<uint8?>(malloc1(uint64(max_sample_bytes)))
     storage = h264bsdAlloc()
-    if (!(scratch != null) || !(storage != null)) {
+    if (scratch == null || storage == null) {
         MP4D_close(addr(mp4))
         return -5
     }
-    if (h264bsdInit(storage, 0u) != uint(int(anon_277.H264BSD_RDY))) {
+    if (h264bsdInit(storage, 0u) != uint(anon_277.H264BSD_RDY)) {
         MP4D_close(addr(mp4))
         return -6
     }
     {
         var frame_bytes : uint = 0u
         var sample_offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), 0u, addr(frame_bytes), null, null)
-        sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + sample_offset, int(frame_bytes), 1, scratch, max_sample_bytes, track_length_size)
+        sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + sample_offset, int(frame_bytes),
+                1, scratch, max_sample_bytes, track_length_size)
     }
     MP4D_close(addr(mp4))
     if (sample_length < 0) {
@@ -20895,10 +22094,10 @@ def h264mp4_probe_sample0_idr_stage(field : int) : int {
     while (decode_offset < 665) {
         read_bytes = 0u
         result = h264bsdDecode(storage, scratch + decode_offset, uint(sample_length - decode_offset), 0u, addr(read_bytes))
-        if (result == uint(int(anon_277.H264BSD_ERROR)) || result == uint(int(anon_277.H264BSD_PARAM_SET_ERROR)) || result == uint(int(anon_277.H264BSD_MEMALLOC_ERROR))) {
+        if (result == uint(anon_277.H264BSD_ERROR) || result == uint(anon_277.H264BSD_PARAM_SET_ERROR) || result == uint(anon_277.H264BSD_MEMALLOC_ERROR)) {
             return -10 - int(result)
         }
-        if (read_bytes == 0u && result != uint(int(anon_277.H264BSD_HDRS_RDY))) {
+        if (read_bytes == 0u && result != uint(anon_277.H264BSD_HDRS_RDY)) {
             return -20 - int(result)
         }
         decode_offset += int(read_bytes)
@@ -20947,10 +22146,10 @@ def h264mp4_probe_sample0_idr_stage(field : int) : int {
         return int(storage.pendingActivation)
     }
     if (field == 14) {
-        return storage.activeSps != null ? 1 : 0
+        return int_of(storage.activeSps != null)
     }
     if (field == 15) {
-        return storage.activePps != null ? 1 : 0
+        return int_of(storage.activePps != null)
     }
     tmp = h264bsdCheckPpsId(addr(strm), addr(pps_id))
     if (field == 20) {
@@ -20997,7 +22196,8 @@ def h264mp4_probe_sample0_idr_stage(field : int) : int {
     storage.prevNalUnit[0] = nal
     h264bsdComputeSliceGroupMap(storage, addr(storage.sliceHeader[0]).sliceGroupChangeCycle)
     h264bsdInitRefPicList(addr(storage.dpb[0]))
-    tmp = h264bsdReorderRefPicList(addr(storage.dpb[0]), addr(addr(storage.sliceHeader[0]).refPicListReordering), addr(storage.sliceHeader[0]).frameNum, addr(storage.sliceHeader[0]).numRefIdxL0Active)
+    tmp = h264bsdReorderRefPicList(addr(storage.dpb[0]), addr(addr(storage.sliceHeader[0]).refPicListReordering), addr(storage.sliceHeader[0]).frameNum,
+            addr(storage.sliceHeader[0]).numRefIdxL0Active)
     if (field == 40) {
         return int(tmp)
     }
@@ -21051,7 +22251,8 @@ def h264mp4_probe_decode_until_sample(target_sample : int; field : int) : int {
         MP4D_close(addr(mp4))
         return -3
     }
-    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]), int(h264_file_all__sample_mp4_len))
+    track_length_size = h264_file_all__detect_track_length_size(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]),
+            int(h264_file_all__sample_mp4_len))
     if (track_length_size <= 0) {
         MP4D_close(addr(mp4))
         return -4
@@ -21073,11 +22274,11 @@ def h264mp4_probe_decode_until_sample(target_sample : int; field : int) : int {
     }
     scratch = reinterpret<uint8?>(malloc1(uint64(max_sample_bytes)))
     state.storage = h264bsdAlloc()
-    if (!(scratch != null) || !(state.storage != null)) {
+    if (scratch == null || state.storage == null) {
         MP4D_close(addr(mp4))
         return -6
     }
-    if (h264bsdInit(state.storage, 0u) != uint(int(anon_277.H264BSD_RDY))) {
+    if (h264bsdInit(state.storage, 0u) != uint(anon_277.H264BSD_RDY)) {
         h264bsdFree(state.storage)
         MP4D_close(addr(mp4))
         return -7
@@ -21086,7 +22287,8 @@ def h264mp4_probe_decode_until_sample(target_sample : int; field : int) : int {
     while (sample_index < int(mp4.track[track_index].sample_count)) {
         var frame_bytes : uint = 0u
         var offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
-        last_sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), sample_index == 0 ? 1 : 0, scratch, max_sample_bytes, track_length_size)
+        last_sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes),
+                int_of(sample_index == 0), scratch, max_sample_bytes, track_length_size)
         if (last_sample_length < 0) {
             h264bsdShutdown(state.storage)
             h264bsdFree(state.storage)
@@ -21101,20 +22303,20 @@ def h264mp4_probe_decode_until_sample(target_sample : int; field : int) : int {
             var result : uint = h264bsdDecode(state.storage, scratch + last_decode_offset, uint(last_sample_length - last_decode_offset), 0u, addr(read_bytes))
             last_result = int(result)
             last_read_bytes = int(read_bytes)
-            if (result == uint(int(anon_277.H264BSD_ERROR)) || result == uint(int(anon_277.H264BSD_PARAM_SET_ERROR)) || result == uint(int(anon_277.H264BSD_MEMALLOC_ERROR))) {
+            if (result == uint(anon_277.H264BSD_ERROR) || result == uint(anon_277.H264BSD_PARAM_SET_ERROR) || result == uint(anon_277.H264BSD_MEMALLOC_ERROR)) {
                 last_ok = 0
                 break
             }
-            if (read_bytes == 0u && result != uint(int(anon_277.H264BSD_HDRS_RDY))) {
+            if (read_bytes == 0u && result != uint(anon_277.H264BSD_HDRS_RDY)) {
                 last_ok = 0
                 break
             }
             last_decode_offset += int(read_bytes)
-            if (result == uint(int(anon_277.H264BSD_HDRS_RDY))) {
+            if (result == uint(anon_277.H264BSD_HDRS_RDY)) {
                 state.width = h264_file_all__output_picture_width(state.storage)
                 state.height = h264_file_all__output_picture_height(state.storage)
             }
-            if (result == uint(int(anon_277.H264BSD_PIC_RDY))) {
+            if (result == uint(anon_277.H264BSD_PIC_RDY)) {
                 var pic_id : uint = 0u
                 var is_idr_pic : uint = 0u
                 var num_err_mbs : uint = 0u
@@ -21127,7 +22329,7 @@ def h264mp4_probe_decode_until_sample(target_sample : int; field : int) : int {
         if (last_picture_ready != 0) {
             frame_count += 1
         }
-        if (sample_index == target_sample || !(last_ok != 0)) {
+        if (sample_index == target_sample || last_ok == 0) {
             var result : int = 0
             if (field == 0) {
                 result = last_sample_length
@@ -21204,10 +22406,10 @@ def h264mp4_host_decode_frame(frame_index : int) : int {
     var picture : uint8? = null
     var width : int = 0
     var height : int = 0
-    if (!(h264_file_all__host_bytes != null) || h264_file_all__host_length <= 0 || frame_index < 0) {
+    if (h264_file_all__host_bytes == null || h264_file_all__host_length <= 0 || frame_index < 0) {
         return 0
     }
-    if (!(h264_file_all__decode_frame_yuv(h264_file_all__host_bytes, h264_file_all__host_length, frame_index, addr(picture), addr(width), addr(height)) != 0)) {
+    if (h264_file_all__decode_frame_yuv(h264_file_all__host_bytes, h264_file_all__host_length, frame_index, addr(picture), addr(width), addr(height)) == 0) {
         return 0
     }
     h264_file_all__host_picture = picture
@@ -21225,7 +22427,7 @@ def h264mp4_host_get_y_ptr : int {
 
 [c_function]
 def h264mp4_host_get_u_ptr : int {
-    if (!(h264_file_all__host_picture != null)) {
+    if (h264_file_all__host_picture == null) {
         return 0
     }
     return int(int64(intptr(h264_file_all__host_picture + h264_file_all__host_y_size)))
@@ -21233,7 +22435,7 @@ def h264mp4_host_get_u_ptr : int {
 
 [c_function]
 def h264mp4_host_get_v_ptr : int {
-    if (!(h264_file_all__host_picture != null)) {
+    if (h264_file_all__host_picture == null) {
         return 0
     }
     return int(int64(intptr(h264_file_all__host_picture + h264_file_all__host_y_size + h264_file_all__host_u_size)))
@@ -21279,19 +22481,21 @@ def private h264_file_all__frames_release {
 def h264mp4_frames_begin_bytes(var source : uint8?; length : int) : int {
     var sample_index : int = 0
     h264_file_all__frames = null
-    if (!(source != null) || length <= 0) {
+    if (source == null || length <= 0) {
         return 0
     }
     shim_reset_heap()
     h264_file_all__frames = reinterpret<FrameStream?>(malloc1(uint64(typeinfo sizeof(type<FrameStream>))))
-    if (!(h264_file_all__frames != null)) {
+    if (h264_file_all__frames == null) {
         return 0
     }
     memset1(reinterpret<void?>(h264_file_all__frames), 0, uint64(typeinfo sizeof(type<FrameStream>)))
     h264_file_all__frames.input.bytes = source
     h264_file_all__frames.input.length = length
     h264_file_all__frames.frame_index = -1
-    if (MP4D_open(addr(h264_file_all__frames.mp4), @@h264_file_all__memory_read_callback, reinterpret<void?>(addr(h264_file_all__frames.input)), int64(length)) == 0) {
+    if (MP4D_open(addr(h264_file_all__frames.mp4), @@h264_file_all__memory_read_callback, reinterpret<void?>(addr(h264_file_all__frames.input)),
+                int64(length)) ==
+            0) {
         h264_file_all__frames = null
         return 0
     }
@@ -21300,7 +22504,8 @@ def h264mp4_frames_begin_bytes(var source : uint8?; length : int) : int {
         h264_file_all__frames_release()
         return 0
     }
-    h264_file_all__frames.track_length_size = h264_file_all__detect_track_length_size(addr(h264_file_all__frames.mp4), h264_file_all__frames.track_index, h264_file_all__frames.input.bytes, h264_file_all__frames.input.length)
+    h264_file_all__frames.track_length_size = h264_file_all__detect_track_length_size(addr(h264_file_all__frames.mp4), h264_file_all__frames.track_index,
+            h264_file_all__frames.input.bytes, h264_file_all__frames.input.length)
     if (h264_file_all__frames.track_length_size <= 0) {
         h264_file_all__frames_release()
         return 0
@@ -21309,7 +22514,8 @@ def h264mp4_frames_begin_bytes(var source : uint8?; length : int) : int {
     sample_index = 0
     while (sample_index < int(h264_file_all__frames.mp4.track[h264_file_all__frames.track_index].sample_count)) {
         var frame_bytes : uint = 0u
-        var offset : uint64 = MP4D_frame_offset(addr(h264_file_all__frames.mp4), uint(h264_file_all__frames.track_index), uint(sample_index), addr(frame_bytes), null, null)
+        var offset : uint64 = MP4D_frame_offset(addr(h264_file_all__frames.mp4), uint(h264_file_all__frames.track_index), uint(sample_index), addr(frame_bytes),
+                null, null)
         var annexb_bytes : int = 0
         if ((offset + uint64(frame_bytes)) > uint64(uint(h264_file_all__frames.input.length))) {
             h264_file_all__frames_release()
@@ -21326,16 +22532,16 @@ def h264mp4_frames_begin_bytes(var source : uint8?; length : int) : int {
         sample_index++
     }
     h264_file_all__frames.scratch = reinterpret<uint8?>(malloc1(uint64(h264_file_all__frames.max_sample_bytes)))
-    if (!(h264_file_all__frames.scratch != null)) {
+    if (h264_file_all__frames.scratch == null) {
         h264_file_all__frames_release()
         return 0
     }
     h264_file_all__frames.state.storage = h264bsdAlloc()
-    if (!(h264_file_all__frames.state.storage != null)) {
+    if (h264_file_all__frames.state.storage == null) {
         h264_file_all__frames_release()
         return 0
     }
-    if (h264bsdInit(h264_file_all__frames.state.storage, 0u) != uint(int(anon_277.H264BSD_RDY))) {
+    if (h264bsdInit(h264_file_all__frames.state.storage, 0u) != uint(anon_277.H264BSD_RDY)) {
         h264bsdFree(h264_file_all__frames.state.storage)
         h264_file_all__frames_release()
         return 0
@@ -21351,19 +22557,22 @@ def h264mp4_frames_begin : int {
 
 [c_function]
 def h264mp4_frames_next : int {
-    if (!(h264_file_all__frames != null) || !(h264_file_all__frames.decoder_ready != 0)) {
+    if (h264_file_all__frames == null || h264_file_all__frames.decoder_ready == 0) {
         return 0
     }
     while (h264_file_all__frames.sample_index < int(h264_file_all__frames.mp4.track[h264_file_all__frames.track_index].sample_count)) {
         var frame_bytes : uint = 0u
-        var offset : uint64 = MP4D_frame_offset(addr(h264_file_all__frames.mp4), uint(h264_file_all__frames.track_index), uint(h264_file_all__frames.sample_index), addr(frame_bytes), null, null)
-        var sample_length : int = h264_file_all__build_annexb_sample(addr(h264_file_all__frames.mp4), h264_file_all__frames.track_index, h264_file_all__frames.input.bytes + offset, int(frame_bytes), h264_file_all__frames.sample_index == 0 ? 1 : 0, h264_file_all__frames.scratch, h264_file_all__frames.max_sample_bytes, h264_file_all__frames.track_length_size)
+        var offset : uint64 = MP4D_frame_offset(addr(h264_file_all__frames.mp4), uint(h264_file_all__frames.track_index),
+                uint(h264_file_all__frames.sample_index), addr(frame_bytes), null, null)
+        var sample_length : int = h264_file_all__build_annexb_sample(addr(h264_file_all__frames.mp4), h264_file_all__frames.track_index,
+                h264_file_all__frames.input.bytes + offset, int(frame_bytes), int_of(h264_file_all__frames.sample_index == 0), h264_file_all__frames.scratch,
+                h264_file_all__frames.max_sample_bytes, h264_file_all__frames.track_length_size)
         var picture_ready : int = 0
         h264_file_all__frames.sample_index += 1
         if (sample_length < 0) {
             return 0
         }
-        if (!(h264_file_all__decode_access_unit(addr(h264_file_all__frames.state), h264_file_all__frames.scratch, sample_length, addr(picture_ready)) != 0)) {
+        if (h264_file_all__decode_access_unit(addr(h264_file_all__frames.state), h264_file_all__frames.scratch, sample_length, addr(picture_ready)) == 0) {
             return 0
         }
         if (picture_ready != 0) {
@@ -21405,7 +22614,7 @@ def private h264_file_all__load_last_argument(argc : int; var argv : uint8 ??) :
         return 0
     }
     f = reinterpret<FILE?>(crt::fopen(argv[argc - 1], cstr("rb")))
-    if (!(f != null)) {
+    if (f == null) {
         return 0
     }
     got = crt::fread(reinterpret<void?>(addr(h264_file_all__file_bytes[0])), 1ul, uint64(MAX_FILE_BYTES), reinterpret<void?>(f))
@@ -21424,7 +22633,7 @@ def c_main(argc : int; var argv : uint8 ??) : int {
         return 2
     }
     printf(cstr("bytes=%d\n"), length)
-    if (!(h264mp4_frames_begin_bytes(addr(h264_file_all__file_bytes[0]), length) != 0)) {
+    if (h264mp4_frames_begin_bytes(addr(h264_file_all__file_bytes[0]), length) == 0) {
         printf(cstr("frames_begin=0\n"))
         return 1
     }
