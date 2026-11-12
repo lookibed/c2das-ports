@@ -1011,7 +1011,8 @@ def private c2das_layout_check {
     static_assert(typeinfo sizeof(type<dheader_t>) == 124 && typeinfo alignof(type<dheader_t>) == 4, "dheader_t: clang lays it out as size 124, align 4")
     static_assert(typeinfo offsetof < version > (type<dheader_t>) == 0, "dheader_t.version: clang puts it at 0")
     static_assert(typeinfo offsetof < lumps > (type<dheader_t>) == 4, "dheader_t.lumps: clang puts it at 4")
-    static_assert(typeinfo sizeof(type<dmiptexlump_t>) == 20 && typeinfo alignof(type<dmiptexlump_t>) == 4, "dmiptexlump_t: clang lays it out as size 20, align 4")
+    static_assert(typeinfo sizeof(type<dmiptexlump_t>) == 20 && typeinfo alignof(type<dmiptexlump_t>) == 4,
+            "dmiptexlump_t: clang lays it out as size 20, align 4")
     static_assert(typeinfo offsetof < nummiptex > (type<dmiptexlump_t>) == 0, "dmiptexlump_t.nummiptex: clang puts it at 0")
     static_assert(typeinfo offsetof < dataofs > (type<dmiptexlump_t>) == 4, "dmiptexlump_t.dataofs: clang puts it at 4")
     static_assert(typeinfo sizeof(type<miptex_s>) == 40 && typeinfo alignof(type<miptex_s>) == 4, "miptex_s: clang lays it out as size 40, align 4")
@@ -1083,7 +1084,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < direct > (type<viddef_t>) == 88, "viddef_t.direct: clang puts it at 88")
     static_assert(typeinfo sizeof(type<cache_user_s>) == 8 && typeinfo alignof(type<cache_user_s>) == 8, "cache_user_s: clang lays it out as size 8, align 8")
     static_assert(typeinfo offsetof < data > (type<cache_user_s>) == 0, "cache_user_s.data: clang puts it at 0")
-    static_assert(typeinfo sizeof(type<entity_state_t>) == 44 && typeinfo alignof(type<entity_state_t>) == 4, "entity_state_t: clang lays it out as size 44, align 4")
+    static_assert(typeinfo sizeof(type<entity_state_t>) == 44 && typeinfo alignof(type<entity_state_t>) == 4,
+            "entity_state_t: clang lays it out as size 44, align 4")
     static_assert(typeinfo offsetof < origin > (type<entity_state_t>) == 0, "entity_state_t.origin: clang puts it at 0")
     static_assert(typeinfo offsetof < angles > (type<entity_state_t>) == 12, "entity_state_t.angles: clang puts it at 12")
     static_assert(typeinfo offsetof < modelindex > (type<entity_state_t>) == 24, "entity_state_t.modelindex: clang puts it at 24")
@@ -1141,7 +1143,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < receiveMessage > (type<qsocket_s>) == 8284, "qsocket_s.receiveMessage: clang puts it at 8284")
     static_assert(typeinfo offsetof < _c_addr > (type<qsocket_s>) == 16476, "qsocket_s._c_addr: clang puts it at 16476")
     static_assert(typeinfo offsetof < address > (type<qsocket_s>) == 16492, "qsocket_s.address: clang puts it at 16492")
-    static_assert(typeinfo sizeof(type<net_landriver_t>) == 160 && typeinfo alignof(type<net_landriver_t>) == 8, "net_landriver_t: clang lays it out as size 160, align 8")
+    static_assert(typeinfo sizeof(type<net_landriver_t>) == 160 && typeinfo alignof(type<net_landriver_t>) == 8,
+            "net_landriver_t: clang lays it out as size 160, align 8")
     static_assert(typeinfo offsetof < name > (type<net_landriver_t>) == 0, "net_landriver_t.name: clang puts it at 0")
     static_assert(typeinfo offsetof < initialized > (type<net_landriver_t>) == 8, "net_landriver_t.initialized: clang puts it at 8")
     static_assert(typeinfo offsetof < controlSock > (type<net_landriver_t>) == 12, "net_landriver_t.controlSock: clang puts it at 12")
@@ -1163,7 +1166,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < AddrCompare > (type<net_landriver_t>) == 136, "net_landriver_t.AddrCompare: clang puts it at 136")
     static_assert(typeinfo offsetof < GetSocketPort > (type<net_landriver_t>) == 144, "net_landriver_t.GetSocketPort: clang puts it at 144")
     static_assert(typeinfo offsetof < SetSocketPort > (type<net_landriver_t>) == 152, "net_landriver_t.SetSocketPort: clang puts it at 152")
-    static_assert(typeinfo sizeof(type<net_driver_t>) == 120 && typeinfo alignof(type<net_driver_t>) == 8, "net_driver_t: clang lays it out as size 120, align 8")
+    static_assert(typeinfo sizeof(type<net_driver_t>) == 120 && typeinfo alignof(type<net_driver_t>) == 8,
+            "net_driver_t: clang lays it out as size 120, align 8")
     static_assert(typeinfo offsetof < name > (type<net_driver_t>) == 0, "net_driver_t.name: clang puts it at 0")
     static_assert(typeinfo offsetof < initialized > (type<net_driver_t>) == 8, "net_driver_t.initialized: clang puts it at 8")
     static_assert(typeinfo offsetof < Init > (type<net_driver_t>) == 16, "net_driver_t.Init: clang puts it at 16")
@@ -1188,12 +1192,14 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < driver > (type<hostcache_t>) == 72, "hostcache_t.driver: clang puts it at 72")
     static_assert(typeinfo offsetof < ldriver > (type<hostcache_t>) == 76, "hostcache_t.ldriver: clang puts it at 76")
     static_assert(typeinfo offsetof < _c_addr > (type<hostcache_t>) == 80, "hostcache_t._c_addr: clang puts it at 80")
-    static_assert(typeinfo sizeof(type<_PollProcedure>) == 32 && typeinfo alignof(type<_PollProcedure>) == 8, "_PollProcedure: clang lays it out as size 32, align 8")
+    static_assert(typeinfo sizeof(type<_PollProcedure>) == 32 && typeinfo alignof(type<_PollProcedure>) == 8,
+            "_PollProcedure: clang lays it out as size 32, align 8")
     static_assert(typeinfo offsetof < next > (type<_PollProcedure>) == 0, "_PollProcedure.next: clang puts it at 0")
     static_assert(typeinfo offsetof < nextTime > (type<_PollProcedure>) == 8, "_PollProcedure.nextTime: clang puts it at 8")
     static_assert(typeinfo offsetof < procedure > (type<_PollProcedure>) == 16, "_PollProcedure.procedure: clang puts it at 16")
     static_assert(typeinfo offsetof < arg > (type<_PollProcedure>) == 24, "_PollProcedure.arg: clang puts it at 24")
-    static_assert(typeinfo sizeof(type<portable_samplepair_t>) == 8 && typeinfo alignof(type<portable_samplepair_t>) == 4, "portable_samplepair_t: clang lays it out as size 8, align 4")
+    static_assert(typeinfo sizeof(type<portable_samplepair_t>) == 8 && typeinfo alignof(type<portable_samplepair_t>) == 4,
+            "portable_samplepair_t: clang lays it out as size 8, align 4")
     static_assert(typeinfo offsetof < left > (type<portable_samplepair_t>) == 0, "portable_samplepair_t.left: clang puts it at 0")
     static_assert(typeinfo offsetof < right > (type<portable_samplepair_t>) == 4, "portable_samplepair_t.right: clang puts it at 4")
     static_assert(typeinfo sizeof(type<sfx_s>) == 72 && typeinfo alignof(type<sfx_s>) == 8, "sfx_s: clang lays it out as size 72, align 8")
@@ -1296,7 +1302,8 @@ def private c2das_layout_check {
     static_assert(typeinfo sizeof(type<lightstyle_t>) == 68 && typeinfo alignof(type<lightstyle_t>) == 4, "lightstyle_t: clang lays it out as size 68, align 4")
     static_assert(typeinfo offsetof < length > (type<lightstyle_t>) == 0, "lightstyle_t.length: clang puts it at 0")
     static_assert(typeinfo offsetof < map > (type<lightstyle_t>) == 4, "lightstyle_t.map: clang puts it at 4")
-    static_assert(typeinfo sizeof(type<scoreboard_t>) == 16428 && typeinfo alignof(type<scoreboard_t>) == 4, "scoreboard_t: clang lays it out as size 16428, align 4")
+    static_assert(typeinfo sizeof(type<scoreboard_t>) == 16428 && typeinfo alignof(type<scoreboard_t>) == 4,
+            "scoreboard_t: clang lays it out as size 16428, align 4")
     static_assert(typeinfo offsetof < name > (type<scoreboard_t>) == 0, "scoreboard_t.name: clang puts it at 0")
     static_assert(typeinfo offsetof < entertime > (type<scoreboard_t>) == 32, "scoreboard_t.entertime: clang puts it at 32")
     static_assert(typeinfo offsetof < frags > (type<scoreboard_t>) == 36, "scoreboard_t.frags: clang puts it at 36")
@@ -1318,7 +1325,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < endtime > (type<beam_t>) == 16, "beam_t.endtime: clang puts it at 16")
     static_assert(typeinfo offsetof < start > (type<beam_t>) == 20, "beam_t.start: clang puts it at 20")
     static_assert(typeinfo offsetof < end > (type<beam_t>) == 32, "beam_t.end: clang puts it at 32")
-    static_assert(typeinfo sizeof(type<client_static_t>) == 2320 && typeinfo alignof(type<client_static_t>) == 8, "client_static_t: clang lays it out as size 2320, align 8")
+    static_assert(typeinfo sizeof(type<client_static_t>) == 2320 && typeinfo alignof(type<client_static_t>) == 8,
+            "client_static_t: clang lays it out as size 2320, align 8")
     static_assert(typeinfo offsetof < state > (type<client_static_t>) == 0, "client_static_t.state: clang puts it at 0")
     static_assert(typeinfo offsetof < mapstring > (type<client_static_t>) == 4, "client_static_t.mapstring: clang puts it at 4")
     static_assert(typeinfo offsetof < spawnparms > (type<client_static_t>) == 68, "client_static_t.spawnparms: clang puts it at 68")
@@ -1335,7 +1343,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < signon > (type<client_static_t>) == 2284, "client_static_t.signon: clang puts it at 2284")
     static_assert(typeinfo offsetof < netcon > (type<client_static_t>) == 2288, "client_static_t.netcon: clang puts it at 2288")
     static_assert(typeinfo offsetof < message > (type<client_static_t>) == 2296, "client_static_t.message: clang puts it at 2296")
-    static_assert(typeinfo sizeof(type<client_state_t>) == 4992 && typeinfo alignof(type<client_state_t>) == 8, "client_state_t: clang lays it out as size 4992, align 8")
+    static_assert(typeinfo sizeof(type<client_state_t>) == 4992 && typeinfo alignof(type<client_state_t>) == 8,
+            "client_state_t: clang lays it out as size 4992, align 8")
     static_assert(typeinfo offsetof < movemessages > (type<client_state_t>) == 0, "client_state_t.movemessages: clang puts it at 0")
     static_assert(typeinfo offsetof < cmd > (type<client_state_t>) == 4, "client_state_t.cmd: clang puts it at 4")
     static_assert(typeinfo offsetof < stats > (type<client_state_t>) == 28, "client_state_t.stats: clang puts it at 28")
@@ -1416,7 +1425,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < ofs_globals > (type<dprograms_t>) == 48, "dprograms_t.ofs_globals: clang puts it at 48")
     static_assert(typeinfo offsetof < numglobals > (type<dprograms_t>) == 52, "dprograms_t.numglobals: clang puts it at 52")
     static_assert(typeinfo offsetof < entityfields > (type<dprograms_t>) == 56, "dprograms_t.entityfields: clang puts it at 56")
-    static_assert(typeinfo sizeof(type<globalvars_t>) == 368 && typeinfo alignof(type<globalvars_t>) == 4, "globalvars_t: clang lays it out as size 368, align 4")
+    static_assert(typeinfo sizeof(type<globalvars_t>) == 368 && typeinfo alignof(type<globalvars_t>) == 4,
+            "globalvars_t: clang lays it out as size 368, align 4")
     static_assert(typeinfo offsetof < pad > (type<globalvars_t>) == 0, "globalvars_t.pad: clang puts it at 0")
     static_assert(typeinfo offsetof < self > (type<globalvars_t>) == 112, "globalvars_t.self: clang puts it at 112")
     static_assert(typeinfo offsetof < other > (type<globalvars_t>) == 116, "globalvars_t.other: clang puts it at 116")
@@ -1560,7 +1570,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < baseline > (type<edict_s>) == 60, "edict_s.baseline: clang puts it at 60")
     static_assert(typeinfo offsetof < freetime > (type<edict_s>) == 104, "edict_s.freetime: clang puts it at 104")
     static_assert(typeinfo offsetof < v > (type<edict_s>) == 108, "edict_s.v: clang puts it at 108")
-    static_assert(typeinfo sizeof(type<server_static_t>) == 24 && typeinfo alignof(type<server_static_t>) == 8, "server_static_t: clang lays it out as size 24, align 8")
+    static_assert(typeinfo sizeof(type<server_static_t>) == 24 && typeinfo alignof(type<server_static_t>) == 8,
+            "server_static_t: clang lays it out as size 24, align 8")
     static_assert(typeinfo offsetof < maxclients > (type<server_static_t>) == 0, "server_static_t.maxclients: clang puts it at 0")
     static_assert(typeinfo offsetof < maxclientslimit > (type<server_static_t>) == 4, "server_static_t.maxclientslimit: clang puts it at 4")
     static_assert(typeinfo offsetof < clients > (type<server_static_t>) == 8, "server_static_t.clients: clang puts it at 8")
@@ -1635,23 +1646,30 @@ def private c2das_layout_check {
     static_assert(typeinfo sizeof(type<trivertx_t>) == 4 && typeinfo alignof(type<trivertx_t>) == 1, "trivertx_t: clang lays it out as size 4, align 1")
     static_assert(typeinfo offsetof < v > (type<trivertx_t>) == 0, "trivertx_t.v: clang puts it at 0")
     static_assert(typeinfo offsetof < lightnormalindex > (type<trivertx_t>) == 3, "trivertx_t.lightnormalindex: clang puts it at 3")
-    static_assert(typeinfo sizeof(type<daliasframe_t>) == 24 && typeinfo alignof(type<daliasframe_t>) == 1, "daliasframe_t: clang lays it out as size 24, align 1")
+    static_assert(typeinfo sizeof(type<daliasframe_t>) == 24 && typeinfo alignof(type<daliasframe_t>) == 1,
+            "daliasframe_t: clang lays it out as size 24, align 1")
     static_assert(typeinfo offsetof < bboxmin > (type<daliasframe_t>) == 0, "daliasframe_t.bboxmin: clang puts it at 0")
     static_assert(typeinfo offsetof < bboxmax > (type<daliasframe_t>) == 4, "daliasframe_t.bboxmax: clang puts it at 4")
     static_assert(typeinfo offsetof < name > (type<daliasframe_t>) == 8, "daliasframe_t.name: clang puts it at 8")
-    static_assert(typeinfo sizeof(type<daliasgroup_t>) == 12 && typeinfo alignof(type<daliasgroup_t>) == 4, "daliasgroup_t: clang lays it out as size 12, align 4")
+    static_assert(typeinfo sizeof(type<daliasgroup_t>) == 12 && typeinfo alignof(type<daliasgroup_t>) == 4,
+            "daliasgroup_t: clang lays it out as size 12, align 4")
     static_assert(typeinfo offsetof < numframes > (type<daliasgroup_t>) == 0, "daliasgroup_t.numframes: clang puts it at 0")
     static_assert(typeinfo offsetof < bboxmin > (type<daliasgroup_t>) == 4, "daliasgroup_t.bboxmin: clang puts it at 4")
     static_assert(typeinfo offsetof < bboxmax > (type<daliasgroup_t>) == 8, "daliasgroup_t.bboxmax: clang puts it at 8")
-    static_assert(typeinfo sizeof(type<daliasskingroup_t>) == 4 && typeinfo alignof(type<daliasskingroup_t>) == 4, "daliasskingroup_t: clang lays it out as size 4, align 4")
+    static_assert(typeinfo sizeof(type<daliasskingroup_t>) == 4 && typeinfo alignof(type<daliasskingroup_t>) == 4,
+            "daliasskingroup_t: clang lays it out as size 4, align 4")
     static_assert(typeinfo offsetof < numskins > (type<daliasskingroup_t>) == 0, "daliasskingroup_t.numskins: clang puts it at 0")
-    static_assert(typeinfo sizeof(type<daliasinterval_t>) == 4 && typeinfo alignof(type<daliasinterval_t>) == 4, "daliasinterval_t: clang lays it out as size 4, align 4")
+    static_assert(typeinfo sizeof(type<daliasinterval_t>) == 4 && typeinfo alignof(type<daliasinterval_t>) == 4,
+            "daliasinterval_t: clang lays it out as size 4, align 4")
     static_assert(typeinfo offsetof < interval > (type<daliasinterval_t>) == 0, "daliasinterval_t.interval: clang puts it at 0")
-    static_assert(typeinfo sizeof(type<daliasskininterval_t>) == 4 && typeinfo alignof(type<daliasskininterval_t>) == 4, "daliasskininterval_t: clang lays it out as size 4, align 4")
+    static_assert(typeinfo sizeof(type<daliasskininterval_t>) == 4 && typeinfo alignof(type<daliasskininterval_t>) == 4,
+            "daliasskininterval_t: clang lays it out as size 4, align 4")
     static_assert(typeinfo offsetof < interval > (type<daliasskininterval_t>) == 0, "daliasskininterval_t.interval: clang puts it at 0")
-    static_assert(typeinfo sizeof(type<daliasframetype_t>) == 4 && typeinfo alignof(type<daliasframetype_t>) == 4, "daliasframetype_t: clang lays it out as size 4, align 4")
+    static_assert(typeinfo sizeof(type<daliasframetype_t>) == 4 && typeinfo alignof(type<daliasframetype_t>) == 4,
+            "daliasframetype_t: clang lays it out as size 4, align 4")
     static_assert(typeinfo offsetof < _c_type > (type<daliasframetype_t>) == 0, "daliasframetype_t._c_type: clang puts it at 0")
-    static_assert(typeinfo sizeof(type<daliasskintype_t>) == 4 && typeinfo alignof(type<daliasskintype_t>) == 4, "daliasskintype_t: clang lays it out as size 4, align 4")
+    static_assert(typeinfo sizeof(type<daliasskintype_t>) == 4 && typeinfo alignof(type<daliasskintype_t>) == 4,
+            "daliasskintype_t: clang lays it out as size 4, align 4")
     static_assert(typeinfo offsetof < _c_type > (type<daliasskintype_t>) == 0, "daliasskintype_t._c_type: clang puts it at 0")
     static_assert(typeinfo sizeof(type<dsprite_t>) == 36 && typeinfo alignof(type<dsprite_t>) == 4, "dsprite_t: clang lays it out as size 36, align 4")
     static_assert(typeinfo offsetof < ident > (type<dsprite_t>) == 0, "dsprite_t.ident: clang puts it at 0")
@@ -1663,15 +1681,19 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < numframes > (type<dsprite_t>) == 24, "dsprite_t.numframes: clang puts it at 24")
     static_assert(typeinfo offsetof < beamlength > (type<dsprite_t>) == 28, "dsprite_t.beamlength: clang puts it at 28")
     static_assert(typeinfo offsetof < synctype > (type<dsprite_t>) == 32, "dsprite_t.synctype: clang puts it at 32")
-    static_assert(typeinfo sizeof(type<dspriteframe_t>) == 16 && typeinfo alignof(type<dspriteframe_t>) == 4, "dspriteframe_t: clang lays it out as size 16, align 4")
+    static_assert(typeinfo sizeof(type<dspriteframe_t>) == 16 && typeinfo alignof(type<dspriteframe_t>) == 4,
+            "dspriteframe_t: clang lays it out as size 16, align 4")
     static_assert(typeinfo offsetof < origin > (type<dspriteframe_t>) == 0, "dspriteframe_t.origin: clang puts it at 0")
     static_assert(typeinfo offsetof < width > (type<dspriteframe_t>) == 8, "dspriteframe_t.width: clang puts it at 8")
     static_assert(typeinfo offsetof < height > (type<dspriteframe_t>) == 12, "dspriteframe_t.height: clang puts it at 12")
-    static_assert(typeinfo sizeof(type<dspritegroup_t>) == 4 && typeinfo alignof(type<dspritegroup_t>) == 4, "dspritegroup_t: clang lays it out as size 4, align 4")
+    static_assert(typeinfo sizeof(type<dspritegroup_t>) == 4 && typeinfo alignof(type<dspritegroup_t>) == 4,
+            "dspritegroup_t: clang lays it out as size 4, align 4")
     static_assert(typeinfo offsetof < numframes > (type<dspritegroup_t>) == 0, "dspritegroup_t.numframes: clang puts it at 0")
-    static_assert(typeinfo sizeof(type<dspriteinterval_t>) == 4 && typeinfo alignof(type<dspriteinterval_t>) == 4, "dspriteinterval_t: clang lays it out as size 4, align 4")
+    static_assert(typeinfo sizeof(type<dspriteinterval_t>) == 4 && typeinfo alignof(type<dspriteinterval_t>) == 4,
+            "dspriteinterval_t: clang lays it out as size 4, align 4")
     static_assert(typeinfo offsetof < interval > (type<dspriteinterval_t>) == 0, "dspriteinterval_t.interval: clang puts it at 0")
-    static_assert(typeinfo sizeof(type<dspriteframetype_t>) == 4 && typeinfo alignof(type<dspriteframetype_t>) == 4, "dspriteframetype_t: clang lays it out as size 4, align 4")
+    static_assert(typeinfo sizeof(type<dspriteframetype_t>) == 4 && typeinfo alignof(type<dspriteframetype_t>) == 4,
+            "dspriteframetype_t: clang lays it out as size 4, align 4")
     static_assert(typeinfo offsetof < _c_type > (type<dspriteframetype_t>) == 0, "dspriteframetype_t._c_type: clang puts it at 0")
     static_assert(typeinfo sizeof(type<mvertex_t>) == 12 && typeinfo alignof(type<mvertex_t>) == 4, "mvertex_t: clang lays it out as size 12, align 4")
     static_assert(typeinfo offsetof < position > (type<mvertex_t>) == 0, "mvertex_t.position: clang puts it at 0")
@@ -1740,7 +1762,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < lastclipnode > (type<hull_t>) == 20, "hull_t.lastclipnode: clang puts it at 20")
     static_assert(typeinfo offsetof < clip_mins > (type<hull_t>) == 24, "hull_t.clip_mins: clang puts it at 24")
     static_assert(typeinfo offsetof < clip_maxs > (type<hull_t>) == 36, "hull_t.clip_maxs: clang puts it at 36")
-    static_assert(typeinfo sizeof(type<mspriteframe_s>) == 40 && typeinfo alignof(type<mspriteframe_s>) == 8, "mspriteframe_s: clang lays it out as size 40, align 8")
+    static_assert(typeinfo sizeof(type<mspriteframe_s>) == 40 && typeinfo alignof(type<mspriteframe_s>) == 8,
+            "mspriteframe_s: clang lays it out as size 40, align 8")
     static_assert(typeinfo offsetof < width > (type<mspriteframe_s>) == 0, "mspriteframe_s.width: clang puts it at 0")
     static_assert(typeinfo offsetof < height > (type<mspriteframe_s>) == 4, "mspriteframe_s.height: clang puts it at 4")
     static_assert(typeinfo offsetof < pcachespot > (type<mspriteframe_s>) == 8, "mspriteframe_s.pcachespot: clang puts it at 8")
@@ -1749,11 +1772,13 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < left > (type<mspriteframe_s>) == 24, "mspriteframe_s.left: clang puts it at 24")
     static_assert(typeinfo offsetof < right > (type<mspriteframe_s>) == 28, "mspriteframe_s.right: clang puts it at 28")
     static_assert(typeinfo offsetof < pixels > (type<mspriteframe_s>) == 32, "mspriteframe_s.pixels: clang puts it at 32")
-    static_assert(typeinfo sizeof(type<mspritegroup_t>) == 24 && typeinfo alignof(type<mspritegroup_t>) == 8, "mspritegroup_t: clang lays it out as size 24, align 8")
+    static_assert(typeinfo sizeof(type<mspritegroup_t>) == 24 && typeinfo alignof(type<mspritegroup_t>) == 8,
+            "mspritegroup_t: clang lays it out as size 24, align 8")
     static_assert(typeinfo offsetof < numframes > (type<mspritegroup_t>) == 0, "mspritegroup_t.numframes: clang puts it at 0")
     static_assert(typeinfo offsetof < intervals > (type<mspritegroup_t>) == 8, "mspritegroup_t.intervals: clang puts it at 8")
     static_assert(typeinfo offsetof < frames > (type<mspritegroup_t>) == 16, "mspritegroup_t.frames: clang puts it at 16")
-    static_assert(typeinfo sizeof(type<mspriteframedesc_t>) == 16 && typeinfo alignof(type<mspriteframedesc_t>) == 8, "mspriteframedesc_t: clang lays it out as size 16, align 8")
+    static_assert(typeinfo sizeof(type<mspriteframedesc_t>) == 16 && typeinfo alignof(type<mspriteframedesc_t>) == 8,
+            "mspriteframedesc_t: clang lays it out as size 16, align 8")
     static_assert(typeinfo offsetof < _c_type > (type<mspriteframedesc_t>) == 0, "mspriteframedesc_t._c_type: clang puts it at 0")
     static_assert(typeinfo offsetof < frameptr > (type<mspriteframedesc_t>) == 8, "mspriteframedesc_t.frameptr: clang puts it at 8")
     static_assert(typeinfo sizeof(type<msprite_t>) == 48 && typeinfo alignof(type<msprite_t>) == 8, "msprite_t: clang lays it out as size 48, align 8")
@@ -1764,25 +1789,30 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < beamlength > (type<msprite_t>) == 16, "msprite_t.beamlength: clang puts it at 16")
     static_assert(typeinfo offsetof < cachespot > (type<msprite_t>) == 24, "msprite_t.cachespot: clang puts it at 24")
     static_assert(typeinfo offsetof < frames > (type<msprite_t>) == 32, "msprite_t.frames: clang puts it at 32")
-    static_assert(typeinfo sizeof(type<maliasframedesc_t>) == 32 && typeinfo alignof(type<maliasframedesc_t>) == 4, "maliasframedesc_t: clang lays it out as size 32, align 4")
+    static_assert(typeinfo sizeof(type<maliasframedesc_t>) == 32 && typeinfo alignof(type<maliasframedesc_t>) == 4,
+            "maliasframedesc_t: clang lays it out as size 32, align 4")
     static_assert(typeinfo offsetof < _c_type > (type<maliasframedesc_t>) == 0, "maliasframedesc_t._c_type: clang puts it at 0")
     static_assert(typeinfo offsetof < bboxmin > (type<maliasframedesc_t>) == 4, "maliasframedesc_t.bboxmin: clang puts it at 4")
     static_assert(typeinfo offsetof < bboxmax > (type<maliasframedesc_t>) == 8, "maliasframedesc_t.bboxmax: clang puts it at 8")
     static_assert(typeinfo offsetof < frame > (type<maliasframedesc_t>) == 12, "maliasframedesc_t.frame: clang puts it at 12")
     static_assert(typeinfo offsetof < name > (type<maliasframedesc_t>) == 16, "maliasframedesc_t.name: clang puts it at 16")
-    static_assert(typeinfo sizeof(type<maliasskindesc_t>) == 24 && typeinfo alignof(type<maliasskindesc_t>) == 8, "maliasskindesc_t: clang lays it out as size 24, align 8")
+    static_assert(typeinfo sizeof(type<maliasskindesc_t>) == 24 && typeinfo alignof(type<maliasskindesc_t>) == 8,
+            "maliasskindesc_t: clang lays it out as size 24, align 8")
     static_assert(typeinfo offsetof < _c_type > (type<maliasskindesc_t>) == 0, "maliasskindesc_t._c_type: clang puts it at 0")
     static_assert(typeinfo offsetof < pcachespot > (type<maliasskindesc_t>) == 8, "maliasskindesc_t.pcachespot: clang puts it at 8")
     static_assert(typeinfo offsetof < skin > (type<maliasskindesc_t>) == 16, "maliasskindesc_t.skin: clang puts it at 16")
-    static_assert(typeinfo sizeof(type<maliasgroupframedesc_t>) == 12 && typeinfo alignof(type<maliasgroupframedesc_t>) == 4, "maliasgroupframedesc_t: clang lays it out as size 12, align 4")
+    static_assert(typeinfo sizeof(type<maliasgroupframedesc_t>) == 12 && typeinfo alignof(type<maliasgroupframedesc_t>) == 4,
+            "maliasgroupframedesc_t: clang lays it out as size 12, align 4")
     static_assert(typeinfo offsetof < bboxmin > (type<maliasgroupframedesc_t>) == 0, "maliasgroupframedesc_t.bboxmin: clang puts it at 0")
     static_assert(typeinfo offsetof < bboxmax > (type<maliasgroupframedesc_t>) == 4, "maliasgroupframedesc_t.bboxmax: clang puts it at 4")
     static_assert(typeinfo offsetof < frame > (type<maliasgroupframedesc_t>) == 8, "maliasgroupframedesc_t.frame: clang puts it at 8")
-    static_assert(typeinfo sizeof(type<maliasgroup_t>) == 20 && typeinfo alignof(type<maliasgroup_t>) == 4, "maliasgroup_t: clang lays it out as size 20, align 4")
+    static_assert(typeinfo sizeof(type<maliasgroup_t>) == 20 && typeinfo alignof(type<maliasgroup_t>) == 4,
+            "maliasgroup_t: clang lays it out as size 20, align 4")
     static_assert(typeinfo offsetof < numframes > (type<maliasgroup_t>) == 0, "maliasgroup_t.numframes: clang puts it at 0")
     static_assert(typeinfo offsetof < intervals > (type<maliasgroup_t>) == 4, "maliasgroup_t.intervals: clang puts it at 4")
     static_assert(typeinfo offsetof < frames > (type<maliasgroup_t>) == 8, "maliasgroup_t.frames: clang puts it at 8")
-    static_assert(typeinfo sizeof(type<maliasskingroup_t>) == 32 && typeinfo alignof(type<maliasskingroup_t>) == 8, "maliasskingroup_t: clang lays it out as size 32, align 8")
+    static_assert(typeinfo sizeof(type<maliasskingroup_t>) == 32 && typeinfo alignof(type<maliasskingroup_t>) == 8,
+            "maliasskingroup_t: clang lays it out as size 32, align 8")
     static_assert(typeinfo offsetof < numskins > (type<maliasskingroup_t>) == 0, "maliasskingroup_t.numskins: clang puts it at 0")
     static_assert(typeinfo offsetof < intervals > (type<maliasskingroup_t>) == 4, "maliasskingroup_t.intervals: clang puts it at 4")
     static_assert(typeinfo offsetof < skindescs > (type<maliasskingroup_t>) == 8, "maliasskingroup_t.skindescs: clang puts it at 8")
@@ -1865,7 +1895,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < v > (type<finalvert_s>) == 0, "finalvert_s.v: clang puts it at 0")
     static_assert(typeinfo offsetof < flags > (type<finalvert_s>) == 24, "finalvert_s.flags: clang puts it at 24")
     static_assert(typeinfo offsetof < reserved > (type<finalvert_s>) == 28, "finalvert_s.reserved: clang puts it at 28")
-    static_assert(typeinfo sizeof(type<affinetridesc_t>) == 56 && typeinfo alignof(type<affinetridesc_t>) == 8, "affinetridesc_t: clang lays it out as size 56, align 8")
+    static_assert(typeinfo sizeof(type<affinetridesc_t>) == 56 && typeinfo alignof(type<affinetridesc_t>) == 8,
+            "affinetridesc_t: clang lays it out as size 56, align 8")
     static_assert(typeinfo offsetof < pskin > (type<affinetridesc_t>) == 0, "affinetridesc_t.pskin: clang puts it at 0")
     static_assert(typeinfo offsetof < pskindesc > (type<affinetridesc_t>) == 8, "affinetridesc_t.pskindesc: clang puts it at 8")
     static_assert(typeinfo offsetof < skinwidth > (type<affinetridesc_t>) == 16, "affinetridesc_t.skinwidth: clang puts it at 16")
@@ -1923,19 +1954,44 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < memsize > (type<quakeparms_t>) == 40, "quakeparms_t.memsize: clang puts it at 40")
 }
 
-var private crc__crctable : uint16[256] = fixed_array(uint16(0), uint16(4129), uint16(8258), uint16(12387), uint16(16516), uint16(20645), uint16(24774), uint16(28903), uint16(33032), uint16(37161), uint16(41290), uint16(45419), uint16(49548), uint16(53677), uint16(57806), uint16(61935), uint16(4657), uint16(528), uint16(12915), uint16(8786), uint16(21173), uint16(17044), uint16(29431), uint16(25302), uint16(37689), uint16(33560), uint16(45947), uint16(41818), uint16(54205), uint16(50076), uint16(62463), uint16(58334), uint16(9314), uint16(13379), uint16(1056), uint16(5121), uint16(25830), uint16(29895), uint16(17572), uint16(21637), uint16(42346), uint16(46411), uint16(34088), uint16(38153), uint16(58862), uint16(62927), uint16(50604), uint16(54669), uint16(13907), uint16(9842), uint16(5649), uint16(1584), uint16(30423), uint16(26358), uint16(22165), uint16(18100), uint16(46939), uint16(42874), uint16(38681), uint16(34616), uint16(63455), uint16(59390), uint16(55197), uint16(51132), uint16(18628), uint16(22757), uint16(26758), uint16(30887), uint16(2112), uint16(6241), uint16(10242), uint16(14371), uint16(51660), uint16(55789), uint16(59790), uint16(63919), uint16(35144), uint16(39273), uint16(43274), uint16(47403), uint16(23285), uint16(19156), uint16(31415), uint16(27286), uint16(6769), uint16(2640), uint16(14899), uint16(10770), uint16(56317), uint16(52188), uint16(64447), uint16(60318), uint16(39801), uint16(35672), uint16(47931), uint16(43802), uint16(27814), uint16(31879), uint16(19684), uint16(23749), uint16(11298), uint16(15363), uint16(3168), uint16(7233), uint16(60846), uint16(64911), uint16(52716), uint16(56781), uint16(44330), uint16(48395), uint16(36200), uint16(40265), uint16(32407), uint16(28342), uint16(24277), uint16(20212), uint16(15891), uint16(11826), uint16(7761), uint16(3696), uint16(65439), uint16(61374), uint16(57309), uint16(53244), uint16(48923), uint16(44858), uint16(40793), uint16(36728), uint16(37256), uint16(33193), uint16(45514), uint16(41451), uint16(53516), uint16(49453), uint16(61774), uint16(57711), uint16(4224), uint16(161), uint16(12482), uint16(8419), uint16(20484), uint16(16421), uint16(28742), uint16(24679), uint16(33721), uint16(37784), uint16(41979), uint16(46042), uint16(49981), uint16(54044), uint16(58239), uint16(62302), uint16(689), uint16(4752), uint16(8947), uint16(13010), uint16(16949), uint16(21012), uint16(25207), uint16(29270), uint16(46570), uint16(42443), uint16(38312), uint16(34185), uint16(62830), uint16(58703), uint16(54572), uint16(50445), uint16(13538), uint16(9411), uint16(5280), uint16(1153), uint16(29798), uint16(25671), uint16(21540), uint16(17413), uint16(42971), uint16(47098), uint16(34713), uint16(38840), uint16(59231), uint16(63358), uint16(50973), uint16(55100), uint16(9939), uint16(14066), uint16(1681), uint16(5808), uint16(26199), uint16(30326), uint16(17941), uint16(22068), uint16(55628), uint16(51565), uint16(63758), uint16(59695), uint16(39368), uint16(35305), uint16(47498), uint16(43435), uint16(22596), uint16(18533), uint16(30726), uint16(26663), uint16(6336), uint16(2273), uint16(14466), uint16(10403), uint16(52093), uint16(56156), uint16(60223), uint16(64286), uint16(35833), uint16(39896), uint16(43963), uint16(48026), uint16(19061), uint16(23124), uint16(27191), uint16(31254), uint16(2801), uint16(6864), uint16(10931), uint16(14994), uint16(64814), uint16(60687), uint16(56684), uint16(52557), uint16(48554), uint16(44427), uint16(40424), uint16(36297), uint16(31782), uint16(27655), uint16(23652), uint16(19525), uint16(15522), uint16(11395), uint16(7392), uint16(3265), uint16(61215), uint16(65342), uint16(53085), uint16(57212), uint16(44955), uint16(49082), uint16(36825), uint16(40952), uint16(28183), uint16(32310), uint16(20053), uint16(24180), uint16(11923), uint16(16050), uint16(3793), uint16(7920))
+var private crc__crctable : uint16[256] = fixed_array(uint16(0), uint16(4129), uint16(8258), uint16(12387), uint16(16516), uint16(20645), uint16(24774),
+        uint16(28903), uint16(33032), uint16(37161), uint16(41290), uint16(45419), uint16(49548), uint16(53677), uint16(57806), uint16(61935), uint16(4657),
+        uint16(528), uint16(12915), uint16(8786), uint16(21173), uint16(17044), uint16(29431), uint16(25302), uint16(37689), uint16(33560), uint16(45947),
+        uint16(41818), uint16(54205), uint16(50076), uint16(62463), uint16(58334), uint16(9314), uint16(13379), uint16(1056), uint16(5121), uint16(25830),
+        uint16(29895), uint16(17572), uint16(21637), uint16(42346), uint16(46411), uint16(34088), uint16(38153), uint16(58862), uint16(62927), uint16(50604),
+        uint16(54669), uint16(13907), uint16(9842), uint16(5649), uint16(1584), uint16(30423), uint16(26358), uint16(22165), uint16(18100), uint16(46939),
+        uint16(42874), uint16(38681), uint16(34616), uint16(63455), uint16(59390), uint16(55197), uint16(51132), uint16(18628), uint16(22757), uint16(26758),
+        uint16(30887), uint16(2112), uint16(6241), uint16(10242), uint16(14371), uint16(51660), uint16(55789), uint16(59790), uint16(63919), uint16(35144),
+        uint16(39273), uint16(43274), uint16(47403), uint16(23285), uint16(19156), uint16(31415), uint16(27286), uint16(6769), uint16(2640), uint16(14899),
+        uint16(10770), uint16(56317), uint16(52188), uint16(64447), uint16(60318), uint16(39801), uint16(35672), uint16(47931), uint16(43802), uint16(27814),
+        uint16(31879), uint16(19684), uint16(23749), uint16(11298), uint16(15363), uint16(3168), uint16(7233), uint16(60846), uint16(64911), uint16(52716),
+        uint16(56781), uint16(44330), uint16(48395), uint16(36200), uint16(40265), uint16(32407), uint16(28342), uint16(24277), uint16(20212), uint16(15891),
+        uint16(11826), uint16(7761), uint16(3696), uint16(65439), uint16(61374), uint16(57309), uint16(53244), uint16(48923), uint16(44858), uint16(40793),
+        uint16(36728), uint16(37256), uint16(33193), uint16(45514), uint16(41451), uint16(53516), uint16(49453), uint16(61774), uint16(57711), uint16(4224),
+        uint16(161), uint16(12482), uint16(8419), uint16(20484), uint16(16421), uint16(28742), uint16(24679), uint16(33721), uint16(37784), uint16(41979),
+        uint16(46042), uint16(49981), uint16(54044), uint16(58239), uint16(62302), uint16(689), uint16(4752), uint16(8947), uint16(13010), uint16(16949),
+        uint16(21012), uint16(25207), uint16(29270), uint16(46570), uint16(42443), uint16(38312), uint16(34185), uint16(62830), uint16(58703), uint16(54572),
+        uint16(50445), uint16(13538), uint16(9411), uint16(5280), uint16(1153), uint16(29798), uint16(25671), uint16(21540), uint16(17413), uint16(42971),
+        uint16(47098), uint16(34713), uint16(38840), uint16(59231), uint16(63358), uint16(50973), uint16(55100), uint16(9939), uint16(14066), uint16(1681),
+        uint16(5808), uint16(26199), uint16(30326), uint16(17941), uint16(22068), uint16(55628), uint16(51565), uint16(63758), uint16(59695), uint16(39368),
+        uint16(35305), uint16(47498), uint16(43435), uint16(22596), uint16(18533), uint16(30726), uint16(26663), uint16(6336), uint16(2273), uint16(14466),
+        uint16(10403), uint16(52093), uint16(56156), uint16(60223), uint16(64286), uint16(35833), uint16(39896), uint16(43963), uint16(48026), uint16(19061),
+        uint16(23124), uint16(27191), uint16(31254), uint16(2801), uint16(6864), uint16(10931), uint16(14994), uint16(64814), uint16(60687), uint16(56684),
+        uint16(52557), uint16(48554), uint16(44427), uint16(40424), uint16(36297), uint16(31782), uint16(27655), uint16(23652), uint16(19525), uint16(15522),
+        uint16(11395), uint16(7392), uint16(3265), uint16(61215), uint16(65342), uint16(53085), uint16(57212), uint16(44955), uint16(49082), uint16(36825),
+        uint16(40952), uint16(28183), uint16(32310), uint16(20053), uint16(24180), uint16(11923), uint16(16050), uint16(3793), uint16(7920))
 
 let private CRC_INIT_VALUE = 65535
 let private CRC_XOR_VALUE = 0
 
 [c_function]
 def CRC_Init(var crcvalue : uint16?) {
-    deref(crcvalue) = uint16(CRC_INIT_VALUE)
+    *crcvalue = uint16(CRC_INIT_VALUE)
 }
 
 [c_function]
 def CRC_ProcessByte(var crcvalue : uint16?; data : uint8) {
-    deref(crcvalue) = uint16((int(deref(crcvalue)) << 8) ^ int(crc__crctable[(int(deref(crcvalue)) >> 8) ^ int(data)]))
+    *crcvalue = uint16((int(*crcvalue) << 8) ^ int(crc__crctable[(int(*crcvalue) >> 8) ^ int(data)]))
 }
 
 def CRC_Value(crcvalue : uint16) : uint16 {
