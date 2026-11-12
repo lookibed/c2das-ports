@@ -39,7 +39,7 @@ def cht_CheckCheat(var cht : cheatseq_t?; key : uint8) : int {
         // still reading characters from the cheat code
         // and verifying. reset back to the beginning
         // if a key is wrong
-        if (int(key) == int(cht.sequence[cht.chars_read])) {
+        if (key == cht.sequence[cht.chars_read]) {
             cht.chars_read++
         } else {
             cht.chars_read = 0ul

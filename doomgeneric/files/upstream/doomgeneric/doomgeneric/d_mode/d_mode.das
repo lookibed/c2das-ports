@@ -3,7 +3,9 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_switch
 require c_runtime/cstr
+require c_runtime/int_of
 
 enum GameMission_t {
     doom
@@ -75,8 +77,27 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < version > (type<anon_26>) == 4, "anon_26.version: clang puts it at 4")
 }
 
-var private d_mode__valid_modes : anon_21[13] = fixed_array(anon_21(mission = GameMission_t.pack_chex, mode = GameMode_t.shareware, episode = 1, map = 5), anon_21(mission = GameMission_t.doom, mode = GameMode_t.shareware, episode = 1, map = 9), anon_21(mission = GameMission_t.doom, mode = GameMode_t.registered, episode = 3, map = 9), anon_21(mission = GameMission_t.doom, mode = GameMode_t.retail, episode = 4, map = 9), anon_21(mission = GameMission_t.doom2, mode = GameMode_t.commercial, episode = 1, map = 32), anon_21(mission = GameMission_t.pack_tnt, mode = GameMode_t.commercial, episode = 1, map = 32), anon_21(mission = GameMission_t.pack_plut, mode = GameMode_t.commercial, episode = 1, map = 32), anon_21(mission = GameMission_t.pack_hacx, mode = GameMode_t.commercial, episode = 1, map = 32), anon_21(mission = GameMission_t.heretic, mode = GameMode_t.shareware, episode = 1, map = 9), anon_21(mission = GameMission_t.heretic, mode = GameMode_t.registered, episode = 3, map = 9), anon_21(mission = GameMission_t.heretic, mode = GameMode_t.retail, episode = 5, map = 9), anon_21(mission = GameMission_t.hexen, mode = GameMode_t.commercial, episode = 1, map = 60), anon_21(mission = GameMission_t.strife, mode = GameMode_t.commercial, episode = 1, map = 34))
-var private d_mode__valid_versions : anon_26[10] = fixed_array(anon_26(mission = GameMission_t.doom, version = GameVersion_t.exe_doom_1_9), anon_26(mission = GameMission_t.doom, version = GameVersion_t.exe_hacx), anon_26(mission = GameMission_t.doom, version = GameVersion_t.exe_ultimate), anon_26(mission = GameMission_t.doom, version = GameVersion_t.exe_final), anon_26(mission = GameMission_t.doom, version = GameVersion_t.exe_final2), anon_26(mission = GameMission_t.doom, version = GameVersion_t.exe_chex), anon_26(mission = GameMission_t.heretic, version = GameVersion_t.exe_heretic_1_3), anon_26(mission = GameMission_t.hexen, version = GameVersion_t.exe_hexen_1_1), anon_26(mission = GameMission_t.strife, version = GameVersion_t.exe_strife_1_2), anon_26(mission = GameMission_t.strife, version = GameVersion_t.exe_strife_1_31))
+var private d_mode__valid_modes : anon_21[13] = fixed_array(anon_21(mission = GameMission_t.pack_chex, mode = GameMode_t.shareware, episode = 1, map = 5),
+        anon_21(mission = GameMission_t.doom, mode = GameMode_t.shareware, episode = 1, map = 9),
+        anon_21(mission = GameMission_t.doom, mode = GameMode_t.registered, episode = 3, map = 9),
+        anon_21(mission = GameMission_t.doom, mode = GameMode_t.retail, episode = 4, map = 9),
+        anon_21(mission = GameMission_t.doom2, mode = GameMode_t.commercial, episode = 1, map = 32),
+        anon_21(mission = GameMission_t.pack_tnt, mode = GameMode_t.commercial, episode = 1, map = 32),
+        anon_21(mission = GameMission_t.pack_plut, mode = GameMode_t.commercial, episode = 1, map = 32),
+        anon_21(mission = GameMission_t.pack_hacx, mode = GameMode_t.commercial, episode = 1, map = 32),
+        anon_21(mission = GameMission_t.heretic, mode = GameMode_t.shareware, episode = 1, map = 9),
+        anon_21(mission = GameMission_t.heretic, mode = GameMode_t.registered, episode = 3, map = 9),
+        anon_21(mission = GameMission_t.heretic, mode = GameMode_t.retail, episode = 5, map = 9),
+        anon_21(mission = GameMission_t.hexen, mode = GameMode_t.commercial, episode = 1, map = 60),
+        anon_21(mission = GameMission_t.strife, mode = GameMode_t.commercial, episode = 1, map = 34))
+var private d_mode__valid_versions : anon_26[10] = fixed_array(anon_26(mission = GameMission_t.doom, version = GameVersion_t.exe_doom_1_9),
+        anon_26(mission = GameMission_t.doom, version = GameVersion_t.exe_hacx), anon_26(mission = GameMission_t.doom, version = GameVersion_t.exe_ultimate),
+        anon_26(mission = GameMission_t.doom, version = GameVersion_t.exe_final), anon_26(mission = GameMission_t.doom, version = GameVersion_t.exe_final2),
+        anon_26(mission = GameMission_t.doom, version = GameVersion_t.exe_chex),
+        anon_26(mission = GameMission_t.heretic, version = GameVersion_t.exe_heretic_1_3),
+        anon_26(mission = GameMission_t.hexen, version = GameVersion_t.exe_hexen_1_1),
+        anon_26(mission = GameMission_t.strife, version = GameVersion_t.exe_strife_1_2),
+        anon_26(mission = GameMission_t.strife, version = GameVersion_t.exe_strife_1_31))
 
 def D_ValidGameMode(mission : GameMission_t; mode : GameMode_t) : uint {
     var i : int
@@ -95,16 +116,16 @@ def D_ValidEpisodeMap(mission : GameMission_t; mode : GameMode_t; episode : int;
     // Hacks for Heretic secret episodes
     if (mission == GameMission_t.heretic) {
         if (mode == GameMode_t.retail && episode == 6) {
-            return uint(map >= 1 && map <= 3 ? 1 : 0)
+            return uint(int_of(map >= 1 && map <= 3))
         } elif (mode == GameMode_t.registered && episode == 4) {
-            return uint(map == 1 ? 1 : 0)
+            return uint(int_of(map == 1))
         }
     }
     // Find the table entry for this mission/mode combination.
     i = 0
     while (uint64(i) < uint64(typeinfo sizeof(type<anon_21[13]>)) / uint64(typeinfo sizeof(type<anon_21>))) {
         if (mission == d_mode__valid_modes[i].mission && mode == d_mode__valid_modes[i].mode) {
-            return uint(episode >= 1 && episode <= d_mode__valid_modes[i].episode && map >= 1 && map <= d_mode__valid_modes[i].map ? 1 : 0)
+            return uint(int_of(episode >= 1 && episode <= d_mode__valid_modes[i].episode && map >= 1 && map <= d_mode__valid_modes[i].map))
         }
         i++
     }
@@ -124,7 +145,8 @@ def D_GetNumEpisodes(mission : GameMission_t; mode : GameMode_t) : int {
 def D_ValidGameVersion(var mission : GameMission_t; version : GameVersion_t) : uint {
     var i : int
     // All Doom variants can use the Doom versions.
-    if (mission == GameMission_t.doom2 || mission == GameMission_t.pack_plut || mission == GameMission_t.pack_tnt || mission == GameMission_t.pack_hacx || mission == GameMission_t.pack_chex) {
+    if (mission == GameMission_t.doom2 || mission == GameMission_t.pack_plut || mission == GameMission_t.pack_tnt || mission == GameMission_t.pack_hacx ||
+            mission == GameMission_t.pack_chex) {
         mission = GameMission_t.doom
     }
     i = 0
@@ -138,36 +160,48 @@ def D_ValidGameVersion(var mission : GameMission_t; version : GameVersion_t) : u
 }
 
 def D_IsEpisodeMap(mission : GameMission_t) : uint {
-    let _cond = mission
-    if (_cond == GameMission_t.doom || _cond == GameMission_t.heretic || _cond == GameMission_t.pack_chex) {
-        return 1u
-    } else {
-        return 0u
+    c_switch(mission) {
+        case(GameMission_t.doom, GameMission_t.heretic, GameMission_t.pack_chex) {
+            return 1u
+        }
+        case(GameMission_t.none, GameMission_t.hexen, GameMission_t.doom2, GameMission_t.pack_hacx, GameMission_t.pack_tnt, GameMission_t.pack_plut, GameMission_t.strife, _) {
+            return 0u
+        }
     }
 }
 
 def D_GameMissionString(mission : GameMission_t) : uint8? {
-    let _cond = mission
-    if (_cond == GameMission_t.doom) {
-        return cstr("doom")
-    } elif (_cond == GameMission_t.doom2) {
-        return cstr("doom2")
-    } elif (_cond == GameMission_t.pack_tnt) {
-        return cstr("tnt")
-    } elif (_cond == GameMission_t.pack_plut) {
-        return cstr("plutonia")
-    } elif (_cond == GameMission_t.pack_hacx) {
-        return cstr("hacx")
-    } elif (_cond == GameMission_t.pack_chex) {
-        return cstr("chex")
-    } elif (_cond == GameMission_t.heretic) {
-        return cstr("heretic")
-    } elif (_cond == GameMission_t.hexen) {
-        return cstr("hexen")
-    } elif (_cond == GameMission_t.strife) {
-        return cstr("strife")
-    } else {
-        return cstr("none")
+    c_switch(mission) {
+        case(GameMission_t.none, _) {
+            return cstr("none")
+        }
+        case(GameMission_t.doom) {
+            return cstr("doom")
+        }
+        case(GameMission_t.doom2) {
+            return cstr("doom2")
+        }
+        case(GameMission_t.pack_tnt) {
+            return cstr("tnt")
+        }
+        case(GameMission_t.pack_plut) {
+            return cstr("plutonia")
+        }
+        case(GameMission_t.pack_hacx) {
+            return cstr("hacx")
+        }
+        case(GameMission_t.pack_chex) {
+            return cstr("chex")
+        }
+        case(GameMission_t.heretic) {
+            return cstr("heretic")
+        }
+        case(GameMission_t.hexen) {
+            return cstr("hexen")
+        }
+        case(GameMission_t.strife) {
+            return cstr("strife")
+        }
     }
 }
 

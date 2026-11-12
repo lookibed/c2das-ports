@@ -14,7 +14,8 @@ struct sha1_context_s {
 
 [init]
 def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<sha1_context_s>) == 92 && typeinfo alignof(type<sha1_context_s>) == 4, "sha1_context_s: clang lays it out as size 92, align 4")
+    static_assert(typeinfo sizeof(type<sha1_context_s>) == 92 && typeinfo alignof(type<sha1_context_s>) == 4,
+            "sha1_context_s: clang lays it out as size 92, align 4")
     static_assert(typeinfo offsetof < h0 > (type<sha1_context_s>) == 0, "sha1_context_s.h0: clang puts it at 0")
     static_assert(typeinfo offsetof < h1 > (type<sha1_context_s>) == 4, "sha1_context_s.h1: clang puts it at 4")
     static_assert(typeinfo offsetof < h2 > (type<sha1_context_s>) == 8, "sha1_context_s.h2: clang puts it at 8")
@@ -63,19 +64,19 @@ def private sha1__Transform(var hd : sha1_context_s?; var data : uint8?) {
         p2 = reinterpret<uint8?>(addr(x[0]))
         while (i < 16) {
             var _t0 = data
-            data = data + 1
-            p2[3] = deref(_t0)
+            data++
+            p2[3] = *_t0
             var _t1 = data
-            data = data + 1
-            p2[2] = deref(_t1)
+            data++
+            p2[2] = *_t1
             var _t2 = data
-            data = data + 1
-            p2[1] = deref(_t2)
+            data++
+            p2[1] = *_t2
             var _t3 = data
-            data = data + 1
-            p2[0] = deref(_t3)
+            data++
+            p2[0] = *_t3
             i++
-            p2 = p2 + 4
+            p2 += 4
         }
     }
     {
@@ -544,7 +545,7 @@ def SHA1_Update(var hd : sha1_context_s?; var inbuf : uint8?; var inlen : uint64
         hd.count = 0
         hd.nblocks++
     }
-    if (!(inbuf != null)) {
+    if (inbuf == null) {
         return
     }
     if (hd.count != 0) {
@@ -552,12 +553,12 @@ def SHA1_Update(var hd : sha1_context_s?; var inbuf : uint8?; var inlen : uint64
             let _t0 = hd.count
             hd.count++
             var _t1 = inbuf
-            inbuf = inbuf + 1
-            hd.buf[_t0] = deref(_t1)
+            inbuf++
+            hd.buf[_t0] = *_t1
             inlen--
         }
         SHA1_Update(hd, null, 0ul)
-        if (!(inlen != 0)) {
+        if (inlen == 0) {
             return
         }
     }
@@ -566,14 +567,14 @@ def SHA1_Update(var hd : sha1_context_s?; var inbuf : uint8?; var inlen : uint64
         hd.count = 0
         hd.nblocks++
         inlen -= 64ul
-        inbuf = inbuf + 64
+        inbuf += 64
     }
     while (inlen != 0 && hd.count < 64) {
         let _t2 = hd.count
         hd.count++
         var _t3 = inbuf
-        inbuf = inbuf + 1
-        hd.buf[_t2] = deref(_t3)
+        inbuf++
+        hd.buf[_t2] = *_t3
         inlen--
     }
 }
@@ -643,73 +644,73 @@ def SHA1_Final(var digest : uint8?; var hd : sha1_context_s?) {
     // little endian
     {
         var _t4 = p
-        p = p + 1
-        deref(_t4) = uint8(hd.h0 >> 24u)
+        p++
+        *_t4 = uint8(hd.h0 >> 24u)
         var _t5 = p
-        p = p + 1
-        deref(_t5) = uint8(hd.h0 >> 16u)
+        p++
+        *_t5 = uint8(hd.h0 >> 16u)
         var _t6 = p
-        p = p + 1
-        deref(_t6) = uint8(hd.h0 >> 8u)
+        p++
+        *_t6 = uint8(hd.h0 >> 8u)
         var _t7 = p
-        p = p + 1
-        deref(_t7) = uint8(hd.h0)
+        p++
+        *_t7 = uint8(hd.h0)
     }
     {
         var _t8 = p
-        p = p + 1
-        deref(_t8) = uint8(hd.h1 >> 24u)
+        p++
+        *_t8 = uint8(hd.h1 >> 24u)
         var _t9 = p
-        p = p + 1
-        deref(_t9) = uint8(hd.h1 >> 16u)
+        p++
+        *_t9 = uint8(hd.h1 >> 16u)
         var _t10 = p
-        p = p + 1
-        deref(_t10) = uint8(hd.h1 >> 8u)
+        p++
+        *_t10 = uint8(hd.h1 >> 8u)
         var _t11 = p
-        p = p + 1
-        deref(_t11) = uint8(hd.h1)
+        p++
+        *_t11 = uint8(hd.h1)
     }
     {
         var _t12 = p
-        p = p + 1
-        deref(_t12) = uint8(hd.h2 >> 24u)
+        p++
+        *_t12 = uint8(hd.h2 >> 24u)
         var _t13 = p
-        p = p + 1
-        deref(_t13) = uint8(hd.h2 >> 16u)
+        p++
+        *_t13 = uint8(hd.h2 >> 16u)
         var _t14 = p
-        p = p + 1
-        deref(_t14) = uint8(hd.h2 >> 8u)
+        p++
+        *_t14 = uint8(hd.h2 >> 8u)
         var _t15 = p
-        p = p + 1
-        deref(_t15) = uint8(hd.h2)
+        p++
+        *_t15 = uint8(hd.h2)
     }
     {
         var _t16 = p
-        p = p + 1
-        deref(_t16) = uint8(hd.h3 >> 24u)
+        p++
+        *_t16 = uint8(hd.h3 >> 24u)
         var _t17 = p
-        p = p + 1
-        deref(_t17) = uint8(hd.h3 >> 16u)
+        p++
+        *_t17 = uint8(hd.h3 >> 16u)
         var _t18 = p
-        p = p + 1
-        deref(_t18) = uint8(hd.h3 >> 8u)
+        p++
+        *_t18 = uint8(hd.h3 >> 8u)
         var _t19 = p
-        p = p + 1
-        deref(_t19) = uint8(hd.h3)
+        p++
+        *_t19 = uint8(hd.h3)
     }
     {
         var _t20 = p
-        p = p + 1
-        deref(_t20) = uint8(hd.h4 >> 24u)
+        p++
+        *_t20 = uint8(hd.h4 >> 24u)
         var _t21 = p
-        p = p + 1
-        deref(_t21) = uint8(hd.h4 >> 16u)
+        p++
+        *_t21 = uint8(hd.h4 >> 16u)
         var _t22 = p
-        p = p + 1
-        deref(_t22) = uint8(hd.h4 >> 8u)
+        p++
+        *_t22 = uint8(hd.h4 >> 8u)
         var _t23 = p
-        p = p + 1
-        deref(_t23) = uint8(hd.h4)
+        p++
+        *_t23 = uint8(hd.h4)
     }
     crt::memcpy(reinterpret<void?>(digest), reinterpret<void?>(addr(hd.buf[0])), uint64(typeinfo sizeof(type<uint8[20]>)))
 }

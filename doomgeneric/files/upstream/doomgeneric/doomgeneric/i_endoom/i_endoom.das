@@ -19,7 +19,8 @@ struct color {
 
 [init]
 def private c2das_layout_check {
-    static_assert(typeinfo sizeof(type<screen_mode_t>) == 32 && typeinfo alignof(type<screen_mode_t>) == 8, "screen_mode_t: clang lays it out as size 32, align 8")
+    static_assert(typeinfo sizeof(type<screen_mode_t>) == 32 && typeinfo alignof(type<screen_mode_t>) == 8,
+            "screen_mode_t: clang lays it out as size 32, align 8")
     static_assert(typeinfo offsetof < width > (type<screen_mode_t>) == 0, "screen_mode_t.width: clang puts it at 0")
     static_assert(typeinfo offsetof < height > (type<screen_mode_t>) == 4, "screen_mode_t.height: clang puts it at 4")
     static_assert(typeinfo offsetof < InitMode > (type<screen_mode_t>) == 8, "screen_mode_t.InitMode: clang puts it at 8")

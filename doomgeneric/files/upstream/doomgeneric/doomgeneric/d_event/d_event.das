@@ -63,7 +63,7 @@ let private MAXEVENTS = 64
 // Called by the I/O functions when input is detected
 [c_function]
 def D_PostEvent(var ev : event_t?) {
-    d_event__events[d_event__eventhead] = deref(ev)
+    d_event__events[d_event__eventhead] = *ev
     d_event__eventhead = (d_event__eventhead + 1) % MAXEVENTS
 }
 
