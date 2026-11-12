@@ -17,8 +17,8 @@ def I_GetHeapSize : int {
 
 [c_function]
 def I_ZoneBase(var size : int?) : uint8? {
-    deref(size) = mb_used * 1024 * 1024
-    return reinterpret<uint8?>(invoke(doom_malloc, deref(size)))
+    *size = mb_used * 1024 * 1024
+    return reinterpret<uint8?>(invoke(doom_malloc, *size))
 }
 
 // I_GetTime
@@ -29,7 +29,7 @@ def I_GetTime : int {
     var usec : int
     var newtics : int
     invoke(doom_gettime, addr(sec), addr(usec))
-    if (!(I_GetTime_basetime != 0)) {
+    if (I_GetTime_basetime == 0) {
         I_GetTime_basetime = sec
     }
     newtics = (sec - I_GetTime_basetime) * TICRATE + usec * TICRATE / 1000000

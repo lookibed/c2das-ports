@@ -49,7 +49,13 @@ var cheat_ammo_seq : uint8[6] = fixed_array(178u8, 38u8, 242u8, 102u8, 162u8, 25
 var cheat_ammonokey_seq : uint8[5] = fixed_array(178u8, 38u8, 102u8, 162u8, 255u8)
 var cheat_noclip_seq : uint8[11] = fixed_array(178u8, 38u8, 234u8, 42u8, 178u8, 234u8, 42u8, 246u8, 42u8, 38u8, 255u8)
 var cheat_commercial_noclip_seq : uint8[7] = fixed_array(178u8, 38u8, 226u8, 54u8, 178u8, 42u8, 255u8)
-var cheat_powerup_seq : uint8[7][10] = fixed_array(fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 110u8, 255u8), fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 234u8, 255u8), fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 178u8, 255u8), fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 106u8, 255u8), fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 162u8, 255u8), fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 54u8, 255u8), fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 255u8, uint8(0)))
+var cheat_powerup_seq : uint8[7][10] = fixed_array(fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 110u8, 255u8),
+        fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 234u8, 255u8),
+        fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 178u8, 255u8),
+        fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 106u8, 255u8),
+        fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 162u8, 255u8),
+        fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 54u8, 255u8),
+        fixed_array(178u8, 38u8, 98u8, 166u8, 50u8, 246u8, 54u8, 38u8, 255u8, uint8(0)))
 var cheat_clev_seq : uint8[10] = fixed_array(178u8, 38u8, 226u8, 54u8, 166u8, 110u8, 1u8, 0u8, 0u8, 255u8)
 var cheat_mypos_seq : uint8[8] = fixed_array(178u8, 38u8, 182u8, 186u8, 42u8, 246u8, 234u8, 255u8)
 var cheat_mus : cheatseq_t = cheatseq_t(sequence = unsafe(addr(cheat_mus_seq[0])), p = null)
@@ -58,7 +64,10 @@ var cheat_ammo : cheatseq_t = cheatseq_t(sequence = unsafe(addr(cheat_ammo_seq[0
 var cheat_ammonokey : cheatseq_t = cheatseq_t(sequence = unsafe(addr(cheat_ammonokey_seq[0])), p = null)
 var cheat_noclip : cheatseq_t = cheatseq_t(sequence = unsafe(addr(cheat_noclip_seq[0])), p = null)
 var cheat_commercial_noclip : cheatseq_t = cheatseq_t(sequence = unsafe(addr(cheat_commercial_noclip_seq[0])), p = null)
-var cheat_powerup : cheatseq_t[7] = fixed_array(cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[0][0])), p = null), cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[1][0])), p = null), cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[2][0])), p = null), cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[3][0])), p = null), cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[4][0])), p = null), cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[5][0])), p = null), cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[6][0])), p = null))
+var cheat_powerup : cheatseq_t[7] = fixed_array(cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[0][0])), p = null),
+        cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[1][0])), p = null), cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[2][0])), p = null),
+        cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[3][0])), p = null), cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[4][0])), p = null),
+        cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[5][0])), p = null), cheatseq_t(sequence = unsafe(addr(cheat_powerup_seq[6][0])), p = null))
 var cheat_choppers : cheatseq_t = cheatseq_t(sequence = unsafe(addr(cheat_choppers_seq[0])), p = null)
 var cheat_clev : cheatseq_t = cheatseq_t(sequence = unsafe(addr(cheat_clev_seq[0])), p = null)
 var cheat_mypos : cheatseq_t = cheatseq_t(sequence = unsafe(addr(cheat_mypos_seq[0])), p = null)
@@ -85,17 +94,21 @@ def ST_refreshBackground {
 def ST_Responder(var ev : event_t?) : doom_boolean {
     // Filter automap on/off.
     if (ev._c_type == evtype_t.ev_keyup && ((uint(ev.data1) & 4294901760u) == uint(AM_MSGHEADER))) {
-        let _cond = ev.data1
-        if (_cond == 1634559232) {
-            st_gamestate = st_stateenum_t.AutomapState
-            st_firsttime = doom_boolean._c_true
-        } elif (_cond == 1634564096) {
-            // doom_print("AM exited\n");
-            st_gamestate = st_stateenum_t.FirstPersonState
+        c_switch(ev.data1) {
+            case(1634559232) {
+                st_gamestate = st_stateenum_t.AutomapState
+                st_firsttime = doom_boolean._c_true
+                break
+            }
+            case(1634564096) {
+                // doom_print("AM exited\n");
+                st_gamestate = st_stateenum_t.FirstPersonState
+                break
+            }
         }
     } elif (ev._c_type == evtype_t.ev_keydown) {
         // if a user keypress...
-        if (!(int(netgame) != 0)) {
+        if (int(netgame) == 0) {
             // b. - enabled for more debug fun.
             // if (gameskill != sk_nightmare) {
             // 'dqd' cheat for toggleable god mode
@@ -169,7 +182,7 @@ def ST_Responder(var ev : event_t?) : doom_boolean {
             // 'behold?' power-up cheats
             for (i in range(6)) {
                 if (cht_CheckCheat(addr(cheat_powerup[0]) + end_index(i, 7), uint8(ev.data1)) != 0) {
-                    if (!(plyr.powers[i] != 0)) {
+                    if (plyr.powers[i] == 0) {
                         P_GivePower(plyr, i)
                     } elif (i != int(powertype_t.pw_strength)) {
                         plyr.powers[i] = 1
@@ -265,7 +278,7 @@ def ST_updateFaceWidget {
     var doevilgrin : doom_boolean
     if (ST_updateFaceWidget_priority < 10) {
         // dead
-        if (!(plyr.health != 0)) {
+        if (plyr.health == 0) {
             ST_updateFaceWidget_priority = 9
             st_faceindex = ST_DEADFACE
             st_facecount = 1
@@ -301,11 +314,11 @@ def ST_updateFaceWidget {
                 if (badguyangle > plyr.mo.angle) {
                     // whether right or left
                     diffang = badguyangle - plyr.mo.angle
-                    i = diffang > ANG180 ? 1 : 0
+                    i = int_of(diffang > ANG180)
                 } else {
                     // whether left or right
                     diffang = plyr.mo.angle - badguyangle
-                    i = diffang <= ANG180 ? 1 : 0
+                    i = int_of(diffang <= ANG180)
                 }
                 // confusing, aint it?
                 st_facecount = ST_TURNCOUNT
@@ -344,7 +357,7 @@ def ST_updateFaceWidget {
                 ST_updateFaceWidget_lastattackdown = ST_RAMPAGEDELAY
             } else {
                 ST_updateFaceWidget_lastattackdown--
-                if (!(ST_updateFaceWidget_lastattackdown != 0)) {
+                if (ST_updateFaceWidget_lastattackdown == 0) {
                     ST_updateFaceWidget_priority = 5
                     st_faceindex = ST_calcPainOffset() + ST_RAMPAGEOFFSET
                     st_facecount = 1
@@ -364,7 +377,7 @@ def ST_updateFaceWidget {
         }
     }
     // look left or look right if the facecount has timed out
-    if (!(st_facecount != 0)) {
+    if (st_facecount == 0) {
         st_faceindex = ST_calcPainOffset() + (st_randomnumber % 3)
         st_facecount = ST_STRAIGHTFACECOUNT
         ST_updateFaceWidget_priority = 0
@@ -383,7 +396,7 @@ def ST_updateWidgets {
     w_ready.data = int(plyr.readyweapon)
     // update keycard multiple widgets
     for (i in range(3)) {
-        keyboxes[i] = uint(int(plyr.cards[i])) != 0 ? i : -1
+        keyboxes[i] = uint(plyr.cards[i]) != 0 ? i : -1
         if (int(plyr.cards[i + 3]) != 0) {
             keyboxes[i] = i + 3
         }
@@ -391,11 +404,11 @@ def ST_updateWidgets {
     // refresh everything if this is him coming back to life
     ST_updateFaceWidget()
     // used by the w_armsbg widget
-    st_notdeathmatch = enum_from_int(type<doom_boolean>, !(int(deathmatch) != 0) ? 1 : 0)
+    st_notdeathmatch = enum_from_int(type<doom_boolean>, int_of(int(deathmatch) == 0))
     // used by w_arms[] widgets
-    st_armson = enum_from_int(type<doom_boolean>, uint(int(st_statusbaron)) != 0 && !(int(deathmatch) != 0) ? 1 : 0)
+    st_armson = enum_from_int(type<doom_boolean>, int_of(uint(st_statusbaron) != 0 && int(deathmatch) == 0))
     // used by w_frags widget
-    st_fragson = enum_from_int(type<doom_boolean>, uint(int(deathmatch)) != 0 && uint(int(st_statusbaron)) != 0 ? 1 : 0)
+    st_fragson = enum_from_int(type<doom_boolean>, int_of(uint(deathmatch) != 0 && uint(st_statusbaron) != 0))
     st_fragscount = 0
     for (i in range(MAXPLAYERS)) {
         if (i != consoleplayer) {
@@ -406,7 +419,7 @@ def ST_updateWidgets {
     }
     // get rid of chat window if up because of message
     st_msgcounter--
-    if (!(st_msgcounter != 0)) {
+    if (st_msgcounter == 0) {
         st_chat = st_oldchat
     }
 }
@@ -459,9 +472,9 @@ def ST_doPaletteStuff {
 [c_function]
 def ST_drawWidgets(refresh : doom_boolean) {
     // used by w_arms[] widgets
-    st_armson = enum_from_int(type<doom_boolean>, uint(int(st_statusbaron)) != 0 && !(int(deathmatch) != 0) ? 1 : 0)
+    st_armson = enum_from_int(type<doom_boolean>, int_of(uint(st_statusbaron) != 0 && int(deathmatch) == 0))
     // used by w_frags widget
-    st_fragson = enum_from_int(type<doom_boolean>, uint(int(deathmatch)) != 0 && uint(int(st_statusbaron)) != 0 ? 1 : 0)
+    st_fragson = enum_from_int(type<doom_boolean>, int_of(uint(deathmatch) != 0 && uint(st_statusbaron) != 0))
     STlib_updateNum(addr(w_ready), refresh)
     for (i in range(4)) {
         STlib_updateNum(addr(w_ammo[0]) + end_index(i, 4), refresh)
@@ -494,8 +507,8 @@ def ST_diffDraw {
 }
 
 def ST_Drawer(fullscreen : doom_boolean; refresh : doom_boolean) {
-    st_statusbaron = enum_from_int(type<doom_boolean>, (!(int(fullscreen) != 0)) || uint(int(automapactive)) != 0 ? 1 : 0)
-    st_firsttime = enum_from_int(type<doom_boolean>, uint(int(st_firsttime)) != 0 || uint(int(refresh)) != 0 ? 1 : 0)
+    st_statusbaron = enum_from_int(type<doom_boolean>, int_of((int(fullscreen) == 0) || uint(automapactive) != 0))
+    st_firsttime = enum_from_int(type<doom_boolean>, int_of(uint(st_firsttime) != 0 || uint(refresh) != 0))
     // Do red-/gold-shifts from damage/items
     ST_doPaletteStuff()
     // If just after ST_Start(), refresh all
@@ -723,7 +736,8 @@ def ST_initData {
 [c_function]
 def ST_createWidgets {
     // ready weapon ammo
-    STlib_initNum(addr(w_ready), ST_AMMOX, ST_AMMOY, addr(tallnum[0]), addr(plyr.ammo[0]) + end_index(int(weaponinfo[int(plyr.readyweapon)].ammo), 4), addr(st_statusbaron), ST_AMMOWIDTH)
+    STlib_initNum(addr(w_ready), ST_AMMOX, ST_AMMOY, addr(tallnum[0]), addr(plyr.ammo[0]) + end_index(int(weaponinfo[int(plyr.readyweapon)].ammo), 4),
+            addr(st_statusbaron), ST_AMMOWIDTH)
     // the last weapon type
     w_ready.data = int(plyr.readyweapon)
     // health percentage
@@ -732,7 +746,8 @@ def ST_createWidgets {
     STlib_initBinIcon(addr(w_armsbg), ST_ARMSBGX, ST_ARMSBGY, armsbg, addr(st_notdeathmatch), addr(st_statusbaron))
     // weapons owned
     for (i in range(6)) {
-        STlib_initMultIcon(addr(w_arms[0]) + end_index(i, 6), ST_ARMSX + (i % 3) * ST_ARMSXSPACE, ST_ARMSY + (i / 3) * ST_ARMSYSPACE, addr(arms[i][0]), reinterpret<int?>(addr(plyr.weaponowned[0]) + end_index(i + 1, 9)), addr(st_armson))
+        STlib_initMultIcon(addr(w_arms[0]) + end_index(i, 6), ST_ARMSX + (i % 3) * ST_ARMSXSPACE, ST_ARMSY + (i / 3) * ST_ARMSYSPACE, addr(arms[i][0]),
+                reinterpret<int?>(addr(plyr.weaponowned[0]) + end_index(i + 1, 9)), addr(st_armson))
     }
     // frags sum
     STlib_initNum(addr(w_frags), ST_FRAGSX, ST_FRAGSY, addr(tallnum[0]), addr(st_fragscount), addr(st_fragson), ST_FRAGSWIDTH)
@@ -757,7 +772,7 @@ def ST_createWidgets {
 }
 
 def ST_Start {
-    if (!(int(st_stopped) != 0)) {
+    if (int(st_stopped) == 0) {
         ST_Stop()
     }
     ST_initData()

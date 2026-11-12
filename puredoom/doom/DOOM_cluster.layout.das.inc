@@ -40,13 +40,15 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < x > (type<menu_s>) == 32, "menu_s.x: clang puts it at 32")
     static_assert(typeinfo offsetof < y > (type<menu_s>) == 34, "menu_s.y: clang puts it at 34")
     static_assert(typeinfo offsetof < lastOn > (type<menu_s>) == 36, "menu_s.lastOn: clang puts it at 36")
-    static_assert(typeinfo sizeof(type<menu_custom_text_seg_t>) == 24 && typeinfo alignof(type<menu_custom_text_seg_t>) == 8, "menu_custom_text_seg_t: clang lays it out as size 24, align 8")
+    static_assert(typeinfo sizeof(type<menu_custom_text_seg_t>) == 24 && typeinfo alignof(type<menu_custom_text_seg_t>) == 8,
+            "menu_custom_text_seg_t: clang lays it out as size 24, align 8")
     static_assert(typeinfo offsetof < lump > (type<menu_custom_text_seg_t>) == 0, "menu_custom_text_seg_t.lump: clang puts it at 0")
     static_assert(typeinfo offsetof < x > (type<menu_custom_text_seg_t>) == 8, "menu_custom_text_seg_t.x: clang puts it at 8")
     static_assert(typeinfo offsetof < w > (type<menu_custom_text_seg_t>) == 12, "menu_custom_text_seg_t.w: clang puts it at 12")
     static_assert(typeinfo offsetof < offx > (type<menu_custom_text_seg_t>) == 16, "menu_custom_text_seg_t.offx: clang puts it at 16")
     static_assert(typeinfo offsetof < offy > (type<menu_custom_text_seg_t>) == 20, "menu_custom_text_seg_t.offy: clang puts it at 20")
-    static_assert(typeinfo sizeof(type<menu_custom_text_t>) == 392 && typeinfo alignof(type<menu_custom_text_t>) == 8, "menu_custom_text_t: clang lays it out as size 392, align 8")
+    static_assert(typeinfo sizeof(type<menu_custom_text_t>) == 392 && typeinfo alignof(type<menu_custom_text_t>) == 8,
+            "menu_custom_text_t: clang lays it out as size 392, align 8")
     static_assert(typeinfo offsetof < name > (type<menu_custom_text_t>) == 0, "menu_custom_text_t.name: clang puts it at 0")
     static_assert(typeinfo offsetof < segs > (type<menu_custom_text_t>) == 8, "menu_custom_text_t.segs: clang puts it at 8")
     static_assert(typeinfo sizeof(type<anim_t>) == 20 && typeinfo alignof(type<anim_t>) == 4, "anim_t: clang lays it out as size 20, align 4")
@@ -106,7 +108,8 @@ def private c2das_layout_check {
     static_assert(typeinfo sizeof(type<point_t>) == 8 && typeinfo alignof(type<point_t>) == 4, "point_t: clang lays it out as size 8, align 4")
     static_assert(typeinfo offsetof < x > (type<point_t>) == 0, "point_t.x: clang puts it at 0")
     static_assert(typeinfo offsetof < y > (type<point_t>) == 4, "point_t.y: clang puts it at 4")
-    static_assert(typeinfo sizeof(type<anim_t_wi_stuff>) == 72 && typeinfo alignof(type<anim_t_wi_stuff>) == 8, "anim_t_wi_stuff: clang lays it out as size 72, align 8")
+    static_assert(typeinfo sizeof(type<anim_t_wi_stuff>) == 72 && typeinfo alignof(type<anim_t_wi_stuff>) == 8,
+            "anim_t_wi_stuff: clang lays it out as size 72, align 8")
     static_assert(typeinfo offsetof < _c_type > (type<anim_t_wi_stuff>) == 0, "anim_t_wi_stuff._c_type: clang puts it at 0")
     static_assert(typeinfo offsetof < period > (type<anim_t_wi_stuff>) == 4, "anim_t_wi_stuff.period: clang puts it at 4")
     static_assert(typeinfo offsetof < nanims > (type<anim_t_wi_stuff>) == 8, "anim_t_wi_stuff.nanims: clang puts it at 8")

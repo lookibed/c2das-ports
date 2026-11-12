@@ -27,10 +27,57 @@ struct islope_t {
 }
 
 var automapactive : doom_boolean = doom_boolean._c_false
-var player_arrow : mline_t[7] = fixed_array(mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 0), b = mpoint_t(x = 8 * 16 * (1 << 16) / 7, y = 0)), mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7, y = 0), b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 - 8 * 16 * (1 << 16) / 7 / 2, y = 8 * 16 * (1 << 16) / 7 / 4)), mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7, y = 0), b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 - 8 * 16 * (1 << 16) / 7 / 2, y = -(8 * 16 * (1 << 16) / 7) / 4)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 0), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) - 8 * 16 * (1 << 16) / 7 / 8, y = 8 * 16 * (1 << 16) / 7 / 4)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 0), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) - 8 * 16 * (1 << 16) / 7 / 8, y = -(8 * 16 * (1 << 16) / 7) / 4)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 3 * (8 * 16 * (1 << 16) / 7) / 8, y = 0), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 8 * 16 * (1 << 16) / 7 / 4)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 3 * (8 * 16 * (1 << 16) / 7) / 8, y = 0), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = -(8 * 16 * (1 << 16) / 7) / 4)))
-var cheat_player_arrow : mline_t[16] = fixed_array(mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 0), b = mpoint_t(x = 8 * 16 * (1 << 16) / 7, y = 0)), mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7, y = 0), b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 - 8 * 16 * (1 << 16) / 7 / 2, y = 8 * 16 * (1 << 16) / 7 / 6)), mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7, y = 0), b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 - 8 * 16 * (1 << 16) / 7 / 2, y = -(8 * 16 * (1 << 16) / 7) / 6)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 0), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) - 8 * 16 * (1 << 16) / 7 / 8, y = 8 * 16 * (1 << 16) / 7 / 6)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 0), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) - 8 * 16 * (1 << 16) / 7 / 8, y = -(8 * 16 * (1 << 16) / 7) / 6)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 3 * (8 * 16 * (1 << 16) / 7) / 8, y = 0), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 8 * 16 * (1 << 16) / 7 / 6)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 3 * (8 * 16 * (1 << 16) / 7) / 8, y = 0), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = -(8 * 16 * (1 << 16) / 7) / 6)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 2, y = 0), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 2, y = -(8 * 16 * (1 << 16) / 7) / 6)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 2, y = -(8 * 16 * (1 << 16) / 7) / 6), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 2 + 8 * 16 * (1 << 16) / 7 / 6, y = -(8 * 16 * (1 << 16) / 7) / 6)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 2 + 8 * 16 * (1 << 16) / 7 / 6, y = -(8 * 16 * (1 << 16) / 7) / 6), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 2 + 8 * 16 * (1 << 16) / 7 / 6, y = 8 * 16 * (1 << 16) / 7 / 4)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 6, y = 0), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 6, y = -(8 * 16 * (1 << 16) / 7) / 6)), mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 6, y = -(8 * 16 * (1 << 16) / 7) / 6), b = mpoint_t(x = 0, y = -(8 * 16 * (1 << 16) / 7) / 6)), mline_t(a = mpoint_t(x = 0, y = -(8 * 16 * (1 << 16) / 7) / 6), b = mpoint_t(x = 0, y = 8 * 16 * (1 << 16) / 7 / 4)), mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7 / 6, y = 8 * 16 * (1 << 16) / 7 / 4), b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 / 6, y = -(8 * 16 * (1 << 16) / 7) / 7)), mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7 / 6, y = -(8 * 16 * (1 << 16) / 7) / 7), b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 / 6 + 8 * 16 * (1 << 16) / 7 / 32, y = -(8 * 16 * (1 << 16) / 7) / 7 - 8 * 16 * (1 << 16) / 7 / 32)), mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7 / 6 + 8 * 16 * (1 << 16) / 7 / 32, y = -(8 * 16 * (1 << 16) / 7) / 7 - 8 * 16 * (1 << 16) / 7 / 32), b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 / 6 + 8 * 16 * (1 << 16) / 7 / 10, y = -(8 * 16 * (1 << 16) / 7) / 7)))
-var triangle_guy : mline_t[3] = fixed_array(mline_t(a = mpoint_t(x = int(-0.867lf * double(1 << 16)), y = int(-0.5lf * double(1 << 16))), b = mpoint_t(x = int(0.867lf * double(1 << 16)), y = int(-0.5lf * double(1 << 16)))), mline_t(a = mpoint_t(x = int(0.867lf * double(1 << 16)), y = int(-0.5lf * double(1 << 16))), b = mpoint_t(x = 0, y = 1 << 16)), mline_t(a = mpoint_t(x = 0, y = 1 << 16), b = mpoint_t(x = int(-0.867lf * double(1 << 16)), y = int(-0.5lf * double(1 << 16)))))
-var thintriangle_guy : mline_t[3] = fixed_array(mline_t(a = mpoint_t(x = int(-0.5lf * double(1 << 16)), y = int(-0.7lf * double(1 << 16))), b = mpoint_t(x = 1 << 16, y = 0)), mline_t(a = mpoint_t(x = 1 << 16, y = 0), b = mpoint_t(x = int(-0.5lf * double(1 << 16)), y = int(0.7lf * double(1 << 16)))), mline_t(a = mpoint_t(x = int(-0.5lf * double(1 << 16)), y = int(0.7lf * double(1 << 16))), b = mpoint_t(x = int(-0.5lf * double(1 << 16)), y = int(-0.7lf * double(1 << 16)))))
+var player_arrow : mline_t[7] = fixed_array(mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 0),
+            b = mpoint_t(x = 8 * 16 * (1 << 16) / 7, y = 0)),
+        mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7, y = 0),
+            b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 - 8 * 16 * (1 << 16) / 7 / 2, y = 8 * 16 * (1 << 16) / 7 / 4)),
+        mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7, y = 0),
+            b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 - 8 * 16 * (1 << 16) / 7 / 2, y = -(8 * 16 * (1 << 16) / 7) / 4)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 0),
+            b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) - 8 * 16 * (1 << 16) / 7 / 8, y = 8 * 16 * (1 << 16) / 7 / 4)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 0),
+            b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) - 8 * 16 * (1 << 16) / 7 / 8, y = -(8 * 16 * (1 << 16) / 7) / 4)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 3 * (8 * 16 * (1 << 16) / 7) / 8, y = 0),
+            b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 8 * 16 * (1 << 16) / 7 / 4)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 3 * (8 * 16 * (1 << 16) / 7) / 8, y = 0),
+            b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = -(8 * 16 * (1 << 16) / 7) / 4)))
+var cheat_player_arrow : mline_t[16] = fixed_array(mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 0),
+            b = mpoint_t(x = 8 * 16 * (1 << 16) / 7, y = 0)),
+        mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7, y = 0),
+            b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 - 8 * 16 * (1 << 16) / 7 / 2, y = 8 * 16 * (1 << 16) / 7 / 6)),
+        mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7, y = 0),
+            b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 - 8 * 16 * (1 << 16) / 7 / 2, y = -(8 * 16 * (1 << 16) / 7) / 6)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 0),
+            b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) - 8 * 16 * (1 << 16) / 7 / 8, y = 8 * 16 * (1 << 16) / 7 / 6)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 0),
+            b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) - 8 * 16 * (1 << 16) / 7 / 8, y = -(8 * 16 * (1 << 16) / 7) / 6)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 3 * (8 * 16 * (1 << 16) / 7) / 8, y = 0),
+            b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = 8 * 16 * (1 << 16) / 7 / 6)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 3 * (8 * 16 * (1 << 16) / 7) / 8, y = 0),
+            b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) + 8 * 16 * (1 << 16) / 7 / 8, y = -(8 * 16 * (1 << 16) / 7) / 6)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 2, y = 0), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 2, y = -(8 * 16 * (1 << 16) / 7) / 6)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 2, y = -(8 * 16 * (1 << 16) / 7) / 6),
+            b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 2 + 8 * 16 * (1 << 16) / 7 / 6, y = -(8 * 16 * (1 << 16) / 7) / 6)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 2 + 8 * 16 * (1 << 16) / 7 / 6, y = -(8 * 16 * (1 << 16) / 7) / 6),
+            b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 2 + 8 * 16 * (1 << 16) / 7 / 6, y = 8 * 16 * (1 << 16) / 7 / 4)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 6, y = 0), b = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 6, y = -(8 * 16 * (1 << 16) / 7) / 6)),
+        mline_t(a = mpoint_t(x = -(8 * 16 * (1 << 16) / 7) / 6, y = -(8 * 16 * (1 << 16) / 7) / 6), b = mpoint_t(x = 0, y = -(8 * 16 * (1 << 16) / 7) / 6)),
+        mline_t(a = mpoint_t(x = 0, y = -(8 * 16 * (1 << 16) / 7) / 6), b = mpoint_t(x = 0, y = 8 * 16 * (1 << 16) / 7 / 4)),
+        mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7 / 6, y = 8 * 16 * (1 << 16) / 7 / 4),
+            b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 / 6, y = -(8 * 16 * (1 << 16) / 7) / 7)),
+        mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7 / 6, y = -(8 * 16 * (1 << 16) / 7) / 7),
+            b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 / 6 + 8 * 16 * (1 << 16) / 7 / 32, y = -(8 * 16 * (1 << 16) / 7) / 7 - 8 * 16 * (1 << 16) / 7 / 32)),
+        mline_t(a = mpoint_t(x = 8 * 16 * (1 << 16) / 7 / 6 + 8 * 16 * (1 << 16) / 7 / 32, y = -(8 * 16 * (1 << 16) / 7) / 7 - 8 * 16 * (1 << 16) / 7 / 32),
+            b = mpoint_t(x = 8 * 16 * (1 << 16) / 7 / 6 + 8 * 16 * (1 << 16) / 7 / 10, y = -(8 * 16 * (1 << 16) / 7) / 7)))
+var triangle_guy : mline_t[3] = fixed_array(mline_t(a = mpoint_t(x = int(-0.867lf * double(1 << 16)), y = int(-0.5lf * double(1 << 16))),
+            b = mpoint_t(x = int(0.867lf * double(1 << 16)), y = int(-0.5lf * double(1 << 16)))),
+        mline_t(a = mpoint_t(x = int(0.867lf * double(1 << 16)), y = int(-0.5lf * double(1 << 16))), b = mpoint_t(x = 0, y = 1 << 16)),
+        mline_t(a = mpoint_t(x = 0, y = 1 << 16), b = mpoint_t(x = int(-0.867lf * double(1 << 16)), y = int(-0.5lf * double(1 << 16)))))
+var thintriangle_guy : mline_t[3] = fixed_array(mline_t(a = mpoint_t(x = int(-0.5lf * double(1 << 16)), y = int(-0.7lf * double(1 << 16))),
+            b = mpoint_t(x = 1 << 16, y = 0)),
+        mline_t(a = mpoint_t(x = 1 << 16, y = 0), b = mpoint_t(x = int(-0.5lf * double(1 << 16)), y = int(0.7lf * double(1 << 16)))),
+        mline_t(a = mpoint_t(x = int(-0.5lf * double(1 << 16)), y = int(0.7lf * double(1 << 16))),
+            b = mpoint_t(x = int(-0.5lf * double(1 << 16)), y = int(-0.7lf * double(1 << 16)))))
 var private cheating : int = 0
 var private grid : int = 0
 var private leveljuststarted : int = 1
@@ -100,12 +147,12 @@ def AM_getIslope(var ml : mline_t?; var _c_is : islope_t?) {
     var dy : int
     dy = ml.a.y - ml.b.y
     dx = ml.b.x - ml.a.x
-    if (!(dy != 0)) {
+    if (dy == 0) {
         _c_is.islp = dx < 0 ? -DOOM_MAXINT : DOOM_MAXINT
     } else {
         _c_is.islp = FixedDiv(dx, dy)
     }
-    if (!(dx != 0)) {
+    if (dx == 0) {
         _c_is.slp = dy < 0 ? -DOOM_MAXINT : DOOM_MAXINT
     } else {
         _c_is.slp = FixedDiv(dy, dx)
@@ -133,7 +180,7 @@ def AM_saveScaleAndLoc {
 def AM_restoreScaleAndLoc {
     m_w = old_m_w
     m_h = old_m_h
-    if (!(followplayer != 0)) {
+    if (followplayer == 0) {
         m_x = old_m_x
         m_y = old_m_y
     } else {
@@ -227,7 +274,7 @@ def AM_initVariables {
     m_h = FixedMul(f_h << 16, scale_ftom)
     // find player to center on initially
     pnum = consoleplayer
-    if (!(int(playeringame[pnum]) != 0)) {
+    if (int(playeringame[pnum]) == 0) {
         pnum = 0
         while (pnum < MAXPLAYERS) {
             if (int(playeringame[pnum]) != 0) {
@@ -305,7 +352,7 @@ def AM_Stop {
 }
 
 def AM_Start {
-    if (!(int(stopped) != 0)) {
+    if (int(stopped) == 0) {
         AM_Stop()
     }
     stopped = doom_boolean._c_false
@@ -337,7 +384,7 @@ def AM_maxOutWindowScale {
 def AM_Responder(var ev : event_t?) : doom_boolean {
     var rc : int
     rc = int(doom_boolean._c_false)
-    if (!(int(automapactive) != 0)) {
+    if (int(automapactive) == 0) {
         if (ev._c_type == evtype_t.ev_keydown && ev.data1 == AM_STARTKEY) {
             AM_Start()
             viewactive = doom_boolean._c_false
@@ -345,102 +392,137 @@ def AM_Responder(var ev : event_t?) : doom_boolean {
         }
     } elif (ev._c_type == evtype_t.ev_keydown) {
         rc = int(doom_boolean._c_true)
-        let _cond = ev.data1
-        if (_cond == 174) {
-            // pan right
-            if (!(followplayer != 0)) {
-                m_paninc.x = FixedMul(F_PANINC << 16, scale_ftom)
-            } else {
+        c_switch(ev.data1) {
+            case(174) {
+                // pan right
+                if (followplayer == 0) {
+                    m_paninc.x = FixedMul(F_PANINC << 16, scale_ftom)
+                } else {
+                    rc = int(doom_boolean._c_false)
+                }
+                break
+            }
+            case(172) {
+                // pan left
+                if (followplayer == 0) {
+                    m_paninc.x = -FixedMul(F_PANINC << 16, scale_ftom)
+                } else {
+                    rc = int(doom_boolean._c_false)
+                }
+                break
+            }
+            case(173) {
+                // pan up
+                if (followplayer == 0) {
+                    m_paninc.y = FixedMul(F_PANINC << 16, scale_ftom)
+                } else {
+                    rc = int(doom_boolean._c_false)
+                }
+                break
+            }
+            case(175) {
+                // pan down
+                if (followplayer == 0) {
+                    m_paninc.y = -FixedMul(F_PANINC << 16, scale_ftom)
+                } else {
+                    rc = int(doom_boolean._c_false)
+                }
+                break
+            }
+            case('-') {
+                // zoom out
+                mtof_zoommul = M_ZOOMOUT
+                ftom_zoommul = M_ZOOMIN
+                break
+            }
+            case('=') {
+                // zoom in
+                mtof_zoommul = M_ZOOMIN
+                ftom_zoommul = M_ZOOMOUT
+                break
+            }
+            case(9) {
+                AM_Responder_bigstate = 0
+                viewactive = doom_boolean._c_true
+                AM_Stop()
+                break
+            }
+            case('0') {
+                AM_Responder_bigstate = int_of(AM_Responder_bigstate == 0)
+                if (AM_Responder_bigstate != 0) {
+                    AM_saveScaleAndLoc()
+                    AM_minOutWindowScale()
+                } else {
+                    AM_restoreScaleAndLoc()
+                }
+                break
+            }
+            case('f') {
+                followplayer = int_of(followplayer == 0)
+                f_oldloc.x = DOOM_MAXINT
+                am_map_plr.message = followplayer != 0 ? cstr("Follow Mode ON") : cstr("Follow Mode OFF")
+                break
+            }
+            case('g') {
+                grid = int_of(grid == 0)
+                am_map_plr.message = grid != 0 ? cstr("Grid ON") : cstr("Grid OFF")
+                break
+            }
+            case('m') {
+                doom_strcpy(addr(AM_Responder_buffer[0]), cstr("Marked Spot"))
+                doom_concat(addr(AM_Responder_buffer[0]), cstr(" "))
+                doom_concat(addr(AM_Responder_buffer[0]), doom_itoa(markpointnum, 10))
+                // doom_sprintf(buffer, "%s %d", AMSTR_MARKEDSPOT, markpointnum);
+                am_map_plr.message = addr(AM_Responder_buffer[0])
+                AM_addMark()
+                break
+            }
+            case('c') {
+                AM_clearMarks()
+                am_map_plr.message = cstr("All Marks Cleared")
+                break
+            }
+            case(_) {
+                AM_Responder_cheatstate = 0
                 rc = int(doom_boolean._c_false)
             }
-        } elif (_cond == 172) {
-            // pan left
-            if (!(followplayer != 0)) {
-                m_paninc.x = -FixedMul(F_PANINC << 16, scale_ftom)
-            } else {
-                rc = int(doom_boolean._c_false)
-            }
-        } elif (_cond == 173) {
-            // pan up
-            if (!(followplayer != 0)) {
-                m_paninc.y = FixedMul(F_PANINC << 16, scale_ftom)
-            } else {
-                rc = int(doom_boolean._c_false)
-            }
-        } elif (_cond == 175) {
-            // pan down
-            if (!(followplayer != 0)) {
-                m_paninc.y = -FixedMul(F_PANINC << 16, scale_ftom)
-            } else {
-                rc = int(doom_boolean._c_false)
-            }
-        } elif (_cond == '-') {
-            // zoom out
-            mtof_zoommul = M_ZOOMOUT
-            ftom_zoommul = M_ZOOMIN
-        } elif (_cond == '=') {
-            // zoom in
-            mtof_zoommul = M_ZOOMIN
-            ftom_zoommul = M_ZOOMOUT
-        } elif (_cond == 9) {
-            AM_Responder_bigstate = 0
-            viewactive = doom_boolean._c_true
-            AM_Stop()
-        } elif (_cond == '0') {
-            AM_Responder_bigstate = !(AM_Responder_bigstate != 0) ? 1 : 0
-            if (AM_Responder_bigstate != 0) {
-                AM_saveScaleAndLoc()
-                AM_minOutWindowScale()
-            } else {
-                AM_restoreScaleAndLoc()
-            }
-        } elif (_cond == 'f') {
-            followplayer = !(followplayer != 0) ? 1 : 0
-            f_oldloc.x = DOOM_MAXINT
-            am_map_plr.message = followplayer != 0 ? cstr("Follow Mode ON") : cstr("Follow Mode OFF")
-        } elif (_cond == 'g') {
-            grid = !(grid != 0) ? 1 : 0
-            am_map_plr.message = grid != 0 ? cstr("Grid ON") : cstr("Grid OFF")
-        } elif (_cond == 'm') {
-            doom_strcpy(addr(AM_Responder_buffer[0]), cstr("Marked Spot"))
-            doom_concat(addr(AM_Responder_buffer[0]), cstr(" "))
-            doom_concat(addr(AM_Responder_buffer[0]), doom_itoa(markpointnum, 10))
-            // doom_sprintf(buffer, "%s %d", AMSTR_MARKEDSPOT, markpointnum);
-            am_map_plr.message = addr(AM_Responder_buffer[0])
-            AM_addMark()
-        } elif (_cond == 'c') {
-            AM_clearMarks()
-            am_map_plr.message = cstr("All Marks Cleared")
-        } else {
-            AM_Responder_cheatstate = 0
-            rc = int(doom_boolean._c_false)
         }
-        if (!(int(deathmatch) != 0) && cht_CheckCheat(addr(cheat_amap), uint8(ev.data1)) != 0) {
+        if (int(deathmatch) == 0 && cht_CheckCheat(addr(cheat_amap), uint8(ev.data1)) != 0) {
             rc = int(doom_boolean._c_false)
             cheating = (cheating + 1) % 3
         }
     } elif (ev._c_type == evtype_t.ev_keyup) {
         rc = int(doom_boolean._c_false)
-        let _cond2 = ev.data1
-        if (_cond2 == 174) {
-            if (!(followplayer != 0)) {
-                m_paninc.x = 0
+        c_switch(ev.data1) {
+            case(174) {
+                if (followplayer == 0) {
+                    m_paninc.x = 0
+                }
+                break
             }
-        } elif (_cond2 == 172) {
-            if (!(followplayer != 0)) {
-                m_paninc.x = 0
+            case(172) {
+                if (followplayer == 0) {
+                    m_paninc.x = 0
+                }
+                break
             }
-        } elif (_cond2 == 173) {
-            if (!(followplayer != 0)) {
-                m_paninc.y = 0
+            case(173) {
+                if (followplayer == 0) {
+                    m_paninc.y = 0
+                }
+                break
             }
-        } elif (_cond2 == 175) {
-            if (!(followplayer != 0)) {
-                m_paninc.y = 0
+            case(175) {
+                if (followplayer == 0) {
+                    m_paninc.y = 0
+                }
+                break
             }
-        } elif (_cond2 == '-' || _cond2 == '=') {
-            mtof_zoommul = FRACUNIT
-            ftom_zoommul = FRACUNIT
+            case('-', '=') {
+                mtof_zoommul = FRACUNIT
+                ftom_zoommul = FRACUNIT
+                break
+            }
         }
     }
     return enum_from_int(type<doom_boolean>, rc)
@@ -487,7 +569,7 @@ def AM_updateLightLev {
 
 // Updates on Game Tick
 def AM_Ticker {
-    if (!(int(automapactive) != 0)) {
+    if (int(automapactive) == 0) {
         return
     }
     amclock++
@@ -762,13 +844,13 @@ def AM_drawWalls {
             AM_drawWalls_l.b.x = lines[i].v2.x
             AM_drawWalls_l.b.y = lines[i].v2.y
             if (cheating != 0 || (int(lines[i].flags) & ML_MAPPED) != 0) {
-                if ((int(lines[i].flags) & LINE_NEVERSEE) != 0 && !(cheating != 0)) {
+                if ((int(lines[i].flags) & LINE_NEVERSEE) != 0 && cheating == 0) {
                     continue
                 }
-                if (!(lines[i].backsector != null)) {
+                if (lines[i].backsector == null) {
                     AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + lightlev)
                 } else {
-                    if (int(lines[i].special) == 39) {
+                    if (lines[i].special == 39) {
                         // teleporters
                         AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + WALLRANGE / 2)
                     } elif ((int(lines[i].flags) & ML_SECRET) != 0) {
@@ -789,7 +871,7 @@ def AM_drawWalls {
                     }
                 }
             } elif (am_map_plr.powers[int(powertype_t.pw_allmap)] != 0) {
-                if (!((int(lines[i].flags) & LINE_NEVERSEE) != 0)) {
+                if ((int(lines[i].flags) & LINE_NEVERSEE) == 0) {
                     AM_drawMline(addr(AM_drawWalls_l), GRAYS + 3)
                 }
             }
@@ -804,9 +886,9 @@ def AM_drawWalls {
 [c_function]
 def AM_rotate(var x : int?; var y : int?; a : uint) {
     var tmpx : int
-    tmpx = FixedMul(deref(x), finecosine[a >> uint(ANGLETOFINESHIFT)]) - FixedMul(deref(y), finesine[a >> uint(ANGLETOFINESHIFT)])
-    deref(y) = FixedMul(deref(x), finesine[a >> uint(ANGLETOFINESHIFT)]) + FixedMul(deref(y), finecosine[a >> uint(ANGLETOFINESHIFT)])
-    deref(x) = tmpx
+    tmpx = FixedMul(*x, finecosine[a >> uint(ANGLETOFINESHIFT)]) - FixedMul(*y, finesine[a >> uint(ANGLETOFINESHIFT)])
+    *y = FixedMul(*x, finesine[a >> uint(ANGLETOFINESHIFT)]) + FixedMul(*y, finecosine[a >> uint(ANGLETOFINESHIFT)])
+    *x = tmpx
 }
 
 [c_function]
@@ -844,7 +926,7 @@ def AM_drawPlayers {
     var p : player_s?
     var their_color : int = -1
     var color : int
-    if (!(int(netgame) != 0)) {
+    if (int(netgame) == 0) {
         if (cheating != 0) {
             AM_drawLineCharacter(addr(cheat_player_arrow[0]), int(NUMCHEATPLYRLINES), 0, am_map_plr.mo.angle, WHITE, am_map_plr.mo.x, am_map_plr.mo.y)
         } else {
@@ -855,10 +937,10 @@ def AM_drawPlayers {
     for (i in range(MAXPLAYERS)) {
         their_color++
         p = addr(players[0]) + end_index(i, 4)
-        if ((uint(int(deathmatch)) != 0 && !(int(singledemo) != 0)) && intptr(p) != intptr(am_map_plr)) {
+        if ((uint(deathmatch) != 0 && int(singledemo) == 0) && intptr(p) != intptr(am_map_plr)) {
             continue
         }
-        if (!(int(playeringame[i]) != 0)) {
+        if (int(playeringame[i]) == 0) {
             continue
         }
         if (p.powers[int(powertype_t.pw_invisibility)] != 0) {
@@ -915,7 +997,7 @@ def AM_drawCrosshair(color : int) {
 }
 
 def AM_Drawer {
-    if (!(int(automapactive) != 0)) {
+    if (int(automapactive) == 0) {
         return
     }
     AM_clearFB(BACKGROUND)

@@ -3,6 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_do_while
 require c_runtime/c_function
 require m_cheat_h
 
@@ -17,25 +18,26 @@ def cht_CheckCheat(var cht : cheatseq_t?; key : uint8) : int {
     if (firsttime != 0) {
         firsttime = 0
         for (i in range(256)) {
-            cheat_xlate_table[i] = uint8(((i & 1) << 7) + ((i & 2) << 5) + (i & 4) + ((i & 8) << 1) + ((i & 16) >> 1) + (i & 32) + ((i & 64) >> 5) + ((i & 128) >> 7))
+            cheat_xlate_table[i] = uint8(((i & 1) << 7) + ((i & 2) << 5) + (i & 4) + ((i & 8) << 1) + ((i & 16) >> 1) + (i & 32) + ((i & 64) >> 5) +
+                    ((i & 128) >> 7))
         }
     }
-    if (!(cht.p != null)) {
+    if (cht.p == null) {
         // initialize if first time
         cht.p = cht.sequence
     }
-    if (int(deref(cht.p)) == 0) {
+    if (*cht.p == 0) {
         var _t0 = cht.p
-        cht.p = cht.p + 1
-        deref(_t0) = uint8(key)
-    } elif (int(cheat_xlate_table[int(uint8(key))]) == int(deref(cht.p))) {
-        cht.p = cht.p + 1
+        cht.p++
+        *_t0 = key
+    } elif (cheat_xlate_table[int(key)] == *cht.p) {
+        cht.p++
     } else {
         cht.p = cht.sequence
     }
-    if (int(deref(cht.p)) == 1) {
-        cht.p = cht.p + 1
-    } elif (int(deref(cht.p)) == 255) {
+    if (*cht.p == 1) {
+        cht.p++
+    } elif (*cht.p == 255) {
         // end of sequence character
         cht.p = cht.sequence
         rc = 1
@@ -50,25 +52,22 @@ def cht_GetParam(var cht : cheatseq_t?; var buffer : uint8?) {
     p = cht.sequence
     while (true) {
         var _t0 = p
-        p = p + 1
-        if (!(int(deref(_t0)) != 1)) {
+        p++
+        if (!(*_t0 != 1)) {
             break
         }
     }
-    while (true) {
-        c = deref(p)
+    c_do_while(c != 0 && *p != 255) {
+        c = *p
         var _t1 = buffer
-        buffer = buffer + 1
-        deref(_t1) = uint8(c)
+        buffer++
+        *_t1 = c
         var _t2 = p
-        p = p + 1
-        deref(_t2) = 0u8
-        if (!(c != 0 && int(deref(p)) != 255)) {
-            break
-        }
+        p++
+        *_t2 = 0u8
     }
-    if (int(deref(p)) == 255) {
-        deref(buffer) = 0u8
+    if (*p == 255) {
+        *buffer = 0u8
     }
 }
 

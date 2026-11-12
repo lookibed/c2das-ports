@@ -5,17 +5,15 @@ var activeplats : plat_t? [30]
 [c_function]
 def T_PlatRaise(var plat : plat_t?) {
     var res : result_e
-    let _cond = plat.status
-    while (true) {
-        var _flag = false
-        if (_cond == plat_e.up) {
+    c_switch(plat.status) {
+        case(plat_e.up) {
             res = T_MovePlane(plat.sector, plat.speed, plat.high, plat.crush, 0, 1)
             if (plat._c_type == plattype_e.raiseAndChange || plat._c_type == plattype_e.raiseToNearestAndChange) {
-                if (!((leveltime & 7) != 0)) {
+                if ((leveltime & 7) == 0) {
                     S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(plat.sector.soundorg))), int(sfxenum_t.sfx_stnmov))
                 }
             }
-            if (res == result_e.crushed && (!(int(plat.crush) != 0))) {
+            if (res == result_e.crushed && (int(plat.crush) == 0)) {
                 plat.count = plat.wait
                 plat.status = plat_e.down
                 S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(plat.sector.soundorg))), int(sfxenum_t.sfx_pstart))
@@ -24,18 +22,24 @@ def T_PlatRaise(var plat : plat_t?) {
                     plat.count = plat.wait
                     plat.status = plat_e.waiting
                     S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(plat.sector.soundorg))), int(sfxenum_t.sfx_pstop))
-                    let _cond2 = plat._c_type
-                    if (_cond2 == plattype_e.blazeDWUS || _cond2 == plattype_e.downWaitUpStay) {
-                        P_RemoveActivePlat(plat)
-                    } elif (_cond2 == plattype_e.raiseAndChange || _cond2 == plattype_e.raiseToNearestAndChange) {
-                        P_RemoveActivePlat(plat)
-                    } else {
+                    c_switch(plat._c_type) {
+                        case(plattype_e.blazeDWUS, plattype_e.downWaitUpStay) {
+                            P_RemoveActivePlat(plat)
+                            break
+                        }
+                        case(plattype_e.raiseAndChange, plattype_e.raiseToNearestAndChange) {
+                            P_RemoveActivePlat(plat)
+                            break
+                        }
+                        case(_) {
+                            break
+                        }
                     }
                 }
             }
             break
         }
-        if (_cond == plat_e.down) {
+        case(plat_e.down) {
             res = T_MovePlane(plat.sector, plat.speed, plat.low, doom_boolean._c_false, 0, -1)
             if (res == result_e.pastdest) {
                 plat.count = plat.wait
@@ -44,10 +48,9 @@ def T_PlatRaise(var plat : plat_t?) {
             }
             break
         }
-        _flag ||= _cond == plat_e.waiting
-        if (_flag) {
+        case(plat_e.waiting) {
             plat.count--
-            if (!(plat.count != 0)) {
+            if (plat.count == 0) {
                 if (plat.sector.floorheight == plat.low) {
                     plat.status = plat_e.up
                 } else {
@@ -56,11 +59,9 @@ def T_PlatRaise(var plat : plat_t?) {
                 S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(plat.sector.soundorg))), int(sfxenum_t.sfx_pstart))
             }
         }
-        _flag ||= _cond == plat_e.in_stasis
-        if (_flag) {
+        case(plat_e.in_stasis) {
             break
         }
-        break
     }
 }
 
@@ -75,10 +76,14 @@ def EV_DoPlat(var line : line_s?; _c_type : plattype_e; amount : int) : int {
     secnum = -1
     rtn = 0
     // Activate all <type> plats that are in_stasis
-    let _cond = _c_type
-    if (_cond == plattype_e.perpetualRaise) {
-        P_ActivateInStasis(int(line.tag))
-    } else {
+    c_switch(_c_type) {
+        case(plattype_e.perpetualRaise) {
+            P_ActivateInStasis(int(line.tag))
+            break
+        }
+        case(_) {
+            break
+        }
     }
     while (true) {
         secnum = P_FindSectorFromLineTag(line, secnum)
@@ -91,7 +96,7 @@ def EV_DoPlat(var line : line_s?; _c_type : plattype_e; amount : int) : int {
         }
         // Find lowest & highest floors around sector
         rtn = 1
-        plat = reinterpret<plat_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<plat_t>))), PU_LEVSPEC, null))
+        plat = reinterpret<plat_t?>(Z_Malloc(typeinfo sizeof(type<plat_t>), PU_LEVSPEC, null))
         P_AddThinker(addr(plat.thinker))
         plat._c_type = _c_type
         plat.sector = sec
@@ -99,56 +104,66 @@ def EV_DoPlat(var line : line_s?; _c_type : plattype_e; amount : int) : int {
         plat.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_PlatRaise)
         plat.crush = doom_boolean._c_false
         plat.tag = int(line.tag)
-        let _cond2 = _c_type
-        if (_cond2 == plattype_e.raiseToNearestAndChange) {
-            plat.speed = FRACUNIT / 2
-            sec.floorpic = sides[int(line.sidenum[0])].sector.floorpic
-            plat.high = P_FindNextHighestFloor(sec, sec.floorheight)
-            plat.wait = 0
-            plat.status = plat_e.up
-            // NO MORE DAMAGE, IF APPLICABLE
-            sec.special = int16(0)
-            S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_stnmov))
-        } elif (_cond2 == plattype_e.raiseAndChange) {
-            plat.speed = FRACUNIT / 2
-            sec.floorpic = sides[int(line.sidenum[0])].sector.floorpic
-            plat.high = sec.floorheight + amount * FRACUNIT
-            plat.wait = 0
-            plat.status = plat_e.up
-            S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_stnmov))
-        } elif (_cond2 == plattype_e.downWaitUpStay) {
-            plat.speed = FRACUNIT * 4
-            plat.low = P_FindLowestFloorSurrounding(sec)
-            if (plat.low > sec.floorheight) {
-                plat.low = sec.floorheight
+        c_switch(_c_type) {
+            case(plattype_e.raiseToNearestAndChange) {
+                plat.speed = FRACUNIT / 2
+                sec.floorpic = sides[int(line.sidenum[0])].sector.floorpic
+                plat.high = P_FindNextHighestFloor(sec, sec.floorheight)
+                plat.wait = 0
+                plat.status = plat_e.up
+                // NO MORE DAMAGE, IF APPLICABLE
+                sec.special = int16(0)
+                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_stnmov))
+                break
             }
-            plat.high = sec.floorheight
-            plat.wait = 35 * PLATWAIT
-            plat.status = plat_e.down
-            S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_pstart))
-        } elif (_cond2 == plattype_e.blazeDWUS) {
-            plat.speed = FRACUNIT * 8
-            plat.low = P_FindLowestFloorSurrounding(sec)
-            if (plat.low > sec.floorheight) {
-                plat.low = sec.floorheight
+            case(plattype_e.raiseAndChange) {
+                plat.speed = FRACUNIT / 2
+                sec.floorpic = sides[int(line.sidenum[0])].sector.floorpic
+                plat.high = sec.floorheight + amount * FRACUNIT
+                plat.wait = 0
+                plat.status = plat_e.up
+                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_stnmov))
+                break
             }
-            plat.high = sec.floorheight
-            plat.wait = 35 * PLATWAIT
-            plat.status = plat_e.down
-            S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_pstart))
-        } elif (_cond2 == plattype_e.perpetualRaise) {
-            plat.speed = FRACUNIT
-            plat.low = P_FindLowestFloorSurrounding(sec)
-            if (plat.low > sec.floorheight) {
-                plat.low = sec.floorheight
-            }
-            plat.high = P_FindHighestFloorSurrounding(sec)
-            if (plat.high < sec.floorheight) {
+            case(plattype_e.downWaitUpStay) {
+                plat.speed = FRACUNIT * 4
+                plat.low = P_FindLowestFloorSurrounding(sec)
+                if (plat.low > sec.floorheight) {
+                    plat.low = sec.floorheight
+                }
                 plat.high = sec.floorheight
+                plat.wait = 35 * PLATWAIT
+                plat.status = plat_e.down
+                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_pstart))
+                break
             }
-            plat.wait = 35 * PLATWAIT
-            plat.status = enum_from_int(type<plat_e>, P_Random() & 1)
-            S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_pstart))
+            case(plattype_e.blazeDWUS) {
+                plat.speed = FRACUNIT * 8
+                plat.low = P_FindLowestFloorSurrounding(sec)
+                if (plat.low > sec.floorheight) {
+                    plat.low = sec.floorheight
+                }
+                plat.high = sec.floorheight
+                plat.wait = 35 * PLATWAIT
+                plat.status = plat_e.down
+                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_pstart))
+                break
+            }
+            case(plattype_e.perpetualRaise) {
+                plat.speed = FRACUNIT
+                plat.low = P_FindLowestFloorSurrounding(sec)
+                if (plat.low > sec.floorheight) {
+                    plat.low = sec.floorheight
+                }
+                plat.high = P_FindHighestFloorSurrounding(sec)
+                if (plat.high < sec.floorheight) {
+                    plat.high = sec.floorheight
+                }
+                plat.wait = 35 * PLATWAIT
+                plat.status = enum_from_int(type<plat_e>, P_Random() & 1)
+                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_pstart))
+                break
+            }
         }
         P_AddActivePlat(plat)
     }

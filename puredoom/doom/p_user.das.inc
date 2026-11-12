@@ -26,7 +26,7 @@ def P_CalcHeight(var player : player_s?) {
     if (player.bob > MAXBOB) {
         player.bob = MAXBOB
     }
-    if ((player.cheats & int(cheat_t.CF_NOMOMENTUM)) != 0 || !(int(onground) != 0)) {
+    if ((player.cheats & int(cheat_t.CF_NOMOMENTUM)) != 0 || int(onground) == 0) {
         player.viewz = player.mo.z + VIEWHEIGHT
         if (player.viewz > player.mo.ceilingz - 4 * FRACUNIT) {
             player.viewz = player.mo.ceilingz - 4 * FRACUNIT
@@ -51,7 +51,7 @@ def P_CalcHeight(var player : player_s?) {
         }
         if (player.deltaviewheight != 0) {
             player.deltaviewheight += FRACUNIT / 4
-            if (!(player.deltaviewheight != 0)) {
+            if (player.deltaviewheight == 0) {
                 player.deltaviewheight = 1
             }
         }
@@ -70,11 +70,11 @@ def P_MovePlayer(var player : player_s?) {
     player.mo.angle += uint(int(cmd.angleturn) << 16)
     // Do not let the player control movement
     // if not onground.
-    onground = enum_from_int(type<doom_boolean>, (player.mo.z <= player.mo.floorz) ? 1 : 0)
-    if (cmd.forwardmove != 0 && uint(int(onground)) != 0) {
+    onground = enum_from_int(type<doom_boolean>, int_of(player.mo.z <= player.mo.floorz))
+    if (cmd.forwardmove != 0 && uint(onground) != 0) {
         P_Thrust(player, player.mo.angle, int(cmd.forwardmove) * 2048)
     }
-    if (cmd.sidemove != 0 && uint(int(onground)) != 0) {
+    if (cmd.sidemove != 0 && uint(onground) != 0) {
         P_Thrust(player, player.mo.angle - uint(ANG90), int(cmd.sidemove) * 2048)
     }
     if ((cmd.forwardmove != 0 || cmd.sidemove != 0) && intptr(player.mo.state) == intptr(addr(states[int(statenum_t.S_PLAY)]))) {
@@ -97,7 +97,7 @@ def P_DeathThink(var player : player_s?) {
         player.viewheight = 6 * FRACUNIT
     }
     player.deltaviewheight = 0
-    onground = enum_from_int(type<doom_boolean>, (player.mo.z <= player.mo.floorz) ? 1 : 0)
+    onground = enum_from_int(type<doom_boolean>, int_of(player.mo.z <= player.mo.floorz))
     P_CalcHeight(player)
     if (player.attacker != null && intptr(player.attacker) != intptr(player.mo)) {
         angle = R_PointToAngle2(player.mo.x, player.mo.y, player.attacker.x, player.attacker.y)
@@ -167,13 +167,15 @@ def P_PlayerThink(var player : player_s?) {
         // when the weapon psprite can do it
         // (read: not in the middle of an attack).
         newweapon = enum_from_int(type<weapontype_t>, (int(cmd.buttons) & int(buttoncode_t.BT_WEAPONMASK)) >> int(buttoncode_t.BT_WEAPONSHIFT))
-        if (newweapon == weapontype_t.wp_fist && uint(int(player.weaponowned[int(weapontype_t.wp_chainsaw)])) != 0 && !(player.readyweapon == weapontype_t.wp_chainsaw && player.powers[int(powertype_t.pw_strength)] != 0)) {
+        if (newweapon == weapontype_t.wp_fist && uint(player.weaponowned[int(weapontype_t.wp_chainsaw)]) != 0 &&
+                !(player.readyweapon == weapontype_t.wp_chainsaw && player.powers[int(powertype_t.pw_strength)] != 0)) {
             newweapon = weapontype_t.wp_chainsaw
         }
-        if ((gamemode == GameMode_t.commercial) && newweapon == weapontype_t.wp_shotgun && uint(int(player.weaponowned[int(weapontype_t.wp_supershotgun)])) != 0 && player.readyweapon != weapontype_t.wp_supershotgun) {
+        if ((gamemode == GameMode_t.commercial) && newweapon == weapontype_t.wp_shotgun && uint(player.weaponowned[int(weapontype_t.wp_supershotgun)]) != 0 &&
+                player.readyweapon != weapontype_t.wp_supershotgun) {
             newweapon = weapontype_t.wp_supershotgun
         }
-        if (uint(int(player.weaponowned[int(newweapon)])) != 0 && newweapon != player.readyweapon) {
+        if (uint(player.weaponowned[int(newweapon)]) != 0 && newweapon != player.readyweapon) {
             // Do not go to plasma or BFG in shareware,
             // even if cheated.
             if ((newweapon != weapontype_t.wp_plasma && newweapon != weapontype_t.wp_bfg) || (gamemode != GameMode_t.shareware)) {
@@ -183,7 +185,7 @@ def P_PlayerThink(var player : player_s?) {
     }
     // check for use
     if ((int(cmd.buttons) & int(buttoncode_t.BT_USE)) != 0) {
-        if (!(player.usedown != 0)) {
+        if (player.usedown == 0) {
             P_UseLines(player)
             player.usedown = int(doom_boolean._c_true)
         }
@@ -202,7 +204,7 @@ def P_PlayerThink(var player : player_s?) {
     }
     if (player.powers[int(powertype_t.pw_invisibility)] != 0) {
         player.powers[int(powertype_t.pw_invisibility)]--
-        if (!(player.powers[int(powertype_t.pw_invisibility)] != 0)) {
+        if (player.powers[int(powertype_t.pw_invisibility)] == 0) {
             player.mo.flags &= ~int(mobjflag_t.MF_SHADOW)
         }
     }

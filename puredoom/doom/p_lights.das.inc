@@ -22,7 +22,7 @@ def P_SpawnFireFlicker(var sector : sector_t?) {
     // Note that we are resetting sector attributes.
     // Nothing special about it during gameplay.
     sector.special = int16(0)
-    flick = reinterpret<fireflicker_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<fireflicker_t>))), PU_LEVSPEC, null))
+    flick = reinterpret<fireflicker_t?>(Z_Malloc(typeinfo sizeof(type<fireflicker_t>), PU_LEVSPEC, null))
     P_AddThinker(addr(flick.thinker))
     flick.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_FireFlicker)
     flick.sector = sector
@@ -55,7 +55,7 @@ def P_SpawnLightFlash(var sector : sector_t?) {
     var flash : lightflash_t?
     // nothing special about it during gameplay
     sector.special = int16(0)
-    flash = reinterpret<lightflash_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<lightflash_t>))), PU_LEVSPEC, null))
+    flash = reinterpret<lightflash_t?>(Z_Malloc(typeinfo sizeof(type<lightflash_t>), PU_LEVSPEC, null))
     P_AddThinker(addr(flash.thinker))
     flash.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_LightFlash)
     flash.sector = sector
@@ -87,7 +87,7 @@ def T_StrobeFlash(var flash : strobe_t?) {
 [c_function]
 def P_SpawnStrobeFlash(var sector : sector_t?; fastOrSlow : int; inSync : int) {
     var flash : strobe_t?
-    flash = reinterpret<strobe_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<strobe_t>))), PU_LEVSPEC, null))
+    flash = reinterpret<strobe_t?>(Z_Malloc(typeinfo sizeof(type<strobe_t>), PU_LEVSPEC, null))
     P_AddThinker(addr(flash.thinker))
     flash.sector = sector
     flash.darktime = fastOrSlow
@@ -100,7 +100,7 @@ def P_SpawnStrobeFlash(var sector : sector_t?; fastOrSlow : int; inSync : int) {
     }
     // nothing special about it during gameplay
     sector.special = int16(0)
-    if (!(inSync != 0)) {
+    if (inSync == 0) {
         flash.count = (P_Random() & 7) + 1
     } else {
         flash.count = 1
@@ -138,14 +138,14 @@ def EV_TurnTagLightsOff(var line : line_s?) {
     sector = sectors
     j = 0
     while (j < numsectors) {
-        if (int(sector.tag) == int(line.tag)) {
+        if (sector.tag == line.tag) {
             min = int(sector.lightlevel)
             i = 0
             while (i < sector.linecount) {
                 {
                     templine = sector.lines[i]
                     tsec = getNextSector(templine, sector)
-                    if (!(tsec != null)) {
+                    if (tsec == null) {
                         continue
                     }
                     if (int(tsec.lightlevel) < min) {
@@ -158,7 +158,7 @@ def EV_TurnTagLightsOff(var line : line_s?) {
             sector.lightlevel = int16(min)
         }
         j++
-        sector = sector + 1
+        sector++
     }
 }
 
@@ -173,17 +173,17 @@ def EV_LightTurnOn(var line : line_s?; var bright : int) {
     sector = sectors
     i = 0
     while (i < numsectors) {
-        if (int(sector.tag) == int(line.tag)) {
+        if (sector.tag == line.tag) {
             // bright = 0 means to search
             // for highest light level
             // surrounding sector
-            if (!(bright != 0)) {
+            if (bright == 0) {
                 j = 0
                 while (j < sector.linecount) {
                     {
                         templine = sector.lines[j]
                         temp = getNextSector(templine, sector)
-                        if (!(temp != null)) {
+                        if (temp == null) {
                             continue
                         }
                         if (int(temp.lightlevel) > bright) {
@@ -197,26 +197,30 @@ def EV_LightTurnOn(var line : line_s?; var bright : int) {
             sector.lightlevel = int16(bright)
         }
         i++
-        sector = sector + 1
+        sector++
     }
 }
 
 // Spawn glowing light
 def T_Glow(var g : glow_t?) {
-    let _cond = g.direction
-    if (_cond == -1) {
-        // DOWN
-        g.sector.lightlevel = int16(int(g.sector.lightlevel) - GLOWSPEED)
-        if (int(g.sector.lightlevel) <= g.minlight) {
-            g.sector.lightlevel = int16(int(g.sector.lightlevel) + GLOWSPEED)
-            g.direction = 1
-        }
-    } elif (_cond == 1) {
-        // UP
-        g.sector.lightlevel = int16(int(g.sector.lightlevel) + GLOWSPEED)
-        if (int(g.sector.lightlevel) >= g.maxlight) {
+    c_switch(g.direction) {
+        case(-1) {
+            // DOWN
             g.sector.lightlevel = int16(int(g.sector.lightlevel) - GLOWSPEED)
-            g.direction = -1
+            if (int(g.sector.lightlevel) <= g.minlight) {
+                g.sector.lightlevel = int16(int(g.sector.lightlevel) + GLOWSPEED)
+                g.direction = 1
+            }
+            break
+        }
+        case(1) {
+            // UP
+            g.sector.lightlevel = int16(int(g.sector.lightlevel) + GLOWSPEED)
+            if (int(g.sector.lightlevel) >= g.maxlight) {
+                g.sector.lightlevel = int16(int(g.sector.lightlevel) - GLOWSPEED)
+                g.direction = -1
+            }
+            break
         }
     }
 }
@@ -224,7 +228,7 @@ def T_Glow(var g : glow_t?) {
 [c_function]
 def P_SpawnGlowingLight(var sector : sector_t?) {
     var g : glow_t?
-    g = reinterpret<glow_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<glow_t>))), PU_LEVSPEC, null))
+    g = reinterpret<glow_t?>(Z_Malloc(typeinfo sizeof(type<glow_t>), PU_LEVSPEC, null))
     P_AddThinker(addr(g.thinker))
     g.sector = sector
     g.minlight = P_FindMinSurroundingLight(sector, int(sector.lightlevel))

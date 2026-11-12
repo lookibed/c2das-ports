@@ -32,7 +32,7 @@ def HUlib_addCharToTextLine(var t : hu_textline_t?; ch : uint8) : doom_boolean {
 }
 
 def HUlib_delCharFromTextLine(var t : hu_textline_t?) : doom_boolean {
-    if (!(t.len != 0)) {
+    if (t.len == 0) {
         return doom_boolean._c_false
     } else {
         t.len--
@@ -53,7 +53,7 @@ def HUlib_drawTextLine(var l : hu_textline_t?; drawcursor : doom_boolean) {
     i = 0
     while (i < l.len) {
         c = uint8(doom_toupper(int(l.l[i])))
-        if (int(c) != ' ' && int(c) >= l.sc && int(c) <= '_') {
+        if (c != ' ' && int(c) >= l.sc && int(c) <= '_') {
             w = int(read_patch_t_width(l.f[int(c) - l.sc], 0))
             if (x + w > SCREENWIDTH) {
                 break
@@ -69,7 +69,7 @@ def HUlib_drawTextLine(var l : hu_textline_t?; drawcursor : doom_boolean) {
         i++
     }
     // draw the cursor if requested
-    if (uint(int(drawcursor)) != 0 && x + int(read_patch_t_width(l.f['_' - l.sc], 0)) <= SCREENWIDTH) {
+    if (uint(drawcursor) != 0 && x + int(read_patch_t_width(l.f['_' - l.sc], 0)) <= SCREENWIDTH) {
         V_DrawPatchDirect(x, l.y, FG, l.f['_' - l.sc])
     }
 }
@@ -83,7 +83,7 @@ def HUlib_eraseTextLine(var l : hu_textline_t?) {
     // Only erases when NOT in automap and the screen is reduced,
     // and the text must either need updating or refreshing
     // (because of a recent change back from the automap)
-    if (!(int(automapactive) != 0) && viewwindowx != 0 && l.needsupdate != 0) {
+    if (int(automapactive) == 0 && viewwindowx != 0 && l.needsupdate != 0) {
         lh = int(read_patch_t_height(l.f[0], 0)) + 1
         y = l.y
         yoffset = y * SCREENWIDTH
@@ -139,16 +139,16 @@ def HUlib_addLineToSText(var s : hu_stext_t?) {
 def HUlib_addMessageToSText(var s : hu_stext_t?; var prefix : uint8?; var msg : uint8?) {
     HUlib_addLineToSText(s)
     if (prefix != null) {
-        while (deref(prefix) != 0) {
+        while (*prefix != 0) {
             var _t0 = prefix
-            prefix = prefix + 1
-            HUlib_addCharToTextLine(addr(s.l[0]) + end_index(s.cl, 4), deref(_t0))
+            prefix++
+            HUlib_addCharToTextLine(addr(s.l[0]) + end_index(s.cl, 4), *_t0)
         }
     }
-    while (deref(msg) != 0) {
+    while (*msg != 0) {
         var _t1 = msg
-        msg = msg + 1
-        HUlib_addCharToTextLine(addr(s.l[0]) + end_index(s.cl, 4), deref(_t1))
+        msg++
+        HUlib_addCharToTextLine(addr(s.l[0]) + end_index(s.cl, 4), *_t1)
     }
 }
 
@@ -157,7 +157,7 @@ def HUlib_drawSText(var s : hu_stext_t?) {
     var i : int
     var idx : int
     var l : hu_textline_t?
-    if (!(int(deref(s.on)) != 0)) {
+    if (int(*s.on) == 0) {
         // if not on, don't draw
         return
     }
@@ -182,13 +182,13 @@ def HUlib_eraseSText(var s : hu_stext_t?) {
     var i : int
     i = 0
     while (i < s.h) {
-        if (uint(int(s.laston)) != 0 && !(int(deref(s.on)) != 0)) {
+        if (uint(s.laston) != 0 && int(*s.on) == 0) {
             s.l[i].needsupdate = 4
         }
         HUlib_eraseTextLine(addr(s.l[0]) + end_index(i, 4))
         i++
     }
-    s.laston = deref(s.on)
+    s.laston = *s.on
 }
 
 [c_function]
@@ -224,10 +224,10 @@ def HUlib_resetIText(var it : hu_itext_t?) {
 
 [c_function]
 def HUlib_addPrefixToIText(var it : hu_itext_t?; var str : uint8?) {
-    while (deref(str) != 0) {
+    while (*str != 0) {
         var _t0 = str
-        str = str + 1
-        HUlib_addCharToTextLine(addr(it.l), deref(_t0))
+        str++
+        HUlib_addCharToTextLine(addr(it.l), *_t0)
     }
     it.lm = it.l.len
 }
@@ -237,7 +237,7 @@ def HUlib_addPrefixToIText(var it : hu_itext_t?; var str : uint8?) {
 [c_function]
 def HUlib_keyInIText(var it : hu_itext_t?; ch : uint8) : doom_boolean {
     if (int(ch) >= ' ' && int(ch) <= '_') {
-        HUlib_addCharToTextLine(addr(it.l), uint8(ch))
+        HUlib_addCharToTextLine(addr(it.l), ch)
     } elif (int(ch) == KEY_BACKSPACE) {
         HUlib_delCharFromIText(it)
     } elif (int(ch) != KEY_ENTER) {
@@ -251,7 +251,7 @@ def HUlib_keyInIText(var it : hu_itext_t?; ch : uint8) : doom_boolean {
 [c_function]
 def HUlib_drawIText(var it : hu_itext_t?) {
     var l : hu_textline_t? = addr(it.l)
-    if (!(int(deref(it.on)) != 0)) {
+    if (int(*it.on) == 0) {
         return
     }
     // draw the line w/ cursor
@@ -260,10 +260,10 @@ def HUlib_drawIText(var it : hu_itext_t?) {
 
 [c_function]
 def HUlib_eraseIText(var it : hu_itext_t?) {
-    if (uint(int(it.laston)) != 0 && !(int(deref(it.on)) != 0)) {
+    if (uint(it.laston) != 0 && int(*it.on) == 0) {
         it.l.needsupdate = 4
     }
     HUlib_eraseTextLine(addr(it.l))
-    it.laston = deref(it.on)
+    it.laston = *it.on
 }
 

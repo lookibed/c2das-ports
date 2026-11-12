@@ -30,7 +30,16 @@ var t5text : uint8? = cstr("What now? Looks totally different. Kind\nof like Kin
 var t6text : uint8? = cstr("Time for a vacation. You've burst the\nbowels of hell and by golly you're ready\nfor a break. You mutter to yourself,\nMaybe someone else can kick Hell's ass\nnext time around. Ahead lies a quiet town,\nwith peaceful flowing water, quaint\nbuildings, and presumably no Hellspawn.\n\nAs you step off the transport, you hear\nthe stomp of a cyberdemon's iron shoe.")
 var finaletext : uint8?
 var finaleflat : uint8?
-var castorder : castinfo_t[18] = fixed_array(castinfo_t(name = cstr("ZOMBIEMAN"), _c_type = mobjtype_t.MT_POSSESSED), castinfo_t(name = cstr("SHOTGUN GUY"), _c_type = mobjtype_t.MT_SHOTGUY), castinfo_t(name = cstr("HEAVY WEAPON DUDE"), _c_type = mobjtype_t.MT_CHAINGUY), castinfo_t(name = cstr("IMP"), _c_type = mobjtype_t.MT_TROOP), castinfo_t(name = cstr("DEMON"), _c_type = mobjtype_t.MT_SERGEANT), castinfo_t(name = cstr("LOST SOUL"), _c_type = mobjtype_t.MT_SKULL), castinfo_t(name = cstr("CACODEMON"), _c_type = mobjtype_t.MT_HEAD), castinfo_t(name = cstr("HELL KNIGHT"), _c_type = mobjtype_t.MT_KNIGHT), castinfo_t(name = cstr("BARON OF HELL"), _c_type = mobjtype_t.MT_BRUISER), castinfo_t(name = cstr("ARACHNOTRON"), _c_type = mobjtype_t.MT_BABY), castinfo_t(name = cstr("PAIN ELEMENTAL"), _c_type = mobjtype_t.MT_PAIN), castinfo_t(name = cstr("REVENANT"), _c_type = mobjtype_t.MT_UNDEAD), castinfo_t(name = cstr("MANCUBUS"), _c_type = mobjtype_t.MT_FATSO), castinfo_t(name = cstr("ARCH-VILE"), _c_type = mobjtype_t.MT_VILE), castinfo_t(name = cstr("THE SPIDER MASTERMIND"), _c_type = mobjtype_t.MT_SPIDER), castinfo_t(name = cstr("THE CYBERDEMON"), _c_type = mobjtype_t.MT_CYBORG), castinfo_t(name = cstr("OUR HERO"), _c_type = mobjtype_t.MT_PLAYER), castinfo_t(name = null, _c_type = mobjtype_t.MT_PLAYER))
+var castorder : castinfo_t[18] = fixed_array(castinfo_t(name = cstr("ZOMBIEMAN"), _c_type = mobjtype_t.MT_POSSESSED),
+        castinfo_t(name = cstr("SHOTGUN GUY"), _c_type = mobjtype_t.MT_SHOTGUY), castinfo_t(name = cstr("HEAVY WEAPON DUDE"), _c_type = mobjtype_t.MT_CHAINGUY),
+        castinfo_t(name = cstr("IMP"), _c_type = mobjtype_t.MT_TROOP), castinfo_t(name = cstr("DEMON"), _c_type = mobjtype_t.MT_SERGEANT),
+        castinfo_t(name = cstr("LOST SOUL"), _c_type = mobjtype_t.MT_SKULL), castinfo_t(name = cstr("CACODEMON"), _c_type = mobjtype_t.MT_HEAD),
+        castinfo_t(name = cstr("HELL KNIGHT"), _c_type = mobjtype_t.MT_KNIGHT), castinfo_t(name = cstr("BARON OF HELL"), _c_type = mobjtype_t.MT_BRUISER),
+        castinfo_t(name = cstr("ARACHNOTRON"), _c_type = mobjtype_t.MT_BABY), castinfo_t(name = cstr("PAIN ELEMENTAL"), _c_type = mobjtype_t.MT_PAIN),
+        castinfo_t(name = cstr("REVENANT"), _c_type = mobjtype_t.MT_UNDEAD), castinfo_t(name = cstr("MANCUBUS"), _c_type = mobjtype_t.MT_FATSO),
+        castinfo_t(name = cstr("ARCH-VILE"), _c_type = mobjtype_t.MT_VILE), castinfo_t(name = cstr("THE SPIDER MASTERMIND"), _c_type = mobjtype_t.MT_SPIDER),
+        castinfo_t(name = cstr("THE CYBERDEMON"), _c_type = mobjtype_t.MT_CYBORG), castinfo_t(name = cstr("OUR HERO"), _c_type = mobjtype_t.MT_PLAYER),
+        castinfo_t(name = null, _c_type = mobjtype_t.MT_PLAYER))
 var castnum : int
 var casttics : int
 var caststate : state_t?
@@ -49,62 +58,88 @@ def F_StartFinale {
     // Okay - IWAD dependend stuff.
     // This has been changed severly, and
     // some stuff might have changed in the process.
-    let _cond = gamemode
-    if (_cond == GameMode_t.shareware || _cond == GameMode_t.registered || _cond == GameMode_t.retail) {
-        {
+    c_switch(gamemode) {
+        case(GameMode_t.shareware, GameMode_t.registered, GameMode_t.retail) {
             // DOOM 1 - E1, E3 or E4, but each nine missions
             S_ChangeMusic(int(musicenum_t.mus_victor), int(doom_boolean._c_true))
-            let _cond2 = gameepisode
-            if (_cond2 == 1) {
-                finaleflat = cstr("FLOOR4_8")
-                finaletext = e1text
-            } elif (_cond2 == 2) {
-                finaleflat = cstr("SFLR6_1")
-                finaletext = e2text
-            } elif (_cond2 == 3) {
-                finaleflat = cstr("MFLR8_4")
-                finaletext = e3text
-            } elif (_cond2 == 4) {
-                finaleflat = cstr("MFLR8_3")
-                finaletext = e4text
-            } else {
+            c_switch(gameepisode) {
+                case(1) {
+                    finaleflat = cstr("FLOOR4_8")
+                    finaletext = e1text
+                    break
+                }
+                case(2) {
+                    finaleflat = cstr("SFLR6_1")
+                    finaletext = e2text
+                    break
+                }
+                case(3) {
+                    finaleflat = cstr("MFLR8_4")
+                    finaletext = e3text
+                    break
+                }
+                case(4) {
+                    finaleflat = cstr("MFLR8_3")
+                    finaletext = e4text
+                    break
+                }
+                case(_) {
+                    // Ouch.
+                    break
+                }
             }
+            break
         }
-    } elif (_cond == GameMode_t.commercial) {
-        {
-            // Ouch.
+        case(GameMode_t.commercial) {
             // DOOM II and missions packs with E1, M34
             S_ChangeMusic(int(musicenum_t.mus_read_m), int(doom_boolean._c_true))
-            let _cond3 = gamemap
-            if (_cond3 == 6) {
-                finaleflat = cstr("SLIME16")
-                finaletext = c1text
-            } elif (_cond3 == 11) {
-                finaleflat = cstr("RROCK14")
-                finaletext = c2text
-            } elif (_cond3 == 20) {
-                finaleflat = cstr("RROCK07")
-                finaletext = c3text
-            } elif (_cond3 == 30) {
-                finaleflat = cstr("RROCK17")
-                finaletext = c4text
-            } elif (_cond3 == 15) {
-                finaleflat = cstr("RROCK13")
-                finaletext = c5text
-            } elif (_cond3 == 31) {
-                finaleflat = cstr("RROCK19")
-                finaletext = c6text
-            } else {
+            c_switch(gamemap) {
+                case(6) {
+                    finaleflat = cstr("SLIME16")
+                    finaletext = c1text
+                    break
+                }
+                case(11) {
+                    finaleflat = cstr("RROCK14")
+                    finaletext = c2text
+                    break
+                }
+                case(20) {
+                    finaleflat = cstr("RROCK07")
+                    finaletext = c3text
+                    break
+                }
+                case(30) {
+                    finaleflat = cstr("RROCK17")
+                    finaletext = c4text
+                    break
+                }
+                case(15) {
+                    finaleflat = cstr("RROCK13")
+                    finaletext = c5text
+                    break
+                }
+                case(31) {
+                    finaleflat = cstr("RROCK19")
+                    finaletext = c6text
+                    break
+                }
+                case(_) {
+                    // Ouch.
+                    break
+                }
             }
+            break
         }
-    } else {
-        // Ouch.
-        // Indeterminate.
-        S_ChangeMusic(int(musicenum_t.mus_read_m), int(doom_boolean._c_true))
-        // Not used anywhere else.
-        finaleflat = cstr("F_SKY1")
-        // FIXME - other text, music?
-        finaletext = c1text
+        case(_) {
+            // Indeterminate.
+            S_ChangeMusic(int(musicenum_t.mus_read_m), int(doom_boolean._c_true))
+            // Not used anywhere else.
+            finaleflat = cstr("F_SKY1")
+            // FIXME - other text, music?
+            finaletext = c1text
+            break
+        }
     }
     finalestage = 0
     finalecount = 0
@@ -147,7 +182,7 @@ def F_Ticker {
     if (gamemode == GameMode_t.commercial) {
         return
     }
-    if (!(finalestage != 0) && finalecount > doom_strlen(finaletext) * TEXTSPEED + TEXTWAIT) {
+    if (finalestage == 0 && finalecount > doom_strlen(finaletext) * TEXTSPEED + TEXTWAIT) {
         finalecount = 0
         finalestage = 1
         // force a wipe
@@ -177,12 +212,12 @@ def F_TextWrite {
         x = 0
         while (x < SCREENWIDTH / 64) {
             doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(src + ((y & 63) << 6)), 64)
-            dest = dest + 64
+            dest += 64
             x++
         }
         if ((SCREENWIDTH & 63) != 0) {
             doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(src + ((y & 63) << 6)), SCREENWIDTH & 63)
-            dest = dest + (SCREENWIDTH & 63)
+            dest += SCREENWIDTH & 63
         }
     }
     V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT)
@@ -201,13 +236,13 @@ def F_TextWrite {
                 count--
             }
             _f = true
-            if (!(count != 0)) {
+            if (count == 0) {
                 break
             }
             var _t0 = ch
-            ch = ch + 1
-            c = int(deref(_t0))
-            if (!(c != 0)) {
+            ch++
+            c = int(*_t0)
+            if (c == 0) {
                 break
             }
             if (c == '\n') {
@@ -280,43 +315,79 @@ def F_CastTicker {
         caststate = addr(states[0]) + end_index(st, 967)
         castframes++
         // sound hacks....
-        let _cond = st
-        if (_cond == 154) {
-            sfx = int(sfxenum_t.sfx_dshtgn)
-        } elif (_cond == 185) {
-            sfx = int(sfxenum_t.sfx_pistol)
-        } elif (_cond == 218) {
-            sfx = int(sfxenum_t.sfx_shotgn)
-        } elif (_cond == 256) {
-            sfx = int(sfxenum_t.sfx_vilatk)
-        } elif (_cond == 336) {
-            sfx = int(sfxenum_t.sfx_skeswg)
-        } elif (_cond == 338) {
-            sfx = int(sfxenum_t.sfx_skepch)
-        } elif (_cond == 340) {
-            sfx = int(sfxenum_t.sfx_skeatk)
-        } elif (_cond == 383 || _cond == 380 || _cond == 377) {
-            sfx = int(sfxenum_t.sfx_firsht)
-        } elif (_cond == 417 || _cond == 418 || _cond == 419) {
-            sfx = int(sfxenum_t.sfx_shotgn)
-        } elif (_cond == 454) {
-            sfx = int(sfxenum_t.sfx_claw)
-        } elif (_cond == 486) {
-            sfx = int(sfxenum_t.sfx_sgtatk)
-        } elif (_cond == 538 || _cond == 567 || _cond == 505) {
-            sfx = int(sfxenum_t.sfx_firsht)
-        } elif (_cond == 590) {
-            sfx = int(sfxenum_t.sfx_sklatk)
-        } elif (_cond == 616 || _cond == 617) {
-            sfx = int(sfxenum_t.sfx_shotgn)
-        } elif (_cond == 648) {
-            sfx = int(sfxenum_t.sfx_plasma)
-        } elif (_cond == 685 || _cond == 687 || _cond == 689) {
-            sfx = int(sfxenum_t.sfx_rlaunc)
-        } elif (_cond == 710) {
-            sfx = int(sfxenum_t.sfx_sklatk)
-        } else {
-            sfx = 0
+        c_switch(st) {
+            case(154) {
+                sfx = int(sfxenum_t.sfx_dshtgn)
+                break
+            }
+            case(185) {
+                sfx = int(sfxenum_t.sfx_pistol)
+                break
+            }
+            case(218) {
+                sfx = int(sfxenum_t.sfx_shotgn)
+                break
+            }
+            case(256) {
+                sfx = int(sfxenum_t.sfx_vilatk)
+                break
+            }
+            case(336) {
+                sfx = int(sfxenum_t.sfx_skeswg)
+                break
+            }
+            case(338) {
+                sfx = int(sfxenum_t.sfx_skepch)
+                break
+            }
+            case(340) {
+                sfx = int(sfxenum_t.sfx_skeatk)
+                break
+            }
+            case(383, 380, 377) {
+                sfx = int(sfxenum_t.sfx_firsht)
+                break
+            }
+            case(417, 418, 419) {
+                sfx = int(sfxenum_t.sfx_shotgn)
+                break
+            }
+            case(454) {
+                sfx = int(sfxenum_t.sfx_claw)
+                break
+            }
+            case(486) {
+                sfx = int(sfxenum_t.sfx_sgtatk)
+                break
+            }
+            case(538, 567, 505) {
+                sfx = int(sfxenum_t.sfx_firsht)
+                break
+            }
+            case(590) {
+                sfx = int(sfxenum_t.sfx_sklatk)
+                break
+            }
+            case(616, 617) {
+                sfx = int(sfxenum_t.sfx_shotgn)
+                break
+            }
+            case(648) {
+                sfx = int(sfxenum_t.sfx_plasma)
+                break
+            }
+            case(685, 687, 689) {
+                sfx = int(sfxenum_t.sfx_rlaunc)
+                break
+            }
+            case(710) {
+                sfx = int(sfxenum_t.sfx_sklatk)
+                break
+            }
+            case(_) {
+                sfx = 0
+                break
+            }
         }
         if (sfx != 0) {
             S_StartSound(null, sfx)
@@ -339,7 +410,7 @@ def F_CastTicker {
             }
         }
     }
-    if (!(int(castattacking) != 0)) {
+    if (int(castattacking) == 0) {
         goto label 2
     }
     if (!(castframes == 24 || intptr(caststate) == intptr(addr(states[0]) + end_index(mobjinfo[int(castorder[castnum]._c_type)].seestate, 967)))) {
@@ -391,9 +462,9 @@ def F_CastPrint(var text : uint8?) {
     width = 0
     while (ch != null) {
         var _t0 = ch
-        ch = ch + 1
-        c = int(deref(_t0))
-        if (!(c != 0)) {
+        ch++
+        c = int(*_t0)
+        if (c == 0) {
             break
         }
         c = doom_toupper(c) - HU_FONTSTART
@@ -409,9 +480,9 @@ def F_CastPrint(var text : uint8?) {
     ch = text
     while (ch != null) {
         var _t1 = ch
-        ch = ch + 1
-        c = int(deref(_t1))
-        if (!(c != 0)) {
+        ch++
+        c = int(*_t1)
+        if (c == 0) {
             break
         }
         c = doom_toupper(c) - HU_FONTSTART
@@ -460,20 +531,20 @@ def F_DrawPatchCol(x : int; var patch : uint8?; col : int) {
     column = reinterpret<uint8?>(reinterpret<uint8?>(patch) + ptr_patch_t_columnofs(patch, 0)[col])
     desttop = screens[0] + x
     // step through the posts in a column
-    while (int(read_post_t_topdelta(column, 0)) != 255) {
+    while (read_post_t_topdelta(column, 0) != 255) {
         source = reinterpret<uint8?>(column) + 3
         dest = desttop + int(read_post_t_topdelta(column, 0)) * SCREENWIDTH
         count = int(read_post_t_length(column, 0))
         while (true) {
             let _t0 = count
             count--
-            if (!(_t0 != 0)) {
+            if (_t0 == 0) {
                 break
             }
             var _t1 = source
-            source = source + 1
-            deref(dest) = deref(_t1)
-            dest = dest + SCREENWIDTH
+            source++
+            *dest = *_t1
+            dest += SCREENWIDTH
         }
         column = reinterpret<uint8?>(reinterpret<uint8?>(column) + int(read_post_t_length(column, 0)) + 4)
     }
@@ -533,22 +604,30 @@ def F_Drawer {
         F_CastDrawer()
         return
     }
-    if (!(finalestage != 0)) {
+    if (finalestage == 0) {
         F_TextWrite()
     } else {
-        let _cond = gameepisode
-        if (_cond == 1) {
-            if (gamemode == GameMode_t.retail) {
-                V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("CREDIT"), PU_CACHE)))
-            } else {
-                V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("HELP2"), PU_CACHE)))
+        c_switch(gameepisode) {
+            case(1) {
+                if (gamemode == GameMode_t.retail) {
+                    V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("CREDIT"), PU_CACHE)))
+                } else {
+                    V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("HELP2"), PU_CACHE)))
+                }
+                break
             }
-        } elif (_cond == 2) {
-            V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("VICTORY2"), PU_CACHE)))
-        } elif (_cond == 3) {
-            F_BunnyScroll()
-        } elif (_cond == 4) {
-            V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("ENDPIC"), PU_CACHE)))
+            case(2) {
+                V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("VICTORY2"), PU_CACHE)))
+                break
+            }
+            case(3) {
+                F_BunnyScroll()
+                break
+            }
+            case(4) {
+                V_DrawPatch(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("ENDPIC"), PU_CACHE)))
+                break
+            }
         }
     }
 }

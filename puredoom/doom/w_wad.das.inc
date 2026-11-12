@@ -16,9 +16,9 @@ var private W_AddFile_previous_realloc_size : int = 1
 
 [c_function]
 def doom_strupr(var s : uint8?) {
-    while (deref(s) != 0) {
-        deref(s) = uint8(doom_toupper(int(deref(s))))
-        s = s + 1
+    while (*s != 0) {
+        *s = uint8(doom_toupper(int(*s)))
+        s++
     }
 }
 
@@ -28,13 +28,13 @@ def ExtractFileBase(var path : uint8?; var dest : uint8?) {
     var length : int
     src = path + doom_strlen(path) + -(1)
     // back up until a \ or the start
-    while (intptr(src) != intptr(path) && int(deref(src - 1)) != '\\' && int(deref(src - 1)) != '/') {
-        src = src - 1
+    while (intptr(src) != intptr(path) && *(src - 1) != '\\' && *(src - 1) != '/') {
+        src--
     }
     // copy up to eight characters
     doom_memset(reinterpret<void?>(dest), 0, 8)
     length = 0
-    while (deref(src) != 0 && int(deref(src)) != '.') {
+    while (*src != 0 && *src != '.') {
         length++
         if (length == 9) {
             // I_Error("Error: Filename base of %s >8 chars", path);
@@ -44,10 +44,10 @@ def ExtractFileBase(var path : uint8?; var dest : uint8?) {
             I_Error(addr(error_buf[0]))
         }
         var _t0 = dest
-        dest = dest + 1
+        dest++
         var _t1 = src
-        src = src + 1
-        deref(_t0) = uint8(doom_toupper(int(deref(_t1))))
+        src++
+        *_t0 = uint8(doom_toupper(int(*_t1)))
     }
 }
 
@@ -75,8 +75,8 @@ def W_AddFile(var filename : uint8?) {
     var allocated : void? = null
     // open the file and add to directory
     // handle reload indicator.
-    if (int(filename[0]) == '~') {
-        filename = filename + 1
+    if (filename[0] == '~') {
+        filename++
         reloadname = filename
         reloadlump = numlumps
     }
@@ -105,7 +105,7 @@ def W_AddFile(var filename : uint8?) {
         numlumps++
     } else {
         // WAD file
-        invoke(doom_read, handle, reinterpret<void?>(addr(header)), int(uint64(typeinfo sizeof(type<wadinfo_t>))))
+        invoke(doom_read, handle, reinterpret<void?>(addr(header)), typeinfo sizeof(type<wadinfo_t>))
         if (doom_strncmp(addr(header.identification[0]), cstr("IWAD"), 4) != 0) {
             // Homebrew levels?
             if (doom_strncmp(addr(header.identification[0]), cstr("PWAD"), 4) != 0) {
@@ -132,7 +132,7 @@ def W_AddFile(var filename : uint8?) {
     doom_memcpy(new_lumpinfo, reinterpret<void?>(lumpinfo), W_AddFile_previous_realloc_size)
     W_AddFile_previous_realloc_size = int(uint64(numlumps) * uint64(typeinfo sizeof(type<lumpinfo_t>)))
     lumpinfo = reinterpret<lumpinfo_t?>(new_lumpinfo)
-    if (!(lumpinfo != null)) {
+    if (lumpinfo == null) {
         I_Error(cstr("Error: Couldn't realloc lumpinfo"))
     }
     lump_p = addr(lumpinfo[startlump])
@@ -144,8 +144,8 @@ def W_AddFile(var filename : uint8?) {
         lump_p.size = fileinfo.size
         doom_strncpy(addr(lump_p.name[0]), addr(fileinfo.name[0]), 8)
         i++
-        lump_p = lump_p + 1
-        fileinfo = fileinfo + 1
+        lump_p++
+        fileinfo++
     }
     if (reloadname != null) {
         invoke(doom_close, handle)
@@ -167,7 +167,7 @@ def W_Reload {
     var handle : void?
     var length : int
     var fileinfo : filelump_t?
-    if (!(reloadname != null)) {
+    if (reloadname == null) {
         return
     }
     handle = invoke(doom_open, reloadname, cstr("rb"))
@@ -177,7 +177,7 @@ def W_Reload {
         doom_concat(addr(error_buf[0]), reloadname)
         I_Error(addr(error_buf[0]))
     }
-    invoke(doom_read, handle, reinterpret<void?>(addr(header)), int(uint64(typeinfo sizeof(type<wadinfo_t>))))
+    invoke(doom_read, handle, reinterpret<void?>(addr(header)), typeinfo sizeof(type<wadinfo_t>))
     lumpcount = header.numlumps
     header.infotableofs = header.infotableofs
     length = int(uint64(lumpcount) * uint64(typeinfo sizeof(type<filelump_t>)))
@@ -194,8 +194,8 @@ def W_Reload {
         lump_p.position = fileinfo.filepos
         lump_p.size = fileinfo.size
         i++
-        lump_p = lump_p + 1
-        fileinfo = fileinfo + 1
+        lump_p++
+        fileinfo++
     }
     invoke(doom_close, handle)
     invoke(doom_free, reinterpret<void?>(fileinfo))
@@ -219,17 +219,17 @@ def W_InitMultipleFiles(var filenames : uint8 ??) {
     numlumps = 0
     // will be realloced as lumps are added
     lumpinfo = reinterpret<lumpinfo_t?>(invoke(doom_malloc, 1))
-    while (deref(filenames) != null) {
-        W_AddFile(deref(filenames))
-        filenames = filenames + 1
+    while (*filenames != null) {
+        W_AddFile(*filenames)
+        filenames++
     }
-    if (!(numlumps != 0)) {
+    if (numlumps == 0) {
         I_Error(cstr("Error: W_InitFiles: no files found"))
     }
     // set up caching
     size = int(uint64(numlumps) * uint64(typeinfo sizeof(type<void?>)))
     lumpcache = reinterpret<void ??>(invoke(doom_malloc, size))
-    if (!(lumpcache != null)) {
+    if (lumpcache == null) {
         I_Error(cstr("Error: Couldn't allocate lumpcache"))
     }
     doom_memset(reinterpret<void?>(lumpcache), 0, size)
@@ -270,11 +270,11 @@ def W_CheckNumForName(var name : uint8?) : int {
     lump_p = lumpinfo + numlumps
     while (true) {
         var _t0 = lump_p
-        lump_p = lump_p - 1
+        lump_p--
         if (!(intptr(_t0) != intptr(lumpinfo))) {
             break
         }
-        if (deref(reinterpret<int?>(addr(lump_p.name[0]))) == v1 && deref(reinterpret<int?>(addr(lump_p.name[4]))) == v2) {
+        if (*reinterpret<int?>(addr(lump_p.name[0])) == v1 && *reinterpret<int?>(addr(lump_p.name[4])) == v2) {
             return int(int64(lump_p - lumpinfo))
         }
     }
@@ -377,7 +377,7 @@ def W_CacheLumpNum(lump : int; tag : int) : void? {
         doom_concat(addr(error_buf[0]), cstr(" >= numlumps"))
         I_Error(addr(error_buf[0]))
     }
-    if (!(lumpcache[lump] != null)) {
+    if (lumpcache[lump] == null) {
         // read the lump in
         // doom_print ("cache miss on lump %i\n",lump);
         // [c2das] 128 zero bytes past the lump: a column drawer reads up to 127 bytes past a
@@ -418,7 +418,7 @@ def W_Profile {
     while (i < numlumps) {
         {
             ptr = lumpcache[i]
-            if (!(ptr != null)) {
+            if (ptr == null) {
                 ch = uint8(' ')
                 continue
             } else {
@@ -442,7 +442,7 @@ def W_Profile {
         doom_memcpy(reinterpret<void?>(addr(name[0])), reinterpret<void?>(addr(lumpinfo[i].name[0])), 8)
         j = 0
         while (j < 8) {
-            if (!(name[j] != 0)) {
+            if (name[j] == 0) {
                 break
             }
             j++

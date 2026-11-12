@@ -16,7 +16,30 @@ var numlinespecials : int16
 var linespeciallist : line_s? [64]
 var anims : anim_t[32]
 var lastanim : anim_t?
-var animdefs : animdef_t[23] = fixed_array(animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("NUKAGE3", 9), startname = cstr_array("NUKAGE1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("FWATER4", 9), startname = cstr_array("FWATER1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("SWATER4", 9), startname = cstr_array("SWATER1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("LAVA4", 9), startname = cstr_array("LAVA1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("BLOOD3", 9), startname = cstr_array("BLOOD1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("RROCK08", 9), startname = cstr_array("RROCK05", 9), speed = 8), animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("SLIME04", 9), startname = cstr_array("SLIME01", 9), speed = 8), animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("SLIME08", 9), startname = cstr_array("SLIME05", 9), speed = 8), animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("SLIME12", 9), startname = cstr_array("SLIME09", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("BLODGR4", 9), startname = cstr_array("BLODGR1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("SLADRIP3", 9), startname = cstr_array("SLADRIP1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("BLODRIP4", 9), startname = cstr_array("BLODRIP1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("FIREWALL", 9), startname = cstr_array("FIREWALA", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("GSTFONT3", 9), startname = cstr_array("GSTFONT1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("FIRELAVA", 9), startname = cstr_array("FIRELAV3", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("FIREMAG3", 9), startname = cstr_array("FIREMAG1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("FIREBLU2", 9), startname = cstr_array("FIREBLU1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("ROCKRED3", 9), startname = cstr_array("ROCKRED1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("BFALL4", 9), startname = cstr_array("BFALL1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("SFALL4", 9), startname = cstr_array("SFALL1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("WFALL4", 9), startname = cstr_array("WFALL1", 9), speed = 8), animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("DBRAIN4", 9), startname = cstr_array("DBRAIN1", 9), speed = 8), animdef_t(istexture = enum_from_int(type<doom_boolean>, -1)))
+var animdefs : animdef_t[23] = fixed_array(animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("NUKAGE3", 9),
+            startname = cstr_array("NUKAGE1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("FWATER4", 9), startname = cstr_array("FWATER1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("SWATER4", 9), startname = cstr_array("SWATER1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("LAVA4", 9), startname = cstr_array("LAVA1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("BLOOD3", 9), startname = cstr_array("BLOOD1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("RROCK08", 9), startname = cstr_array("RROCK05", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("SLIME04", 9), startname = cstr_array("SLIME01", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("SLIME08", 9), startname = cstr_array("SLIME05", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_false, endname = cstr_array("SLIME12", 9), startname = cstr_array("SLIME09", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("BLODGR4", 9), startname = cstr_array("BLODGR1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("SLADRIP3", 9), startname = cstr_array("SLADRIP1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("BLODRIP4", 9), startname = cstr_array("BLODRIP1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("FIREWALL", 9), startname = cstr_array("FIREWALA", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("GSTFONT3", 9), startname = cstr_array("GSTFONT1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("FIRELAVA", 9), startname = cstr_array("FIRELAV3", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("FIREMAG3", 9), startname = cstr_array("FIREMAG1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("FIREBLU2", 9), startname = cstr_array("FIREBLU1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("ROCKRED3", 9), startname = cstr_array("ROCKRED1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("BFALL4", 9), startname = cstr_array("BFALL1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("SFALL4", 9), startname = cstr_array("SFALL1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("WFALL4", 9), startname = cstr_array("WFALL1", 9), speed = 8),
+        animdef_t(istexture = doom_boolean._c_true, endname = cstr_array("DBRAIN4", 9), startname = cstr_array("DBRAIN1", 9), speed = 8),
+        animdef_t(istexture = enum_from_int(type<doom_boolean>, -1)))
 
 [c_function]
 def P_InitPicAnims {
@@ -53,7 +76,7 @@ def P_InitPicAnims {
                 I_Error(addr(error_buf[0]))
             }
             lastanim.speed = animdefs[i].speed
-            lastanim = lastanim + 1
+            lastanim++
         } finally {
             i++
         }
@@ -90,7 +113,7 @@ def twoSided(sector : int; line : int) : int {
 // Return sector_t * of sector next to current.
 // 0 if not two-sided line
 def getNextSector(var line : line_s?; var sec : sector_t?) : sector_t? {
-    if (!((int(line.flags) & ML_TWOSIDED) != 0)) {
+    if ((int(line.flags) & ML_TWOSIDED) == 0) {
         return null
     }
     if (intptr(line.frontsector) == intptr(sec)) {
@@ -112,7 +135,7 @@ def P_FindLowestFloorSurrounding(var sec : sector_t?) : int {
         {
             check = sec.lines[i]
             other = getNextSector(check, sec)
-            if (!(other != null)) {
+            if (other == null) {
                 continue
             }
             if (other.floorheight < floor) {
@@ -138,7 +161,7 @@ def P_FindHighestFloorSurrounding(var sec : sector_t?) : int {
         {
             check = sec.lines[i]
             other = getNextSector(check, sec)
-            if (!(other != null)) {
+            if (other == null) {
                 continue
             }
             if (other.floorheight > floor) {
@@ -177,7 +200,7 @@ def P_FindNextHighestFloor(var sec : sector_t?; currentheight : int) : int {
             }
             check = sec.lines[i]
             other = getNextSector(check, sec)
-            if (!(other != null)) {
+            if (other == null) {
                 continue
             }
             if (other.floorheight > height) {
@@ -193,7 +216,7 @@ def P_FindNextHighestFloor(var sec : sector_t?; currentheight : int) : int {
         }
     }
     // Find lowest height in list
-    if (!(h != 0)) {
+    if (h == 0) {
         return currentheight
     }
     min = heightlist[0]
@@ -218,7 +241,7 @@ def P_FindLowestCeilingSurrounding(var sec : sector_t?) : int {
         {
             check = sec.lines[i]
             other = getNextSector(check, sec)
-            if (!(other != null)) {
+            if (other == null) {
                 continue
             }
             if (other.ceilingheight < height) {
@@ -243,7 +266,7 @@ def P_FindHighestCeilingSurrounding(var sec : sector_t?) : int {
         {
             check = sec.lines[i]
             other = getNextSector(check, sec)
-            if (!(other != null)) {
+            if (other == null) {
                 continue
             }
             if (other.ceilingheight > height) {
@@ -262,7 +285,7 @@ def P_FindSectorFromLineTag(var line : line_s?; start : int) : int {
     var i : int
     i = start + 1
     while (i < numsectors) {
-        if (int(sectors[i].tag) == int(line.tag)) {
+        if (sectors[i].tag == line.tag) {
             return i
         }
         i++
@@ -283,7 +306,7 @@ def P_FindMinSurroundingLight(var sector : sector_t?; max : int) : int {
         {
             line = sector.lines[i]
             check = getNextSector(line, sector)
-            if (!(check != null)) {
+            if (check == null) {
                 continue
             }
             if (int(check.lightlevel) < min) {
@@ -305,296 +328,446 @@ def P_CrossSpecialLine(linenum : int; side : int; var thing : mobj_s?) {
     var ok : int
     line = addr(lines[linenum])
     // Triggers that other things can activate
-    if (!(thing.player != null)) {
+    if (thing.player == null) {
         // Things that should NOT trigger specials...
-        let _cond = thing._c_type
-        if (_cond == mobjtype_t.MT_ROCKET || _cond == mobjtype_t.MT_PLASMA || _cond == mobjtype_t.MT_BFG || _cond == mobjtype_t.MT_TROOPSHOT || _cond == mobjtype_t.MT_HEADSHOT || _cond == mobjtype_t.MT_BRUISERSHOT) {
-            return
-        } else {
+        c_switch(thing._c_type) {
+            case(mobjtype_t.MT_ROCKET, mobjtype_t.MT_PLASMA, mobjtype_t.MT_BFG, mobjtype_t.MT_TROOPSHOT, mobjtype_t.MT_HEADSHOT, mobjtype_t.MT_BRUISERSHOT) {
+                return
+                break
+            }
+            case(_) {
+                break
+            }
         }
         ok = 0
-        let _cond2 = int(line.special)
-        if (_cond2 == 39 || _cond2 == 97 || _cond2 == 125 || _cond2 == 126 || _cond2 == 4 || _cond2 == 10 || _cond2 == 88) {
-            // TELEPORT TRIGGER
-            // TELEPORT RETRIGGER
-            // TELEPORT MONSTERONLY TRIGGER
-            // TELEPORT MONSTERONLY RETRIGGER
-            // RAISE DOOR
-            // PLAT DOWN-WAIT-UP-STAY TRIGGER
-            // PLAT DOWN-WAIT-UP-STAY RETRIGGER
-            ok = 1
+        c_switch(int(line.special)) {
+            case(39, 97, 125, 126, 4, 10, 88) {
+                // TELEPORT TRIGGER
+                // TELEPORT RETRIGGER
+                // TELEPORT MONSTERONLY TRIGGER
+                // TELEPORT MONSTERONLY RETRIGGER
+                // RAISE DOOR
+                // PLAT DOWN-WAIT-UP-STAY TRIGGER
+                // PLAT DOWN-WAIT-UP-STAY RETRIGGER
+                ok = 1
+                break
+            }
         }
-        if (!(ok != 0)) {
+        if (ok == 0) {
             return
         }
     }
     // Note: could use some const's here.
-    let _cond3 = int(line.special)
-    if (_cond3 == 2) {
-        // TRIGGERS.
-        // All from here to RETRIGGERS.
-        // Open Door
-        EV_DoDoor(line, vldoor_e.door_open)
-        line.special = int16(0)
-    } elif (_cond3 == 3) {
-        // Close Door
-        EV_DoDoor(line, vldoor_e.door_close)
-        line.special = int16(0)
-    } elif (_cond3 == 4) {
-        // Raise Door
-        EV_DoDoor(line, vldoor_e.door_normal)
-        line.special = int16(0)
-    } elif (_cond3 == 5) {
-        // Raise Floor
-        EV_DoFloor(line, floor_e.raiseFloor)
-        line.special = int16(0)
-    } elif (_cond3 == 6) {
-        // Fast Ceiling Crush & Raise
-        EV_DoCeiling(line, ceiling_e.fastCrushAndRaise)
-        line.special = int16(0)
-    } elif (_cond3 == 8) {
-        // Build Stairs
-        EV_BuildStairs(line, stair_e.build8)
-        line.special = int16(0)
-    } elif (_cond3 == 10) {
-        // PlatDownWaitUp
-        EV_DoPlat(line, plattype_e.downWaitUpStay, 0)
-        line.special = int16(0)
-    } elif (_cond3 == 12) {
-        // Light Turn On - brightest near
-        EV_LightTurnOn(line, 0)
-        line.special = int16(0)
-    } elif (_cond3 == 13) {
-        // Light Turn On 255
-        EV_LightTurnOn(line, 255)
-        line.special = int16(0)
-    } elif (_cond3 == 16) {
-        // Close Door 30
-        EV_DoDoor(line, vldoor_e.close30ThenOpen)
-        line.special = int16(0)
-    } elif (_cond3 == 17) {
-        // Start Light Strobing
-        EV_StartLightStrobing(line)
-        line.special = int16(0)
-    } elif (_cond3 == 19) {
-        // Lower Floor
-        EV_DoFloor(line, floor_e.lowerFloor)
-        line.special = int16(0)
-    } elif (_cond3 == 22) {
-        // Raise floor to nearest height and change texture
-        EV_DoPlat(line, plattype_e.raiseToNearestAndChange, 0)
-        line.special = int16(0)
-    } elif (_cond3 == 25) {
-        // Ceiling Crush and Raise
-        EV_DoCeiling(line, ceiling_e.crushAndRaise)
-        line.special = int16(0)
-    } elif (_cond3 == 30) {
-        // Raise floor to shortest texture height
-        // on either side of lines.
-        EV_DoFloor(line, floor_e.raiseToTexture)
-        line.special = int16(0)
-    } elif (_cond3 == 35) {
-        // Lights Very Dark
-        EV_LightTurnOn(line, 35)
-        line.special = int16(0)
-    } elif (_cond3 == 36) {
-        // Lower Floor (TURBO)
-        EV_DoFloor(line, floor_e.turboLower)
-        line.special = int16(0)
-    } elif (_cond3 == 37) {
-        // LowerAndChange
-        EV_DoFloor(line, floor_e.lowerAndChange)
-        line.special = int16(0)
-    } elif (_cond3 == 38) {
-        // Lower Floor To Lowest
-        EV_DoFloor(line, floor_e.lowerFloorToLowest)
-        line.special = int16(0)
-    } elif (_cond3 == 39) {
-        // TELEPORT!
-        EV_Teleport(line, side, thing)
-        line.special = int16(0)
-    } elif (_cond3 == 40) {
-        // RaiseCeilingLowerFloor
-        EV_DoCeiling(line, ceiling_e.raiseToHighest)
-        EV_DoFloor(line, floor_e.lowerFloorToLowest)
-        line.special = int16(0)
-    } elif (_cond3 == 44) {
-        // Ceiling Crush
-        EV_DoCeiling(line, ceiling_e.lowerAndCrush)
-        line.special = int16(0)
-    } elif (_cond3 == 52) {
-        // EXIT!
-        G_ExitLevel()
-    } elif (_cond3 == 53) {
-        // Perpetual Platform Raise
-        EV_DoPlat(line, plattype_e.perpetualRaise, 0)
-        line.special = int16(0)
-    } elif (_cond3 == 54) {
-        // Platform Stop
-        EV_StopPlat(line)
-        line.special = int16(0)
-    } elif (_cond3 == 56) {
-        // Raise Floor Crush
-        EV_DoFloor(line, floor_e.raiseFloorCrush)
-        line.special = int16(0)
-    } elif (_cond3 == 57) {
-        // Ceiling Crush Stop
-        EV_CeilingCrushStop(line)
-        line.special = int16(0)
-    } elif (_cond3 == 58) {
-        // Raise Floor 24
-        EV_DoFloor(line, floor_e.raiseFloor24)
-        line.special = int16(0)
-    } elif (_cond3 == 59) {
-        // Raise Floor 24 And Change
-        EV_DoFloor(line, floor_e.raiseFloor24AndChange)
-        line.special = int16(0)
-    } elif (_cond3 == 104) {
-        // Turn lights off in sector(tag)
-        EV_TurnTagLightsOff(line)
-        line.special = int16(0)
-    } elif (_cond3 == 108) {
-        // Blazing Door Raise (faster than TURBO!)
-        EV_DoDoor(line, vldoor_e.blazeRaise)
-        line.special = int16(0)
-    } elif (_cond3 == 109) {
-        // Blazing Door Open (faster than TURBO!)
-        EV_DoDoor(line, vldoor_e.blazeOpen)
-        line.special = int16(0)
-    } elif (_cond3 == 100) {
-        // Build Stairs Turbo 16
-        EV_BuildStairs(line, stair_e.turbo16)
-        line.special = int16(0)
-    } elif (_cond3 == 110) {
-        // Blazing Door Close (faster than TURBO!)
-        EV_DoDoor(line, vldoor_e.blazeClose)
-        line.special = int16(0)
-    } elif (_cond3 == 119) {
-        // Raise floor to nearest surr. floor
-        EV_DoFloor(line, floor_e.raiseFloorToNearest)
-        line.special = int16(0)
-    } elif (_cond3 == 121) {
-        // Blazing PlatDownWaitUpStay
-        EV_DoPlat(line, plattype_e.blazeDWUS, 0)
-        line.special = int16(0)
-    } elif (_cond3 == 124) {
-        // Secret EXIT
-        G_SecretExitLevel()
-    } elif (_cond3 == 125) {
-        // TELEPORT MonsterONLY
-        if (!(thing.player != null)) {
+    c_switch(int(line.special)) {
+        case(2) {
+            // TRIGGERS.
+            // All from here to RETRIGGERS.
+            // Open Door
+            EV_DoDoor(line, vldoor_e.door_open)
+            line.special = int16(0)
+            break
+        }
+        case(3) {
+            // Close Door
+            EV_DoDoor(line, vldoor_e.door_close)
+            line.special = int16(0)
+            break
+        }
+        case(4) {
+            // Raise Door
+            EV_DoDoor(line, vldoor_e.door_normal)
+            line.special = int16(0)
+            break
+        }
+        case(5) {
+            // Raise Floor
+            EV_DoFloor(line, floor_e.raiseFloor)
+            line.special = int16(0)
+            break
+        }
+        case(6) {
+            // Fast Ceiling Crush & Raise
+            EV_DoCeiling(line, ceiling_e.fastCrushAndRaise)
+            line.special = int16(0)
+            break
+        }
+        case(8) {
+            // Build Stairs
+            EV_BuildStairs(line, stair_e.build8)
+            line.special = int16(0)
+            break
+        }
+        case(10) {
+            // PlatDownWaitUp
+            EV_DoPlat(line, plattype_e.downWaitUpStay, 0)
+            line.special = int16(0)
+            break
+        }
+        case(12) {
+            // Light Turn On - brightest near
+            EV_LightTurnOn(line, 0)
+            line.special = int16(0)
+            break
+        }
+        case(13) {
+            // Light Turn On 255
+            EV_LightTurnOn(line, 255)
+            line.special = int16(0)
+            break
+        }
+        case(16) {
+            // Close Door 30
+            EV_DoDoor(line, vldoor_e.close30ThenOpen)
+            line.special = int16(0)
+            break
+        }
+        case(17) {
+            // Start Light Strobing
+            EV_StartLightStrobing(line)
+            line.special = int16(0)
+            break
+        }
+        case(19) {
+            // Lower Floor
+            EV_DoFloor(line, floor_e.lowerFloor)
+            line.special = int16(0)
+            break
+        }
+        case(22) {
+            // Raise floor to nearest height and change texture
+            EV_DoPlat(line, plattype_e.raiseToNearestAndChange, 0)
+            line.special = int16(0)
+            break
+        }
+        case(25) {
+            // Ceiling Crush and Raise
+            EV_DoCeiling(line, ceiling_e.crushAndRaise)
+            line.special = int16(0)
+            break
+        }
+        case(30) {
+            // Raise floor to shortest texture height
+            // on either side of lines.
+            EV_DoFloor(line, floor_e.raiseToTexture)
+            line.special = int16(0)
+            break
+        }
+        case(35) {
+            // Lights Very Dark
+            EV_LightTurnOn(line, 35)
+            line.special = int16(0)
+            break
+        }
+        case(36) {
+            // Lower Floor (TURBO)
+            EV_DoFloor(line, floor_e.turboLower)
+            line.special = int16(0)
+            break
+        }
+        case(37) {
+            // LowerAndChange
+            EV_DoFloor(line, floor_e.lowerAndChange)
+            line.special = int16(0)
+            break
+        }
+        case(38) {
+            // Lower Floor To Lowest
+            EV_DoFloor(line, floor_e.lowerFloorToLowest)
+            line.special = int16(0)
+            break
+        }
+        case(39) {
+            // TELEPORT!
             EV_Teleport(line, side, thing)
             line.special = int16(0)
+            break
         }
-    } elif (_cond3 == 130) {
-        // Raise Floor Turbo
-        EV_DoFloor(line, floor_e.raiseFloorTurbo)
-        line.special = int16(0)
-    } elif (_cond3 == 141) {
-        // Silent Ceiling Crush & Raise
-        EV_DoCeiling(line, ceiling_e.silentCrushAndRaise)
-        line.special = int16(0)
-    } elif (_cond3 == 72) {
-        // RETRIGGERS. All from here till end.
-        // Ceiling Crush
-        EV_DoCeiling(line, ceiling_e.lowerAndCrush)
-    } elif (_cond3 == 73) {
-        // Ceiling Crush and Raise
-        EV_DoCeiling(line, ceiling_e.crushAndRaise)
-    } elif (_cond3 == 74) {
-        // Ceiling Crush Stop
-        EV_CeilingCrushStop(line)
-    } elif (_cond3 == 75) {
-        // Close Door
-        EV_DoDoor(line, vldoor_e.door_close)
-    } elif (_cond3 == 76) {
-        // Close Door 30
-        EV_DoDoor(line, vldoor_e.close30ThenOpen)
-    } elif (_cond3 == 77) {
-        // Fast Ceiling Crush & Raise
-        EV_DoCeiling(line, ceiling_e.fastCrushAndRaise)
-    } elif (_cond3 == 79) {
-        // Lights Very Dark
-        EV_LightTurnOn(line, 35)
-    } elif (_cond3 == 80) {
-        // Light Turn On - brightest near
-        EV_LightTurnOn(line, 0)
-    } elif (_cond3 == 81) {
-        // Light Turn On 255
-        EV_LightTurnOn(line, 255)
-    } elif (_cond3 == 82) {
-        // Lower Floor To Lowest
-        EV_DoFloor(line, floor_e.lowerFloorToLowest)
-    } elif (_cond3 == 83) {
-        // Lower Floor
-        EV_DoFloor(line, floor_e.lowerFloor)
-    } elif (_cond3 == 84) {
-        // LowerAndChange
-        EV_DoFloor(line, floor_e.lowerAndChange)
-    } elif (_cond3 == 86) {
-        // Open Door
-        EV_DoDoor(line, vldoor_e.door_open)
-    } elif (_cond3 == 87) {
-        // Perpetual Platform Raise
-        EV_DoPlat(line, plattype_e.perpetualRaise, 0)
-    } elif (_cond3 == 88) {
-        // PlatDownWaitUp
-        EV_DoPlat(line, plattype_e.downWaitUpStay, 0)
-    } elif (_cond3 == 89) {
-        // Platform Stop
-        EV_StopPlat(line)
-    } elif (_cond3 == 90) {
-        // Raise Door
-        EV_DoDoor(line, vldoor_e.door_normal)
-    } elif (_cond3 == 91) {
-        // Raise Floor
-        EV_DoFloor(line, floor_e.raiseFloor)
-    } elif (_cond3 == 92) {
-        // Raise Floor 24
-        EV_DoFloor(line, floor_e.raiseFloor24)
-    } elif (_cond3 == 93) {
-        // Raise Floor 24 And Change
-        EV_DoFloor(line, floor_e.raiseFloor24AndChange)
-    } elif (_cond3 == 94) {
-        // Raise Floor Crush
-        EV_DoFloor(line, floor_e.raiseFloorCrush)
-    } elif (_cond3 == 95) {
-        // Raise floor to nearest height
-        // and change texture.
-        EV_DoPlat(line, plattype_e.raiseToNearestAndChange, 0)
-    } elif (_cond3 == 96) {
-        // Raise floor to shortest texture height
-        // on either side of lines.
-        EV_DoFloor(line, floor_e.raiseToTexture)
-    } elif (_cond3 == 97) {
-        // TELEPORT!
-        EV_Teleport(line, side, thing)
-    } elif (_cond3 == 98) {
-        // Lower Floor (TURBO)
-        EV_DoFloor(line, floor_e.turboLower)
-    } elif (_cond3 == 105) {
-        // Blazing Door Raise (faster than TURBO!)
-        EV_DoDoor(line, vldoor_e.blazeRaise)
-    } elif (_cond3 == 106) {
-        // Blazing Door Open (faster than TURBO!)
-        EV_DoDoor(line, vldoor_e.blazeOpen)
-    } elif (_cond3 == 107) {
-        // Blazing Door Close (faster than TURBO!)
-        EV_DoDoor(line, vldoor_e.blazeClose)
-    } elif (_cond3 == 120) {
-        // Blazing PlatDownWaitUpStay.
-        EV_DoPlat(line, plattype_e.blazeDWUS, 0)
-    } elif (_cond3 == 126) {
-        // TELEPORT MonsterONLY.
-        if (!(thing.player != null)) {
+        case(40) {
+            // RaiseCeilingLowerFloor
+            EV_DoCeiling(line, ceiling_e.raiseToHighest)
+            EV_DoFloor(line, floor_e.lowerFloorToLowest)
+            line.special = int16(0)
+            break
+        }
+        case(44) {
+            // Ceiling Crush
+            EV_DoCeiling(line, ceiling_e.lowerAndCrush)
+            line.special = int16(0)
+            break
+        }
+        case(52) {
+            // EXIT!
+            G_ExitLevel()
+            break
+        }
+        case(53) {
+            // Perpetual Platform Raise
+            EV_DoPlat(line, plattype_e.perpetualRaise, 0)
+            line.special = int16(0)
+            break
+        }
+        case(54) {
+            // Platform Stop
+            EV_StopPlat(line)
+            line.special = int16(0)
+            break
+        }
+        case(56) {
+            // Raise Floor Crush
+            EV_DoFloor(line, floor_e.raiseFloorCrush)
+            line.special = int16(0)
+            break
+        }
+        case(57) {
+            // Ceiling Crush Stop
+            EV_CeilingCrushStop(line)
+            line.special = int16(0)
+            break
+        }
+        case(58) {
+            // Raise Floor 24
+            EV_DoFloor(line, floor_e.raiseFloor24)
+            line.special = int16(0)
+            break
+        }
+        case(59) {
+            // Raise Floor 24 And Change
+            EV_DoFloor(line, floor_e.raiseFloor24AndChange)
+            line.special = int16(0)
+            break
+        }
+        case(104) {
+            // Turn lights off in sector(tag)
+            EV_TurnTagLightsOff(line)
+            line.special = int16(0)
+            break
+        }
+        case(108) {
+            // Blazing Door Raise (faster than TURBO!)
+            EV_DoDoor(line, vldoor_e.blazeRaise)
+            line.special = int16(0)
+            break
+        }
+        case(109) {
+            // Blazing Door Open (faster than TURBO!)
+            EV_DoDoor(line, vldoor_e.blazeOpen)
+            line.special = int16(0)
+            break
+        }
+        case(100) {
+            // Build Stairs Turbo 16
+            EV_BuildStairs(line, stair_e.turbo16)
+            line.special = int16(0)
+            break
+        }
+        case(110) {
+            // Blazing Door Close (faster than TURBO!)
+            EV_DoDoor(line, vldoor_e.blazeClose)
+            line.special = int16(0)
+            break
+        }
+        case(119) {
+            // Raise floor to nearest surr. floor
+            EV_DoFloor(line, floor_e.raiseFloorToNearest)
+            line.special = int16(0)
+            break
+        }
+        case(121) {
+            // Blazing PlatDownWaitUpStay
+            EV_DoPlat(line, plattype_e.blazeDWUS, 0)
+            line.special = int16(0)
+            break
+        }
+        case(124) {
+            // Secret EXIT
+            G_SecretExitLevel()
+            break
+        }
+        case(125) {
+            // TELEPORT MonsterONLY
+            if (thing.player == null) {
+                EV_Teleport(line, side, thing)
+                line.special = int16(0)
+            }
+            break
+        }
+        case(130) {
+            // Raise Floor Turbo
+            EV_DoFloor(line, floor_e.raiseFloorTurbo)
+            line.special = int16(0)
+            break
+        }
+        case(141) {
+            // Silent Ceiling Crush & Raise
+            EV_DoCeiling(line, ceiling_e.silentCrushAndRaise)
+            line.special = int16(0)
+            break
+        }
+        case(72) {
+            // RETRIGGERS. All from here till end.
+            // Ceiling Crush
+            EV_DoCeiling(line, ceiling_e.lowerAndCrush)
+            break
+        }
+        case(73) {
+            // Ceiling Crush and Raise
+            EV_DoCeiling(line, ceiling_e.crushAndRaise)
+            break
+        }
+        case(74) {
+            // Ceiling Crush Stop
+            EV_CeilingCrushStop(line)
+            break
+        }
+        case(75) {
+            // Close Door
+            EV_DoDoor(line, vldoor_e.door_close)
+            break
+        }
+        case(76) {
+            // Close Door 30
+            EV_DoDoor(line, vldoor_e.close30ThenOpen)
+            break
+        }
+        case(77) {
+            // Fast Ceiling Crush & Raise
+            EV_DoCeiling(line, ceiling_e.fastCrushAndRaise)
+            break
+        }
+        case(79) {
+            // Lights Very Dark
+            EV_LightTurnOn(line, 35)
+            break
+        }
+        case(80) {
+            // Light Turn On - brightest near
+            EV_LightTurnOn(line, 0)
+            break
+        }
+        case(81) {
+            // Light Turn On 255
+            EV_LightTurnOn(line, 255)
+            break
+        }
+        case(82) {
+            // Lower Floor To Lowest
+            EV_DoFloor(line, floor_e.lowerFloorToLowest)
+            break
+        }
+        case(83) {
+            // Lower Floor
+            EV_DoFloor(line, floor_e.lowerFloor)
+            break
+        }
+        case(84) {
+            // LowerAndChange
+            EV_DoFloor(line, floor_e.lowerAndChange)
+            break
+        }
+        case(86) {
+            // Open Door
+            EV_DoDoor(line, vldoor_e.door_open)
+            break
+        }
+        case(87) {
+            // Perpetual Platform Raise
+            EV_DoPlat(line, plattype_e.perpetualRaise, 0)
+            break
+        }
+        case(88) {
+            // PlatDownWaitUp
+            EV_DoPlat(line, plattype_e.downWaitUpStay, 0)
+            break
+        }
+        case(89) {
+            // Platform Stop
+            EV_StopPlat(line)
+            break
+        }
+        case(90) {
+            // Raise Door
+            EV_DoDoor(line, vldoor_e.door_normal)
+            break
+        }
+        case(91) {
+            // Raise Floor
+            EV_DoFloor(line, floor_e.raiseFloor)
+            break
+        }
+        case(92) {
+            // Raise Floor 24
+            EV_DoFloor(line, floor_e.raiseFloor24)
+            break
+        }
+        case(93) {
+            // Raise Floor 24 And Change
+            EV_DoFloor(line, floor_e.raiseFloor24AndChange)
+            break
+        }
+        case(94) {
+            // Raise Floor Crush
+            EV_DoFloor(line, floor_e.raiseFloorCrush)
+            break
+        }
+        case(95) {
+            // Raise floor to nearest height
+            // and change texture.
+            EV_DoPlat(line, plattype_e.raiseToNearestAndChange, 0)
+            break
+        }
+        case(96) {
+            // Raise floor to shortest texture height
+            // on either side of lines.
+            EV_DoFloor(line, floor_e.raiseToTexture)
+            break
+        }
+        case(97) {
+            // TELEPORT!
             EV_Teleport(line, side, thing)
+            break
         }
-    } elif (_cond3 == 128) {
-        // Raise To Nearest Floor
-        EV_DoFloor(line, floor_e.raiseFloorToNearest)
-    } elif (_cond3 == 129) {
-        // Raise Floor Turbo
-        EV_DoFloor(line, floor_e.raiseFloorTurbo)
+        case(98) {
+            // Lower Floor (TURBO)
+            EV_DoFloor(line, floor_e.turboLower)
+            break
+        }
+        case(105) {
+            // Blazing Door Raise (faster than TURBO!)
+            EV_DoDoor(line, vldoor_e.blazeRaise)
+            break
+        }
+        case(106) {
+            // Blazing Door Open (faster than TURBO!)
+            EV_DoDoor(line, vldoor_e.blazeOpen)
+            break
+        }
+        case(107) {
+            // Blazing Door Close (faster than TURBO!)
+            EV_DoDoor(line, vldoor_e.blazeClose)
+            break
+        }
+        case(120) {
+            // Blazing PlatDownWaitUpStay.
+            EV_DoPlat(line, plattype_e.blazeDWUS, 0)
+            break
+        }
+        case(126) {
+            // TELEPORT MonsterONLY.
+            if (thing.player == null) {
+                EV_Teleport(line, side, thing)
+            }
+            break
+        }
+        case(128) {
+            // Raise To Nearest Floor
+            EV_DoFloor(line, floor_e.raiseFloorToNearest)
+            break
+        }
+        case(129) {
+            // Raise Floor Turbo
+            EV_DoFloor(line, floor_e.raiseFloorTurbo)
+            break
+        }
     }
 }
 
@@ -603,30 +776,38 @@ def P_CrossSpecialLine(linenum : int; side : int; var thing : mobj_s?) {
 def P_ShootSpecialLine(var thing : mobj_s?; var line : line_s?) {
     var ok : int
     // Impacts that other things can activate.
-    if (!(thing.player != null)) {
+    if (thing.player == null) {
         ok = 0
-        let _cond = int(line.special)
-        if (_cond == 46) {
-            // OPEN DOOR IMPACT
-            ok = 1
+        c_switch(int(line.special)) {
+            case(46) {
+                // OPEN DOOR IMPACT
+                ok = 1
+                break
+            }
         }
-        if (!(ok != 0)) {
+        if (ok == 0) {
             return
         }
     }
-    let _cond2 = int(line.special)
-    if (_cond2 == 24) {
-        // RAISE FLOOR
-        EV_DoFloor(line, floor_e.raiseFloor)
-        P_ChangeSwitchTexture(line, 0)
-    } elif (_cond2 == 46) {
-        // OPEN DOOR
-        EV_DoDoor(line, vldoor_e.door_open)
-        P_ChangeSwitchTexture(line, 1)
-    } elif (_cond2 == 47) {
-        // RAISE FLOOR NEAR AND CHANGE
-        EV_DoPlat(line, plattype_e.raiseToNearestAndChange, 0)
-        P_ChangeSwitchTexture(line, 0)
+    c_switch(int(line.special)) {
+        case(24) {
+            // RAISE FLOOR
+            EV_DoFloor(line, floor_e.raiseFloor)
+            P_ChangeSwitchTexture(line, 0)
+            break
+        }
+        case(46) {
+            // OPEN DOOR
+            EV_DoDoor(line, vldoor_e.door_open)
+            P_ChangeSwitchTexture(line, 1)
+            break
+        }
+        case(47) {
+            // RAISE FLOOR NEAR AND CHANGE
+            EV_DoPlat(line, plattype_e.raiseToNearestAndChange, 0)
+            P_ChangeSwitchTexture(line, 0)
+            break
+        }
     }
 }
 
@@ -642,51 +823,63 @@ def P_PlayerInSpecialSector(var player : player_s?) {
         return
     }
     // Has hitten ground.
-    let _cond = int(sector.special)
-    if (_cond == 5) {
-        // HELLSLIME DAMAGE
-        if (!(player.powers[int(powertype_t.pw_ironfeet)] != 0)) {
-            if (!((leveltime & 31) != 0)) {
-                P_DamageMobj(player.mo, null, null, 10)
+    c_switch(int(sector.special)) {
+        case(5) {
+            // HELLSLIME DAMAGE
+            if (player.powers[int(powertype_t.pw_ironfeet)] == 0) {
+                if ((leveltime & 31) == 0) {
+                    P_DamageMobj(player.mo, null, null, 10)
+                }
             }
+            break
         }
-    } elif (_cond == 7) {
-        // NUKAGE DAMAGE
-        if (!(player.powers[int(powertype_t.pw_ironfeet)] != 0)) {
-            if (!((leveltime & 31) != 0)) {
-                P_DamageMobj(player.mo, null, null, 5)
+        case(7) {
+            // NUKAGE DAMAGE
+            if (player.powers[int(powertype_t.pw_ironfeet)] == 0) {
+                if ((leveltime & 31) == 0) {
+                    P_DamageMobj(player.mo, null, null, 5)
+                }
             }
+            break
         }
-    } elif (_cond == 16 || _cond == 4) {
-        // SUPER HELLSLIME DAMAGE
-        // STROBE HURT
-        if (!(player.powers[int(powertype_t.pw_ironfeet)] != 0) || (P_Random() < 5)) {
-            if (!((leveltime & 31) != 0)) {
+        case(16, 4) {
+            // SUPER HELLSLIME DAMAGE
+            // STROBE HURT
+            if (player.powers[int(powertype_t.pw_ironfeet)] == 0 || (P_Random() < 5)) {
+                if ((leveltime & 31) == 0) {
+                    P_DamageMobj(player.mo, null, null, 20)
+                }
+            }
+            break
+        }
+        case(9) {
+            // SECRET SECTOR
+            player.secretcount++
+            player.message = cstr("A secret is revealed!")
+            S_StartSound(null, int(sfxenum_t.sfx_getpow))
+            sector.special = int16(0)
+            break
+        }
+        case(11) {
+            // EXIT SUPER DAMAGE! (for E1M8 finale)
+            player.cheats &= ~int(cheat_t.CF_GODMODE)
+            if ((leveltime & 31) == 0) {
                 P_DamageMobj(player.mo, null, null, 20)
             }
+            if (player.health <= 10) {
+                G_ExitLevel()
+            }
+            break
         }
-    } elif (_cond == 9) {
-        // SECRET SECTOR
-        player.secretcount++
-        player.message = cstr("A secret is revealed!")
-        S_StartSound(null, int(sfxenum_t.sfx_getpow))
-        sector.special = int16(0)
-    } elif (_cond == 11) {
-        // EXIT SUPER DAMAGE! (for E1M8 finale)
-        player.cheats &= ~int(cheat_t.CF_GODMODE)
-        if (!((leveltime & 31) != 0)) {
-            P_DamageMobj(player.mo, null, null, 20)
+        case(_) {
+            // I_Error("Error: P_PlayerInSpecialSector: "
+            // "unknown special %i",
+            // sector->special);
+            doom_strcpy(addr(error_buf[0]), cstr("Error: P_PlayerInSpecialSector: unknown special "))
+            doom_concat(addr(error_buf[0]), doom_itoa(int(sector.special), 10))
+            I_Error(addr(error_buf[0]))
+            break
         }
-        if (player.health <= 10) {
-            G_ExitLevel()
-        }
-    } else {
-        // I_Error("Error: P_PlayerInSpecialSector: "
-        // "unknown special %i",
-        // sector->special);
-        doom_strcpy(addr(error_buf[0]), cstr("Error: P_PlayerInSpecialSector: unknown special "))
-        doom_concat(addr(error_buf[0]), doom_itoa(int(sector.special), 10))
-        I_Error(addr(error_buf[0]))
     }
 }
 
@@ -701,7 +894,7 @@ def P_UpdateSpecials {
     // LEVEL TIMER
     if (levelTimer == doom_boolean._c_true) {
         levelTimeCount--
-        if (!(levelTimeCount != 0)) {
+        if (levelTimeCount == 0) {
             G_ExitLevel()
         }
     }
@@ -718,16 +911,18 @@ def P_UpdateSpecials {
             }
             i++
         }
-        anim = anim + 1
+        anim++
     }
     // ANIMATE LINE SPECIALS
     i = 0
     while (i < int(numlinespecials)) {
         line = linespeciallist[i]
-        let _cond = int(line.special)
-        if (_cond == 48) {
-            // EFFECT FIRSTCOL SCROLL +
-            sides[int(line.sidenum[0])].textureoffset += FRACUNIT
+        c_switch(int(line.special)) {
+            case(48) {
+                // EFFECT FIRSTCOL SCROLL +
+                sides[int(line.sidenum[0])].textureoffset += FRACUNIT
+                break
+            }
         }
         i++
     }
@@ -735,17 +930,23 @@ def P_UpdateSpecials {
     for (i1 in range(MAXBUTTONS)) {
         if (buttonlist[i1].btimer != 0) {
             buttonlist[i1].btimer--
-            if (!(buttonlist[i1].btimer != 0)) {
-                let _cond2 = buttonlist[i1]._c_where
-                if (_cond2 == bwhere_e.top) {
-                    sides[int(buttonlist[i1].line.sidenum[0])].toptexture = int16(buttonlist[i1].btexture)
-                } elif (_cond2 == bwhere_e.middle) {
-                    sides[int(buttonlist[i1].line.sidenum[0])].midtexture = int16(buttonlist[i1].btexture)
-                } elif (_cond2 == bwhere_e.bottom) {
-                    sides[int(buttonlist[i1].line.sidenum[0])].bottomtexture = int16(buttonlist[i1].btexture)
+            if (buttonlist[i1].btimer == 0) {
+                c_switch(buttonlist[i1]._c_where) {
+                    case(bwhere_e.top) {
+                        sides[int(buttonlist[i1].line.sidenum[0])].toptexture = int16(buttonlist[i1].btexture)
+                        break
+                    }
+                    case(bwhere_e.middle) {
+                        sides[int(buttonlist[i1].line.sidenum[0])].midtexture = int16(buttonlist[i1].btexture)
+                        break
+                    }
+                    case(bwhere_e.bottom) {
+                        sides[int(buttonlist[i1].line.sidenum[0])].bottomtexture = int16(buttonlist[i1].btexture)
+                        break
+                    }
                 }
                 S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(buttonlist[i1].soundorg))), int(sfxenum_t.sfx_swtchn))
-                doom_memset(reinterpret<void?>(addr(buttonlist[0]) + end_index(i1, 16)), 0, int(uint64(typeinfo sizeof(type<button_t>))))
+                doom_memset(reinterpret<void?>(addr(buttonlist[0]) + end_index(i1, 16)), 0, typeinfo sizeof(type<button_t>))
             }
         }
     }
@@ -786,12 +987,12 @@ def EV_DoDonut(var line : line_s?) : int {
                 if (!(i < s2.linecount)) {
                     break
                 }
-                if ((!((int(s2.lines[i].flags) & ML_TWOSIDED) != 0)) || (intptr(s2.lines[i].backsector) == intptr(s1))) {
+                if (((int(s2.lines[i].flags) & ML_TWOSIDED) == 0) || (intptr(s2.lines[i].backsector) == intptr(s1))) {
                     continue
                 }
                 s3 = s2.lines[i].backsector
                 // Spawn rising slime
-                floor = reinterpret<floormove_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<floormove_t>))), PU_LEVSPEC, null))
+                floor = reinterpret<floormove_t?>(Z_Malloc(typeinfo sizeof(type<floormove_t>), PU_LEVSPEC, null))
                 P_AddThinker(addr(floor.thinker))
                 s2.specialdata = reinterpret<void?>(floor)
                 floor.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_MoveFloor)
@@ -804,7 +1005,7 @@ def EV_DoDonut(var line : line_s?) : int {
                 floor.newspecial = 0
                 floor.floordestheight = s3.floorheight
                 // Spawn lowering donut-hole
-                floor = reinterpret<floormove_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<floormove_t>))), PU_LEVSPEC, null))
+                floor = reinterpret<floormove_t?>(Z_Malloc(typeinfo sizeof(type<floormove_t>), PU_LEVSPEC, null))
                 P_AddThinker(addr(floor.thinker))
                 s1.specialdata = reinterpret<void?>(floor)
                 floor.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_MoveFloor)
@@ -834,12 +1035,12 @@ def P_SpawnSpecials {
     // See if -TIMER needs to be used.
     levelTimer = doom_boolean._c_false
     i = M_CheckParm(cstr("-avg"))
-    if (i != 0 && uint(int(deathmatch)) != 0) {
+    if (i != 0 && uint(deathmatch) != 0) {
         levelTimer = doom_boolean._c_true
         levelTimeCount = 20 * 60 * 35
     }
     i = M_CheckParm(cstr("-timer"))
-    if (i != 0 && uint(int(deathmatch)) != 0) {
+    if (i != 0 && uint(deathmatch) != 0) {
         var time : int
         time = doom_atoi(myargv[i + 1]) * 60 * 35
         levelTimer = doom_boolean._c_true
@@ -850,58 +1051,82 @@ def P_SpawnSpecials {
     i = 0
     while (i < numsectors) {
         {
-            if (!(sector.special != 0)) {
+            if (sector.special == 0) {
                 continue
             }
-            let _cond = int(sector.special)
-            if (_cond == 1) {
-                // FLICKERING LIGHTS
-                P_SpawnLightFlash(sector)
-            } elif (_cond == 2) {
-                // STROBE FAST
-                P_SpawnStrobeFlash(sector, FASTDARK, 0)
-            } elif (_cond == 3) {
-                // STROBE SLOW
-                P_SpawnStrobeFlash(sector, SLOWDARK, 0)
-            } elif (_cond == 4) {
-                // STROBE FAST/DEATH SLIME
-                P_SpawnStrobeFlash(sector, FASTDARK, 0)
-                sector.special = int16(4)
-            } elif (_cond == 8) {
-                // GLOWING LIGHT
-                P_SpawnGlowingLight(sector)
-            } elif (_cond == 9) {
-                // SECRET SECTOR
-                totalsecret++
-            } elif (_cond == 10) {
-                // DOOR CLOSE IN 30 SECONDS
-                P_SpawnDoorCloseIn30(sector)
-            } elif (_cond == 12) {
-                // SYNC STROBE SLOW
-                P_SpawnStrobeFlash(sector, SLOWDARK, 1)
-            } elif (_cond == 13) {
-                // SYNC STROBE FAST
-                P_SpawnStrobeFlash(sector, FASTDARK, 1)
-            } elif (_cond == 14) {
-                // DOOR RAISE IN 5 MINUTES
-                P_SpawnDoorRaiseIn5Mins(sector, i)
-            } elif (_cond == 17) {
-                P_SpawnFireFlicker(sector)
+            c_switch(int(sector.special)) {
+                case(1) {
+                    // FLICKERING LIGHTS
+                    P_SpawnLightFlash(sector)
+                    break
+                }
+                case(2) {
+                    // STROBE FAST
+                    P_SpawnStrobeFlash(sector, FASTDARK, 0)
+                    break
+                }
+                case(3) {
+                    // STROBE SLOW
+                    P_SpawnStrobeFlash(sector, SLOWDARK, 0)
+                    break
+                }
+                case(4) {
+                    // STROBE FAST/DEATH SLIME
+                    P_SpawnStrobeFlash(sector, FASTDARK, 0)
+                    sector.special = int16(4)
+                    break
+                }
+                case(8) {
+                    // GLOWING LIGHT
+                    P_SpawnGlowingLight(sector)
+                    break
+                }
+                case(9) {
+                    // SECRET SECTOR
+                    totalsecret++
+                    break
+                }
+                case(10) {
+                    // DOOR CLOSE IN 30 SECONDS
+                    P_SpawnDoorCloseIn30(sector)
+                    break
+                }
+                case(12) {
+                    // SYNC STROBE SLOW
+                    P_SpawnStrobeFlash(sector, SLOWDARK, 1)
+                    break
+                }
+                case(13) {
+                    // SYNC STROBE FAST
+                    P_SpawnStrobeFlash(sector, FASTDARK, 1)
+                    break
+                }
+                case(14) {
+                    // DOOR RAISE IN 5 MINUTES
+                    P_SpawnDoorRaiseIn5Mins(sector, i)
+                    break
+                }
+                case(17) {
+                    P_SpawnFireFlicker(sector)
+                    break
+                }
             }
         } finally {
             i++
-            sector = sector + 1
+            sector++
         }
     }
     // Init line EFFECTs
     numlinespecials = int16(0)
     i = 0
     while (i < numlines) {
-        let _cond2 = int(lines[i].special)
-        if (_cond2 == 48) {
-            // EFFECT FIRSTCOL SCROLL+
-            linespeciallist[int(numlinespecials)] = addr(lines[i])
-            numlinespecials = int16(int(numlinespecials) + 1)
+        c_switch(int(lines[i].special)) {
+            case(48) {
+                // EFFECT FIRSTCOL SCROLL+
+                linespeciallist[int(numlinespecials)] = addr(lines[i])
+                numlinespecials = int16(int(numlinespecials) + 1)
+                break
+            }
         }
         i++
     }
@@ -913,7 +1138,7 @@ def P_SpawnSpecials {
         activeplats[i1] = null
     }
     for (i1 in range(MAXBUTTONS)) {
-        doom_memset(reinterpret<void?>(addr(buttonlist[0]) + end_index(i1, 16)), 0, int(uint64(typeinfo sizeof(type<button_t>))))
+        doom_memset(reinterpret<void?>(addr(buttonlist[0]) + end_index(i1, 16)), 0, typeinfo sizeof(type<button_t>))
     }
 }
 

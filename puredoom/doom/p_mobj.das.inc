@@ -7,7 +7,7 @@ var iquetail : int
 [c_function]
 def P_SetMobjState(var mobj : mobj_s?; var state : statenum_t) : doom_boolean {
     var st : state_t?
-    while (true) {
+    c_do_while(mobj.tics == 0) {
         if (state == statenum_t.S_NULL) {
             mobj.state = null
             P_RemoveMobj(mobj)
@@ -24,9 +24,6 @@ def P_SetMobjState(var mobj : mobj_s?; var state : statenum_t) : doom_boolean {
             invoke(st.action.acp1, reinterpret<void?>(mobj))
         }
         state = st.nextstate
-        if (!(!(mobj.tics != 0))) {
-            break
-        }
     }
     return doom_boolean._c_true
 }
@@ -56,7 +53,7 @@ def P_XYMovement(var mo : mobj_s?) {
     var player : player_s?
     var xmove : int
     var ymove : int
-    if (!(mo.momx != 0) && !(mo.momy != 0)) {
+    if (mo.momx == 0 && mo.momy == 0) {
         if ((mo.flags & int(mobjflag_t.MF_SKULLFLY)) != 0) {
             // the skull slammed into something
             mo.flags &= ~int(mobjflag_t.MF_SKULLFLY)
@@ -80,7 +77,7 @@ def P_XYMovement(var mo : mobj_s?) {
     }
     xmove = mo.momx
     ymove = mo.momy
-    while (true) {
+    c_do_while(xmove != 0 || ymove != 0) {
         if (xmove > MAXMOVE / 2 || ymove > MAXMOVE / 2) {
             ptryx = mo.x + xmove / 2
             ptryy = mo.y + ymove / 2
@@ -92,7 +89,7 @@ def P_XYMovement(var mo : mobj_s?) {
             ymove = 0
             xmove = ymove
         }
-        if (!(int(P_TryMove(mo, ptryx, ptryy)) != 0)) {
+        if (int(P_TryMove(mo, ptryx, ptryy)) == 0) {
             // blocked move
             if (mo.player != null) {
                 // try to slide along it
@@ -111,9 +108,6 @@ def P_XYMovement(var mo : mobj_s?) {
                 mo.momy = 0
                 mo.momx = mo.momy
             }
-        }
-        if (!(xmove != 0 || ymove != 0)) {
-            break
         }
     }
     // slow down
@@ -140,9 +134,10 @@ def P_XYMovement(var mo : mobj_s?) {
             }
         }
     }
-    if (mo.momx > -STOPSPEED && mo.momx < STOPSPEED && mo.momy > -STOPSPEED && mo.momy < STOPSPEED && (!(player != null) || (int(player.cmd.forwardmove) == 0 && int(player.cmd.sidemove) == 0))) {
+    if (mo.momx > -STOPSPEED && mo.momx < STOPSPEED && mo.momy > -STOPSPEED && mo.momy < STOPSPEED &&
+            (player == null || (player.cmd.forwardmove == 0 && player.cmd.sidemove == 0))) {
         // if in a walking frame, stop moving
-        if (player != null && uint(int64(player.mo.state - addr(states[0])) - int64(int(statenum_t.S_PLAY_RUN1))) < 4u) {
+        if (player != null && uint(int64(player.mo.state - addr(states[0])) - int64(uint(statenum_t.S_PLAY_RUN1))) < 4u) {
             P_SetMobjState(player.mo, statenum_t.S_PLAY)
         }
         mo.momx = 0
@@ -167,7 +162,7 @@ def P_ZMovement(var mo : mobj_s?) {
     mo.z += mo.momz
     if ((mo.flags & int(mobjflag_t.MF_FLOAT)) != 0 && mo.target != null) {
         // float down towards target if too close
-        if (!((mo.flags & int(mobjflag_t.MF_SKULLFLY)) != 0) && !((mo.flags & int(mobjflag_t.MF_INFLOAT)) != 0)) {
+        if ((mo.flags & int(mobjflag_t.MF_SKULLFLY)) == 0 && (mo.flags & int(mobjflag_t.MF_INFLOAT)) == 0) {
             dist = P_AproxDistance(mo.x - mo.target.x, mo.y - mo.target.y)
             delta = (mo.target.z + (mo.height >> 1)) - mo.z
             if (delta < 0 && dist < -(delta * 3)) {
@@ -199,11 +194,11 @@ def P_ZMovement(var mo : mobj_s?) {
             mo.momz = 0
         }
         mo.z = mo.floorz
-        if ((mo.flags & int(mobjflag_t.MF_MISSILE)) != 0 && !((mo.flags & int(mobjflag_t.MF_NOCLIP)) != 0)) {
+        if ((mo.flags & int(mobjflag_t.MF_MISSILE)) != 0 && (mo.flags & int(mobjflag_t.MF_NOCLIP)) == 0) {
             P_ExplodeMissile(mo)
             return
         }
-    } elif (!((mo.flags & int(mobjflag_t.MF_NOGRAVITY)) != 0)) {
+    } elif ((mo.flags & int(mobjflag_t.MF_NOGRAVITY)) == 0) {
         if (mo.momz == 0) {
             mo.momz = -FRACUNIT * 2
         } else {
@@ -220,7 +215,7 @@ def P_ZMovement(var mo : mobj_s?) {
             // the skull slammed into something
             mo.momz = -mo.momz
         }
-        if ((mo.flags & int(mobjflag_t.MF_MISSILE)) != 0 && !((mo.flags & int(mobjflag_t.MF_NOCLIP)) != 0)) {
+        if ((mo.flags & int(mobjflag_t.MF_MISSILE)) != 0 && (mo.flags & int(mobjflag_t.MF_NOCLIP)) == 0) {
             P_ExplodeMissile(mo)
             return
         }
@@ -239,7 +234,7 @@ def P_NightmareRespawn(var mobj : mobj_s?) {
     x = int(mobj.spawnpoint.x) << FRACBITS
     y = int(mobj.spawnpoint.y) << FRACBITS
     // somthing is occupying it's position?
-    if (!(int(P_CheckPosition(mobj, x, y)) != 0)) {
+    if (int(P_CheckPosition(mobj, x, y)) == 0) {
         // no respwan
         return
     }
@@ -297,18 +292,18 @@ def P_MobjThinker(var mobj : mobj_s?) {
     if (mobj.tics != -1) {
         mobj.tics--
         // you can cycle through multiple states in a tic
-        if (!(mobj.tics != 0)) {
-            if (!(int(P_SetMobjState(mobj, mobj.state.nextstate)) != 0)) {
+        if (mobj.tics == 0) {
+            if (int(P_SetMobjState(mobj, mobj.state.nextstate)) == 0) {
                 // freed itself
                 return
             }
         }
     } else {
         // check for nightmare respawn
-        if (!((mobj.flags & int(mobjflag_t.MF_COUNTKILL)) != 0)) {
+        if ((mobj.flags & int(mobjflag_t.MF_COUNTKILL)) == 0) {
             return
         }
-        if (!(int(respawnmonsters) != 0)) {
+        if (int(respawnmonsters) == 0) {
             return
         }
         mobj.movecount++
@@ -331,8 +326,8 @@ def P_SpawnMobj(x : int; y : int; z : int; _c_type : mobjtype_t) : mobj_s? {
     var mobj : mobj_s?
     var st : state_t?
     var info : mobjinfo_t?
-    mobj = reinterpret<mobj_s?>(Z_Malloc(int(uint64(typeinfo sizeof(type<mobj_s>))), PU_LEVEL, null))
-    doom_memset(reinterpret<void?>(mobj), 0, int(uint64(typeinfo sizeof(type<mobj_s>))))
+    mobj = reinterpret<mobj_s?>(Z_Malloc(typeinfo sizeof(type<mobj_s>), PU_LEVEL, null))
+    doom_memset(reinterpret<void?>(mobj), 0, typeinfo sizeof(type<mobj_s>))
     info = addr(mobjinfo[0]) + end_index(int(_c_type), 137)
     mobj._c_type = _c_type
     mobj.info = info
@@ -372,7 +367,8 @@ def P_SpawnMobj(x : int; y : int; z : int; _c_type : mobjtype_t) : mobj_s? {
 // P_RemoveMobj
 [c_function]
 def P_RemoveMobj(var mobj : mobj_s?) {
-    if ((mobj.flags & int(mobjflag_t.MF_SPECIAL)) != 0 && !((mobj.flags & int(mobjflag_t.MF_DROPPED)) != 0) && (mobj._c_type != mobjtype_t.MT_INV) && (mobj._c_type != mobjtype_t.MT_INS)) {
+    if ((mobj.flags & int(mobjflag_t.MF_SPECIAL)) != 0 && (mobj.flags & int(mobjflag_t.MF_DROPPED)) == 0 && (mobj._c_type != mobjtype_t.MT_INV) &&
+            (mobj._c_type != mobjtype_t.MT_INS)) {
         itemrespawnque[iquehead] = mobj.spawnpoint
         itemrespawntime[iquehead] = leveltime
         iquehead = (iquehead + 1) & (ITEMQUESIZE - 1)
@@ -400,7 +396,7 @@ def P_RespawnSpecials {
     var mthing : mapthing_t?
     var i : int
     // only respawn items in deathmatch
-    if (uint(int(deathmatch)) != 2u) {
+    if (uint(deathmatch) != 2u) {
         return
     }
     // nothing left to respawn?
@@ -433,7 +429,7 @@ def P_RespawnSpecials {
         z = DOOM_MININT
     }
     mo = P_SpawnMobj(x, y, z, enum_from_int(type<mobjtype_t>, i))
-    mo.spawnpoint = deref(mthing)
+    mo.spawnpoint = *mthing
     mo.angle = uint(ANG45 * (int(mthing.angle) / 45))
     // pull it from the que
     iquetail = (iquetail + 1) & (ITEMQUESIZE - 1)
@@ -451,7 +447,7 @@ def P_SpawnPlayer(var mthing : mapthing_t?) {
     var z : int
     var mobj : mobj_s?
     // not playing?
-    if (!(int(playeringame[int(mthing._c_type) - 1]) != 0)) {
+    if (int(playeringame[int(mthing._c_type) - 1]) == 0) {
         return
     }
     p = addr(players[0]) + end_index(int(mthing._c_type) - 1, 4)
@@ -506,24 +502,24 @@ def P_SpawnMapThing(var mthing : mapthing_t?) {
     var y : int
     var z : int
     // count deathmatch start positions
-    if (int(mthing._c_type) == 11) {
+    if (mthing._c_type == 11) {
         if (intptr(deathmatch_p) < intptr(addr(deathmatchstarts[0]) + 10)) {
-            doom_memcpy(reinterpret<void?>(deathmatch_p), reinterpret<void?>(mthing), int(uint64(typeinfo sizeof(type<mapthing_t>))))
-            deathmatch_p = deathmatch_p + 1
+            doom_memcpy(reinterpret<void?>(deathmatch_p), reinterpret<void?>(mthing), typeinfo sizeof(type<mapthing_t>))
+            deathmatch_p++
         }
         return
     }
     // check for players specially
     if (int(mthing._c_type) <= 4) {
         // save spots for respawning in network games
-        playerstarts[int(mthing._c_type) - 1] = deref(mthing)
-        if (!(int(deathmatch) != 0)) {
+        playerstarts[int(mthing._c_type) - 1] = *mthing
+        if (int(deathmatch) == 0) {
             P_SpawnPlayer(mthing)
         }
         return
     }
     // check for apropriate skill level
-    if (!(int(netgame) != 0) && (int(mthing._c_options) & 16) != 0) {
+    if (int(netgame) == 0 && (int(mthing._c_options) & 16) != 0) {
         return
     }
     if (gameskill == skill_t.sk_baby) {
@@ -531,9 +527,9 @@ def P_SpawnMapThing(var mthing : mapthing_t?) {
     } elif (gameskill == skill_t.sk_nightmare) {
         bit = 4
     } else {
-        bit = 1 << int(uint(int(gameskill)) - 1u)
+        bit = 1 << int(uint(gameskill) - 1u)
     }
-    if (!((int(mthing._c_options) & bit) != 0)) {
+    if ((int(mthing._c_options) & bit) == 0) {
         return
     }
     // find which type to spawn
@@ -558,11 +554,11 @@ def P_SpawnMapThing(var mthing : mapthing_t?) {
         I_Error(addr(error_buf[0]))
     }
     // don't spawn keycards and players in deathmatch
-    if (uint(int(deathmatch)) != 0 && (mobjinfo[i].flags & int(mobjflag_t.MF_NOTDMATCH)) != 0) {
+    if (uint(deathmatch) != 0 && (mobjinfo[i].flags & int(mobjflag_t.MF_NOTDMATCH)) != 0) {
         return
     }
     // don't spawn any monsters if -nomonsters
-    if (uint(int(nomonsters)) != 0 && (i == int(mobjtype_t.MT_SKULL) || (mobjinfo[i].flags & int(mobjflag_t.MF_COUNTKILL)) != 0)) {
+    if (uint(nomonsters) != 0 && (i == int(mobjtype_t.MT_SKULL) || (mobjinfo[i].flags & int(mobjflag_t.MF_COUNTKILL)) != 0)) {
         return
     }
     // spawn it
@@ -574,7 +570,7 @@ def P_SpawnMapThing(var mthing : mapthing_t?) {
         z = DOOM_MININT
     }
     mobj = P_SpawnMobj(x, y, z, enum_from_int(type<mobjtype_t>, i))
-    mobj.spawnpoint = deref(mthing)
+    mobj.spawnpoint = *mthing
     if (mobj.tics > 0) {
         mobj.tics = 1 + (P_Random() % mobj.tics)
     }
@@ -636,7 +632,7 @@ def P_CheckMissileSpawn(var th : mobj_s?) {
     th.x += th.momx >> 1
     th.y += th.momy >> 1
     th.z += th.momz >> 1
-    if (!(int(P_TryMove(th, th.x, th.y)) != 0)) {
+    if (int(P_TryMove(th, th.x, th.y)) == 0) {
         P_ExplodeMissile(th)
     }
 }
@@ -685,14 +681,14 @@ def P_SpawnPlayerMissile(var source : mobj_s?; _c_type : mobjtype_t) {
     // see which target is to be aimed at
     an = source.angle
     slope = P_AimLineAttack(source, an, 16 * 64 * FRACUNIT)
-    if (!(linetarget != null)) {
+    if (linetarget == null) {
         an += uint(1 << 26)
         slope = P_AimLineAttack(source, an, 16 * 64 * FRACUNIT)
-        if (!(linetarget != null)) {
+        if (linetarget == null) {
             an -= uint(2 << 26)
             slope = P_AimLineAttack(source, an, 16 * 64 * FRACUNIT)
         }
-        if (!(linetarget != null)) {
+        if (linetarget == null) {
             an = source.angle
             slope = 0
         }

@@ -48,8 +48,8 @@ def P_LoadVertexes(lump : int) {
         li.x = int(read_mapvertex_t_x(ml, 0)) << FRACBITS
         li.y = int(read_mapvertex_t_y(ml, 0)) << FRACBITS
         i++
-        li = li + 1
-        ml = ml + 4
+        li++
+        ml += 4
     }
     // Free buffer memory.
     Z_Free(reinterpret<void?>(data))
@@ -89,8 +89,8 @@ def P_LoadSegs(lump : int) {
             li.backsector = null
         }
         i++
-        li = li + 1
-        ml = ml + 12
+        li++
+        ml += 12
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -113,8 +113,8 @@ def P_LoadSubsectors(lump : int) {
         ss.numlines = read_mapsubsector_t_numsegs(ms, 0)
         ss.firstline = read_mapsubsector_t_firstseg(ms, 0)
         i++
-        ss = ss + 1
-        ms = ms + 4
+        ss++
+        ms += 4
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -143,8 +143,8 @@ def P_LoadSectors(lump : int) {
         ss.tag = read_mapsector_t_tag(ms, 0)
         ss.thinglist = null
         i++
-        ss = ss + 1
-        ms = ms + 26
+        ss++
+        ms += 26
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -174,8 +174,8 @@ def P_LoadNodes(lump : int) {
             }
         }
         i++
-        no = no + 1
-        mn = mn + 28
+        no++
+        mn += 28
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -196,19 +196,21 @@ def P_LoadThings(lump : int) {
         spawn = doom_boolean._c_true
         // Do not spawn cool, new monsters if !commercial
         if (gamemode != GameMode_t.commercial) {
-            let _cond = int(mt._c_type)
-            if (_cond == 68 || _cond == 64 || _cond == 88 || _cond == 89 || _cond == 69 || _cond == 67 || _cond == 71 || _cond == 65 || _cond == 66 || _cond == 84) {
-                // Arachnotron
-                // Archvile
-                // Boss Brain
-                // Boss Shooter
-                // Hell Knight
-                // Mancubus
-                // Pain Elemental
-                // Former Human Commando
-                // Revenant
-                // Wolf SS
-                spawn = doom_boolean._c_false
+            c_switch(int(mt._c_type)) {
+                case(68, 64, 88, 89, 69, 67, 71, 65, 66, 84) {
+                    // Arachnotron
+                    // Archvile
+                    // Boss Brain
+                    // Boss Shooter
+                    // Hell Knight
+                    // Mancubus
+                    // Pain Elemental
+                    // Former Human Commando
+                    // Revenant
+                    // Wolf SS
+                    spawn = doom_boolean._c_false
+                    break
+                }
             }
         }
         if (spawn == doom_boolean._c_false) {
@@ -222,7 +224,7 @@ def P_LoadThings(lump : int) {
         mt._c_options = mt._c_options
         P_SpawnMapThing(mt)
         i++
-        mt = mt + 1
+        mt++
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -254,9 +256,9 @@ def P_LoadLineDefs(lump : int) {
         v2 = ld.v2
         ld.dx = v2.x - v1.x
         ld.dy = v2.y - v1.y
-        if (!(ld.dx != 0)) {
+        if (ld.dx == 0) {
             ld.slopetype = slopetype_t.ST_VERTICAL
-        } elif (!(ld.dy != 0)) {
+        } elif (ld.dy == 0) {
             ld.slopetype = slopetype_t.ST_HORIZONTAL
         } else {
             if (FixedDiv(ld.dy, ld.dx) > 0) {
@@ -281,19 +283,19 @@ def P_LoadLineDefs(lump : int) {
         }
         ld.sidenum[0] = ptr_maplinedef_t_sidenum(mld, 0)[0]
         ld.sidenum[1] = ptr_maplinedef_t_sidenum(mld, 0)[1]
-        if (int(ld.sidenum[0]) != -1) {
+        if (ld.sidenum[0] != -1) {
             ld.frontsector = sides[int(ld.sidenum[0])].sector
         } else {
             ld.frontsector = null
         }
-        if (int(ld.sidenum[1]) != -1) {
+        if (ld.sidenum[1] != -1) {
             ld.backsector = sides[int(ld.sidenum[1])].sector
         } else {
             ld.backsector = null
         }
         i++
-        mld = mld + 14
-        ld = ld + 1
+        mld += 14
+        ld++
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -320,8 +322,8 @@ def P_LoadSideDefs(lump : int) {
         sd.midtexture = int16(R_TextureNumForName(ptr_mapsidedef_t_midtexture(msd, 0)))
         sd.sector = addr(sectors[int(read_mapsidedef_t_sector(msd, 0))])
         i++
-        msd = msd + 30
-        sd = sd + 1
+        msd += 30
+        sd++
     }
     Z_Free(reinterpret<void?>(data))
 }
@@ -368,7 +370,7 @@ def P_GroupLines {
         seg = addr(segs[int(ss.firstline)])
         ss.sector = seg.sidedef.sector
         i++
-        ss = ss + 1
+        ss++
     }
     // count number of lines in each sector
     li = lines
@@ -382,7 +384,7 @@ def P_GroupLines {
             total++
         }
         i++
-        li = li + 1
+        li++
     }
     // build line tables for each sector
     linebuffer = reinterpret<line_s ??>(Z_Malloc(int(uint64(total) * uint64(typeinfo sizeof(type<line_s?>))), PU_LEVEL, null))
@@ -396,13 +398,13 @@ def P_GroupLines {
         while (j < numlines) {
             if (intptr(li.frontsector) == intptr(sector) || intptr(li.backsector) == intptr(sector)) {
                 var _t0 = linebuffer
-                linebuffer = linebuffer + 1
-                deref(_t0) = li
+                linebuffer++
+                *_t0 = li
                 M_AddToBox(addr(bbox[0]), li.v1.x, li.v1.y)
                 M_AddToBox(addr(bbox[0]), li.v2.x, li.v2.y)
             }
             j++
-            li = li + 1
+            li++
         }
         if (int64(linebuffer - sector.lines) != int64(sector.linecount)) {
             I_Error(cstr("Error: P_GroupLines: miscounted"))
@@ -424,7 +426,7 @@ def P_GroupLines {
         _c_block = _c_block < 0 ? 0 : _c_block
         sector.blockbox[int(anon_787.BOXLEFT)] = _c_block
         i++
-        sector = sector + 1
+        sector++
     }
 }
 

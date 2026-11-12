@@ -83,7 +83,7 @@ def getsfx(var sfxname : uint8?; var len : int?) : void? {
     // Remove the cached lump.
     Z_Free(reinterpret<void?>(sfx))
     // Preserve padded length.
-    deref(len) = paddedsize
+    *len = paddedsize
     // Return allocated padded data.
     return reinterpret<void?>(paddedsfx + 8)
 }
@@ -104,7 +104,8 @@ def addsfx(sfxid : int; volume : int; step : int; var seperation : int) : int {
     var leftvol : int
     // Chainsaw troubles.
     // Play these sound effects only one at a time.
-    if (sfxid == int(sfxenum_t.sfx_sawup) || sfxid == int(sfxenum_t.sfx_sawidl) || sfxid == int(sfxenum_t.sfx_sawful) || sfxid == int(sfxenum_t.sfx_sawhit) || sfxid == int(sfxenum_t.sfx_stnmov) || sfxid == int(sfxenum_t.sfx_pistol)) {
+    if (sfxid == int(sfxenum_t.sfx_sawup) || sfxid == int(sfxenum_t.sfx_sawidl) || sfxid == int(sfxenum_t.sfx_sawful) || sfxid == int(sfxenum_t.sfx_sawhit) ||
+            sfxid == int(sfxenum_t.sfx_stnmov) || sfxid == int(sfxenum_t.sfx_pistol)) {
         // Loop all channels, check.
         for (i1 in range(NUM_CHANNELS)) {
             // Active, and using the same SFX?
@@ -142,7 +143,7 @@ def addsfx(sfxid : int; volume : int; step : int; var seperation : int) : int {
     // Set pointer to end of raw data.
     channelsend[slot] = channels[slot] + lengths[sfxid]
     // Reset current handle number, limited to 0..100.
-    if (!(addsfx_handlenums != 0)) {
+    if (addsfx_handlenums == 0) {
         addsfx_handlenums = uint16(100)
     }
     // Assign current handle number.
@@ -525,7 +526,7 @@ def I_StopSound(handle : int) {
 
 def I_SoundIsPlaying(handle : int) : int {
     // Ouch.
-    return gametic < handle ? 1 : 0
+    return int_of(gametic < handle)
 }
 
 // This function loops all active (internal) sound
@@ -582,7 +583,7 @@ def I_UpdateSound {
             // Check channel, if active.
             if (channels[chan] != null) {
                 // Get the raw data from the channel.
-                sample = uint(deref(channels[chan]))
+                sample = uint(*channels[chan])
                 // Add left and right part
                 // for this channel (sound)
                 // to the current data.
@@ -592,7 +593,7 @@ def I_UpdateSound {
                 // Increment index ???
                 channelstepremainder[chan] += channelstep[chan]
                 // MSB is next sample???
-                channels[chan] = channels[chan] + (channelstepremainder[chan] >> 16u)
+                channels[chan] += channelstepremainder[chan] >> 16u
                 // Limit to LSB???
                 channelstepremainder[chan] &= uint(65536 - 1)
                 // Check whether we are done.
@@ -607,23 +608,23 @@ def I_UpdateSound {
         // else if (dl < -128) *leftout = -128;
         // else *leftout = dl;
         if (dl > 32767) {
-            deref(leftout) = int16(32767)
+            *leftout = int16(32767)
         } elif (dl < -32768) {
-            deref(leftout) = int16(-32768)
+            *leftout = int16(-32768)
         } else {
-            deref(leftout) = int16(dl)
+            *leftout = int16(dl)
         }
         // Same for right hardware channel.
         if (dr > 32767) {
-            deref(rightout) = int16(32767)
+            *rightout = int16(32767)
         } elif (dr < -32768) {
-            deref(rightout) = int16(-32768)
+            *rightout = int16(-32768)
         } else {
-            deref(rightout) = int16(dr)
+            *rightout = int16(dr)
         }
         // Increment current pointers in mixbuffer.
-        leftout = leftout + step
-        rightout = rightout + step
+        leftout += step
+        rightout += step
     }
 }
 
@@ -645,9 +646,9 @@ def I_ShutdownSound {
     var i : int
     // FIXME (below).
     invoke(doom_print, cstr("I_ShutdownSound: NOT finishing pending sounds\n"))
-    while (!(done != 0)) {
+    while (done == 0) {
         i = 0
-        while (i < 8 && !(channels[i] != null)) {
+        while (i < 8 && channels[i] == null) {
             i++
         }
         // FIXME. No proper channel output.
@@ -666,7 +667,7 @@ def I_InitSound {
     invoke(doom_print, cstr("I_InitSound: "))
     for (i in range(1, int(sfxenum_t.NUMSFX))) {
         // Alias? Example is the chaingun sound linked to pistol.
-        if (!(S_sfx[i].link != null)) {
+        if (S_sfx[i].link == null) {
             // Load data from WAD file.
             S_sfx[i].data = getsfx(S_sfx[i].name, addr(lengths[0]) + end_index(i, 109))
         } else {
@@ -729,8 +730,8 @@ def I_UnRegisterSong(handle : int) {
 
 [c_function]
 def I_RegisterSong(var data : void?) : int {
-    doom_memcpy(reinterpret<void?>(addr(mus_header)), data, int(uint64(typeinfo sizeof(type<mus_header_t>))))
-    if (doom_strncmp(addr(mus_header.ID[0]), cstr("MUS"), 3) != 0 || int(mus_header.ID[3]) != 26) {
+    doom_memcpy(reinterpret<void?>(addr(mus_header)), data, typeinfo sizeof(type<mus_header_t>))
+    if (doom_strncmp(addr(mus_header.ID[0]), cstr("MUS"), 3) != 0 || mus_header.ID[3] != 26) {
         return 0
     }
     mus_data = reinterpret<uint8?>(data)
@@ -754,7 +755,7 @@ def I_TickSong : uint64 {
         queue_midi_head++
         return queued_midi_msgs[_t0 % MAX_QUEUED_MIDI_MSGS]
     }
-    if (!(int(mus_playing) != 0) || !(mus_data != null)) {
+    if (int(mus_playing) == 0 || mus_data == null) {
         return 0ul
     }
     if (mus_delay <= 0) {
@@ -769,10 +770,8 @@ def I_TickSong : uint64 {
         } elif (channel == 9) {
             channel = 15
         }
-        let _cond = _c_type
-        while (true) {
-            var _flag = false
-            if (_cond == 0) {
+        c_switch(_c_type) {
+            case(0) {
                 {
                     let _t2 = mus_offset
                     mus_offset++
@@ -781,7 +780,7 @@ def I_TickSong : uint64 {
                     break
                 }
             }
-            if (_cond == 1) {
+            case(1) {
                 {
                     let _t3 = mus_offset
                     mus_offset++
@@ -797,7 +796,7 @@ def I_TickSong : uint64 {
                     break
                 }
             }
-            if (_cond == 2) {
+            case(2) {
                 {
                     let _t5 = mus_offset
                     mus_offset++
@@ -808,29 +807,41 @@ def I_TickSong : uint64 {
                     break
                 }
             }
-            if (_cond == 3) {
+            case(3) {
                 {
                     let _t6 = mus_offset
                     mus_offset++
                     var controller : int = int(mus_data[_t6]) & 127
-                    let _cond2 = controller
-                    if (_cond2 == 10) {
-                        midi_event = uint64(176 | channel | (120 << 8))
-                    } elif (_cond2 == 11) {
-                        midi_event = uint64(176 | channel | (123 << 8))
-                    } elif (_cond2 == 12) {
-                        midi_event = uint64(176 | channel | (126 << 8))
-                    } elif (_cond2 == 13) {
-                        midi_event = uint64(176 | channel | (127 << 8))
-                    } elif (_cond2 == 14) {
-                        midi_event = uint64(176 | channel | (121 << 8))
-                    } elif (_cond2 == 15) {
+                    c_switch(controller) {
+                        case(10) {
+                            midi_event = uint64(176 | channel | (120 << 8))
+                            break
+                        }
+                        case(11) {
+                            midi_event = uint64(176 | channel | (123 << 8))
+                            break
+                        }
+                        case(12) {
+                            midi_event = uint64(176 | channel | (126 << 8))
+                            break
+                        }
+                        case(13) {
+                            midi_event = uint64(176 | channel | (127 << 8))
+                            break
+                        }
+                        case(14) {
+                            midi_event = uint64(176 | channel | (121 << 8))
+                            break
+                        }
+                        case(15) {
+                            // Doom never implemented
+                            break
+                        }
                     }
-                    // Doom never implemented
                     break
                 }
             }
-            if (_cond == 4) {
+            case(4) {
                 {
                     let _t7 = mus_offset
                     mus_offset++
@@ -838,37 +849,56 @@ def I_TickSong : uint64 {
                     let _t8 = mus_offset
                     mus_offset++
                     var value : int = int(mus_data[_t8]) & 127
-                    let _cond3 = controller
-                    if (_cond3 == 0) {
-                        midi_event = uint64(192 | channel | (value << 8))
-                    } elif (_cond3 == 1) {
-                        midi_event = uint64(176 | channel | 8192 | (value << 16))
-                    } elif (_cond3 == 2) {
-                        midi_event = uint64(176 | channel | 256 | (value << 16))
-                    } elif (_cond3 == 3) {
-                        mus_channel_volumes[channel] = value
-                        midi_event = uint64(176 | channel | 1792 | (((mus_channel_volumes[channel] * mus_volume) / 127) << 16))
-                    } elif (_cond3 == 4) {
-                        midi_event = uint64(176 | channel | 2560 | (value << 16))
-                    } elif (_cond3 == 5) {
-                        midi_event = uint64(176 | channel | 2816 | (value << 16))
-                    } elif (_cond3 == 6) {
-                        midi_event = uint64(176 | channel | 23296 | (value << 16))
-                    } elif (_cond3 == 7) {
-                        midi_event = uint64(176 | channel | 23808 | (value << 16))
-                    } elif (_cond3 == 8) {
-                        midi_event = uint64(176 | channel | 16384 | (value << 16))
-                    } elif (_cond3 == 9) {
-                        midi_event = uint64(176 | channel | 17152 | (value << 16))
+                    c_switch(controller) {
+                        case(0) {
+                            midi_event = uint64(192 | channel | (value << 8))
+                            break
+                        }
+                        case(1) {
+                            midi_event = uint64(176 | channel | 8192 | (value << 16))
+                            break
+                        }
+                        case(2) {
+                            midi_event = uint64(176 | channel | 256 | (value << 16))
+                            break
+                        }
+                        case(3) {
+                            mus_channel_volumes[channel] = value
+                            midi_event = uint64(176 | channel | 1792 | (((mus_channel_volumes[channel] * mus_volume) / 127) << 16))
+                            break
+                        }
+                        case(4) {
+                            midi_event = uint64(176 | channel | 2560 | (value << 16))
+                            break
+                        }
+                        case(5) {
+                            midi_event = uint64(176 | channel | 2816 | (value << 16))
+                            break
+                        }
+                        case(6) {
+                            midi_event = uint64(176 | channel | 23296 | (value << 16))
+                            break
+                        }
+                        case(7) {
+                            midi_event = uint64(176 | channel | 23808 | (value << 16))
+                            break
+                        }
+                        case(8) {
+                            midi_event = uint64(176 | channel | 16384 | (value << 16))
+                            break
+                        }
+                        case(9) {
+                            midi_event = uint64(176 | channel | 17152 | (value << 16))
+                            break
+                        }
                     }
                     break
                 }
             }
-            if (_cond == 5) {
+            case(5) {
                 break
             }
-            _flag ||= _cond == 6
-            if (_flag) {
+            case(6) {
                 // Loop
                 if (int(mus_loop) != 0) {
                     mus_delay = 0
@@ -879,8 +909,7 @@ def I_TickSong : uint64 {
                     return 0ul
                 }
             }
-            _flag ||= _cond == 7
-            if (_flag) {
+            case(7) {
                 {
                     let _t9 = mus_offset
                     mus_offset++
@@ -888,20 +917,16 @@ def I_TickSong : uint64 {
                     break
                 }
             }
-            break
         }
         // Followed by delay
         if ((event & 128) != 0) {
             mus_delay = 0
             var delay_byte : int = 0
-            while (true) {
+            c_do_while((delay_byte & 128) != 0) {
                 let _t10 = mus_offset
                 mus_offset++
                 delay_byte = int(mus_data[_t10])
                 mus_delay = mus_delay * 128 + delay_byte & 127
-                if (!((delay_byte & 128) != 0)) {
-                    break
-                }
             }
             return midi_event
         }

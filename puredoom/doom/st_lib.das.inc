@@ -23,13 +23,13 @@ def STlib_initNum(var n : st_number_t?; x : int; y : int; var pl : uint8 ??; var
 [c_function]
 def STlib_drawNum(var n : st_number_t?; refresh : doom_boolean) {
     var numdigits : int = n.width
-    var num : int = deref(n.num)
+    var num : int = *n.num
     var w : int = int(read_patch_t_width(n.p[0], 0))
     var h : int = int(read_patch_t_height(n.p[0], 0))
     var x : int = n.x
     var neg : int
-    n.oldnum = deref(n.num)
-    neg = num < 0 ? 1 : 0
+    n.oldnum = *n.num
+    neg = int_of(num < 0)
     if (neg != 0) {
         if (numdigits == 2 && num < -9) {
             num = -9
@@ -50,7 +50,7 @@ def STlib_drawNum(var n : st_number_t?; refresh : doom_boolean) {
     }
     x = n.x
     // in the special case of 0, you draw 0
-    if (!(num != 0)) {
+    if (num == 0) {
         V_DrawPatch(x - w, n.y, STLIB_FG, n.p[0])
     }
     // draw the new number
@@ -76,7 +76,7 @@ def STlib_drawNum(var n : st_number_t?; refresh : doom_boolean) {
 
 [c_function]
 def STlib_updateNum(var n : st_number_t?; refresh : doom_boolean) {
-    if (int(deref(n.on)) != 0) {
+    if (int(*n.on) != 0) {
         STlib_drawNum(n, refresh)
     }
 }
@@ -89,7 +89,7 @@ def STlib_initPercent(var p : st_percent_t?; x : int; y : int; var pl : uint8 ??
 
 [c_function]
 def STlib_updatePercent(var per : st_percent_t?; refresh : int) {
-    if (refresh != 0 && uint(int(deref(per.n.on))) != 0) {
+    if (refresh != 0 && uint(*per.n.on) != 0) {
         V_DrawPatch(per.n.x, per.n.y, STLIB_FG, per.p)
     }
     STlib_updateNum(addr(per.n), enum_from_int(type<doom_boolean>, refresh))
@@ -110,7 +110,7 @@ def STlib_updateMultIcon(var mi : st_multicon_t?; refresh : doom_boolean) {
     var h : int
     var x : int
     var y : int
-    if (uint(int(deref(mi.on))) != 0 && (mi.oldinum != deref(mi.inum) || uint(int(refresh)) != 0) && (deref(mi.inum) != -1)) {
+    if (uint(*mi.on) != 0 && (mi.oldinum != *mi.inum || uint(refresh) != 0) && (*mi.inum != -1)) {
         if (mi.oldinum != -1) {
             x = mi.x - int(read_patch_t_leftoffset(mi.p[mi.oldinum], 0))
             y = mi.y - int(read_patch_t_topoffset(mi.p[mi.oldinum], 0))
@@ -121,8 +121,8 @@ def STlib_updateMultIcon(var mi : st_multicon_t?; refresh : doom_boolean) {
             }
             V_CopyRect(x, y - ST_Y, STLIB_BG, w, h, x, y, STLIB_FG)
         }
-        V_DrawPatch(mi.x, mi.y, STLIB_FG, mi.p[deref(mi.inum)])
-        mi.oldinum = deref(mi.inum)
+        V_DrawPatch(mi.x, mi.y, STLIB_FG, mi.p[*mi.inum])
+        mi.oldinum = *mi.inum
     }
 }
 
@@ -141,7 +141,7 @@ def STlib_updateBinIcon(var bi : st_binicon_t?; refresh : doom_boolean) {
     var y : int
     var w : int
     var h : int
-    if (uint(int(deref(bi.on))) != 0 && (uint(bi.oldval) != uint(int(deref(bi.val))) || uint(int(refresh)) != 0)) {
+    if (uint(*bi.on) != 0 && (uint(bi.oldval) != uint(*bi.val) || uint(refresh) != 0)) {
         x = bi.x - int(read_patch_t_leftoffset(bi.p, 0))
         y = bi.y - int(read_patch_t_topoffset(bi.p, 0))
         w = int(read_patch_t_width(bi.p, 0))
@@ -149,12 +149,12 @@ def STlib_updateBinIcon(var bi : st_binicon_t?; refresh : doom_boolean) {
         if (y - ST_Y < 0) {
             I_Error(cstr("Error: updateBinIcon: y - ST_Y < 0"))
         }
-        if (int(deref(bi.val)) != 0) {
+        if (int(*bi.val) != 0) {
             V_DrawPatch(bi.x, bi.y, STLIB_FG, bi.p)
         } else {
             V_CopyRect(x, y - ST_Y, STLIB_BG, w, h, x, y, STLIB_FG)
         }
-        bi.oldval = int(deref(bi.val))
+        bi.oldval = int(*bi.val)
     }
 }
 

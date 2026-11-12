@@ -249,7 +249,7 @@ def R_DrawColumnInCache(var patch : uint8?; var cache : uint8?; originy : int; c
     var source : uint8?
     var dest : uint8?
     dest = cache + 3
-    while (int(read_post_t_topdelta(patch, 0)) != 255) {
+    while (read_post_t_topdelta(patch, 0) != 255) {
         source = reinterpret<uint8?>(patch) + 3
         count = int(read_post_t_length(patch, 0))
         position = originy + int(read_post_t_topdelta(patch, 0))
@@ -319,7 +319,7 @@ def R_GenerateComposite(texnum : int) {
             }
         }
         i++
-        patch = patch + 1
+        patch++
     }
     // Now that the texture has been built in column cache,
     // it is purgable from zone memory.
@@ -380,11 +380,11 @@ def R_GenerateLookup(texnum : int) {
             x++
         }
         i++
-        patch = patch + 1
+        patch++
     }
     x = 0
     while (x < int(texture.width)) {
-        if (!(patchcount[x] != 0)) {
+        if (patchcount[x] == 0) {
             // doom_print("R_GenerateLookup: column without a patch (%s)\n",
             // texture->name);
             invoke(doom_print, cstr("R_GenerateLookup: column without a patch ("))
@@ -423,7 +423,7 @@ def R_GetColumn(tex : int; var col : int) : uint8? {
     if (lump > 0) {
         return reinterpret<uint8?>(W_CacheLumpNum(lump, PU_CACHE)) + ofs
     }
-    if (!(texturecomposite[tex] != null)) {
+    if (texturecomposite[tex] == null) {
         R_GenerateComposite(tex)
     }
     return texturecomposite[tex] + ofs
@@ -461,7 +461,7 @@ def R_InitTextures {
     // Load the patch names from pnames.lmp.
     name[8] = 0u8
     names = reinterpret<uint8?>(W_CacheLumpName(cstr("PNAMES"), PU_STATIC))
-    nummappatches = deref(reinterpret<int?>(names))
+    nummappatches = *reinterpret<int?>(names)
     name_p = names + 4
     patchlookup = reinterpret<int?>(invoke(doom_malloc, int(uint64(nummappatches) * uint64(typeinfo sizeof(type<int>)))))
     for (i1 in range(nummappatches)) {
@@ -474,12 +474,12 @@ def R_InitTextures {
     // TEXTURE1 for shareware, plus TEXTURE2 for commercial.
     maptex1 = reinterpret<int?>(W_CacheLumpName(cstr("TEXTURE1"), PU_STATIC))
     maptex = maptex1
-    numtextures1 = deref(maptex)
+    numtextures1 = *maptex
     maxoff = W_LumpLength(W_GetNumForName(cstr("TEXTURE1")))
     directory = maptex + 1
     if (W_CheckNumForName(cstr("TEXTURE2")) != -1) {
         maptex2 = reinterpret<int?>(W_CacheLumpName(cstr("TEXTURE2"), PU_STATIC))
-        numtextures2 = deref(maptex2)
+        numtextures2 = *maptex2
         maxoff2 = W_LumpLength(W_GetNumForName(cstr("TEXTURE2")))
     } else {
         maptex2 = null
@@ -511,7 +511,7 @@ def R_InitTextures {
     invoke(doom_print, cstr("\b\b\b\b\b\b\b\b\b\b"))
     i = 0
     while (i < numtextures) {
-        if (!((i & 63) != 0)) {
+        if ((i & 63) == 0) {
             invoke(doom_print, cstr("."))
         }
         if (i == numtextures1) {
@@ -520,17 +520,19 @@ def R_InitTextures {
             maxoff = maxoff2
             directory = maptex + 1
         }
-        offset = deref(directory)
+        offset = *directory
         if (offset > maxoff) {
             I_Error(cstr("Error: R_InitTextures: bad texture directory"))
         }
         mtexture = reinterpret<uint8?>(reinterpret<uint8?>(maptex) + offset)
-        textures[i] = reinterpret<texture_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<texture_t>)) + uint64(typeinfo sizeof(type<texpatch_t>)) * uint64(int(read_maptexture_t_patchcount(mtexture, 0)) - 1)), PU_STATIC, null))
+        textures[i] = reinterpret<texture_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<texture_t>)) + uint64(typeinfo sizeof(type<texpatch_t>)) *
+                    uint64(int(read_maptexture_t_patchcount(mtexture, 0)) - 1)),
+                PU_STATIC, null))
         texture = textures[i]
         texture.width = read_maptexture_t_width(mtexture, 0)
         texture.height = read_maptexture_t_height(mtexture, 0)
         texture.patchcount = read_maptexture_t_patchcount(mtexture, 0)
-        doom_memcpy(reinterpret<void?>(addr(texture.name[0])), reinterpret<void?>(ptr_maptexture_t_name(mtexture, 0)), int(uint64(typeinfo sizeof(type<uint8[8]>))))
+        doom_memcpy(reinterpret<void?>(addr(texture.name[0])), reinterpret<void?>(ptr_maptexture_t_name(mtexture, 0)), typeinfo sizeof(type<uint8[8]>))
         mpatch = ptr_maptexture_t_patches(mtexture, 0) + 0 * 10
         patch = addr(addr(texture.patches[0])[0])
         j = 0
@@ -546,8 +548,8 @@ def R_InitTextures {
                 I_Error(addr(error_buf[0]))
             }
             j++
-            mpatch = mpatch + 10
-            patch = patch + 1
+            mpatch += 10
+            patch++
         }
         texturecolumnlump[i] = reinterpret<int16?>(Z_Malloc(int(uint64(texture.width) * uint64(typeinfo sizeof(type<int16>))), PU_STATIC, null))
         texturecolumnofs[i] = reinterpret<uint16?>(Z_Malloc(int(uint64(texture.width) * uint64(typeinfo sizeof(type<uint16>))), PU_STATIC, null))
@@ -559,7 +561,7 @@ def R_InitTextures {
         textureheight[i] = int(texture.height) << FRACBITS
         totalwidth += int(texture.width)
         i++
-        directory = directory + 1
+        directory++
     }
     Z_Free(reinterpret<void?>(maptex1))
     if (maptex2 != null) {
@@ -613,7 +615,7 @@ def R_InitSpriteLumps {
     spritetopoffset = reinterpret<int?>(Z_Malloc(int(uint64(numspritelumps) * uint64(typeinfo sizeof(type<int>))), PU_STATIC, null))
     i = 0
     while (i < numspritelumps) {
-        if (!((i & 63) != 0)) {
+        if ((i & 63) == 0) {
             invoke(doom_print, cstr("."))
         }
         patch = reinterpret<uint8?>(W_CacheLumpNum(firstspritelump + i, PU_CACHE))
@@ -679,12 +681,12 @@ def R_FlatNumForName(var name : uint8?) : int {
 def R_CheckTextureNumForName(var name : uint8?) : int {
     var i : int
     // "NoTexture" marker.
-    if (int(name[0]) == '-') {
+    if (name[0] == '-') {
         return 0
     }
     i = 0
     while (i < numtextures) {
-        if (!(doom_strncasecmp(addr(textures[i].name[0]), name, 8) != 0)) {
+        if (doom_strncasecmp(addr(textures[i].name[0]), name, 8) == 0) {
             return i
         }
         i++
@@ -767,7 +769,7 @@ def R_PrecacheLevel {
     i = 0
     while (i < numtextures) {
         {
-            if (!(texturepresent[i] != 0)) {
+            if (texturepresent[i] == 0) {
                 continue
             }
             texture = textures[i]
@@ -796,7 +798,7 @@ def R_PrecacheLevel {
     i = 0
     while (i < numsprites) {
         {
-            if (!(spritepresent[i] != 0)) {
+            if (spritepresent[i] == 0) {
                 continue
             }
             j = 0

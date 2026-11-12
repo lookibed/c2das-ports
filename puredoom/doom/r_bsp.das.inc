@@ -12,7 +12,9 @@ var drawsegs : drawseg_s[256]
 var ds_p : drawseg_s?
 var newend : cliprange_t?
 var solidsegs : cliprange_t[32]
-var checkcoord : int[12][4] = fixed_array(fixed_array(3, 0, 2, 1), fixed_array(3, 0, 2, 0), fixed_array(3, 1, 2, 0), fixed_array(0, 0, 0, 0), fixed_array(2, 0, 2, 1), fixed_array(0, 0, 0, 0), fixed_array(3, 1, 3, 0), fixed_array(0, 0, 0, 0), fixed_array(2, 0, 3, 1), fixed_array(2, 1, 3, 1), fixed_array(2, 1, 3, 0), fixed_array(0, 0, 0, 0))
+var checkcoord : int[12][4] = fixed_array(fixed_array(3, 0, 2, 1), fixed_array(3, 0, 2, 0), fixed_array(3, 1, 2, 0), fixed_array(0, 0, 0, 0),
+        fixed_array(2, 0, 2, 1), fixed_array(0, 0, 0, 0), fixed_array(3, 1, 3, 0), fixed_array(0, 0, 0, 0), fixed_array(2, 0, 3, 1), fixed_array(2, 1, 3, 1),
+        fixed_array(2, 1, 3, 0), fixed_array(0, 0, 0, 0))
 
 // R_ClearDrawSegs
 [c_function]
@@ -32,7 +34,7 @@ def R_ClipSolidWallSegment(first : int; last : int) {
     // (adjacent pixels are touching).
     start = addr(solidsegs[0])
     while (start.last < first - 1) {
-        start = start + 1
+        start++
     }
     if (first < start.first) {
         if (last < start.first - 1) {
@@ -40,10 +42,10 @@ def R_ClipSolidWallSegment(first : int; last : int) {
             // so insert a new clippost.
             R_StoreWallRange(first, last)
             next = newend
-            newend = newend + 1
+            newend++
             while (intptr(next) != intptr(start)) {
-                deref(next) = deref(next - 1)
-                next = next - 1
+                *next = *(next - 1)
+                next--
             }
             next.first = first
             next.last = last
@@ -62,7 +64,7 @@ def R_ClipSolidWallSegment(first : int; last : int) {
     while (last >= (next + 1).first - 1) {
         // There is a fragment between two posts.
         R_StoreWallRange(next.last + 1, (next + 1).first - 1)
-        next = next + 1
+        next++
         if (last <= next.last) {
             // Bottom is contained in next.
             // Adjust the clip size.
@@ -83,13 +85,13 @@ def R_ClipSolidWallSegment(first : int; last : int) {
     }
     while (true) {
         var _t0 = next
-        next = next + 1
+        next++
         if (!(intptr(_t0) != intptr(newend))) {
             break
         }
         // Remove a post.
-        start = start + 1
-        deref(start) = deref(next)
+        start++
+        *start = *next
     }
     newend = start + 1
 }
@@ -106,7 +108,7 @@ def R_ClipPassWallSegment(first : int; last : int) {
     // (adjacent pixels are touching).
     start = addr(solidsegs[0])
     while (start.last < first - 1) {
-        start = start + 1
+        start++
     }
     if (first < start.first) {
         if (last < start.first - 1) {
@@ -124,7 +126,7 @@ def R_ClipPassWallSegment(first : int; last : int) {
     while (last >= (start + 1).first - 1) {
         // There is a fragment between two posts.
         R_StoreWallRange(start.last + 1, (start + 1).first - 1)
-        start = start + 1
+        start++
         if (last <= start.last) {
             return
         }
@@ -198,7 +200,7 @@ def R_AddLine(var line : seg_t?) {
     }
     backsector = line.backsector
     // Single sided line?
-    if (!(backsector != null)) {
+    if (backsector == null) {
         goto label 2
     }
     // Closed door.
@@ -214,7 +216,8 @@ def R_AddLine(var line : seg_t?) {
     // Identical floor and ceiling on both sides,
     // identical light levels on both sides,
     // and no middle texture.
-    if (int(backsector.ceilingpic) == int(frontsector.ceilingpic) && int(backsector.floorpic) == int(frontsector.floorpic) && int(backsector.lightlevel) == int(frontsector.lightlevel) && int(curline.sidedef.midtexture) == 0) {
+    if (backsector.ceilingpic == frontsector.ceilingpic && backsector.floorpic == frontsector.floorpic && backsector.lightlevel == frontsector.lightlevel &&
+            curline.sidedef.midtexture == 0) {
         return
     }
     label 1:  // clippass
@@ -308,7 +311,7 @@ def R_CheckBBox(var bspcoord : int?) : doom_boolean {
     sx2--
     start = addr(solidsegs[0])
     while (start.last < sx2) {
-        start = start + 1
+        start++
     }
     if (sx1 >= start.first && sx2 <= start.last) {
         // The clippost contains the new span.
@@ -355,11 +358,11 @@ def R_Subsector(num : int) {
     while (true) {
         let _t0 = count
         count--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         R_AddLine(line)
-        line = line + 1
+        line++
     }
 }
 

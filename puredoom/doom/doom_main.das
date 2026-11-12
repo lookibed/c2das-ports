@@ -29,8 +29,8 @@ let private MAX_UPDATES = 2000000
 
 [c_function]
 def private virtual_gettime(var sec : int?; var usec : int?) {
-    deref(sec) = int(virtual_usec / 1000000l)
-    deref(usec) = int(virtual_usec % 1000000l)
+    *sec = int(virtual_usec / 1000000l)
+    *usec = int(virtual_usec % 1000000l)
 }
 
 // the playback's line: the tics Doom has run and the CPU seconds since the update loop started

@@ -26,8 +26,8 @@ def I_InitNetwork {
     var p : int
     // host information entry
     var hostentry : hostent?
-    doomcom = reinterpret<doomcom_t?>(invoke(doom_malloc, int(uint64(typeinfo sizeof(type<doomcom_t>)))))
-    doom_memset(reinterpret<void?>(doomcom), 0, int(uint64(typeinfo sizeof(type<doomcom_t>))))
+    doomcom = reinterpret<doomcom_t?>(invoke(doom_malloc, typeinfo sizeof(type<doomcom_t>)))
+    doom_memset(reinterpret<void?>(doomcom), 0, typeinfo sizeof(type<doomcom_t>))
     // set up for network
     i = M_CheckParm(cstr("-dup"))
     if (i != 0 && i < myargc - 1) {
@@ -65,13 +65,13 @@ def I_InitNetwork {
     // parse network game options,
     // -net <consoleplayer> <host> <host> ...
     i = M_CheckParm(cstr("-net"))
-    if (!(i != 0)) {
+    if (i == 0) {
         // single player game
         netgame = doom_boolean._c_false
         doomcom.id = DOOMCOM_ID
         doomcom.numnodes = int16(1)
         doomcom.numplayers = doomcom.numnodes
-        doomcom.deathmatch = int16(int(doom_boolean._c_false))
+        doomcom.deathmatch = int16(doom_boolean._c_false)
         doomcom.consoleplayer = int16(0)
         return
     }

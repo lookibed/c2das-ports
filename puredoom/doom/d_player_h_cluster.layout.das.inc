@@ -133,7 +133,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < patch > (type<vissprite_s>) == 56, "vissprite_s.patch: clang puts it at 56")
     static_assert(typeinfo offsetof < colormap > (type<vissprite_s>) == 64, "vissprite_s.colormap: clang puts it at 64")
     static_assert(typeinfo offsetof < mobjflags > (type<vissprite_s>) == 72, "vissprite_s.mobjflags: clang puts it at 72")
-    static_assert(typeinfo sizeof(type<spriteframe_t>) == 28 && typeinfo alignof(type<spriteframe_t>) == 4, "spriteframe_t: clang lays it out as size 28, align 4")
+    static_assert(typeinfo sizeof(type<spriteframe_t>) == 28 && typeinfo alignof(type<spriteframe_t>) == 4,
+            "spriteframe_t: clang lays it out as size 28, align 4")
     static_assert(typeinfo offsetof < rotate > (type<spriteframe_t>) == 0, "spriteframe_t.rotate: clang puts it at 0")
     static_assert(typeinfo offsetof < lump > (type<spriteframe_t>) == 4, "spriteframe_t.lump: clang puts it at 4")
     static_assert(typeinfo offsetof < flip > (type<spriteframe_t>) == 20, "spriteframe_t.flip: clang puts it at 20")
@@ -188,7 +189,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < colormap > (type<player_s>) == 256, "player_s.colormap: clang puts it at 256")
     static_assert(typeinfo offsetof < psprites > (type<player_s>) == 264, "player_s.psprites: clang puts it at 264")
     static_assert(typeinfo offsetof < didsecret > (type<player_s>) == 312, "player_s.didsecret: clang puts it at 312")
-    static_assert(typeinfo sizeof(type<wbplayerstruct_t>) == 40 && typeinfo alignof(type<wbplayerstruct_t>) == 4, "wbplayerstruct_t: clang lays it out as size 40, align 4")
+    static_assert(typeinfo sizeof(type<wbplayerstruct_t>) == 40 && typeinfo alignof(type<wbplayerstruct_t>) == 4,
+            "wbplayerstruct_t: clang lays it out as size 40, align 4")
     static_assert(typeinfo offsetof < _c_in > (type<wbplayerstruct_t>) == 0, "wbplayerstruct_t._c_in: clang puts it at 0")
     static_assert(typeinfo offsetof < skills > (type<wbplayerstruct_t>) == 4, "wbplayerstruct_t.skills: clang puts it at 4")
     static_assert(typeinfo offsetof < sitems > (type<wbplayerstruct_t>) == 8, "wbplayerstruct_t.sitems: clang puts it at 8")
@@ -196,7 +198,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < stime > (type<wbplayerstruct_t>) == 16, "wbplayerstruct_t.stime: clang puts it at 16")
     static_assert(typeinfo offsetof < frags > (type<wbplayerstruct_t>) == 20, "wbplayerstruct_t.frags: clang puts it at 20")
     static_assert(typeinfo offsetof < score > (type<wbplayerstruct_t>) == 36, "wbplayerstruct_t.score: clang puts it at 36")
-    static_assert(typeinfo sizeof(type<wbstartstruct_t>) == 200 && typeinfo alignof(type<wbstartstruct_t>) == 4, "wbstartstruct_t: clang lays it out as size 200, align 4")
+    static_assert(typeinfo sizeof(type<wbstartstruct_t>) == 200 && typeinfo alignof(type<wbstartstruct_t>) == 4,
+            "wbstartstruct_t: clang lays it out as size 200, align 4")
     static_assert(typeinfo offsetof < epsd > (type<wbstartstruct_t>) == 0, "wbstartstruct_t.epsd: clang puts it at 0")
     static_assert(typeinfo offsetof < didsecret > (type<wbstartstruct_t>) == 4, "wbstartstruct_t.didsecret: clang puts it at 4")
     static_assert(typeinfo offsetof < last > (type<wbstartstruct_t>) == 8, "wbstartstruct_t.last: clang puts it at 8")

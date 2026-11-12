@@ -71,8 +71,8 @@ def doom_eof_impl(var handle : void?) : int {
 
 [c_function]
 def doom_gettime_impl(var sec : int?; var usec : int?) {
-    deref(sec) = 0
-    deref(usec) = 0
+    *sec = 0
+    *usec = 0
 }
 
 def doom_exit_impl(code : int) {
@@ -90,9 +90,9 @@ def doom_memset(var ptr : void?; value : int; num : int) {
     {
         var i : int = 0
         while (i < num) {
-            deref(p) = uint8(value)
+            *p = uint8(value)
             i++
-            p = p + 1
+            p++
         }
     }
 }
@@ -104,10 +104,10 @@ def doom_memcpy(var destination : void?; var source : void?; num : int) : void? 
     {
         var i : int = 0
         while (i < num) {
-            deref(dst) = deref(src)
+            *dst = *src
             i++
-            dst = dst + 1
-            src = src + 1
+            dst++
+            src++
         }
     }
     return destination
@@ -118,8 +118,8 @@ def doom_strlen(var str : uint8?) : int {
     var len : int = 0
     while (true) {
         var _t0 = str
-        str = str + 1
-        if (!(deref(_t0) != 0)) {
+        str++
+        if (*_t0 == 0) {
             break
         }
         len++
@@ -130,31 +130,31 @@ def doom_strlen(var str : uint8?) : int {
 [c_function]
 def doom_concat(var dst : uint8?; var src : uint8?) : uint8? {
     var ret : uint8? = dst
-    dst = dst + doom_strlen(dst)
-    while (deref(src) != 0) {
+    dst += doom_strlen(dst)
+    while (*src != 0) {
         var _t0 = dst
-        dst = dst + 1
+        dst++
         var _t1 = src
-        src = src + 1
-        deref(_t0) = deref(_t1)
+        src++
+        *_t0 = *_t1
     }
     // \0
-    deref(dst) = deref(src)
+    *dst = *src
     return ret
 }
 
 [c_function]
 def doom_strcpy(var dst : uint8?; var src : uint8?) : uint8? {
     var ret : uint8? = dst
-    while (deref(src) != 0) {
+    while (*src != 0) {
         var _t0 = dst
-        dst = dst + 1
+        dst++
         var _t1 = src
-        src = src + 1
-        deref(_t0) = deref(_t1)
+        src++
+        *_t0 = *_t1
     }
     // \0
-    deref(dst) = deref(src)
+    *dst = *src
     return ret
 }
 
@@ -162,7 +162,7 @@ def doom_strcpy(var dst : uint8?; var src : uint8?) : uint8? {
 def doom_strncpy(var dst : uint8?; var src : uint8?; num : int) : uint8? {
     var i : int = 0
     while (i < num) {
-        if (!(src[i] != 0)) {
+        if (src[i] == 0) {
             break
         }
         dst[i] = src[i]
@@ -180,12 +180,12 @@ def doom_strncpy(var dst : uint8?; var src : uint8?; num : int) : uint8? {
 def doom_strcmp(var str1 : uint8?; var str2 : uint8?) : int {
     var ret : int = 0
     while (true) {
-        ret = int(deref(reinterpret<uint8?>(str1))) - int(deref(reinterpret<uint8?>(str2)))
-        if (!(!(ret != 0) && deref(str1) != 0)) {
+        ret = int(*reinterpret<uint8?>(str1)) - int(*reinterpret<uint8?>(str2))
+        if (!(ret == 0 && *str1 != 0)) {
             break
         }
-        str1 = str1 + 1
-        str2 = str2 + 1
+        str1++
+        str2++
     }
     if (ret < 0) {
         ret = -1
@@ -200,8 +200,8 @@ def doom_strncmp(var str1 : uint8?; var str2 : uint8?; n : int) : int {
     var ret : int = 0
     var count : int = 1
     while (true) {
-        ret = int(deref(reinterpret<uint8?>(str1))) - int(deref(reinterpret<uint8?>(str2)))
-        var _t1 = !(ret != 0) && deref(str1) != 0
+        ret = int(*reinterpret<uint8?>(str1)) - int(*reinterpret<uint8?>(str2))
+        var _t1 = ret == 0 && *str1 != 0
         if (_t1) {
             let _t0 = count
             count++
@@ -210,8 +210,8 @@ def doom_strncmp(var str1 : uint8?; var str2 : uint8?; n : int) : int {
         if (!(_t1)) {
             break
         }
-        str1 = str1 + 1
-        str2 = str2 + 1
+        str1++
+        str2++
     }
     if (ret < 0) {
         ret = -1
@@ -232,12 +232,12 @@ def doom_toupper(c : int) : int {
 def doom_strcasecmp(var str1 : uint8?; var str2 : uint8?) : int {
     var ret : int = 0
     while (true) {
-        ret = doom_toupper(int(deref(reinterpret<uint8?>(str1)))) - doom_toupper(int(deref(reinterpret<uint8?>(str2))))
-        if (!(!(ret != 0) && deref(str1) != 0)) {
+        ret = doom_toupper(int(*reinterpret<uint8?>(str1))) - doom_toupper(int(*reinterpret<uint8?>(str2)))
+        if (!(ret == 0 && *str1 != 0)) {
             break
         }
-        str1 = str1 + 1
-        str2 = str2 + 1
+        str1++
+        str2++
     }
     if (ret < 0) {
         ret = -1
@@ -252,8 +252,8 @@ def doom_strncasecmp(var str1 : uint8?; var str2 : uint8?; n : int) : int {
     var ret : int = 0
     var count : int = 1
     while (true) {
-        ret = doom_toupper(int(deref(reinterpret<uint8?>(str1)))) - doom_toupper(int(deref(reinterpret<uint8?>(str2))))
-        var _t1 = !(ret != 0) && deref(str1) != 0
+        ret = doom_toupper(int(*reinterpret<uint8?>(str1))) - doom_toupper(int(*reinterpret<uint8?>(str2)))
+        var _t1 = ret == 0 && *str1 != 0
         if (_t1) {
             let _t0 = count
             count++
@@ -262,8 +262,8 @@ def doom_strncasecmp(var str1 : uint8?; var str2 : uint8?; n : int) : int {
         if (!(_t1)) {
             break
         }
-        str1 = str1 + 1
-        str2 = str2 + 1
+        str1++
+        str2++
     }
     if (ret < 0) {
         ret = -1
@@ -279,8 +279,8 @@ def doom_atoi(var str : uint8?) : int {
     var c : int
     while (true) {
         var _t0 = str
-        str = str + 1
-        c = int(deref(_t0))
+        str++
+        c = int(*_t0)
         if (!(c != 0)) {
             break
         }
@@ -296,8 +296,8 @@ def doom_atox(var str : uint8?) : int {
     var c : int
     while (true) {
         var _t0 = str
-        str = str + 1
-        c = int(deref(_t0))
+        str++
+        c = int(*_t0)
         if (!(c != 0)) {
             break
         }
@@ -412,7 +412,7 @@ def doom_set_resolution(width : int; height : int) {
 
 def doom_set_default_int(var name : uint8?; value : int) {
     var _c_def : default_t? = get_default(name)
-    if (!(_c_def != null)) {
+    if (_c_def == null) {
         return
     }
     _c_def.defaultvalue = value
@@ -420,7 +420,7 @@ def doom_set_default_int(var name : uint8?; value : int) {
 
 def doom_set_default_string(var name : uint8?; var value : uint8?) {
     var _c_def : default_t? = get_default(name)
-    if (!(_c_def != null)) {
+    if (_c_def == null) {
         return
     }
     _c_def.default_text_value = value
@@ -435,7 +435,10 @@ def doom_set_malloc(malloc_fn : function<(a0 : int) : void?>; free_fn : function
     doom_free = free_fn
 }
 
-def doom_set_file_io(open_fn : function<(var a0 : uint8?; var a1 : uint8?) : void?>; close_fn : function<(var a0 : void?) : void>; read_fn : function<(var a0 : void?; var a1 : void?; a2 : int) : int>; write_fn : function<(var a0 : void?; var a1 : void?; a2 : int) : int>; seek_fn : function<(var a0 : void?; a1 : int; a2 : doom_seek_t) : int>; tell_fn : function<(var a0 : void?) : int>; eof_fn : function<(var a0 : void?) : int>) {
+def doom_set_file_io(open_fn : function<(var a0 : uint8?; var a1 : uint8?) : void?>; close_fn : function<(var a0 : void?) : void>;
+                     read_fn : function<(var a0 : void?; var a1 : void?; a2 : int) : int>; write_fn : function<(var a0 : void?; var a1 : void?; a2 : int) : int>;
+                     seek_fn : function<(var a0 : void?; a1 : int; a2 : doom_seek_t) : int>; tell_fn : function<(var a0 : void?) : int>;
+                     eof_fn : function<(var a0 : void?) : int>) {
     doom_open = open_fn
     doom_close = close_fn
     doom_read = read_fn
@@ -459,43 +462,43 @@ def doom_set_getenv(getenv_fn : function<(var a0 : uint8?) : uint8?>) {
 
 [c_function]
 def doom_init(argc : int; var argv : uint8 ??; flags : int) {
-    if (!(doom_print != null)) {
+    if (doom_print == null) {
         doom_print = @@doom_print_impl
     }
-    if (!(doom_malloc != null)) {
+    if (doom_malloc == null) {
         doom_malloc = @@doom_malloc_impl
     }
-    if (!(doom_free != null)) {
+    if (doom_free == null) {
         doom_free = @@doom_free_impl
     }
-    if (!(doom_open != null)) {
+    if (doom_open == null) {
         doom_open = @@doom_open_impl
     }
-    if (!(doom_close != null)) {
+    if (doom_close == null) {
         doom_close = @@doom_close_impl
     }
-    if (!(doom_read != null)) {
+    if (doom_read == null) {
         doom_read = @@doom_read_impl
     }
-    if (!(doom_write != null)) {
+    if (doom_write == null) {
         doom_write = @@doom_write_impl
     }
-    if (!(doom_seek != null)) {
+    if (doom_seek == null) {
         doom_seek = @@doom_seek_impl
     }
-    if (!(doom_tell != null)) {
+    if (doom_tell == null) {
         doom_tell = @@doom_tell_impl
     }
-    if (!(doom_eof != null)) {
+    if (doom_eof == null) {
         doom_eof = @@doom_eof_impl
     }
-    if (!(doom_gettime != null)) {
+    if (doom_gettime == null) {
         doom_gettime = @@doom_gettime_impl
     }
-    if (!(doom_exit != null)) {
+    if (doom_exit == null) {
         doom_exit = @@doom_exit_impl
     }
-    if (!(doom_getenv != null)) {
+    if (doom_getenv == null) {
         doom_getenv = @@doom_getenv_impl
     }
     screen_buffer = reinterpret<uint8?>(invoke(doom_malloc, SCREENWIDTH * SCREENHEIGHT))
@@ -539,7 +542,7 @@ def doom_get_framebuffer(channels : int) : uint8? {
     var len : int
     doom_memcpy(reinterpret<void?>(screen_buffer), reinterpret<void?>(screens[0]), SCREENWIDTH * SCREENHEIGHT)
     // Draw crosshair
-    if (crosshair != 0 && !(int(menuactive) != 0) && gamestate == gamestate_t.GS_LEVEL && !(int(automapactive) != 0)) {
+    if (crosshair != 0 && int(menuactive) == 0 && gamestate == gamestate_t.GS_LEVEL && int(automapactive) == 0) {
         var y : int
         if (setblocks == 11) {
             y = SCREENHEIGHT / 2 + 8

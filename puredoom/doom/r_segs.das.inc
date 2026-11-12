@@ -82,8 +82,8 @@ def R_RenderMaskedSegRange(var ds : drawseg_s?; x1 : int; x2 : int) {
     dc_x = x1
     while (dc_x <= x2) {
         // calculate lighting
-        if (int(maskedtexturecol[dc_x]) != int(DOOM_MAXSHORT)) {
-            if (!(fixedcolormap != null)) {
+        if (maskedtexturecol[dc_x] != DOOM_MAXSHORT) {
+            if (fixedcolormap == null) {
                 index = uint(spryscale >> LIGHTSCALESHIFT)
                 if (index >= uint(MAXLIGHTSCALE)) {
                     index = uint(MAXLIGHTSCALE - 1)
@@ -306,7 +306,7 @@ def R_StoreWallRange(start : int; stop : int) {
     toptexture = bottomtexture
     midtexture = toptexture
     ds_p.maskedtexturecol = null
-    if (!(backsector != null)) {
+    if (backsector == null) {
         // single sided line
         midtexture = texturetranslation[int(sidedef.midtexture)]
         // a single sided line is terminal, so it must mark ends
@@ -363,13 +363,13 @@ def R_StoreWallRange(start : int; stop : int) {
         if (int(frontsector.ceilingpic) == skyflatnum && int(backsector.ceilingpic) == skyflatnum) {
             worldtop = worldhigh
         }
-        if (worldlow != worldbottom || int(backsector.floorpic) != int(frontsector.floorpic) || int(backsector.lightlevel) != int(frontsector.lightlevel)) {
+        if (worldlow != worldbottom || backsector.floorpic != frontsector.floorpic || backsector.lightlevel != frontsector.lightlevel) {
             markfloor = doom_boolean._c_true
         } else {
             // same plane on both sides
             markfloor = doom_boolean._c_false
         }
-        if (worldhigh != worldtop || int(backsector.ceilingpic) != int(frontsector.ceilingpic) || int(backsector.lightlevel) != int(frontsector.lightlevel)) {
+        if (worldhigh != worldtop || backsector.ceilingpic != frontsector.ceilingpic || backsector.lightlevel != frontsector.lightlevel) {
             markceiling = doom_boolean._c_true
         } else {
             // same plane on both sides
@@ -412,11 +412,11 @@ def R_StoreWallRange(start : int; stop : int) {
             maskedtexture = doom_boolean._c_true
             maskedtexturecol = lastopening - rw_x
             ds_p.maskedtexturecol = maskedtexturecol
-            lastopening = lastopening + (rw_stopx - rw_x)
+            lastopening += rw_stopx - rw_x
         }
     }
     // calculate rw_offset (only needed for textured lines)
-    segtextured = enum_from_int(type<doom_boolean>, int(uint(midtexture | toptexture | bottomtexture) | uint(int(maskedtexture))))
+    segtextured = enum_from_int(type<doom_boolean>, int(uint(midtexture | toptexture | bottomtexture) | uint(maskedtexture)))
     if (int(segtextured) != 0) {
         offsetangle = rw_normalangle - uint(rw_angle1)
         if (offsetangle > ANG180) {
@@ -436,7 +436,7 @@ def R_StoreWallRange(start : int; stop : int) {
         // use different light tables
         // for horizontal / vertical / diagonal
         // OPTIMIZE: get rid of LIGHTSEGSHIFT globally
-        if (!(fixedcolormap != null)) {
+        if (fixedcolormap == null) {
             lightnum = (int(frontsector.lightlevel) >> LIGHTSEGSHIFT) + extralight
             if (curline.v1.y == curline.v2.y) {
                 lightnum--
@@ -491,24 +491,24 @@ def R_StoreWallRange(start : int; stop : int) {
     }
     R_RenderSegLoop()
     // save sprite clipping info
-    if (((ds_p.silhouette & SIL_TOP) != 0 || uint(int(maskedtexture)) != 0) && !(ds_p.sprtopclip != null)) {
+    if (((ds_p.silhouette & SIL_TOP) != 0 || uint(maskedtexture) != 0) && ds_p.sprtopclip == null) {
         doom_memcpy(reinterpret<void?>(lastopening), reinterpret<void?>(addr(ceilingclip[0]) + start), 2 * (rw_stopx - start))
         ds_p.sprtopclip = lastopening - start
-        lastopening = lastopening + (rw_stopx - start)
+        lastopening += rw_stopx - start
     }
-    if (((ds_p.silhouette & SIL_BOTTOM) != 0 || uint(int(maskedtexture)) != 0) && !(ds_p.sprbottomclip != null)) {
+    if (((ds_p.silhouette & SIL_BOTTOM) != 0 || uint(maskedtexture) != 0) && ds_p.sprbottomclip == null) {
         doom_memcpy(reinterpret<void?>(lastopening), reinterpret<void?>(addr(floorclip[0]) + start), 2 * (rw_stopx - start))
         ds_p.sprbottomclip = lastopening - start
-        lastopening = lastopening + (rw_stopx - start)
+        lastopening += rw_stopx - start
     }
-    if (uint(int(maskedtexture)) != 0 && !((ds_p.silhouette & SIL_TOP) != 0)) {
+    if (uint(maskedtexture) != 0 && (ds_p.silhouette & SIL_TOP) == 0) {
         ds_p.silhouette |= SIL_TOP
         ds_p.tsilheight = DOOM_MININT
     }
-    if (uint(int(maskedtexture)) != 0 && !((ds_p.silhouette & SIL_BOTTOM) != 0)) {
+    if (uint(maskedtexture) != 0 && (ds_p.silhouette & SIL_BOTTOM) == 0) {
         ds_p.silhouette |= SIL_BOTTOM
         ds_p.bsilheight = DOOM_MAXINT
     }
-    ds_p = ds_p + 1
+    ds_p++
 }
 

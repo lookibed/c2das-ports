@@ -5,89 +5,94 @@ var activeceilings : ceiling_t? [30]
 [c_function]
 def T_MoveCeiling(var ceiling : ceiling_t?) {
     var res : result_e
-    let _cond = ceiling.direction
-    if (_cond == 0) {
-    } elif (_cond == 1) {
-        // IN STASIS
-        // UP
-        res = T_MovePlane(ceiling.sector, ceiling.speed, ceiling.topheight, doom_boolean._c_false, 1, ceiling.direction)
-        if (!((leveltime & 7) != 0)) {
-            let _cond2 = ceiling._c_type
-            if (_cond2 == ceiling_e.silentCrushAndRaise) {
+    c_switch(ceiling.direction) {
+        case(0) {
+            // IN STASIS
+            break
+        }
+        case(1) {
+            // UP
+            res = T_MovePlane(ceiling.sector, ceiling.speed, ceiling.topheight, doom_boolean._c_false, 1, ceiling.direction)
+            if ((leveltime & 7) == 0) {
+                c_switch(ceiling._c_type) {
+                    case(ceiling_e.silentCrushAndRaise) {
+                        break
+                    }
+                    case(_) {
+                        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(ceiling.sector.soundorg))), int(sfxenum_t.sfx_stnmov))
+                        // ?
+                        break
+                    }
+                }
+            }
+            if (res == result_e.pastdest) {
+                c_switch(ceiling._c_type) {
+                    case(ceiling_e.raiseToHighest) {
+                        P_RemoveActiveCeiling(ceiling)
+                        break
+                    }
+                    case(ceiling_e.silentCrushAndRaise) {
+                        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(ceiling.sector.soundorg))), int(sfxenum_t.sfx_pstop))
+                    }
+                    case(ceiling_e.fastCrushAndRaise, ceiling_e.crushAndRaise) {
+                        ceiling.direction = -1
+                        break
+                    }
+                    case(_) {
+                        break
+                    }
+                }
+            }
+            break
+        }
+        case(-1) {
+            // DOWN
+            res = T_MovePlane(ceiling.sector, ceiling.speed, ceiling.bottomheight, ceiling.crush, 1, ceiling.direction)
+            if ((leveltime & 7) == 0) {
+                c_switch(ceiling._c_type) {
+                    case(ceiling_e.silentCrushAndRaise) {
+                        break
+                    }
+                    case(_) {
+                        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(ceiling.sector.soundorg))), int(sfxenum_t.sfx_stnmov))
+                    }
+                }
+            }
+            if (res == result_e.pastdest) {
+                c_switch(ceiling._c_type) {
+                    case(ceiling_e.silentCrushAndRaise) {
+                        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(ceiling.sector.soundorg))), int(sfxenum_t.sfx_pstop))
+                    }
+                    case(ceiling_e.crushAndRaise) {
+                        ceiling.speed = FRACUNIT
+                    }
+                    case(ceiling_e.fastCrushAndRaise) {
+                        ceiling.direction = 1
+                        break
+                    }
+                    case(ceiling_e.lowerAndCrush, ceiling_e.lowerToFloor) {
+                        P_RemoveActiveCeiling(ceiling)
+                        break
+                    }
+                    case(_) {
+                        break
+                    }
+                }
             } else {
-                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(ceiling.sector.soundorg))), int(sfxenum_t.sfx_stnmov))
-            }
-        }
-        // ?
-        if (res == result_e.pastdest) {
-            let _cond3 = ceiling._c_type
-            while (true) {
-                var _flag3 = false
-                if (_cond3 == ceiling_e.raiseToHighest) {
-                    P_RemoveActiveCeiling(ceiling)
-                    break
-                }
-                _flag3 ||= _cond3 == ceiling_e.silentCrushAndRaise
-                if (_flag3) {
-                    S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(ceiling.sector.soundorg))), int(sfxenum_t.sfx_pstop))
-                }
-                _flag3 ||= _cond3 == ceiling_e.fastCrushAndRaise
-                _flag3 ||= _cond3 == ceiling_e.crushAndRaise
-                if (_flag3) {
-                    ceiling.direction = -1
-                    break
-                }
-                if (!(_cond3 == ceiling_e.raiseToHighest || _cond3 == ceiling_e.silentCrushAndRaise || _cond3 == ceiling_e.fastCrushAndRaise || _cond3 == ceiling_e.crushAndRaise)) {
-                    break
-                }
-                break
-            }
-        }
-    } elif (_cond == -1) {
-        // DOWN
-        res = T_MovePlane(ceiling.sector, ceiling.speed, ceiling.bottomheight, ceiling.crush, 1, ceiling.direction)
-        if (!((leveltime & 7) != 0)) {
-            let _cond4 = ceiling._c_type
-            if (_cond4 == ceiling_e.silentCrushAndRaise) {
-            } else {
-                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(ceiling.sector.soundorg))), int(sfxenum_t.sfx_stnmov))
-            }
-        }
-        if (res == result_e.pastdest) {
-            let _cond5 = ceiling._c_type
-            while (true) {
-                var _flag5 = false
-                _flag5 ||= _cond5 == ceiling_e.silentCrushAndRaise
-                if (_flag5) {
-                    S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(ceiling.sector.soundorg))), int(sfxenum_t.sfx_pstop))
-                }
-                _flag5 ||= _cond5 == ceiling_e.crushAndRaise
-                if (_flag5) {
-                    ceiling.speed = FRACUNIT
-                }
-                _flag5 ||= _cond5 == ceiling_e.fastCrushAndRaise
-                if (_flag5) {
-                    ceiling.direction = 1
-                    break
-                }
-                if (_cond5 == ceiling_e.lowerAndCrush || _cond5 == ceiling_e.lowerToFloor) {
-                    P_RemoveActiveCeiling(ceiling)
-                    break
-                }
-                if (!(_cond5 == ceiling_e.silentCrushAndRaise || _cond5 == ceiling_e.crushAndRaise || _cond5 == ceiling_e.fastCrushAndRaise || _cond5 == ceiling_e.lowerAndCrush || _cond5 == ceiling_e.lowerToFloor)) {
-                    break
-                }
-                break
-            }
-        } else {
-            // ( res != pastdest )
-            if (res == result_e.crushed) {
-                let _cond6 = ceiling._c_type
-                if (_cond6 == ceiling_e.silentCrushAndRaise || _cond6 == ceiling_e.crushAndRaise || _cond6 == ceiling_e.lowerAndCrush) {
-                    ceiling.speed = FRACUNIT / 8
-                } else {
+                // ( res != pastdest )
+                if (res == result_e.crushed) {
+                    c_switch(ceiling._c_type) {
+                        case(ceiling_e.silentCrushAndRaise, ceiling_e.crushAndRaise, ceiling_e.lowerAndCrush) {
+                            ceiling.speed = FRACUNIT / 8
+                            break
+                        }
+                        case(_) {
+                            break
+                        }
+                    }
                 }
             }
+            break
         }
     }
 }
@@ -103,20 +108,13 @@ def EV_DoCeiling(var line : line_s?; _c_type : ceiling_e) : int {
     secnum = -1
     rtn = 0
     // Reactivate in-stasis ceilings...for certain types.
-    let _cond = _c_type
-    while (true) {
-        var _flag = false
-        _flag ||= _cond == ceiling_e.fastCrushAndRaise
-        _flag ||= _cond == ceiling_e.silentCrushAndRaise
-        _flag ||= _cond == ceiling_e.crushAndRaise
-        if (_flag) {
+    c_switch(_c_type) {
+        case(ceiling_e.fastCrushAndRaise, ceiling_e.silentCrushAndRaise, ceiling_e.crushAndRaise) {
             P_ActivateInStasisCeiling(line)
         }
-        _flag ||= !(_cond == ceiling_e.fastCrushAndRaise || _cond == ceiling_e.silentCrushAndRaise || _cond == ceiling_e.crushAndRaise)
-        if (_flag) {
+        case(_) {
             break
         }
-        break
     }
     while (true) {
         secnum = P_FindSectorFromLineTag(line, secnum)
@@ -129,16 +127,14 @@ def EV_DoCeiling(var line : line_s?; _c_type : ceiling_e) : int {
         }
         // new door thinker
         rtn = 1
-        ceiling = reinterpret<ceiling_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<ceiling_t>))), PU_LEVSPEC, null))
+        ceiling = reinterpret<ceiling_t?>(Z_Malloc(typeinfo sizeof(type<ceiling_t>), PU_LEVSPEC, null))
         P_AddThinker(addr(ceiling.thinker))
         sec.specialdata = reinterpret<void?>(ceiling)
         ceiling.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_MoveCeiling)
         ceiling.sector = sec
         ceiling.crush = doom_boolean._c_false
-        let _cond2 = _c_type
-        while (true) {
-            var _flag2 = false
-            if (_cond2 == ceiling_e.fastCrushAndRaise) {
+        c_switch(_c_type) {
+            case(ceiling_e.fastCrushAndRaise) {
                 ceiling.crush = doom_boolean._c_true
                 ceiling.topheight = sec.ceilingheight
                 ceiling.bottomheight = sec.floorheight + (8 * FRACUNIT)
@@ -146,15 +142,11 @@ def EV_DoCeiling(var line : line_s?; _c_type : ceiling_e) : int {
                 ceiling.speed = FRACUNIT * 2
                 break
             }
-            _flag2 ||= _cond2 == ceiling_e.silentCrushAndRaise
-            _flag2 ||= _cond2 == ceiling_e.crushAndRaise
-            if (_flag2) {
+            case(ceiling_e.silentCrushAndRaise, ceiling_e.crushAndRaise) {
                 ceiling.crush = doom_boolean._c_true
                 ceiling.topheight = sec.ceilingheight
             }
-            _flag2 ||= _cond2 == ceiling_e.lowerAndCrush
-            _flag2 ||= _cond2 == ceiling_e.lowerToFloor
-            if (_flag2) {
+            case(ceiling_e.lowerAndCrush, ceiling_e.lowerToFloor) {
                 ceiling.bottomheight = sec.floorheight
                 if (_c_type != ceiling_e.lowerToFloor) {
                     ceiling.bottomheight += 8 * FRACUNIT
@@ -163,13 +155,12 @@ def EV_DoCeiling(var line : line_s?; _c_type : ceiling_e) : int {
                 ceiling.speed = FRACUNIT
                 break
             }
-            if (_cond2 == ceiling_e.raiseToHighest) {
+            case(ceiling_e.raiseToHighest) {
                 ceiling.topheight = P_FindHighestCeilingSurrounding(sec)
                 ceiling.direction = 1
                 ceiling.speed = FRACUNIT
                 break
             }
-            break
         }
         ceiling.tag = int(sec.tag)
         ceiling._c_type = _c_type

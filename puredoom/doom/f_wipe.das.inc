@@ -4,7 +4,8 @@ var private wipe_scr_start : uint8?
 var private wipe_scr_end : uint8?
 var private wipe_scr : uint8?
 var private y : int?
-var private wipe_ScreenWipe_wipes : function<(a0 : int; a1 : int; a2 : int) : int>[6] = fixed_array(@@wipe_initColorXForm, @@wipe_doColorXForm, @@wipe_exitColorXForm, @@wipe_initMelt, @@wipe_doMelt, @@wipe_exitMelt)
+var private wipe_ScreenWipe_wipes : function<(a0 : int; a1 : int; a2 : int) : int>[6] = fixed_array(@@wipe_initColorXForm, @@wipe_doColorXForm,
+        @@wipe_exitColorXForm, @@wipe_initMelt, @@wipe_doMelt, @@wipe_exitMelt)
 
 [c_function]
 def wipe_shittyColMajorXform(var _c_array : int16?; width : int; height : int) {
@@ -35,29 +36,29 @@ def wipe_doColorXForm(width : int; height : int; ticks : int) : int {
     w = wipe_scr
     e = wipe_scr_end
     while (intptr(w) != intptr(wipe_scr + width * height)) {
-        if (int(deref(w)) != int(deref(e))) {
-            if (int(deref(w)) > int(deref(e))) {
-                newval = int(deref(w)) - ticks
-                if (newval < int(deref(e))) {
-                    deref(w) = deref(e)
+        if (*w != *e) {
+            if (int(*w) > int(*e)) {
+                newval = int(*w) - ticks
+                if (newval < int(*e)) {
+                    *w = *e
                 } else {
-                    deref(w) = uint8(newval)
+                    *w = uint8(newval)
                 }
                 changed = doom_boolean._c_true
-            } elif (int(deref(w)) < int(deref(e))) {
-                newval = int(deref(w)) + ticks
-                if (newval > int(deref(e))) {
-                    deref(w) = deref(e)
+            } elif (int(*w) < int(*e)) {
+                newval = int(*w) + ticks
+                if (newval > int(*e)) {
+                    *w = *e
                 } else {
-                    deref(w) = uint8(newval)
+                    *w = uint8(newval)
                 }
                 changed = doom_boolean._c_true
             }
         }
-        w = w + 1
-        e = e + 1
+        w++
+        e++
     }
-    return !(int(changed) != 0) ? 1 : 0
+    return int_of(int(changed) == 0)
 }
 
 def wipe_exitColorXForm(width : int; height : int; ticks : int) : int {
@@ -101,7 +102,7 @@ def wipe_doMelt(var width : int; height : int; var ticks : int) : int {
     while (true) {
         let _t0 = ticks
         ticks--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         for (i in range(width)) {
@@ -119,8 +120,8 @@ def wipe_doMelt(var width : int; height : int; var ticks : int) : int {
                 j = dy
                 while (j != 0) {
                     var _t1 = s
-                    s = s + 1
-                    d[idx] = deref(_t1)
+                    s++
+                    d[idx] = *_t1
                     idx += width
                     j--
                 }
@@ -131,8 +132,8 @@ def wipe_doMelt(var width : int; height : int; var ticks : int) : int {
                 j = height - y[i]
                 while (j != 0) {
                     var _t2 = s
-                    s = s + 1
-                    d[idx] = deref(_t2)
+                    s++
+                    d[idx] = *_t2
                     idx += width
                     j--
                 }
@@ -166,7 +167,7 @@ def wipe_EndScreen(x : int; y : int; width : int; height : int) : int {
 def wipe_ScreenWipe(wipeno : int; x : int; y : int; width : int; height : int; ticks : int) : int {
     var rc : int
     // initial stuff
-    if (!(int(go) != 0)) {
+    if (int(go) == 0) {
         go = doom_boolean._c_true
         // wipe_scr = (byte *) Z_Malloc(width*height, PU_STATIC, 0); // DEBUG
         wipe_scr = screens[0]
@@ -181,6 +182,6 @@ def wipe_ScreenWipe(wipeno : int; x : int; y : int; width : int; height : int; t
         go = doom_boolean._c_false
         invoke(wipe_ScreenWipe_wipes[wipeno * 3 + 2], width, height, ticks)
     }
-    return !(int(go) != 0) ? 1 : 0
+    return int_of(int(go) == 0)
 }
 

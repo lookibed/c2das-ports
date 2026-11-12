@@ -13,7 +13,8 @@ def private c2das_layout_check {
     static_assert(typeinfo sizeof(type<st_percent_t>) == 56 && typeinfo alignof(type<st_percent_t>) == 8, "st_percent_t: clang lays it out as size 56, align 8")
     static_assert(typeinfo offsetof < n > (type<st_percent_t>) == 0, "st_percent_t.n: clang puts it at 0")
     static_assert(typeinfo offsetof < p > (type<st_percent_t>) == 48, "st_percent_t.p: clang puts it at 48")
-    static_assert(typeinfo sizeof(type<st_multicon_t>) == 48 && typeinfo alignof(type<st_multicon_t>) == 8, "st_multicon_t: clang lays it out as size 48, align 8")
+    static_assert(typeinfo sizeof(type<st_multicon_t>) == 48 && typeinfo alignof(type<st_multicon_t>) == 8,
+            "st_multicon_t: clang lays it out as size 48, align 8")
     static_assert(typeinfo offsetof < x > (type<st_multicon_t>) == 0, "st_multicon_t.x: clang puts it at 0")
     static_assert(typeinfo offsetof < y > (type<st_multicon_t>) == 4, "st_multicon_t.y: clang puts it at 4")
     static_assert(typeinfo offsetof < oldinum > (type<st_multicon_t>) == 8, "st_multicon_t.oldinum: clang puts it at 8")

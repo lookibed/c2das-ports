@@ -25,13 +25,13 @@ def P_ArchivePlayers {
     var j : int
     var dest : player_s?
     for (i in range(MAXPLAYERS)) {
-        if (!(int(playeringame[i]) != 0)) {
+        if (int(playeringame[i]) == 0) {
             continue
         }
-        save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
+        save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
         dest = reinterpret<player_s?>(save_p)
-        doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(addr(players[0]) + end_index(i, 4)), int(uint64(typeinfo sizeof(type<player_s>))))
-        save_p = save_p + uint64(typeinfo sizeof(type<player_s>))
+        doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(addr(players[0]) + end_index(i, 4)), typeinfo sizeof(type<player_s>))
+        save_p += uint64(typeinfo sizeof(type<player_s>))
         j = 0
         while (j < int(psprnum_t.NUMPSPRITES)) {
             if (dest.psprites[j].state != null) {
@@ -47,12 +47,12 @@ def P_ArchivePlayers {
 def P_UnArchivePlayers {
     var j : int
     for (i in range(MAXPLAYERS)) {
-        if (!(int(playeringame[i]) != 0)) {
+        if (int(playeringame[i]) == 0) {
             continue
         }
-        save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
-        doom_memcpy(reinterpret<void?>(addr(players[0]) + end_index(i, 4)), reinterpret<void?>(save_p), int(uint64(typeinfo sizeof(type<player_s>))))
-        save_p = save_p + uint64(typeinfo sizeof(type<player_s>))
+        save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+        doom_memcpy(reinterpret<void?>(addr(players[0]) + end_index(i, 4)), reinterpret<void?>(save_p), typeinfo sizeof(type<player_s>))
+        save_p += uint64(typeinfo sizeof(type<player_s>))
         // will be set when unarc thinker
         players[i].mo = null
         players[i].message = null
@@ -81,67 +81,67 @@ def P_ArchiveWorld {
     sec = sectors
     while (i < numsectors) {
         var _t0 = put
-        put = put + 1
-        deref(_t0) = int16(sec.floorheight >> FRACBITS)
+        put++
+        *_t0 = int16(sec.floorheight >> FRACBITS)
         var _t1 = put
-        put = put + 1
-        deref(_t1) = int16(sec.ceilingheight >> FRACBITS)
+        put++
+        *_t1 = int16(sec.ceilingheight >> FRACBITS)
         var _t2 = put
-        put = put + 1
-        deref(_t2) = sec.floorpic
+        put++
+        *_t2 = sec.floorpic
         var _t3 = put
-        put = put + 1
-        deref(_t3) = sec.ceilingpic
+        put++
+        *_t3 = sec.ceilingpic
         var _t4 = put
-        put = put + 1
-        deref(_t4) = sec.lightlevel
+        put++
+        *_t4 = sec.lightlevel
         // needed?
         var _t5 = put
-        put = put + 1
-        deref(_t5) = sec.special
+        put++
+        *_t5 = sec.special
         // needed?
         var _t6 = put
-        put = put + 1
-        deref(_t6) = sec.tag
+        put++
+        *_t6 = sec.tag
         i++
-        sec = sec + 1
+        sec++
     }
     // do lines
     i = 0
     li = lines
     while (i < numlines) {
         var _t7 = put
-        put = put + 1
-        deref(_t7) = li.flags
+        put++
+        *_t7 = li.flags
         var _t8 = put
-        put = put + 1
-        deref(_t8) = li.special
+        put++
+        *_t8 = li.special
         var _t9 = put
-        put = put + 1
-        deref(_t9) = li.tag
+        put++
+        *_t9 = li.tag
         for (j in range(2)) {
-            if (int(li.sidenum[j]) == -1) {
+            if (li.sidenum[j] == -1) {
                 continue
             }
             si = addr(sides[int(li.sidenum[j])])
             var _t10 = put
-            put = put + 1
-            deref(_t10) = int16(si.textureoffset >> FRACBITS)
+            put++
+            *_t10 = int16(si.textureoffset >> FRACBITS)
             var _t11 = put
-            put = put + 1
-            deref(_t11) = int16(si.rowoffset >> FRACBITS)
+            put++
+            *_t11 = int16(si.rowoffset >> FRACBITS)
             var _t12 = put
-            put = put + 1
-            deref(_t12) = si.toptexture
+            put++
+            *_t12 = si.toptexture
             var _t13 = put
-            put = put + 1
-            deref(_t13) = si.bottomtexture
+            put++
+            *_t13 = si.bottomtexture
             var _t14 = put
-            put = put + 1
-            deref(_t14) = si.midtexture
+            put++
+            *_t14 = si.midtexture
         }
         i++
-        li = li + 1
+        li++
     }
     save_p = reinterpret<uint8?>(put)
 }
@@ -160,69 +160,69 @@ def P_UnArchiveWorld {
     sec = sectors
     while (i < numsectors) {
         var _t0 = get
-        get = get + 1
-        sec.floorheight = int(deref(_t0)) << FRACBITS
+        get++
+        sec.floorheight = int(*_t0) << FRACBITS
         var _t1 = get
-        get = get + 1
-        sec.ceilingheight = int(deref(_t1)) << FRACBITS
+        get++
+        sec.ceilingheight = int(*_t1) << FRACBITS
         var _t2 = get
-        get = get + 1
-        sec.floorpic = deref(_t2)
+        get++
+        sec.floorpic = *_t2
         var _t3 = get
-        get = get + 1
-        sec.ceilingpic = deref(_t3)
+        get++
+        sec.ceilingpic = *_t3
         var _t4 = get
-        get = get + 1
-        sec.lightlevel = deref(_t4)
+        get++
+        sec.lightlevel = *_t4
         // needed?
         var _t5 = get
-        get = get + 1
-        sec.special = deref(_t5)
+        get++
+        sec.special = *_t5
         // needed?
         var _t6 = get
-        get = get + 1
-        sec.tag = deref(_t6)
+        get++
+        sec.tag = *_t6
         sec.specialdata = null
         sec.soundtarget = null
         i++
-        sec = sec + 1
+        sec++
     }
     // do lines
     i = 0
     li = lines
     while (i < numlines) {
         var _t7 = get
-        get = get + 1
-        li.flags = deref(_t7)
+        get++
+        li.flags = *_t7
         var _t8 = get
-        get = get + 1
-        li.special = deref(_t8)
+        get++
+        li.special = *_t8
         var _t9 = get
-        get = get + 1
-        li.tag = deref(_t9)
+        get++
+        li.tag = *_t9
         for (j in range(2)) {
-            if (int(li.sidenum[j]) == -1) {
+            if (li.sidenum[j] == -1) {
                 continue
             }
             si = addr(sides[int(li.sidenum[j])])
             var _t10 = get
-            get = get + 1
-            si.textureoffset = int(deref(_t10)) << FRACBITS
+            get++
+            si.textureoffset = int(*_t10) << FRACBITS
             var _t11 = get
-            get = get + 1
-            si.rowoffset = int(deref(_t11)) << FRACBITS
+            get++
+            si.rowoffset = int(*_t11) << FRACBITS
             var _t12 = get
-            get = get + 1
-            si.toptexture = deref(_t12)
+            get++
+            si.toptexture = *_t12
             var _t13 = get
-            get = get + 1
-            si.bottomtexture = deref(_t13)
+            get++
+            si.bottomtexture = *_t13
             var _t14 = get
-            get = get + 1
-            si.midtexture = deref(_t14)
+            get++
+            si.midtexture = *_t14
         }
         i++
-        li = li + 1
+        li++
     }
     save_p = reinterpret<uint8?>(get)
 }
@@ -238,12 +238,12 @@ def P_ArchiveThinkers {
         {
             if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
                 var _t0 = save_p
-                save_p = save_p + 1
-                deref(_t0) = uint8(int(thinkerclass_t.tc_mobj))
-                save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
+                save_p++
+                *_t0 = uint8(thinkerclass_t.tc_mobj)
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
                 mobj = reinterpret<mobj_s?>(save_p)
-                doom_memcpy(reinterpret<void?>(mobj), reinterpret<void?>(th), int(uint64(typeinfo sizeof(type<mobj_s>))))
-                save_p = save_p + uint64(typeinfo sizeof(type<mobj_s>))
+                doom_memcpy(reinterpret<void?>(mobj), reinterpret<void?>(th), typeinfo sizeof(type<mobj_s>))
+                save_p += uint64(typeinfo sizeof(type<mobj_s>))
                 mobj.state = reinterpret<state_t?>(uint64(int64(mobj.state - addr(states[0]))))
                 if (mobj.player != null) {
                     mobj.player = reinterpret<player_s?>(uint64(int64(mobj.player - addr(players[0])) + 1l))
@@ -257,8 +257,8 @@ def P_ArchiveThinkers {
     // I_Error ("P_ArchiveThinkers: Unknown thinker function");
     // add a terminating marker
     var _t1 = save_p
-    save_p = save_p + 1
-    deref(_t1) = uint8(int(thinkerclass_t.tc_end))
+    save_p++
+    *_t1 = uint8(thinkerclass_t.tc_end)
 }
 
 // P_UnArchiveThinkers
@@ -283,35 +283,39 @@ def P_UnArchiveThinkers {
     // read in saved thinkers
     while (1 != 0) {
         var _t0 = save_p
-        save_p = save_p + 1
-        tclass = deref(_t0)
-        let _cond = int(tclass)
-        if (_cond == 0) {
-            // end of list
-            return
-        } elif (_cond == 1) {
-            save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
-            mobj = reinterpret<mobj_s?>(Z_Malloc(int(uint64(typeinfo sizeof(type<mobj_s>))), PU_LEVEL, null))
-            doom_memcpy(reinterpret<void?>(mobj), reinterpret<void?>(save_p), int(uint64(typeinfo sizeof(type<mobj_s>))))
-            save_p = save_p + uint64(typeinfo sizeof(type<mobj_s>))
-            mobj.state = addr(states[0]) + end_index(int64(intptr(mobj.state)), 967)
-            mobj.target = null
-            if (mobj.player != null) {
-                mobj.player = addr(players[0]) + end_index(int64(intptr(mobj.player)) - 1l, 4)
-                mobj.player.mo = mobj
+        save_p++
+        tclass = *_t0
+        c_switch(int(tclass)) {
+            case(0) {
+                // end of list
+                return
             }
-            P_SetThingPosition(mobj)
-            mobj.info = addr(mobjinfo[0]) + end_index(int(mobj._c_type), 137)
-            mobj.floorz = mobj.subsector.sector.floorheight
-            mobj.ceilingz = mobj.subsector.sector.ceilingheight
-            mobj.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)
-            P_AddThinker(addr(mobj.thinker))
-        } else {
-            // I_Error("Error: Unknown tclass %i in savegame", tclass);
-            doom_strcpy(addr(error_buf[0]), cstr("Error: Unknown tclass "))
-            doom_concat(addr(error_buf[0]), doom_itoa(int(tclass), 10))
-            doom_concat(addr(error_buf[0]), cstr(" in savegame"))
-            I_Error(addr(error_buf[0]))
+            case(1) {
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                mobj = reinterpret<mobj_s?>(Z_Malloc(typeinfo sizeof(type<mobj_s>), PU_LEVEL, null))
+                doom_memcpy(reinterpret<void?>(mobj), reinterpret<void?>(save_p), typeinfo sizeof(type<mobj_s>))
+                save_p += uint64(typeinfo sizeof(type<mobj_s>))
+                mobj.state = addr(states[0]) + end_index(int64(intptr(mobj.state)), 967)
+                mobj.target = null
+                if (mobj.player != null) {
+                    mobj.player = addr(players[0]) + end_index(int64(intptr(mobj.player)) - 1l, 4)
+                    mobj.player.mo = mobj
+                }
+                P_SetThingPosition(mobj)
+                mobj.info = addr(mobjinfo[0]) + end_index(int(mobj._c_type), 137)
+                mobj.floorz = mobj.subsector.sector.floorheight
+                mobj.ceilingz = mobj.subsector.sector.ceilingheight
+                mobj.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)
+                P_AddThinker(addr(mobj.thinker))
+                break
+            }
+            case(_) {
+                // I_Error("Error: Unknown tclass %i in savegame", tclass);
+                doom_strcpy(addr(error_buf[0]), cstr("Error: Unknown tclass "))
+                doom_concat(addr(error_buf[0]), doom_itoa(int(tclass), 10))
+                doom_concat(addr(error_buf[0]), cstr(" in savegame"))
+                I_Error(addr(error_buf[0]))
+            }
         }
     }
 }
@@ -349,90 +353,90 @@ def P_ArchiveSpecials {
                 }
                 if (i < MAXCEILINGS) {
                     var _t0 = save_p
-                    save_p = save_p + 1
-                    deref(_t0) = uint8(int(anon_940.tc_ceiling))
-                    save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
+                    save_p++
+                    *_t0 = uint8(anon_940.tc_ceiling)
+                    save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
                     ceiling = reinterpret<ceiling_t?>(save_p)
-                    doom_memcpy(reinterpret<void?>(ceiling), reinterpret<void?>(th), int(uint64(typeinfo sizeof(type<ceiling_t>))))
-                    save_p = save_p + uint64(typeinfo sizeof(type<ceiling_t>))
+                    doom_memcpy(reinterpret<void?>(ceiling), reinterpret<void?>(th), typeinfo sizeof(type<ceiling_t>))
+                    save_p += uint64(typeinfo sizeof(type<ceiling_t>))
                     ceiling.sector = reinterpret<sector_t?>(uint64(int64(ceiling.sector - sectors)))
                 }
                 continue
             }
             if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@T_MoveCeiling)) {
                 var _t1 = save_p
-                save_p = save_p + 1
-                deref(_t1) = uint8(int(anon_940.tc_ceiling))
-                save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
+                save_p++
+                *_t1 = uint8(anon_940.tc_ceiling)
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
                 ceiling = reinterpret<ceiling_t?>(save_p)
-                doom_memcpy(reinterpret<void?>(ceiling), reinterpret<void?>(th), int(uint64(typeinfo sizeof(type<ceiling_t>))))
-                save_p = save_p + uint64(typeinfo sizeof(type<ceiling_t>))
+                doom_memcpy(reinterpret<void?>(ceiling), reinterpret<void?>(th), typeinfo sizeof(type<ceiling_t>))
+                save_p += uint64(typeinfo sizeof(type<ceiling_t>))
                 ceiling.sector = reinterpret<sector_t?>(uint64(int64(ceiling.sector - sectors)))
                 continue
             }
             if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@T_VerticalDoor)) {
                 var _t2 = save_p
-                save_p = save_p + 1
-                deref(_t2) = uint8(int(anon_940.tc_door))
-                save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
+                save_p++
+                *_t2 = uint8(anon_940.tc_door)
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
                 door = reinterpret<vldoor_t?>(save_p)
-                doom_memcpy(reinterpret<void?>(door), reinterpret<void?>(th), int(uint64(typeinfo sizeof(type<vldoor_t>))))
-                save_p = save_p + uint64(typeinfo sizeof(type<vldoor_t>))
+                doom_memcpy(reinterpret<void?>(door), reinterpret<void?>(th), typeinfo sizeof(type<vldoor_t>))
+                save_p += uint64(typeinfo sizeof(type<vldoor_t>))
                 door.sector = reinterpret<sector_t?>(uint64(int64(door.sector - sectors)))
                 continue
             }
             if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@T_MoveFloor)) {
                 var _t3 = save_p
-                save_p = save_p + 1
-                deref(_t3) = uint8(int(anon_940.tc_floor))
-                save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
+                save_p++
+                *_t3 = uint8(anon_940.tc_floor)
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
                 floor = reinterpret<floormove_t?>(save_p)
-                doom_memcpy(reinterpret<void?>(floor), reinterpret<void?>(th), int(uint64(typeinfo sizeof(type<floormove_t>))))
-                save_p = save_p + uint64(typeinfo sizeof(type<floormove_t>))
+                doom_memcpy(reinterpret<void?>(floor), reinterpret<void?>(th), typeinfo sizeof(type<floormove_t>))
+                save_p += uint64(typeinfo sizeof(type<floormove_t>))
                 floor.sector = reinterpret<sector_t?>(uint64(int64(floor.sector - sectors)))
                 continue
             }
             if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@T_PlatRaise)) {
                 var _t4 = save_p
-                save_p = save_p + 1
-                deref(_t4) = uint8(int(anon_940.tc_plat))
-                save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
+                save_p++
+                *_t4 = uint8(anon_940.tc_plat)
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
                 plat = reinterpret<plat_t?>(save_p)
-                doom_memcpy(reinterpret<void?>(plat), reinterpret<void?>(th), int(uint64(typeinfo sizeof(type<plat_t>))))
-                save_p = save_p + uint64(typeinfo sizeof(type<plat_t>))
+                doom_memcpy(reinterpret<void?>(plat), reinterpret<void?>(th), typeinfo sizeof(type<plat_t>))
+                save_p += uint64(typeinfo sizeof(type<plat_t>))
                 plat.sector = reinterpret<sector_t?>(uint64(int64(plat.sector - sectors)))
                 continue
             }
             if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@T_LightFlash)) {
                 var _t5 = save_p
-                save_p = save_p + 1
-                deref(_t5) = uint8(int(anon_940.tc_flash))
-                save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
+                save_p++
+                *_t5 = uint8(anon_940.tc_flash)
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
                 flash = reinterpret<lightflash_t?>(save_p)
-                doom_memcpy(reinterpret<void?>(flash), reinterpret<void?>(th), int(uint64(typeinfo sizeof(type<lightflash_t>))))
-                save_p = save_p + uint64(typeinfo sizeof(type<lightflash_t>))
+                doom_memcpy(reinterpret<void?>(flash), reinterpret<void?>(th), typeinfo sizeof(type<lightflash_t>))
+                save_p += uint64(typeinfo sizeof(type<lightflash_t>))
                 flash.sector = reinterpret<sector_t?>(uint64(int64(flash.sector - sectors)))
                 continue
             }
             if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@T_StrobeFlash)) {
                 var _t6 = save_p
-                save_p = save_p + 1
-                deref(_t6) = uint8(int(anon_940.tc_strobe))
-                save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
+                save_p++
+                *_t6 = uint8(anon_940.tc_strobe)
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
                 strobe = reinterpret<strobe_t?>(save_p)
-                doom_memcpy(reinterpret<void?>(strobe), reinterpret<void?>(th), int(uint64(typeinfo sizeof(type<strobe_t>))))
-                save_p = save_p + uint64(typeinfo sizeof(type<strobe_t>))
+                doom_memcpy(reinterpret<void?>(strobe), reinterpret<void?>(th), typeinfo sizeof(type<strobe_t>))
+                save_p += uint64(typeinfo sizeof(type<strobe_t>))
                 strobe.sector = reinterpret<sector_t?>(uint64(int64(strobe.sector - sectors)))
                 continue
             }
             if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@T_Glow)) {
                 var _t7 = save_p
-                save_p = save_p + 1
-                deref(_t7) = uint8(int(anon_940.tc_glow))
-                save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
+                save_p++
+                *_t7 = uint8(anon_940.tc_glow)
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
                 glow = reinterpret<glow_t?>(save_p)
-                doom_memcpy(reinterpret<void?>(glow), reinterpret<void?>(th), int(uint64(typeinfo sizeof(type<glow_t>))))
-                save_p = save_p + uint64(typeinfo sizeof(type<glow_t>))
+                doom_memcpy(reinterpret<void?>(glow), reinterpret<void?>(th), typeinfo sizeof(type<glow_t>))
+                save_p += uint64(typeinfo sizeof(type<glow_t>))
                 glow.sector = reinterpret<sector_t?>(uint64(int64(glow.sector - sectors)))
                 continue
             }
@@ -442,8 +446,8 @@ def P_ArchiveSpecials {
     }
     // add a terminating marker
     var _t8 = save_p
-    save_p = save_p + 1
-    deref(_t8) = uint8(int(anon_940.tc_endspecials))
+    save_p++
+    *_t8 = uint8(anon_940.tc_endspecials)
 }
 
 // P_UnArchiveSpecials
@@ -460,85 +464,101 @@ def P_UnArchiveSpecials {
     // read in saved thinkers
     while (1 != 0) {
         var _t0 = save_p
-        save_p = save_p + 1
-        tclass = deref(_t0)
-        let _cond = int(tclass)
-        if (_cond == 7) {
-            // end of list
-            return
-        } elif (_cond == 0) {
-            save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
-            ceiling = reinterpret<ceiling_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<ceiling_t>))), PU_LEVEL, null))
-            doom_memcpy(reinterpret<void?>(ceiling), reinterpret<void?>(save_p), int(uint64(typeinfo sizeof(type<ceiling_t>))))
-            save_p = save_p + uint64(typeinfo sizeof(type<ceiling_t>))
-            ceiling.sector = addr(sectors[int64(intptr(ceiling.sector))])
-            ceiling.sector.specialdata = reinterpret<void?>(ceiling)
-            if (ceiling.thinker._c_function.acp1 != null) {
-                ceiling.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_MoveCeiling)
+        save_p++
+        tclass = *_t0
+        c_switch(int(tclass)) {
+            case(7) {
+                // end of list
+                return
             }
-            P_AddThinker(addr(ceiling.thinker))
-            P_AddActiveCeiling(ceiling)
-        } elif (_cond == 1) {
-            save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
-            door = reinterpret<vldoor_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<vldoor_t>))), PU_LEVEL, null))
-            doom_memcpy(reinterpret<void?>(door), reinterpret<void?>(save_p), int(uint64(typeinfo sizeof(type<vldoor_t>))))
-            save_p = save_p + uint64(typeinfo sizeof(type<vldoor_t>))
-            door.sector = addr(sectors[int64(intptr(door.sector))])
-            door.sector.specialdata = reinterpret<void?>(door)
-            door.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_VerticalDoor)
-            P_AddThinker(addr(door.thinker))
-        } elif (_cond == 2) {
-            save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
-            floor = reinterpret<floormove_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<floormove_t>))), PU_LEVEL, null))
-            doom_memcpy(reinterpret<void?>(floor), reinterpret<void?>(save_p), int(uint64(typeinfo sizeof(type<floormove_t>))))
-            save_p = save_p + uint64(typeinfo sizeof(type<floormove_t>))
-            floor.sector = addr(sectors[int64(intptr(floor.sector))])
-            floor.sector.specialdata = reinterpret<void?>(floor)
-            floor.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_MoveFloor)
-            P_AddThinker(addr(floor.thinker))
-        } elif (_cond == 3) {
-            save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
-            plat = reinterpret<plat_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<plat_t>))), PU_LEVEL, null))
-            doom_memcpy(reinterpret<void?>(plat), reinterpret<void?>(save_p), int(uint64(typeinfo sizeof(type<plat_t>))))
-            save_p = save_p + uint64(typeinfo sizeof(type<plat_t>))
-            plat.sector = addr(sectors[int64(intptr(plat.sector))])
-            plat.sector.specialdata = reinterpret<void?>(plat)
-            if (plat.thinker._c_function.acp1 != null) {
-                plat.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_PlatRaise)
+            case(0) {
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                ceiling = reinterpret<ceiling_t?>(Z_Malloc(typeinfo sizeof(type<ceiling_t>), PU_LEVEL, null))
+                doom_memcpy(reinterpret<void?>(ceiling), reinterpret<void?>(save_p), typeinfo sizeof(type<ceiling_t>))
+                save_p += uint64(typeinfo sizeof(type<ceiling_t>))
+                ceiling.sector = addr(sectors[int64(intptr(ceiling.sector))])
+                ceiling.sector.specialdata = reinterpret<void?>(ceiling)
+                if (ceiling.thinker._c_function.acp1 != null) {
+                    ceiling.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_MoveCeiling)
+                }
+                P_AddThinker(addr(ceiling.thinker))
+                P_AddActiveCeiling(ceiling)
+                break
             }
-            P_AddThinker(addr(plat.thinker))
-            P_AddActivePlat(plat)
-        } elif (_cond == 4) {
-            save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
-            flash = reinterpret<lightflash_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<lightflash_t>))), PU_LEVEL, null))
-            doom_memcpy(reinterpret<void?>(flash), reinterpret<void?>(save_p), int(uint64(typeinfo sizeof(type<lightflash_t>))))
-            save_p = save_p + uint64(typeinfo sizeof(type<lightflash_t>))
-            flash.sector = addr(sectors[int64(intptr(flash.sector))])
-            flash.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_LightFlash)
-            P_AddThinker(addr(flash.thinker))
-        } elif (_cond == 5) {
-            save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
-            strobe = reinterpret<strobe_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<strobe_t>))), PU_LEVEL, null))
-            doom_memcpy(reinterpret<void?>(strobe), reinterpret<void?>(save_p), int(uint64(typeinfo sizeof(type<strobe_t>))))
-            save_p = save_p + uint64(typeinfo sizeof(type<strobe_t>))
-            strobe.sector = addr(sectors[int64(intptr(strobe.sector))])
-            strobe.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_StrobeFlash)
-            P_AddThinker(addr(strobe.thinker))
-        } elif (_cond == 6) {
-            save_p = save_p + (4l - (int64(intptr(save_p)) & 3l) & 3l)
-            glow = reinterpret<glow_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<glow_t>))), PU_LEVEL, null))
-            doom_memcpy(reinterpret<void?>(glow), reinterpret<void?>(save_p), int(uint64(typeinfo sizeof(type<glow_t>))))
-            save_p = save_p + uint64(typeinfo sizeof(type<glow_t>))
-            glow.sector = addr(sectors[int64(intptr(glow.sector))])
-            glow.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_Glow)
-            P_AddThinker(addr(glow.thinker))
-        } else {
-            // I_Error("Error: P_UnarchiveSpecials:Unknown tclass %i "
-            // "in savegame", tclass);
-            doom_strcpy(addr(error_buf[0]), cstr("Error: P_UnarchiveSpecials:Unknown tclass "))
-            doom_concat(addr(error_buf[0]), doom_itoa(int(tclass), 10))
-            doom_concat(addr(error_buf[0]), cstr(" in savegame"))
-            I_Error(addr(error_buf[0]))
+            case(1) {
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                door = reinterpret<vldoor_t?>(Z_Malloc(typeinfo sizeof(type<vldoor_t>), PU_LEVEL, null))
+                doom_memcpy(reinterpret<void?>(door), reinterpret<void?>(save_p), typeinfo sizeof(type<vldoor_t>))
+                save_p += uint64(typeinfo sizeof(type<vldoor_t>))
+                door.sector = addr(sectors[int64(intptr(door.sector))])
+                door.sector.specialdata = reinterpret<void?>(door)
+                door.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_VerticalDoor)
+                P_AddThinker(addr(door.thinker))
+                break
+            }
+            case(2) {
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                floor = reinterpret<floormove_t?>(Z_Malloc(typeinfo sizeof(type<floormove_t>), PU_LEVEL, null))
+                doom_memcpy(reinterpret<void?>(floor), reinterpret<void?>(save_p), typeinfo sizeof(type<floormove_t>))
+                save_p += uint64(typeinfo sizeof(type<floormove_t>))
+                floor.sector = addr(sectors[int64(intptr(floor.sector))])
+                floor.sector.specialdata = reinterpret<void?>(floor)
+                floor.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_MoveFloor)
+                P_AddThinker(addr(floor.thinker))
+                break
+            }
+            case(3) {
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                plat = reinterpret<plat_t?>(Z_Malloc(typeinfo sizeof(type<plat_t>), PU_LEVEL, null))
+                doom_memcpy(reinterpret<void?>(plat), reinterpret<void?>(save_p), typeinfo sizeof(type<plat_t>))
+                save_p += uint64(typeinfo sizeof(type<plat_t>))
+                plat.sector = addr(sectors[int64(intptr(plat.sector))])
+                plat.sector.specialdata = reinterpret<void?>(plat)
+                if (plat.thinker._c_function.acp1 != null) {
+                    plat.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_PlatRaise)
+                }
+                P_AddThinker(addr(plat.thinker))
+                P_AddActivePlat(plat)
+                break
+            }
+            case(4) {
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                flash = reinterpret<lightflash_t?>(Z_Malloc(typeinfo sizeof(type<lightflash_t>), PU_LEVEL, null))
+                doom_memcpy(reinterpret<void?>(flash), reinterpret<void?>(save_p), typeinfo sizeof(type<lightflash_t>))
+                save_p += uint64(typeinfo sizeof(type<lightflash_t>))
+                flash.sector = addr(sectors[int64(intptr(flash.sector))])
+                flash.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_LightFlash)
+                P_AddThinker(addr(flash.thinker))
+                break
+            }
+            case(5) {
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                strobe = reinterpret<strobe_t?>(Z_Malloc(typeinfo sizeof(type<strobe_t>), PU_LEVEL, null))
+                doom_memcpy(reinterpret<void?>(strobe), reinterpret<void?>(save_p), typeinfo sizeof(type<strobe_t>))
+                save_p += uint64(typeinfo sizeof(type<strobe_t>))
+                strobe.sector = addr(sectors[int64(intptr(strobe.sector))])
+                strobe.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_StrobeFlash)
+                P_AddThinker(addr(strobe.thinker))
+                break
+            }
+            case(6) {
+                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                glow = reinterpret<glow_t?>(Z_Malloc(typeinfo sizeof(type<glow_t>), PU_LEVEL, null))
+                doom_memcpy(reinterpret<void?>(glow), reinterpret<void?>(save_p), typeinfo sizeof(type<glow_t>))
+                save_p += uint64(typeinfo sizeof(type<glow_t>))
+                glow.sector = addr(sectors[int64(intptr(glow.sector))])
+                glow.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_Glow)
+                P_AddThinker(addr(glow.thinker))
+                break
+            }
+            case(_) {
+                // I_Error("Error: P_UnarchiveSpecials:Unknown tclass %i "
+                // "in savegame", tclass);
+                doom_strcpy(addr(error_buf[0]), cstr("Error: P_UnarchiveSpecials:Unknown tclass "))
+                doom_concat(addr(error_buf[0]), doom_itoa(int(tclass), 10))
+                doom_concat(addr(error_buf[0]), cstr(" in savegame"))
+                I_Error(addr(error_buf[0]))
+            }
         }
     }
 }

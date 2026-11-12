@@ -56,7 +56,7 @@ def P_Ticker {
         return
     }
     // pause if in menu and at least one tic has been run
-    if (!(int(netgame) != 0) && uint(int(menuactive)) != 0 && !(int(demoplayback) != 0) && players[consoleplayer].viewz != 1) {
+    if (int(netgame) == 0 && uint(menuactive) != 0 && int(demoplayback) == 0 && players[consoleplayer].viewz != 1) {
         return
     }
     for (i in range(MAXPLAYERS)) {

@@ -3,108 +3,120 @@
 def T_MovePlane(var sector : sector_t?; speed : int; dest : int; crush : doom_boolean; floorOrCeiling : int; direction : int) : result_e {
     var flag : doom_boolean
     var lastpos : int
-    let _cond = floorOrCeiling
-    if (_cond == 0) {
-        // FLOOR
-        let _cond2 = direction
-        if (_cond2 == -1) {
-            // DOWN
-            if (sector.floorheight - speed < dest) {
-                lastpos = sector.floorheight
-                sector.floorheight = dest
-                flag = P_ChangeSector(sector, crush)
-                if (flag == doom_boolean._c_true) {
-                    sector.floorheight = lastpos
-                    P_ChangeSector(sector, crush)
-                }
-                // return crushed;
-                return result_e.pastdest
-            } else {
-                lastpos = sector.floorheight
-                sector.floorheight -= speed
-                flag = P_ChangeSector(sector, crush)
-                if (flag == doom_boolean._c_true) {
-                    sector.floorheight = lastpos
-                    P_ChangeSector(sector, crush)
-                    return result_e.crushed
-                }
-            }
-        } elif (_cond2 == 1) {
-            // UP
-            if (sector.floorheight + speed > dest) {
-                lastpos = sector.floorheight
-                sector.floorheight = dest
-                flag = P_ChangeSector(sector, crush)
-                if (flag == doom_boolean._c_true) {
-                    sector.floorheight = lastpos
-                    P_ChangeSector(sector, crush)
-                }
-                // return crushed;
-                return result_e.pastdest
-            } else {
-                // COULD GET CRUSHED
-                lastpos = sector.floorheight
-                sector.floorheight += speed
-                flag = P_ChangeSector(sector, crush)
-                if (flag == doom_boolean._c_true) {
-                    if (crush == doom_boolean._c_true) {
-                        return result_e.crushed
+    c_switch(floorOrCeiling) {
+        case(0) {
+            // FLOOR
+            c_switch(direction) {
+                case(-1) {
+                    // DOWN
+                    if (sector.floorheight - speed < dest) {
+                        lastpos = sector.floorheight
+                        sector.floorheight = dest
+                        flag = P_ChangeSector(sector, crush)
+                        if (flag == doom_boolean._c_true) {
+                            sector.floorheight = lastpos
+                            P_ChangeSector(sector, crush)
+                        }
+                        // return crushed;
+                        return result_e.pastdest
+                    } else {
+                        lastpos = sector.floorheight
+                        sector.floorheight -= speed
+                        flag = P_ChangeSector(sector, crush)
+                        if (flag == doom_boolean._c_true) {
+                            sector.floorheight = lastpos
+                            P_ChangeSector(sector, crush)
+                            return result_e.crushed
+                        }
                     }
-                    sector.floorheight = lastpos
-                    P_ChangeSector(sector, crush)
-                    return result_e.crushed
+                    break
+                }
+                case(1) {
+                    // UP
+                    if (sector.floorheight + speed > dest) {
+                        lastpos = sector.floorheight
+                        sector.floorheight = dest
+                        flag = P_ChangeSector(sector, crush)
+                        if (flag == doom_boolean._c_true) {
+                            sector.floorheight = lastpos
+                            P_ChangeSector(sector, crush)
+                        }
+                        // return crushed;
+                        return result_e.pastdest
+                    } else {
+                        // COULD GET CRUSHED
+                        lastpos = sector.floorheight
+                        sector.floorheight += speed
+                        flag = P_ChangeSector(sector, crush)
+                        if (flag == doom_boolean._c_true) {
+                            if (crush == doom_boolean._c_true) {
+                                return result_e.crushed
+                            }
+                            sector.floorheight = lastpos
+                            P_ChangeSector(sector, crush)
+                            return result_e.crushed
+                        }
+                    }
+                    break
                 }
             }
+            break
         }
-    } elif (_cond == 1) {
-        // CEILING
-        let _cond3 = direction
-        if (_cond3 == -1) {
-            // DOWN
-            if (sector.ceilingheight - speed < dest) {
-                lastpos = sector.ceilingheight
-                sector.ceilingheight = dest
-                flag = P_ChangeSector(sector, crush)
-                if (flag == doom_boolean._c_true) {
-                    sector.ceilingheight = lastpos
-                    P_ChangeSector(sector, crush)
-                }
-                // return crushed;
-                return result_e.pastdest
-            } else {
-                // COULD GET CRUSHED
-                lastpos = sector.ceilingheight
-                sector.ceilingheight -= speed
-                flag = P_ChangeSector(sector, crush)
-                if (flag == doom_boolean._c_true) {
-                    if (crush == doom_boolean._c_true) {
-                        return result_e.crushed
+        case(1) {
+            // CEILING
+            c_switch(direction) {
+                case(-1) {
+                    // DOWN
+                    if (sector.ceilingheight - speed < dest) {
+                        lastpos = sector.ceilingheight
+                        sector.ceilingheight = dest
+                        flag = P_ChangeSector(sector, crush)
+                        if (flag == doom_boolean._c_true) {
+                            sector.ceilingheight = lastpos
+                            P_ChangeSector(sector, crush)
+                        }
+                        // return crushed;
+                        return result_e.pastdest
+                    } else {
+                        // COULD GET CRUSHED
+                        lastpos = sector.ceilingheight
+                        sector.ceilingheight -= speed
+                        flag = P_ChangeSector(sector, crush)
+                        if (flag == doom_boolean._c_true) {
+                            if (crush == doom_boolean._c_true) {
+                                return result_e.crushed
+                            }
+                            sector.ceilingheight = lastpos
+                            P_ChangeSector(sector, crush)
+                            return result_e.crushed
+                        }
                     }
-                    sector.ceilingheight = lastpos
-                    P_ChangeSector(sector, crush)
-                    return result_e.crushed
+                    break
+                }
+                case(1) {
+                    // UP
+                    if (sector.ceilingheight + speed > dest) {
+                        lastpos = sector.ceilingheight
+                        sector.ceilingheight = dest
+                        flag = P_ChangeSector(sector, crush)
+                        if (flag == doom_boolean._c_true) {
+                            sector.ceilingheight = lastpos
+                            P_ChangeSector(sector, crush)
+                        }
+                        // return crushed;
+                        return result_e.pastdest
+                    } else {
+                        lastpos = sector.ceilingheight
+                        sector.ceilingheight += speed
+                        flag = P_ChangeSector(sector, crush)
+                    }
+                    // UNUSED
+                    break
                 }
             }
-        } elif (_cond3 == 1) {
-            // UP
-            if (sector.ceilingheight + speed > dest) {
-                lastpos = sector.ceilingheight
-                sector.ceilingheight = dest
-                flag = P_ChangeSector(sector, crush)
-                if (flag == doom_boolean._c_true) {
-                    sector.ceilingheight = lastpos
-                    P_ChangeSector(sector, crush)
-                }
-                // return crushed;
-                return result_e.pastdest
-            } else {
-                lastpos = sector.ceilingheight
-                sector.ceilingheight += speed
-                flag = P_ChangeSector(sector, crush)
-            }
+            break
         }
     }
-    // UNUSED
     return result_e.ok
 }
 
@@ -113,40 +125,30 @@ def T_MovePlane(var sector : sector_t?; speed : int; dest : int; crush : doom_bo
 def T_MoveFloor(var floor : floormove_t?) {
     var res : result_e
     res = T_MovePlane(floor.sector, floor.speed, floor.floordestheight, floor.crush, 0, floor.direction)
-    if (!((leveltime & 7) != 0)) {
+    if ((leveltime & 7) == 0) {
         S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(floor.sector.soundorg))), int(sfxenum_t.sfx_stnmov))
     }
     if (res == result_e.pastdest) {
         floor.sector.specialdata = null
         if (floor.direction == 1) {
-            let _cond = floor._c_type
-            while (true) {
-                var _flag = false
-                _flag ||= _cond == floor_e.donutRaise
-                if (_flag) {
+            c_switch(floor._c_type) {
+                case(floor_e.donutRaise) {
                     floor.sector.special = int16(floor.newspecial)
                     floor.sector.floorpic = floor.texture
                 }
-                _flag ||= !(_cond == floor_e.donutRaise)
-                if (_flag) {
+                case(_) {
                     break
                 }
-                break
             }
         } elif (floor.direction == -1) {
-            let _cond2 = floor._c_type
-            while (true) {
-                var _flag2 = false
-                _flag2 ||= _cond2 == floor_e.lowerAndChange
-                if (_flag2) {
+            c_switch(floor._c_type) {
+                case(floor_e.lowerAndChange) {
                     floor.sector.special = int16(floor.newspecial)
                     floor.sector.floorpic = floor.texture
                 }
-                _flag2 ||= !(_cond2 == floor_e.lowerAndChange)
-                if (_flag2) {
+                case(_) {
                     break
                 }
-                break
             }
         }
         P_RemoveThinker(addr(floor.thinker))
@@ -176,30 +178,28 @@ def EV_DoFloor(var line : line_s?; floortype : floor_e) : int {
         }
         // new floor thinker
         rtn = 1
-        floor = reinterpret<floormove_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<floormove_t>))), PU_LEVSPEC, null))
+        floor = reinterpret<floormove_t?>(Z_Malloc(typeinfo sizeof(type<floormove_t>), PU_LEVSPEC, null))
         P_AddThinker(addr(floor.thinker))
         sec.specialdata = reinterpret<void?>(floor)
         floor.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_MoveFloor)
         floor._c_type = floortype
         floor.crush = doom_boolean._c_false
-        let _cond = floortype
-        while (true) {
-            var _flag = false
-            if (_cond == floor_e.lowerFloor) {
+        c_switch(floortype) {
+            case(floor_e.lowerFloor) {
                 floor.direction = -1
                 floor.sector = sec
                 floor.speed = FRACUNIT
                 floor.floordestheight = P_FindHighestFloorSurrounding(sec)
                 break
             }
-            if (_cond == floor_e.lowerFloorToLowest) {
+            case(floor_e.lowerFloorToLowest) {
                 floor.direction = -1
                 floor.sector = sec
                 floor.speed = FRACUNIT
                 floor.floordestheight = P_FindLowestFloorSurrounding(sec)
                 break
             }
-            if (_cond == floor_e.turboLower) {
+            case(floor_e.turboLower) {
                 floor.direction = -1
                 floor.sector = sec
                 floor.speed = FRACUNIT * 4
@@ -209,12 +209,10 @@ def EV_DoFloor(var line : line_s?; floortype : floor_e) : int {
                 }
                 break
             }
-            _flag ||= _cond == floor_e.raiseFloorCrush
-            if (_flag) {
+            case(floor_e.raiseFloorCrush) {
                 floor.crush = doom_boolean._c_true
             }
-            _flag ||= _cond == floor_e.raiseFloor
-            if (_flag) {
+            case(floor_e.raiseFloor) {
                 floor.direction = 1
                 floor.sector = sec
                 floor.speed = FRACUNIT
@@ -222,38 +220,38 @@ def EV_DoFloor(var line : line_s?; floortype : floor_e) : int {
                 if (floor.floordestheight > sec.ceilingheight) {
                     floor.floordestheight = sec.ceilingheight
                 }
-                floor.floordestheight -= (8 * FRACUNIT) * ((floortype == floor_e.raiseFloorCrush) ? 1 : 0)
+                floor.floordestheight -= (8 * FRACUNIT) * int_of(floortype == floor_e.raiseFloorCrush)
                 break
             }
-            if (_cond == floor_e.raiseFloorTurbo) {
+            case(floor_e.raiseFloorTurbo) {
                 floor.direction = 1
                 floor.sector = sec
                 floor.speed = FRACUNIT * 4
                 floor.floordestheight = P_FindNextHighestFloor(sec, sec.floorheight)
                 break
             }
-            if (_cond == floor_e.raiseFloorToNearest) {
+            case(floor_e.raiseFloorToNearest) {
                 floor.direction = 1
                 floor.sector = sec
                 floor.speed = FRACUNIT
                 floor.floordestheight = P_FindNextHighestFloor(sec, sec.floorheight)
                 break
             }
-            if (_cond == floor_e.raiseFloor24) {
+            case(floor_e.raiseFloor24) {
                 floor.direction = 1
                 floor.sector = sec
                 floor.speed = FRACUNIT
                 floor.floordestheight = floor.sector.floorheight + 24 * FRACUNIT
                 break
             }
-            if (_cond == floor_e.raiseFloor512) {
+            case(floor_e.raiseFloor512) {
                 floor.direction = 1
                 floor.sector = sec
                 floor.speed = FRACUNIT
                 floor.floordestheight = floor.sector.floorheight + 512 * FRACUNIT
                 break
             }
-            if (_cond == floor_e.raiseFloor24AndChange) {
+            case(floor_e.raiseFloor24AndChange) {
                 floor.direction = 1
                 floor.sector = sec
                 floor.speed = FRACUNIT
@@ -262,7 +260,7 @@ def EV_DoFloor(var line : line_s?; floortype : floor_e) : int {
                 sec.special = line.frontsector.special
                 break
             }
-            if (_cond == floor_e.raiseToTexture) {
+            case(floor_e.raiseToTexture) {
                 {
                     var minsize : int = DOOM_MAXINT
                     var side : side_t?
@@ -291,8 +289,7 @@ def EV_DoFloor(var line : line_s?; floortype : floor_e) : int {
                 }
                 break
             }
-            _flag ||= _cond == floor_e.lowerAndChange
-            if (_flag) {
+            case(floor_e.lowerAndChange) {
                 floor.direction = -1
                 floor.sector = sec
                 floor.speed = FRACUNIT
@@ -320,11 +317,9 @@ def EV_DoFloor(var line : line_s?; floortype : floor_e) : int {
                     i++
                 }
             }
-            _flag ||= !(_cond == floor_e.lowerFloor || _cond == floor_e.lowerFloorToLowest || _cond == floor_e.turboLower || _cond == floor_e.raiseFloorCrush || _cond == floor_e.raiseFloor || _cond == floor_e.raiseFloorTurbo || _cond == floor_e.raiseFloorToNearest || _cond == floor_e.raiseFloor24 || _cond == floor_e.raiseFloor512 || _cond == floor_e.raiseFloor24AndChange || _cond == floor_e.raiseToTexture || _cond == floor_e.lowerAndChange)
-            if (_flag) {
+            case(_) {
                 break
             }
-            break
         }
     }
     return rtn
@@ -359,19 +354,23 @@ def EV_BuildStairs(var line : line_s?; _c_type : stair_e) : int {
         }
         // new floor thinker
         rtn = 1
-        floor = reinterpret<floormove_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<floormove_t>))), PU_LEVSPEC, null))
+        floor = reinterpret<floormove_t?>(Z_Malloc(typeinfo sizeof(type<floormove_t>), PU_LEVSPEC, null))
         P_AddThinker(addr(floor.thinker))
         sec.specialdata = reinterpret<void?>(floor)
         floor.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_MoveFloor)
         floor.direction = 1
         floor.sector = sec
-        let _cond = _c_type
-        if (_cond == stair_e.build8) {
-            speed = FRACUNIT / 4
-            stairsize = 8 * FRACUNIT
-        } elif (_cond == stair_e.turbo16) {
-            speed = FRACUNIT * 4
-            stairsize = 16 * FRACUNIT
+        c_switch(_c_type) {
+            case(stair_e.build8) {
+                speed = FRACUNIT / 4
+                stairsize = 8 * FRACUNIT
+                break
+            }
+            case(stair_e.turbo16) {
+                speed = FRACUNIT * 4
+                stairsize = 16 * FRACUNIT
+                break
+            }
         }
         floor.speed = speed
         height = sec.floorheight + stairsize
@@ -380,7 +379,7 @@ def EV_BuildStairs(var line : line_s?; _c_type : stair_e) : int {
         // Find next sector to raise
         // 1. Find 2-sided line with same sector side[0]
         // 2. Other side is the next sector to raise
-        while (true) {
+        c_do_while(ok != 0) {
             ok = 0
             {
                 i = 0
@@ -393,7 +392,7 @@ def EV_BuildStairs(var line : line_s?; _c_type : stair_e) : int {
                     if (!(i < sec.linecount)) {
                         break
                     }
-                    if (!((int(sec.lines[i].flags) & ML_TWOSIDED) != 0)) {
+                    if ((int(sec.lines[i].flags) & ML_TWOSIDED) == 0) {
                         continue
                     }
                     tsec = sec.lines[i].frontsector
@@ -412,7 +411,7 @@ def EV_BuildStairs(var line : line_s?; _c_type : stair_e) : int {
                     }
                     sec = tsec
                     secnum = newsecnum
-                    floor = reinterpret<floormove_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<floormove_t>))), PU_LEVSPEC, null))
+                    floor = reinterpret<floormove_t?>(Z_Malloc(typeinfo sizeof(type<floormove_t>), PU_LEVSPEC, null))
                     P_AddThinker(addr(floor.thinker))
                     sec.specialdata = reinterpret<void?>(floor)
                     floor.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_MoveFloor)
@@ -423,9 +422,6 @@ def EV_BuildStairs(var line : line_s?; _c_type : stair_e) : int {
                     ok = 1
                     break
                 }
-            }
-            if (!(ok != 0)) {
-                break
             }
         }
     }

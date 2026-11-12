@@ -34,7 +34,7 @@ var bombdamage : int
 // PIT_StompThing
 def PIT_StompThing(var thing : mobj_s?) : doom_boolean {
     var blockdist : int
-    if (!((thing.flags & int(mobjflag_t.MF_SHOOTABLE)) != 0)) {
+    if ((thing.flags & int(mobjflag_t.MF_SHOOTABLE)) == 0) {
         return doom_boolean._c_true
     }
     blockdist = thing.radius + tmthing.radius
@@ -47,7 +47,7 @@ def PIT_StompThing(var thing : mobj_s?) : doom_boolean {
         return doom_boolean._c_true
     }
     // monsters don't stomp things except on boss level
-    if (!(tmthing.player != null) && gamemap != 30) {
+    if (tmthing.player == null && gamemap != 30) {
         return doom_boolean._c_false
     }
     P_DamageMobj(thing, tmthing, tmthing, 10000)
@@ -92,7 +92,7 @@ def P_TeleportMove(var thing : mobj_s?; x : int; y : int) : doom_boolean {
     while (bx <= xh) {
         by = yl
         while (by <= yh) {
-            if (!(int(P_BlockThingsIterator(bx, by, @@PIT_StompThing)) != 0)) {
+            if (int(P_BlockThingsIterator(bx, by, @@PIT_StompThing)) == 0) {
                 return doom_boolean._c_false
             }
             by++
@@ -114,7 +114,8 @@ def P_TeleportMove(var thing : mobj_s?; x : int; y : int) : doom_boolean {
 // Adjusts tmfloorz and tmceilingz as lines are contacted
 [c_function]
 def PIT_CheckLine(var ld : line_s?) : doom_boolean {
-    if (tmbbox[int(anon_787.BOXRIGHT)] <= ld.bbox[int(anon_787.BOXLEFT)] || tmbbox[int(anon_787.BOXLEFT)] >= ld.bbox[int(anon_787.BOXRIGHT)] || tmbbox[int(anon_787.BOXTOP)] <= ld.bbox[int(anon_787.BOXBOTTOM)] || tmbbox[int(anon_787.BOXBOTTOM)] >= ld.bbox[int(anon_787.BOXTOP)]) {
+    if (tmbbox[int(anon_787.BOXRIGHT)] <= ld.bbox[int(anon_787.BOXLEFT)] || tmbbox[int(anon_787.BOXLEFT)] >= ld.bbox[int(anon_787.BOXRIGHT)] ||
+            tmbbox[int(anon_787.BOXTOP)] <= ld.bbox[int(anon_787.BOXBOTTOM)] || tmbbox[int(anon_787.BOXBOTTOM)] >= ld.bbox[int(anon_787.BOXTOP)]) {
         return doom_boolean._c_true
     }
     if (P_BoxOnLineSide(addr(tmbbox[0]), ld) != -1) {
@@ -129,16 +130,16 @@ def PIT_CheckLine(var ld : line_s?) : doom_boolean {
     // NOTE: specials are NOT sorted by order,
     // so two special lines that are only 8 pixels apart
     // could be crossed in either order.
-    if (!(ld.backsector != null)) {
+    if (ld.backsector == null) {
         // one sided line
         return doom_boolean._c_false
     }
-    if (!((tmthing.flags & int(mobjflag_t.MF_MISSILE)) != 0)) {
+    if ((tmthing.flags & int(mobjflag_t.MF_MISSILE)) == 0) {
         if ((int(ld.flags) & ML_BLOCKING) != 0) {
             // explicitly blocking everything
             return doom_boolean._c_false
         }
-        if (!(tmthing.player != null) && (int(ld.flags) & ML_BLOCKMONSTERS) != 0) {
+        if (tmthing.player == null && (int(ld.flags) & ML_BLOCKMONSTERS) != 0) {
             // block monsters only
             return doom_boolean._c_false
         }
@@ -169,7 +170,7 @@ def PIT_CheckThing(var thing : mobj_s?) : doom_boolean {
     var blockdist : int
     var solid : doom_boolean
     var damage : int
-    if (!((thing.flags & (int(mobjflag_t.MF_SOLID) | int(mobjflag_t.MF_SPECIAL) | int(mobjflag_t.MF_SHOOTABLE))) != 0)) {
+    if ((thing.flags & (int(mobjflag_t.MF_SOLID) | int(mobjflag_t.MF_SPECIAL) | int(mobjflag_t.MF_SHOOTABLE))) == 0) {
         return doom_boolean._c_true
     }
     blockdist = thing.radius + tmthing.radius
@@ -204,7 +205,9 @@ def PIT_CheckThing(var thing : mobj_s?) : doom_boolean {
             // underneath
             return doom_boolean._c_true
         }
-        if (tmthing.target != null && (tmthing.target._c_type == thing._c_type || (tmthing.target._c_type == mobjtype_t.MT_KNIGHT && thing._c_type == mobjtype_t.MT_BRUISER) || (tmthing.target._c_type == mobjtype_t.MT_BRUISER && thing._c_type == mobjtype_t.MT_KNIGHT))) {
+        if (tmthing.target != null &&
+                (tmthing.target._c_type == thing._c_type || (tmthing.target._c_type == mobjtype_t.MT_KNIGHT && thing._c_type == mobjtype_t.MT_BRUISER) ||
+                    (tmthing.target._c_type == mobjtype_t.MT_BRUISER && thing._c_type == mobjtype_t.MT_KNIGHT))) {
             // Don't hit same species as originator.
             if (intptr(thing) == intptr(tmthing.target)) {
                 return doom_boolean._c_true
@@ -215,9 +218,9 @@ def PIT_CheckThing(var thing : mobj_s?) : doom_boolean {
                 return doom_boolean._c_false
             }
         }
-        if (!((thing.flags & int(mobjflag_t.MF_SHOOTABLE)) != 0)) {
+        if ((thing.flags & int(mobjflag_t.MF_SHOOTABLE)) == 0) {
             // didn't do any damage
-            return enum_from_int(type<doom_boolean>, !((thing.flags & int(mobjflag_t.MF_SOLID)) != 0) ? 1 : 0)
+            return enum_from_int(type<doom_boolean>, int_of((thing.flags & int(mobjflag_t.MF_SOLID)) == 0))
         }
         // damage / explode
         damage = ((P_Random() % 8) + 1) * tmthing.info.damage
@@ -232,9 +235,9 @@ def PIT_CheckThing(var thing : mobj_s?) : doom_boolean {
             // can remove thing
             P_TouchSpecialThing(thing, tmthing)
         }
-        return enum_from_int(type<doom_boolean>, !(int(solid) != 0) ? 1 : 0)
+        return enum_from_int(type<doom_boolean>, int_of(int(solid) == 0))
     }
-    return enum_from_int(type<doom_boolean>, !((thing.flags & int(mobjflag_t.MF_SOLID)) != 0) ? 1 : 0)
+    return enum_from_int(type<doom_boolean>, int_of((thing.flags & int(mobjflag_t.MF_SOLID)) == 0))
 }
 
 // P_CheckPosition
@@ -299,7 +302,7 @@ def P_CheckPosition(var thing : mobj_s?; x : int; y : int) : doom_boolean {
     while (bx <= xh) {
         by = yl
         while (by <= yh) {
-            if (!(int(P_BlockThingsIterator(bx, by, @@PIT_CheckThing)) != 0)) {
+            if (int(P_BlockThingsIterator(bx, by, @@PIT_CheckThing)) == 0) {
                 return doom_boolean._c_false
             }
             by++
@@ -315,7 +318,7 @@ def P_CheckPosition(var thing : mobj_s?; x : int; y : int) : doom_boolean {
     while (bx <= xh) {
         by = yl
         while (by <= yh) {
-            if (!(int(P_BlockLinesIterator(bx, by, @@PIT_CheckLine)) != 0)) {
+            if (int(P_BlockLinesIterator(bx, by, @@PIT_CheckLine)) == 0) {
                 return doom_boolean._c_false
             }
             by++
@@ -336,25 +339,25 @@ def P_TryMove(var thing : mobj_s?; x : int; y : int) : doom_boolean {
     var oldside : int
     var ld : line_s?
     floatok = doom_boolean._c_false
-    if (!(int(P_CheckPosition(thing, x, y)) != 0)) {
+    if (int(P_CheckPosition(thing, x, y)) == 0) {
         // solid wall or thing
         return doom_boolean._c_false
     }
-    if (!((thing.flags & int(mobjflag_t.MF_NOCLIP)) != 0)) {
+    if ((thing.flags & int(mobjflag_t.MF_NOCLIP)) == 0) {
         if (tmceilingz - tmfloorz < thing.height) {
             // doesn't fit
             return doom_boolean._c_false
         }
         floatok = doom_boolean._c_true
-        if (!((thing.flags & int(mobjflag_t.MF_TELEPORT)) != 0) && tmceilingz - thing.z < thing.height) {
+        if ((thing.flags & int(mobjflag_t.MF_TELEPORT)) == 0 && tmceilingz - thing.z < thing.height) {
             // mobj must lower itself to fit
             return doom_boolean._c_false
         }
-        if (!((thing.flags & int(mobjflag_t.MF_TELEPORT)) != 0) && tmfloorz - thing.z > 24 * FRACUNIT) {
+        if ((thing.flags & int(mobjflag_t.MF_TELEPORT)) == 0 && tmfloorz - thing.z > 24 * FRACUNIT) {
             // too big a step up
             return doom_boolean._c_false
         }
-        if (!((thing.flags & (int(mobjflag_t.MF_DROPOFF) | int(mobjflag_t.MF_FLOAT))) != 0) && tmfloorz - tmdropoffz > 24 * FRACUNIT) {
+        if ((thing.flags & (int(mobjflag_t.MF_DROPOFF) | int(mobjflag_t.MF_FLOAT))) == 0 && tmfloorz - tmdropoffz > 24 * FRACUNIT) {
             // don't stand over a dropoff
             return doom_boolean._c_false
         }
@@ -370,11 +373,11 @@ def P_TryMove(var thing : mobj_s?; x : int; y : int) : doom_boolean {
     thing.y = y
     P_SetThingPosition(thing)
     // if any special lines were hit, do the effect
-    if (!((thing.flags & (int(mobjflag_t.MF_TELEPORT) | int(mobjflag_t.MF_NOCLIP))) != 0)) {
+    if ((thing.flags & (int(mobjflag_t.MF_TELEPORT) | int(mobjflag_t.MF_NOCLIP))) == 0) {
         while (true) {
             let _t0 = numspechit
             numspechit--
-            if (!(_t0 != 0)) {
+            if (_t0 == 0) {
                 break
             }
             // see if the line was crossed
@@ -401,7 +404,7 @@ def P_TryMove(var thing : mobj_s?; x : int; y : int) : doom_boolean {
 // and false will be returned.
 def P_ThingHeightClip(var thing : mobj_s?) : doom_boolean {
     var onfloor : doom_boolean
-    onfloor = enum_from_int(type<doom_boolean>, (thing.z == thing.floorz) ? 1 : 0)
+    onfloor = enum_from_int(type<doom_boolean>, int_of(thing.z == thing.floorz))
     P_CheckPosition(thing, thing.x, thing.y)
     // what about stranding a monster partially off an edge?
     thing.floorz = tmfloorz
@@ -461,11 +464,11 @@ def P_HitSlideLine(var ld : line_s?) {
 // PTR_SlideTraverse
 def PTR_SlideTraverse(var _c_in : intercept_t?) : doom_boolean {
     var li : line_s?
-    if (!(int(_c_in.isaline) != 0)) {
+    if (int(_c_in.isaline) == 0) {
         I_Error(cstr("Error: PTR_SlideTraverse: not a line?"))
     }
     li = _c_in.d.line
-    if (!((int(li.flags) & ML_TWOSIDED) != 0)) {
+    if ((int(li.flags) & ML_TWOSIDED) == 0) {
         if (P_PointOnLineSide(slidemo.x, slidemo.y, li) != 0) {
             // don't hit the back side
             return doom_boolean._c_true
@@ -548,7 +551,7 @@ def P_SlideMove(var mo : mobj_s?) {
     }
     label 2:  // stairstep
     // the move most have hit the middle, so stairstep
-    if (!(int(P_TryMove(mo, mo.x, mo.y + mo.momy)) != 0)) {
+    if (int(P_TryMove(mo, mo.x, mo.y + mo.momy)) == 0) {
         P_TryMove(mo, mo.x + mo.momx, mo.y)
     }
     return
@@ -558,7 +561,7 @@ def P_SlideMove(var mo : mobj_s?) {
     if (bestslidefrac > 0) {
         newx = FixedMul(mo.momx, bestslidefrac)
         newy = FixedMul(mo.momy, bestslidefrac)
-        if (!(int(P_TryMove(mo, mo.x + newx, mo.y + newy)) != 0)) {
+        if (int(P_TryMove(mo, mo.x + newx, mo.y + newy)) == 0) {
             goto label 2
         }
     }
@@ -577,7 +580,7 @@ def P_SlideMove(var mo : mobj_s?) {
     P_HitSlideLine(bestslideline)
     mo.momx = tmxmove
     mo.momy = tmymove
-    if (!(int(P_TryMove(mo, mo.x + tmxmove, mo.y + tmymove)) != 0)) {
+    if (int(P_TryMove(mo, mo.x + tmxmove, mo.y + tmymove)) == 0) {
         goto label 1
     }
 }
@@ -593,7 +596,7 @@ def PTR_AimTraverse(var _c_in : intercept_t?) : doom_boolean {
     var dist : int
     if (int(_c_in.isaline) != 0) {
         li = _c_in.d.line
-        if (!((int(li.flags) & ML_TWOSIDED) != 0)) {
+        if ((int(li.flags) & ML_TWOSIDED) == 0) {
             // stop
             return doom_boolean._c_false
         }
@@ -631,7 +634,7 @@ def PTR_AimTraverse(var _c_in : intercept_t?) : doom_boolean {
         // can't shoot self
         return doom_boolean._c_true
     }
-    if (!((th.flags & int(mobjflag_t.MF_SHOOTABLE)) != 0)) {
+    if ((th.flags & int(mobjflag_t.MF_SHOOTABLE)) == 0) {
         // corpse or something
         return doom_boolean._c_true
     }
@@ -677,7 +680,7 @@ def PTR_ShootTraverse(var _c_in : intercept_t?) : doom_boolean {
         if (li.special != 0) {
             P_ShootSpecialLine(shootthing, li)
         }
-        if (!((int(li.flags) & ML_TWOSIDED) != 0)) {
+        if ((int(li.flags) & ML_TWOSIDED) == 0) {
             goto label 1
         }
         // crosses a two sided line
@@ -725,7 +728,7 @@ def PTR_ShootTraverse(var _c_in : intercept_t?) : doom_boolean {
         // can't shoot self
         return doom_boolean._c_true
     }
-    if (!((th.flags & int(mobjflag_t.MF_SHOOTABLE)) != 0)) {
+    if ((th.flags & int(mobjflag_t.MF_SHOOTABLE)) == 0) {
         // corpse or something
         return doom_boolean._c_true
     }
@@ -805,7 +808,7 @@ def P_LineAttack(var t1 : mobj_s?; var angle : uint; distance : int; slope : int
 [c_function]
 def PTR_UseTraverse(var _c_in : intercept_t?) : doom_boolean {
     var side : int
-    if (!(_c_in.d.line.special != 0)) {
+    if (_c_in.d.line.special == 0) {
         P_LineOpening(_c_in.d.line)
         if (openrange <= 0) {
             S_StartSound(reinterpret<void?>(usething), int(sfxenum_t.sfx_noway))
@@ -849,7 +852,7 @@ def PIT_RadiusAttack(var thing : mobj_s?) : doom_boolean {
     var dx : int
     var dy : int
     var dist : int
-    if (!((thing.flags & int(mobjflag_t.MF_SHOOTABLE)) != 0)) {
+    if ((thing.flags & int(mobjflag_t.MF_SHOOTABLE)) == 0) {
         return doom_boolean._c_true
     }
     // Boss spider and cyborg
@@ -926,12 +929,12 @@ def PIT_ChangeSector(var thing : mobj_s?) : doom_boolean {
         // keep checking
         return doom_boolean._c_true
     }
-    if (!((thing.flags & int(mobjflag_t.MF_SHOOTABLE)) != 0)) {
+    if ((thing.flags & int(mobjflag_t.MF_SHOOTABLE)) == 0) {
         // assume it is bloody gibs or something
         return doom_boolean._c_true
     }
     nofit = doom_boolean._c_true
-    if (uint(int(crushchange)) != 0 && !((leveltime & 3) != 0)) {
+    if (uint(crushchange) != 0 && (leveltime & 3) == 0) {
         P_DamageMobj(thing, null, null, 10)
         // spray blood in a random direction
         mo = P_SpawnMobj(thing.x, thing.y, thing.z + thing.height / 2, mobjtype_t.MT_BLOOD)

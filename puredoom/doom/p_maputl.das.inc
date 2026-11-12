@@ -27,17 +27,17 @@ def P_PointOnLineSide(x : int; y : int; var line : line_s?) : int {
     var dy : int
     var left : int
     var right : int
-    if (!(line.dx != 0)) {
+    if (line.dx == 0) {
         if (x <= line.v1.x) {
-            return line.dy > 0 ? 1 : 0
+            return int_of(line.dy > 0)
         }
-        return line.dy < 0 ? 1 : 0
+        return int_of(line.dy < 0)
     }
-    if (!(line.dy != 0)) {
+    if (line.dy == 0) {
         if (y <= line.v1.y) {
-            return line.dx < 0 ? 1 : 0
+            return int_of(line.dx < 0)
         }
-        return line.dx > 0 ? 1 : 0
+        return int_of(line.dx > 0)
     }
     dx = x - line.v1.x
     dy = y - line.v1.y
@@ -58,27 +58,35 @@ def P_PointOnLineSide(x : int; y : int; var line : line_s?) : int {
 def P_BoxOnLineSide(var tmbox : int?; var ld : line_s?) : int {
     var p1 : int
     var p2 : int
-    let _cond = ld.slopetype
-    if (_cond == slopetype_t.ST_HORIZONTAL) {
-        p1 = tmbox[int(anon_787.BOXTOP)] > ld.v1.y ? 1 : 0
-        p2 = tmbox[int(anon_787.BOXBOTTOM)] > ld.v1.y ? 1 : 0
-        if (ld.dx < 0) {
-            p1 ^= 1
-            p2 ^= 1
+    c_switch(ld.slopetype) {
+        case(slopetype_t.ST_HORIZONTAL) {
+            p1 = int_of(tmbox[int(anon_787.BOXTOP)] > ld.v1.y)
+            p2 = int_of(tmbox[int(anon_787.BOXBOTTOM)] > ld.v1.y)
+            if (ld.dx < 0) {
+                p1 ^= 1
+                p2 ^= 1
+            }
+            break
         }
-    } elif (_cond == slopetype_t.ST_VERTICAL) {
-        p1 = tmbox[int(anon_787.BOXRIGHT)] < ld.v1.x ? 1 : 0
-        p2 = tmbox[int(anon_787.BOXLEFT)] < ld.v1.x ? 1 : 0
-        if (ld.dy < 0) {
-            p1 ^= 1
-            p2 ^= 1
+        case(slopetype_t.ST_VERTICAL) {
+            p1 = int_of(tmbox[int(anon_787.BOXRIGHT)] < ld.v1.x)
+            p2 = int_of(tmbox[int(anon_787.BOXLEFT)] < ld.v1.x)
+            if (ld.dy < 0) {
+                p1 ^= 1
+                p2 ^= 1
+            }
+            break
         }
-    } elif (_cond == slopetype_t.ST_POSITIVE) {
-        p1 = P_PointOnLineSide(tmbox[int(anon_787.BOXLEFT)], tmbox[int(anon_787.BOXTOP)], ld)
-        p2 = P_PointOnLineSide(tmbox[int(anon_787.BOXRIGHT)], tmbox[int(anon_787.BOXBOTTOM)], ld)
-    } elif (_cond == slopetype_t.ST_NEGATIVE) {
-        p1 = P_PointOnLineSide(tmbox[int(anon_787.BOXRIGHT)], tmbox[int(anon_787.BOXTOP)], ld)
-        p2 = P_PointOnLineSide(tmbox[int(anon_787.BOXLEFT)], tmbox[int(anon_787.BOXBOTTOM)], ld)
+        case(slopetype_t.ST_POSITIVE) {
+            p1 = P_PointOnLineSide(tmbox[int(anon_787.BOXLEFT)], tmbox[int(anon_787.BOXTOP)], ld)
+            p2 = P_PointOnLineSide(tmbox[int(anon_787.BOXRIGHT)], tmbox[int(anon_787.BOXBOTTOM)], ld)
+            break
+        }
+        case(slopetype_t.ST_NEGATIVE) {
+            p1 = P_PointOnLineSide(tmbox[int(anon_787.BOXRIGHT)], tmbox[int(anon_787.BOXTOP)], ld)
+            p2 = P_PointOnLineSide(tmbox[int(anon_787.BOXLEFT)], tmbox[int(anon_787.BOXBOTTOM)], ld)
+            break
+        }
     }
     if (p1 == p2) {
         return p1
@@ -93,17 +101,17 @@ def P_PointOnDivlineSide(x : int; y : int; var line : divline_t?) : int {
     var dy : int
     var left : int
     var right : int
-    if (!(line.dx != 0)) {
+    if (line.dx == 0) {
         if (x <= line.x) {
-            return line.dy > 0 ? 1 : 0
+            return int_of(line.dy > 0)
         }
-        return line.dy < 0 ? 1 : 0
+        return int_of(line.dy < 0)
     }
-    if (!(line.dy != 0)) {
+    if (line.dy == 0) {
         if (y <= line.y) {
-            return line.dx < 0 ? 1 : 0
+            return int_of(line.dx < 0)
         }
-        return line.dx > 0 ? 1 : 0
+        return int_of(line.dx > 0)
     }
     dx = x - line.x
     dy = y - line.y
@@ -159,7 +167,7 @@ def P_InterceptVector(var v2 : divline_t?; var v1 : divline_t?) : int {
 def P_LineOpening(var linedef : line_s?) {
     var front : sector_t?
     var back : sector_t?
-    if (int(linedef.sidenum[1]) == -1) {
+    if (linedef.sidenum[1] == -1) {
         // single sided line
         openrange = 0
         return
@@ -190,7 +198,7 @@ def P_LineOpening(var linedef : line_s?) {
 def P_UnsetThingPosition(var thing : mobj_s?) {
     var blockx : int
     var blocky : int
-    if (!((thing.flags & int(mobjflag_t.MF_NOSECTOR)) != 0)) {
+    if ((thing.flags & int(mobjflag_t.MF_NOSECTOR)) == 0) {
         // inert things don't need to be in blockmap?
         // unlink from subsector
         if (thing.snext != null) {
@@ -202,7 +210,7 @@ def P_UnsetThingPosition(var thing : mobj_s?) {
             thing.subsector.sector.thinglist = thing.snext
         }
     }
-    if (!((thing.flags & int(mobjflag_t.MF_NOBLOCKMAP)) != 0)) {
+    if ((thing.flags & int(mobjflag_t.MF_NOBLOCKMAP)) == 0) {
         // inert things don't need to be in blockmap
         // unlink from block map
         if (thing.bnext != null) {
@@ -234,7 +242,7 @@ def P_SetThingPosition(var thing : mobj_s?) {
     // link into subsector
     ss = R_PointInSubsector(thing.x, thing.y)
     thing.subsector = ss
-    if (!((thing.flags & int(mobjflag_t.MF_NOSECTOR)) != 0)) {
+    if ((thing.flags & int(mobjflag_t.MF_NOSECTOR)) == 0) {
         // invisible things don't go into the sector links
         sec = ss.sector
         thing.sprev = null
@@ -245,18 +253,18 @@ def P_SetThingPosition(var thing : mobj_s?) {
         sec.thinglist = thing
     }
     // link into blockmap
-    if (!((thing.flags & int(mobjflag_t.MF_NOBLOCKMAP)) != 0)) {
+    if ((thing.flags & int(mobjflag_t.MF_NOBLOCKMAP)) == 0) {
         // inert things don't need to be in blockmap
         blockx = (thing.x - bmaporgx) >> MAPBLOCKSHIFT
         blocky = (thing.y - bmaporgy) >> MAPBLOCKSHIFT
         if (blockx >= 0 && blockx < bmapwidth && blocky >= 0 && blocky < bmapheight) {
             link = addr(blocklinks[blocky * bmapwidth + blockx])
             thing.bprev = null
-            thing.bnext = deref(link)
-            if (deref(link) != null) {
-                deref(link).bprev = thing
+            thing.bnext = *link
+            if (*link != null) {
+                (*link).bprev = thing
             }
-            deref(link) = thing
+            *link = thing
         } else {
             // thing is off the map
             thing.bprev = null
@@ -286,19 +294,19 @@ def P_BlockLinesIterator(x : int; y : int; func : function<(var a0 : line_s?) : 
         var _f = false
         while (true) {
             if (_f) {
-                list = list + 1
+                list++
             }
             _f = true
-            if (!(int(deref(list)) != -1)) {
+            if (!(*list != -1)) {
                 break
             }
-            ld = addr(lines[int(deref(list))])
+            ld = addr(lines[int(*list)])
             if (ld.validcount == validcount) {
                 // line has already been checked
                 continue
             }
             ld.validcount = validcount
-            if (!(int(invoke(func, ld)) != 0)) {
+            if (int(invoke(func, ld)) == 0) {
                 return doom_boolean._c_false
             }
         }
@@ -316,7 +324,7 @@ def P_BlockThingsIterator(x : int; y : int; func : function<(var a0 : mobj_s?) :
     }
     mobj = blocklinks[y * bmapwidth + x]
     while (mobj != null) {
-        if (!(int(invoke(func, mobj)) != 0)) {
+        if (int(invoke(func, mobj)) == 0) {
             return doom_boolean._c_false
         }
         mobj = mobj.bnext
@@ -357,14 +365,14 @@ def PIT_AddLineIntercepts(var ld : line_s?) : doom_boolean {
         return doom_boolean._c_true
     }
     // try to early out the check
-    if (uint(int(earlyout)) != 0 && frac < FRACUNIT && !(ld.backsector != null)) {
+    if (uint(earlyout) != 0 && frac < FRACUNIT && ld.backsector == null) {
         // stop checking
         return doom_boolean._c_false
     }
     intercept_p.frac = frac
     intercept_p.isaline = doom_boolean._c_true
     intercept_p.d.line = ld
-    intercept_p = intercept_p + 1
+    intercept_p++
     // continue
     return doom_boolean._c_true
 }
@@ -381,7 +389,7 @@ def PIT_AddThingIntercepts(var thing : mobj_s?) : doom_boolean {
     var tracepositive : doom_boolean
     var dl : divline_t
     var frac : int
-    tracepositive = enum_from_int(type<doom_boolean>, (trace.dx ^ trace.dy) > 0 ? 1 : 0)
+    tracepositive = enum_from_int(type<doom_boolean>, int_of((trace.dx ^ trace.dy) > 0))
     // check a corner to corner crossection for hit
     if (int(tracepositive) != 0) {
         x1 = thing.x - thing.radius
@@ -412,7 +420,7 @@ def PIT_AddThingIntercepts(var thing : mobj_s?) : doom_boolean {
     intercept_p.frac = frac
     intercept_p.isaline = doom_boolean._c_false
     intercept_p.d.thing = thing
-    intercept_p = intercept_p + 1
+    intercept_p++
     // keep going
     return doom_boolean._c_true
 }
@@ -432,7 +440,7 @@ def P_TraverseIntercepts(func : function<(var a0 : intercept_t?) : doom_boolean>
     while (true) {
         let _t0 = count
         count--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         dist = DOOM_MAXINT
@@ -442,7 +450,7 @@ def P_TraverseIntercepts(func : function<(var a0 : intercept_t?) : doom_boolean>
                 dist = scan.frac
                 _c_in = scan
             }
-            scan = scan + 1
+            scan++
         }
         if (dist > maxfrac) {
             // checked everything in range
@@ -450,7 +458,7 @@ def P_TraverseIntercepts(func : function<(var a0 : intercept_t?) : doom_boolean>
         }
         // UNUSED
         // don't check these yet, there may be others inserted
-        if (!(int(invoke(func, _c_in)) != 0)) {
+        if (int(invoke(func, _c_in)) == 0) {
             // don't bother going farther
             return doom_boolean._c_false
         }
@@ -466,7 +474,8 @@ def P_TraverseIntercepts(func : function<(var a0 : intercept_t?) : doom_boolean>
 // Returns true if the traverser function returns true
 // for all lines.
 [c_function]
-def P_PathTraverse(var x1 : int; var y1 : int; var x2 : int; var y2 : int; flags : int; trav : function<(var a0 : intercept_t?) : doom_boolean>) : doom_boolean {
+def P_PathTraverse(var x1 : int; var y1 : int; var x2 : int; var y2 : int; flags : int;
+                   trav : function<(var a0 : intercept_t?) : doom_boolean>) : doom_boolean {
     var xt1 : int
     var yt1 : int
     var xt2 : int
@@ -538,13 +547,13 @@ def P_PathTraverse(var x1 : int; var y1 : int; var x2 : int; var y2 : int; flags
     mapy = yt1
     for (count in range(64)) {
         if ((flags & PT_ADDLINES) != 0) {
-            if (!(int(P_BlockLinesIterator(mapx, mapy, @@PIT_AddLineIntercepts)) != 0)) {
+            if (int(P_BlockLinesIterator(mapx, mapy, @@PIT_AddLineIntercepts)) == 0) {
                 // early out
                 return doom_boolean._c_false
             }
         }
         if ((flags & PT_ADDTHINGS) != 0) {
-            if (!(int(P_BlockThingsIterator(mapx, mapy, @@PIT_AddThingIntercepts)) != 0)) {
+            if (int(P_BlockThingsIterator(mapx, mapy, @@PIT_AddThingIntercepts)) == 0) {
                 // early out
                 return doom_boolean._c_false
             }

@@ -9,8 +9,8 @@ def P_SetPsprite(var player : player_s?; position : int; var stnum : statenum_t)
     var psp : pspdef_t?
     var state : state_t?
     psp = addr(player.psprites[0]) + end_index(position, 2)
-    while (true) {
-        if (!(int(stnum) != 0)) {
+    c_do_while(psp.tics == 0) {
+        if (int(stnum) == 0) {
             // object removed itself
             psp.state = null
             break
@@ -28,14 +28,11 @@ def P_SetPsprite(var player : player_s?; position : int; var stnum : statenum_t)
         // Modified handling.
         if (state.action.acp2 != null) {
             invoke(state.action.acp2, reinterpret<void?>(player), reinterpret<void?>(psp))
-            if (!(psp.state != null)) {
+            if (psp.state == null) {
                 break
             }
         }
         stnum = psp.state.nextstate
-        if (!(!(psp.tics != 0))) {
-            break
-        }
     }
 }
 
@@ -82,29 +79,27 @@ def P_CheckAmmo(var player : player_s?) : doom_boolean {
     }
     // Out of ammo, pick a weapon to change to.
     // Preferences are set here.
-    while (true) {
-        if (uint(int(player.weaponowned[int(weapontype_t.wp_plasma)])) != 0 && player.ammo[int(ammotype_t.am_cell)] != 0 && (gamemode != GameMode_t.shareware)) {
+    c_do_while(player.pendingweapon == weapontype_t.wp_nochange) {
+        if (uint(player.weaponowned[int(weapontype_t.wp_plasma)]) != 0 && player.ammo[int(ammotype_t.am_cell)] != 0 && (gamemode != GameMode_t.shareware)) {
             player.pendingweapon = weapontype_t.wp_plasma
-        } elif (uint(int(player.weaponowned[int(weapontype_t.wp_supershotgun)])) != 0 && player.ammo[int(ammotype_t.am_shell)] > 2 && (gamemode == GameMode_t.commercial)) {
+        } elif (uint(player.weaponowned[int(weapontype_t.wp_supershotgun)]) != 0 && player.ammo[int(ammotype_t.am_shell)] > 2 &&
+                (gamemode == GameMode_t.commercial)) {
             player.pendingweapon = weapontype_t.wp_supershotgun
-        } elif (uint(int(player.weaponowned[int(weapontype_t.wp_chaingun)])) != 0 && player.ammo[int(ammotype_t.am_clip)] != 0) {
+        } elif (uint(player.weaponowned[int(weapontype_t.wp_chaingun)]) != 0 && player.ammo[int(ammotype_t.am_clip)] != 0) {
             player.pendingweapon = weapontype_t.wp_chaingun
-        } elif (uint(int(player.weaponowned[int(weapontype_t.wp_shotgun)])) != 0 && player.ammo[int(ammotype_t.am_shell)] != 0) {
+        } elif (uint(player.weaponowned[int(weapontype_t.wp_shotgun)]) != 0 && player.ammo[int(ammotype_t.am_shell)] != 0) {
             player.pendingweapon = weapontype_t.wp_shotgun
         } elif (player.ammo[int(ammotype_t.am_clip)] != 0) {
             player.pendingweapon = weapontype_t.wp_pistol
         } elif (int(player.weaponowned[int(weapontype_t.wp_chainsaw)]) != 0) {
             player.pendingweapon = weapontype_t.wp_chainsaw
-        } elif (uint(int(player.weaponowned[int(weapontype_t.wp_missile)])) != 0 && player.ammo[int(ammotype_t.am_misl)] != 0) {
+        } elif (uint(player.weaponowned[int(weapontype_t.wp_missile)]) != 0 && player.ammo[int(ammotype_t.am_misl)] != 0) {
             player.pendingweapon = weapontype_t.wp_missile
-        } elif (uint(int(player.weaponowned[int(weapontype_t.wp_bfg)])) != 0 && player.ammo[int(ammotype_t.am_cell)] > 40 && (gamemode != GameMode_t.shareware)) {
+        } elif (uint(player.weaponowned[int(weapontype_t.wp_bfg)]) != 0 && player.ammo[int(ammotype_t.am_cell)] > 40 && (gamemode != GameMode_t.shareware)) {
             player.pendingweapon = weapontype_t.wp_bfg
         } else {
             // If everything fails.
             player.pendingweapon = weapontype_t.wp_fist
-        }
-        if (!(player.pendingweapon == weapontype_t.wp_nochange)) {
-            break
         }
     }
     // Now set appropriate weapon overlay.
@@ -116,7 +111,7 @@ def P_CheckAmmo(var player : player_s?) : doom_boolean {
 [c_function]
 def P_FireWeapon(var player : player_s?) {
     var newstate : statenum_t
-    if (!(int(P_CheckAmmo(player)) != 0)) {
+    if (int(P_CheckAmmo(player)) == 0) {
         return
     }
     P_SetMobjState(player.mo, statenum_t.S_PLAY_ATK1)
@@ -146,7 +141,8 @@ def A_WeaponReady(var player : player_s?; var psp : pspdef_t?) {
     var newstate : statenum_t
     var angle : int
     // get out of attack state
-    if (intptr(player.mo.state) == intptr(addr(states[int(statenum_t.S_PLAY_ATK1)])) || intptr(player.mo.state) == intptr(addr(states[int(statenum_t.S_PLAY_ATK2)]))) {
+    if (intptr(player.mo.state) == intptr(addr(states[int(statenum_t.S_PLAY_ATK1)])) ||
+            intptr(player.mo.state) == intptr(addr(states[int(statenum_t.S_PLAY_ATK2)]))) {
         P_SetMobjState(player.mo, statenum_t.S_PLAY)
     }
     if (player.readyweapon == weapontype_t.wp_chainsaw && intptr(psp.state) == intptr(addr(states[int(statenum_t.S_SAW)]))) {
@@ -154,7 +150,7 @@ def A_WeaponReady(var player : player_s?; var psp : pspdef_t?) {
     }
     // check for change
     // if player is dead, put the weapon away
-    if (player.pendingweapon != weapontype_t.wp_nochange || !(player.health != 0)) {
+    if (player.pendingweapon != weapontype_t.wp_nochange || player.health == 0) {
         // change weapon
         // (pending weapon should allready be validated)
         newstate = enum_from_int(type<statenum_t>, weaponinfo[int(player.readyweapon)].downstate)
@@ -164,7 +160,7 @@ def A_WeaponReady(var player : player_s?; var psp : pspdef_t?) {
     // check for fire
     // the missile launcher and bfg do not auto fire
     if ((int(player.cmd.buttons) & int(buttoncode_t.BT_ATTACK)) != 0) {
-        if (!(player.attackdown != 0) || (player.readyweapon != weapontype_t.wp_missile && player.readyweapon != weapontype_t.wp_bfg)) {
+        if (player.attackdown == 0 || (player.readyweapon != weapontype_t.wp_missile && player.readyweapon != weapontype_t.wp_bfg)) {
             player.attackdown = int(doom_boolean._c_true)
             P_FireWeapon(player)
             return
@@ -215,7 +211,7 @@ def A_Lower(var player : player_s?; var psp : pspdef_t?) {
     }
     // The old weapon has been lowered off the screen,
     // so change the weapon and start raising it
-    if (!(player.health != 0)) {
+    if (player.health == 0) {
         // Player is dead, so keep the weapon off screen.
         P_SetPsprite(player, int(psprnum_t.ps_weapon), statenum_t.S_NULL)
         return
@@ -277,7 +273,7 @@ def A_Saw(var player : player_s?; var psp : pspdef_t?) {
     // use meleerange + 1 se the puff doesn't skip the flash
     slope = P_AimLineAttack(player.mo, angle, MELEERANGE + 1)
     P_LineAttack(player.mo, angle, MELEERANGE + 1, slope, damage)
-    if (!(linetarget != null)) {
+    if (linetarget == null) {
         S_StartSound(reinterpret<void?>(player.mo), int(sfxenum_t.sfx_sawful))
         return
     }
@@ -327,10 +323,10 @@ def P_BulletSlope(var mo : mobj_s?) {
     // see which target is to be aimed at
     an = mo.angle
     bulletslope = P_AimLineAttack(mo, an, 16 * 64 * FRACUNIT)
-    if (!(linetarget != null)) {
+    if (linetarget == null) {
         an += uint(1 << 26)
         bulletslope = P_AimLineAttack(mo, an, 16 * 64 * FRACUNIT)
-        if (!(linetarget != null)) {
+        if (linetarget == null) {
             an -= uint(2 << 26)
             bulletslope = P_AimLineAttack(mo, an, 16 * 64 * FRACUNIT)
         }
@@ -343,7 +339,7 @@ def P_GunShot(var mo : mobj_s?; accurate : doom_boolean) {
     var damage : int
     damage = 5 * (P_Random() % 3 + 1)
     angle = mo.angle
-    if (!(int(accurate) != 0)) {
+    if (int(accurate) == 0) {
         angle += uint((P_Random() - P_Random()) << 18)
     }
     P_LineAttack(mo, angle, MISSILERANGE, bulletslope, damage)
@@ -357,7 +353,7 @@ def A_FirePistol(var player : player_s?; var psp : pspdef_t?) {
     player.ammo[int(weaponinfo[int(player.readyweapon)].ammo)]--
     P_SetPsprite(player, int(psprnum_t.ps_flash), enum_from_int(type<statenum_t>, weaponinfo[int(player.readyweapon)].flashstate))
     P_BulletSlope(player.mo)
-    P_GunShot(player.mo, enum_from_int(type<doom_boolean>, !(player.refire != 0) ? 1 : 0))
+    P_GunShot(player.mo, enum_from_int(type<doom_boolean>, int_of(player.refire == 0)))
 }
 
 // A_FireShotgun
@@ -395,14 +391,15 @@ def A_FireShotgun2(var player : player_s?; var psp : pspdef_t?) {
 [c_function]
 def A_FireCGun(var player : player_s?; var psp : pspdef_t?) {
     S_StartSound(reinterpret<void?>(player.mo), int(sfxenum_t.sfx_pistol))
-    if (!(player.ammo[int(weaponinfo[int(player.readyweapon)].ammo)] != 0)) {
+    if (player.ammo[int(weaponinfo[int(player.readyweapon)].ammo)] == 0) {
         return
     }
     P_SetMobjState(player.mo, statenum_t.S_PLAY_ATK2)
     player.ammo[int(weaponinfo[int(player.readyweapon)].ammo)]--
-    P_SetPsprite(player, int(psprnum_t.ps_flash), enum_from_int(type<statenum_t>, int(int64(psp.state + weaponinfo[int(player.readyweapon)].flashstate - addr(states[int(statenum_t.S_CHAIN1)])))))
+    P_SetPsprite(player, int(psprnum_t.ps_flash),
+            enum_from_int(type<statenum_t>, int(int64(psp.state + weaponinfo[int(player.readyweapon)].flashstate - addr(states[int(statenum_t.S_CHAIN1)])))))
     P_BulletSlope(player.mo)
-    P_GunShot(player.mo, enum_from_int(type<doom_boolean>, !(player.refire != 0) ? 1 : 0))
+    P_GunShot(player.mo, enum_from_int(type<doom_boolean>, int_of(player.refire == 0)))
 }
 
 // ?
@@ -430,7 +427,7 @@ def A_BFGSpray(var mo : mobj_s?) {
         // mo->target is the originator (player)
         // of the missile
         P_AimLineAttack(mo.target, an, 16 * 64 * FRACUNIT)
-        if (!(linetarget != null)) {
+        if (linetarget == null) {
             continue
         }
         P_SpawnMobj(linetarget.x, linetarget.y, linetarget.z + (linetarget.height >> 2), mobjtype_t.MT_EXTRABFG)
@@ -479,13 +476,13 @@ def P_MovePsprites(var player : player_s?) {
             // a -1 tic count never changes
             if (psp.tics != -1) {
                 psp.tics--
-                if (!(psp.tics != 0)) {
+                if (psp.tics == 0) {
                     P_SetPsprite(player, i, psp.state.nextstate)
                 }
             }
         }
         i++
-        psp = psp + 1
+        psp++
     }
     player.psprites[int(psprnum_t.ps_flash)].sx = player.psprites[int(psprnum_t.ps_weapon)].sx
     player.psprites[int(psprnum_t.ps_flash)].sy = player.psprites[int(psprnum_t.ps_weapon)].sy

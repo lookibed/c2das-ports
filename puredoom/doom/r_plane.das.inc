@@ -101,7 +101,7 @@ def R_ClearPlanes {
     lastvisplane = addr(visplanes[0])
     lastopening = addr(openings[0])
     // texture calculation
-    doom_memset(reinterpret<void?>(addr(cachedheight[0])), 0, int(uint64(typeinfo sizeof(type<int[200]>))))
+    doom_memset(reinterpret<void?>(addr(cachedheight[0])), 0, typeinfo sizeof(type<int[200]>))
     // left to right mapping
     angle = (viewangle - uint(ANG90)) >> uint(ANGLETOFINESHIFT)
     // scale will be unit scale at SCREENWIDTH/2 distance
@@ -123,7 +123,7 @@ def R_FindPlane(var height : int; picnum : int; var lightlevel : int) : visplane
         if (height == check.height && picnum == check.picnum && lightlevel == check.lightlevel) {
             break
         }
-        check = check + 1
+        check++
     }
     if (intptr(check) < intptr(lastvisplane)) {
         return check
@@ -131,13 +131,13 @@ def R_FindPlane(var height : int; picnum : int; var lightlevel : int) : visplane
     if (int64(lastvisplane - addr(visplanes[0])) == int64(MAXVISPLANES)) {
         I_Error(cstr("Error: R_FindPlane: no more visplanes"))
     }
-    lastvisplane = lastvisplane + 1
+    lastvisplane++
     check.height = height
     check.picnum = picnum
     check.lightlevel = lightlevel
     check.minx = SCREENWIDTH
     check.maxx = -1
-    doom_memset(reinterpret<void?>(addr(check.top[0])), 255, int(uint64(typeinfo sizeof(type<uint8[320]>))))
+    doom_memset(reinterpret<void?>(addr(check.top[0])), 255, typeinfo sizeof(type<uint8[320]>))
     return check
 }
 
@@ -165,7 +165,7 @@ def R_CheckPlane(var pl : visplane_t?; start : int; stop : int) : visplane_t? {
     }
     x = intrl
     while (x <= intrh) {
-        if (int(addr(pl.top[0])[x]) != 255) {
+        if (addr(pl.top[0])[x] != 255) {
             break
         }
         x++
@@ -181,11 +181,11 @@ def R_CheckPlane(var pl : visplane_t?; start : int; stop : int) : visplane_t? {
     lastvisplane.picnum = pl.picnum
     lastvisplane.lightlevel = pl.lightlevel
     var _t0 = lastvisplane
-    lastvisplane = lastvisplane + 1
+    lastvisplane++
     pl = _t0
     pl.minx = start
     pl.maxx = stop
-    doom_memset(reinterpret<void?>(addr(pl.top[0])), 255, int(uint64(typeinfo sizeof(type<uint8[320]>))))
+    doom_memset(reinterpret<void?>(addr(pl.top[0])), 255, typeinfo sizeof(type<uint8[320]>))
     return pl
 }
 
@@ -298,7 +298,7 @@ def R_DrawPlanes {
             }
             Z_ChangeTag2(reinterpret<void?>(ds_source), PU_CACHE)
         } finally {
-            pl = pl + 1
+            pl++
         }
     }
 }

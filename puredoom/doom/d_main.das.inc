@@ -36,7 +36,7 @@ var pagename : uint8?
 // Called by the I/O functions when input is detected
 [c_function]
 def D_PostEvent(var ev : event_t?) {
-    events[eventhead] = deref(ev)
+    events[eventhead] = *ev
     eventhead++
     eventhead &= (MAXEVENTS - 1)
 }
@@ -52,7 +52,7 @@ def D_ProcessEvents {
     }
     while (eventtail != eventhead) {
         ev = addr(events[0]) + end_index(eventtail, 4096)
-        if (!(int(M_Responder(ev)) != 0)) {
+        if (int(M_Responder(ev)) == 0) {
             G_Responder(ev)
         }
         // else menu ate the event
@@ -92,44 +92,42 @@ def D_Display {
         HU_Erase()
     }
     // do buffered drawing
-    let _cond = gamestate
-    while (true) {
-        if (_cond == gamestate_t.GS_LEVEL) {
-            if (!(gametic != 0)) {
+    c_switch(gamestate) {
+        case(gamestate_t.GS_LEVEL) {
+            if (gametic == 0) {
                 break
             }
             if (int(automapactive) != 0) {
                 AM_Drawer()
             }
-            if (uint(int(wipe)) != 0 || (viewheight != 200 && uint(int(D_Display_fullscreen)) != 0)) {
+            if (uint(wipe) != 0 || (viewheight != 200 && uint(D_Display_fullscreen) != 0)) {
                 redrawsbar = doom_boolean._c_true
             }
-            if (uint(int(D_Display_inhelpscreensstate)) != 0 && !(int(inhelpscreens) != 0)) {
+            if (uint(D_Display_inhelpscreensstate) != 0 && int(inhelpscreens) == 0) {
                 // just put away the help screen
                 redrawsbar = doom_boolean._c_true
             }
-            ST_Drawer(enum_from_int(type<doom_boolean>, viewheight == 200 ? 1 : 0), redrawsbar)
-            D_Display_fullscreen = enum_from_int(type<doom_boolean>, viewheight == 200 ? 1 : 0)
+            ST_Drawer(enum_from_int(type<doom_boolean>, int_of(viewheight == 200)), redrawsbar)
+            D_Display_fullscreen = enum_from_int(type<doom_boolean>, int_of(viewheight == 200))
             break
         }
-        if (_cond == gamestate_t.GS_INTERMISSION) {
+        case(gamestate_t.GS_INTERMISSION) {
             WI_Drawer()
             break
         }
-        if (_cond == gamestate_t.GS_FINALE) {
+        case(gamestate_t.GS_FINALE) {
             F_Drawer()
             break
         }
-        if (_cond == gamestate_t.GS_DEMOSCREEN) {
+        case(gamestate_t.GS_DEMOSCREEN) {
             D_PageDrawer()
             break
         }
-        break
     }
     // draw buffered stuff to screen
     I_UpdateNoBlit()
     // draw the view directly
-    if (gamestate == gamestate_t.GS_LEVEL && !(int(automapactive) != 0) && gametic != 0) {
+    if (gamestate == gamestate_t.GS_LEVEL && int(automapactive) == 0 && gametic != 0) {
         R_RenderPlayerView(addr(players[0]) + end_index(displayplayer, 4))
     }
     if (gamestate == gamestate_t.GS_LEVEL && gametic != 0) {
@@ -147,8 +145,8 @@ def D_Display {
         R_FillBackScreen()
     }
     // see if the border needs to be updated to the screen
-    if (gamestate == gamestate_t.GS_LEVEL && !(int(automapactive) != 0) && scaledviewwidth != 320) {
-        if (uint(int(menuactive)) != 0 || uint(int(D_Display_menuactivestate)) != 0 || !(int(D_Display_viewactivestate) != 0)) {
+    if (gamestate == gamestate_t.GS_LEVEL && int(automapactive) == 0 && scaledviewwidth != 320) {
+        if (uint(menuactive) != 0 || uint(D_Display_menuactivestate) != 0 || int(D_Display_viewactivestate) == 0) {
             D_Display_borderdrawcount = 3
         }
         if (D_Display_borderdrawcount != 0) {
@@ -178,7 +176,7 @@ def D_Display {
     NetUpdate()
     // normal update
     is_wiping_screen = wipe
-    if (!(int(wipe) != 0)) {
+    if (int(wipe) == 0) {
         // page flip or blit buffer
         I_FinishUpdate()
         return
@@ -295,47 +293,61 @@ def D_DoAdvanceDemo {
     } else {
         demosequence = (demosequence + 1) % 6
     }
-    let _cond = demosequence
-    if (_cond == 0) {
-        if (gamemode == GameMode_t.commercial) {
-            pagetic = 35 * 11
-        } else {
-            pagetic = 170
-        }
-        gamestate = gamestate_t.GS_DEMOSCREEN
-        pagename = cstr("TITLEPIC")
-        if (gamemode == GameMode_t.commercial) {
-            S_StartMusic(int(musicenum_t.mus_dm2ttl))
-        } else {
-            S_StartMusic(int(musicenum_t.mus_intro))
-        }
-    } elif (_cond == 1) {
-        G_DeferedPlayDemo(cstr("demo1"))
-    } elif (_cond == 2) {
-        pagetic = 200
-        gamestate = gamestate_t.GS_DEMOSCREEN
-        pagename = cstr("CREDIT")
-    } elif (_cond == 3) {
-        G_DeferedPlayDemo(cstr("demo2"))
-    } elif (_cond == 4) {
-        gamestate = gamestate_t.GS_DEMOSCREEN
-        if (gamemode == GameMode_t.commercial) {
-            pagetic = 35 * 11
-            pagename = cstr("TITLEPIC")
-            S_StartMusic(int(musicenum_t.mus_dm2ttl))
-        } else {
-            pagetic = 200
-            if (gamemode == GameMode_t.retail) {
-                pagename = cstr("CREDIT")
+    c_switch(demosequence) {
+        case(0) {
+            if (gamemode == GameMode_t.commercial) {
+                pagetic = 35 * 11
             } else {
-                pagename = cstr("HELP2")
+                pagetic = 170
             }
+            gamestate = gamestate_t.GS_DEMOSCREEN
+            pagename = cstr("TITLEPIC")
+            if (gamemode == GameMode_t.commercial) {
+                S_StartMusic(int(musicenum_t.mus_dm2ttl))
+            } else {
+                S_StartMusic(int(musicenum_t.mus_intro))
+            }
+            break
         }
-    } elif (_cond == 5) {
-        G_DeferedPlayDemo(cstr("demo3"))
-    } elif (_cond == 6) {
-        // THE DEFINITIVE DOOM Special Edition demo
-        G_DeferedPlayDemo(cstr("demo4"))
+        case(1) {
+            G_DeferedPlayDemo(cstr("demo1"))
+            break
+        }
+        case(2) {
+            pagetic = 200
+            gamestate = gamestate_t.GS_DEMOSCREEN
+            pagename = cstr("CREDIT")
+            break
+        }
+        case(3) {
+            G_DeferedPlayDemo(cstr("demo2"))
+            break
+        }
+        case(4) {
+            gamestate = gamestate_t.GS_DEMOSCREEN
+            if (gamemode == GameMode_t.commercial) {
+                pagetic = 35 * 11
+                pagename = cstr("TITLEPIC")
+                S_StartMusic(int(musicenum_t.mus_dm2ttl))
+            } else {
+                pagetic = 200
+                if (gamemode == GameMode_t.retail) {
+                    pagename = cstr("CREDIT")
+                } else {
+                    pagename = cstr("HELP2")
+                }
+            }
+            break
+        }
+        case(5) {
+            G_DeferedPlayDemo(cstr("demo3"))
+            break
+        }
+        case(6) {
+            // THE DEFINITIVE DOOM Special Edition demo
+            G_DeferedPlayDemo(cstr("demo4"))
+            break
+        }
     }
 }
 
@@ -376,7 +388,7 @@ def IdentifyVersion {
     var home : uint8?
     var doomwaddir : uint8?
     doomwaddir = invoke(doom_getenv, cstr("DOOMWADDIR"))
-    if (!(doomwaddir != null)) {
+    if (doomwaddir == null) {
         doomwaddir = cstr(".")
     }
     // Commercial.
@@ -416,7 +428,7 @@ def IdentifyVersion {
     doom_strcpy(doom2fwad, doomwaddir)
     doom_concat(doom2fwad, cstr("/doom2f.wad"))
     home = invoke(doom_getenv, cstr("HOME"))
-    if (!(home != null)) {
+    if (home == null) {
         I_Error(cstr("Error: Please set $HOME to your home directory"))
     }
     // doom_sprintf(basedefault, "%s/.doomrc", home);
@@ -520,7 +532,7 @@ def FindResponseFile {
     var i : int
     i = 1
     while (i < myargc) {
-        if (int(myargv[i][0]) == '@') {
+        if (myargv[i][0] == '@') {
             var handle : void? = null
             var size : int
             var k : int
@@ -532,7 +544,7 @@ def FindResponseFile {
             var firstargv : uint8?
             // READ THE RESPONSE FILE INTO MEMORY
             handle = invoke(doom_open, addr(myargv[i][1]), cstr("rb"))
-            if (!(handle != null)) {
+            if (handle == null) {
                 invoke(doom_print, cstr("\nNo such response file!"))
                 invoke(doom_exit, 1)
             }
@@ -563,7 +575,7 @@ def FindResponseFile {
             indexinfile = k
             // SKIP PAST ARGV[0] (KEEP IT)
             indexinfile++
-            while (true) {
+            c_do_while(k < size) {
                 let _t1 = indexinfile
                 indexinfile++
                 myargv[_t1] = infile + k
@@ -573,9 +585,6 @@ def FindResponseFile {
                 infile[k] = 0u8
                 while (k < size && ((int(infile[k]) <= ' ') || (int(infile[k]) > 'z'))) {
                     k++
-                }
-                if (!(k < size)) {
-                    break
                 }
             }
             for (k1 in range(index)) {
@@ -617,77 +626,87 @@ def D_DoomMain {
     } elif (M_CheckParm(cstr("-deathmatch")) != 0) {
         deathmatch = doom_boolean._c_true
     }
-    let _cond = gamemode
-    if (_cond == GameMode_t.retail) {
-        // doom_sprintf(title,
-        // " "
-        // "The Ultimate DOOM Startup v%i.%i"
-        // " ",
-        // VERSION / 100, VERSION % 100);
-        doom_strcpy(addr(title[0]), cstr("                         The Ultimate DOOM Startup v"))
-        doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
-        doom_concat(addr(title[0]), cstr("."))
-        doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
-        doom_concat(addr(title[0]), cstr("                           "))
-    } elif (_cond == GameMode_t.shareware) {
-        // doom_sprintf(title,
-        // " "
-        // "DOOM Shareware Startup v%i.%i"
-        // " ",
-        // VERSION / 100, VERSION % 100);
-        doom_strcpy(addr(title[0]), cstr("                            DOOM Shareware Startup v"))
-        doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
-        doom_concat(addr(title[0]), cstr("."))
-        doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
-        doom_concat(addr(title[0]), cstr("                           "))
-    } elif (_cond == GameMode_t.registered) {
-        // doom_sprintf(title,
-        // " "
-        // "DOOM Registered Startup v%i.%i"
-        // " ",
-        // VERSION / 100, VERSION % 100);
-        doom_strcpy(addr(title[0]), cstr("                            DOOM Registered Startup v"))
-        doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
-        doom_concat(addr(title[0]), cstr("."))
-        doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
-        doom_concat(addr(title[0]), cstr("                           "))
-    } elif (_cond == GameMode_t.commercial) {
-        // doom_sprintf(title,
-        // " "
-        // "DOOM 2: Hell on Earth v%i.%i"
-        // " ",
-        // VERSION / 100, VERSION % 100);
-        doom_strcpy(addr(title[0]), cstr("                         DOOM 2: Hell on Earth v"))
-        doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
-        doom_concat(addr(title[0]), cstr("."))
-        doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
-        doom_concat(addr(title[0]), cstr("                           "))
-    } else {
-        // FIXME
-        // case pack_plut:
-        // sprintf (title,
-        // " "
-        // "DOOM 2: Plutonia Experiment v%i.%i"
-        // " ",
-        // VERSION/100,VERSION%100);
-        // break;
-        // case pack_tnt:
-        // sprintf (title,
-        // " "
-        // "DOOM 2: TNT - Evilution v%i.%i"
-        // " ",
-        // VERSION/100,VERSION%100);
-        // break;
-        // doom_sprintf(title,
-        // " "
-        // "Public DOOM - v%i.%i"
-        // " ",
-        // VERSION / 100, VERSION % 100);
-        doom_strcpy(addr(title[0]), cstr("                     Public DOOM - v"))
-        doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
-        doom_concat(addr(title[0]), cstr("."))
-        doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
-        doom_concat(addr(title[0]), cstr("                           "))
+    c_switch(gamemode) {
+        case(GameMode_t.retail) {
+            // doom_sprintf(title,
+            // " "
+            // "The Ultimate DOOM Startup v%i.%i"
+            // " ",
+            // VERSION / 100, VERSION % 100);
+            doom_strcpy(addr(title[0]), cstr("                         The Ultimate DOOM Startup v"))
+            doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
+            doom_concat(addr(title[0]), cstr("."))
+            doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
+            doom_concat(addr(title[0]), cstr("                           "))
+            break
+        }
+        case(GameMode_t.shareware) {
+            // doom_sprintf(title,
+            // " "
+            // "DOOM Shareware Startup v%i.%i"
+            // " ",
+            // VERSION / 100, VERSION % 100);
+            doom_strcpy(addr(title[0]), cstr("                            DOOM Shareware Startup v"))
+            doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
+            doom_concat(addr(title[0]), cstr("."))
+            doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
+            doom_concat(addr(title[0]), cstr("                           "))
+            break
+        }
+        case(GameMode_t.registered) {
+            // doom_sprintf(title,
+            // " "
+            // "DOOM Registered Startup v%i.%i"
+            // " ",
+            // VERSION / 100, VERSION % 100);
+            doom_strcpy(addr(title[0]), cstr("                            DOOM Registered Startup v"))
+            doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
+            doom_concat(addr(title[0]), cstr("."))
+            doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
+            doom_concat(addr(title[0]), cstr("                           "))
+            break
+        }
+        case(GameMode_t.commercial) {
+            // doom_sprintf(title,
+            // " "
+            // "DOOM 2: Hell on Earth v%i.%i"
+            // " ",
+            // VERSION / 100, VERSION % 100);
+            doom_strcpy(addr(title[0]), cstr("                         DOOM 2: Hell on Earth v"))
+            doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
+            doom_concat(addr(title[0]), cstr("."))
+            doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
+            doom_concat(addr(title[0]), cstr("                           "))
+            break
+        }
+        case(_) {
+            // FIXME
+            // case pack_plut:
+            // sprintf (title,
+            // " "
+            // "DOOM 2: Plutonia Experiment v%i.%i"
+            // " ",
+            // VERSION/100,VERSION%100);
+            // break;
+            // case pack_tnt:
+            // sprintf (title,
+            // " "
+            // "DOOM 2: TNT - Evilution v%i.%i"
+            // " ",
+            // VERSION/100,VERSION%100);
+            // break;
+            // doom_sprintf(title,
+            // " "
+            // "Public DOOM - v%i.%i"
+            // " ",
+            // VERSION / 100, VERSION % 100);
+            doom_strcpy(addr(title[0]), cstr("                     Public DOOM - v"))
+            doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) / 100, 10))
+            doom_concat(addr(title[0]), cstr("."))
+            doom_concat(addr(title[0]), doom_itoa(int(anon_82.VERSION) % 100, 10))
+            doom_concat(addr(title[0]), cstr("                           "))
+            break
+        }
     }
     // doom_print("%s\n", title);
     invoke(doom_print, addr(title[0]))
@@ -727,32 +746,36 @@ def D_DoomMain {
         // big hack, change to -warp
         myargv[p][4] = uint8('p')
         // Map name handling.
-        let _cond2 = gamemode
-        if (_cond2 == GameMode_t.shareware || _cond2 == GameMode_t.retail || _cond2 == GameMode_t.registered) {
-            // doom_sprintf(file, "~"DEVMAPS"E%cM%c.wad", myargv[p + 1][0], myargv[p + 2][0]);
-            doom_strcpy(addr(file[0]), cstr("~devmapsE"))
-            doom_concat(addr(file[0]), doom_ctoa(myargv[p + 1][0]))
-            doom_concat(addr(file[0]), cstr("M"))
-            doom_concat(addr(file[0]), doom_ctoa(myargv[p + 2][0]))
-            doom_concat(addr(file[0]), cstr(".wad"))
-            // doom_print("Warping to Episode %s, Map %s.\n", myargv[p + 1], myargv[p + 2]);
-            invoke(doom_print, cstr("Warping to Episode "))
-            invoke(doom_print, myargv[p + 1])
-            invoke(doom_print, cstr(", Map "))
-            invoke(doom_print, myargv[p + 2])
-            invoke(doom_print, cstr(".\n"))
-        } else {
-            p = doom_atoi(myargv[p + 1])
-            if (p < 10) {
-                // doom_sprintf(file, "~"DEVMAPS"cdata/map0%i.wad", p);
-                doom_strcpy(addr(file[0]), cstr("~devmapscdata/map0"))
-                doom_concat(addr(file[0]), doom_itoa(p, 10))
+        c_switch(gamemode) {
+            case(GameMode_t.shareware, GameMode_t.retail, GameMode_t.registered) {
+                // doom_sprintf(file, "~"DEVMAPS"E%cM%c.wad", myargv[p + 1][0], myargv[p + 2][0]);
+                doom_strcpy(addr(file[0]), cstr("~devmapsE"))
+                doom_concat(addr(file[0]), doom_ctoa(myargv[p + 1][0]))
+                doom_concat(addr(file[0]), cstr("M"))
+                doom_concat(addr(file[0]), doom_ctoa(myargv[p + 2][0]))
                 doom_concat(addr(file[0]), cstr(".wad"))
-            } else {
-                // doom_sprintf(file, "~"DEVMAPS"cdata/map%i.wad", p);
-                doom_strcpy(addr(file[0]), cstr("~devmapscdata/map"))
-                doom_concat(addr(file[0]), doom_itoa(p, 10))
-                doom_concat(addr(file[0]), cstr(".wad"))
+                // doom_print("Warping to Episode %s, Map %s.\n", myargv[p + 1], myargv[p + 2]);
+                invoke(doom_print, cstr("Warping to Episode "))
+                invoke(doom_print, myargv[p + 1])
+                invoke(doom_print, cstr(", Map "))
+                invoke(doom_print, myargv[p + 2])
+                invoke(doom_print, cstr(".\n"))
+                break
+            }
+            case(GameMode_t.commercial, _) {
+                p = doom_atoi(myargv[p + 1])
+                if (p < 10) {
+                    // doom_sprintf(file, "~"DEVMAPS"cdata/map0%i.wad", p);
+                    doom_strcpy(addr(file[0]), cstr("~devmapscdata/map0"))
+                    doom_concat(addr(file[0]), doom_itoa(p, 10))
+                    doom_concat(addr(file[0]), cstr(".wad"))
+                } else {
+                    // doom_sprintf(file, "~"DEVMAPS"cdata/map%i.wad", p);
+                    doom_strcpy(addr(file[0]), cstr("~devmapscdata/map"))
+                    doom_concat(addr(file[0]), doom_itoa(p, 10))
+                    doom_concat(addr(file[0]), cstr(".wad"))
+                }
+                break
             }
         }
         D_AddFile(addr(file[0]))
@@ -765,14 +788,14 @@ def D_DoomMain {
         modifiedgame = doom_boolean._c_true
         while (true) {
             p++
-            if (!(p != myargc && int(myargv[p][0]) != '-')) {
+            if (!(p != myargc && myargv[p][0] != '-')) {
                 break
             }
             D_AddFile(myargv[p])
         }
     }
     p = M_CheckParm(cstr("-playdemo"))
-    if (!(p != 0)) {
+    if (p == 0) {
         p = M_CheckParm(cstr("-timedemo"))
     }
     if (p != 0 && p < myargc - 1) {
@@ -802,7 +825,7 @@ def D_DoomMain {
         autostart = doom_boolean._c_true
     }
     p = M_CheckParm(cstr("-timer"))
-    if (p != 0 && p < myargc - 1 && uint(int(deathmatch)) != 0) {
+    if (p != 0 && p < myargc - 1 && uint(deathmatch) != 0) {
         var time : int
         time = doom_atoi(myargv[p + 1])
         // doom_print("Levels will end after %d minute", time);
@@ -815,7 +838,7 @@ def D_DoomMain {
         invoke(doom_print, cstr(".\n"))
     }
     p = M_CheckParm(cstr("-avg"))
-    if (p != 0 && p < myargc - 1 && uint(int(deathmatch)) != 0) {
+    if (p != 0 && p < myargc - 1 && uint(deathmatch) != 0) {
         invoke(doom_print, cstr("Austin Virtual Gaming: Levels will end after 20 minutes\n"))
     }
     p = M_CheckParm(cstr("-warp"))
@@ -842,7 +865,11 @@ def D_DoomMain {
     if (int(modifiedgame) != 0) {
         // These are the lumps that will be checked in IWAD,
         // if any one is not present, execution will be aborted.
-        var name : uint8[23][8] = fixed_array(cstr_array("e2m1", 8), cstr_array("e2m2", 8), cstr_array("e2m3", 8), cstr_array("e2m4", 8), cstr_array("e2m5", 8), cstr_array("e2m6", 8), cstr_array("e2m7", 8), cstr_array("e2m8", 8), cstr_array("e2m9", 8), cstr_array("e3m1", 8), cstr_array("e3m3", 8), cstr_array("e3m3", 8), cstr_array("e3m4", 8), cstr_array("e3m5", 8), cstr_array("e3m6", 8), cstr_array("e3m7", 8), cstr_array("e3m8", 8), cstr_array("e3m9", 8), cstr_array("dphoof", 8), cstr_array("bfgga0", 8), cstr_array("heada1", 8), cstr_array("cybra1", 8), cstr_array("spida1d1", 8))
+        var name : uint8[23][8] = fixed_array(cstr_array("e2m1", 8), cstr_array("e2m2", 8), cstr_array("e2m3", 8), cstr_array("e2m4", 8), cstr_array("e2m5", 8),
+                cstr_array("e2m6", 8), cstr_array("e2m7", 8), cstr_array("e2m8", 8), cstr_array("e2m9", 8), cstr_array("e3m1", 8), cstr_array("e3m3", 8),
+                cstr_array("e3m3", 8), cstr_array("e3m4", 8), cstr_array("e3m5", 8), cstr_array("e3m6", 8), cstr_array("e3m7", 8), cstr_array("e3m8", 8),
+                cstr_array("e3m9", 8), cstr_array("dphoof", 8), cstr_array("bfgga0", 8), cstr_array("heada1", 8), cstr_array("cybra1", 8),
+                cstr_array("spida1d1", 8))
         if (gamemode == GameMode_t.shareware) {
             I_Error(cstr("Error: \nYou cannot -file with the shareware version. Register!"))
         }
@@ -859,19 +886,28 @@ def D_DoomMain {
     // Iff additonal PWAD files are used, print modified banner
     if (int(modifiedgame) != 0) {
         // m
-        invoke(doom_print, cstr("===========================================================================\nATTENTION:  This version of DOOM has been modified.  If you would like to\nget a copy of the original game, call 1-800-IDGAMES or see the readme file.\n        You will not receive technical support for modified games.\n===========================================================================\n"))
+        invoke(doom_print,
+                cstr("===========================================================================\nATTENTION:  This version of DOOM has been modified.  If you would like to\nget a copy of the original game, call 1-800-IDGAMES or see the readme file.\n        You will not receive technical support for modified games.\n===========================================================================\n"))
     }
     // " press enter to continue\n"
     // getchar();
     // Check and print which version is executed.
-    let _cond3 = gamemode
-    if (_cond3 == GameMode_t.shareware || _cond3 == GameMode_t.indetermined) {
-        invoke(doom_print, cstr("===========================================================================\n                                Shareware!\n===========================================================================\n"))
-    } elif (_cond3 == GameMode_t.registered || _cond3 == GameMode_t.retail || _cond3 == GameMode_t.commercial) {
-        invoke(doom_print, cstr("===========================================================================\n                 Commercial product - do not distribute!\n         Please report software piracy to the SPA: 1-800-388-PIR8\n===========================================================================\n"))
-    } else {
+    c_switch(gamemode) {
+        case(GameMode_t.shareware, GameMode_t.indetermined) {
+            invoke(doom_print,
+                    cstr("===========================================================================\n                                Shareware!\n===========================================================================\n"))
+            break
+        }
+        case(GameMode_t.registered, GameMode_t.retail, GameMode_t.commercial) {
+            invoke(doom_print,
+                    cstr("===========================================================================\n                 Commercial product - do not distribute!\n         Please report software piracy to the SPA: 1-800-388-PIR8\n===========================================================================\n"))
+            break
+        }
+        case(_) {
+            // Ouch.
+            break
+        }
     }
-    // Ouch.
     invoke(doom_print, cstr("M_Init: Init miscellaneous info.\n"))
     M_Init()
     invoke(doom_print, cstr("R_Init: Init DOOM refresh daemon - "))
@@ -927,7 +963,7 @@ def D_DoomMain {
         G_LoadGame(addr(file[0]))
     }
     if (gameaction != gameaction_t.ga_loadgame) {
-        if (uint(int(autostart)) != 0 || uint(int(netgame)) != 0) {
+        if (uint(autostart) != 0 || uint(netgame) != 0) {
             G_InitNew(startskill, startepisode, startmap)
         } else {
             // start up intro loop

@@ -156,7 +156,8 @@ var messy : int
 var messageLastMenuActive : int
 var messageNeedsInput : doom_boolean
 var messageRoutine : function<(a0 : int) : void>
-var gammamsg : uint8[5][26] = fixed_array(cstr_array("Gamma correction OFF", 26), cstr_array("Gamma correction level 1", 26), cstr_array("Gamma correction level 2", 26), cstr_array("Gamma correction level 3", 26), cstr_array("Gamma correction level 4", 26))
+var gammamsg : uint8[5][26] = fixed_array(cstr_array("Gamma correction OFF", 26), cstr_array("Gamma correction level 1", 26),
+        cstr_array("Gamma correction level 2", 26), cstr_array("Gamma correction level 3", 26), cstr_array("Gamma correction level 4", 26))
 var saveStringEnter : int
 var saveSlot : int
 var saveCharIndex : int
@@ -169,14 +170,52 @@ var skullAnimCounter : int16
 var whichSkull : int16
 var skullName : uint8[2][9] = fixed_array(cstr_array("M_SKULL1", 9), cstr_array("M_SKULL2", 9))
 var currentMenu : menu_s?
-var menu_custom_texts : menu_custom_text_t[4] = fixed_array(menu_custom_text_t(name = cstr("TXT_MMOV"), segs = fixed_array(menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 0, w = 74, offx = 0, offy = 0), menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 0, w = 31, offx = 83, offy = 0), menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 160, w = 14, offx = 83 + 31, offy = 0), menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 60, w = 14, offx = 83 + 31 + 14, offy = 0), menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 169, w = 5, offx = 83 + 31 + 14 + 14, offy = 0), menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())), menu_custom_text_t(name = cstr("TXT_MOPT"), segs = fixed_array(menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 0, w = 74, offx = 0, offy = 0), menu_custom_text_seg_t(lump = cstr("M_OPTION"), x = 0, w = 92, offx = 74 + 9, offy = 0), menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())), menu_custom_text_t(name = cstr("TXT_CROS"), segs = fixed_array(menu_custom_text_seg_t(lump = cstr("M_SKILL"), x = 0, w = 16, offx = 0, offy = 0), menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 14, w = 15, offx = 16, offy = 0), menu_custom_text_seg_t(lump = cstr("M_SKILL"), x = 46, w = 30, offx = 16 + 15, offy = 0), menu_custom_text_seg_t(lump = cstr("M_SKILL"), x = 62, w = 14, offx = 16 + 15 + 30, offy = 0), menu_custom_text_seg_t(lump = cstr("M_SKILL"), x = 16, w = 15, offx = 16 + 15 + 30 + 14, offy = 0), menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 140, w = 19, offx = 16 + 15 + 30 + 14 + 15, offy = 0), menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 14, w = 15, offx = 16 + 15 + 30 + 14 + 15 + 19, offy = 0), menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 169, w = 5, offx = 16 + 15 + 30 + 14 + 15 + 19 + 15, offy = 0), menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())), menu_custom_text_t(name = cstr("TXT_ARUN"), segs = fixed_array(menu_custom_text_seg_t(lump = cstr("M_SGTTL"), x = 90, w = 17, offx = 0, offy = 0), menu_custom_text_seg_t(lump = cstr("M_GDLOW"), x = 0, w = 10, offx = 17, offy = 3), menu_custom_text_seg_t(lump = cstr("M_GDLOW"), x = 26, w = 16, offx = 17 + 10, offy = 3), menu_custom_text_seg_t(lump = cstr("M_DISP"), x = 57, w = 30, offx = 17 + 10 + 16, offy = 0), menu_custom_text_seg_t(lump = cstr("M_RDTHIS"), x = 99, w = 14, offx = 17 + 10 + 16 + 30, offy = 0), menu_custom_text_seg_t(lump = cstr("M_RDTHIS"), x = 0, w = 16, offx = 17 + 10 + 16 + 30 + 14 + 7, offy = 0), menu_custom_text_seg_t(lump = cstr("M_SFXVOL"), x = 90, w = 15, offx = 17 + 10 + 16 + 30 + 14 + 7 + 16, offy = 0), menu_custom_text_seg_t(lump = cstr("M_OPTION"), x = 62, w = 15, offx = 17 + 10 + 16 + 30 + 14 + 7 + 16 + 15, offy = 0), menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 169, w = 5, offx = 17 + 10 + 16 + 30 + 14 + 7 + 16 + 15 + 15, offy = 0), menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())))
+var menu_custom_texts : menu_custom_text_t[4] = fixed_array(menu_custom_text_t(name = cstr("TXT_MMOV"),
+            segs = fixed_array(menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 0, w = 74, offx = 0, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 0, w = 31, offx = 83, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 160, w = 14, offx = 83 + 31, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 60, w = 14, offx = 83 + 31 + 14, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 169, w = 5, offx = 83 + 31 + 14 + 14, offy = 0), menu_custom_text_seg_t(lump = null),
+                menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(),
+                menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())),
+        menu_custom_text_t(name = cstr("TXT_MOPT"),
+            segs = fixed_array(menu_custom_text_seg_t(lump = cstr("M_MSENS"), x = 0, w = 74, offx = 0, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_OPTION"), x = 0, w = 92, offx = 74 + 9, offy = 0), menu_custom_text_seg_t(lump = null),
+                menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(),
+                menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(),
+                menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())),
+        menu_custom_text_t(name = cstr("TXT_CROS"),
+            segs = fixed_array(menu_custom_text_seg_t(lump = cstr("M_SKILL"), x = 0, w = 16, offx = 0, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 14, w = 15, offx = 16, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_SKILL"), x = 46, w = 30, offx = 16 + 15, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_SKILL"), x = 62, w = 14, offx = 16 + 15 + 30, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_SKILL"), x = 16, w = 15, offx = 16 + 15 + 30 + 14, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 140, w = 19, offx = 16 + 15 + 30 + 14 + 15, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 14, w = 15, offx = 16 + 15 + 30 + 14 + 15 + 19, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 169, w = 5, offx = 16 + 15 + 30 + 14 + 15 + 19 + 15, offy = 0),
+                menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(),
+                menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t())),
+        menu_custom_text_t(name = cstr("TXT_ARUN"),
+            segs = fixed_array(menu_custom_text_seg_t(lump = cstr("M_SGTTL"), x = 90, w = 17, offx = 0, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_GDLOW"), x = 0, w = 10, offx = 17, offy = 3),
+                menu_custom_text_seg_t(lump = cstr("M_GDLOW"), x = 26, w = 16, offx = 17 + 10, offy = 3),
+                menu_custom_text_seg_t(lump = cstr("M_DISP"), x = 57, w = 30, offx = 17 + 10 + 16, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_RDTHIS"), x = 99, w = 14, offx = 17 + 10 + 16 + 30, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_RDTHIS"), x = 0, w = 16, offx = 17 + 10 + 16 + 30 + 14 + 7, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_SFXVOL"), x = 90, w = 15, offx = 17 + 10 + 16 + 30 + 14 + 7 + 16, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_OPTION"), x = 62, w = 15, offx = 17 + 10 + 16 + 30 + 14 + 7 + 16 + 15, offy = 0),
+                menu_custom_text_seg_t(lump = cstr("M_DETAIL"), x = 169, w = 5, offx = 17 + 10 + 16 + 30 + 14 + 7 + 16 + 15 + 15, offy = 0),
+                menu_custom_text_seg_t(lump = null), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(), menu_custom_text_seg_t(),
+                menu_custom_text_seg_t(), menu_custom_text_seg_t())))
 var custom_texts_count : int = int(uint64(typeinfo sizeof(type<menu_custom_text_t[4]>)) / uint64(typeinfo sizeof(type<menu_custom_text_t>)))
 var tempstring : uint8[80]
 var epi : int
 var detailNames : uint8[2][9] = fixed_array(cstr_array("M_GDHIGH", 9), cstr_array("M_GDLOW", 9))
 var msgNames : uint8[2][9] = fixed_array(cstr_array("M_MSGOFF", 9), cstr_array("M_MSGON", 9))
-var quitsounds : int[8] = fixed_array(int(sfxenum_t.sfx_pldeth), int(sfxenum_t.sfx_dmpain), int(sfxenum_t.sfx_popain), int(sfxenum_t.sfx_slop), int(sfxenum_t.sfx_telept), int(sfxenum_t.sfx_posit1), int(sfxenum_t.sfx_posit3), int(sfxenum_t.sfx_sgtatk))
-var quitsounds2 : int[8] = fixed_array(int(sfxenum_t.sfx_vilact), int(sfxenum_t.sfx_getpow), int(sfxenum_t.sfx_boscub), int(sfxenum_t.sfx_slop), int(sfxenum_t.sfx_skeswg), int(sfxenum_t.sfx_kntdth), int(sfxenum_t.sfx_bspact), int(sfxenum_t.sfx_sgtatk))
+var quitsounds : int[8] = fixed_array(int(sfxenum_t.sfx_pldeth), int(sfxenum_t.sfx_dmpain), int(sfxenum_t.sfx_popain), int(sfxenum_t.sfx_slop),
+        int(sfxenum_t.sfx_telept), int(sfxenum_t.sfx_posit1), int(sfxenum_t.sfx_posit3), int(sfxenum_t.sfx_sgtatk))
+var quitsounds2 : int[8] = fixed_array(int(sfxenum_t.sfx_vilact), int(sfxenum_t.sfx_getpow), int(sfxenum_t.sfx_boscub), int(sfxenum_t.sfx_slop),
+        int(sfxenum_t.sfx_skeswg), int(sfxenum_t.sfx_kntdth), int(sfxenum_t.sfx_bspact), int(sfxenum_t.sfx_sgtatk))
 var main_e : anon_809
 var MainMenu : menuitem_t[6]
 var MainDef : menu_s
@@ -184,23 +223,50 @@ var episodes_e : anon_811
 var EpisodeMenu : menuitem_t[4]
 var EpiDef : menu_s
 var newgame_e : anon_813
-var NewGameMenu : menuitem_t[5] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("M_JKILL", 10), routine = @@M_ChooseSkill, alphaKey = uint8('i')), menuitem_t(status = int16(1), name = cstr_array("M_ROUGH", 10), routine = @@M_ChooseSkill, alphaKey = uint8('h')), menuitem_t(status = int16(1), name = cstr_array("M_HURT", 10), routine = @@M_ChooseSkill, alphaKey = uint8('h')), menuitem_t(status = int16(1), name = cstr_array("M_ULTRA", 10), routine = @@M_ChooseSkill, alphaKey = uint8('u')), menuitem_t(status = int16(1), name = cstr_array("M_NMARE", 10), routine = @@M_ChooseSkill, alphaKey = uint8('n')))
+var NewGameMenu : menuitem_t[5] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("M_JKILL", 10), routine = @@M_ChooseSkill, alphaKey = uint8('i')),
+        menuitem_t(status = int16(1), name = cstr_array("M_ROUGH", 10), routine = @@M_ChooseSkill, alphaKey = uint8('h')),
+        menuitem_t(status = int16(1), name = cstr_array("M_HURT", 10), routine = @@M_ChooseSkill, alphaKey = uint8('h')),
+        menuitem_t(status = int16(1), name = cstr_array("M_ULTRA", 10), routine = @@M_ChooseSkill, alphaKey = uint8('u')),
+        menuitem_t(status = int16(1), name = cstr_array("M_NMARE", 10), routine = @@M_ChooseSkill, alphaKey = uint8('n')))
 var NewDef : menu_s
 var OptionsMenu : menuitem_t?
 var options_e : anon_815
 var OptionsMenuFull : menuitem_t[8]
 var OptionsDef : menu_s
 var options_e_no_mouse : anon_817
-var OptionsMenuNoMouse : menuitem_t[7] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("M_ENDGAM", 10), routine = @@M_EndGame, alphaKey = uint8('e')), menuitem_t(status = int16(1), name = cstr_array("M_MESSG", 10), routine = @@M_ChangeMessages, alphaKey = uint8('m')), menuitem_t(status = int16(1), name = cstr_array("TXT_CROS", 10), routine = @@M_ChangeCrosshair, alphaKey = uint8('c')), menuitem_t(status = int16(1), name = cstr_array("TXT_ARUN", 10), routine = @@M_ChangeAlwaysRun, alphaKey = uint8('r')), menuitem_t(status = int16(2), name = cstr_array("M_SCRNSZ", 10), routine = @@M_SizeDisplay, alphaKey = uint8('s')), menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>), menuitem_t(status = int16(1), name = cstr_array("M_SVOL", 10), routine = @@M_Sound, alphaKey = uint8('s')))
+var OptionsMenuNoMouse : menuitem_t[7] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("M_ENDGAM", 10), routine = @@M_EndGame,
+            alphaKey = uint8('e')),
+        menuitem_t(status = int16(1), name = cstr_array("M_MESSG", 10), routine = @@M_ChangeMessages, alphaKey = uint8('m')),
+        menuitem_t(status = int16(1), name = cstr_array("TXT_CROS", 10), routine = @@M_ChangeCrosshair, alphaKey = uint8('c')),
+        menuitem_t(status = int16(1), name = cstr_array("TXT_ARUN", 10), routine = @@M_ChangeAlwaysRun, alphaKey = uint8('r')),
+        menuitem_t(status = int16(2), name = cstr_array("M_SCRNSZ", 10), routine = @@M_SizeDisplay, alphaKey = uint8('s')),
+        menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>),
+        menuitem_t(status = int16(1), name = cstr_array("M_SVOL", 10), routine = @@M_Sound, alphaKey = uint8('s')))
 var OptionsNoMouseDef : menu_s
 var options_e_no_sound : anon_819
-var OptionsMenuNoSound : menuitem_t[7] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("M_ENDGAM", 10), routine = @@M_EndGame, alphaKey = uint8('e')), menuitem_t(status = int16(1), name = cstr_array("M_MESSG", 10), routine = @@M_ChangeMessages, alphaKey = uint8('m')), menuitem_t(status = int16(1), name = cstr_array("TXT_CROS", 10), routine = @@M_ChangeCrosshair, alphaKey = uint8('c')), menuitem_t(status = int16(1), name = cstr_array("TXT_ARUN", 10), routine = @@M_ChangeAlwaysRun, alphaKey = uint8('r')), menuitem_t(status = int16(2), name = cstr_array("M_SCRNSZ", 10), routine = @@M_SizeDisplay, alphaKey = uint8('s')), menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>), menuitem_t(status = int16(1), name = cstr_array("TXT_MOPT", 10), routine = @@M_MouseOptions, alphaKey = uint8('f')))
+var OptionsMenuNoSound : menuitem_t[7] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("M_ENDGAM", 10), routine = @@M_EndGame,
+            alphaKey = uint8('e')),
+        menuitem_t(status = int16(1), name = cstr_array("M_MESSG", 10), routine = @@M_ChangeMessages, alphaKey = uint8('m')),
+        menuitem_t(status = int16(1), name = cstr_array("TXT_CROS", 10), routine = @@M_ChangeCrosshair, alphaKey = uint8('c')),
+        menuitem_t(status = int16(1), name = cstr_array("TXT_ARUN", 10), routine = @@M_ChangeAlwaysRun, alphaKey = uint8('r')),
+        menuitem_t(status = int16(2), name = cstr_array("M_SCRNSZ", 10), routine = @@M_SizeDisplay, alphaKey = uint8('s')),
+        menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>),
+        menuitem_t(status = int16(1), name = cstr_array("TXT_MOPT", 10), routine = @@M_MouseOptions, alphaKey = uint8('f')))
 var OptionsNoSoundDef : menu_s
 var options_e_no_sound_no_mouse : anon_820
-var OptionsMenuNoSoundNoMouse : menuitem_t[6] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("M_ENDGAM", 10), routine = @@M_EndGame, alphaKey = uint8('e')), menuitem_t(status = int16(1), name = cstr_array("M_MESSG", 10), routine = @@M_ChangeMessages, alphaKey = uint8('m')), menuitem_t(status = int16(1), name = cstr_array("TXT_CROS", 10), routine = @@M_ChangeCrosshair, alphaKey = uint8('c')), menuitem_t(status = int16(1), name = cstr_array("TXT_ARUN", 10), routine = @@M_ChangeAlwaysRun, alphaKey = uint8('r')), menuitem_t(status = int16(2), name = cstr_array("M_SCRNSZ", 10), routine = @@M_SizeDisplay, alphaKey = uint8('s')), menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>))
+var OptionsMenuNoSoundNoMouse : menuitem_t[6] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("M_ENDGAM", 10), routine = @@M_EndGame,
+            alphaKey = uint8('e')),
+        menuitem_t(status = int16(1), name = cstr_array("M_MESSG", 10), routine = @@M_ChangeMessages, alphaKey = uint8('m')),
+        menuitem_t(status = int16(1), name = cstr_array("TXT_CROS", 10), routine = @@M_ChangeCrosshair, alphaKey = uint8('c')),
+        menuitem_t(status = int16(1), name = cstr_array("TXT_ARUN", 10), routine = @@M_ChangeAlwaysRun, alphaKey = uint8('r')),
+        menuitem_t(status = int16(2), name = cstr_array("M_SCRNSZ", 10), routine = @@M_SizeDisplay, alphaKey = uint8('s')),
+        menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>))
 var OptionsNoSoundNoMouseDef : menu_s
 var mouseoptions_e : anon_821
-var MouseOptionsMenu : menuitem_t[3] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("TXT_MMOV", 10), routine = @@M_MouseMove, alphaKey = uint8('f')), menuitem_t(status = int16(2), name = cstr_array("M_MSENS", 10), routine = @@M_ChangeSensitivity, alphaKey = uint8('m')), menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>))
+var MouseOptionsMenu : menuitem_t[3] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("TXT_MMOV", 10), routine = @@M_MouseMove,
+            alphaKey = uint8('f')),
+        menuitem_t(status = int16(2), name = cstr_array("M_MSENS", 10), routine = @@M_ChangeSensitivity, alphaKey = uint8('m')),
+        menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>))
 var MouseOptionsDef : menu_s
 var read_e : anon_823
 var ReadMenu1 : menuitem_t[1]
@@ -210,18 +276,35 @@ var ReadMenu2 : menuitem_t[1] = fixed_array(menuitem_t(status = int16(1), name =
 var ReadDef2 : menu_s
 var SoundMenu : menuitem_t?
 var sound_e : anon_826
-var SoundMenuFull : menuitem_t[4] = fixed_array(menuitem_t(status = int16(2), name = cstr_array("M_SFXVOL", 10), routine = @@M_SfxVol, alphaKey = uint8('s')), menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>), menuitem_t(status = int16(2), name = cstr_array("M_MUSVOL", 10), routine = @@M_MusicVol, alphaKey = uint8('m')), menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>))
+var SoundMenuFull : menuitem_t[4] = fixed_array(menuitem_t(status = int16(2), name = cstr_array("M_SFXVOL", 10), routine = @@M_SfxVol, alphaKey = uint8('s')),
+        menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>),
+        menuitem_t(status = int16(2), name = cstr_array("M_MUSVOL", 10), routine = @@M_MusicVol, alphaKey = uint8('m')),
+        menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>))
 var SoundDef : menu_s
 var sound_e_no_sfx : anon_827
-var SoundMenuNoSFX : menuitem_t[2] = fixed_array(menuitem_t(status = int16(2), name = cstr_array("M_MUSVOL", 10), routine = @@M_MusicVol, alphaKey = uint8('m')), menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>))
+var SoundMenuNoSFX : menuitem_t[2] = fixed_array(menuitem_t(status = int16(2), name = cstr_array("M_MUSVOL", 10), routine = @@M_MusicVol,
+            alphaKey = uint8('m')),
+        menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>))
 var SoundNoSFXDef : menu_s
 var sound_e_no_music : anon_829
-var SoundMenuNoMusic : menuitem_t[2] = fixed_array(menuitem_t(status = int16(2), name = cstr_array("M_SFXVOL", 10), routine = @@M_SfxVol, alphaKey = uint8('s')), menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>))
+var SoundMenuNoMusic : menuitem_t[2] = fixed_array(menuitem_t(status = int16(2), name = cstr_array("M_SFXVOL", 10), routine = @@M_SfxVol,
+            alphaKey = uint8('s')),
+        menuitem_t(status = int16(-1), name = cstr_array("", 10), routine = default<function<(a0 : int) : void>>))
 var SoundNoMusicDef : menu_s
 var load_e : anon_830
-var DOOM_LoadMenu : menuitem_t[6] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_LoadSelect, alphaKey = uint8('1')), menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_LoadSelect, alphaKey = uint8('2')), menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_LoadSelect, alphaKey = uint8('3')), menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_LoadSelect, alphaKey = uint8('4')), menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_LoadSelect, alphaKey = uint8('5')), menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_LoadSelect, alphaKey = uint8('6')))
+var DOOM_LoadMenu : menuitem_t[6] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_LoadSelect, alphaKey = uint8('1')),
+        menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_LoadSelect, alphaKey = uint8('2')),
+        menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_LoadSelect, alphaKey = uint8('3')),
+        menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_LoadSelect, alphaKey = uint8('4')),
+        menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_LoadSelect, alphaKey = uint8('5')),
+        menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_LoadSelect, alphaKey = uint8('6')))
 var LoadDef : menu_s
-var SaveMenu : menuitem_t[6] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_SaveSelect, alphaKey = uint8('1')), menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_SaveSelect, alphaKey = uint8('2')), menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_SaveSelect, alphaKey = uint8('3')), menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_SaveSelect, alphaKey = uint8('4')), menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_SaveSelect, alphaKey = uint8('5')), menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_SaveSelect, alphaKey = uint8('6')))
+var SaveMenu : menuitem_t[6] = fixed_array(menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_SaveSelect, alphaKey = uint8('1')),
+        menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_SaveSelect, alphaKey = uint8('2')),
+        menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_SaveSelect, alphaKey = uint8('3')),
+        menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_SaveSelect, alphaKey = uint8('4')),
+        menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_SaveSelect, alphaKey = uint8('5')),
+        menuitem_t(status = int16(1), name = cstr_array("", 10), routine = @@M_SaveSelect, alphaKey = uint8('6')))
 var SaveDef : menu_s
 var private M_Responder_joywait : int = 0
 var private M_Responder_mousewait : int = 0
@@ -245,7 +328,7 @@ def M_DrawCustomMenuText(var name : uint8?; x : int; y : int) {
                 while (seg.lump != null) {
                     var lump : void? = W_CacheLumpName(seg.lump, PU_CACHE)
                     V_DrawPatchRectDirect(x + seg.offx, y, 0, reinterpret<uint8?>(lump), seg.x, seg.w)
-                    seg = seg + 1
+                    seg++
                 }
                 break
             }
@@ -357,7 +440,7 @@ def M_SaveSelect(choice : int) {
     saveStringEnter = 1
     saveSlot = choice
     doom_strcpy(addr(saveOldString[0]), addr(savegamestrings[choice][0]))
-    if (!(doom_strcmp(addr(savegamestrings[choice][0]), cstr("empty slot")) != 0)) {
+    if (doom_strcmp(addr(savegamestrings[choice][0]), cstr("empty slot")) == 0) {
         savegamestrings[choice][0] = 0u8
     }
     saveCharIndex = doom_strlen(addr(savegamestrings[choice][0]))
@@ -366,7 +449,7 @@ def M_SaveSelect(choice : int) {
 // Selected from DOOM menu
 [c_function]
 def M_SaveGame(choice : int) {
-    if (!(int(usergame) != 0)) {
+    if (int(usergame) == 0) {
         M_StartMessage(cstr("you can't save if you aren't playing!\n\npress a key."), null, doom_boolean._c_false)
         return
     }
@@ -387,7 +470,7 @@ def M_QuickSaveResponse(ch : int) {
 
 [c_function]
 def M_QuickSave {
-    if (!(int(usergame) != 0)) {
+    if (int(usergame) == 0) {
         S_StartSound(null, int(sfxenum_t.sfx_oof))
         return
     }
@@ -439,12 +522,18 @@ def M_QuickLoad {
 [c_function]
 def M_DrawReadThis1 {
     inhelpscreens = doom_boolean._c_true
-    let _cond = gamemode
-    if (_cond == GameMode_t.commercial) {
-        V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("HELP"), PU_CACHE)))
-    } elif (_cond == GameMode_t.shareware || _cond == GameMode_t.registered || _cond == GameMode_t.retail) {
-        V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("HELP1"), PU_CACHE)))
-    } else {
+    c_switch(gamemode) {
+        case(GameMode_t.commercial) {
+            V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("HELP"), PU_CACHE)))
+            break
+        }
+        case(GameMode_t.shareware, GameMode_t.registered, GameMode_t.retail) {
+            V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("HELP1"), PU_CACHE)))
+            break
+        }
+        case(_) {
+            break
+        }
     }
     return
 }
@@ -453,13 +542,19 @@ def M_DrawReadThis1 {
 [c_function]
 def M_DrawReadThis2 {
     inhelpscreens = doom_boolean._c_true
-    let _cond = gamemode
-    if (_cond == GameMode_t.retail || _cond == GameMode_t.commercial) {
-        // This hack keeps us from having to change menus.
-        V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("CREDIT"), PU_CACHE)))
-    } elif (_cond == GameMode_t.shareware || _cond == GameMode_t.registered) {
-        V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("HELP2"), PU_CACHE)))
-    } else {
+    c_switch(gamemode) {
+        case(GameMode_t.retail, GameMode_t.commercial) {
+            // This hack keeps us from having to change menus.
+            V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("CREDIT"), PU_CACHE)))
+            break
+        }
+        case(GameMode_t.shareware, GameMode_t.registered) {
+            V_DrawPatchDirect(0, 0, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("HELP2"), PU_CACHE)))
+            break
+        }
+        case(_) {
+            break
+        }
     }
     return
 }
@@ -468,11 +563,11 @@ def M_DrawReadThis2 {
 [c_function]
 def M_DrawSound {
     V_DrawPatchDirect(60, 38, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_SVOL"), PU_CACHE)))
-    if (!((doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) != 0)) {
+    if ((doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) == 0) {
         var offset : int = (doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) != 0 ? int(anon_829.sfx_vol_no_music) : int(anon_826.sfx_vol)
         M_DrawThermo(int(SoundDef.x), int(SoundDef.y) + LINEHEIGHT * (offset + 1), 16, snd_SfxVolume)
     }
-    if (!((doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) != 0)) {
+    if ((doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) == 0) {
         var offset : int = (doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) != 0 ? int(anon_827.music_vol_no_sfx) : int(anon_826.music_vol)
         M_DrawThermo(int(SoundDef.x), int(SoundDef.y) + LINEHEIGHT * (offset + 1), 16, snd_MusicVolume)
     }
@@ -489,14 +584,18 @@ def M_MouseOptions(choice : int) {
 }
 
 def M_SfxVol(choice : int) {
-    let _cond = choice
-    if (_cond == 0) {
-        if (snd_SfxVolume != 0) {
-            snd_SfxVolume--
+    c_switch(choice) {
+        case(0) {
+            if (snd_SfxVolume != 0) {
+                snd_SfxVolume--
+            }
+            break
         }
-    } elif (_cond == 1) {
-        if (snd_SfxVolume < 15) {
-            snd_SfxVolume++
+        case(1) {
+            if (snd_SfxVolume < 15) {
+                snd_SfxVolume++
+            }
+            break
         }
     }
     // 8
@@ -504,14 +603,18 @@ def M_SfxVol(choice : int) {
 }
 
 def M_MusicVol(choice : int) {
-    let _cond = choice
-    if (_cond == 0) {
-        if (snd_MusicVolume != 0) {
-            snd_MusicVolume--
+    c_switch(choice) {
+        case(0) {
+            if (snd_MusicVolume != 0) {
+                snd_MusicVolume--
+            }
+            break
         }
-    } elif (_cond == 1) {
-        if (snd_MusicVolume < 15) {
-            snd_MusicVolume++
+        case(1) {
+            if (snd_MusicVolume < 15) {
+                snd_MusicVolume++
+            }
+            break
         }
     }
     // 8
@@ -533,7 +636,7 @@ def M_DrawNewGame {
 
 [c_function]
 def M_NewGame(choice : int) {
-    if (uint(int(netgame)) != 0 && !(int(demoplayback) != 0)) {
+    if (uint(netgame) != 0 && int(demoplayback) == 0) {
         M_StartMessage(cstr("you can't start a new game\nwhile in a network game.\n\npress a key."), null, doom_boolean._c_false)
         return
     }
@@ -561,7 +664,8 @@ def M_VerifyNightmare(ch : int) {
 [c_function]
 def M_ChooseSkill(choice : int) {
     if (choice == int(anon_813.nightmare)) {
-        M_StartMessage(cstr("are you sure? this skill level\nisn't even remotely fair.\n\npress y or n."), reinterpret<void?>(@@M_VerifyNightmare), doom_boolean._c_true)
+        M_StartMessage(cstr("are you sure? this skill level\nisn't even remotely fair.\n\npress y or n."), reinterpret<void?>(@@M_VerifyNightmare),
+                doom_boolean._c_true)
         return
     }
     G_DeferedInitNew(enum_from_int(type<skill_t>, choice), epi + 1, 1)
@@ -590,16 +694,20 @@ def M_DrawOptions {
     V_DrawPatchDirect(108, 15, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_OPTTTL"), PU_CACHE)))
     // V_DrawPatchDirect (OptionsDef.x + 175,OptionsDef.y+LINEHEIGHT*detail,0,
     // W_CacheLumpName(detailNames[detailLevel],PU_CACHE)); // Details do nothing?
-    V_DrawPatchDirect(int(OptionsDef.x) + 120, int(OptionsDef.y) + LINEHEIGHT * int(anon_815.messages), 0, reinterpret<uint8?>(W_CacheLumpName(addr(msgNames[showMessages][0]), PU_CACHE)))
-    V_DrawPatchDirect(int(OptionsDef.x) + 131, int(OptionsDef.y) + LINEHEIGHT * int(anon_815.crosshair_opt), 0, reinterpret<uint8?>(W_CacheLumpName(addr(msgNames[crosshair][0]), PU_CACHE)))
-    V_DrawPatchDirect(int(OptionsDef.x) + 147, int(OptionsDef.y) + LINEHEIGHT * int(anon_815.always_run_opt), 0, reinterpret<uint8?>(W_CacheLumpName(addr(msgNames[always_run][0]), PU_CACHE)))
+    V_DrawPatchDirect(int(OptionsDef.x) + 120, int(OptionsDef.y) + LINEHEIGHT * int(anon_815.messages), 0,
+            reinterpret<uint8?>(W_CacheLumpName(addr(msgNames[showMessages][0]), PU_CACHE)))
+    V_DrawPatchDirect(int(OptionsDef.x) + 131, int(OptionsDef.y) + LINEHEIGHT * int(anon_815.crosshair_opt), 0,
+            reinterpret<uint8?>(W_CacheLumpName(addr(msgNames[crosshair][0]), PU_CACHE)))
+    V_DrawPatchDirect(int(OptionsDef.x) + 147, int(OptionsDef.y) + LINEHEIGHT * int(anon_815.always_run_opt), 0,
+            reinterpret<uint8?>(W_CacheLumpName(addr(msgNames[always_run][0]), PU_CACHE)))
     M_DrawThermo(int(OptionsDef.x), int(OptionsDef.y) + LINEHEIGHT * (int(anon_815.scrnsize) + 1), 9, screenSize)
 }
 
 [c_function]
 def M_DrawMouseOptions {
     M_DrawCustomMenuText(cstr("TXT_MOPT"), 74, 45)
-    V_DrawPatchDirect(int(MouseOptionsDef.x) + 149, int(MouseOptionsDef.y) + LINEHEIGHT * int(anon_821.mousemov), 0, reinterpret<uint8?>(W_CacheLumpName(addr(msgNames[mousemove][0]), PU_CACHE)))
+    V_DrawPatchDirect(int(MouseOptionsDef.x) + 149, int(MouseOptionsDef.y) + LINEHEIGHT * int(anon_821.mousemov), 0,
+            reinterpret<uint8?>(W_CacheLumpName(addr(msgNames[mousemove][0]), PU_CACHE)))
     M_DrawThermo(int(MouseOptionsDef.x), int(MouseOptionsDef.y) + LINEHEIGHT * (int(anon_821.mousesens) + 1), 10, mouseSensitivity)
 }
 
@@ -613,7 +721,7 @@ def M_ChangeMessages(var choice : int) {
     // warning: unused parameter `int choice'
     choice = 0
     showMessages = 1 - showMessages
-    if (!(showMessages != 0)) {
+    if (showMessages == 0) {
         players[consoleplayer].message = cstr("Messages OFF")
     } else {
         players[consoleplayer].message = cstr("Messages ON")
@@ -626,7 +734,7 @@ def M_ChangeCrosshair(var choice : int) {
     // warning: unused parameter `int choice'
     choice = 0
     crosshair = 1 - crosshair
-    if (!(crosshair != 0)) {
+    if (crosshair == 0) {
         players[consoleplayer].message = cstr("Crosshair OFF")
     } else {
         players[consoleplayer].message = cstr("Crosshair ON")
@@ -639,7 +747,7 @@ def M_ChangeAlwaysRun(var choice : int) {
     // warning: unused parameter `int choice'
     choice = 0
     always_run = 1 - always_run
-    if (!(always_run != 0)) {
+    if (always_run == 0) {
         players[consoleplayer].message = cstr("Always run OFF")
     } else {
         players[consoleplayer].message = cstr("Always run ON")
@@ -660,7 +768,7 @@ def M_EndGameResponse(ch : int) {
 [c_function]
 def M_EndGame(var choice : int) {
     choice = 0
-    if (!(int(usergame) != 0)) {
+    if (int(usergame) == 0) {
         S_StartSound(null, int(sfxenum_t.sfx_oof))
         return
     }
@@ -695,7 +803,7 @@ def M_QuitResponse(ch : int) {
     if (ch != 'y') {
         return
     }
-    if (!(int(netgame) != 0)) {
+    if (int(netgame) == 0) {
         if (gamemode == GameMode_t.commercial) {
             S_StartSound(null, quitsounds2[(gametic >> 2) & 7])
         } else {
@@ -723,14 +831,18 @@ def M_QuitDOOM(choice : int) {
 }
 
 def M_ChangeSensitivity(choice : int) {
-    let _cond = choice
-    if (_cond == 0) {
-        if (mouseSensitivity != 0) {
-            mouseSensitivity--
+    c_switch(choice) {
+        case(0) {
+            if (mouseSensitivity != 0) {
+                mouseSensitivity--
+            }
+            break
         }
-    } elif (_cond == 1) {
-        if (mouseSensitivity < 9) {
-            mouseSensitivity++
+        case(1) {
+            if (mouseSensitivity < 9) {
+                mouseSensitivity++
+            }
+            break
         }
     }
 }
@@ -749,16 +861,20 @@ def M_ChangeDetail(var choice : int) {
 }
 
 def M_SizeDisplay(choice : int) {
-    let _cond = choice
-    if (_cond == 0) {
-        if (screenSize > 0) {
-            screenblocks--
-            screenSize--
+    c_switch(choice) {
+        case(0) {
+            if (screenSize > 0) {
+                screenblocks--
+                screenSize--
+            }
+            break
         }
-    } elif (_cond == 1) {
-        if (screenSize < 8) {
-            screenblocks++
-            screenSize++
+        case(1) {
+            if (screenSize < 8) {
+                screenblocks++
+                screenSize++
+            }
+            break
         }
     }
     R_SetViewSize(screenblocks, detailLevel)
@@ -833,7 +949,7 @@ def M_StringHeight(var _c_string : uint8?) : int {
     h = height
     i = 0
     while (i < doom_strlen(_c_string)) {
-        if (int(_c_string[i]) == '\n') {
+        if (_c_string[i] == '\n') {
             h += height
         }
         i++
@@ -854,9 +970,9 @@ def M_WriteText(x : int; y : int; var _c_string : uint8?) {
     cy = y
     while (1 != 0) {
         var _t0 = ch
-        ch = ch + 1
-        c = int(deref(_t0))
-        if (!(c != 0)) {
+        ch++
+        c = int(*_t0)
+        if (c == 0) {
             break
         }
         if (c == '\n') {
@@ -950,35 +1066,35 @@ def M_Responder(var ev : event_t?) : doom_boolean {
     }
     // Save Game string input
     if (saveStringEnter != 0) {
-        let _cond = ch
-        while (true) {
-            if (_cond == 127) {
+        c_switch(ch) {
+            case(127) {
                 if (saveCharIndex > 0) {
                     saveCharIndex--
                     savegamestrings[saveSlot][saveCharIndex] = 0u8
                 }
                 break
             }
-            if (_cond == 27) {
+            case(27) {
                 saveStringEnter = 0
                 doom_strcpy(addr(savegamestrings[saveSlot][0]), addr(saveOldString[0]))
                 break
             }
-            if (_cond == 13) {
+            case(13) {
                 saveStringEnter = 0
                 if (savegamestrings[saveSlot][0] != 0) {
                     M_DoSave(saveSlot)
                 }
                 break
             }
-            if (!(_cond == 127 || _cond == 27 || _cond == 13)) {
+            case(_) {
                 ch = doom_toupper(ch)
                 if (ch != 32) {
                     if (ch - HU_FONTSTART < 0 || ch - HU_FONTSTART >= HU_FONTSIZE) {
                         break
                     }
                 }
-                if (ch >= 32 && ch <= 127 && saveCharIndex < SAVESTRINGSIZE - 1 && M_StringWidth(addr(savegamestrings[saveSlot][0])) < (SAVESTRINGSIZE - 2) * 8) {
+                if (ch >= 32 && ch <= 127 && saveCharIndex < SAVESTRINGSIZE - 1 &&
+                        M_StringWidth(addr(savegamestrings[saveSlot][0])) < (SAVESTRINGSIZE - 2) * 8) {
                     let _t0 = saveCharIndex
                     saveCharIndex++
                     savegamestrings[saveSlot][_t0] = uint8(ch)
@@ -986,7 +1102,6 @@ def M_Responder(var ev : event_t?) : doom_boolean {
                 }
                 break
             }
-            break
         }
         return doom_boolean._c_true
     }
@@ -1004,106 +1119,119 @@ def M_Responder(var ev : event_t?) : doom_boolean {
         S_StartSound(null, int(sfxenum_t.sfx_swtchx))
         return doom_boolean._c_true
     }
-    if (uint(int(devparm)) != 0 && ch == KEY_F1) {
+    if (uint(devparm) != 0 && ch == KEY_F1) {
         G_ScreenShot()
         return doom_boolean._c_true
     }
     // F-Keys
-    if (!(int(menuactive) != 0)) {
-        let _cond2 = ch
-        if (_cond2 == 45) {
-            // Screen size down
-            if (uint(int(automapactive)) != 0 || uint(int(chat_on)) != 0) {
-                return doom_boolean._c_false
+    if (int(menuactive) == 0) {
+        c_switch(ch) {
+            case(45) {
+                // Screen size down
+                if (uint(automapactive) != 0 || uint(chat_on) != 0) {
+                    return doom_boolean._c_false
+                }
+                M_SizeDisplay(0)
+                S_StartSound(null, int(sfxenum_t.sfx_stnmov))
+                return doom_boolean._c_true
             }
-            M_SizeDisplay(0)
-            S_StartSound(null, int(sfxenum_t.sfx_stnmov))
-            return doom_boolean._c_true
-        } elif (_cond2 == 61) {
-            // Screen size up
-            if (uint(int(automapactive)) != 0 || uint(int(chat_on)) != 0) {
-                return doom_boolean._c_false
+            case(61) {
+                // Screen size up
+                if (uint(automapactive) != 0 || uint(chat_on) != 0) {
+                    return doom_boolean._c_false
+                }
+                M_SizeDisplay(1)
+                S_StartSound(null, int(sfxenum_t.sfx_stnmov))
+                return doom_boolean._c_true
             }
-            M_SizeDisplay(1)
-            S_StartSound(null, int(sfxenum_t.sfx_stnmov))
-            return doom_boolean._c_true
-        } elif (_cond2 == 187) {
-            // Help key
-            M_StartControlPanel()
-            if (gamemode == GameMode_t.retail) {
-                currentMenu = addr(ReadDef2)
-            } else {
-                currentMenu = addr(ReadDef1)
+            case(187) {
+                // Help key
+                M_StartControlPanel()
+                if (gamemode == GameMode_t.retail) {
+                    currentMenu = addr(ReadDef2)
+                } else {
+                    currentMenu = addr(ReadDef1)
+                }
+                itemOn = int16(0)
+                S_StartSound(null, int(sfxenum_t.sfx_swtchn))
+                return doom_boolean._c_true
             }
-            itemOn = int16(0)
-            S_StartSound(null, int(sfxenum_t.sfx_swtchn))
-            return doom_boolean._c_true
-        } elif (_cond2 == 188) {
-            // Save
-            M_StartControlPanel()
-            S_StartSound(null, int(sfxenum_t.sfx_swtchn))
-            M_SaveGame(0)
-            return doom_boolean._c_true
-        } elif (_cond2 == 189) {
-            // Load
-            M_StartControlPanel()
-            S_StartSound(null, int(sfxenum_t.sfx_swtchn))
-            M_LoadGame(0)
-            return doom_boolean._c_true
-        } elif (_cond2 == 190) {
-            // Sound Volume
-            M_StartControlPanel()
-            currentMenu = addr(SoundDef)
-            itemOn = int16(int(anon_826.sfx_vol))
-            S_StartSound(null, int(sfxenum_t.sfx_swtchn))
-            return doom_boolean._c_true
-        } elif (_cond2 == 191) {
-            // case KEY_F5: // Detail toggle
-            // M_ChangeDetail(0);
-            // S_StartSound(0, sfx_swtchn);
-            // return true;
-            // Crosshair toggle
-            M_ChangeCrosshair(0)
-            S_StartSound(null, int(sfxenum_t.sfx_swtchn))
-            return doom_boolean._c_true
-        } elif (_cond2 == 192) {
-            // Quicksave
-            S_StartSound(null, int(sfxenum_t.sfx_swtchn))
-            M_QuickSave()
-            return doom_boolean._c_true
-        } elif (_cond2 == 193) {
-            // End game
-            S_StartSound(null, int(sfxenum_t.sfx_swtchn))
-            M_EndGame(0)
-            return doom_boolean._c_true
-        } elif (_cond2 == 194) {
-            // Toggle messages
-            M_ChangeMessages(0)
-            S_StartSound(null, int(sfxenum_t.sfx_swtchn))
-            return doom_boolean._c_true
-        } elif (_cond2 == 195) {
-            // Quickload
-            S_StartSound(null, int(sfxenum_t.sfx_swtchn))
-            M_QuickLoad()
-            return doom_boolean._c_true
-        } elif (_cond2 == 196) {
-            // Quit DOOM
-            S_StartSound(null, int(sfxenum_t.sfx_swtchn))
-            M_QuitDOOM(0)
-            return doom_boolean._c_true
-        } elif (_cond2 == 215) {
-            // gamma toggle
-            usegamma++
-            if (usegamma > 4) {
-                usegamma = 0
+            case(188) {
+                // Save
+                M_StartControlPanel()
+                S_StartSound(null, int(sfxenum_t.sfx_swtchn))
+                M_SaveGame(0)
+                return doom_boolean._c_true
             }
-            players[consoleplayer].message = addr(gammamsg[usegamma][0])
-            I_SetPalette(reinterpret<uint8?>(W_CacheLumpName(cstr("PLAYPAL"), PU_CACHE)))
-            return doom_boolean._c_true
+            case(189) {
+                // Load
+                M_StartControlPanel()
+                S_StartSound(null, int(sfxenum_t.sfx_swtchn))
+                M_LoadGame(0)
+                return doom_boolean._c_true
+            }
+            case(190) {
+                // Sound Volume
+                M_StartControlPanel()
+                currentMenu = addr(SoundDef)
+                itemOn = int16(anon_826.sfx_vol)
+                S_StartSound(null, int(sfxenum_t.sfx_swtchn))
+                return doom_boolean._c_true
+            }
+            case(191) {
+                // case KEY_F5: // Detail toggle
+                // M_ChangeDetail(0);
+                // S_StartSound(0, sfx_swtchn);
+                // return true;
+                // Crosshair toggle
+                M_ChangeCrosshair(0)
+                S_StartSound(null, int(sfxenum_t.sfx_swtchn))
+                return doom_boolean._c_true
+            }
+            case(192) {
+                // Quicksave
+                S_StartSound(null, int(sfxenum_t.sfx_swtchn))
+                M_QuickSave()
+                return doom_boolean._c_true
+            }
+            case(193) {
+                // End game
+                S_StartSound(null, int(sfxenum_t.sfx_swtchn))
+                M_EndGame(0)
+                return doom_boolean._c_true
+            }
+            case(194) {
+                // Toggle messages
+                M_ChangeMessages(0)
+                S_StartSound(null, int(sfxenum_t.sfx_swtchn))
+                return doom_boolean._c_true
+            }
+            case(195) {
+                // Quickload
+                S_StartSound(null, int(sfxenum_t.sfx_swtchn))
+                M_QuickLoad()
+                return doom_boolean._c_true
+            }
+            case(196) {
+                // Quit DOOM
+                S_StartSound(null, int(sfxenum_t.sfx_swtchn))
+                M_QuitDOOM(0)
+                return doom_boolean._c_true
+            }
+            case(215) {
+                // gamma toggle
+                usegamma++
+                if (usegamma > 4) {
+                    usegamma = 0
+                }
+                players[consoleplayer].message = addr(gammamsg[usegamma][0])
+                I_SetPalette(reinterpret<uint8?>(W_CacheLumpName(cstr("PLAYPAL"), PU_CACHE)))
+                return doom_boolean._c_true
+            }
         }
     }
     // Pop-up menu?
-    if (!(int(menuactive) != 0)) {
+    if (int(menuactive) == 0) {
         if (ch == KEY_ESCAPE) {
             M_StartControlPanel()
             S_StartSound(null, int(sfxenum_t.sfx_swtchn))
@@ -1112,89 +1240,92 @@ def M_Responder(var ev : event_t?) : doom_boolean {
         return doom_boolean._c_false
     }
     // Keys usable within menu
-    let _cond3 = ch
-    if (_cond3 == 175) {
-        while (true) {
-            if (int(itemOn) + 1 > int(currentMenu.numitems) - 1) {
-                itemOn = int16(0)
-            } else {
-                itemOn = int16(int(itemOn) + 1)
+    c_switch(ch) {
+        case(175) {
+            c_do_while(currentMenu.menuitems[int(itemOn)].status == -1) {
+                if (int(itemOn) + 1 > int(currentMenu.numitems) - 1) {
+                    itemOn = int16(0)
+                } else {
+                    itemOn = int16(int(itemOn) + 1)
+                }
+                S_StartSound(null, int(sfxenum_t.sfx_pstop))
             }
-            S_StartSound(null, int(sfxenum_t.sfx_pstop))
-            if (!(int(currentMenu.menuitems[int(itemOn)].status) == -1)) {
-                break
+            return doom_boolean._c_true
+        }
+        case(173) {
+            c_do_while(currentMenu.menuitems[int(itemOn)].status == -1) {
+                if (itemOn == 0) {
+                    itemOn = int16(int(currentMenu.numitems) - 1)
+                } else {
+                    itemOn = int16(int(itemOn) - 1)
+                }
+                S_StartSound(null, int(sfxenum_t.sfx_pstop))
             }
+            return doom_boolean._c_true
         }
-        return doom_boolean._c_true
-    } elif (_cond3 == 173) {
-        while (true) {
-            if (!(itemOn != 0)) {
-                itemOn = int16(int(currentMenu.numitems) - 1)
-            } else {
-                itemOn = int16(int(itemOn) - 1)
-            }
-            S_StartSound(null, int(sfxenum_t.sfx_pstop))
-            if (!(int(currentMenu.menuitems[int(itemOn)].status) == -1)) {
-                break
-            }
-        }
-        return doom_boolean._c_true
-    } elif (_cond3 == 172) {
-        if (currentMenu.menuitems[int(itemOn)].routine != null && int(currentMenu.menuitems[int(itemOn)].status) == 2) {
-            S_StartSound(null, int(sfxenum_t.sfx_stnmov))
-            invoke(currentMenu.menuitems[int(itemOn)].routine, 0)
-        }
-        return doom_boolean._c_true
-    } elif (_cond3 == 174) {
-        if (currentMenu.menuitems[int(itemOn)].routine != null && int(currentMenu.menuitems[int(itemOn)].status) == 2) {
-            S_StartSound(null, int(sfxenum_t.sfx_stnmov))
-            invoke(currentMenu.menuitems[int(itemOn)].routine, 1)
-        }
-        return doom_boolean._c_true
-    } elif (_cond3 == 13) {
-        if (currentMenu.menuitems[int(itemOn)].routine != null && currentMenu.menuitems[int(itemOn)].status != 0) {
-            currentMenu.lastOn = itemOn
-            if (int(currentMenu.menuitems[int(itemOn)].status) == 2) {
-                // right arrow
-                invoke(currentMenu.menuitems[int(itemOn)].routine, 1)
+        case(172) {
+            if (currentMenu.menuitems[int(itemOn)].routine != null && currentMenu.menuitems[int(itemOn)].status == 2) {
                 S_StartSound(null, int(sfxenum_t.sfx_stnmov))
-            } else {
-                invoke(currentMenu.menuitems[int(itemOn)].routine, int(itemOn))
-                S_StartSound(null, int(sfxenum_t.sfx_pistol))
+                invoke(currentMenu.menuitems[int(itemOn)].routine, 0)
             }
+            return doom_boolean._c_true
         }
-        return doom_boolean._c_true
-    } elif (_cond3 == 27) {
-        currentMenu.lastOn = itemOn
-        M_ClearMenus()
-        S_StartSound(null, int(sfxenum_t.sfx_swtchx))
-        return doom_boolean._c_true
-    } elif (_cond3 == 127) {
-        currentMenu.lastOn = itemOn
-        if (currentMenu.prevMenu != null) {
-            currentMenu = currentMenu.prevMenu
-            itemOn = currentMenu.lastOn
-            S_StartSound(null, int(sfxenum_t.sfx_swtchn))
-        }
-        return doom_boolean._c_true
-    } else {
-        i = int(itemOn) + 1
-        while (i < int(currentMenu.numitems)) {
-            if (int(currentMenu.menuitems[i].alphaKey) == ch) {
-                itemOn = int16(i)
-                S_StartSound(null, int(sfxenum_t.sfx_pstop))
-                return doom_boolean._c_true
+        case(174) {
+            if (currentMenu.menuitems[int(itemOn)].routine != null && currentMenu.menuitems[int(itemOn)].status == 2) {
+                S_StartSound(null, int(sfxenum_t.sfx_stnmov))
+                invoke(currentMenu.menuitems[int(itemOn)].routine, 1)
             }
-            i++
+            return doom_boolean._c_true
         }
-        i = 0
-        while (i <= int(itemOn)) {
-            if (int(currentMenu.menuitems[i].alphaKey) == ch) {
-                itemOn = int16(i)
-                S_StartSound(null, int(sfxenum_t.sfx_pstop))
-                return doom_boolean._c_true
+        case(13) {
+            if (currentMenu.menuitems[int(itemOn)].routine != null && currentMenu.menuitems[int(itemOn)].status != 0) {
+                currentMenu.lastOn = itemOn
+                if (currentMenu.menuitems[int(itemOn)].status == 2) {
+                    // right arrow
+                    invoke(currentMenu.menuitems[int(itemOn)].routine, 1)
+                    S_StartSound(null, int(sfxenum_t.sfx_stnmov))
+                } else {
+                    invoke(currentMenu.menuitems[int(itemOn)].routine, int(itemOn))
+                    S_StartSound(null, int(sfxenum_t.sfx_pistol))
+                }
             }
-            i++
+            return doom_boolean._c_true
+        }
+        case(27) {
+            currentMenu.lastOn = itemOn
+            M_ClearMenus()
+            S_StartSound(null, int(sfxenum_t.sfx_swtchx))
+            return doom_boolean._c_true
+        }
+        case(127) {
+            currentMenu.lastOn = itemOn
+            if (currentMenu.prevMenu != null) {
+                currentMenu = currentMenu.prevMenu
+                itemOn = currentMenu.lastOn
+                S_StartSound(null, int(sfxenum_t.sfx_swtchn))
+            }
+            return doom_boolean._c_true
+        }
+        case(_) {
+            i = int(itemOn) + 1
+            while (i < int(currentMenu.numitems)) {
+                if (int(currentMenu.menuitems[i].alphaKey) == ch) {
+                    itemOn = int16(i)
+                    S_StartSound(null, int(sfxenum_t.sfx_pstop))
+                    return doom_boolean._c_true
+                }
+                i++
+            }
+            i = 0
+            while (i <= int(itemOn)) {
+                if (int(currentMenu.menuitems[i].alphaKey) == ch) {
+                    itemOn = int16(i)
+                    S_StartSound(null, int(sfxenum_t.sfx_pstop))
+                    return doom_boolean._c_true
+                }
+                i++
+            }
+            break
         }
     }
     return doom_boolean._c_false
@@ -1231,7 +1362,7 @@ def M_Drawer {
         while (messageString[start] != 0) {
             i = int16(0)
             while (int(i) < doom_strlen(messageString + start)) {
-                if (int((messageString + start)[int(i)]) == '\n') {
+                if ((messageString + start)[int(i)] == '\n') {
                     doom_memset(reinterpret<void?>(addr(_c_string[0])), 0, 40)
                     doom_strncpy(addr(_c_string[0]), messageString + start, int(i))
                     start += int(i) + 1
@@ -1249,7 +1380,7 @@ def M_Drawer {
         }
         return
     }
-    if (!(int(menuactive) != 0)) {
+    if (int(menuactive) == 0) {
         return
     }
     // Darken background so the menu is more readable.
@@ -1287,7 +1418,8 @@ def M_Drawer {
         i = int16(int(i) + 1)
     }
     // DRAW SKULL
-    V_DrawPatchDirect(int(M_Drawer_x) + SKULLXOFF, int(currentMenu.y) - 5 + int(itemOn) * LINEHEIGHT, 0, reinterpret<uint8?>(W_CacheLumpName(addr(skullName[int(whichSkull)][0]), PU_CACHE)))
+    V_DrawPatchDirect(int(M_Drawer_x) + SKULLXOFF, int(currentMenu.y) - 5 + int(itemOn) * LINEHEIGHT, 0,
+            reinterpret<uint8?>(W_CacheLumpName(addr(skullName[int(whichSkull)][0]), PU_CACHE)))
 }
 
 // M_ClearMenus
@@ -1314,25 +1446,26 @@ def M_Ticker {
 [c_function]
 def M_Init {
     var hide_mouse : doom_boolean = (doom_flags & DOOM_FLAG_HIDE_MOUSE_OPTIONS) != 0 ? doom_boolean._c_true : doom_boolean._c_false
-    var hide_sound : doom_boolean = ((doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) != 0 && (doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) != 0) ? doom_boolean._c_true : doom_boolean._c_false
+    var hide_sound : doom_boolean = ((doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) != 0 &&
+            (doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) != 0) ? doom_boolean._c_true : doom_boolean._c_false
     OptionsMenu = addr(OptionsMenuFull[0])
-    if (uint(int(hide_mouse)) != 0 && !(int(hide_sound) != 0)) {
+    if (uint(hide_mouse) != 0 && int(hide_sound) == 0) {
         OptionsMenu = addr(OptionsMenuNoMouse[0])
-        doom_memcpy(reinterpret<void?>(addr(OptionsDef)), reinterpret<void?>(addr(OptionsNoMouseDef)), int(uint64(typeinfo sizeof(type<menu_s>))))
-    } elif (!(int(hide_mouse) != 0) && uint(int(hide_sound)) != 0) {
+        doom_memcpy(reinterpret<void?>(addr(OptionsDef)), reinterpret<void?>(addr(OptionsNoMouseDef)), typeinfo sizeof(type<menu_s>))
+    } elif (int(hide_mouse) == 0 && uint(hide_sound) != 0) {
         OptionsMenu = addr(OptionsMenuNoSound[0])
-        doom_memcpy(reinterpret<void?>(addr(OptionsDef)), reinterpret<void?>(addr(OptionsNoSoundDef)), int(uint64(typeinfo sizeof(type<menu_s>))))
-    } elif (uint(int(hide_mouse)) != 0 && uint(int(hide_sound)) != 0) {
+        doom_memcpy(reinterpret<void?>(addr(OptionsDef)), reinterpret<void?>(addr(OptionsNoSoundDef)), typeinfo sizeof(type<menu_s>))
+    } elif (uint(hide_mouse) != 0 && uint(hide_sound) != 0) {
         OptionsMenu = addr(OptionsMenuNoSoundNoMouse[0])
-        doom_memcpy(reinterpret<void?>(addr(OptionsDef)), reinterpret<void?>(addr(OptionsNoSoundNoMouseDef)), int(uint64(typeinfo sizeof(type<menu_s>))))
+        doom_memcpy(reinterpret<void?>(addr(OptionsDef)), reinterpret<void?>(addr(OptionsNoSoundNoMouseDef)), typeinfo sizeof(type<menu_s>))
     }
     SoundMenu = addr(SoundMenuFull[0])
     if ((doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) != 0) {
         SoundMenu = addr(SoundMenuNoMusic[0])
-        doom_memcpy(reinterpret<void?>(addr(SoundDef)), reinterpret<void?>(addr(SoundNoMusicDef)), int(uint64(typeinfo sizeof(type<menu_s>))))
+        doom_memcpy(reinterpret<void?>(addr(SoundDef)), reinterpret<void?>(addr(SoundNoMusicDef)), typeinfo sizeof(type<menu_s>))
     } elif ((doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) != 0) {
         SoundMenu = addr(SoundMenuNoSFX[0])
-        doom_memcpy(reinterpret<void?>(addr(SoundDef)), reinterpret<void?>(addr(SoundNoSFXDef)), int(uint64(typeinfo sizeof(type<menu_s>))))
+        doom_memcpy(reinterpret<void?>(addr(SoundDef)), reinterpret<void?>(addr(SoundNoSFXDef)), typeinfo sizeof(type<menu_s>))
     }
     currentMenu = addr(MainDef)
     menuactive = doom_boolean._c_false
@@ -1346,25 +1479,32 @@ def M_Init {
     quickSaveSlot = -1
     // Here we could catch other version dependencies,
     // like HELP1/2, and four episodes.
-    let _cond = gamemode
-    if (_cond == GameMode_t.commercial) {
-        // This is used because DOOM 2 had only one HELP
-        // page. I use CREDIT as second page now, but
-        // kept this hack for educational purposes.
-        MainMenu[int(anon_809.readthis)] = MainMenu[int(anon_809.quitdoom)]
-        MainDef.numitems = int16(int(MainDef.numitems) - 1)
-        MainDef.y = int16(int(MainDef.y) + 8)
-        NewDef.prevMenu = addr(MainDef)
-        ReadDef1.routine = @@M_DrawReadThis1
-        ReadDef1.x = int16(330)
-        ReadDef1.y = int16(165)
-        ReadMenu1[0].routine = @@M_FinishReadThis
-    } elif (_cond == GameMode_t.shareware || _cond == GameMode_t.registered) {
-        // Episode 2 and 3 are handled,
-        // branching to an ad screen.
-        // We need to remove the fourth episode.
-        EpiDef.numitems = int16(int(EpiDef.numitems) - 1)
-    } else {
+    c_switch(gamemode) {
+        case(GameMode_t.commercial) {
+            // This is used because DOOM 2 had only one HELP
+            // page. I use CREDIT as second page now, but
+            // kept this hack for educational purposes.
+            MainMenu[int(anon_809.readthis)] = MainMenu[int(anon_809.quitdoom)]
+            MainDef.numitems = int16(int(MainDef.numitems) - 1)
+            MainDef.y = int16(int(MainDef.y) + 8)
+            NewDef.prevMenu = addr(MainDef)
+            ReadDef1.routine = @@M_DrawReadThis1
+            ReadDef1.x = int16(330)
+            ReadDef1.y = int16(165)
+            ReadMenu1[0].routine = @@M_FinishReadThis
+            break
+        }
+        case(GameMode_t.shareware, GameMode_t.registered) {
+            // Episode 2 and 3 are handled,
+            // branching to an ad screen.
+            // We need to remove the fourth episode.
+            EpiDef.numitems = int16(int(EpiDef.numitems) - 1)
+            break
+        }
+        case(GameMode_t.retail, _) {
+            // We are fine.
+            break
+        }
     }
 }
 

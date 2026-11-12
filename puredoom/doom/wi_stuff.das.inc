@@ -18,12 +18,47 @@ struct anim_t_wi_stuff {
     nexttic, lastdrawn, ctr, state : int
 }
 
-var private lnodes : point_t[4][9] = fixed_array(fixed_array(point_t(x = 185, y = 164), point_t(x = 148, y = 143), point_t(x = 69, y = 122), point_t(x = 209, y = 102), point_t(x = 116, y = 89), point_t(x = 166, y = 55), point_t(x = 71, y = 56), point_t(x = 135, y = 29), point_t(x = 71, y = 24)), fixed_array(point_t(x = 254, y = 25), point_t(x = 97, y = 50), point_t(x = 188, y = 64), point_t(x = 128, y = 78), point_t(x = 214, y = 92), point_t(x = 133, y = 130), point_t(x = 208, y = 136), point_t(x = 148, y = 140), point_t(x = 235, y = 158)), fixed_array(point_t(x = 156, y = 168), point_t(x = 48, y = 154), point_t(x = 174, y = 95), point_t(x = 265, y = 75), point_t(x = 130, y = 48), point_t(x = 279, y = 23), point_t(x = 198, y = 48), point_t(x = 140, y = 25), point_t(x = 281, y = 136)), fixed_array(point_t(), point_t(), point_t(), point_t(), point_t(), point_t(), point_t(), point_t(), point_t()))
-var private epsd0animinfo : anim_t_wi_stuff[10] = fixed_array(anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 224, y = 104)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 184, y = 160)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 112, y = 136)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 72, y = 112)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 88, y = 96)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 64, y = 48)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 192, y = 40)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 136, y = 16)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 80, y = 16)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 64, y = 24)))
-var private epsd1animinfo : anim_t_wi_stuff[9] = fixed_array(anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 1), anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 2), anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 3), anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 4), anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 5), anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 6), anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 7), anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 192, y = 144), data1 = 8), anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 8))
-var private epsd2animinfo : anim_t_wi_stuff[6] = fixed_array(anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 104, y = 168)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 40, y = 136)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 160, y = 96)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 104, y = 80)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 120, y = 32)), anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 4, nanims = 3, loc = point_t(x = 40, y = 0)))
-var private NUMANIMS : int[4] = fixed_array(int(uint64(typeinfo sizeof(type<anim_t_wi_stuff[10]>)) / uint64(typeinfo sizeof(type<anim_t_wi_stuff>))), int(uint64(typeinfo sizeof(type<anim_t_wi_stuff[9]>)) / uint64(typeinfo sizeof(type<anim_t_wi_stuff>))), int(uint64(typeinfo sizeof(type<anim_t_wi_stuff[6]>)) / uint64(typeinfo sizeof(type<anim_t_wi_stuff>))), 0)
-var private anims_wi_stuff : anim_t_wi_stuff? [4] = fixed_array<anim_t_wi_stuff?>(unsafe(addr(epsd0animinfo[0])), unsafe(addr(epsd1animinfo[0])), unsafe(addr(epsd2animinfo[0])), null)
+var private lnodes : point_t[4][9] = fixed_array(fixed_array(point_t(x = 185, y = 164), point_t(x = 148, y = 143), point_t(x = 69, y = 122),
+            point_t(x = 209, y = 102), point_t(x = 116, y = 89), point_t(x = 166, y = 55), point_t(x = 71, y = 56), point_t(x = 135, y = 29),
+            point_t(x = 71, y = 24)),
+        fixed_array(point_t(x = 254, y = 25), point_t(x = 97, y = 50), point_t(x = 188, y = 64), point_t(x = 128, y = 78), point_t(x = 214, y = 92),
+            point_t(x = 133, y = 130), point_t(x = 208, y = 136), point_t(x = 148, y = 140), point_t(x = 235, y = 158)),
+        fixed_array(point_t(x = 156, y = 168), point_t(x = 48, y = 154), point_t(x = 174, y = 95), point_t(x = 265, y = 75), point_t(x = 130, y = 48),
+            point_t(x = 279, y = 23), point_t(x = 198, y = 48), point_t(x = 140, y = 25), point_t(x = 281, y = 136)),
+        fixed_array(point_t(), point_t(), point_t(), point_t(), point_t(), point_t(), point_t(), point_t(), point_t()))
+var private epsd0animinfo : anim_t_wi_stuff[10] = fixed_array(anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3,
+            loc = point_t(x = 224, y = 104)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 184, y = 160)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 112, y = 136)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 72, y = 112)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 88, y = 96)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 64, y = 48)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 192, y = 40)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 136, y = 16)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 80, y = 16)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 64, y = 24)))
+var private epsd1animinfo : anim_t_wi_stuff[9] = fixed_array(anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1,
+            loc = point_t(x = 128, y = 136), data1 = 1),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 2),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 3),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 4),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 5),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 6),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 7),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 192, y = 144), data1 = 8),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_LEVEL, period = 35 * 1 / 3, nanims = 1, loc = point_t(x = 128, y = 136), data1 = 8))
+var private epsd2animinfo : anim_t_wi_stuff[6] = fixed_array(anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3,
+            loc = point_t(x = 104, y = 168)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 40, y = 136)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 160, y = 96)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 104, y = 80)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 3, nanims = 3, loc = point_t(x = 120, y = 32)),
+        anim_t_wi_stuff(_c_type = animenum_t.ANIM_ALWAYS, period = 35 * 1 / 4, nanims = 3, loc = point_t(x = 40, y = 0)))
+var private NUMANIMS : int[4] = fixed_array(int(uint64(typeinfo sizeof(type<anim_t_wi_stuff[10]>)) / uint64(typeinfo sizeof(type<anim_t_wi_stuff>))),
+        int(uint64(typeinfo sizeof(type<anim_t_wi_stuff[9]>)) / uint64(typeinfo sizeof(type<anim_t_wi_stuff>))),
+        int(uint64(typeinfo sizeof(type<anim_t_wi_stuff[6]>)) / uint64(typeinfo sizeof(type<anim_t_wi_stuff>))), 0)
+var private anims_wi_stuff : anim_t_wi_stuff? [4] = fixed_array<anim_t_wi_stuff?>(unsafe(addr(epsd0animinfo[0])), unsafe(addr(epsd1animinfo[0])),
+        unsafe(addr(epsd2animinfo[0])), null)
 var private acceleratestage : int
 var private me : int
 var private state : stateenum_t
@@ -116,7 +151,7 @@ def WI_drawOnLnode(n : int; var c : uint8 ??) {
     var bottom : int
     var fits : doom_boolean = doom_boolean._c_false
     i = 0
-    while (true) {
+    c_do_while(int(fits) == 0 && i != 2) {
         left = lnodes[wbs.epsd][n].x - int(read_patch_t_leftoffset(c[i], 0))
         top = lnodes[wbs.epsd][n].y - int(read_patch_t_topoffset(c[i], 0))
         right = left + int(read_patch_t_width(c[i], 0))
@@ -126,11 +161,8 @@ def WI_drawOnLnode(n : int; var c : uint8 ??) {
         } else {
             i++
         }
-        if (!(!(int(fits) != 0) && i != 2)) {
-            break
-        }
     }
-    if (uint(int(fits)) != 0 && i < 2) {
+    if (uint(fits) != 0 && i < 2) {
         V_DrawPatch(lnodes[wbs.epsd][n].x, lnodes[wbs.epsd][n].y, FB, c[i])
     } else {
         // DEBUG
@@ -181,29 +213,35 @@ def WI_updateAnimatedBack {
     while (i < NUMANIMS[wbs.epsd]) {
         a = addr(anims_wi_stuff[wbs.epsd][i])
         if (bcnt == a.nexttic) {
-            let _cond = a._c_type
-            if (_cond == animenum_t.ANIM_ALWAYS) {
-                a.ctr++
-                if (a.ctr >= a.nanims) {
-                    a.ctr = 0
-                }
-                a.nexttic = bcnt + a.period
-            } elif (_cond == animenum_t.ANIM_RANDOM) {
-                a.ctr++
-                if (a.ctr == a.nanims) {
-                    a.ctr = -1
-                    a.nexttic = bcnt + a.data2 + (M_Random() % a.data1)
-                } else {
-                    a.nexttic = bcnt + a.period
-                }
-            } elif (_cond == animenum_t.ANIM_LEVEL) {
-                // gawd-awful hack for level anims
-                if (!(state == stateenum_t.StatCount && i == 7) && wbs.next == a.data1) {
+            c_switch(a._c_type) {
+                case(animenum_t.ANIM_ALWAYS) {
                     a.ctr++
-                    if (a.ctr == a.nanims) {
-                        a.ctr--
+                    if (a.ctr >= a.nanims) {
+                        a.ctr = 0
                     }
                     a.nexttic = bcnt + a.period
+                    break
+                }
+                case(animenum_t.ANIM_RANDOM) {
+                    a.ctr++
+                    if (a.ctr == a.nanims) {
+                        a.ctr = -1
+                        a.nexttic = bcnt + a.data2 + (M_Random() % a.data1)
+                    } else {
+                        a.nexttic = bcnt + a.period
+                    }
+                    break
+                }
+                case(animenum_t.ANIM_LEVEL) {
+                    // gawd-awful hack for level anims
+                    if (!(state == stateenum_t.StatCount && i == 7) && wbs.next == a.data1) {
+                        a.ctr++
+                        if (a.ctr == a.nanims) {
+                            a.ctr--
+                        }
+                        a.nexttic = bcnt + a.period
+                    }
+                    break
                 }
             }
         }
@@ -240,7 +278,7 @@ def WI_drawNum(var x : int; y : int; var n : int; var digits : int) : int {
     var neg : int
     var temp : int
     if (digits < 0) {
-        if (!(n != 0)) {
+        if (n == 0) {
             // make variable-length zeros 1 digit long
             digits = 1
         } else {
@@ -253,7 +291,7 @@ def WI_drawNum(var x : int; y : int; var n : int; var digits : int) : int {
             }
         }
     }
-    neg = n < 0 ? 1 : 0
+    neg = int_of(n < 0)
     if (neg != 0) {
         n = -n
     }
@@ -265,7 +303,7 @@ def WI_drawNum(var x : int; y : int; var n : int; var digits : int) : int {
     while (true) {
         let _t0 = digits
         digits--
-        if (!(_t0 != 0)) {
+        if (_t0 == 0) {
             break
         }
         x -= fontwidth
@@ -298,16 +336,13 @@ def WI_drawTime(var x : int; y : int; t : int) {
     }
     if (t <= 61 * 59) {
         div = 1
-        while (true) {
+        c_do_while(t / div != 0) {
             n = (t / div) % 60
             x = WI_drawNum(x, y, n, 2) - int(read_patch_t_width(colon, 0))
             div *= 60
             // draw
             if (div == 60 || t / div != 0) {
                 V_DrawPatch(x, y, FB, colon)
-            }
-            if (!(t / div != 0)) {
-                break
             }
         }
     } else {
@@ -329,7 +364,7 @@ def WI_initNoState {
 def WI_updateNoState {
     WI_updateAnimatedBack()
     cnt--
-    if (!(cnt != 0)) {
+    if (cnt == 0) {
         WI_End()
         G_WorldDone()
     }
@@ -345,10 +380,10 @@ def WI_initShowNextLoc {
 def WI_updateShowNextLoc {
     WI_updateAnimatedBack()
     cnt--
-    if (!(cnt != 0) || acceleratestage != 0) {
+    if (cnt == 0 || acceleratestage != 0) {
         WI_initNoState()
     } else {
-        snl_pointeron = enum_from_int(type<doom_boolean>, (cnt & 31) < 20 ? 1 : 0)
+        snl_pointeron = enum_from_int(type<doom_boolean>, int_of((cnt & 31) < 20))
     }
 }
 
@@ -395,7 +430,7 @@ def WI_drawNoState {
 def WI_fragSum(playernum : int) : int {
     var frags : int = 0
     for (i in range(MAXPLAYERS)) {
-        if (uint(int(playeringame[i])) != 0 && i != playernum) {
+        if (uint(playeringame[i]) != 0 && i != playernum) {
             frags += plrs[playernum].frags[i]
         }
     }
@@ -444,14 +479,14 @@ def WI_updateDeathmatchStats {
         dm_state = 4
     }
     if (dm_state == 2) {
-        if (!((bcnt & 3) != 0)) {
+        if ((bcnt & 3) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
         stillticking = doom_boolean._c_false
         for (i in range(MAXPLAYERS)) {
             if (int(playeringame[i]) != 0) {
                 for (j in range(MAXPLAYERS)) {
-                    if (uint(int(playeringame[j])) != 0 && dm_frags[i][j] != plrs[i].frags[j]) {
+                    if (uint(playeringame[j]) != 0 && dm_frags[i][j] != plrs[i].frags[j]) {
                         if (plrs[i].frags[j] < 0) {
                             dm_frags[i][j]--
                         } else {
@@ -475,7 +510,7 @@ def WI_updateDeathmatchStats {
                 }
             }
         }
-        if (!(int(stillticking) != 0)) {
+        if (int(stillticking) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_barexp))
             dm_state++
         }
@@ -490,7 +525,7 @@ def WI_updateDeathmatchStats {
         }
     } elif ((dm_state & 1) != 0) {
         cnt_pause--
-        if (!(cnt_pause != 0)) {
+        if (cnt_pause == 0) {
             dm_state++
             cnt_pause = TICRATE
         }
@@ -556,7 +591,7 @@ def WI_initNetgameStats {
     ng_state = 1
     cnt_pause = TICRATE
     for (i in range(MAXPLAYERS)) {
-        if (!(int(playeringame[i]) != 0)) {
+        if (int(playeringame[i]) == 0) {
             continue
         }
         cnt_frags[i] = 0
@@ -565,7 +600,7 @@ def WI_initNetgameStats {
         cnt_kills[i] = cnt_items[i]
         dofrags += WI_fragSum(i)
     }
-    dofrags = !!(dofrags != 0) ? 1 : 0
+    dofrags = int_of(dofrags != 0)
     WI_initAnimatedBack()
 }
 
@@ -577,7 +612,7 @@ def WI_updateNetgameStats {
     if (acceleratestage != 0 && ng_state != 10) {
         acceleratestage = 0
         for (i in range(MAXPLAYERS)) {
-            if (!(int(playeringame[i]) != 0)) {
+            if (int(playeringame[i]) == 0) {
                 continue
             }
             cnt_kills[i] = (plrs[i].skills * 100) / wbs.maxkills
@@ -591,12 +626,12 @@ def WI_updateNetgameStats {
         ng_state = 10
     }
     if (ng_state == 2) {
-        if (!((bcnt & 3) != 0)) {
+        if ((bcnt & 3) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
         stillticking = doom_boolean._c_false
         for (i in range(MAXPLAYERS)) {
-            if (!(int(playeringame[i]) != 0)) {
+            if (int(playeringame[i]) == 0) {
                 continue
             }
             cnt_kills[i] += 2
@@ -606,17 +641,17 @@ def WI_updateNetgameStats {
                 stillticking = doom_boolean._c_true
             }
         }
-        if (!(int(stillticking) != 0)) {
+        if (int(stillticking) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_barexp))
             ng_state++
         }
     } elif (ng_state == 4) {
-        if (!((bcnt & 3) != 0)) {
+        if ((bcnt & 3) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
         stillticking = doom_boolean._c_false
         for (i in range(MAXPLAYERS)) {
-            if (!(int(playeringame[i]) != 0)) {
+            if (int(playeringame[i]) == 0) {
                 continue
             }
             cnt_items[i] += 2
@@ -626,17 +661,17 @@ def WI_updateNetgameStats {
                 stillticking = doom_boolean._c_true
             }
         }
-        if (!(int(stillticking) != 0)) {
+        if (int(stillticking) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_barexp))
             ng_state++
         }
     } elif (ng_state == 6) {
-        if (!((bcnt & 3) != 0)) {
+        if ((bcnt & 3) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
         stillticking = doom_boolean._c_false
         for (i in range(MAXPLAYERS)) {
-            if (!(int(playeringame[i]) != 0)) {
+            if (int(playeringame[i]) == 0) {
                 continue
             }
             cnt_secret[i] += 2
@@ -646,17 +681,17 @@ def WI_updateNetgameStats {
                 stillticking = doom_boolean._c_true
             }
         }
-        if (!(int(stillticking) != 0)) {
+        if (int(stillticking) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_barexp))
-            ng_state += 1 + 2 * (!(dofrags != 0) ? 1 : 0)
+            ng_state += 1 + 2 * int_of(dofrags == 0)
         }
     } elif (ng_state == 8) {
-        if (!((bcnt & 3) != 0)) {
+        if ((bcnt & 3) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
         stillticking = doom_boolean._c_false
         for (i in range(MAXPLAYERS)) {
-            if (!(int(playeringame[i]) != 0)) {
+            if (int(playeringame[i]) == 0) {
                 continue
             }
             cnt_frags[i] += 1
@@ -667,7 +702,7 @@ def WI_updateNetgameStats {
                 stillticking = doom_boolean._c_true
             }
         }
-        if (!(int(stillticking) != 0)) {
+        if (int(stillticking) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_pldeth))
             ng_state++
         }
@@ -682,7 +717,7 @@ def WI_updateNetgameStats {
         }
     } elif ((ng_state & 1) != 0) {
         cnt_pause--
-        if (!(cnt_pause != 0)) {
+        if (cnt_pause == 0) {
             ng_state++
             cnt_pause = TICRATE
         }
@@ -698,19 +733,22 @@ def WI_drawNetgameStats {
     WI_drawAnimatedBack()
     WI_drawLF()
     // draw stat titles (top line)
-    V_DrawPatch(32 + int(read_patch_t_width(star, 0)) / 2 + 32 * (!(dofrags != 0) ? 1 : 0) + NG_SPACINGX - int(read_patch_t_width(kills, 0)), NG_STATSY, FB, kills)
-    V_DrawPatch(32 + int(read_patch_t_width(star, 0)) / 2 + 32 * (!(dofrags != 0) ? 1 : 0) + 2 * NG_SPACINGX - int(read_patch_t_width(items, 0)), NG_STATSY, FB, items)
-    V_DrawPatch(32 + int(read_patch_t_width(star, 0)) / 2 + 32 * (!(dofrags != 0) ? 1 : 0) + 3 * NG_SPACINGX - int(read_patch_t_width(secret, 0)), NG_STATSY, FB, secret)
+    V_DrawPatch(32 + int(read_patch_t_width(star, 0)) / 2 + 32 * int_of(dofrags == 0) + NG_SPACINGX - int(read_patch_t_width(kills, 0)), NG_STATSY, FB, kills)
+    V_DrawPatch(32 + int(read_patch_t_width(star, 0)) / 2 + 32 * int_of(dofrags == 0) + 2 * NG_SPACINGX - int(read_patch_t_width(items, 0)), NG_STATSY, FB,
+            items)
+    V_DrawPatch(32 + int(read_patch_t_width(star, 0)) / 2 + 32 * int_of(dofrags == 0) + 3 * NG_SPACINGX - int(read_patch_t_width(secret, 0)), NG_STATSY, FB,
+            secret)
     if (dofrags != 0) {
-        V_DrawPatch(32 + int(read_patch_t_width(star, 0)) / 2 + 32 * (!(dofrags != 0) ? 1 : 0) + 4 * NG_SPACINGX - int(read_patch_t_width(frags, 0)), NG_STATSY, FB, frags)
+        V_DrawPatch(32 + int(read_patch_t_width(star, 0)) / 2 + 32 * int_of(dofrags == 0) + 4 * NG_SPACINGX - int(read_patch_t_width(frags, 0)), NG_STATSY, FB,
+                frags)
     }
     // draw stats
     y = NG_STATSY + int(read_patch_t_height(kills, 0))
     for (i in range(MAXPLAYERS)) {
-        if (!(int(playeringame[i]) != 0)) {
+        if (int(playeringame[i]) == 0) {
             continue
         }
-        x = 32 + int(read_patch_t_width(star, 0)) / 2 + 32 * (!(dofrags != 0) ? 1 : 0)
+        x = 32 + int(read_patch_t_width(star, 0)) / 2 + 32 * int_of(dofrags == 0)
         V_DrawPatch(x - int(read_patch_t_width(p[i], 0)), y, FB, p[i])
         if (i == me) {
             V_DrawPatch(x - int(read_patch_t_width(p[i], 0)), y, FB, star)
@@ -757,7 +795,7 @@ def WI_updateStats {
     }
     if (sp_state == 2) {
         cnt_kills[0] += 2
-        if (!((bcnt & 3) != 0)) {
+        if ((bcnt & 3) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
         if (cnt_kills[0] >= (plrs[me].skills * 100) / wbs.maxkills) {
@@ -767,7 +805,7 @@ def WI_updateStats {
         }
     } elif (sp_state == 4) {
         cnt_items[0] += 2
-        if (!((bcnt & 3) != 0)) {
+        if ((bcnt & 3) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
         if (cnt_items[0] >= (plrs[me].sitems * 100) / wbs.maxitems) {
@@ -777,7 +815,7 @@ def WI_updateStats {
         }
     } elif (sp_state == 6) {
         cnt_secret[0] += 2
-        if (!((bcnt & 3) != 0)) {
+        if ((bcnt & 3) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
         if (cnt_secret[0] >= (plrs[me].ssecret * 100) / wbs.maxsecret) {
@@ -786,7 +824,7 @@ def WI_updateStats {
             sp_state++
         }
     } elif (sp_state == 8) {
-        if (!((bcnt & 3) != 0)) {
+        if ((bcnt & 3) == 0) {
             S_StartSound(null, int(sfxenum_t.sfx_pistol))
         }
         cnt_time += 3
@@ -812,7 +850,7 @@ def WI_updateStats {
         }
     } elif ((sp_state & 1) != 0) {
         cnt_pause--
-        if (!(cnt_pause != 0)) {
+        if (cnt_pause == 0) {
             sp_state++
             cnt_pause = TICRATE
         }
@@ -851,7 +889,7 @@ def WI_checkForAccelerate {
     while (i < MAXPLAYERS) {
         if (int(playeringame[i]) != 0) {
             if ((int(player.cmd.buttons) & int(buttoncode_t.BT_ATTACK)) != 0) {
-                if (!(player.attackdown != 0)) {
+                if (player.attackdown == 0) {
                     acceleratestage = 1
                 }
                 player.attackdown = int(doom_boolean._c_true)
@@ -859,7 +897,7 @@ def WI_checkForAccelerate {
                 player.attackdown = int(doom_boolean._c_false)
             }
             if ((int(player.cmd.buttons) & int(buttoncode_t.BT_USE)) != 0) {
-                if (!(player.usedown != 0)) {
+                if (player.usedown == 0) {
                     acceleratestage = 1
                 }
                 player.usedown = int(doom_boolean._c_true)
@@ -868,7 +906,7 @@ def WI_checkForAccelerate {
             }
         }
         i++
-        player = player + 1
+        player++
     }
 }
 
@@ -885,19 +923,25 @@ def WI_Ticker {
         }
     }
     WI_checkForAccelerate()
-    let _cond = state
-    if (_cond == stateenum_t.StatCount) {
-        if (int(deathmatch) != 0) {
-            WI_updateDeathmatchStats()
-        } elif (int(netgame) != 0) {
-            WI_updateNetgameStats()
-        } else {
-            WI_updateStats()
+    c_switch(state) {
+        case(stateenum_t.StatCount) {
+            if (int(deathmatch) != 0) {
+                WI_updateDeathmatchStats()
+            } elif (int(netgame) != 0) {
+                WI_updateNetgameStats()
+            } else {
+                WI_updateStats()
+            }
+            break
         }
-    } elif (_cond == stateenum_t.ShowNextLoc) {
-        WI_updateShowNextLoc()
-    } elif (_cond == stateenum_t.NoState) {
-        WI_updateNoState()
+        case(stateenum_t.ShowNextLoc) {
+            WI_updateShowNextLoc()
+            break
+        }
+        case(stateenum_t.NoState) {
+            WI_updateNoState()
+            break
+        }
     }
 }
 
@@ -1006,7 +1050,7 @@ def WI_loadData {
     // Yuck.
     if (int(Language_t.french) != 0) {
         // "items"
-        if (uint(int(netgame)) != 0 && !(int(deathmatch) != 0)) {
+        if (uint(netgame) != 0 && int(deathmatch) == 0) {
             items = reinterpret<uint8?>(W_CacheLumpName(cstr("WIOBJ"), PU_STATIC))
         } else {
             items = reinterpret<uint8?>(W_CacheLumpName(cstr("WIOSTI"), PU_STATIC))
@@ -1117,7 +1161,8 @@ def WI_unloadData {
                 if (wbs.epsd != 1 || j != 8) {
                     i = 0
                     while (i < anims_wi_stuff[wbs.epsd][j].nanims) {
-                        if (reinterpret<memblock_s?>(reinterpret<uint8?>(anims_wi_stuff[wbs.epsd][j].p[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
+                        if (reinterpret<memblock_s?>(reinterpret<uint8?>(anims_wi_stuff[wbs.epsd][j].p[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id !=
+                                1919505) {
                             var buf : uint8[260]
                             doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/wi_stuff.c:"))
                             doom_concat(addr(buf[0]), doom_itoa(1685, 10))
@@ -1260,19 +1305,25 @@ def WI_unloadData {
 }
 
 def WI_Drawer {
-    let _cond = state
-    if (_cond == stateenum_t.StatCount) {
-        if (int(deathmatch) != 0) {
-            WI_drawDeathmatchStats()
-        } elif (int(netgame) != 0) {
-            WI_drawNetgameStats()
-        } else {
-            WI_drawStats()
+    c_switch(state) {
+        case(stateenum_t.StatCount) {
+            if (int(deathmatch) != 0) {
+                WI_drawDeathmatchStats()
+            } elif (int(netgame) != 0) {
+                WI_drawNetgameStats()
+            } else {
+                WI_drawStats()
+            }
+            break
         }
-    } elif (_cond == stateenum_t.ShowNextLoc) {
-        WI_drawShowNextLoc()
-    } elif (_cond == stateenum_t.NoState) {
-        WI_drawNoState()
+        case(stateenum_t.ShowNextLoc) {
+            WI_drawShowNextLoc()
+            break
+        }
+        case(stateenum_t.NoState) {
+            WI_drawNoState()
+            break
+        }
     }
 }
 
@@ -1285,13 +1336,13 @@ def WI_initVariables(var wbstartstruct : wbstartstruct_t?) {
     firstrefresh = 1
     me = wbs.pnum
     plrs = addr(wbs.plyr[0])
-    if (!(wbs.maxkills != 0)) {
+    if (wbs.maxkills == 0) {
         wbs.maxkills = 1
     }
-    if (!(wbs.maxitems != 0)) {
+    if (wbs.maxitems == 0) {
         wbs.maxitems = 1
     }
-    if (!(wbs.maxsecret != 0)) {
+    if (wbs.maxsecret == 0) {
         wbs.maxsecret = 1
     }
     if (gamemode != GameMode_t.retail) {

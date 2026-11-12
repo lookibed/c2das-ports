@@ -3,81 +3,119 @@
 [c_function]
 def T_VerticalDoor(var door : vldoor_t?) {
     var res : result_e
-    let _cond = door.direction
-    if (_cond == 0) {
-        // WAITING
-        door.topcountdown--
-        if (!(door.topcountdown != 0)) {
-            let _cond2 = door._c_type
-            if (_cond2 == vldoor_e.blazeRaise) {
-                // time to go back down
-                door.direction = -1
-                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_bdcls))
-            } elif (_cond2 == vldoor_e.door_normal) {
-                // time to go back down
-                door.direction = -1
-                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_dorcls))
-            } elif (_cond2 == vldoor_e.close30ThenOpen) {
-                door.direction = 1
-                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_doropn))
-            } else {
+    c_switch(door.direction) {
+        case(0) {
+            // WAITING
+            door.topcountdown--
+            if (door.topcountdown == 0) {
+                c_switch(door._c_type) {
+                    case(vldoor_e.blazeRaise) {
+                        // time to go back down
+                        door.direction = -1
+                        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_bdcls))
+                        break
+                    }
+                    case(vldoor_e.door_normal) {
+                        // time to go back down
+                        door.direction = -1
+                        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_dorcls))
+                        break
+                    }
+                    case(vldoor_e.close30ThenOpen) {
+                        door.direction = 1
+                        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_doropn))
+                        break
+                    }
+                    case(_) {
+                        break
+                    }
+                }
             }
+            break
         }
-    } elif (_cond == 2) {
-        // INITIAL WAIT
-        door.topcountdown--
-        if (!(door.topcountdown != 0)) {
-            let _cond3 = door._c_type
-            if (_cond3 == vldoor_e.raiseIn5Mins) {
-                door.direction = 1
-                door._c_type = vldoor_e.door_normal
-                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_doropn))
-            } else {
+        case(2) {
+            // INITIAL WAIT
+            door.topcountdown--
+            if (door.topcountdown == 0) {
+                c_switch(door._c_type) {
+                    case(vldoor_e.raiseIn5Mins) {
+                        door.direction = 1
+                        door._c_type = vldoor_e.door_normal
+                        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_doropn))
+                        break
+                    }
+                    case(_) {
+                        break
+                    }
+                }
             }
+            break
         }
-    } elif (_cond == -1) {
-        // DOWN
-        res = T_MovePlane(door.sector, door.speed, door.sector.floorheight, doom_boolean._c_false, 1, door.direction)
-        if (res == result_e.pastdest) {
-            let _cond4 = door._c_type
-            if (_cond4 == vldoor_e.blazeRaise || _cond4 == vldoor_e.blazeClose) {
-                door.sector.specialdata = null
-                // unlink and free
-                P_RemoveThinker(addr(door.thinker))
-                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_bdcls))
-            } elif (_cond4 == vldoor_e.door_normal || _cond4 == vldoor_e.door_close) {
-                door.sector.specialdata = null
-                // unlink and free
-                P_RemoveThinker(addr(door.thinker))
-            } elif (_cond4 == vldoor_e.close30ThenOpen) {
-                door.direction = 0
-                door.topcountdown = 35 * 30
-            } else {
+        case(-1) {
+            // DOWN
+            res = T_MovePlane(door.sector, door.speed, door.sector.floorheight, doom_boolean._c_false, 1, door.direction)
+            if (res == result_e.pastdest) {
+                c_switch(door._c_type) {
+                    case(vldoor_e.blazeRaise, vldoor_e.blazeClose) {
+                        door.sector.specialdata = null
+                        // unlink and free
+                        P_RemoveThinker(addr(door.thinker))
+                        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_bdcls))
+                        break
+                    }
+                    case(vldoor_e.door_normal, vldoor_e.door_close) {
+                        door.sector.specialdata = null
+                        // unlink and free
+                        P_RemoveThinker(addr(door.thinker))
+                        break
+                    }
+                    case(vldoor_e.close30ThenOpen) {
+                        door.direction = 0
+                        door.topcountdown = 35 * 30
+                        break
+                    }
+                    case(_) {
+                        break
+                    }
+                }
+            } elif (res == result_e.crushed) {
+                c_switch(door._c_type) {
+                    case(vldoor_e.blazeClose, vldoor_e.door_close) {
+                        // DO NOT GO BACK UP!
+                        break
+                    }
+                    case(_) {
+                        door.direction = 1
+                        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_doropn))
+                        break
+                    }
+                }
             }
-        } elif (res == result_e.crushed) {
-            let _cond5 = door._c_type
-            if (_cond5 == vldoor_e.blazeClose || _cond5 == vldoor_e.door_close) {
-            } else {
-                // DO NOT GO BACK UP!
-                door.direction = 1
-                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_doropn))
-            }
+            break
         }
-    } elif (_cond == 1) {
-        // UP
-        res = T_MovePlane(door.sector, door.speed, door.topheight, doom_boolean._c_false, 1, door.direction)
-        if (res == result_e.pastdest) {
-            let _cond6 = door._c_type
-            if (_cond6 == vldoor_e.blazeRaise || _cond6 == vldoor_e.door_normal) {
-                // wait at top
-                door.direction = 0
-                door.topcountdown = door.topwait
-            } elif (_cond6 == vldoor_e.close30ThenOpen || _cond6 == vldoor_e.blazeOpen || _cond6 == vldoor_e.door_open) {
-                door.sector.specialdata = null
-                // unlink and free
-                P_RemoveThinker(addr(door.thinker))
-            } else {
+        case(1) {
+            // UP
+            res = T_MovePlane(door.sector, door.speed, door.topheight, doom_boolean._c_false, 1, door.direction)
+            if (res == result_e.pastdest) {
+                c_switch(door._c_type) {
+                    case(vldoor_e.blazeRaise, vldoor_e.door_normal) {
+                        // wait at top
+                        door.direction = 0
+                        door.topcountdown = door.topwait
+                        break
+                    }
+                    case(vldoor_e.close30ThenOpen, vldoor_e.blazeOpen, vldoor_e.door_open) {
+                        door.sector.specialdata = null
+                        // unlink and free
+                        P_RemoveThinker(addr(door.thinker))
+                        break
+                    }
+                    case(_) {
+                        break
+                    }
+                }
             }
+            break
         }
     }
 }
@@ -87,39 +125,45 @@ def T_VerticalDoor(var door : vldoor_t?) {
 def EV_DoLockedDoor(var line : line_s?; _c_type : vldoor_e; var thing : mobj_s?) : int {
     var p : player_s?
     p = thing.player
-    if (!(p != null)) {
+    if (p == null) {
         return 0
     }
-    let _cond = int(line.special)
-    if (_cond == 99 || _cond == 133) {
-        // Blue Lock
-        if (!(p != null)) {
-            return 0
+    c_switch(int(line.special)) {
+        case(99, 133) {
+            // Blue Lock
+            if (p == null) {
+                return 0
+            }
+            if (int(p.cards[int(card_t.it_bluecard)]) == 0 && int(p.cards[int(card_t.it_blueskull)]) == 0) {
+                p.message = cstr("You need a blue key to activate this object")
+                S_StartSound(null, int(sfxenum_t.sfx_oof))
+                return 0
+            }
+            break
         }
-        if (!(int(p.cards[int(card_t.it_bluecard)]) != 0) && !(int(p.cards[int(card_t.it_blueskull)]) != 0)) {
-            p.message = cstr("You need a blue key to activate this object")
-            S_StartSound(null, int(sfxenum_t.sfx_oof))
-            return 0
+        case(134, 135) {
+            // Red Lock
+            if (p == null) {
+                return 0
+            }
+            if (int(p.cards[int(card_t.it_redcard)]) == 0 && int(p.cards[int(card_t.it_redskull)]) == 0) {
+                p.message = cstr("You need a red key to activate this object")
+                S_StartSound(null, int(sfxenum_t.sfx_oof))
+                return 0
+            }
+            break
         }
-    } elif (_cond == 134 || _cond == 135) {
-        // Red Lock
-        if (!(p != null)) {
-            return 0
-        }
-        if (!(int(p.cards[int(card_t.it_redcard)]) != 0) && !(int(p.cards[int(card_t.it_redskull)]) != 0)) {
-            p.message = cstr("You need a red key to activate this object")
-            S_StartSound(null, int(sfxenum_t.sfx_oof))
-            return 0
-        }
-    } elif (_cond == 136 || _cond == 137) {
-        // Yellow Lock
-        if (!(p != null)) {
-            return 0
-        }
-        if (!(int(p.cards[int(card_t.it_yellowcard)]) != 0) && !(int(p.cards[int(card_t.it_yellowskull)]) != 0)) {
-            p.message = cstr("You need a yellow key to activate this object")
-            S_StartSound(null, int(sfxenum_t.sfx_oof))
-            return 0
+        case(136, 137) {
+            // Yellow Lock
+            if (p == null) {
+                return 0
+            }
+            if (int(p.cards[int(card_t.it_yellowcard)]) == 0 && int(p.cards[int(card_t.it_yellowskull)]) == 0) {
+                p.message = cstr("You need a yellow key to activate this object")
+                S_StartSound(null, int(sfxenum_t.sfx_oof))
+                return 0
+            }
+            break
         }
     }
     return EV_DoDoor(line, _c_type)
@@ -144,7 +188,7 @@ def EV_DoDoor(var line : line_s?; _c_type : vldoor_e) : int {
         }
         // new door thinker
         rtn = 1
-        door = reinterpret<vldoor_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<vldoor_t>))), PU_LEVSPEC, null))
+        door = reinterpret<vldoor_t?>(Z_Malloc(typeinfo sizeof(type<vldoor_t>), PU_LEVSPEC, null))
         P_AddThinker(addr(door.thinker))
         sec.specialdata = reinterpret<void?>(door)
         door.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_VerticalDoor)
@@ -152,38 +196,50 @@ def EV_DoDoor(var line : line_s?; _c_type : vldoor_e) : int {
         door._c_type = _c_type
         door.topwait = VDOORWAIT
         door.speed = FRACUNIT * 2
-        let _cond = _c_type
-        if (_cond == vldoor_e.blazeClose) {
-            door.topheight = P_FindLowestCeilingSurrounding(sec)
-            door.topheight -= 4 * FRACUNIT
-            door.direction = -1
-            door.speed = FRACUNIT * 2 * 4
-            S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_bdcls))
-        } elif (_cond == vldoor_e.door_close) {
-            door.topheight = P_FindLowestCeilingSurrounding(sec)
-            door.topheight -= 4 * FRACUNIT
-            door.direction = -1
-            S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_dorcls))
-        } elif (_cond == vldoor_e.close30ThenOpen) {
-            door.topheight = sec.ceilingheight
-            door.direction = -1
-            S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_dorcls))
-        } elif (_cond == vldoor_e.blazeRaise || _cond == vldoor_e.blazeOpen) {
-            door.direction = 1
-            door.topheight = P_FindLowestCeilingSurrounding(sec)
-            door.topheight -= 4 * FRACUNIT
-            door.speed = FRACUNIT * 2 * 4
-            if (door.topheight != sec.ceilingheight) {
-                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_bdopn))
+        c_switch(_c_type) {
+            case(vldoor_e.blazeClose) {
+                door.topheight = P_FindLowestCeilingSurrounding(sec)
+                door.topheight -= 4 * FRACUNIT
+                door.direction = -1
+                door.speed = FRACUNIT * 2 * 4
+                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_bdcls))
+                break
             }
-        } elif (_cond == vldoor_e.door_normal || _cond == vldoor_e.door_open) {
-            door.direction = 1
-            door.topheight = P_FindLowestCeilingSurrounding(sec)
-            door.topheight -= 4 * FRACUNIT
-            if (door.topheight != sec.ceilingheight) {
-                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_doropn))
+            case(vldoor_e.door_close) {
+                door.topheight = P_FindLowestCeilingSurrounding(sec)
+                door.topheight -= 4 * FRACUNIT
+                door.direction = -1
+                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_dorcls))
+                break
             }
-        } else {
+            case(vldoor_e.close30ThenOpen) {
+                door.topheight = sec.ceilingheight
+                door.direction = -1
+                S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_dorcls))
+                break
+            }
+            case(vldoor_e.blazeRaise, vldoor_e.blazeOpen) {
+                door.direction = 1
+                door.topheight = P_FindLowestCeilingSurrounding(sec)
+                door.topheight -= 4 * FRACUNIT
+                door.speed = FRACUNIT * 2 * 4
+                if (door.topheight != sec.ceilingheight) {
+                    S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_bdopn))
+                }
+                break
+            }
+            case(vldoor_e.door_normal, vldoor_e.door_open) {
+                door.direction = 1
+                door.topheight = P_FindLowestCeilingSurrounding(sec)
+                door.topheight -= 4 * FRACUNIT
+                if (door.topheight != sec.ceilingheight) {
+                    S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(door.sector.soundorg))), int(sfxenum_t.sfx_doropn))
+                }
+                break
+            }
+            case(_) {
+                break
+            }
         }
     }
     return rtn
@@ -201,36 +257,42 @@ def EV_VerticalDoor(var line : line_s?; var thing : mobj_s?) {
     side = 0
     // Check for locks
     player = thing.player
-    let _cond = int(line.special)
-    if (_cond == 26 || _cond == 32) {
-        // Blue Lock
-        if (!(player != null)) {
-            return
+    c_switch(int(line.special)) {
+        case(26, 32) {
+            // Blue Lock
+            if (player == null) {
+                return
+            }
+            if (int(player.cards[int(card_t.it_bluecard)]) == 0 && int(player.cards[int(card_t.it_blueskull)]) == 0) {
+                player.message = cstr("You need a blue key to open this door")
+                S_StartSound(null, int(sfxenum_t.sfx_oof))
+                return
+            }
+            break
         }
-        if (!(int(player.cards[int(card_t.it_bluecard)]) != 0) && !(int(player.cards[int(card_t.it_blueskull)]) != 0)) {
-            player.message = cstr("You need a blue key to open this door")
-            S_StartSound(null, int(sfxenum_t.sfx_oof))
-            return
+        case(27, 34) {
+            // Yellow Lock
+            if (player == null) {
+                return
+            }
+            if (int(player.cards[int(card_t.it_yellowcard)]) == 0 && int(player.cards[int(card_t.it_yellowskull)]) == 0) {
+                player.message = cstr("You need a yellow key to open this door")
+                S_StartSound(null, int(sfxenum_t.sfx_oof))
+                return
+            }
+            break
         }
-    } elif (_cond == 27 || _cond == 34) {
-        // Yellow Lock
-        if (!(player != null)) {
-            return
-        }
-        if (!(int(player.cards[int(card_t.it_yellowcard)]) != 0) && !(int(player.cards[int(card_t.it_yellowskull)]) != 0)) {
-            player.message = cstr("You need a yellow key to open this door")
-            S_StartSound(null, int(sfxenum_t.sfx_oof))
-            return
-        }
-    } elif (_cond == 28 || _cond == 33) {
-        // Red Lock
-        if (!(player != null)) {
-            return
-        }
-        if (!(int(player.cards[int(card_t.it_redcard)]) != 0) && !(int(player.cards[int(card_t.it_redskull)]) != 0)) {
-            player.message = cstr("You need a red key to open this door")
-            S_StartSound(null, int(sfxenum_t.sfx_oof))
-            return
+        case(28, 33) {
+            // Red Lock
+            if (player == null) {
+                return
+            }
+            if (int(player.cards[int(card_t.it_redcard)]) == 0 && int(player.cards[int(card_t.it_redskull)]) == 0) {
+                player.message = cstr("You need a red key to open this door")
+                S_StartSound(null, int(sfxenum_t.sfx_oof))
+                return
+            }
+            break
         }
     }
     // if the sector has an active thinker, use it
@@ -238,38 +300,45 @@ def EV_VerticalDoor(var line : line_s?; var thing : mobj_s?) {
     secnum = int(int64(sec - sectors))
     if (sec.specialdata != null) {
         door = reinterpret<vldoor_t?>(sec.specialdata)
-        let _cond2 = int(line.special)
-        if (_cond2 == 1 || _cond2 == 26 || _cond2 == 27 || _cond2 == 28 || _cond2 == 117) {
-            // ONLY FOR "RAISE" DOORS, NOT "OPEN"s
-            if (door.direction == -1) {
-                // go back up
-                door.direction = 1
-            } else {
-                if (!(thing.player != null)) {
-                    // JDC: bad guys never close doors
-                    return
+        c_switch(int(line.special)) {
+            case(1, 26, 27, 28, 117) {
+                // ONLY FOR "RAISE" DOORS, NOT "OPEN"s
+                if (door.direction == -1) {
+                    // go back up
+                    door.direction = 1
+                } else {
+                    if (thing.player == null) {
+                        // JDC: bad guys never close doors
+                        return
+                    }
+                    // start going down immediately
+                    door.direction = -1
                 }
-                // start going down immediately
-                door.direction = -1
+                return
             }
-            return
         }
     }
     // for proper sound
-    let _cond3 = int(line.special)
-    if (_cond3 == 117 || _cond3 == 118) {
-        // BLAZING DOOR RAISE
-        // BLAZING DOOR OPEN
-        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_bdopn))
-    } elif (_cond3 == 1 || _cond3 == 31) {
-        // NORMAL DOOR SOUND
-        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_doropn))
-    } else {
-        // LOCKED DOOR SOUND
-        S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_doropn))
+    c_switch(int(line.special)) {
+        case(117, 118) {
+            // BLAZING DOOR RAISE
+            // BLAZING DOOR OPEN
+            S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_bdopn))
+            break
+        }
+        case(1, 31) {
+            // NORMAL DOOR SOUND
+            S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_doropn))
+            break
+        }
+        case(_) {
+            // LOCKED DOOR SOUND
+            S_StartSound(reinterpret<void?>(reinterpret<mobj_s?>(addr(sec.soundorg))), int(sfxenum_t.sfx_doropn))
+            break
+        }
     }
     // new door thinker
-    door = reinterpret<vldoor_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<vldoor_t>))), PU_LEVSPEC, null))
+    door = reinterpret<vldoor_t?>(Z_Malloc(typeinfo sizeof(type<vldoor_t>), PU_LEVSPEC, null))
     P_AddThinker(addr(door.thinker))
     sec.specialdata = reinterpret<void?>(door)
     door.thinker._c_function.acp1 = reinterpret<function<(var a0 : void?) : void>>(@@T_VerticalDoor)
@@ -277,21 +346,29 @@ def EV_VerticalDoor(var line : line_s?; var thing : mobj_s?) {
     door.direction = 1
     door.speed = FRACUNIT * 2
     door.topwait = VDOORWAIT
-    let _cond4 = int(line.special)
-    if (_cond4 == 1 || _cond4 == 26 || _cond4 == 27 || _cond4 == 28) {
-        door._c_type = vldoor_e.door_normal
-    } elif (_cond4 == 31 || _cond4 == 32 || _cond4 == 33 || _cond4 == 34) {
-        door._c_type = vldoor_e.door_open
-        line.special = int16(0)
-    } elif (_cond4 == 117) {
-        // blazing door raise
-        door._c_type = vldoor_e.blazeRaise
-        door.speed = FRACUNIT * 2 * 4
-    } elif (_cond4 == 118) {
-        // blazing door open
-        door._c_type = vldoor_e.blazeOpen
-        line.special = int16(0)
-        door.speed = FRACUNIT * 2 * 4
+    c_switch(int(line.special)) {
+        case(1, 26, 27, 28) {
+            door._c_type = vldoor_e.door_normal
+            break
+        }
+        case(31, 32, 33, 34) {
+            door._c_type = vldoor_e.door_open
+            line.special = int16(0)
+            break
+        }
+        case(117) {
+            // blazing door raise
+            door._c_type = vldoor_e.blazeRaise
+            door.speed = FRACUNIT * 2 * 4
+            break
+        }
+        case(118) {
+            // blazing door open
+            door._c_type = vldoor_e.blazeOpen
+            line.special = int16(0)
+            door.speed = FRACUNIT * 2 * 4
+            break
+        }
     }
     // find the top and bottom of the movement range
     door.topheight = P_FindLowestCeilingSurrounding(sec)
@@ -302,7 +379,7 @@ def EV_VerticalDoor(var line : line_s?; var thing : mobj_s?) {
 [c_function]
 def P_SpawnDoorCloseIn30(var sec : sector_t?) {
     var door : vldoor_t?
-    door = reinterpret<vldoor_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<vldoor_t>))), PU_LEVSPEC, null))
+    door = reinterpret<vldoor_t?>(Z_Malloc(typeinfo sizeof(type<vldoor_t>), PU_LEVSPEC, null))
     P_AddThinker(addr(door.thinker))
     sec.specialdata = reinterpret<void?>(door)
     sec.special = int16(0)
@@ -318,7 +395,7 @@ def P_SpawnDoorCloseIn30(var sec : sector_t?) {
 [c_function]
 def P_SpawnDoorRaiseIn5Mins(var sec : sector_t?; secnum : int) {
     var door : vldoor_t?
-    door = reinterpret<vldoor_t?>(Z_Malloc(int(uint64(typeinfo sizeof(type<vldoor_t>))), PU_LEVSPEC, null))
+    door = reinterpret<vldoor_t?>(Z_Malloc(typeinfo sizeof(type<vldoor_t>), PU_LEVSPEC, null))
     P_AddThinker(addr(door.thinker))
     sec.specialdata = reinterpret<void?>(door)
     sec.special = int16(0)

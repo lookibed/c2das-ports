@@ -14,23 +14,23 @@ def P_DivlineSide(x : int; y : int; var node : divline_t?) : int {
     var dy : int
     var left : int
     var right : int
-    if (!(node.dx != 0)) {
+    if (node.dx == 0) {
         if (x == node.x) {
             return 2
         }
         if (x <= node.x) {
-            return node.dy > 0 ? 1 : 0
+            return int_of(node.dy > 0)
         }
-        return node.dy < 0 ? 1 : 0
+        return int_of(node.dy < 0)
     }
-    if (!(node.dy != 0)) {
+    if (node.dy == 0) {
         if (x == node.y) {
             return 2
         }
         if (y <= node.y) {
-            return node.dx < 0 ? 1 : 0
+            return int_of(node.dx < 0)
         }
-        return node.dx > 0 ? 1 : 0
+        return int_of(node.dx > 0)
     }
     dx = x - node.x
     dy = y - node.y
@@ -102,11 +102,11 @@ def P_CrossSubsector(num : int) : doom_boolean {
         var _f = false
         while (true) {
             if (_f) {
-                seg = seg + 1
+                seg++
                 count--
             }
             _f = true
-            if (!(count != 0)) {
+            if (count == 0) {
                 break
             }
             line = seg.linedef
@@ -135,7 +135,7 @@ def P_CrossSubsector(num : int) : doom_boolean {
             }
             // stop because it is not two sided anyway
             // might do this after updating validcount?
-            if (!((int(line.flags) & ML_TWOSIDED) != 0)) {
+            if ((int(line.flags) & ML_TWOSIDED) == 0) {
                 return doom_boolean._c_false
             }
             // crosses a two sided line
@@ -208,7 +208,7 @@ def P_CrossBSPNode(bspnum : int) : doom_boolean {
         side = 0
     }
     // cross the starting side
-    if (!(int(P_CrossBSPNode(int(bsp.children[side]))) != 0)) {
+    if (int(P_CrossBSPNode(int(bsp.children[side]))) == 0) {
         return doom_boolean._c_false
     }
     // the partition plane is crossed here

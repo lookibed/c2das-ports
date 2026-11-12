@@ -59,14 +59,14 @@ def Z_Free(var ptr : void?) {
         // smaller values are not pointers
         // Note: OS-dependend?
         // clear the user's mark
-        deref(_c_block.user) = null
+        *_c_block.user = null
     }
     // mark as free
     _c_block.user = null
     _c_block.tag = 0
     _c_block.id = 0
     other = _c_block.prev
-    if (!(other.user != null)) {
+    if (other.user == null) {
         // merge with previous free block
         other.size += _c_block.size
         other.next = _c_block.next
@@ -77,7 +77,7 @@ def Z_Free(var ptr : void?) {
         _c_block = other
     }
     other = _c_block.next
-    if (!(other.user != null)) {
+    if (other.user == null) {
         // merge the next free block onto the end
         _c_block.size += other.size
         _c_block.next = other.next
@@ -107,12 +107,12 @@ def Z_Malloc(var size : int; tag : int; var user : void?) : void? {
     // if there is a free block behind the rover,
     // back up over them
     base = mainzone.rover
-    if (!(base.prev.user != null)) {
+    if (base.prev.user == null) {
         base = base.prev
     }
     rover = base
     start = base.prev
-    while (true) {
+    c_do_while(base.user != null || base.size < size) {
         if (intptr(rover) == intptr(start)) {
             // scanned all the way around the list
             // I_Error("Error: Z_Malloc: failed on allocation of %i bytes", size);
@@ -138,9 +138,6 @@ def Z_Malloc(var size : int; tag : int; var user : void?) : void? {
         } else {
             rover = rover.next
         }
-        if (!(base.user != null || base.size < size)) {
-            break
-        }
     }
     // found a block big enough
     extra = base.size - size
@@ -160,7 +157,7 @@ def Z_Malloc(var size : int; tag : int; var user : void?) : void? {
     if (user != null) {
         // mark as an in use block
         base.user = reinterpret<void ??>(user)
-        deref(reinterpret<void ??>(user)) = reinterpret<void?>(reinterpret<uint8?>(base) + uint64(typeinfo sizeof(type<memblock_s>)))
+        *reinterpret<void ??>(user) = reinterpret<void?>(reinterpret<uint8?>(base) + uint64(typeinfo sizeof(type<memblock_s>)))
     } else {
         if (tag >= PU_PURGELEVEL) {
             I_Error(cstr("Error: Z_Malloc: an owner is required for purgable blocks"))
@@ -186,7 +183,7 @@ def Z_FreeTags(lowtag : int; hightag : int) {
             // get link before freeing
             next = _c_block.next
             // free block?
-            if (!(_c_block.user != null)) {
+            if (_c_block.user == null) {
                 continue
             }
             if (_c_block.tag >= lowtag && _c_block.tag <= hightag) {
@@ -241,7 +238,7 @@ def Z_DumpHeap(lowtag : int; hightag : int) {
         if (intptr(_c_block.next.prev) != intptr(_c_block)) {
             invoke(doom_print, cstr("ERROR: next block doesn't have proper back link\n"))
         }
-        if (!(_c_block.user != null) && !(_c_block.next.user != null)) {
+        if (_c_block.user == null && _c_block.next.user == null) {
             invoke(doom_print, cstr("ERROR: two consecutive free blocks\n"))
         }
         _c_block = _c_block.next
@@ -282,7 +279,7 @@ def Z_FileDumpHeap(var f : void?) {
         if (intptr(_c_block.next.prev) != intptr(_c_block)) {
             doom_fprint(f, cstr("ERROR: next block doesn't have proper back link\n"))
         }
-        if (!(_c_block.user != null) && !(_c_block.next.user != null)) {
+        if (_c_block.user == null && _c_block.next.user == null) {
             doom_fprint(f, cstr("ERROR: two consecutive free blocks\n"))
         }
         _c_block = _c_block.next
@@ -305,7 +302,7 @@ def Z_CheckHeap {
         if (intptr(_c_block.next.prev) != intptr(_c_block)) {
             I_Error(cstr("Error: Z_CheckHeap: next block doesn't have proper back link\n"))
         }
-        if (!(_c_block.user != null) && !(_c_block.next.user != null)) {
+        if (_c_block.user == null && _c_block.next.user == null) {
             I_Error(cstr("Error: Z_CheckHeap: two consecutive free blocks\n"))
         }
         _c_block = _c_block.next
@@ -334,7 +331,7 @@ def Z_FreeMemory : int {
     free = 0
     _c_block = mainzone.blocklist.next
     while (intptr(_c_block) != intptr(addr(mainzone.blocklist))) {
-        if (!(_c_block.user != null) || _c_block.tag >= PU_PURGELEVEL) {
+        if (_c_block.user == null || _c_block.tag >= PU_PURGELEVEL) {
             free += _c_block.size
         }
         _c_block = _c_block.next

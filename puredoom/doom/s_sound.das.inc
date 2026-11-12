@@ -68,7 +68,8 @@ def S_Start {
     if (gamemode == GameMode_t.commercial) {
         mnum = int(musicenum_t.mus_runnin) + gamemap - 1
     } else {
-        var spmus : int[9] = fixed_array(int(musicenum_t.mus_e3m4), int(musicenum_t.mus_e3m2), int(musicenum_t.mus_e3m3), int(musicenum_t.mus_e1m5), int(musicenum_t.mus_e2m7), int(musicenum_t.mus_e2m4), int(musicenum_t.mus_e2m6), int(musicenum_t.mus_e2m5), int(musicenum_t.mus_e1m9))
+        var spmus : int[9] = fixed_array(int(musicenum_t.mus_e3m4), int(musicenum_t.mus_e3m2), int(musicenum_t.mus_e3m3), int(musicenum_t.mus_e1m5),
+                int(musicenum_t.mus_e2m7), int(musicenum_t.mus_e2m4), int(musicenum_t.mus_e2m6), int(musicenum_t.mus_e2m5), int(musicenum_t.mus_e1m9))
         // Song - Who? - Where?
         // American e4m1
         // Romero e4m2
@@ -131,7 +132,7 @@ def S_StartSoundAtVolume(var origin_p : void?; sfx_id : int; var volume : int) {
         if (origin.x == players[consoleplayer].mo.x && origin.y == players[consoleplayer].mo.y) {
             sep = NORM_SEP
         }
-        if (!(rc != 0)) {
+        if (rc == 0) {
             return
         }
     } else {
@@ -168,7 +169,7 @@ def S_StartSoundAtVolume(var origin_p : void?; sfx_id : int; var volume : int) {
         sfx.lumpnum = I_GetSfxLumpNum(sfx)
     }
     // cache data if necessary
-    if (!(sfx.data != null)) {
+    if (sfx.data == null) {
         invoke(doom_print, cstr("S_StartSoundAtVolume: 16bit and not pre-cached - wtf?\n"))
     }
     // DOS remains, 8bit handling
@@ -206,14 +207,14 @@ def S_StopSound(var origin : void?) {
 
 // Stop and resume music, during game PAUSE.
 def S_PauseSound {
-    if (mus_playing_s_sound != null && !(int(mus_paused) != 0)) {
+    if (mus_playing_s_sound != null && int(mus_paused) == 0) {
         I_PauseSong(mus_playing_s_sound.handle)
         mus_paused = doom_boolean._c_true
     }
 }
 
 def S_ResumeSound {
-    if (mus_playing_s_sound != null && uint(int(mus_paused)) != 0) {
+    if (mus_playing_s_sound != null && uint(mus_paused) != 0) {
         I_ResumeSong(mus_playing_s_sound.handle)
         mus_paused = doom_boolean._c_false
     }
@@ -255,7 +256,7 @@ def S_UpdateSounds(var listener_p : void?) {
                     // or modify their params
                     if (c.origin != null && intptr(listener_p) != intptr(c.origin)) {
                         audible = S_AdjustSoundParams(listener, reinterpret<mobj_s?>(c.origin), addr(volume), addr(sep), addr(pitch))
-                        if (!(audible != 0)) {
+                        if (audible == 0) {
                             S_StopChannel(cnum)
                         } else {
                             I_UpdateSoundParams(c.handle, volume, sep, pitch)
@@ -321,7 +322,7 @@ def S_ChangeMusic(musicnum : int; looping : int) {
     // shutdown old music
     S_StopMusic()
     // get lumpnum if neccessary
-    if (!(music.lumpnum != 0)) {
+    if (music.lumpnum == 0) {
         // doom_sprintf(namebuf, "d_%s", music->name);
         doom_strcpy(addr(namebuf[0]), cstr("d_"))
         doom_concat(addr(namebuf[0]), music.name)
@@ -407,20 +408,20 @@ def S_AdjustSoundParams(var listener : mobj_s?; var source : mobj_s?; var vol : 
     }
     angle >>= uint(ANGLETOFINESHIFT)
     // stereo separation
-    deref(sep) = 128 - (FixedMul(S_STEREO_SWING, finesine[angle]) >> FRACBITS)
+    *sep = 128 - (FixedMul(S_STEREO_SWING, finesine[angle]) >> FRACBITS)
     // volume calculation
     if (approx_dist < S_CLOSE_DIST) {
-        deref(vol) = snd_SfxVolume
+        *vol = snd_SfxVolume
     } elif (gamemap == 8) {
         if (approx_dist > S_CLIPPING_DIST) {
             approx_dist = S_CLIPPING_DIST
         }
-        deref(vol) = 15 + ((snd_SfxVolume - 15) * ((S_CLIPPING_DIST - approx_dist) >> FRACBITS)) / S_ATTENUATOR
+        *vol = 15 + ((snd_SfxVolume - 15) * ((S_CLIPPING_DIST - approx_dist) >> FRACBITS)) / S_ATTENUATOR
     } else {
         // distance effect
-        deref(vol) = (snd_SfxVolume * ((S_CLIPPING_DIST - approx_dist) >> FRACBITS)) / S_ATTENUATOR
+        *vol = (snd_SfxVolume * ((S_CLIPPING_DIST - approx_dist) >> FRACBITS)) / S_ATTENUATOR
     }
-    return (deref(vol) > 0) ? 1 : 0
+    return int_of(*vol > 0)
 }
 
 // S_getChannel :
@@ -433,7 +434,7 @@ def S_getChannel(var origin : void?; var sfxinfo : sfxinfo_struct?) : int {
     // Find an open channel
     cnum = 0
     while (cnum < numChannels) {
-        if (!(channels_s_sound[cnum].sfxinfo != null)) {
+        if (channels_s_sound[cnum].sfxinfo == null) {
             break
         } elif (origin != null && intptr(channels_s_sound[cnum].origin) == intptr(origin)) {
             S_StopChannel(cnum)

@@ -21,9 +21,9 @@ var defaultfile : uint8?
 def M_DrawText(var x : int; y : int; direct : doom_boolean; var _c_string : uint8?) : int {
     var c : int
     var w : int
-    while (deref(_c_string) != 0) {
-        c = doom_toupper(int(deref(_c_string))) - HU_FONTSTART
-        _c_string = _c_string + 1
+    while (*_c_string != 0) {
+        c = doom_toupper(int(*_c_string)) - HU_FONTSTART
+        _c_string++
         if (c < 0 || c > HU_FONTSIZE) {
             x += 4
             continue
@@ -84,7 +84,7 @@ def M_ReadFile(var name : uint8?; var buffer : uint8 ??) : int {
         doom_concat(addr(error_buf[0]), name)
         I_Error(addr(error_buf[0]))
     }
-    deref(buffer) = buf
+    *buffer = buf
     return length
 }
 
@@ -95,14 +95,14 @@ def M_SaveDefaults {
     var v : int
     var f : void?
     f = invoke(doom_open, defaultfile, cstr("w"))
-    if (!(f != null)) {
+    if (f == null) {
         // can't write the file, but don't complain
         return
     }
     i = 0
     while (i < numdefaults) {
         if (defaults[i].defaultvalue > -4095 && defaults[i].defaultvalue < 4095) {
-            v = deref(defaults[i].location)
+            v = *defaults[i].location
             // fprintf(f, "%s\t\t%i\n", defaults[i].name, v);
             doom_fprint(f, defaults[i].name)
             doom_fprint(f, cstr("\t\t"))
@@ -113,7 +113,7 @@ def M_SaveDefaults {
             // (char**)(defaults[i].text_location));
             doom_fprint(f, defaults[i].name)
             doom_fprint(f, cstr("\t\t\""))
-            doom_fprint(f, deref(defaults[i].text_location))
+            doom_fprint(f, *defaults[i].text_location)
             doom_fprint(f, cstr("\"\n"))
         }
         i++
@@ -137,9 +137,9 @@ def M_LoadDefaults {
     i = 0
     while (i < numdefaults) {
         if (defaults[i].defaultvalue == 65535) {
-            deref(defaults[i].text_location) = defaults[i].default_text_value
+            *defaults[i].text_location = defaults[i].default_text_value
         } else {
-            deref(defaults[i].location) = defaults[i].defaultvalue
+            *defaults[i].location = defaults[i].defaultvalue
         }
         i++
     }
@@ -157,14 +157,14 @@ def M_LoadDefaults {
     // read the file in, overriding any set defaults
     f = invoke(doom_open, defaultfile, cstr("r"))
     if (f != null) {
-        while (!(invoke(doom_eof, f) != 0)) {
+        while (invoke(doom_eof, f) == 0) {
             // def
             var arg_read : int = 0
             var c : uint8
             i = 0
             while (i < 79) {
                 invoke(doom_read, f, reinterpret<void?>(addr(c)), 1)
-                if (int(c) == ' ' || int(c) == '\n' || int(c) == '\t') {
+                if (c == ' ' || c == '\n' || c == '\t') {
                     if (i > 0) {
                         arg_read++
                     }
@@ -175,22 +175,22 @@ def M_LoadDefaults {
             }
             _c_def[i] = uint8('\0')
             // Ignore spaces
-            if (int(c) != '\n') {
+            if (c != '\n') {
                 while (1 != 0) {
                     invoke(doom_read, f, reinterpret<void?>(addr(c)), 1)
-                    if (int(c) != ' ' && int(c) != '\t') {
+                    if (c != ' ' && c != '\t') {
                         break
                     }
                 }
                 // strparam
                 i = 0
-                if (int(c) != '\n') {
+                if (c != '\n') {
                     while (i < 260) {
                         let _t0 = i
                         i++
                         strparm[_t0] = c
                         invoke(doom_read, f, reinterpret<void?>(addr(c)), 1)
-                        if (int(c) == '\n') {
+                        if (c == '\n') {
                             if (i > 0) {
                                 arg_read++
                             }
@@ -203,14 +203,14 @@ def M_LoadDefaults {
             isstring = doom_boolean._c_false
             // if (fscanf(f, "%79s %[^\n]\n", def, strparm) == 2)
             if (arg_read == 2) {
-                if (int(strparm[0]) == '"') {
+                if (strparm[0] == '"') {
                     // get a string default
                     isstring = doom_boolean._c_true
                     len = doom_strlen(addr(strparm[0]))
                     newstring = reinterpret<uint8?>(invoke(doom_malloc, len))
                     strparm[len - 1] = 0u8
                     doom_strcpy(newstring, addr(strparm[0]) + 1)
-                } elif (int(strparm[0]) == '0' && int(strparm[1]) == 'x') {
+                } elif (strparm[0] == '0' && strparm[1] == 'x') {
                     // sscanf(strparm + 2, "%x", &parm);
                     parm = doom_atox(addr(strparm[0]) + 2)
                 } else {
@@ -219,11 +219,11 @@ def M_LoadDefaults {
                 }
                 i = 0
                 while (i < numdefaults) {
-                    if (!(doom_strcmp(addr(_c_def[0]), defaults[i].name) != 0)) {
-                        if (!(int(isstring) != 0)) {
-                            deref(defaults[i].location) = parm
+                    if (doom_strcmp(addr(_c_def[0]), defaults[i].name) == 0) {
+                        if (int(isstring) == 0) {
+                            *defaults[i].location = parm
                         } else {
-                            deref(defaults[i].text_location) = newstring
+                            *defaults[i].text_location = newstring
                         }
                         break
                     }
@@ -256,44 +256,44 @@ def WritePCXfile(var filename : uint8?; var data : uint8?; width : int; height :
     pcx.ymax = uint16(height - 1)
     pcx.hres = uint16(width)
     pcx.vres = uint16(height)
-    doom_memset(reinterpret<void?>(addr(pcx.palette[0])), 0, int(uint64(typeinfo sizeof(type<uint8[48]>))))
+    doom_memset(reinterpret<void?>(addr(pcx.palette[0])), 0, typeinfo sizeof(type<uint8[48]>))
     // chunky image
     pcx.color_planes = 1u8
     pcx.bytes_per_line = uint16(width)
     // not a grey scale
     pcx.palette_type = uint16(2)
-    doom_memset(reinterpret<void?>(addr(pcx.filler[0])), 0, int(uint64(typeinfo sizeof(type<uint8[58]>))))
+    doom_memset(reinterpret<void?>(addr(pcx.filler[0])), 0, typeinfo sizeof(type<uint8[58]>))
     // pack the image
     pack = addr(pcx.data)
     for (i in range(width * height)) {
-        if ((int(deref(data)) & 192) != 192) {
+        if ((int(*data) & 192) != 192) {
             var _t0 = pack
-            pack = pack + 1
+            pack++
             var _t1 = data
-            data = data + 1
-            deref(_t0) = deref(_t1)
+            data++
+            *_t0 = *_t1
         } else {
             var _t2 = pack
-            pack = pack + 1
-            deref(_t2) = 193u8
+            pack++
+            *_t2 = 193u8
             var _t3 = pack
-            pack = pack + 1
+            pack++
             var _t4 = data
-            data = data + 1
-            deref(_t3) = deref(_t4)
+            data++
+            *_t3 = *_t4
         }
     }
     // write the palette
     // palette ID byte
     var _t5 = pack
-    pack = pack + 1
-    deref(_t5) = 12u8
+    pack++
+    *_t5 = 12u8
     for (i in range(768)) {
         var _t6 = pack
-        pack = pack + 1
+        pack++
         var _t7 = palette
-        palette = palette + 1
-        deref(_t6) = deref(_t7)
+        palette++
+        *_t6 = *_t7
     }
     // write output file
     length = int(int64(pack - reinterpret<uint8?>(pcx)))

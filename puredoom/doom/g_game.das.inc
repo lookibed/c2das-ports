@@ -79,8 +79,10 @@ var savegameslot : int
 var savedescription : uint8[32]
 var bodyque : mobj_s? [32]
 var statcopy : void?
-var pars : int[4][10] = fixed_array(fixed_array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0), fixed_array(0, 30, 75, 120, 90, 165, 180, 180, 30, 165), fixed_array(0, 90, 90, 90, 120, 90, 360, 240, 30, 170), fixed_array(0, 90, 45, 90, 150, 90, 90, 165, 30, 135))
-var cpars : int[32] = fixed_array(30, 90, 120, 120, 90, 150, 120, 120, 270, 90, 210, 150, 150, 150, 210, 150, 420, 150, 210, 150, 240, 150, 180, 150, 150, 300, 330, 420, 300, 180, 120, 30)
+var pars : int[4][10] = fixed_array(fixed_array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0), fixed_array(0, 30, 75, 120, 90, 165, 180, 180, 30, 165),
+        fixed_array(0, 90, 90, 90, 120, 90, 360, 240, 30, 170), fixed_array(0, 90, 45, 90, 150, 90, 90, 165, 30, 135))
+var cpars : int[32] = fixed_array(30, 90, 120, 120, 90, 150, 120, 120, 270, 90, 210, 150, 150, 150, 210, 150, 420, 150, 210, 150, 240, 150, 180, 150, 150, 300,
+        330, 420, 300, 180, 120, 30)
 var secretexit : doom_boolean
 var savename : uint8[256]
 var d_skill : skill_t
@@ -118,16 +120,19 @@ def G_BuildTiccmd(var cmd : ticcmd_t?) {
     var base : ticcmd_t?
     // empty, or external driver
     base = I_BaseTiccmd()
-    doom_memcpy(reinterpret<void?>(cmd), reinterpret<void?>(base), int(uint64(typeinfo sizeof(type<ticcmd_t>))))
+    doom_memcpy(reinterpret<void?>(cmd), reinterpret<void?>(base), typeinfo sizeof(type<ticcmd_t>))
     cmd.consistancy = consistancy[consoleplayer][maketic % BACKUPTICS]
-    strafe = enum_from_int(type<doom_boolean>, uint(int(gamekeydown[key_strafe])) != 0 || uint(int(mousebuttons[mousebstrafe])) != 0 || uint(int(joybuttons[joybstrafe])) != 0 ? 1 : 0)
-    var running : doom_boolean = enum_from_int(type<doom_boolean>, always_run != 0 ? (uint(int(gamekeydown[key_speed])) != 0 ? int(doom_boolean._c_false) : int(doom_boolean._c_true)) : (uint(int(gamekeydown[key_speed])) != 0 ? int(doom_boolean._c_true) : int(doom_boolean._c_false)))
-    speed = uint(int(running)) != 0 || uint(int(joybuttons[joybspeed])) != 0 ? 1 : 0
+    strafe = enum_from_int(type<doom_boolean>, int_of(uint(gamekeydown[key_strafe]) != 0 || uint(mousebuttons[mousebstrafe]) != 0 ||
+            uint(joybuttons[joybstrafe]) != 0))
+    var running : doom_boolean = enum_from_int(type<doom_boolean>, always_run != 0 ?
+            (uint(gamekeydown[key_speed]) != 0 ? int(doom_boolean._c_false) : int(doom_boolean._c_true)) :
+            (uint(gamekeydown[key_speed]) != 0 ? int(doom_boolean._c_true) : int(doom_boolean._c_false)))
+    speed = int_of(uint(running) != 0 || uint(joybuttons[joybspeed]) != 0)
     side = 0
     forward = side
     // use two stage accelerative turning
     // on the keyboard and joystick
-    if (joyxmove < 0 || joyxmove > 0 || uint(int(gamekeydown[key_right])) != 0 || uint(int(gamekeydown[key_left])) != 0) {
+    if (joyxmove < 0 || joyxmove > 0 || uint(gamekeydown[key_right]) != 0 || uint(gamekeydown[key_left]) != 0) {
         turnheld += ticdup
     } else {
         turnheld = 0
@@ -185,11 +190,11 @@ def G_BuildTiccmd(var cmd : ticcmd_t?) {
         side -= sidemove[speed]
     }
     // buttons
-    cmd.chatchar = uint8(HU_dequeueChatChar())
-    if (uint(int(gamekeydown[key_fire])) != 0 || uint(int(mousebuttons[mousebfire])) != 0 || uint(int(joybuttons[joybfire])) != 0) {
+    cmd.chatchar = HU_dequeueChatChar()
+    if (uint(gamekeydown[key_fire]) != 0 || uint(mousebuttons[mousebfire]) != 0 || uint(joybuttons[joybfire]) != 0) {
         cmd.buttons = uint8(int(cmd.buttons) | int(buttoncode_t.BT_ATTACK))
     }
-    if (uint(int(gamekeydown[key_use])) != 0 || uint(int(joybuttons[joybuse])) != 0) {
+    if (uint(gamekeydown[key_use]) != 0 || uint(joybuttons[joybuse]) != 0) {
         cmd.buttons = uint8(int(cmd.buttons) | int(buttoncode_t.BT_USE))
         // clear double clicks if hit use button
         dclicks = 0
@@ -207,7 +212,7 @@ def G_BuildTiccmd(var cmd : ticcmd_t?) {
         forward += forwardmove[speed]
     }
     // forward double click
-    if (uint(int(mousebuttons[mousebforward])) != uint(dclickstate) && dclicktime > 1) {
+    if (uint(mousebuttons[mousebforward]) != uint(dclickstate) && dclicktime > 1) {
         dclickstate = int(mousebuttons[mousebforward])
         if (dclickstate != 0) {
             dclicks++
@@ -226,8 +231,8 @@ def G_BuildTiccmd(var cmd : ticcmd_t?) {
         }
     }
     // strafe double click
-    bstrafe = enum_from_int(type<doom_boolean>, uint(int(mousebuttons[mousebstrafe])) != 0 || uint(int(joybuttons[joybstrafe])) != 0 ? 1 : 0)
-    if (uint(int(bstrafe)) != uint(dclickstate2) && dclicktime2 > 1) {
+    bstrafe = enum_from_int(type<doom_boolean>, int_of(uint(mousebuttons[mousebstrafe]) != 0 || uint(joybuttons[joybstrafe]) != 0))
+    if (uint(bstrafe) != uint(dclickstate2) && dclicktime2 > 1) {
         dclickstate2 = int(bstrafe)
         if (dclickstate2 != 0) {
             dclicks2++
@@ -289,7 +294,7 @@ def G_DoLoadLevel {
     skyflatnum = R_FlatNumForName(cstr("F_SKY1"))
     // DOOM determines the sky texture to be used
     // depending on the current episode, and the game version.
-    if ((gamemode == GameMode_t.commercial) || (uint(int(gamemode)) == uint(int(GameMission_t.pack_tnt))) || (uint(int(gamemode)) == uint(int(GameMission_t.pack_plut)))) {
+    if ((gamemode == GameMode_t.commercial) || (uint(gamemode) == uint(GameMission_t.pack_tnt)) || (uint(gamemode) == uint(GameMission_t.pack_plut))) {
         skytexture = R_TextureNumForName(cstr("SKY3"))
         if (gamemap < 12) {
             skytexture = R_TextureNumForName(cstr("SKY1"))
@@ -305,10 +310,10 @@ def G_DoLoadLevel {
     }
     gamestate = gamestate_t.GS_LEVEL
     for (i in range(MAXPLAYERS)) {
-        if (uint(int(playeringame[i])) != 0 && players[i].playerstate == playerstate_t.PST_DEAD) {
+        if (uint(playeringame[i]) != 0 && players[i].playerstate == playerstate_t.PST_DEAD) {
             players[i].playerstate = playerstate_t.PST_REBORN
         }
-        doom_memset(reinterpret<void?>(addr(players[i].frags[0])), 0, int(uint64(typeinfo sizeof(type<int[4]>))))
+        doom_memset(reinterpret<void?>(addr(players[i].frags[0])), 0, typeinfo sizeof(type<int[4]>))
     }
     P_SetupLevel(gameepisode, gamemap, 0, gameskill)
     // view the guy you are playing
@@ -317,7 +322,7 @@ def G_DoLoadLevel {
     gameaction = gameaction_t.ga_nothing
     Z_CheckHeap()
     // clear cmd building stuff
-    doom_memset(reinterpret<void?>(addr(gamekeydown[0])), 0, int(uint64(typeinfo sizeof(type<doom_boolean[256]>))))
+    doom_memset(reinterpret<void?>(addr(gamekeydown[0])), 0, typeinfo sizeof(type<doom_boolean[256]>))
     joyymove = 0
     joyxmove = joyymove
     mousey = 0
@@ -334,21 +339,18 @@ def G_DoLoadLevel {
 [c_function]
 def G_Responder(var ev : event_t?) : doom_boolean {
     // allow spy mode changes even during the demo
-    if (gamestate == gamestate_t.GS_LEVEL && ev._c_type == evtype_t.ev_keydown && ev.data1 == KEY_F12 && (uint(int(singledemo)) != 0 || !(int(deathmatch) != 0))) {
+    if (gamestate == gamestate_t.GS_LEVEL && ev._c_type == evtype_t.ev_keydown && ev.data1 == KEY_F12 && (uint(singledemo) != 0 || int(deathmatch) == 0)) {
         // spy mode
-        while (true) {
+        c_do_while(int(playeringame[displayplayer]) == 0 && displayplayer != consoleplayer) {
             displayplayer++
             if (displayplayer == MAXPLAYERS) {
                 displayplayer = 0
-            }
-            if (!(!(int(playeringame[displayplayer]) != 0) && displayplayer != consoleplayer)) {
-                break
             }
         }
         return doom_boolean._c_true
     }
     // any other key pops up menu if in demos
-    if (gameaction == gameaction_t.ga_nothing && !(int(singledemo) != 0) && (uint(int(demoplayback)) != 0 || gamestate == gamestate_t.GS_DEMOSCREEN)) {
+    if (gameaction == gameaction_t.ga_nothing && int(singledemo) == 0 && (uint(demoplayback) != 0 || gamestate == gamestate_t.GS_DEMOSCREEN)) {
         if (ev._c_type == evtype_t.ev_keydown || (ev._c_type == evtype_t.ev_mouse && ev.data1 != 0) || (ev._c_type == evtype_t.ev_joystick && ev.data1 != 0)) {
             M_StartControlPanel()
             return doom_boolean._c_true
@@ -375,41 +377,47 @@ def G_Responder(var ev : event_t?) : doom_boolean {
             return doom_boolean._c_true
         }
     }
-    let _cond = ev._c_type
-    if (_cond == evtype_t.ev_keydown) {
-        if (ev.data1 == KEY_PAUSE) {
-            sendpause = doom_boolean._c_true
+    c_switch(ev._c_type) {
+        case(evtype_t.ev_keydown) {
+            if (ev.data1 == KEY_PAUSE) {
+                sendpause = doom_boolean._c_true
+                return doom_boolean._c_true
+            }
+            if (ev.data1 < NUMKEYS) {
+                gamekeydown[ev.data1] = doom_boolean._c_true
+            }
+            // eat key down events
             return doom_boolean._c_true
         }
-        if (ev.data1 < NUMKEYS) {
-            gamekeydown[ev.data1] = doom_boolean._c_true
+        case(evtype_t.ev_keyup) {
+            if (ev.data1 < NUMKEYS) {
+                gamekeydown[ev.data1] = doom_boolean._c_false
+            }
+            // always let key up events filter down
+            return doom_boolean._c_false
         }
-        // eat key down events
-        return doom_boolean._c_true
-    } elif (_cond == evtype_t.ev_keyup) {
-        if (ev.data1 < NUMKEYS) {
-            gamekeydown[ev.data1] = doom_boolean._c_false
+        case(evtype_t.ev_mouse) {
+            mousebuttons[0] = enum_from_int(type<doom_boolean>, ev.data1 & 1)
+            mousebuttons[1] = enum_from_int(type<doom_boolean>, ev.data1 & 2)
+            mousebuttons[2] = enum_from_int(type<doom_boolean>, ev.data1 & 4)
+            mousex = ev.data2 * (mouseSensitivity + 5) / 10
+            mousey = ev.data3 * (mouseSensitivity + 5) / 10
+            // eat events
+            return doom_boolean._c_true
         }
-        // always let key up events filter down
-        return doom_boolean._c_false
-    } elif (_cond == evtype_t.ev_mouse) {
-        mousebuttons[0] = enum_from_int(type<doom_boolean>, ev.data1 & 1)
-        mousebuttons[1] = enum_from_int(type<doom_boolean>, ev.data1 & 2)
-        mousebuttons[2] = enum_from_int(type<doom_boolean>, ev.data1 & 4)
-        mousex = ev.data2 * (mouseSensitivity + 5) / 10
-        mousey = ev.data3 * (mouseSensitivity + 5) / 10
-        // eat events
-        return doom_boolean._c_true
-    } elif (_cond == evtype_t.ev_joystick) {
-        joybuttons[0] = enum_from_int(type<doom_boolean>, ev.data1 & 1)
-        joybuttons[1] = enum_from_int(type<doom_boolean>, ev.data1 & 2)
-        joybuttons[2] = enum_from_int(type<doom_boolean>, ev.data1 & 4)
-        joybuttons[3] = enum_from_int(type<doom_boolean>, ev.data1 & 8)
-        joyxmove = ev.data2
-        joyymove = ev.data3
-        // eat events
-        return doom_boolean._c_true
-    } else {
+        case(evtype_t.ev_joystick) {
+            joybuttons[0] = enum_from_int(type<doom_boolean>, ev.data1 & 1)
+            joybuttons[1] = enum_from_int(type<doom_boolean>, ev.data1 & 2)
+            joybuttons[2] = enum_from_int(type<doom_boolean>, ev.data1 & 4)
+            joybuttons[3] = enum_from_int(type<doom_boolean>, ev.data1 & 8)
+            joyxmove = ev.data2
+            joyymove = ev.data3
+            // eat events
+            return doom_boolean._c_true
+        }
+        case(_) {
+            break
+        }
     }
     return doom_boolean._c_false
 }
@@ -447,33 +455,53 @@ def G_Ticker {
     var cmd : ticcmd_t?
     // do player reborns if needed
     for (i in range(MAXPLAYERS)) {
-        if (uint(int(playeringame[i])) != 0 && players[i].playerstate == playerstate_t.PST_REBORN) {
+        if (uint(playeringame[i]) != 0 && players[i].playerstate == playerstate_t.PST_REBORN) {
             G_DoReborn(i)
         }
     }
     // do things to change the game state
     while (gameaction != gameaction_t.ga_nothing) {
-        let _cond = gameaction
-        if (_cond == gameaction_t.ga_loadlevel) {
-            G_DoLoadLevel()
-        } elif (_cond == gameaction_t.ga_newgame) {
-            G_DoNewGame()
-        } elif (_cond == gameaction_t.ga_loadgame) {
-            G_DoLoadGame()
-        } elif (_cond == gameaction_t.ga_savegame) {
-            G_DoSaveGame()
-        } elif (_cond == gameaction_t.ga_playdemo) {
-            G_DoPlayDemo()
-        } elif (_cond == gameaction_t.ga_completed) {
-            G_DoCompleted()
-        } elif (_cond == gameaction_t.ga_victory) {
-            F_StartFinale()
-        } elif (_cond == gameaction_t.ga_worlddone) {
-            G_DoWorldDone()
-        } elif (_cond == gameaction_t.ga_screenshot) {
-            M_ScreenShot()
-            gameaction = gameaction_t.ga_nothing
-        } elif (_cond == gameaction_t.ga_nothing) {
+        c_switch(gameaction) {
+            case(gameaction_t.ga_loadlevel) {
+                G_DoLoadLevel()
+                break
+            }
+            case(gameaction_t.ga_newgame) {
+                G_DoNewGame()
+                break
+            }
+            case(gameaction_t.ga_loadgame) {
+                G_DoLoadGame()
+                break
+            }
+            case(gameaction_t.ga_savegame) {
+                G_DoSaveGame()
+                break
+            }
+            case(gameaction_t.ga_playdemo) {
+                G_DoPlayDemo()
+                break
+            }
+            case(gameaction_t.ga_completed) {
+                G_DoCompleted()
+                break
+            }
+            case(gameaction_t.ga_victory) {
+                F_StartFinale()
+                break
+            }
+            case(gameaction_t.ga_worlddone) {
+                G_DoWorldDone()
+                break
+            }
+            case(gameaction_t.ga_screenshot) {
+                M_ScreenShot()
+                gameaction = gameaction_t.ga_nothing
+                break
+            }
+            case(gameaction_t.ga_nothing) {
+                break
+            }
         }
     }
     // get commands, check consistancy,
@@ -482,7 +510,7 @@ def G_Ticker {
     for (i in range(MAXPLAYERS)) {
         if (int(playeringame[i]) != 0) {
             cmd = addr(players[i].cmd)
-            doom_memcpy(reinterpret<void?>(cmd), reinterpret<void?>(addr(netcmds[i][0]) + end_index(buf, 12)), int(uint64(typeinfo sizeof(type<ticcmd_t>))))
+            doom_memcpy(reinterpret<void?>(cmd), reinterpret<void?>(addr(netcmds[i][0]) + end_index(buf, 12)), typeinfo sizeof(type<ticcmd_t>))
             if (int(demoplayback) != 0) {
                 G_ReadDemoTiccmd(cmd)
             }
@@ -490,14 +518,14 @@ def G_Ticker {
                 G_WriteDemoTiccmd(cmd)
             }
             // check for turbo cheats
-            if (int(cmd.forwardmove) > TURBOTHRESHOLD && !((gametic & 31) != 0) && ((gametic >> 5) & 3) == i) {
+            if (int(cmd.forwardmove) > TURBOTHRESHOLD && (gametic & 31) == 0 && ((gametic >> 5) & 3) == i) {
                 // doom_sprintf(turbomessage, "%s is turbo!", player_names[i]);
                 doom_strcpy(addr(G_Ticker_turbomessage[0]), player_names[i])
                 doom_concat(addr(G_Ticker_turbomessage[0]), cstr(" is turbo!"))
                 players[consoleplayer].message = addr(G_Ticker_turbomessage[0])
             }
-            if (uint(int(netgame)) != 0 && !(int(netdemo) != 0) && !((gametic % ticdup) != 0)) {
-                if (gametic > BACKUPTICS && int(consistancy[i][buf]) != int(cmd.consistancy)) {
+            if (uint(netgame) != 0 && int(netdemo) == 0 && (gametic % ticdup) == 0) {
+                if (gametic > BACKUPTICS && consistancy[i][buf] != cmd.consistancy) {
                     // I_Error("Error: consistency failure (%i should be %i)",
                     // cmd->consistancy, consistancy[i][buf]);
                     doom_strcpy(addr(error_buf[0]), cstr("Error: consistency failure ("))
@@ -519,37 +547,49 @@ def G_Ticker {
     for (i in range(MAXPLAYERS)) {
         if (int(playeringame[i]) != 0) {
             if ((int(players[i].cmd.buttons) & int(buttoncode_t.BT_SPECIAL)) != 0) {
-                let _cond2 = int(players[i].cmd.buttons) & int(buttoncode_t.BT_SPECIALMASK)
-                if (_cond2 == 1) {
-                    paused = enum_from_int(type<doom_boolean>, int(uint(int(paused)) ^ 1u))
-                    if (int(paused) != 0) {
-                        S_PauseSound()
-                    } else {
-                        S_ResumeSound()
+                c_switch(int(players[i].cmd.buttons) & int(buttoncode_t.BT_SPECIALMASK)) {
+                    case(1) {
+                        paused = enum_from_int(type<doom_boolean>, int(uint(paused) ^ 1u))
+                        if (int(paused) != 0) {
+                            S_PauseSound()
+                        } else {
+                            S_ResumeSound()
+                        }
+                        break
                     }
-                } elif (_cond2 == 2) {
-                    if (!(savedescription[0] != 0)) {
-                        doom_strcpy(addr(savedescription[0]), cstr("NET GAME"))
+                    case(2) {
+                        if (savedescription[0] == 0) {
+                            doom_strcpy(addr(savedescription[0]), cstr("NET GAME"))
+                        }
+                        savegameslot = (int(players[i].cmd.buttons) & int(buttoncode_t.BTS_SAVEMASK)) >> int(buttoncode_t.BTS_SAVESHIFT)
+                        gameaction = gameaction_t.ga_savegame
+                        break
                     }
-                    savegameslot = (int(players[i].cmd.buttons) & int(buttoncode_t.BTS_SAVEMASK)) >> int(buttoncode_t.BTS_SAVESHIFT)
-                    gameaction = gameaction_t.ga_savegame
                 }
             }
         }
     }
     // do main actions
-    let _cond3 = gamestate
-    if (_cond3 == gamestate_t.GS_LEVEL) {
-        P_Ticker()
-        ST_Ticker()
-        AM_Ticker()
-        HU_Ticker()
-    } elif (_cond3 == gamestate_t.GS_INTERMISSION) {
-        WI_Ticker()
-    } elif (_cond3 == gamestate_t.GS_FINALE) {
-        F_Ticker()
-    } elif (_cond3 == gamestate_t.GS_DEMOSCREEN) {
-        D_PageTicker()
+    c_switch(gamestate) {
+        case(gamestate_t.GS_LEVEL) {
+            P_Ticker()
+            ST_Ticker()
+            AM_Ticker()
+            HU_Ticker()
+            break
+        }
+        case(gamestate_t.GS_INTERMISSION) {
+            WI_Ticker()
+            break
+        }
+        case(gamestate_t.GS_FINALE) {
+            F_Ticker()
+            break
+        }
+        case(gamestate_t.GS_DEMOSCREEN) {
+            D_PageTicker()
+            break
+        }
     }
     tic_checksum_cs = G_TicChecksum()
     tic_checksum_tic = gametic
@@ -573,8 +613,8 @@ def G_InitPlayer(player : int) {
 def G_PlayerFinishLevel(player : int) {
     var p : player_s?
     p = addr(players[0]) + end_index(player, 4)
-    doom_memset(reinterpret<void?>(addr(p.powers[0])), 0, int(uint64(typeinfo sizeof(type<int[6]>))))
-    doom_memset(reinterpret<void?>(addr(p.cards[0])), 0, int(uint64(typeinfo sizeof(type<doom_boolean[6]>))))
+    doom_memset(reinterpret<void?>(addr(p.powers[0])), 0, typeinfo sizeof(type<int[6]>))
+    doom_memset(reinterpret<void?>(addr(p.cards[0])), 0, typeinfo sizeof(type<doom_boolean[6]>))
     // cancel invisibility
     p.mo.flags &= ~int(mobjflag_t.MF_SHADOW)
     // cancel gun flashes
@@ -596,13 +636,13 @@ def G_PlayerReborn(player : int) {
     var killcount : int
     var itemcount : int
     var secretcount : int
-    doom_memcpy(reinterpret<void?>(addr(frags[0])), reinterpret<void?>(addr(players[player].frags[0])), int(uint64(typeinfo sizeof(type<int[4]>))))
+    doom_memcpy(reinterpret<void?>(addr(frags[0])), reinterpret<void?>(addr(players[player].frags[0])), typeinfo sizeof(type<int[4]>))
     killcount = players[player].killcount
     itemcount = players[player].itemcount
     secretcount = players[player].secretcount
     p = addr(players[0]) + end_index(player, 4)
-    doom_memset(reinterpret<void?>(p), 0, int(uint64(typeinfo sizeof(type<player_s>))))
-    doom_memcpy(reinterpret<void?>(addr(players[player].frags[0])), reinterpret<void?>(addr(frags[0])), int(uint64(typeinfo sizeof(type<int[4]>))))
+    doom_memset(reinterpret<void?>(p), 0, typeinfo sizeof(type<player_s>))
+    doom_memcpy(reinterpret<void?>(addr(players[player].frags[0])), reinterpret<void?>(addr(frags[0])), typeinfo sizeof(type<int[4]>))
     players[player].killcount = killcount
     players[player].itemcount = itemcount
     players[player].secretcount = secretcount
@@ -628,7 +668,7 @@ def G_CheckSpot(playernum : int; var mthing : mapthing_t?) : doom_boolean {
     var ss : subsector_s?
     var an : uint
     var mo : mobj_s?
-    if (!(players[playernum].mo != null)) {
+    if (players[playernum].mo == null) {
         // first spawn of level, before corpses
         for (i in range(playernum)) {
             if (players[i].mo.x == int(mthing.x) << FRACBITS && players[i].mo.y == int(mthing.y) << FRACBITS) {
@@ -639,7 +679,7 @@ def G_CheckSpot(playernum : int; var mthing : mapthing_t?) : doom_boolean {
     }
     x = int(mthing.x) << FRACBITS
     y = int(mthing.y) << FRACBITS
-    if (!(int(P_CheckPosition(players[playernum].mo, x, y)) != 0)) {
+    if (int(P_CheckPosition(players[playernum].mo, x, y)) == 0) {
         return doom_boolean._c_false
     }
     // flush an old corpse if needed
@@ -689,7 +729,7 @@ def G_DeathMatchSpawnPlayer(playernum : int) {
 // G_DoReborn
 [c_function]
 def G_DoReborn(playernum : int) {
-    if (!(int(netgame) != 0)) {
+    if (int(netgame) == 0) {
         // reload the level from scratch
         gameaction = gameaction_t.ga_loadlevel
     } else {
@@ -758,15 +798,18 @@ def G_DoCompleted {
         AM_Stop()
     }
     if (gamemode != GameMode_t.commercial) {
-        let _cond = gamemap
-        if (_cond == 8) {
-            gameaction = gameaction_t.ga_victory
-            return
-        } elif (_cond == 9) {
-            i = 0
-            while (i < MAXPLAYERS) {
-                players[i].didsecret = doom_boolean._c_true
-                i++
+        c_switch(gamemap) {
+            case(8) {
+                gameaction = gameaction_t.ga_victory
+                return
+            }
+            case(9) {
+                i = 0
+                while (i < MAXPLAYERS) {
+                    players[i].didsecret = doom_boolean._c_true
+                    i++
+                }
+                break
             }
         }
     }
@@ -787,18 +830,25 @@ def G_DoCompleted {
     // wminfo.next is 0 biased, unlike gamemap
     if (gamemode == GameMode_t.commercial) {
         if (int(secretexit) != 0) {
-            let _cond2 = gamemap
-            if (_cond2 == 15) {
-                wminfo.next = 30
-            } elif (_cond2 == 31) {
-                wminfo.next = 31
+            c_switch(gamemap) {
+                case(15) {
+                    wminfo.next = 30
+                    break
+                }
+                case(31) {
+                    wminfo.next = 31
+                    break
+                }
             }
         } else {
-            let _cond3 = gamemap
-            if (_cond3 == 31 || _cond3 == 32) {
-                wminfo.next = 15
-            } else {
-                wminfo.next = gamemap
+            c_switch(gamemap) {
+                case(31, 32) {
+                    wminfo.next = 15
+                    break
+                }
+                case(_) {
+                    wminfo.next = gamemap
+                }
             }
         }
     } else {
@@ -807,15 +857,23 @@ def G_DoCompleted {
             wminfo.next = 8
         } elif (gamemap == 9) {
             // returning from secret level
-            let _cond4 = gameepisode
-            if (_cond4 == 1) {
-                wminfo.next = 3
-            } elif (_cond4 == 2) {
-                wminfo.next = 5
-            } elif (_cond4 == 3) {
-                wminfo.next = 6
-            } elif (_cond4 == 4) {
-                wminfo.next = 2
+            c_switch(gameepisode) {
+                case(1) {
+                    wminfo.next = 3
+                    break
+                }
+                case(2) {
+                    wminfo.next = 5
+                    break
+                }
+                case(3) {
+                    wminfo.next = 6
+                    break
+                }
+                case(4) {
+                    wminfo.next = 2
+                    break
+                }
             }
         } else {
             // go to next level
@@ -838,13 +896,13 @@ def G_DoCompleted {
         wminfo.plyr[i1].sitems = players[i1].itemcount
         wminfo.plyr[i1].ssecret = players[i1].secretcount
         wminfo.plyr[i1].stime = leveltime
-        doom_memcpy(reinterpret<void?>(addr(wminfo.plyr[i1].frags[0])), reinterpret<void?>(addr(players[i1].frags[0])), int(uint64(typeinfo sizeof(type<int[4]>))))
+        doom_memcpy(reinterpret<void?>(addr(wminfo.plyr[i1].frags[0])), reinterpret<void?>(addr(players[i1].frags[0])), typeinfo sizeof(type<int[4]>))
     }
     gamestate = gamestate_t.GS_INTERMISSION
     viewactive = doom_boolean._c_false
     automapactive = doom_boolean._c_false
     if (statcopy != null) {
-        doom_memcpy(statcopy, reinterpret<void?>(addr(wminfo)), int(uint64(typeinfo sizeof(type<wbstartstruct_t>))))
+        doom_memcpy(statcopy, reinterpret<void?>(addr(wminfo)), typeinfo sizeof(type<wbstartstruct_t>))
     }
     WI_Start(addr(wminfo))
 }
@@ -856,25 +914,16 @@ def G_WorldDone {
         players[consoleplayer].didsecret = doom_boolean._c_true
     }
     if (gamemode == GameMode_t.commercial) {
-        let _cond = gamemap
-        while (true) {
-            var _flag = false
-            _flag ||= _cond == 15
-            _flag ||= _cond == 31
-            if (_flag) {
-                if (!(int(secretexit) != 0)) {
+        c_switch(gamemap) {
+            case(15, 31) {
+                if (int(secretexit) == 0) {
                     break
                 }
             }
-            _flag ||= _cond == 6
-            _flag ||= _cond == 11
-            _flag ||= _cond == 20
-            _flag ||= _cond == 30
-            if (_flag) {
+            case(6, 11, 20, 30) {
                 F_StartFinale()
                 break
             }
-            break
         }
     }
 }
@@ -904,7 +953,7 @@ def G_DoLoadGame {
     length = M_ReadFile(addr(savename[0]), addr(savebuffer))
     save_p = savebuffer + SAVESTRINGSIZE
     // skip the description field
-    doom_memset(reinterpret<void?>(addr(vcheck[0])), 0, int(uint64(typeinfo sizeof(type<uint8[16]>))))
+    doom_memset(reinterpret<void?>(addr(vcheck[0])), 0, typeinfo sizeof(type<uint8[16]>))
     // doom_sprintf(vcheck, "version %i", VERSION);
     doom_strcpy(addr(vcheck[0]), cstr("version "))
     doom_concat(addr(vcheck[0]), doom_itoa(int(anon_82.VERSION), 10))
@@ -912,40 +961,40 @@ def G_DoLoadGame {
         // bad version
         return
     }
-    save_p = save_p + VERSIONSIZE
+    save_p += VERSIONSIZE
     var _t0 = save_p
-    save_p = save_p + 1
-    gameskill = enum_from_int(type<skill_t>, int(deref(_t0)))
+    save_p++
+    gameskill = enum_from_int(type<skill_t>, int(*_t0))
     var _t1 = save_p
-    save_p = save_p + 1
-    gameepisode = int(deref(_t1))
+    save_p++
+    gameepisode = int(*_t1)
     var _t2 = save_p
-    save_p = save_p + 1
-    gamemap = int(deref(_t2))
+    save_p++
+    gamemap = int(*_t2)
     for (i in range(MAXPLAYERS)) {
         var _t3 = save_p
-        save_p = save_p + 1
-        playeringame[i] = enum_from_int(type<doom_boolean>, int(deref(_t3)))
+        save_p++
+        playeringame[i] = enum_from_int(type<doom_boolean>, int(*_t3))
     }
     // load a base level
     G_InitNew(gameskill, gameepisode, gamemap)
     // get the times
     var _t4 = save_p
-    save_p = save_p + 1
-    a = int(deref(_t4))
+    save_p++
+    a = int(*_t4)
     var _t5 = save_p
-    save_p = save_p + 1
-    b = int(deref(_t5))
+    save_p++
+    b = int(*_t5)
     var _t6 = save_p
-    save_p = save_p + 1
-    c = int(deref(_t6))
+    save_p++
+    c = int(*_t6)
     leveltime = (a << 16) + (b << 8) + c
     // dearchive all the modifications
     P_UnArchivePlayers()
     P_UnArchiveWorld()
     P_UnArchiveThinkers()
     P_UnArchiveSpecials()
-    if (int(deref(save_p)) != 29) {
+    if (*save_p != 29) {
         I_Error(cstr("Error: Bad savegame"))
     }
     // done
@@ -981,44 +1030,44 @@ def G_DoSaveGame {
     savebuffer = screens[1] + 16384
     save_p = savebuffer
     doom_memcpy(reinterpret<void?>(save_p), reinterpret<void?>(description), SAVESTRINGSIZE)
-    save_p = save_p + SAVESTRINGSIZE
-    doom_memset(reinterpret<void?>(addr(name2[0])), 0, int(uint64(typeinfo sizeof(type<uint8[16]>))))
+    save_p += SAVESTRINGSIZE
+    doom_memset(reinterpret<void?>(addr(name2[0])), 0, typeinfo sizeof(type<uint8[16]>))
     // doom_sprintf(name2, "version %i", VERSION);
     doom_strcpy(addr(name2[0]), cstr("version "))
     doom_concat(addr(name2[0]), doom_itoa(int(anon_82.VERSION), 10))
     doom_memcpy(reinterpret<void?>(save_p), reinterpret<void?>(addr(name2[0])), VERSIONSIZE)
-    save_p = save_p + VERSIONSIZE
+    save_p += VERSIONSIZE
     var _t0 = save_p
-    save_p = save_p + 1
-    deref(_t0) = uint8(int(gameskill))
+    save_p++
+    *_t0 = uint8(gameskill)
     var _t1 = save_p
-    save_p = save_p + 1
-    deref(_t1) = uint8(gameepisode)
+    save_p++
+    *_t1 = uint8(gameepisode)
     var _t2 = save_p
-    save_p = save_p + 1
-    deref(_t2) = uint8(gamemap)
+    save_p++
+    *_t2 = uint8(gamemap)
     for (i in range(MAXPLAYERS)) {
         var _t3 = save_p
-        save_p = save_p + 1
-        deref(_t3) = uint8(int(playeringame[i]))
+        save_p++
+        *_t3 = uint8(playeringame[i])
     }
     var _t4 = save_p
-    save_p = save_p + 1
-    deref(_t4) = uint8(leveltime >> 16)
+    save_p++
+    *_t4 = uint8(leveltime >> 16)
     var _t5 = save_p
-    save_p = save_p + 1
-    deref(_t5) = uint8(leveltime >> 8)
+    save_p++
+    *_t5 = uint8(leveltime >> 8)
     var _t6 = save_p
-    save_p = save_p + 1
-    deref(_t6) = uint8(leveltime)
+    save_p++
+    *_t6 = uint8(leveltime)
     P_ArchivePlayers()
     P_ArchiveWorld()
     P_ArchiveThinkers()
     P_ArchiveSpecials()
     // consistancy marker
     var _t7 = save_p
-    save_p = save_p + 1
-    deref(_t7) = 29u8
+    save_p++
+    *_t7 = 29u8
     length = int(int64(save_p - savebuffer))
     if (length > SAVEGAMESIZE) {
         I_Error(cstr("Error: Savegame buffer overrun"))
@@ -1060,7 +1109,7 @@ def G_InitNew(var skill : skill_t; var episode : int; var map : int) {
         paused = doom_boolean._c_false
         S_ResumeSound()
     }
-    if (uint(int(skill)) > uint(int(skill_t.sk_nightmare))) {
+    if (uint(skill) > uint(skill_t.sk_nightmare)) {
         skill = skill_t.sk_nightmare
     }
     // This was quite messy with SPECIAL and commented parts.
@@ -1090,12 +1139,12 @@ def G_InitNew(var skill : skill_t; var episode : int; var map : int) {
         map = 9
     }
     M_ClearRandom()
-    if (skill == skill_t.sk_nightmare || uint(int(respawnparm)) != 0) {
+    if (skill == skill_t.sk_nightmare || uint(respawnparm) != 0) {
         respawnmonsters = doom_boolean._c_true
     } else {
         respawnmonsters = doom_boolean._c_false
     }
-    if (uint(int(fastparm)) != 0 || (skill == skill_t.sk_nightmare && gameskill != skill_t.sk_nightmare)) {
+    if (uint(fastparm) != 0 || (skill == skill_t.sk_nightmare && gameskill != skill_t.sk_nightmare)) {
         i = int(statenum_t.S_SARG_RUN1)
         while (i <= int(statenum_t.S_SARG_PAIN2)) {
             states[i].tics >>= 1l
@@ -1137,16 +1186,24 @@ def G_InitNew(var skill : skill_t; var episode : int; var map : int) {
             skytexture = R_TextureNumForName(cstr("SKY2"))
         }
     } else {
-        let _cond = episode
-        if (_cond == 1) {
-            skytexture = R_TextureNumForName(cstr("SKY1"))
-        } elif (_cond == 2) {
-            skytexture = R_TextureNumForName(cstr("SKY2"))
-        } elif (_cond == 3) {
-            skytexture = R_TextureNumForName(cstr("SKY3"))
-        } elif (_cond == 4) {
-            // Special Edition sky
-            skytexture = R_TextureNumForName(cstr("SKY4"))
+        c_switch(episode) {
+            case(1) {
+                skytexture = R_TextureNumForName(cstr("SKY1"))
+                break
+            }
+            case(2) {
+                skytexture = R_TextureNumForName(cstr("SKY2"))
+                break
+            }
+            case(3) {
+                skytexture = R_TextureNumForName(cstr("SKY3"))
+                break
+            }
+            case(4) {
+                // Special Edition sky
+                skytexture = R_TextureNumForName(cstr("SKY4"))
+                break
+            }
         }
     }
     G_DoLoadLevel()
@@ -1154,23 +1211,23 @@ def G_InitNew(var skill : skill_t; var episode : int; var map : int) {
 
 [c_function]
 def G_ReadDemoTiccmd(var cmd : ticcmd_t?) {
-    if (int(deref(demo_p)) == DEMOMARKER) {
+    if (int(*demo_p) == DEMOMARKER) {
         // end of demo data stream
         G_CheckDemoStatus()
         return
     }
     var _t0 = demo_p
-    demo_p = demo_p + 1
-    cmd.forwardmove = int8(deref(_t0))
+    demo_p++
+    cmd.forwardmove = int8(*_t0)
     var _t1 = demo_p
-    demo_p = demo_p + 1
-    cmd.sidemove = int8(deref(_t1))
+    demo_p++
+    cmd.sidemove = int8(*_t1)
     var _t2 = demo_p
-    demo_p = demo_p + 1
-    cmd.angleturn = int16(int(deref(_t2)) << 8)
+    demo_p++
+    cmd.angleturn = int16(int(*_t2) << 8)
     var _t3 = demo_p
-    demo_p = demo_p + 1
-    cmd.buttons = deref(_t3)
+    demo_p++
+    cmd.buttons = *_t3
 }
 
 [c_function]
@@ -1180,18 +1237,18 @@ def G_WriteDemoTiccmd(var cmd : ticcmd_t?) {
         G_CheckDemoStatus()
     }
     var _t0 = demo_p
-    demo_p = demo_p + 1
-    deref(_t0) = uint8(cmd.forwardmove)
+    demo_p++
+    *_t0 = uint8(cmd.forwardmove)
     var _t1 = demo_p
-    demo_p = demo_p + 1
-    deref(_t1) = uint8(cmd.sidemove)
+    demo_p++
+    *_t1 = uint8(cmd.sidemove)
     var _t2 = demo_p
-    demo_p = demo_p + 1
-    deref(_t2) = uint8((int(cmd.angleturn) + 128) >> 8)
+    demo_p++
+    *_t2 = uint8((int(cmd.angleturn) + 128) >> 8)
     var _t3 = demo_p
-    demo_p = demo_p + 1
-    deref(_t3) = cmd.buttons
-    demo_p = demo_p - 4
+    demo_p++
+    *_t3 = cmd.buttons
+    demo_p -= 4
     if (intptr(demo_p) > intptr(demoend - 16)) {
         // no more space
         G_CheckDemoStatus()
@@ -1223,36 +1280,36 @@ def G_RecordDemo(var name : uint8?) {
 def G_BeginRecording {
     demo_p = demobuffer
     var _t0 = demo_p
-    demo_p = demo_p + 1
-    deref(_t0) = uint8(int(anon_82.VERSION))
+    demo_p++
+    *_t0 = uint8(anon_82.VERSION)
     var _t1 = demo_p
-    demo_p = demo_p + 1
-    deref(_t1) = uint8(int(gameskill))
+    demo_p++
+    *_t1 = uint8(gameskill)
     var _t2 = demo_p
-    demo_p = demo_p + 1
-    deref(_t2) = uint8(gameepisode)
+    demo_p++
+    *_t2 = uint8(gameepisode)
     var _t3 = demo_p
-    demo_p = demo_p + 1
-    deref(_t3) = uint8(gamemap)
+    demo_p++
+    *_t3 = uint8(gamemap)
     var _t4 = demo_p
-    demo_p = demo_p + 1
-    deref(_t4) = uint8(int(deathmatch))
+    demo_p++
+    *_t4 = uint8(deathmatch)
     var _t5 = demo_p
-    demo_p = demo_p + 1
-    deref(_t5) = uint8(int(respawnparm))
+    demo_p++
+    *_t5 = uint8(respawnparm)
     var _t6 = demo_p
-    demo_p = demo_p + 1
-    deref(_t6) = uint8(int(fastparm))
+    demo_p++
+    *_t6 = uint8(fastparm)
     var _t7 = demo_p
-    demo_p = demo_p + 1
-    deref(_t7) = uint8(int(nomonsters))
+    demo_p++
+    *_t7 = uint8(nomonsters)
     var _t8 = demo_p
-    demo_p = demo_p + 1
-    deref(_t8) = uint8(consoleplayer)
+    demo_p++
+    *_t8 = uint8(consoleplayer)
     for (i in range(MAXPLAYERS)) {
         var _t9 = demo_p
-        demo_p = demo_p + 1
-        deref(_t9) = uint8(int(playeringame[i]))
+        demo_p++
+        *_t9 = uint8(playeringame[i])
     }
 }
 
@@ -1270,9 +1327,9 @@ def G_DoPlayDemo {
     demo_p = reinterpret<uint8?>(W_CacheLumpName(defdemoname, PU_STATIC))
     demobuffer = demo_p
     var _t0 = demo_p
-    demo_p = demo_p + 1
-    var demo_version : uint8 = deref(_t0)
-    if (int(demo_version) != int(anon_82.VERSION) && int(demo_version) != 109) {
+    demo_p++
+    var demo_version : uint8 = *_t0
+    if (int(demo_version) != int(anon_82.VERSION) && demo_version != 109) {
         // Demos seem to run fine with version 109
         // doom_print("Demo is from a different game version! Demo Verson = %i, this version = %i\n", (int)demo_version, VERSION);
         invoke(doom_print, cstr("Demo is from a different game version! Demo Verson = "))
@@ -1284,33 +1341,33 @@ def G_DoPlayDemo {
         return
     }
     var _t1 = demo_p
-    demo_p = demo_p + 1
-    skill = enum_from_int(type<skill_t>, int(deref(_t1)))
+    demo_p++
+    skill = enum_from_int(type<skill_t>, int(*_t1))
     var _t2 = demo_p
-    demo_p = demo_p + 1
-    episode = int(deref(_t2))
+    demo_p++
+    episode = int(*_t2)
     var _t3 = demo_p
-    demo_p = demo_p + 1
-    map = int(deref(_t3))
+    demo_p++
+    map = int(*_t3)
     var _t4 = demo_p
-    demo_p = demo_p + 1
-    deathmatch = enum_from_int(type<doom_boolean>, int(deref(_t4)))
+    demo_p++
+    deathmatch = enum_from_int(type<doom_boolean>, int(*_t4))
     var _t5 = demo_p
-    demo_p = demo_p + 1
-    respawnparm = enum_from_int(type<doom_boolean>, int(deref(_t5)))
+    demo_p++
+    respawnparm = enum_from_int(type<doom_boolean>, int(*_t5))
     var _t6 = demo_p
-    demo_p = demo_p + 1
-    fastparm = enum_from_int(type<doom_boolean>, int(deref(_t6)))
+    demo_p++
+    fastparm = enum_from_int(type<doom_boolean>, int(*_t6))
     var _t7 = demo_p
-    demo_p = demo_p + 1
-    nomonsters = enum_from_int(type<doom_boolean>, int(deref(_t7)))
+    demo_p++
+    nomonsters = enum_from_int(type<doom_boolean>, int(*_t7))
     var _t8 = demo_p
-    demo_p = demo_p + 1
-    consoleplayer = int(deref(_t8))
+    demo_p++
+    consoleplayer = int(*_t8)
     for (i in range(MAXPLAYERS)) {
         var _t9 = demo_p
-        demo_p = demo_p + 1
-        playeringame[i] = enum_from_int(type<doom_boolean>, int(deref(_t9)))
+        demo_p++
+        playeringame[i] = enum_from_int(type<doom_boolean>, int(*_t9))
     }
     if (int(playeringame[1]) != 0) {
         netgame = doom_boolean._c_true
@@ -1375,8 +1432,8 @@ def G_CheckDemoStatus : doom_boolean {
     }
     if (int(demorecording) != 0) {
         var _t0 = demo_p
-        demo_p = demo_p + 1
-        deref(_t0) = uint8(DEMOMARKER)
+        demo_p++
+        *_t0 = uint8(DEMOMARKER)
         M_WriteFile(addr(demoname[0]), reinterpret<void?>(demobuffer), int(int64(demo_p - demobuffer)))
         Z_Free(reinterpret<void?>(demobuffer))
         demorecording = doom_boolean._c_false

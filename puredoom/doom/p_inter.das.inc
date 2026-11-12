@@ -8,7 +8,7 @@ def P_GiveAmmo(var player : player_s?; ammo : ammotype_t; var num : int) : doom_
     if (ammo == ammotype_t.am_noammo) {
         return doom_boolean._c_false
     }
-    if (uint(int(ammo)) < 0u || uint(int(ammo)) > uint(int(ammotype_t.NUMAMMO))) {
+    if (uint(ammo) < 0u || uint(ammo) > uint(ammotype_t.NUMAMMO)) {
         // I_Error ("P_GiveAmmo: bad type %i", ammo);
         doom_strcpy(addr(error_buf[0]), cstr("P_GiveAmmo: bad type "))
         doom_concat(addr(error_buf[0]), doom_itoa(int(ammo), 10))
@@ -41,10 +41,8 @@ def P_GiveAmmo(var player : player_s?; ammo : ammotype_t; var num : int) : doom_
     // We were down to zero,
     // so select a new weapon.
     // Preferences are not user selectable.
-    let _cond = ammo
-    while (true) {
-        var _flag = false
-        if (_cond == ammotype_t.am_clip) {
+    c_switch(ammo) {
+        case(ammotype_t.am_clip) {
             if (player.readyweapon == weapontype_t.wp_fist) {
                 if (int(player.weaponowned[int(weapontype_t.wp_chaingun)]) != 0) {
                     player.pendingweapon = weapontype_t.wp_chaingun
@@ -54,7 +52,7 @@ def P_GiveAmmo(var player : player_s?; ammo : ammotype_t; var num : int) : doom_
             }
             break
         }
-        if (_cond == ammotype_t.am_shell) {
+        case(ammotype_t.am_shell) {
             if (player.readyweapon == weapontype_t.wp_fist || player.readyweapon == weapontype_t.wp_pistol) {
                 if (int(player.weaponowned[int(weapontype_t.wp_shotgun)]) != 0) {
                     player.pendingweapon = weapontype_t.wp_shotgun
@@ -62,7 +60,7 @@ def P_GiveAmmo(var player : player_s?; ammo : ammotype_t; var num : int) : doom_
             }
             break
         }
-        if (_cond == ammotype_t.am_cell) {
+        case(ammotype_t.am_cell) {
             if (player.readyweapon == weapontype_t.wp_fist || player.readyweapon == weapontype_t.wp_pistol) {
                 if (int(player.weaponowned[int(weapontype_t.wp_plasma)]) != 0) {
                     player.pendingweapon = weapontype_t.wp_plasma
@@ -70,19 +68,16 @@ def P_GiveAmmo(var player : player_s?; ammo : ammotype_t; var num : int) : doom_
             }
             break
         }
-        _flag ||= _cond == ammotype_t.am_misl
-        if (_flag) {
+        case(ammotype_t.am_misl) {
             if (player.readyweapon == weapontype_t.wp_fist) {
                 if (int(player.weaponowned[int(weapontype_t.wp_missile)]) != 0) {
                     player.pendingweapon = weapontype_t.wp_missile
                 }
             }
         }
-        _flag ||= !(_cond == ammotype_t.am_clip || _cond == ammotype_t.am_shell || _cond == ammotype_t.am_cell || _cond == ammotype_t.am_misl)
-        if (_flag) {
+        case(_) {
             break
         }
-        break
     }
     return doom_boolean._c_true
 }
@@ -93,7 +88,7 @@ def P_GiveAmmo(var player : player_s?; ammo : ammotype_t; var num : int) : doom_
 def P_GiveWeapon(var player : player_s?; weapon : weapontype_t; dropped : doom_boolean) : doom_boolean {
     var gaveammo : doom_boolean
     var gaveweapon : doom_boolean
-    if (uint(int(netgame)) != 0 && (uint(int(deathmatch)) != 2u) && !(int(dropped) != 0)) {
+    if (uint(netgame) != 0 && (uint(deathmatch) != 2u) && int(dropped) == 0) {
         // leave placed weapons forever on net games
         if (int(player.weaponowned[int(weapon)]) != 0) {
             return doom_boolean._c_false
@@ -129,7 +124,7 @@ def P_GiveWeapon(var player : player_s?; weapon : weapontype_t; dropped : doom_b
         player.weaponowned[int(weapon)] = doom_boolean._c_true
         player.pendingweapon = weapon
     }
-    return enum_from_int(type<doom_boolean>, (uint(int(gaveweapon)) != 0 || uint(int(gaveammo)) != 0) ? 1 : 0)
+    return enum_from_int(type<doom_boolean>, int_of(uint(gaveweapon) != 0 || uint(gaveammo) != 0))
 }
 
 // P_GiveBody
@@ -223,24 +218,23 @@ def P_TouchSpecialThing(var special : mobj_s?; var toucher : mobj_s?) {
         return
     }
     // Identify by sprite.
-    let _cond = special.sprite
-    while (true) {
-        if (_cond == spritenum_t.SPR_ARM1) {
+    c_switch(special.sprite) {
+        case(spritenum_t.SPR_ARM1) {
             // armor
-            if (!(int(P_GiveArmor(player, 1)) != 0)) {
+            if (int(P_GiveArmor(player, 1)) == 0) {
                 return
             }
             player.message = cstr("Picked up the armor.")
             break
         }
-        if (_cond == spritenum_t.SPR_ARM2) {
-            if (!(int(P_GiveArmor(player, 2)) != 0)) {
+        case(spritenum_t.SPR_ARM2) {
+            if (int(P_GiveArmor(player, 2)) == 0) {
                 return
             }
             player.message = cstr("Picked up the MegaArmor!")
             break
         }
-        if (_cond == spritenum_t.SPR_BON1) {
+        case(spritenum_t.SPR_BON1) {
             // bonus items
             // can go over 100%
             player.health++
@@ -251,19 +245,19 @@ def P_TouchSpecialThing(var special : mobj_s?; var toucher : mobj_s?) {
             player.message = cstr("Picked up a health bonus.")
             break
         }
-        if (_cond == spritenum_t.SPR_BON2) {
+        case(spritenum_t.SPR_BON2) {
             // can go over 100%
             player.armorpoints++
             if (player.armorpoints > 200) {
                 player.armorpoints = 200
             }
-            if (!(player.armortype != 0)) {
+            if (player.armortype == 0) {
                 player.armortype = 1
             }
             player.message = cstr("Picked up an armor bonus.")
             break
         }
-        if (_cond == spritenum_t.SPR_SOUL) {
+        case(spritenum_t.SPR_SOUL) {
             player.health += 100
             if (player.health > 200) {
                 player.health = 200
@@ -273,7 +267,7 @@ def P_TouchSpecialThing(var special : mobj_s?; var toucher : mobj_s?) {
             sound = int(sfxenum_t.sfx_getpow)
             break
         }
-        if (_cond == spritenum_t.SPR_MEGA) {
+        case(spritenum_t.SPR_MEGA) {
             if (gamemode != GameMode_t.commercial) {
                 return
             }
@@ -284,78 +278,78 @@ def P_TouchSpecialThing(var special : mobj_s?; var toucher : mobj_s?) {
             sound = int(sfxenum_t.sfx_getpow)
             break
         }
-        if (_cond == spritenum_t.SPR_BKEY) {
+        case(spritenum_t.SPR_BKEY) {
             // cards
             // leave cards for everyone
-            if (!(int(player.cards[int(card_t.it_bluecard)]) != 0)) {
+            if (int(player.cards[int(card_t.it_bluecard)]) == 0) {
                 player.message = cstr("Picked up a blue keycard.")
             }
             P_GiveCard(player, card_t.it_bluecard)
-            if (!(int(netgame) != 0)) {
+            if (int(netgame) == 0) {
                 break
             }
             return
         }
-        if (_cond == spritenum_t.SPR_YKEY) {
-            if (!(int(player.cards[int(card_t.it_yellowcard)]) != 0)) {
+        case(spritenum_t.SPR_YKEY) {
+            if (int(player.cards[int(card_t.it_yellowcard)]) == 0) {
                 player.message = cstr("Picked up a yellow keycard.")
             }
             P_GiveCard(player, card_t.it_yellowcard)
-            if (!(int(netgame) != 0)) {
+            if (int(netgame) == 0) {
                 break
             }
             return
         }
-        if (_cond == spritenum_t.SPR_RKEY) {
-            if (!(int(player.cards[int(card_t.it_redcard)]) != 0)) {
+        case(spritenum_t.SPR_RKEY) {
+            if (int(player.cards[int(card_t.it_redcard)]) == 0) {
                 player.message = cstr("Picked up a red keycard.")
             }
             P_GiveCard(player, card_t.it_redcard)
-            if (!(int(netgame) != 0)) {
+            if (int(netgame) == 0) {
                 break
             }
             return
         }
-        if (_cond == spritenum_t.SPR_BSKU) {
-            if (!(int(player.cards[int(card_t.it_blueskull)]) != 0)) {
+        case(spritenum_t.SPR_BSKU) {
+            if (int(player.cards[int(card_t.it_blueskull)]) == 0) {
                 player.message = cstr("Picked up a blue skull key.")
             }
             P_GiveCard(player, card_t.it_blueskull)
-            if (!(int(netgame) != 0)) {
+            if (int(netgame) == 0) {
                 break
             }
             return
         }
-        if (_cond == spritenum_t.SPR_YSKU) {
-            if (!(int(player.cards[int(card_t.it_yellowskull)]) != 0)) {
+        case(spritenum_t.SPR_YSKU) {
+            if (int(player.cards[int(card_t.it_yellowskull)]) == 0) {
                 player.message = cstr("Picked up a yellow skull key.")
             }
             P_GiveCard(player, card_t.it_yellowskull)
-            if (!(int(netgame) != 0)) {
+            if (int(netgame) == 0) {
                 break
             }
             return
         }
-        if (_cond == spritenum_t.SPR_RSKU) {
-            if (!(int(player.cards[int(card_t.it_redskull)]) != 0)) {
+        case(spritenum_t.SPR_RSKU) {
+            if (int(player.cards[int(card_t.it_redskull)]) == 0) {
                 player.message = cstr("Picked up a red skull key.")
             }
             P_GiveCard(player, card_t.it_redskull)
-            if (!(int(netgame) != 0)) {
+            if (int(netgame) == 0) {
                 break
             }
             return
         }
-        if (_cond == spritenum_t.SPR_STIM) {
+        case(spritenum_t.SPR_STIM) {
             // medikits, heals
-            if (!(int(P_GiveBody(player, 10)) != 0)) {
+            if (int(P_GiveBody(player, 10)) == 0) {
                 return
             }
             player.message = cstr("Picked up a stimpack.")
             break
         }
-        if (_cond == spritenum_t.SPR_MEDI) {
-            if (!(int(P_GiveBody(player, 25)) != 0)) {
+        case(spritenum_t.SPR_MEDI) {
+            if (int(P_GiveBody(player, 25)) == 0) {
                 return
             }
             if (player.health < 25) {
@@ -365,17 +359,17 @@ def P_TouchSpecialThing(var special : mobj_s?; var toucher : mobj_s?) {
             }
             break
         }
-        if (_cond == spritenum_t.SPR_PINV) {
+        case(spritenum_t.SPR_PINV) {
             // power ups
-            if (!(int(P_GivePower(player, int(powertype_t.pw_invulnerability))) != 0)) {
+            if (int(P_GivePower(player, int(powertype_t.pw_invulnerability))) == 0) {
                 return
             }
             player.message = cstr("Invulnerability!")
             sound = int(sfxenum_t.sfx_getpow)
             break
         }
-        if (_cond == spritenum_t.SPR_PSTR) {
-            if (!(int(P_GivePower(player, int(powertype_t.pw_strength))) != 0)) {
+        case(spritenum_t.SPR_PSTR) {
+            if (int(P_GivePower(player, int(powertype_t.pw_strength))) == 0) {
                 return
             }
             player.message = cstr("Berserk!")
@@ -385,103 +379,103 @@ def P_TouchSpecialThing(var special : mobj_s?; var toucher : mobj_s?) {
             sound = int(sfxenum_t.sfx_getpow)
             break
         }
-        if (_cond == spritenum_t.SPR_PINS) {
-            if (!(int(P_GivePower(player, int(powertype_t.pw_invisibility))) != 0)) {
+        case(spritenum_t.SPR_PINS) {
+            if (int(P_GivePower(player, int(powertype_t.pw_invisibility))) == 0) {
                 return
             }
             player.message = cstr("Partial Invisibility")
             sound = int(sfxenum_t.sfx_getpow)
             break
         }
-        if (_cond == spritenum_t.SPR_SUIT) {
-            if (!(int(P_GivePower(player, int(powertype_t.pw_ironfeet))) != 0)) {
+        case(spritenum_t.SPR_SUIT) {
+            if (int(P_GivePower(player, int(powertype_t.pw_ironfeet))) == 0) {
                 return
             }
             player.message = cstr("Radiation Shielding Suit")
             sound = int(sfxenum_t.sfx_getpow)
             break
         }
-        if (_cond == spritenum_t.SPR_PMAP) {
-            if (!(int(P_GivePower(player, int(powertype_t.pw_allmap))) != 0)) {
+        case(spritenum_t.SPR_PMAP) {
+            if (int(P_GivePower(player, int(powertype_t.pw_allmap))) == 0) {
                 return
             }
             player.message = cstr("Computer Area Map")
             sound = int(sfxenum_t.sfx_getpow)
             break
         }
-        if (_cond == spritenum_t.SPR_PVIS) {
-            if (!(int(P_GivePower(player, int(powertype_t.pw_infrared))) != 0)) {
+        case(spritenum_t.SPR_PVIS) {
+            if (int(P_GivePower(player, int(powertype_t.pw_infrared))) == 0) {
                 return
             }
             player.message = cstr("Light Amplification Visor")
             sound = int(sfxenum_t.sfx_getpow)
             break
         }
-        if (_cond == spritenum_t.SPR_CLIP) {
+        case(spritenum_t.SPR_CLIP) {
             // ammo
             if ((special.flags & int(mobjflag_t.MF_DROPPED)) != 0) {
-                if (!(int(P_GiveAmmo(player, ammotype_t.am_clip, 0)) != 0)) {
+                if (int(P_GiveAmmo(player, ammotype_t.am_clip, 0)) == 0) {
                     return
                 }
             } else {
-                if (!(int(P_GiveAmmo(player, ammotype_t.am_clip, 1)) != 0)) {
+                if (int(P_GiveAmmo(player, ammotype_t.am_clip, 1)) == 0) {
                     return
                 }
             }
             player.message = cstr("Picked up a clip.")
             break
         }
-        if (_cond == spritenum_t.SPR_AMMO) {
-            if (!(int(P_GiveAmmo(player, ammotype_t.am_clip, 5)) != 0)) {
+        case(spritenum_t.SPR_AMMO) {
+            if (int(P_GiveAmmo(player, ammotype_t.am_clip, 5)) == 0) {
                 return
             }
             player.message = cstr("Picked up a box of bullets.")
             break
         }
-        if (_cond == spritenum_t.SPR_ROCK) {
-            if (!(int(P_GiveAmmo(player, ammotype_t.am_misl, 1)) != 0)) {
+        case(spritenum_t.SPR_ROCK) {
+            if (int(P_GiveAmmo(player, ammotype_t.am_misl, 1)) == 0) {
                 return
             }
             player.message = cstr("Picked up a rocket.")
             break
         }
-        if (_cond == spritenum_t.SPR_BROK) {
-            if (!(int(P_GiveAmmo(player, ammotype_t.am_misl, 5)) != 0)) {
+        case(spritenum_t.SPR_BROK) {
+            if (int(P_GiveAmmo(player, ammotype_t.am_misl, 5)) == 0) {
                 return
             }
             player.message = cstr("Picked up a box of rockets.")
             break
         }
-        if (_cond == spritenum_t.SPR_CELL) {
-            if (!(int(P_GiveAmmo(player, ammotype_t.am_cell, 1)) != 0)) {
+        case(spritenum_t.SPR_CELL) {
+            if (int(P_GiveAmmo(player, ammotype_t.am_cell, 1)) == 0) {
                 return
             }
             player.message = cstr("Picked up an energy cell.")
             break
         }
-        if (_cond == spritenum_t.SPR_CELP) {
-            if (!(int(P_GiveAmmo(player, ammotype_t.am_cell, 5)) != 0)) {
+        case(spritenum_t.SPR_CELP) {
+            if (int(P_GiveAmmo(player, ammotype_t.am_cell, 5)) == 0) {
                 return
             }
             player.message = cstr("Picked up an energy cell pack.")
             break
         }
-        if (_cond == spritenum_t.SPR_SHEL) {
-            if (!(int(P_GiveAmmo(player, ammotype_t.am_shell, 1)) != 0)) {
+        case(spritenum_t.SPR_SHEL) {
+            if (int(P_GiveAmmo(player, ammotype_t.am_shell, 1)) == 0) {
                 return
             }
             player.message = cstr("Picked up 4 shotgun shells.")
             break
         }
-        if (_cond == spritenum_t.SPR_SBOX) {
-            if (!(int(P_GiveAmmo(player, ammotype_t.am_shell, 5)) != 0)) {
+        case(spritenum_t.SPR_SBOX) {
+            if (int(P_GiveAmmo(player, ammotype_t.am_shell, 5)) == 0) {
                 return
             }
             player.message = cstr("Picked up a box of shotgun shells.")
             break
         }
-        if (_cond == spritenum_t.SPR_BPAK) {
-            if (!(int(player.backpack) != 0)) {
+        case(spritenum_t.SPR_BPAK) {
+            if (int(player.backpack) == 0) {
                 for (i1 in range(int(ammotype_t.NUMAMMO))) {
                     player.maxammo[i1] *= 2
                 }
@@ -495,67 +489,66 @@ def P_TouchSpecialThing(var special : mobj_s?; var toucher : mobj_s?) {
             player.message = cstr("Picked up a backpack full of ammo!")
             break
         }
-        if (_cond == spritenum_t.SPR_BFUG) {
+        case(spritenum_t.SPR_BFUG) {
             // weapons
-            if (!(int(P_GiveWeapon(player, weapontype_t.wp_bfg, doom_boolean._c_false)) != 0)) {
+            if (int(P_GiveWeapon(player, weapontype_t.wp_bfg, doom_boolean._c_false)) == 0) {
                 return
             }
             player.message = cstr("You got the BFG9000!  Oh, yes.")
             sound = int(sfxenum_t.sfx_wpnup)
             break
         }
-        if (_cond == spritenum_t.SPR_MGUN) {
-            if (!(int(P_GiveWeapon(player, weapontype_t.wp_chaingun, enum_from_int(type<doom_boolean>, special.flags & int(mobjflag_t.MF_DROPPED)))) != 0)) {
+        case(spritenum_t.SPR_MGUN) {
+            if (int(P_GiveWeapon(player, weapontype_t.wp_chaingun, enum_from_int(type<doom_boolean>, special.flags & int(mobjflag_t.MF_DROPPED)))) == 0) {
                 return
             }
             player.message = cstr("You got the chaingun!")
             sound = int(sfxenum_t.sfx_wpnup)
             break
         }
-        if (_cond == spritenum_t.SPR_CSAW) {
-            if (!(int(P_GiveWeapon(player, weapontype_t.wp_chainsaw, doom_boolean._c_false)) != 0)) {
+        case(spritenum_t.SPR_CSAW) {
+            if (int(P_GiveWeapon(player, weapontype_t.wp_chainsaw, doom_boolean._c_false)) == 0) {
                 return
             }
             player.message = cstr("A chainsaw!  Find some meat!")
             sound = int(sfxenum_t.sfx_wpnup)
             break
         }
-        if (_cond == spritenum_t.SPR_LAUN) {
-            if (!(int(P_GiveWeapon(player, weapontype_t.wp_missile, doom_boolean._c_false)) != 0)) {
+        case(spritenum_t.SPR_LAUN) {
+            if (int(P_GiveWeapon(player, weapontype_t.wp_missile, doom_boolean._c_false)) == 0) {
                 return
             }
             player.message = cstr("You got the rocket launcher!")
             sound = int(sfxenum_t.sfx_wpnup)
             break
         }
-        if (_cond == spritenum_t.SPR_PLAS) {
-            if (!(int(P_GiveWeapon(player, weapontype_t.wp_plasma, doom_boolean._c_false)) != 0)) {
+        case(spritenum_t.SPR_PLAS) {
+            if (int(P_GiveWeapon(player, weapontype_t.wp_plasma, doom_boolean._c_false)) == 0) {
                 return
             }
             player.message = cstr("You got the plasma gun!")
             sound = int(sfxenum_t.sfx_wpnup)
             break
         }
-        if (_cond == spritenum_t.SPR_SHOT) {
-            if (!(int(P_GiveWeapon(player, weapontype_t.wp_shotgun, enum_from_int(type<doom_boolean>, special.flags & int(mobjflag_t.MF_DROPPED)))) != 0)) {
+        case(spritenum_t.SPR_SHOT) {
+            if (int(P_GiveWeapon(player, weapontype_t.wp_shotgun, enum_from_int(type<doom_boolean>, special.flags & int(mobjflag_t.MF_DROPPED)))) == 0) {
                 return
             }
             player.message = cstr("You got the shotgun!")
             sound = int(sfxenum_t.sfx_wpnup)
             break
         }
-        if (_cond == spritenum_t.SPR_SGN2) {
-            if (!(int(P_GiveWeapon(player, weapontype_t.wp_supershotgun, enum_from_int(type<doom_boolean>, special.flags & int(mobjflag_t.MF_DROPPED)))) != 0)) {
+        case(spritenum_t.SPR_SGN2) {
+            if (int(P_GiveWeapon(player, weapontype_t.wp_supershotgun, enum_from_int(type<doom_boolean>, special.flags & int(mobjflag_t.MF_DROPPED)))) == 0) {
                 return
             }
             player.message = cstr("You got the super shotgun!")
             sound = int(sfxenum_t.sfx_wpnup)
             break
         }
-        if (!(_cond == spritenum_t.SPR_ARM1 || _cond == spritenum_t.SPR_ARM2 || _cond == spritenum_t.SPR_BON1 || _cond == spritenum_t.SPR_BON2 || _cond == spritenum_t.SPR_SOUL || _cond == spritenum_t.SPR_MEGA || _cond == spritenum_t.SPR_BKEY || _cond == spritenum_t.SPR_YKEY || _cond == spritenum_t.SPR_RKEY || _cond == spritenum_t.SPR_BSKU || _cond == spritenum_t.SPR_YSKU || _cond == spritenum_t.SPR_RSKU || _cond == spritenum_t.SPR_STIM || _cond == spritenum_t.SPR_MEDI || _cond == spritenum_t.SPR_PINV || _cond == spritenum_t.SPR_PSTR || _cond == spritenum_t.SPR_PINS || _cond == spritenum_t.SPR_SUIT || _cond == spritenum_t.SPR_PMAP || _cond == spritenum_t.SPR_PVIS || _cond == spritenum_t.SPR_CLIP || _cond == spritenum_t.SPR_AMMO || _cond == spritenum_t.SPR_ROCK || _cond == spritenum_t.SPR_BROK || _cond == spritenum_t.SPR_CELL || _cond == spritenum_t.SPR_CELP || _cond == spritenum_t.SPR_SHEL || _cond == spritenum_t.SPR_SBOX || _cond == spritenum_t.SPR_BPAK || _cond == spritenum_t.SPR_BFUG || _cond == spritenum_t.SPR_MGUN || _cond == spritenum_t.SPR_CSAW || _cond == spritenum_t.SPR_LAUN || _cond == spritenum_t.SPR_PLAS || _cond == spritenum_t.SPR_SHOT || _cond == spritenum_t.SPR_SGN2)) {
+        case(_) {
             I_Error(cstr("P_SpecialThing: Unknown gettable thing"))
         }
-        break
     }
     if ((special.flags & int(mobjflag_t.MF_COUNTITEM)) != 0) {
         player.itemcount++
@@ -586,20 +579,20 @@ def P_KillMobj(var source : mobj_s?; var target : mobj_s?) {
         if (target.player != null) {
             source.player.frags[int64(target.player - addr(players[0]))]++
         }
-    } elif (!(int(netgame) != 0) && (target.flags & int(mobjflag_t.MF_COUNTKILL)) != 0) {
+    } elif (int(netgame) == 0 && (target.flags & int(mobjflag_t.MF_COUNTKILL)) != 0) {
         // count all monster deaths,
         // even those caused by other monsters
         players[0].killcount++
     }
     if (target.player != null) {
         // count environment kills against you
-        if (!(source != null)) {
+        if (source == null) {
             target.player.frags[int64(target.player - addr(players[0]))]++
         }
         target.flags &= ~int(mobjflag_t.MF_SOLID)
         target.player.playerstate = playerstate_t.PST_DEAD
         P_DropWeapon(target.player)
-        if (intptr(target.player) == intptr(addr(players[0]) + end_index(consoleplayer, 4)) && uint(int(automapactive)) != 0) {
+        if (intptr(target.player) == intptr(addr(players[0]) + end_index(consoleplayer, 4)) && uint(automapactive) != 0) {
             // don't die in auto map,
             // switch view prior to dying
             AM_Stop()
@@ -618,15 +611,22 @@ def P_KillMobj(var source : mobj_s?; var target : mobj_s?) {
     // Drop stuff.
     // This determines the kind of object spawned
     // during the death frame of a thing.
-    let _cond = target._c_type
-    if (_cond == mobjtype_t.MT_WOLFSS || _cond == mobjtype_t.MT_POSSESSED) {
-        item = mobjtype_t.MT_CLIP
-    } elif (_cond == mobjtype_t.MT_SHOTGUY) {
-        item = mobjtype_t.MT_SHOTGUN
-    } elif (_cond == mobjtype_t.MT_CHAINGUY) {
-        item = mobjtype_t.MT_CHAINGUN
-    } else {
-        return
+    c_switch(target._c_type) {
+        case(mobjtype_t.MT_WOLFSS, mobjtype_t.MT_POSSESSED) {
+            item = mobjtype_t.MT_CLIP
+            break
+        }
+        case(mobjtype_t.MT_SHOTGUY) {
+            item = mobjtype_t.MT_SHOTGUN
+            break
+        }
+        case(mobjtype_t.MT_CHAINGUY) {
+            item = mobjtype_t.MT_CHAINGUN
+            break
+        }
+        case(_) {
+            return
+        }
     }
     mo = P_SpawnMobj(target.x, target.y, ONFLOORZ, item)
     // special versions of items
@@ -649,7 +649,7 @@ def P_DamageMobj(var target : mobj_s?; var inflictor : mobj_s?; var source : mob
     var player : player_s?
     var thrust : int
     var temp : int
-    if (!((target.flags & int(mobjflag_t.MF_SHOOTABLE)) != 0)) {
+    if ((target.flags & int(mobjflag_t.MF_SHOOTABLE)) == 0) {
         // shouldn't happen...
         return
     }
@@ -669,7 +669,8 @@ def P_DamageMobj(var target : mobj_s?; var inflictor : mobj_s?; var source : mob
     // Some close combat weapons should not
     // inflict thrust and push the victim out of reach,
     // thus kick away unless using the chainsaw.
-    if (inflictor != null && !((target.flags & int(mobjflag_t.MF_NOCLIP)) != 0) && (!(source != null) || !(source.player != null) || source.player.readyweapon != weapontype_t.wp_chainsaw)) {
+    if (inflictor != null && (target.flags & int(mobjflag_t.MF_NOCLIP)) == 0 &&
+            (source == null || source.player == null || source.player.readyweapon != weapontype_t.wp_chainsaw)) {
         ang = R_PointToAngle2(inflictor.x, inflictor.y, target.x, target.y)
         thrust = damage * (FRACUNIT >> 3) * 100 / target.info.mass
         // make fall forwards sometimes
@@ -684,7 +685,7 @@ def P_DamageMobj(var target : mobj_s?; var inflictor : mobj_s?; var source : mob
     // player specific
     if (player != null) {
         // end of game hell hack
-        if (int(target.subsector.sector.special) == 11 && damage >= target.health) {
+        if (target.subsector.sector.special == 11 && damage >= target.health) {
             damage = target.health - 1
         }
         // Below certain threshold,
@@ -729,14 +730,15 @@ def P_DamageMobj(var target : mobj_s?; var inflictor : mobj_s?; var source : mob
         P_KillMobj(source, target)
         return
     }
-    if ((P_Random() < target.info.painchance) && !((target.flags & int(mobjflag_t.MF_SKULLFLY)) != 0)) {
+    if ((P_Random() < target.info.painchance) && (target.flags & int(mobjflag_t.MF_SKULLFLY)) == 0) {
         // fight back!
         target.flags |= int(mobjflag_t.MF_JUSTHIT)
         P_SetMobjState(target, enum_from_int(type<statenum_t>, target.info.painstate))
     }
     // we're awake now...
     target.reactiontime = 0
-    if ((!(target.threshold != 0) || target._c_type == mobjtype_t.MT_VILE) && source != null && intptr(source) != intptr(target) && source._c_type != mobjtype_t.MT_VILE) {
+    if ((target.threshold == 0 || target._c_type == mobjtype_t.MT_VILE) && source != null && intptr(source) != intptr(target) &&
+            source._c_type != mobjtype_t.MT_VILE) {
         // if not intent on another player,
         // chase after this one
         target.target = source

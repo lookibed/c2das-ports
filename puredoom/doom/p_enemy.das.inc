@@ -12,7 +12,8 @@ enum dirtype_t {
     NUMDIRS
 }
 
-var opposite : dirtype_t[9] = fixed_array(dirtype_t.DI_WEST, dirtype_t.DI_SOUTHWEST, dirtype_t.DI_SOUTH, dirtype_t.DI_SOUTHEAST, dirtype_t.DI_EAST, dirtype_t.DI_NORTHEAST, dirtype_t.DI_NORTH, dirtype_t.DI_NORTHWEST, dirtype_t.DI_NODIR)
+var opposite : dirtype_t[9] = fixed_array(dirtype_t.DI_WEST, dirtype_t.DI_SOUTHWEST, dirtype_t.DI_SOUTH, dirtype_t.DI_SOUTHEAST, dirtype_t.DI_EAST,
+        dirtype_t.DI_NORTHEAST, dirtype_t.DI_NORTH, dirtype_t.DI_NORTHWEST, dirtype_t.DI_NODIR)
 var diags : dirtype_t[4] = fixed_array(dirtype_t.DI_NORTHWEST, dirtype_t.DI_NORTHEAST, dirtype_t.DI_SOUTHWEST, dirtype_t.DI_SOUTHEAST)
 var soundtarget : mobj_s?
 var xspeed : int[8] = fixed_array(1 << 16, 47000, 0, -47000, -(1 << 16), -47000, 0, 47000)
@@ -47,7 +48,7 @@ def P_RecursiveSound(var sec : sector_t?; soundblocks : int) {
     while (i < sec.linecount) {
         {
             check = sec.lines[i]
-            if (!((int(check.flags) & ML_TWOSIDED) != 0)) {
+            if ((int(check.flags) & ML_TWOSIDED) == 0) {
                 continue
             }
             P_LineOpening(check)
@@ -61,7 +62,7 @@ def P_RecursiveSound(var sec : sector_t?; soundblocks : int) {
                 other = sides[int(check.sidenum[0])].sector
             }
             if ((int(check.flags) & ML_SOUNDBLOCK) != 0) {
-                if (!(soundblocks != 0)) {
+                if (soundblocks == 0) {
                     P_RecursiveSound(other, 1)
                 }
             } else {
@@ -86,7 +87,7 @@ def P_NoiseAlert(var target : mobj_s?; var emmiter : mobj_s?) {
 def P_CheckMeleeRange(var actor : mobj_s?) : doom_boolean {
     var pl : mobj_s?
     var dist : int
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return doom_boolean._c_false
     }
     pl = actor.target
@@ -94,7 +95,7 @@ def P_CheckMeleeRange(var actor : mobj_s?) : doom_boolean {
     if (dist >= MELEERANGE - 20 * FRACUNIT + pl.info.radius) {
         return doom_boolean._c_false
     }
-    if (!(int(P_CheckSight(actor, actor.target)) != 0)) {
+    if (int(P_CheckSight(actor, actor.target)) == 0) {
         return doom_boolean._c_false
     }
     return doom_boolean._c_true
@@ -103,7 +104,7 @@ def P_CheckMeleeRange(var actor : mobj_s?) : doom_boolean {
 // P_CheckMissileRange
 def P_CheckMissileRange(var actor : mobj_s?) : doom_boolean {
     var dist : int
-    if (!(int(P_CheckSight(actor, actor.target)) != 0)) {
+    if (int(P_CheckSight(actor, actor.target)) == 0) {
         return doom_boolean._c_false
     }
     if ((actor.flags & int(mobjflag_t.MF_JUSTHIT)) != 0) {
@@ -118,7 +119,7 @@ def P_CheckMissileRange(var actor : mobj_s?) : doom_boolean {
     }
     // OPTIMIZE: get this from a global checksight
     dist = P_AproxDistance(actor.x - actor.target.x, actor.y - actor.target.y) - 64 * FRACUNIT
-    if (!(actor.info.meleestate != 0)) {
+    if (actor.info.meleestate == 0) {
         // no melee attack, so fire more
         dist -= 128 * FRACUNIT
     }
@@ -171,9 +172,9 @@ def P_Move(var actor : mobj_s?) : doom_boolean {
     tryx = actor.x + actor.info.speed * xspeed[actor.movedir]
     tryy = actor.y + actor.info.speed * yspeed[actor.movedir]
     try_ok = P_TryMove(actor, tryx, tryy)
-    if (!(int(try_ok) != 0)) {
+    if (int(try_ok) == 0) {
         // open any specials
-        if ((actor.flags & int(mobjflag_t.MF_FLOAT)) != 0 && uint(int(floatok)) != 0) {
+        if ((actor.flags & int(mobjflag_t.MF_FLOAT)) != 0 && uint(floatok) != 0) {
             // must adjust height
             if (actor.z < tmfloorz) {
                 actor.z += FLOATSPEED
@@ -183,7 +184,7 @@ def P_Move(var actor : mobj_s?) : doom_boolean {
             actor.flags |= int(mobjflag_t.MF_INFLOAT)
             return doom_boolean._c_true
         }
-        if (!(numspechit != 0)) {
+        if (numspechit == 0) {
             return doom_boolean._c_false
         }
         actor.movedir = int(dirtype_t.DI_NODIR)
@@ -191,7 +192,7 @@ def P_Move(var actor : mobj_s?) : doom_boolean {
         while (true) {
             let _t0 = numspechit
             numspechit--
-            if (!(_t0 != 0)) {
+            if (_t0 == 0) {
                 break
             }
             ld = spechit[numspechit]
@@ -206,7 +207,7 @@ def P_Move(var actor : mobj_s?) : doom_boolean {
     } else {
         actor.flags &= ~int(mobjflag_t.MF_INFLOAT)
     }
-    if (!((actor.flags & int(mobjflag_t.MF_FLOAT)) != 0)) {
+    if ((actor.flags & int(mobjflag_t.MF_FLOAT)) == 0) {
         actor.z = actor.floorz
     }
     return doom_boolean._c_true
@@ -222,7 +223,7 @@ def P_Move(var actor : mobj_s?) : doom_boolean {
 // If a door is in the way,
 // an OpenDoor call is made to start it opening.
 def P_TryWalk(var actor : mobj_s?) : doom_boolean {
-    if (!(int(P_Move(actor)) != 0)) {
+    if (int(P_Move(actor)) == 0) {
         return doom_boolean._c_false
     }
     actor.movecount = P_Random() & 15
@@ -236,7 +237,7 @@ def P_NewChaseDir(var actor : mobj_s?) {
     var tdir : int
     var olddir : dirtype_t
     var turnaround : dirtype_t
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         I_Error(cstr("Error: P_NewChaseDir: called with no target"))
     }
     olddir = enum_from_int(type<dirtype_t>, actor.movedir)
@@ -259,8 +260,8 @@ def P_NewChaseDir(var actor : mobj_s?) {
     }
     // try direct route
     if (d[1] != dirtype_t.DI_NODIR && d[2] != dirtype_t.DI_NODIR) {
-        actor.movedir = int(diags[(((deltay < 0) ? 1 : 0) << 1) + ((deltax > 0) ? 1 : 0)])
-        if (uint(actor.movedir) != uint(int(turnaround)) && uint(int(P_TryWalk(actor))) != 0) {
+        actor.movedir = int(diags[(int_of(deltay < 0) << 1) + int_of(deltax > 0)])
+        if (uint(actor.movedir) != uint(turnaround) && uint(P_TryWalk(actor)) != 0) {
             return
         }
     }
@@ -301,7 +302,7 @@ def P_NewChaseDir(var actor : mobj_s?) {
     if ((P_Random() & 1) != 0) {
         tdir = int(dirtype_t.DI_EAST)
         while (tdir <= int(dirtype_t.DI_SOUTHEAST)) {
-            if (uint(tdir) != uint(int(turnaround))) {
+            if (uint(tdir) != uint(turnaround)) {
                 actor.movedir = tdir
                 if (int(P_TryWalk(actor)) != 0) {
                     return
@@ -312,7 +313,7 @@ def P_NewChaseDir(var actor : mobj_s?) {
     } else {
         tdir = int(dirtype_t.DI_SOUTHEAST)
         while (tdir != (int(dirtype_t.DI_EAST) - 1)) {
-            if (uint(tdir) != uint(int(turnaround))) {
+            if (uint(tdir) != uint(turnaround)) {
                 actor.movedir = tdir
                 if (int(P_TryWalk(actor)) != 0) {
                     return
@@ -352,7 +353,7 @@ def P_LookForPlayers(var actor : mobj_s?; allaround : doom_boolean) : doom_boole
                 actor.lastlook = (actor.lastlook + 1) & 3
             }
             _f = true
-            if (!(int(playeringame[actor.lastlook]) != 0)) {
+            if (int(playeringame[actor.lastlook]) == 0) {
                 continue
             }
             let _t0 = c
@@ -366,11 +367,11 @@ def P_LookForPlayers(var actor : mobj_s?; allaround : doom_boolean) : doom_boole
                 // dead
                 continue
             }
-            if (!(int(P_CheckSight(actor, player.mo)) != 0)) {
+            if (int(P_CheckSight(actor, player.mo)) == 0) {
                 // out of sight
                 continue
             }
-            if (!(int(allaround) != 0)) {
+            if (int(allaround) == 0) {
                 an = R_PointToAngle2(actor.x, actor.y, player.mo.x, player.mo.y) - actor.angle
                 if (an > uint(ANG90) && an < ANG270) {
                     dist = P_AproxDistance(player.mo.x - actor.x, player.mo.y - actor.y)
@@ -442,20 +443,26 @@ def A_Look(var actor : mobj_s?) {
             goto label 1
         }
     }
-    if (!(int(P_LookForPlayers(actor, doom_boolean._c_false)) != 0)) {
+    if (int(P_LookForPlayers(actor, doom_boolean._c_false)) == 0) {
         return
     }
     label 1:  // seeyou
     // go into chase state
     if (actor.info.seesound != 0) {
         var sound : int
-        let _cond = actor.info.seesound
-        if (_cond == 36 || _cond == 37 || _cond == 38) {
-            sound = int(sfxenum_t.sfx_posit1) + P_Random() % 3
-        } elif (_cond == 39 || _cond == 40) {
-            sound = int(sfxenum_t.sfx_bgsit1) + P_Random() % 2
-        } else {
-            sound = actor.info.seesound
+        c_switch(actor.info.seesound) {
+            case(36, 37, 38) {
+                sound = int(sfxenum_t.sfx_posit1) + P_Random() % 3
+                break
+            }
+            case(39, 40) {
+                sound = int(sfxenum_t.sfx_bgsit1) + P_Random() % 2
+                break
+            }
+            case(_) {
+                sound = actor.info.seesound
+                break
+            }
         }
         if (actor._c_type == mobjtype_t.MT_SPIDER || actor._c_type == mobjtype_t.MT_CYBORG) {
             // full volume
@@ -478,7 +485,7 @@ def A_Chase(var actor : mobj_s?) {
     }
     // modify target threshold
     if (actor.threshold != 0) {
-        if (!(actor.target != null) || actor.target.health <= 0) {
+        if (actor.target == null || actor.target.health <= 0) {
             actor.threshold = 0
         } else {
             actor.threshold--
@@ -494,7 +501,7 @@ def A_Chase(var actor : mobj_s?) {
             actor.angle += uint(ANG90 / 2)
         }
     }
-    if (!(actor.target != null) || !((actor.target.flags & int(mobjflag_t.MF_SHOOTABLE)) != 0)) {
+    if (actor.target == null || (actor.target.flags & int(mobjflag_t.MF_SHOOTABLE)) == 0) {
         // look for a new target
         if (int(P_LookForPlayers(actor, doom_boolean._c_true)) != 0) {
             // got a new target
@@ -506,13 +513,13 @@ def A_Chase(var actor : mobj_s?) {
     // do not attack twice in a row
     if ((actor.flags & int(mobjflag_t.MF_JUSTATTACKED)) != 0) {
         actor.flags &= ~int(mobjflag_t.MF_JUSTATTACKED)
-        if (gameskill != skill_t.sk_nightmare && !(int(fastparm) != 0)) {
+        if (gameskill != skill_t.sk_nightmare && int(fastparm) == 0) {
             P_NewChaseDir(actor)
         }
         return
     }
     // check for melee attack
-    if (actor.info.meleestate != 0 && uint(int(P_CheckMeleeRange(actor))) != 0) {
+    if (actor.info.meleestate != 0 && uint(P_CheckMeleeRange(actor)) != 0) {
         if (actor.info.attacksound != 0) {
             S_StartSound(reinterpret<void?>(actor), actor.info.attacksound)
         }
@@ -521,10 +528,10 @@ def A_Chase(var actor : mobj_s?) {
     }
     // check for missile attack
     if (actor.info.missilestate != 0) {
-        if (uint(int(gameskill)) < uint(int(skill_t.sk_nightmare)) && !(int(fastparm) != 0) && actor.movecount != 0) {
+        if (uint(gameskill) < uint(skill_t.sk_nightmare) && int(fastparm) == 0 && actor.movecount != 0) {
             goto label 1
         }
-        if (!(int(P_CheckMissileRange(actor)) != 0)) {
+        if (int(P_CheckMissileRange(actor)) == 0) {
             goto label 1
         }
         P_SetMobjState(actor, enum_from_int(type<statenum_t>, actor.info.missilestate))
@@ -534,7 +541,7 @@ def A_Chase(var actor : mobj_s?) {
     label 1:  // nomissile
     // ?
     // possibly choose another target
-    if (uint(int(netgame)) != 0 && !(actor.threshold != 0) && !(int(P_CheckSight(actor, actor.target)) != 0)) {
+    if (uint(netgame) != 0 && actor.threshold == 0 && int(P_CheckSight(actor, actor.target)) == 0) {
         if (int(P_LookForPlayers(actor, doom_boolean._c_true)) != 0) {
             // got a new target
             return
@@ -542,7 +549,7 @@ def A_Chase(var actor : mobj_s?) {
     }
     // chase towards player
     actor.movecount--
-    if (actor.movecount < 0 || !(int(P_Move(actor)) != 0)) {
+    if (actor.movecount < 0 || int(P_Move(actor)) == 0) {
         P_NewChaseDir(actor)
     }
     // make active sound
@@ -553,7 +560,7 @@ def A_Chase(var actor : mobj_s?) {
 
 // A_FaceTarget
 def A_FaceTarget(var actor : mobj_s?) {
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     actor.flags &= ~int(mobjflag_t.MF_AMBUSH)
@@ -569,7 +576,7 @@ def A_PosAttack(var actor : mobj_s?) {
     var angle : int
     var damage : int
     var slope : int
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     A_FaceTarget(actor)
@@ -587,7 +594,7 @@ def A_SPosAttack(var actor : mobj_s?) {
     var bangle : int
     var damage : int
     var slope : int
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     S_StartSound(reinterpret<void?>(actor), int(sfxenum_t.sfx_shotgn))
@@ -607,7 +614,7 @@ def A_CPosAttack(var actor : mobj_s?) {
     var bangle : int
     var damage : int
     var slope : int
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     S_StartSound(reinterpret<void?>(actor), int(sfxenum_t.sfx_shotgn))
@@ -625,7 +632,7 @@ def A_CPosRefire(var actor : mobj_s?) {
     if (P_Random() < 40) {
         return
     }
-    if (!(actor.target != null) || actor.target.health <= 0 || !(int(P_CheckSight(actor, actor.target)) != 0)) {
+    if (actor.target == null || actor.target.health <= 0 || int(P_CheckSight(actor, actor.target)) == 0) {
         P_SetMobjState(actor, enum_from_int(type<statenum_t>, actor.info.seestate))
     }
 }
@@ -636,13 +643,13 @@ def A_SpidRefire(var actor : mobj_s?) {
     if (P_Random() < 10) {
         return
     }
-    if (!(actor.target != null) || actor.target.health <= 0 || !(int(P_CheckSight(actor, actor.target)) != 0)) {
+    if (actor.target == null || actor.target.health <= 0 || int(P_CheckSight(actor, actor.target)) == 0) {
         P_SetMobjState(actor, enum_from_int(type<statenum_t>, actor.info.seestate))
     }
 }
 
 def A_BspiAttack(var actor : mobj_s?) {
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     A_FaceTarget(actor)
@@ -654,7 +661,7 @@ def A_BspiAttack(var actor : mobj_s?) {
 [c_function]
 def A_TroopAttack(var actor : mobj_s?) {
     var damage : int
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     A_FaceTarget(actor)
@@ -670,7 +677,7 @@ def A_TroopAttack(var actor : mobj_s?) {
 
 def A_SargAttack(var actor : mobj_s?) {
     var damage : int
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     A_FaceTarget(actor)
@@ -682,7 +689,7 @@ def A_SargAttack(var actor : mobj_s?) {
 
 def A_HeadAttack(var actor : mobj_s?) {
     var damage : int
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     A_FaceTarget(actor)
@@ -696,7 +703,7 @@ def A_HeadAttack(var actor : mobj_s?) {
 }
 
 def A_CyberAttack(var actor : mobj_s?) {
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     A_FaceTarget(actor)
@@ -706,7 +713,7 @@ def A_CyberAttack(var actor : mobj_s?) {
 [c_function]
 def A_BruisAttack(var actor : mobj_s?) {
     var damage : int
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     if (int(P_CheckMeleeRange(actor)) != 0) {
@@ -722,7 +729,7 @@ def A_BruisAttack(var actor : mobj_s?) {
 // A_SkelMissile
 def A_SkelMissile(var actor : mobj_s?) {
     var mo : mobj_s?
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     A_FaceTarget(actor)
@@ -756,7 +763,7 @@ def A_Tracer(var actor : mobj_s?) {
     }
     // adjust direction
     dest = actor.tracer
-    if (!(dest != null) || dest.health <= 0) {
+    if (dest == null || dest.health <= 0) {
         return
     }
     // change angle
@@ -793,7 +800,7 @@ def A_Tracer(var actor : mobj_s?) {
 
 [c_function]
 def A_SkelWhoosh(var actor : mobj_s?) {
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     A_FaceTarget(actor)
@@ -803,7 +810,7 @@ def A_SkelWhoosh(var actor : mobj_s?) {
 [c_function]
 def A_SkelFist(var actor : mobj_s?) {
     var damage : int
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     A_FaceTarget(actor)
@@ -819,7 +826,7 @@ def A_SkelFist(var actor : mobj_s?) {
 def PIT_VileCheck(var thing : mobj_s?) : doom_boolean {
     var maxdist : int
     var check : doom_boolean
-    if (!((thing.flags & int(mobjflag_t.MF_CORPSE)) != 0)) {
+    if ((thing.flags & int(mobjflag_t.MF_CORPSE)) == 0) {
         // not a monster
         return doom_boolean._c_true
     }
@@ -832,7 +839,8 @@ def PIT_VileCheck(var thing : mobj_s?) : doom_boolean {
         return doom_boolean._c_true
     }
     maxdist = thing.info.radius + mobjinfo[int(mobjtype_t.MT_VILE)].radius
-    if ((thing.x - viletryx < 0 ? -(thing.x - viletryx) : thing.x - viletryx) > maxdist || (thing.y - viletryy < 0 ? -(thing.y - viletryy) : thing.y - viletryy) > maxdist) {
+    if ((thing.x - viletryx < 0 ? -(thing.x - viletryx) : thing.x - viletryx) > maxdist ||
+            (thing.y - viletryy < 0 ? -(thing.y - viletryy) : thing.y - viletryy) > maxdist) {
         // not actually touching
         return doom_boolean._c_true
     }
@@ -842,7 +850,7 @@ def PIT_VileCheck(var thing : mobj_s?) : doom_boolean {
     corpsehit.height <<= 2
     check = P_CheckPosition(corpsehit, corpsehit.x, corpsehit.y)
     corpsehit.height >>= 2
-    if (!(int(check) != 0)) {
+    if (int(check) == 0) {
         // doesn't fit here
         return doom_boolean._c_true
     }
@@ -878,7 +886,7 @@ def A_VileChase(var actor : mobj_s?) {
                 // Call PIT_VileCheck to check
                 // whether object is a corpse
                 // that canbe raised.
-                if (!(int(P_BlockThingsIterator(bx, by, @@PIT_VileCheck)) != 0)) {
+                if (int(P_BlockThingsIterator(bx, by, @@PIT_VileCheck)) == 0) {
                     // got one!
                     temp = actor.target
                     actor.target = corpsehit
@@ -928,11 +936,11 @@ def A_Fire(var actor : mobj_s?) {
     var dest : mobj_s?
     var an : uint
     dest = actor.tracer
-    if (!(dest != null)) {
+    if (dest == null) {
         return
     }
     // don't move it if the vile lost sight
-    if (!(int(P_CheckSight(actor.target, dest)) != 0)) {
+    if (int(P_CheckSight(actor.target, dest)) == 0) {
         return
     }
     an = dest.angle >> uint(ANGLETOFINESHIFT)
@@ -947,7 +955,7 @@ def A_Fire(var actor : mobj_s?) {
 // Spawn the hellfire
 def A_VileTarget(var actor : mobj_s?) {
     var fog : mobj_s?
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     A_FaceTarget(actor)
@@ -963,11 +971,11 @@ def A_VileTarget(var actor : mobj_s?) {
 def A_VileAttack(var actor : mobj_s?) {
     var fire : mobj_s?
     var an : int
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     A_FaceTarget(actor)
-    if (!(int(P_CheckSight(actor, actor.target)) != 0)) {
+    if (int(P_CheckSight(actor, actor.target)) == 0) {
         return
     }
     S_StartSound(reinterpret<void?>(actor), int(sfxenum_t.sfx_barexp))
@@ -975,7 +983,7 @@ def A_VileAttack(var actor : mobj_s?) {
     actor.target.momz = 1000 * FRACUNIT / actor.target.info.mass
     an = int(actor.angle >> uint(ANGLETOFINESHIFT))
     fire = actor.tracer
-    if (!(fire != null)) {
+    if (fire == null) {
         return
     }
     // move the fire between the vile and the player
@@ -1048,7 +1056,7 @@ def A_SkullAttack(var actor : mobj_s?) {
     var dest : mobj_s?
     var an : uint
     var dist : int
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     dest = actor.target
@@ -1082,7 +1090,8 @@ def A_PainShootSkull(var actor : mobj_s?; angle : uint) {
     count = 0
     currentthinker = thinkercap.next
     while (intptr(currentthinker) != intptr(addr(thinkercap))) {
-        if ((currentthinker._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) && reinterpret<mobj_s?>(currentthinker)._c_type == mobjtype_t.MT_SKULL) {
+        if ((currentthinker._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) &&
+                reinterpret<mobj_s?>(currentthinker)._c_type == mobjtype_t.MT_SKULL) {
             count++
         }
         currentthinker = currentthinker.next
@@ -1100,7 +1109,7 @@ def A_PainShootSkull(var actor : mobj_s?; angle : uint) {
     z = actor.z + 8 * FRACUNIT
     newmobj = P_SpawnMobj(x, y, z, mobjtype_t.MT_SKULL)
     // Check for movements.
-    if (!(int(P_TryMove(newmobj, newmobj.x, newmobj.y)) != 0)) {
+    if (int(P_TryMove(newmobj, newmobj.x, newmobj.y)) == 0) {
         // kill it immediately
         P_DamageMobj(newmobj, actor, actor, 10000)
         return
@@ -1112,7 +1121,7 @@ def A_PainShootSkull(var actor : mobj_s?; angle : uint) {
 // A_PainAttack
 // Spawn a lost soul and launch it at the target
 def A_PainAttack(var actor : mobj_s?) {
-    if (!(actor.target != null)) {
+    if (actor.target == null) {
         return
     }
     A_FaceTarget(actor)
@@ -1129,15 +1138,22 @@ def A_PainDie(var actor : mobj_s?) {
 [c_function]
 def A_Scream(var actor : mobj_s?) {
     var sound : int
-    let _cond = actor.info.deathsound
-    if (_cond == 0) {
-        return
-    } elif (_cond == 59 || _cond == 60 || _cond == 61) {
-        sound = int(sfxenum_t.sfx_podth1) + P_Random() % 3
-    } elif (_cond == 62 || _cond == 63) {
-        sound = int(sfxenum_t.sfx_bgdth1) + P_Random() % 2
-    } else {
-        sound = actor.info.deathsound
+    c_switch(actor.info.deathsound) {
+        case(0) {
+            return
+        }
+        case(59, 60, 61) {
+            sound = int(sfxenum_t.sfx_podth1) + P_Random() % 3
+            break
+        }
+        case(62, 63) {
+            sound = int(sfxenum_t.sfx_bgdth1) + P_Random() % 2
+            break
+        }
+        case(_) {
+            sound = actor.info.deathsound
+            break
+        }
     }
     // Check for bosses.
     if (actor._c_type == mobjtype_t.MT_SPIDER || actor._c_type == mobjtype_t.MT_CYBORG) {
@@ -1187,51 +1203,67 @@ def A_BossDeath(var mo : mobj_s?) {
             return
         }
     } else {
-        let _cond = gameepisode
-        if (_cond == 1) {
-            if (gamemap != 8) {
-                return
+        c_switch(gameepisode) {
+            case(1) {
+                if (gamemap != 8) {
+                    return
+                }
+                if (mo._c_type != mobjtype_t.MT_BRUISER) {
+                    return
+                }
+                break
             }
-            if (mo._c_type != mobjtype_t.MT_BRUISER) {
-                return
-            }
-        } elif (_cond == 2) {
-            if (gamemap != 8) {
-                return
-            }
-            if (mo._c_type != mobjtype_t.MT_CYBORG) {
-                return
-            }
-        } elif (_cond == 3) {
-            if (gamemap != 8) {
-                return
-            }
-            if (mo._c_type != mobjtype_t.MT_SPIDER) {
-                return
-            }
-        } elif (_cond == 4) {
-            let _cond2 = gamemap
-            if (_cond2 == 6) {
+            case(2) {
+                if (gamemap != 8) {
+                    return
+                }
                 if (mo._c_type != mobjtype_t.MT_CYBORG) {
                     return
                 }
-            } elif (_cond2 == 8) {
+                break
+            }
+            case(3) {
+                if (gamemap != 8) {
+                    return
+                }
                 if (mo._c_type != mobjtype_t.MT_SPIDER) {
                     return
                 }
-            } else {
-                return
+                break
             }
-        } else {
-            if (gamemap != 8) {
-                return
+            case(4) {
+                c_switch(gamemap) {
+                    case(6) {
+                        if (mo._c_type != mobjtype_t.MT_CYBORG) {
+                            return
+                        }
+                        break
+                    }
+                    case(8) {
+                        if (mo._c_type != mobjtype_t.MT_SPIDER) {
+                            return
+                        }
+                        break
+                    }
+                    case(_) {
+                        return
+                        break
+                    }
+                }
+                break
+            }
+            case(_) {
+                if (gamemap != 8) {
+                    return
+                }
+                break
             }
         }
     }
     // make sure there is a player alive for victory
     i = 0
     while (i < MAXPLAYERS) {
-        if (uint(int(playeringame[i])) != 0 && players[i].health > 0) {
+        if (uint(playeringame[i]) != 0 && players[i].health > 0) {
             break
         }
         i++
@@ -1278,21 +1310,28 @@ def A_BossDeath(var mo : mobj_s?) {
             }
         }
     } else {
-        let _cond3 = gameepisode
-        if (_cond3 == 1) {
-            junk.tag = int16(666)
-            EV_DoFloor(addr(junk), floor_e.lowerFloorToLowest)
-            return
-        } elif (_cond3 == 4) {
-            let _cond4 = gamemap
-            if (_cond4 == 6) {
-                junk.tag = int16(666)
-                EV_DoDoor(addr(junk), vldoor_e.blazeOpen)
-                return
-            } elif (_cond4 == 8) {
+        c_switch(gameepisode) {
+            case(1) {
                 junk.tag = int16(666)
                 EV_DoFloor(addr(junk), floor_e.lowerFloorToLowest)
                 return
+                break
+            }
+            case(4) {
+                c_switch(gamemap) {
+                    case(6) {
+                        junk.tag = int16(666)
+                        EV_DoDoor(addr(junk), vldoor_e.blazeOpen)
+                        return
+                        break
+                    }
+                    case(8) {
+                        junk.tag = int16(666)
+                        EV_DoFloor(addr(junk), floor_e.lowerFloorToLowest)
+                        return
+                        break
+                    }
+                }
             }
         }
     }
@@ -1410,7 +1449,7 @@ def A_BrainSpit(var mo : mobj_s?) {
     var targ : mobj_s?
     var newmobj : mobj_s?
     A_BrainSpit_easy ^= 1
-    if (uint(int(gameskill)) <= uint(int(skill_t.sk_easy)) && (!(A_BrainSpit_easy != 0))) {
+    if (uint(gameskill) <= uint(skill_t.sk_easy) && (A_BrainSpit_easy == 0)) {
         return
     }
     // shoot a cube at current target

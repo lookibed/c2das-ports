@@ -64,17 +64,17 @@ def R_PointOnSide(x : int; y : int; var node : node_t?) : int {
     var dy : int
     var left : int
     var right : int
-    if (!(node.dx != 0)) {
+    if (node.dx == 0) {
         if (x <= node.x) {
-            return node.dy > 0 ? 1 : 0
+            return int_of(node.dy > 0)
         }
-        return node.dy < 0 ? 1 : 0
+        return int_of(node.dy < 0)
     }
-    if (!(node.dy != 0)) {
+    if (node.dy == 0) {
         if (y <= node.y) {
-            return node.dx < 0 ? 1 : 0
+            return int_of(node.dx < 0)
         }
-        return node.dx > 0 ? 1 : 0
+        return int_of(node.dx > 0)
     }
     dx = x - node.x
     dy = y - node.y
@@ -109,17 +109,17 @@ def R_PointOnSegSide(x : int; y : int; var line : seg_t?) : int {
     ly = line.v1.y
     ldx = line.v2.x - lx
     ldy = line.v2.y - ly
-    if (!(ldx != 0)) {
+    if (ldx == 0) {
         if (x <= lx) {
-            return ldy > 0 ? 1 : 0
+            return int_of(ldy > 0)
         }
-        return ldy < 0 ? 1 : 0
+        return int_of(ldy < 0)
     }
-    if (!(ldy != 0)) {
+    if (ldy == 0) {
         if (y <= ly) {
-            return ldx < 0 ? 1 : 0
+            return int_of(ldx < 0)
         }
-        return ldx > 0 ? 1 : 0
+        return int_of(ldx > 0)
     }
     dx = x - lx
     dy = y - ly
@@ -144,7 +144,7 @@ def R_PointOnSegSide(x : int; y : int; var line : seg_t?) : int {
 def R_PointToAngle(var x : int; var y : int) : uint {
     x -= viewx
     y -= viewy
-    if ((!(x != 0)) && (!(y != 0))) {
+    if ((x == 0) && (y == 0)) {
         return 0u
     }
     if (x >= 0) {
@@ -374,7 +374,7 @@ def R_ExecuteSetViewSize {
     centerxfrac = centerx << FRACBITS
     centeryfrac = centery << FRACBITS
     projection = centerxfrac
-    if (!(detailshift != 0)) {
+    if (detailshift == 0) {
         basecolfunc = @@R_DrawColumn
         colfunc = basecolfunc
         fuzzcolfunc = @@R_DrawFuzzColumn
@@ -457,11 +457,11 @@ def R_PointInSubsector(x : int; y : int) : subsector_s? {
     var side : int
     var nodenum : int
     // single subsector is a special case
-    if (!(numnodes != 0)) {
+    if (numnodes == 0) {
         return subsectors
     }
     nodenum = numnodes - 1
-    while (!((nodenum & NF_SUBSECTOR) != 0)) {
+    while ((nodenum & NF_SUBSECTOR) == 0) {
         node = addr(nodes[nodenum])
         side = R_PointOnSide(x, y, node)
         nodenum = int(node.children[side])

@@ -27,7 +27,8 @@ var ylookup : uint8? [832]
 var columnofs : int[1120]
 var translations : uint8[3][256]
 var dccount : int
-var fuzzoffset : int[50] = fixed_array(320, -320, 320, -320, 320, 320, -320, 320, 320, -320, 320, 320, 320, -320, 320, 320, 320, -320, -320, -320, -320, 320, -320, -320, 320, 320, 320, 320, -320, 320, -320, 320, 320, -320, -320, 320, 320, -320, -320, -320, -320, 320, 320, 320, 320, -320, 320, 320, -320, 320)
+var fuzzoffset : int[50] = fixed_array(320, -320, 320, -320, 320, 320, -320, 320, 320, -320, 320, 320, 320, -320, 320, 320, 320, -320, -320, -320, -320, 320,
+        -320, -320, 320, 320, 320, 320, -320, 320, -320, 320, 320, -320, -320, 320, 320, -320, -320, -320, -320, 320, 320, 320, 320, -320, 320, 320, -320, 320)
 var fuzzpos : int = 0
 var dscount : int
 
@@ -71,8 +72,8 @@ def R_DrawColumn {
     for (_t0 in urange64(uint64(uint(count)) + 1ul)) {
         // Re-map color indices from wall texture column
         // using a lighting/special effects LUT.
-        deref(dest) = dc_colormap[int(dc_source[(frac >> FRACBITS) & 127])]
-        dest = dest + SCREENWIDTH
+        *dest = dc_colormap[int(dc_source[(frac >> FRACBITS) & 127])]
+        dest += SCREENWIDTH
         frac += fracstep
     }
 }
@@ -107,10 +108,10 @@ def R_DrawColumnLow {
     frac = dc_texturemid + (dc_yl - centery) * fracstep
     for (_t0 in urange64(uint64(uint(count)) + 1ul)) {
         // Hack. Does not work corretly.
-        deref(dest) = dc_colormap[int(dc_source[(frac >> FRACBITS) & 127])]
-        deref(dest2) = deref(dest)
-        dest = dest + SCREENWIDTH
-        dest2 = dest2 + SCREENWIDTH
+        *dest = dc_colormap[int(dc_source[(frac >> FRACBITS) & 127])]
+        *dest2 = *dest
+        dest += SCREENWIDTH
+        dest2 += SCREENWIDTH
         frac += fracstep
     }
 }
@@ -128,7 +129,7 @@ def R_DrawFuzzColumn {
     var frac : int
     var fracstep : int
     // Adjust borders. Low...
-    if (!(dc_yl != 0)) {
+    if (dc_yl == 0) {
         dc_yl = 1
     }
     // .. and high.
@@ -164,13 +165,13 @@ def R_DrawFuzzColumn {
         // a pixel that is either one column
         // left or right of the current one.
         // Add index from colormap to index.
-        deref(dest) = colormaps[6 * 256 + int(dest[fuzzoffset[fuzzpos]])]
+        *dest = colormaps[6 * 256 + int(dest[fuzzoffset[fuzzpos]])]
         // Clamp table lookup index.
         fuzzpos++
         if (fuzzpos == FUZZTABLE) {
             fuzzpos = 0
         }
-        dest = dest + SCREENWIDTH
+        dest += SCREENWIDTH
         frac += fracstep
     }
 }
@@ -215,8 +216,8 @@ def R_DrawTranslatedColumn {
         // used with PLAY sprites.
         // Thus the "green" ramp of the player 0 sprite
         // is mapped to gray, red, black/indigo.
-        deref(dest) = dc_colormap[int(dc_translation[int(dc_source[frac >> FRACBITS])])]
-        dest = dest + SCREENWIDTH
+        *dest = dc_colormap[int(dc_translation[int(dc_source[frac >> FRACBITS])])]
+        dest += SCREENWIDTH
         frac += fracstep
     }
 }
@@ -276,8 +277,8 @@ def R_DrawSpan {
         // Lookup pixel from flat texture tile,
         // re-index using light/colormap.
         var _t1 = dest
-        dest = dest + 1
-        deref(_t1) = ds_colormap[int(ds_source[spot])]
+        dest++
+        *_t1 = ds_colormap[int(ds_source[spot])]
         // Next step in u,v.
         xfrac += ds_xstep
         yfrac += ds_ystep
@@ -315,11 +316,11 @@ def R_DrawSpanLow {
         // Lowres/blocky mode does it twice,
         // while scale is adjusted appropriately.
         var _t1 = dest
-        dest = dest + 1
-        deref(_t1) = ds_colormap[int(ds_source[spot])]
+        dest++
+        *_t1 = ds_colormap[int(ds_source[spot])]
         var _t2 = dest
-        dest = dest + 1
-        deref(_t2) = ds_colormap[int(ds_source[spot])]
+        dest++
+        *_t2 = ds_colormap[int(ds_source[spot])]
         xfrac += ds_xstep
         yfrac += ds_ystep
     }
@@ -382,12 +383,12 @@ def R_FillBackScreen {
         x = 0
         while (x < SCREENWIDTH / 64) {
             doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(src + ((y1 & 63) << 6)), 64)
-            dest = dest + 64
+            dest += 64
             x++
         }
         if ((SCREENWIDTH & 63) != 0) {
             doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(src + ((y1 & 63) << 6)), SCREENWIDTH & 63)
-            dest = dest + (SCREENWIDTH & 63)
+            dest += SCREENWIDTH & 63
         }
     }
     patch = reinterpret<uint8?>(W_CacheLumpName(cstr("brdr_t"), PU_CACHE))

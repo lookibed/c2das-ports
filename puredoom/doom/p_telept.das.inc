@@ -54,7 +54,7 @@ def EV_Teleport(var line : line_s?; side : int; var thing : mobj_s?) : int {
                     oldx = thing.x
                     oldy = thing.y
                     oldz = thing.z
-                    if (!(int(P_TeleportMove(thing, m.x, m.y)) != 0)) {
+                    if (int(P_TeleportMove(thing, m.x, m.y)) == 0) {
                         return 0
                     }
                     // fixme: not needed?
