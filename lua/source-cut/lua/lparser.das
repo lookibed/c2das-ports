@@ -3,8 +3,11 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_do_while
 require c_runtime/c_function
+require c_runtime/c_switch
 require c_runtime/cstr
+require c_runtime/int_of
 require c_runtime/variadic
 require crt
 require lcode
@@ -41,7 +44,12 @@ struct LHS_assign {
 
 include lparser.layout.das.inc
 
-var private priority : anon_935[21] = fixed_array(anon_935(left = 10u8, right = 10u8), anon_935(left = 10u8, right = 10u8), anon_935(left = 11u8, right = 11u8), anon_935(left = 11u8, right = 11u8), anon_935(left = 14u8, right = 13u8), anon_935(left = 11u8, right = 11u8), anon_935(left = 11u8, right = 11u8), anon_935(left = 6u8, right = 6u8), anon_935(left = 4u8, right = 4u8), anon_935(left = 5u8, right = 5u8), anon_935(left = 7u8, right = 7u8), anon_935(left = 7u8, right = 7u8), anon_935(left = 9u8, right = 8u8), anon_935(left = 3u8, right = 3u8), anon_935(left = 3u8, right = 3u8), anon_935(left = 3u8, right = 3u8), anon_935(left = 3u8, right = 3u8), anon_935(left = 3u8, right = 3u8), anon_935(left = 3u8, right = 3u8), anon_935(left = 2u8, right = 2u8), anon_935(left = 1u8, right = 1u8))
+var private priority : anon_935[21] = fixed_array(anon_935(left = 10u8, right = 10u8), anon_935(left = 10u8, right = 10u8), anon_935(left = 11u8, right = 11u8),
+        anon_935(left = 11u8, right = 11u8), anon_935(left = 14u8, right = 13u8), anon_935(left = 11u8, right = 11u8), anon_935(left = 11u8, right = 11u8),
+        anon_935(left = 6u8, right = 6u8), anon_935(left = 4u8, right = 4u8), anon_935(left = 5u8, right = 5u8), anon_935(left = 7u8, right = 7u8),
+        anon_935(left = 7u8, right = 7u8), anon_935(left = 9u8, right = 8u8), anon_935(left = 3u8, right = 3u8), anon_935(left = 3u8, right = 3u8),
+        anon_935(left = 3u8, right = 3u8), anon_935(left = 3u8, right = 3u8), anon_935(left = 3u8, right = 3u8), anon_935(left = 3u8, right = 3u8),
+        anon_935(left = 2u8, right = 2u8), anon_935(left = 1u8, right = 1u8))
 var private forbody_forprep : OpCode[2] = fixed_array(OpCode.OP_FORPREP, OpCode.OP_TFORPREP)
 var private forbody_forloop : OpCode[2] = fixed_array(OpCode.OP_FORLOOP, OpCode.OP_TFORLOOP)
 
@@ -121,13 +129,14 @@ def private checknext(var ls : LexState?; c : int) {
 // raise an error that the expected 'what' should match a 'who'
 // in line 'where' (if that is not the current line).
 def private check_match(var ls : LexState?; what : int; who : int; _c_where : int) {
-    if (!(testnext(ls, what) != 0)) {
+    if (testnext(ls, what) == 0) {
         // all in the same line?
         if (_c_where == ls.linenumber) {
             // do not need a complex message
             error_expected(ls, what)
         } else {
-            luaX_syntaxerror(ls, luaO_pushfstring`va(ls.L, cstr("%s expected (to close %s at line %d)"), (luaX_token2str(ls, what), luaX_token2str(ls, who), _c_where)))
+            luaX_syntaxerror(ls,
+                    luaO_pushfstring`va(ls.L, cstr("%s expected (to close %s at line %d)"), (luaX_token2str(ls, what), luaX_token2str(ls, who), _c_where)))
         }
     }
 }
@@ -164,7 +173,9 @@ def private codename(var ls : LexState?; var e : expdesc?) {
 def private registerlocalvar(var ls : LexState?; var fs : FuncState?; var varname : TString?) : int {
     var f : Proto? = fs.f
     var oldsize : int = f.sizelocvars
-    f.locvars = reinterpret<LocVar?>(luaM_growaux_(ls.L, reinterpret<void?>(f.locvars), int(fs.ndebugvars), addr(f.sizelocvars), int(uint64(typeinfo sizeof(type<LocVar>))), int(32767ul <= MAX_SIZET / uint64(typeinfo sizeof(type<LocVar>)) ? 32767u : uint(MAX_SIZET / uint64(typeinfo sizeof(type<LocVar>)))), cstr("local variables")))
+    f.locvars = reinterpret<LocVar?>(luaM_growaux_(ls.L, reinterpret<void?>(f.locvars), int(fs.ndebugvars), addr(f.sizelocvars), typeinfo sizeof(type<LocVar>),
+            int(32767ul <= MAX_SIZET / uint64(typeinfo sizeof(type<LocVar>)) ? 32767u : uint(MAX_SIZET / uint64(typeinfo sizeof(type<LocVar>)))),
+            cstr("local variables")))
     while (oldsize < f.sizelocvars) {
         let _t0 = oldsize
         oldsize++
@@ -189,7 +200,10 @@ def private new_localvar(var ls : LexState?; var name : TString?) : int {
     var dyd : Dyndata? = ls.dyd
     var _c_var : Vardesc?
     checklimit(fs, dyd.actvar.n + 1 - fs.firstlocal, MAXVARS, cstr("local variables"))
-    dyd.actvar.arr = reinterpret<Vardesc?>(luaM_growaux_(L, reinterpret<void?>(dyd.actvar.arr), dyd.actvar.n + 1, addr(dyd.actvar.size), int(uint64(typeinfo sizeof(type<Vardesc>))), int(32767ul <= MAX_SIZET / uint64(typeinfo sizeof(type<Vardesc>)) ? 32767u : uint(MAX_SIZET / uint64(typeinfo sizeof(type<Vardesc>)))), cstr("local variables")))
+    dyd.actvar.arr = reinterpret<Vardesc?>(luaM_growaux_(L, reinterpret<void?>(dyd.actvar.arr), dyd.actvar.n + 1, addr(dyd.actvar.size),
+            typeinfo sizeof(type<Vardesc>),
+            int(32767ul <= MAX_SIZET / uint64(typeinfo sizeof(type<Vardesc>)) ? 32767u : uint(MAX_SIZET / uint64(typeinfo sizeof(type<Vardesc>)))),
+            cstr("local variables")))
     let _t0 = dyd.actvar.n
     dyd.actvar.n++
     _c_var = addr(dyd.actvar.arr[_t0])
@@ -262,27 +276,34 @@ def private check_readonly(var ls : LexState?; var e : expdesc?) {
     var fs : FuncState? = ls.fs
     // to be set if variable is const
     var varname : TString? = null
-    let _cond = e.k
-    if (_cond == expkind.VCONST) {
-        varname = ls.dyd.actvar.arr[e.u.info].vd.name
-    } elif (_cond == expkind.VLOCAL) {
-        {
-            var vardesc : Vardesc? = getlocalvardesc(fs, int(e.u._c_var.vidx))
-            // not a regular variable?
-            if (int(vardesc.vd.kind) != VDKREG) {
-                varname = vardesc.vd.name
+    c_switch(e.k) {
+        case(expkind.VCONST) {
+            varname = ls.dyd.actvar.arr[e.u.info].vd.name
+            break
+        }
+        case(expkind.VLOCAL) {
+            {
+                var vardesc : Vardesc? = getlocalvardesc(fs, int(e.u._c_var.vidx))
+                // not a regular variable?
+                if (int(vardesc.vd.kind) != VDKREG) {
+                    varname = vardesc.vd.name
+                }
+                break
             }
         }
-    } elif (_cond == expkind.VUPVAL) {
-        {
-            var up : Upvaldesc? = addr(fs.f.upvalues[e.u.info])
-            if (int(up.kind) != VDKREG) {
-                varname = up.name
+        case(expkind.VUPVAL) {
+            {
+                var up : Upvaldesc? = addr(fs.f.upvalues[e.u.info])
+                if (int(up.kind) != VDKREG) {
+                    varname = up.name
+                }
+                break
             }
         }
-    } else {
-        // other cases cannot be read-only
-        return
+        case(_) {
+            // other cases cannot be read-only
+            return
+        }
     }
     if (varname != null) {
         var msg : uint8? = luaO_pushfstring`va(ls.L, cstr("attempt to assign to const variable '%s'"), (addr(varname.contents[0]),))
@@ -343,7 +364,11 @@ def private allocupvalue(var fs : FuncState?) : Upvaldesc? {
     var f : Proto? = fs.f
     var oldsize : int = f.sizeupvalues
     checklimit(fs, int(fs.nups) + 1, MAXUPVAL, cstr("upvalues"))
-    f.upvalues = reinterpret<Upvaldesc?>(luaM_growaux_(fs.ls.L, reinterpret<void?>(f.upvalues), int(fs.nups), addr(f.sizeupvalues), int(uint64(typeinfo sizeof(type<Upvaldesc>))), int(uint64(MAXUPVAL) <= MAX_SIZET / uint64(typeinfo sizeof(type<Upvaldesc>)) ? uint(MAXUPVAL) : uint(MAX_SIZET / uint64(typeinfo sizeof(type<Upvaldesc>)))), cstr("upvalues")))
+    f.upvalues = reinterpret<Upvaldesc?>(luaM_growaux_(fs.ls.L, reinterpret<void?>(f.upvalues), int(fs.nups), addr(f.sizeupvalues),
+            typeinfo sizeof(type<Upvaldesc>),
+            int(uint64(MAXUPVAL) <= MAX_SIZET / uint64(typeinfo sizeof(type<Upvaldesc>)) ? uint(MAXUPVAL) :
+                uint(MAX_SIZET / uint64(typeinfo sizeof(type<Upvaldesc>)))),
+            cstr("upvalues")))
     while (oldsize < f.sizeupvalues) {
         let _t0 = oldsize
         oldsize++
@@ -432,7 +457,7 @@ def private singlevaraux(var fs : FuncState?; var n : TString?; var _c_var : exp
         var v : int = searchvar(fs, n, _c_var)
         // found?
         if (v >= 0) {
-            if (v == int(expkind.VLOCAL) && !(base != 0)) {
+            if (v == int(expkind.VLOCAL) && base == 0) {
                 // local will be used as an upval
                 markupval(fs, int(_c_var.u._c_var.vidx))
             }
@@ -577,7 +602,9 @@ def private findlabel(var ls : LexState?; var name : TString?) : Labeldesc? {
 [c_function]
 def private newlabelentry(var ls : LexState?; var l : Labellist?; var name : TString?; line : int; pc : int) : int {
     var n : int = l.n
-    l.arr = reinterpret<Labeldesc?>(luaM_growaux_(ls.L, reinterpret<void?>(l.arr), n, addr(l.size), int(uint64(typeinfo sizeof(type<Labeldesc>))), int(32767ul <= MAX_SIZET / uint64(typeinfo sizeof(type<Labeldesc>)) ? 32767u : uint(MAX_SIZET / uint64(typeinfo sizeof(type<Labeldesc>)))), cstr("labels/gotos")))
+    l.arr = reinterpret<Labeldesc?>(luaM_growaux_(ls.L, reinterpret<void?>(l.arr), n, addr(l.size), typeinfo sizeof(type<Labeldesc>),
+            int(32767ul <= MAX_SIZET / uint64(typeinfo sizeof(type<Labeldesc>)) ? 32767u : uint(MAX_SIZET / uint64(typeinfo sizeof(type<Labeldesc>)))),
+            cstr("labels/gotos")))
     l.arr[n].name = name
     l.arr[n].line = line
     l.arr[n].nactvar = ls.fs.nactvar
@@ -663,7 +690,7 @@ def private enterblock(var fs : FuncState?; var bl : BlockCnt?; isloop : uint8) 
     bl.firstlabel = fs.ls.dyd._c_label.n
     bl.firstgoto = fs.ls.dyd.gt.n
     bl.upval = 0u8
-    bl.insidetbc = uint8((fs.bl != null && fs.bl.insidetbc != 0) ? 1 : 0)
+    bl.insidetbc = uint8(int_of(fs.bl != null && fs.bl.insidetbc != 0))
     bl.previous = fs.bl
     fs.bl = bl
 }
@@ -694,10 +721,11 @@ def private leaveblock(var fs : FuncState?) {
     // back to level on entry
     // has to fix pending breaks?
     if (bl.isloop != 0) {
-        hasclose = createlabel(ls, luaS_newlstr(ls.L, cstr("break"), uint64(typeinfo sizeof(type<uint8[6]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul), 0, 0)
+        hasclose = createlabel(ls, luaS_newlstr(ls.L, cstr("break"), uint64(typeinfo sizeof(type<uint8[6]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul), 0,
+                0)
     }
     // still need a 'close'?
-    if (!(hasclose != 0) && bl.previous != null && bl.upval != 0) {
+    if (hasclose == 0 && bl.previous != null && bl.upval != 0) {
         luaK_codeABCk(fs, OpCode.OP_CLOSE, stklevel, 0, 0, 0)
     }
     // free registers
@@ -729,7 +757,10 @@ def private addprototype(var ls : LexState?) : Proto? {
     var f : Proto? = fs.f
     if (fs.np >= f.sizep) {
         var oldsize : int = f.sizep
-        f.p = reinterpret<Proto ??>(luaM_growaux_(L, reinterpret<void?>(f.p), fs.np, addr(f.sizep), int(uint64(typeinfo sizeof(type<Proto?>))), int(uint64(MAXARG_Bx) <= MAX_SIZET / uint64(typeinfo sizeof(type<Proto?>)) ? uint(MAXARG_Bx) : uint(MAX_SIZET / uint64(typeinfo sizeof(type<Proto?>)))), cstr("functions")))
+        f.p = reinterpret<Proto ??>(luaM_growaux_(L, reinterpret<void?>(f.p), fs.np, addr(f.sizep), typeinfo sizeof(type<Proto?>),
+                int(uint64(MAXARG_Bx) <= MAX_SIZET / uint64(typeinfo sizeof(type<Proto?>)) ? uint(MAXARG_Bx) :
+                    uint(MAX_SIZET / uint64(typeinfo sizeof(type<Proto?>)))),
+                cstr("functions")))
         while (oldsize < f.sizep) {
             let _t0 = oldsize
             oldsize++
@@ -797,13 +828,16 @@ def private close_func(var ls : LexState?) {
     luaK_ret(fs, __::luaY_nvarstack(fs), 0)
     leaveblock(fs)
     luaK_finish(fs)
-    f.code = reinterpret<uint?>(luaM_shrinkvector_(L, reinterpret<void?>(f.code), addr(f.sizecode), fs.pc, int(uint64(typeinfo sizeof(type<uint>)))))
-    f.lineinfo = reinterpret<int8?>(luaM_shrinkvector_(L, reinterpret<void?>(f.lineinfo), addr(f.sizelineinfo), fs.pc, int(uint64(typeinfo sizeof(type<int8>)))))
-    f.abslineinfo = reinterpret<AbsLineInfo?>(luaM_shrinkvector_(L, reinterpret<void?>(f.abslineinfo), addr(f.sizeabslineinfo), fs.nabslineinfo, int(uint64(typeinfo sizeof(type<AbsLineInfo>)))))
-    f.k = reinterpret<TValue?>(luaM_shrinkvector_(L, reinterpret<void?>(f.k), addr(f.sizek), fs.nk, int(uint64(typeinfo sizeof(type<TValue>)))))
-    f.p = reinterpret<Proto ??>(luaM_shrinkvector_(L, reinterpret<void?>(f.p), addr(f.sizep), fs.np, int(uint64(typeinfo sizeof(type<Proto?>)))))
-    f.locvars = reinterpret<LocVar?>(luaM_shrinkvector_(L, reinterpret<void?>(f.locvars), addr(f.sizelocvars), int(fs.ndebugvars), int(uint64(typeinfo sizeof(type<LocVar>)))))
-    f.upvalues = reinterpret<Upvaldesc?>(luaM_shrinkvector_(L, reinterpret<void?>(f.upvalues), addr(f.sizeupvalues), int(fs.nups), int(uint64(typeinfo sizeof(type<Upvaldesc>)))))
+    f.code = reinterpret<uint?>(luaM_shrinkvector_(L, reinterpret<void?>(f.code), addr(f.sizecode), fs.pc, typeinfo sizeof(type<uint>)))
+    f.lineinfo = reinterpret<int8?>(luaM_shrinkvector_(L, reinterpret<void?>(f.lineinfo), addr(f.sizelineinfo), fs.pc, typeinfo sizeof(type<int8>)))
+    f.abslineinfo = reinterpret<AbsLineInfo?>(luaM_shrinkvector_(L, reinterpret<void?>(f.abslineinfo), addr(f.sizeabslineinfo), fs.nabslineinfo,
+            typeinfo sizeof(type<AbsLineInfo>)))
+    f.k = reinterpret<TValue?>(luaM_shrinkvector_(L, reinterpret<void?>(f.k), addr(f.sizek), fs.nk, typeinfo sizeof(type<TValue>)))
+    f.p = reinterpret<Proto ??>(luaM_shrinkvector_(L, reinterpret<void?>(f.p), addr(f.sizep), fs.np, typeinfo sizeof(type<Proto?>)))
+    f.locvars = reinterpret<LocVar?>(luaM_shrinkvector_(L, reinterpret<void?>(f.locvars), addr(f.sizelocvars), int(fs.ndebugvars),
+            typeinfo sizeof(type<LocVar>)))
+    f.upvalues = reinterpret<Upvaldesc?>(luaM_shrinkvector_(L, reinterpret<void?>(f.upvalues), addr(f.sizeupvalues), int(fs.nups),
+            typeinfo sizeof(type<Upvaldesc>)))
     ls.fs = fs.prev
     if (L.l_G.GCdebt > 0l) {
         lgc::luaC_step(L)
@@ -814,19 +848,22 @@ def private close_func(var ls : LexState?) {
 // 'until' closes syntactical blocks, but do not close scope,
 // so it is handled in separate.
 def private block_follow(var ls : LexState?; withuntil : int) : int {
-    let _cond = ls.t.token
-    if (_cond == 259 || _cond == 260 || _cond == 261 || _cond == 288) {
-        return 1
-    } elif (_cond == 276) {
-        return withuntil
-    } else {
-        return 0
+    c_switch(ls.t.token) {
+        case(259, 260, 261, 288) {
+            return 1
+        }
+        case(276) {
+            return withuntil
+        }
+        case(_) {
+            return 0
+        }
     }
 }
 
 def private statlist(var ls : LexState?) {
     // statlist -> { stat [';'] }
-    while (!(block_follow(ls, 1) != 0)) {
+    while (block_follow(ls, 1) == 0) {
         if (ls.t.token == int(RESERVED.TK_RETURN)) {
             statement(ls)
             // 'return' must be last statement
@@ -874,7 +911,7 @@ def private recfield(var ls : LexState?; var cc : ConsControl?) {
     checklimit(fs, cc.nh, 2147483647, cstr("items in a constructor"))
     cc.nh++
     checknext(ls, '=')
-    tab = deref(cc.t)
+    tab = *cc.t
     luaK_indexed(fs, addr(tab), addr(key))
     expr(ls, addr(val))
     luaK_storevar(fs, addr(tab), addr(val))
@@ -927,19 +964,25 @@ def private listfield(var ls : LexState?; var cc : ConsControl?) {
 
 def private field(var ls : LexState?; var cc : ConsControl?) {
     // field -> listfield | recfield
-    let _cond = ls.t.token
-    if (_cond == 291) {
-        // may be 'listfield' or 'recfield'
-        // expression?
-        if (luaX_lookahead(ls) != '=') {
-            listfield(ls, cc)
-        } else {
-            recfield(ls, cc)
+    c_switch(ls.t.token) {
+        case(291) {
+            // may be 'listfield' or 'recfield'
+            // expression?
+            if (luaX_lookahead(ls) != '=') {
+                listfield(ls, cc)
+            } else {
+                recfield(ls, cc)
+            }
+            break
         }
-    } elif (_cond == '[') {
-        recfield(ls, cc)
-    } else {
-        listfield(ls, cc)
+        case('[') {
+            recfield(ls, cc)
+            break
+        }
+        case(_) {
+            listfield(ls, cc)
+            break
+        }
     }
 }
 
@@ -963,15 +1006,12 @@ def private constructor(var ls : LexState?; var t : expdesc?) {
     // no value (yet)
     init_exp(addr(cc.v), expkind.VVOID, 0)
     checknext(ls, '{')
-    while (true) {
+    c_do_while(testnext(ls, ',') != 0 || testnext(ls, ';') != 0) {
         if (ls.t.token == '}') {
             break
         }
         closelistfield(fs, addr(cc))
         field(ls, addr(cc))
-        if (!(testnext(ls, ',') != 0 || testnext(ls, ';') != 0)) {
-            break
-        }
     }
     check_match(ls, '}', '{', line)
     lastlistfield(fs, addr(cc))
@@ -991,19 +1031,21 @@ def private parlist(var ls : LexState?) {
     var isvararg : int = 0
     // is 'parlist' not empty?
     if (ls.t.token != ')') {
-        while (true) {
-            let _cond = ls.t.token
-            if (_cond == 291) {
-                new_localvar(ls, str_checkname(ls))
-                nparams++
-            } elif (_cond == 280) {
-                luaX_next(ls)
-                isvararg = 1
-            } else {
-                luaX_syntaxerror(ls, cstr("<name> or '...' expected"))
-            }
-            if (!(!(isvararg != 0) && testnext(ls, ',') != 0)) {
-                break
+        c_do_while(isvararg == 0 && testnext(ls, ',') != 0) {
+            c_switch(ls.t.token) {
+                case(291) {
+                    new_localvar(ls, str_checkname(ls))
+                    nparams++
+                    break
+                }
+                case(280) {
+                    luaX_next(ls)
+                    isvararg = 1
+                    break
+                }
+                case(_) {
+                    luaX_syntaxerror(ls, cstr("<name> or '...' expected"))
+                }
             }
         }
     }
@@ -1060,30 +1102,37 @@ def private funcargs(var ls : LexState?; var f : expdesc?) {
     var base : int
     var nparams : int
     var line : int = ls.linenumber
-    let _cond = ls.t.token
-    if (_cond == '(') {
-        // funcargs -> '(' [ explist ] ')'
-        luaX_next(ls)
-        // arg list is empty?
-        if (ls.t.token == ')') {
-            args.k = expkind.VVOID
-        } else {
-            explist(ls, addr(args))
-            if (args.k == expkind.VCALL || args.k == expkind.VVARARG) {
-                luaK_setreturns(fs, addr(args), LUA_MULTRET)
+    c_switch(ls.t.token) {
+        case('(') {
+            // funcargs -> '(' [ explist ] ')'
+            luaX_next(ls)
+            // arg list is empty?
+            if (ls.t.token == ')') {
+                args.k = expkind.VVOID
+            } else {
+                explist(ls, addr(args))
+                if (args.k == expkind.VCALL || args.k == expkind.VVARARG) {
+                    luaK_setreturns(fs, addr(args), LUA_MULTRET)
+                }
             }
+            check_match(ls, ')', '(', line)
+            break
         }
-        check_match(ls, ')', '(', line)
-    } elif (_cond == '{') {
-        // funcargs -> constructor
-        constructor(ls, addr(args))
-    } elif (_cond == 292) {
-        // funcargs -> STRING
-        codestring(addr(args), ls.t.seminfo.ts)
-        // must use 'seminfo' before 'next'
-        luaX_next(ls)
-    } else {
-        luaX_syntaxerror(ls, cstr("function arguments expected"))
+        case('{') {
+            // funcargs -> constructor
+            constructor(ls, addr(args))
+            break
+        }
+        case(292) {
+            // funcargs -> STRING
+            codestring(addr(args), ls.t.seminfo.ts)
+            // must use 'seminfo' before 'next'
+            luaX_next(ls)
+            break
+        }
+        case(_) {
+            luaX_syntaxerror(ls, cstr("function arguments expected"))
+        }
     }
     // base register for call
     base = f.u.info
@@ -1105,21 +1154,24 @@ def private funcargs(var ls : LexState?; var f : expdesc?) {
 
 def private primaryexp(var ls : LexState?; var v : expdesc?) {
     // primaryexp -> NAME | '(' expr ')'
-    let _cond = ls.t.token
-    if (_cond == '(') {
-        {
-            var line : int = ls.linenumber
-            luaX_next(ls)
-            expr(ls, v)
-            check_match(ls, ')', '(', line)
-            luaK_dischargevars(ls.fs, v)
+    c_switch(ls.t.token) {
+        case('(') {
+            {
+                var line : int = ls.linenumber
+                luaX_next(ls)
+                expr(ls, v)
+                check_match(ls, ')', '(', line)
+                luaK_dischargevars(ls.fs, v)
+                return
+            }
+        }
+        case(291) {
+            singlevar(ls, v)
             return
         }
-    } elif (_cond == 291) {
-        singlevar(ls, v)
-        return
-    } else {
-        luaX_syntaxerror(ls, cstr("unexpected symbol"))
+        case(_) {
+            luaX_syntaxerror(ls, cstr("unexpected symbol"))
+        }
     }
 }
 
@@ -1130,33 +1182,42 @@ def private suffixedexp(var ls : LexState?; var v : expdesc?) {
     var fs : FuncState? = ls.fs
     primaryexp(ls, v)
     while (true) {
-        let _cond = ls.t.token
-        if (_cond == '.') {
-            // fieldsel
-            fieldsel(ls, v)
-        } elif (_cond == '[') {
-            {
-                // '[' exp ']'
-                var key : expdesc
-                luaK_exp2anyregup(fs, v)
-                yindex(ls, addr(key))
-                luaK_indexed(fs, v, addr(key))
+        c_switch(ls.t.token) {
+            case('.') {
+                // fieldsel
+                fieldsel(ls, v)
+                break
             }
-        } elif (_cond == ':') {
-            {
-                // ':' NAME funcargs
-                var key : expdesc
-                luaX_next(ls)
-                codename(ls, addr(key))
-                luaK_self(fs, v, addr(key))
+            case('[') {
+                {
+                    // '[' exp ']'
+                    var key : expdesc
+                    luaK_exp2anyregup(fs, v)
+                    yindex(ls, addr(key))
+                    luaK_indexed(fs, v, addr(key))
+                    break
+                }
+            }
+            case(':') {
+                {
+                    // ':' NAME funcargs
+                    var key : expdesc
+                    luaX_next(ls)
+                    codename(ls, addr(key))
+                    luaK_self(fs, v, addr(key))
+                    funcargs(ls, v)
+                    break
+                }
+            }
+            case('(', 292, '{') {
+                // funcargs
+                luaK_exp2nextreg(fs, v)
                 funcargs(ls, v)
+                break
             }
-        } elif (_cond == '(' || _cond == 292 || _cond == '{') {
-            // funcargs
-            luaK_exp2nextreg(fs, v)
-            funcargs(ls, v)
-        } else {
-            return
+            case(_) {
+                return
+            }
         }
     }
 }
@@ -1164,106 +1225,150 @@ def private suffixedexp(var ls : LexState?; var v : expdesc?) {
 def private simpleexp(var ls : LexState?; var v : expdesc?) {
     // simpleexp -> FLT | INT | STRING | NIL | TRUE | FALSE | ... |
     // constructor | FUNCTION body | suffixedexp
-    let _cond = ls.t.token
-    if (_cond == 289) {
-        init_exp(v, expkind.VKFLT, 0)
-        v.u.nval = ls.t.seminfo.r
-    } elif (_cond == 290) {
-        init_exp(v, expkind.VKINT, 0)
-        v.u.ival = ls.t.seminfo.i
-    } elif (_cond == 292) {
-        codestring(v, ls.t.seminfo.ts)
-    } elif (_cond == 269) {
-        init_exp(v, expkind.VNIL, 0)
-    } elif (_cond == 275) {
-        init_exp(v, expkind.VTRUE, 0)
-    } elif (_cond == 262) {
-        init_exp(v, expkind.VFALSE, 0)
-    } elif (_cond == 280) {
-        {
-            // vararg
-            var fs : FuncState? = ls.fs
-            if (!(fs.f.is_vararg != 0)) {
-                luaX_syntaxerror(ls, cstr("cannot use '...' outside a vararg function"))
-            }
-            init_exp(v, expkind.VVARARG, luaK_codeABCk(fs, OpCode.OP_VARARG, 0, 0, 1, 0))
+    c_switch(ls.t.token) {
+        case(289) {
+            init_exp(v, expkind.VKFLT, 0)
+            v.u.nval = ls.t.seminfo.r
+            break
         }
-    } elif (_cond == '{') {
-        // constructor
-        constructor(ls, v)
-        return
-    } elif (_cond == 264) {
-        luaX_next(ls)
-        body(ls, v, 0, ls.linenumber)
-        return
-    } else {
-        suffixedexp(ls, v)
-        return
+        case(290) {
+            init_exp(v, expkind.VKINT, 0)
+            v.u.ival = ls.t.seminfo.i
+            break
+        }
+        case(292) {
+            codestring(v, ls.t.seminfo.ts)
+            break
+        }
+        case(269) {
+            init_exp(v, expkind.VNIL, 0)
+            break
+        }
+        case(275) {
+            init_exp(v, expkind.VTRUE, 0)
+            break
+        }
+        case(262) {
+            init_exp(v, expkind.VFALSE, 0)
+            break
+        }
+        case(280) {
+            {
+                // vararg
+                var fs : FuncState? = ls.fs
+                if (fs.f.is_vararg == 0) {
+                    luaX_syntaxerror(ls, cstr("cannot use '...' outside a vararg function"))
+                }
+                init_exp(v, expkind.VVARARG, luaK_codeABCk(fs, OpCode.OP_VARARG, 0, 0, 1, 0))
+                break
+            }
+        }
+        case('{') {
+            // constructor
+            constructor(ls, v)
+            return
+        }
+        case(264) {
+            luaX_next(ls)
+            body(ls, v, 0, ls.linenumber)
+            return
+        }
+        case(_) {
+            suffixedexp(ls, v)
+            return
+        }
     }
     luaX_next(ls)
 }
 
 def private getunopr(op : int) : UnOpr {
-    let _cond = op
-    if (_cond == 270) {
-        return UnOpr.OPR_NOT
-    } elif (_cond == '-') {
-        return UnOpr.OPR_MINUS
-    } elif (_cond == '~') {
-        return UnOpr.OPR_BNOT
-    } elif (_cond == '#') {
-        return UnOpr.OPR_LEN
-    } else {
-        return UnOpr.OPR_NOUNOPR
+    c_switch(op) {
+        case(270) {
+            return UnOpr.OPR_NOT
+        }
+        case('-') {
+            return UnOpr.OPR_MINUS
+        }
+        case('~') {
+            return UnOpr.OPR_BNOT
+        }
+        case('#') {
+            return UnOpr.OPR_LEN
+        }
+        case(_) {
+            return UnOpr.OPR_NOUNOPR
+        }
     }
 }
 
 def private getbinopr(op : int) : BinOpr {
-    let _cond = op
-    if (_cond == '+') {
-        return BinOpr.OPR_ADD
-    } elif (_cond == '-') {
-        return BinOpr.OPR_SUB
-    } elif (_cond == '*') {
-        return BinOpr.OPR_MUL
-    } elif (_cond == '%') {
-        return BinOpr.OPR_MOD
-    } elif (_cond == '^') {
-        return BinOpr.OPR_POW
-    } elif (_cond == '/') {
-        return BinOpr.OPR_DIV
-    } elif (_cond == 278) {
-        return BinOpr.OPR_IDIV
-    } elif (_cond == '&') {
-        return BinOpr.OPR_BAND
-    } elif (_cond == '|') {
-        return BinOpr.OPR_BOR
-    } elif (_cond == '~') {
-        return BinOpr.OPR_BXOR
-    } elif (_cond == 285) {
-        return BinOpr.OPR_SHL
-    } elif (_cond == 286) {
-        return BinOpr.OPR_SHR
-    } elif (_cond == 279) {
-        return BinOpr.OPR_CONCAT
-    } elif (_cond == 284) {
-        return BinOpr.OPR_NE
-    } elif (_cond == 281) {
-        return BinOpr.OPR_EQ
-    } elif (_cond == '<') {
-        return BinOpr.OPR_LT
-    } elif (_cond == 283) {
-        return BinOpr.OPR_LE
-    } elif (_cond == '>') {
-        return BinOpr.OPR_GT
-    } elif (_cond == 282) {
-        return BinOpr.OPR_GE
-    } elif (_cond == 256) {
-        return BinOpr.OPR_AND
-    } elif (_cond == 271) {
-        return BinOpr.OPR_OR
-    } else {
-        return BinOpr.OPR_NOBINOPR
+    c_switch(op) {
+        case('+') {
+            return BinOpr.OPR_ADD
+        }
+        case('-') {
+            return BinOpr.OPR_SUB
+        }
+        case('*') {
+            return BinOpr.OPR_MUL
+        }
+        case('%') {
+            return BinOpr.OPR_MOD
+        }
+        case('^') {
+            return BinOpr.OPR_POW
+        }
+        case('/') {
+            return BinOpr.OPR_DIV
+        }
+        case(278) {
+            return BinOpr.OPR_IDIV
+        }
+        case('&') {
+            return BinOpr.OPR_BAND
+        }
+        case('|') {
+            return BinOpr.OPR_BOR
+        }
+        case('~') {
+            return BinOpr.OPR_BXOR
+        }
+        case(285) {
+            return BinOpr.OPR_SHL
+        }
+        case(286) {
+            return BinOpr.OPR_SHR
+        }
+        case(279) {
+            return BinOpr.OPR_CONCAT
+        }
+        case(284) {
+            return BinOpr.OPR_NE
+        }
+        case(281) {
+            return BinOpr.OPR_EQ
+        }
+        case('<') {
+            return BinOpr.OPR_LT
+        }
+        case(283) {
+            return BinOpr.OPR_LE
+        }
+        case('>') {
+            return BinOpr.OPR_GT
+        }
+        case(282) {
+            return BinOpr.OPR_GE
+        }
+        case(256) {
+            return BinOpr.OPR_AND
+        }
+        case(271) {
+            return BinOpr.OPR_OR
+        }
+        case(_) {
+            return BinOpr.OPR_NOBINOPR
+        }
     }
 }
 
@@ -1330,7 +1435,7 @@ def private check_conflict(var ls : LexState?; var lh : LHS_assign?; var v : exp
     // check all previous assignments
     while (lh != null) {
         // assignment to table field?
-        if (uint(int(expkind.VINDEXED)) <= uint(int(lh.v.k)) && uint(int(lh.v.k)) <= uint(int(expkind.VINDEXSTR))) {
+        if (uint(expkind.VINDEXED) <= uint(lh.v.k) && uint(lh.v.k) <= uint(expkind.VINDEXSTR)) {
             // is table an upvalue?
             if (lh.v.k == expkind.VINDEXUP) {
                 if (v.k == expkind.VUPVAL && int(lh.v.u.ind.t) == v.u.info) {
@@ -1342,7 +1447,7 @@ def private check_conflict(var ls : LexState?; var lh : LHS_assign?; var v : exp
                 }
             } else {
                 // table is a register
-                if (v.k == expkind.VLOCAL && int(lh.v.u.ind.t) == int(v.u._c_var.ridx)) {
+                if (v.k == expkind.VLOCAL && lh.v.u.ind.t == v.u._c_var.ridx) {
                     // table is the local being assigned now
                     conflict = 1
                     // assignment will use safe copy
@@ -1376,7 +1481,7 @@ def private check_conflict(var ls : LexState?; var lh : LHS_assign?; var v : exp
 [c_function]
 def private restassign(var ls : LexState?; var lh : LHS_assign?; nvars : int) {
     var e : expdesc
-    if (!(uint(int(expkind.VLOCAL)) <= uint(int(lh.v.k)) && uint(int(lh.v.k)) <= uint(int(expkind.VINDEXSTR)))) {
+    if (!(uint(expkind.VLOCAL) <= uint(lh.v.k) && uint(lh.v.k) <= uint(expkind.VINDEXSTR))) {
         luaX_syntaxerror(ls, cstr("syntax error"))
     }
     check_readonly(ls, addr(lh.v))
@@ -1385,7 +1490,7 @@ def private restassign(var ls : LexState?; var lh : LHS_assign?; nvars : int) {
         var nv : LHS_assign
         nv.prev = lh
         suffixedexp(ls, addr(nv.v))
-        if (!(uint(int(expkind.VINDEXED)) <= uint(int(nv.v.k)) && uint(int(nv.v.k)) <= uint(int(expkind.VINDEXSTR)))) {
+        if (!(uint(expkind.VINDEXED) <= uint(nv.v.k) && uint(nv.v.k) <= uint(expkind.VINDEXSTR))) {
             check_conflict(ls, lh, addr(nv.v))
         }
         // control recursion depth
@@ -1456,7 +1561,8 @@ def private breakstat(var ls : LexState?) {
     var line : int = ls.linenumber
     // skip break
     luaX_next(ls)
-    newgotoentry(ls, luaS_newlstr(ls.L, cstr("break"), uint64(typeinfo sizeof(type<uint8[6]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul), line, luaK_jump(ls.fs))
+    newgotoentry(ls, luaS_newlstr(ls.L, cstr("break"), uint64(typeinfo sizeof(type<uint8[6]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul), line,
+            luaK_jump(ls.fs))
 }
 
 // Check whether there is already a label with the given 'name'.
@@ -1566,7 +1672,7 @@ def private fixforjump(var fs : FuncState?; pc : int; dest : int; back : int) {
     if (offset > MAXARG_Bx) {
         luaX_syntaxerror(fs.ls, cstr("control structure too long"))
     }
-    deref(jmp) = (deref(jmp) & ~(~(~0u << uint(SIZE_Bx)) << uint(POS_k))) | ((uint(offset) << uint(POS_k)) & (~(~0u << uint(SIZE_Bx)) << uint(POS_k)))
+    *jmp = (*jmp & ~(~(~0u << uint(SIZE_Bx)) << uint(POS_k))) | ((uint(offset) << uint(POS_k)) & (~(~0u << uint(SIZE_Bx)) << uint(POS_k)))
 }
 
 // Generate code for a 'for' loop.
@@ -1668,13 +1774,18 @@ def private forstat(var ls : LexState?; line : int) {
     luaX_next(ls)
     // first variable name
     varname = str_checkname(ls)
-    let _cond = ls.t.token
-    if (_cond == '=') {
-        fornum(ls, varname, line)
-    } elif (_cond == ',' || _cond == 267) {
-        forlist(ls, varname)
-    } else {
-        luaX_syntaxerror(ls, cstr("'=' or 'in' expected"))
+    c_switch(ls.t.token) {
+        case('=') {
+            fornum(ls, varname, line)
+            break
+        }
+        case(',', 267) {
+            forlist(ls, varname)
+            break
+        }
+        case(_) {
+            luaX_syntaxerror(ls, cstr("'=' or 'in' expected"))
+        }
     }
     check_match(ls, int(RESERVED.TK_END), int(RESERVED.TK_FOR), line)
     // loop scope ('break' jumps to this point)
@@ -1813,7 +1924,7 @@ def private localstat(var ls : LexState?) {
     var nvars : int = 0
     var nexps : int
     var e : expdesc
-    while (true) {
+    c_do_while(testnext(ls, ',') != 0) {
         vidx = new_localvar(ls, str_checkname(ls))
         kind = getlocalattribute(ls)
         getlocalvardesc(fs, vidx).vd.kind = uint8(kind)
@@ -1826,9 +1937,6 @@ def private localstat(var ls : LexState?) {
             toclose = int(fs.nactvar) + nvars
         }
         nvars++
-        if (!(testnext(ls, ',') != 0)) {
-            break
-        }
     }
     if (testnext(ls, '=') != 0) {
         nexps = explist(ls, addr(e))
@@ -1903,7 +2011,7 @@ def private exprstat(var ls : LexState?) {
         }
         inst = addr(fs.f.code[addr(v.v).u.info])
         // call statement uses no results
-        deref(inst) = (deref(inst) & ~(~(~0u << uint(SIZE_C)) << uint(POS_C))) | ((1u << uint(POS_C)) & (~(~0u << uint(SIZE_C)) << uint(POS_C)))
+        *inst = (*inst & ~(~(~0u << uint(SIZE_C)) << uint(POS_C))) | ((1u << uint(POS_C)) & (~(~0u << uint(SIZE_C)) << uint(POS_C)))
     }
 }
 
@@ -1925,8 +2033,9 @@ def private retstat(var ls : LexState?) {
         if (e.k == expkind.VCALL || e.k == expkind.VVARARG) {
             luaK_setreturns(fs, addr(e), LUA_MULTRET)
             // tail call?
-            if (e.k == expkind.VCALL && nret == 1 && !(fs.bl.insidetbc != 0)) {
-                fs.f.code[addr(e).u.info] = (fs.f.code[addr(e).u.info] & ~(~(~0u << uint(SIZE_OP)) << uint(POS_OP))) | ((uint(int(OpCode.OP_TAILCALL)) << uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << uint(POS_OP)))
+            if (e.k == expkind.VCALL && nret == 1 && fs.bl.insidetbc == 0) {
+                fs.f.code[addr(e).u.info] = (fs.f.code[addr(e).u.info] &
+                        ~(~(~0u << uint(SIZE_OP)) << uint(POS_OP))) | ((uint(OpCode.OP_TAILCALL) << uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << uint(POS_OP)))
             }
             // return all values
             nret = LUA_MULTRET
@@ -1950,63 +2059,89 @@ def private statement(var ls : LexState?) {
     // may be needed for error messages
     var line : int = ls.linenumber
     luaE_incCstack(ls.L)
-    let _cond = ls.t.token
-    if (_cond == ';') {
-        // stat -> ';' (empty statement)
-        // skip ';'
-        luaX_next(ls)
-    } elif (_cond == 266) {
-        // stat -> ifstat
-        ifstat(ls, line)
-    } elif (_cond == 277) {
-        // stat -> whilestat
-        whilestat(ls, line)
-    } elif (_cond == 258) {
-        // stat -> DO block END
-        // skip DO
-        luaX_next(ls)
-        _c_block(ls)
-        check_match(ls, int(RESERVED.TK_END), int(RESERVED.TK_DO), line)
-    } elif (_cond == 263) {
-        // stat -> forstat
-        forstat(ls, line)
-    } elif (_cond == 272) {
-        // stat -> repeatstat
-        repeatstat(ls, line)
-    } elif (_cond == 264) {
-        // stat -> funcstat
-        funcstat(ls, line)
-    } elif (_cond == 268) {
-        // stat -> localstat
-        // skip LOCAL
-        luaX_next(ls)
-        // local function?
-        if (testnext(ls, int(RESERVED.TK_FUNCTION)) != 0) {
-            localfunc(ls)
-        } else {
-            localstat(ls)
+    c_switch(ls.t.token) {
+        case(';') {
+            // stat -> ';' (empty statement)
+            // skip ';'
+            luaX_next(ls)
+            break
         }
-    } elif (_cond == 287) {
-        // stat -> label
-        // skip double colon
-        luaX_next(ls)
-        labelstat(ls, str_checkname(ls), line)
-    } elif (_cond == 273) {
-        // stat -> retstat
-        // skip RETURN
-        luaX_next(ls)
-        retstat(ls)
-    } elif (_cond == 257) {
-        // stat -> breakstat
-        breakstat(ls)
-    } elif (_cond == 265) {
-        // stat -> 'goto' NAME
-        // skip 'goto'
-        luaX_next(ls)
-        gotostat(ls)
-    } else {
-        // stat -> func | assignment
-        exprstat(ls)
+        case(266) {
+            // stat -> ifstat
+            ifstat(ls, line)
+            break
+        }
+        case(277) {
+            // stat -> whilestat
+            whilestat(ls, line)
+            break
+        }
+        case(258) {
+            // stat -> DO block END
+            // skip DO
+            luaX_next(ls)
+            _c_block(ls)
+            check_match(ls, int(RESERVED.TK_END), int(RESERVED.TK_DO), line)
+            break
+        }
+        case(263) {
+            // stat -> forstat
+            forstat(ls, line)
+            break
+        }
+        case(272) {
+            // stat -> repeatstat
+            repeatstat(ls, line)
+            break
+        }
+        case(264) {
+            // stat -> funcstat
+            funcstat(ls, line)
+            break
+        }
+        case(268) {
+            // stat -> localstat
+            // skip LOCAL
+            luaX_next(ls)
+            // local function?
+            if (testnext(ls, int(RESERVED.TK_FUNCTION)) != 0) {
+                localfunc(ls)
+            } else {
+                localstat(ls)
+            }
+            break
+        }
+        case(287) {
+            // stat -> label
+            // skip double colon
+            luaX_next(ls)
+            labelstat(ls, str_checkname(ls), line)
+            break
+        }
+        case(273) {
+            // stat -> retstat
+            // skip RETURN
+            luaX_next(ls)
+            retstat(ls)
+            break
+        }
+        case(257) {
+            // stat -> breakstat
+            breakstat(ls)
+            break
+        }
+        case(265) {
+            // stat -> 'goto' NAME
+            // skip 'goto'
+            luaX_next(ls)
+            gotostat(ls)
+            break
+        }
+        case(_) {
+            // stat -> func | assignment
+            exprstat(ls)
+            break
+        }
     }
     // free registers
     ls.fs.freereg = uint8(__::luaY_nvarstack(ls.fs))
@@ -2082,7 +2217,7 @@ def luaY_parser(var L : lua_State?; var z : Zio?; var buff : Mbuffer?; var dyd :
     mainfunc(addr(lexstate), addr(funcstate))
     // all scopes should be correctly finished
     // remove scanner's table
-    L.top.p = L.top.p - 1
+    L.top.p--
     // closure is on the stack, too
     return cl
 }

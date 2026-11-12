@@ -4,7 +4,9 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/c_switch
 require c_runtime/cstr
+require c_runtime/int_of
 require c_runtime/variadic
 require crt
 require lapi
@@ -14,7 +16,10 @@ require lobject_h_cluster
 
 var private c2das_empty : uint8[1] = fixed_array(uint8(0))
 
-var private tab_funcs : luaL_Reg[8] = fixed_array(luaL_Reg(name = cstr("concat"), func = @@tconcat), luaL_Reg(name = cstr("insert"), func = @@tinsert), luaL_Reg(name = cstr("pack"), func = @@tpack), luaL_Reg(name = cstr("unpack"), func = @@tunpack), luaL_Reg(name = cstr("remove"), func = @@tremove), luaL_Reg(name = cstr("move"), func = @@tmove), luaL_Reg(name = cstr("sort"), func = @@sort), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private tab_funcs : luaL_Reg[8] = fixed_array(luaL_Reg(name = cstr("concat"), func = @@tconcat), luaL_Reg(name = cstr("insert"), func = @@tinsert),
+        luaL_Reg(name = cstr("pack"), func = @@tpack), luaL_Reg(name = cstr("unpack"), func = @@tunpack), luaL_Reg(name = cstr("remove"), func = @@tremove),
+        luaL_Reg(name = cstr("move"), func = @@tmove), luaL_Reg(name = cstr("sort"), func = @@sort),
+        luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
 let private LUA_TNIL = 0
 let private LUA_TTABLE = 5
@@ -31,7 +36,7 @@ let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64
 
 def private checkfield(var L : lua_State?; var key : uint8?; n : int) : int {
     lua_pushstring(L, key)
-    return (lua_rawget(L, -n) != LUA_TNIL) ? 1 : 0
+    return int_of(lua_rawget(L, -n) != LUA_TNIL)
 }
 
 // Check that 'arg' either is a table or can behave like one (that is,
@@ -44,7 +49,7 @@ def private checktab(var L : lua_State?; arg : int; what : int) {
         // must have metatable
         var _t1 = lua_getmetatable(L, arg) != 0
         if (_t1) {
-            var _t0 = !((what & TAB_R) != 0)
+            var _t0 = (what & TAB_R) == 0
             if (!_t0) {
                 n++
                 _t0 = checkfield(L, cstr("__index"), n) != 0
@@ -53,7 +58,7 @@ def private checktab(var L : lua_State?; arg : int; what : int) {
         }
         var _t3 = _t1
         if (_t3) {
-            var _t2 = !((what & TAB_W) != 0)
+            var _t2 = (what & TAB_W) == 0
             if (!_t2) {
                 n++
                 _t2 = checkfield(L, cstr("__newindex"), n) != 0
@@ -62,7 +67,7 @@ def private checktab(var L : lua_State?; arg : int; what : int) {
         }
         var _t5 = _t3
         if (_t5) {
-            var _t4 = !((what & TAB_L) != 0)
+            var _t4 = (what & TAB_L) == 0
             if (!_t4) {
                 n++
                 _t4 = checkfield(L, cstr("__len"), n) != 0
@@ -86,29 +91,34 @@ def private tinsert(var L : lua_State?) : int {
     var e : int64 = luaL_len(L, 1)
     // first empty element
     e += int64(1)
-    let _cond = lua_gettop(L)
-    if (_cond == 2) {
-        // called with only 2 arguments
-        // insert new element at the end
-        pos = e
-    } elif (_cond == 3) {
-        {
-            var i : int64
-            // 2nd argument is the position
-            pos = luaL_checkinteger(L, 2)
-            // check whether 'pos' is in [1, e]
-            let _t0 = uint64(pos) - uint64(1u) < uint64(e) || luaL_argerror(L, 2, cstr("position out of bounds")) != 0
-            // move up elements
-            i = e
-            while (i > pos) {
-                lua_geti(L, 1, i - 1l)
-                // t[i] = t[i - 1]
-                lua_seti(L, 1, i)
-                i--
+    c_switch(lua_gettop(L)) {
+        case(2) {
+            // called with only 2 arguments
+            // insert new element at the end
+            pos = e
+            break
+        }
+        case(3) {
+            {
+                var i : int64
+                // 2nd argument is the position
+                pos = luaL_checkinteger(L, 2)
+                // check whether 'pos' is in [1, e]
+                let _t0 = uint64(pos) - uint64(1u) < uint64(e) || luaL_argerror(L, 2, cstr("position out of bounds")) != 0
+                // move up elements
+                i = e
+                while (i > pos) {
+                    lua_geti(L, 1, i - 1l)
+                    // t[i] = t[i - 1]
+                    lua_seti(L, 1, i)
+                    i--
+                }
+                break
             }
         }
-    } else {
-        return luaL_error`va(L, cstr("wrong number of arguments to 'insert'"), VaNone())
+        case(_) {
+            return luaL_error`va(L, cstr("wrong number of arguments to 'insert'"), VaNone())
+        }
     }
     // t[pos] = v
     lua_seti(L, 1, pos)
@@ -158,7 +168,7 @@ def private tmove(var L : lua_State?) : int {
         // number of elements to move
         n = e - f + 1l
         let _t1 = t <= 9223372036854775807l - n + 1l || luaL_argerror(L, 4, cstr("destination wrap around")) != 0
-        if (t > e || t <= f || (tt != 1 && !(lua_compare(L, 1, tt, LUA_OPEQ) != 0))) {
+        if (t > e || t <= f || (tt != 1 && lua_compare(L, 1, tt, LUA_OPEQ) == 0)) {
             for (i1 in range64(n)) {
                 lua_geti(L, 1, f + i1)
                 lua_seti(L, tt, t + i1)
@@ -179,7 +189,7 @@ def private tmove(var L : lua_State?) : int {
 
 def private addfield(var L : lua_State?; var b : luaL_Buffer?; i : int64) {
     lua_geti(L, 1, i)
-    if (!(lua_isstring(L, -1) != 0)) {
+    if (lua_isstring(L, -1) == 0) {
         luaL_error`va(L, cstr("invalid value (%s) at index %I in table for 'concat'"), (lua_typename(L, lua_type(L, -1)), i))
     }
     luaL_addvalue(b)
@@ -242,7 +252,7 @@ def private tunpack(var L : lua_State?) : int {
     var _t0 = n >= uint64(2147483647u)
     if (!_t0) {
         n++
-        _t0 = !(lua_checkstack(L, int(n)) != 0)
+        _t0 = lua_checkstack(L, int(n)) == 0
     }
     if (_t0) {
         return luaL_error`va(L, cstr("too many results to unpack"), VaNone())
@@ -268,8 +278,10 @@ def private l_randomizePivot : uint {
     var buff : uint[4]
     var i : uint
     var rnd : uint = 0u
-    crt::memcpy(reinterpret<void?>(addr(buff[0])), reinterpret<void?>(addr(c)), uint64(typeinfo sizeof(type<int64>)) / uint64(typeinfo sizeof(type<uint>)) * uint64(typeinfo sizeof(type<uint>)))
-    crt::memcpy(reinterpret<void?>(addr(buff[0]) + uint64(typeinfo sizeof(type<int64>)) / uint64(typeinfo sizeof(type<uint>))), reinterpret<void?>(addr(t)), uint64(typeinfo sizeof(type<int64>)) / uint64(typeinfo sizeof(type<uint>)) * uint64(typeinfo sizeof(type<uint>)))
+    crt::memcpy(reinterpret<void?>(addr(buff[0])), reinterpret<void?>(addr(c)),
+            uint64(typeinfo sizeof(type<int64>)) / uint64(typeinfo sizeof(type<uint>)) * uint64(typeinfo sizeof(type<uint>)))
+    crt::memcpy(reinterpret<void?>(addr(buff[0]) + uint64(typeinfo sizeof(type<int64>)) / uint64(typeinfo sizeof(type<uint>))), reinterpret<void?>(addr(t)),
+            uint64(typeinfo sizeof(type<int64>)) / uint64(typeinfo sizeof(type<uint>)) * uint64(typeinfo sizeof(type<uint>)))
     i = 0u
     while (uint64(i) < uint64(typeinfo sizeof(type<uint[4]>)) / uint64(typeinfo sizeof(type<uint>))) {
         rnd += buff[i]
@@ -325,7 +337,7 @@ def private partition(var L : lua_State?; lo : uint; up : uint) : uint {
         while (true) {
             i++
             lua_geti(L, 1, int64(i))
-            if (!(sort_comp(L, -1, -2) != 0)) {
+            if (sort_comp(L, -1, -2) == 0) {
                 break
             }
             // a[i] < P but a[up - 1] == P ??
@@ -340,7 +352,7 @@ def private partition(var L : lua_State?; lo : uint; up : uint) : uint {
         while (true) {
             j--
             lua_geti(L, 1, int64(j))
-            if (!(sort_comp(L, -3, -1) != 0)) {
+            if (sort_comp(L, -3, -1) == 0) {
                 break
             }
             // j < i but a[j] > P ??

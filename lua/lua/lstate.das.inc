@@ -159,7 +159,7 @@ def private stack_init(var L1 : lua_State?; var L : lua_State?) {
     ci.nresults = int16(0)
     // 'function' entry for this 'ci'
     addr(L1.top.p.val).tt_ = uint8(LUA_TNIL | (0 << 4))
-    L1.top.p = L1.top.p + 1
+    L1.top.p++
     ci.top.p = L1.top.p + LUA_MINSTACK
     L1.ci = ci
 }
@@ -266,7 +266,8 @@ def private close_state(var L : lua_State?) {
     luaM_free_(L, reinterpret<void?>(L.l_G.strt.hash), uint64(L.l_G.strt.size) * uint64(typeinfo sizeof(type<TString?>)))
     freestack(L)
     // free main block
-    invoke(g.frealloc, g.ud, reinterpret<void?>(reinterpret<LX?>(reinterpret<uint8?>(L) + -int64(uint64(typeinfo offsetof < l > (type<LX>))))), uint64(typeinfo sizeof(type<LG>)), 0ul)
+    invoke(g.frealloc, g.ud, reinterpret<void?>(reinterpret<LX?>(reinterpret<uint8?>(L) + -int64(uint64(typeinfo offsetof < l > (type<LX>))))),
+            uint64(typeinfo sizeof(type<LG>)), 0ul)
 }
 
 [c_function]
@@ -287,14 +288,15 @@ def lua_newthread(var L : lua_State?) : lua_State? {
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
         io.tt_ = uint8((LUA_TTHREAD | (0 << 4)) | BIT_ISCOLLECTABLE)
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
     preinit_thread(L1, g)
     c_volatile_store(L1.hookmask, c_volatile_load(L.hookmask))
     L1.basehookcount = L.basehookcount
     c_volatile_store(L1.hook, c_volatile_load(L.hook))
     L1.hookcount = L1.basehookcount
     // initialize L1 extra space
-    crt::memcpy(reinterpret<void?>(reinterpret<uint8?>(L1) + -int64(LUA_EXTRASPACE)), reinterpret<void?>(reinterpret<uint8?>(g.mainthread) + -int64(LUA_EXTRASPACE)), LUA_EXTRASPACE)
+    crt::memcpy(reinterpret<void?>(reinterpret<uint8?>(L1) + -int64(LUA_EXTRASPACE)),
+            reinterpret<void?>(reinterpret<uint8?>(g.mainthread) + -int64(LUA_EXTRASPACE)), LUA_EXTRASPACE)
     // init stack
     stack_init(L1, L)
     return L1
@@ -445,7 +447,8 @@ def luaE_warning(var L : lua_State?; var msg : uint8?; tocont : int) {
 def luaE_warnerror(var L : lua_State?; var _c_where : uint8?) {
     // error object
     var errobj : TValue? = addr((L.top.p - 1).val)
-    var msg : uint8? = ((int(errobj.tt_) & 15) == LUA_TSTRING) ? addr(addr(reinterpret<GCUnion?>(errobj.value_.gc).ts).contents[0]) : cstr("error object is not a string")
+    var msg : uint8? = ((int(errobj.tt_) & 15) ==
+            LUA_TSTRING) ? addr(addr(reinterpret<GCUnion?>(errobj.value_.gc).ts).contents[0]) : cstr("error object is not a string")
     // produce warning "error in %s (%s)" (where, msg)
     luaE_warning(L, cstr("error in "), 1)
     luaE_warning(L, _c_where, 1)

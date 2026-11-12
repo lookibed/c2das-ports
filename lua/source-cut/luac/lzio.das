@@ -23,8 +23,8 @@ def luaZ_fill(var z : Zio?) : int {
     z.n = size - 1ul
     z.p = buff
     var _t0 = z.p
-    z.p = z.p + 1
-    return int(uint8(deref(_t0)))
+    z.p++
+    return int(*_t0)
 }
 
 def luaZ_init(var L : lua_State?; var z : Zio?; reader : function<(var a0 : lua_State?; var a1 : void?; var a2 : uint64?) : uint8?>; var data : void?) {
@@ -49,14 +49,14 @@ def luaZ_read(var z : Zio?; var b : void?; var n : uint64) : uint64 {
             } else {
                 // luaZ_fill consumed first byte; put it back
                 z.n++
-                z.p = z.p - 1
+                z.p--
             }
         }
         // min. between n and z->n
         m = (n <= z.n) ? n : z.n
         crt::memcpy(b, reinterpret<void?>(z.p), m)
         z.n -= m
-        z.p = z.p + m
+        z.p += m
         b = reinterpret<void?>(reinterpret<uint8?>(b) + m)
         n -= m
     }

@@ -3,7 +3,9 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_do_while
 require c_runtime/c_function
+require c_runtime/c_switch
 require c_runtime/cstr
 require lobject_h_cluster
 
@@ -39,14 +41,11 @@ def private dumpByte(var D : DumpState?; y : int) {
 def private dumpSize(var D : DumpState?; var x : uint64) {
     var buff : uint8[10]
     var n : int = 0
-    while (true) {
+    c_do_while(x != 0ul) {
         // fill buffer in reverse order
         n++
         buff[DIBS - uint64(n)] = uint8(x & 127ul)
         x >>= 7ul
-        if (!(x != 0ul)) {
-            break
-        }
     }
     // mark last byte
     buff[DIBS - 1ul] = uint8(int(buff[DIBS - 1ul]) | 128)
@@ -72,7 +71,7 @@ def private dumpString(var D : DumpState?; var s : TString?) {
     if (s == null) {
         dumpSize(D, 0ul)
     } else {
-        var size : uint64 = int(s.shrlen) != 255 ? uint64(s.shrlen) : s.u.lnglen
+        var size : uint64 = s.shrlen != 255 ? uint64(s.shrlen) : s.u.lnglen
         var str : uint8? = addr(s.contents[0])
         dumpSize(D, size + 1ul)
         dumpBlock(D, reinterpret<void?>(str), size * uint64(typeinfo sizeof(type<uint8>)))
@@ -93,14 +92,21 @@ def private dumpConstants(var D : DumpState?; var f : Proto?) {
         var o : TValue? = addr(f.k[i])
         var tt : int = int(o.tt_) & 63
         dumpByte(D, tt)
-        let _cond = tt
-        if (_cond == 19) {
-            dumpNumber(D, o.value_.n)
-        } elif (_cond == 3) {
-            dumpInteger(D, o.value_.i)
-        } elif (_cond == 4 || _cond == 20) {
-            dumpString(D, addr(reinterpret<GCUnion?>(o.value_.gc).ts))
-        } else {
+        c_switch(tt) {
+            case(19) {
+                dumpNumber(D, o.value_.n)
+                break
+            }
+            case(3) {
+                dumpInteger(D, o.value_.i)
+                break
+            }
+            case(4, 20) {
+                dumpString(D, addr(reinterpret<GCUnion?>(o.value_.gc).ts))
+                break
+            }
+            case(_) {
+            }
         }
     }
 }
@@ -176,16 +182,17 @@ def private dumpHeader(var D : DumpState?) {
     dumpByte(D, LUAC_VERSION)
     dumpByte(D, LUAC_FORMAT)
     dumpBlock(D, reinterpret<void?>(cstr("\x19\x93\r\n\x1a\n")), uint64(typeinfo sizeof(type<uint8[7]>)) - uint64(typeinfo sizeof(type<uint8>)))
-    dumpByte(D, int(uint64(typeinfo sizeof(type<uint>))))
-    dumpByte(D, int(uint64(typeinfo sizeof(type<int64>))))
-    dumpByte(D, int(uint64(typeinfo sizeof(type<double>))))
+    dumpByte(D, typeinfo sizeof(type<uint>))
+    dumpByte(D, typeinfo sizeof(type<int64>))
+    dumpByte(D, typeinfo sizeof(type<double>))
     dumpInteger(D, int64(LUAC_INT))
     dumpNumber(D, LUAC_NUM)
 }
 
 // dump Lua function as precompiled chunk
 [c_function]
-def luaU_dump(var L : lua_State?; var f : Proto?; w : function<(var a0 : lua_State?; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var data : void?; strip : int) : int {
+def luaU_dump(var L : lua_State?; var f : Proto?; w : function<(var a0 : lua_State?; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var data : void?;
+              strip : int) : int {
     var D : DumpState
     D.L = L
     D.writer = w

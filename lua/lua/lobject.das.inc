@@ -5,7 +5,15 @@ struct BuffFS {
     space : uint8[199]
 }
 
-var private luaO_ceillog2_log_2 : uint8[256] = fixed_array(0u8, 1u8, 2u8, 2u8, 3u8, 3u8, 3u8, 3u8, 4u8, 4u8, 4u8, 4u8, 4u8, 4u8, 4u8, 4u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8)
+var private luaO_ceillog2_log_2 : uint8[256] = fixed_array(0u8, 1u8, 2u8, 2u8, 3u8, 3u8, 3u8, 3u8, 4u8, 4u8, 4u8, 4u8, 4u8, 4u8, 4u8, 4u8, 5u8, 5u8, 5u8, 5u8,
+        5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 5u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8,
+        6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 6u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8,
+        7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8,
+        7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 7u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8,
+        8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8,
+        8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8,
+        8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8,
+        8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8, 8u8)
 
 // Computes ceil(log2(x))
 def luaO_ceillog2(var x : uint) : int {
@@ -20,78 +28,92 @@ def luaO_ceillog2(var x : uint) : int {
 }
 
 def private intarith(var L : lua_State?; op : int; v1 : int64; v2 : int64) : int64 {
-    let _cond = op
-    if (_cond == 0) {
-        return v1 + v2
-    } elif (_cond == 1) {
-        return v1 - v2
-    } elif (_cond == 2) {
-        return v1 * v2
-    } elif (_cond == 3) {
-        return luaV_mod(L, v1, v2)
-    } elif (_cond == 6) {
-        return luaV_idiv(L, v1, v2)
-    } elif (_cond == 7) {
-        return v1 & v2
-    } elif (_cond == 8) {
-        return v1 | v2
-    } elif (_cond == 9) {
-        return v1 ^ v2
-    } elif (_cond == 10) {
-        return luaV_shiftl(v1, v2)
-    } elif (_cond == 11) {
-        return luaV_shiftl(v1, int64(0) - v2)
-    } elif (_cond == 12) {
-        return int64(0) - v1
-    } elif (_cond == 13) {
-        return int64(~0ul ^ uint64(v1))
-    } else {
-        return 0l
+    c_switch(op) {
+        case(0) {
+            return v1 + v2
+        }
+        case(1) {
+            return v1 - v2
+        }
+        case(2) {
+            return v1 * v2
+        }
+        case(3) {
+            return luaV_mod(L, v1, v2)
+        }
+        case(6) {
+            return luaV_idiv(L, v1, v2)
+        }
+        case(7) {
+            return v1 & v2
+        }
+        case(8) {
+            return v1 | v2
+        }
+        case(9) {
+            return v1 ^ v2
+        }
+        case(10) {
+            return luaV_shiftl(v1, v2)
+        }
+        case(11) {
+            return luaV_shiftl(v1, int64(0) - v2)
+        }
+        case(12) {
+            return int64(0) - v1
+        }
+        case(13) {
+            return int64(~0ul ^ uint64(v1))
+        }
+        case(_) {
+            return 0l
+        }
     }
 }
 
 def private numarith(var L : lua_State?; op : int; v1 : double; v2 : double) : double {
-    let _cond = op
-    if (_cond == 0) {
-        return v1 + v2
-    } elif (_cond == 1) {
-        return v1 - v2
-    } elif (_cond == 2) {
-        return v1 * v2
-    } elif (_cond == 5) {
-        return v1 / v2
-    } elif (_cond == 4) {
-        return v2 == 2.0lf ? v1 * v1 : math::pow(v1, v2)
-    } elif (_cond == 6) {
-        return math::floor(v1 / v2)
-    } elif (_cond == 12) {
-        return -v1
-    } elif (_cond == 3) {
-        return luaV_modf(L, v1, v2)
-    } else {
-        return 0.0lf
+    c_switch(op) {
+        case(0) {
+            return v1 + v2
+        }
+        case(1) {
+            return v1 - v2
+        }
+        case(2) {
+            return v1 * v2
+        }
+        case(5) {
+            return v1 / v2
+        }
+        case(4) {
+            return v2 == 2.0lf ? v1 * v1 : math::pow(v1, v2)
+        }
+        case(6) {
+            return math::floor(v1 / v2)
+        }
+        case(12) {
+            return -v1
+        }
+        case(3) {
+            return luaV_modf(L, v1, v2)
+        }
+        case(_) {
+            return 0.0lf
+        }
     }
 }
 
 [c_function]
 def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValue?; var res : TValue?) : int {
-    let _cond = op
-    while (true) {
-        var _flag = false
-        _flag ||= _cond == 7
-        _flag ||= _cond == 8
-        _flag ||= _cond == 9
-        _flag ||= _cond == 10
-        _flag ||= _cond == 11
-        _flag ||= _cond == 13
-        if (_flag) {
+    c_switch(op) {
+        case(7, 8, 9, 10, 11, 13) {
             {
                 // operate only on integers
                 var i1 : int64
                 var i2 : int64
                 var _t0 : int
                 if (int(p1.tt_) == (LUA_TNUMBER | (0 << 4))) {
-                    deref(addr(i1)) = p1.value_.i
+                    *addr(i1) = p1.value_.i
                     _t0 = 1
                 } else {
                     _t0 = luaV_tointegerns(p1, addr(i1), F2Imod.F2Ieq)
@@ -100,7 +122,7 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                 if (_t2) {
                     var _t1 : int
                     if (int(p2.tt_) == (LUA_TNUMBER | (0 << 4))) {
-                        deref(addr(i2)) = p2.value_.i
+                        *addr(i2) = p2.value_.i
                         _t1 = 1
                     } else {
                         _t1 = luaV_tointegerns(p2, addr(i2), F2Imod.F2Ieq)
@@ -120,9 +142,7 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                 }
             }
         }
-        _flag ||= _cond == 5
-        _flag ||= _cond == 4
-        if (_flag) {
+        case(5, 4) {
             {
                 // operate only on floats
                 var n1 : double
@@ -172,8 +192,7 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                 }
             }
         }
-        _flag ||= !(_cond == 7 || _cond == 8 || _cond == 9 || _cond == 10 || _cond == 11 || _cond == 13 || _cond == 5 || _cond == 4)
-        if (_flag) {
+        case(_) {
             {
                 // other operations
                 var n1 : double
@@ -232,14 +251,13 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                 }
             }
         }
-        break
     }
     return 0
 }
 
 [c_function]
 def luaO_arith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValue?; var res : StackValue?) {
-    if (!(luaO_rawarith(L, op, p1, p2, addr(res.val)) != 0)) {
+    if (luaO_rawarith(L, op, p1, p2, addr(res.val)) == 0) {
         // could not perform raw operation; try metamethod
         luaT_trybinTM(L, p1, p2, res, enum_from_int(type<TMS>, op - LUA_OPADD + int(TMS.TM_ADD)))
     }
@@ -255,11 +273,11 @@ def luaO_hexavalue(c : int) : int {
 
 [c_function]
 def private isneg(var s : uint8 ??) : int {
-    if (int(deref(deref(s))) == '-') {
-        deref(s) = deref(s) + 1
+    if (**s == '-') {
+        (*s)++
         return 1
-    } elif (int(deref(deref(s))) == '+') {
-        deref(s) = deref(s) + 1
+    } elif (**s == '+') {
+        (*s)++
     }
     return 0
 }
@@ -271,17 +289,17 @@ def private isneg(var s : uint8 ??) : int {
 def private l_str2dloc(var s : uint8?; var result : double?; mode : int) : uint8? {
     var endptr : uint8?
     // try to convert
-    deref(result) = (mode == 'x') ? crt::strtod(s, addr(endptr)) : crt::strtod(s, addr(endptr))
+    *result = (mode == 'x') ? crt::strtod(s, addr(endptr)) : crt::strtod(s, addr(endptr))
     // nothing recognized?
     if (intptr(endptr) == intptr(reinterpret<uint8?>(s))) {
         return null
     }
     // skip trailing spaces
-    while ((int(luai_ctype_[int(uint8(deref(endptr))) + 1]) & (1 << SPACEBIT)) != 0) {
-        endptr = endptr + 1
+    while ((int(luai_ctype_[int(*endptr) + 1]) & (1 << SPACEBIT)) != 0) {
+        endptr++
     }
     // OK iff no trailing chars
-    return (int(deref(endptr)) == '\0') ? endptr : null
+    return (*endptr == '\0') ? endptr : null
 }
 
 // Convert string 's' to a Lua number (put in 'result') handling the
@@ -300,7 +318,7 @@ def private l_str2d(var s : uint8?; var result : double?) : uint8? {
     var endptr : uint8?
     // look for special chars
     var pmode : uint8? = crt::strpbrk(s, cstr(".xXnN"))
-    var mode : int = pmode != null ? (int(uint8(deref(pmode))) | ('A' ^ 'a')) : 0
+    var mode : int = pmode != null ? (int(*pmode) | ('A' ^ 'a')) : 0
     // reject 'inf' and 'nan'
     if (mode == 'n') {
         return null
@@ -335,23 +353,23 @@ def private l_str2int(var s : uint8?; var result : int64?) : uint8? {
     var empty : int = 1
     var neg : int
     // skip initial spaces
-    while ((int(luai_ctype_[int(uint8(deref(s))) + 1]) & (1 << SPACEBIT)) != 0) {
-        s = s + 1
+    while ((int(luai_ctype_[int(*s) + 1]) & (1 << SPACEBIT)) != 0) {
+        s++
     }
     neg = isneg(addr(s))
-    if (int(s[0]) == '0' && (int(s[1]) == 'x' || int(s[1]) == 'X')) {
+    if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
         // hex?
         // skip '0x'
-        s = s + 2
-        while ((int(luai_ctype_[int(uint8(deref(s))) + 1]) & (1 << XDIGITBIT)) != 0) {
-            a = a * 16ul + uint64(luaO_hexavalue(int(deref(s))))
+        s += 2
+        while ((int(luai_ctype_[int(*s) + 1]) & (1 << XDIGITBIT)) != 0) {
+            a = a * 16ul + uint64(luaO_hexavalue(int(*s)))
             empty = 0
-            s = s + 1
+            s++
         }
     } else {
         // decimal
-        while ((int(luai_ctype_[int(uint8(deref(s))) + 1]) & (1 << DIGITBIT)) != 0) {
-            var d : int = int(deref(s)) - '0'
+        while ((int(luai_ctype_[int(*s) + 1]) & (1 << DIGITBIT)) != 0) {
+            var d : int = int(*s) - '0'
             // overflow?
             if (a >= MAXBY10 && (a > MAXBY10 || d > MAXLASTD + neg)) {
                 // do not accept it (as integer)
@@ -359,18 +377,18 @@ def private l_str2int(var s : uint8?; var result : int64?) : uint8? {
             }
             a = a * 10ul + uint64(d)
             empty = 0
-            s = s + 1
+            s++
         }
     }
     // skip trailing spaces
-    while ((int(luai_ctype_[int(uint8(deref(s))) + 1]) & (1 << SPACEBIT)) != 0) {
-        s = s + 1
+    while ((int(luai_ctype_[int(*s) + 1]) & (1 << SPACEBIT)) != 0) {
+        s++
     }
     // something wrong in the numeral
-    if (empty != 0 || int(deref(s)) != '\0') {
+    if (empty != 0 || *s != '\0') {
         return null
     } else {
-        deref(result) = int64(neg != 0 ? uint64(0u) - a : a)
+        *result = int64(neg != 0 ? uint64(0u) - a : a)
         return s
     }
 }
@@ -418,7 +436,7 @@ def luaO_utf8esc(var buff : uint8?; var x : uint64) : int {
         // maximum that fits in first byte
         var mfb : uint = 63u
         // add continuation bytes
-        while (true) {
+        c_do_while(x > uint64(mfb)) {
             let _t0 = n
             n++
             buff[UTF8BUFFSZ - _t0] = uint8(128ul | (x & 63ul))
@@ -426,9 +444,6 @@ def luaO_utf8esc(var buff : uint8?; var x : uint64) : int {
             x >>= 6ul
             // now there is one less bit available in first byte
             mfb >>= 1u
-            if (!(x > uint64(mfb))) {
-                break
-            }
         }
         // still needs continuation byte?
         // add first byte
@@ -446,7 +461,7 @@ def private tostringbuff(var obj : TValue?; var buff : uint8?) : int {
     } else {
         len = snprintf(buff, uint64(MAXNUMBER2STR), cstr("%.14g"), obj.value_.n)
         // looks like an int?
-        if (int(buff[crt::strspn(buff, cstr("-0123456789"))]) == '\0') {
+        if (buff[crt::strspn(buff, cstr("-0123456789"))] == '\0') {
             let _t0 = len
             len++
             buff[_t0] = reinterpret<lconv?>(crt::localeconv()).decimal_point[0]
@@ -489,9 +504,9 @@ def private pushstr(var buff : BuffFS?; var str : uint8?; lstr : uint64) {
         io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
     }
     // may use one slot from EXTRA_STACK
-    L.top.p = L.top.p + 1
+    L.top.p++
     // no previous string on the stack?
-    if (!(buff.pushed != 0)) {
+    if (buff.pushed == 0) {
         // now there is one
         buff.pushed = 1
     } else {
@@ -566,76 +581,93 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
         // add 'fmt' up to '%'
         addstr2buff(addr(buff), fmt, uint64(int64(e - fmt)))
         // conversion specifier
-        let _cond = int(e[1])
-        if (_cond == 's') {
-            {
-                // zero-terminated string
-                var s : uint8? = reinterpret<uint8?>(va_p(argp))
-                if (s == null) {
-                    s = cstr("(null)")
-                }
-                addstr2buff(addr(buff), s, crt::strlen(s))
-            }
-        } elif (_cond == 'c') {
-            {
-                // an 'int' as a character
-                var c : uint8 = uint8(uint8(int(va_i(argp))))
-                addstr2buff(addr(buff), addr(c), uint64(typeinfo sizeof(type<uint8>)))
-            }
-        } elif (_cond == 'd') {
-            {
-                // an 'int'
-                var num : TValue
+        c_switch(int(e[1])) {
+            case('s') {
                 {
-                    var io : TValue? = addr(num)
-                    io.value_.i = int64(int(va_i(argp)))
-                    io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+                    // zero-terminated string
+                    var s : uint8? = reinterpret<uint8?>(va_p(argp))
+                    if (s == null) {
+                        s = cstr("(null)")
+                    }
+                    addstr2buff(addr(buff), s, crt::strlen(s))
+                    break
                 }
-                addnum2buff(addr(buff), addr(num))
             }
-        } elif (_cond == 'I') {
-            {
-                // a 'lua_Integer'
-                var num : TValue
+            case('c') {
                 {
-                    var io : TValue? = addr(num)
-                    io.value_.i = va_i(argp)
-                    io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+                    // an 'int' as a character
+                    var c : uint8 = uint8(int(va_i(argp)))
+                    addstr2buff(addr(buff), addr(c), uint64(typeinfo sizeof(type<uint8>)))
+                    break
                 }
-                addnum2buff(addr(buff), addr(num))
             }
-        } elif (_cond == 'f') {
-            {
-                // a 'lua_Number'
-                var num : TValue
+            case('d') {
                 {
-                    var io : TValue? = addr(num)
-                    io.value_.n = va_d(argp)
-                    io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
+                    // an 'int'
+                    var num : TValue
+                    {
+                        var io : TValue? = addr(num)
+                        io.value_.i = int64(int(va_i(argp)))
+                        io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+                    }
+                    addnum2buff(addr(buff), addr(num))
+                    break
                 }
-                addnum2buff(addr(buff), addr(num))
             }
-        } elif (_cond == 'p') {
-            {
-                // a pointer
-                // enough space for '%p'
-                var sz : int = int(3ul * uint64(typeinfo sizeof(type<void?>)) + 8ul)
-                var bf : uint8? = getbuff(addr(buff), sz)
-                var p : void? = reinterpret<void?>(va_p(argp))
-                var len : int = snprintf(bf, uint64(sz), cstr("%p"), p)
-                addr(buff).blen += len
+            case('I') {
+                {
+                    // a 'lua_Integer'
+                    var num : TValue
+                    {
+                        var io : TValue? = addr(num)
+                        io.value_.i = va_i(argp)
+                        io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+                    }
+                    addnum2buff(addr(buff), addr(num))
+                    break
+                }
             }
-        } elif (_cond == 'U') {
-            {
-                // a 'long' as a UTF-8 sequence
-                var bf : uint8[8]
-                var len : int = luaO_utf8esc(addr(bf[0]), uint64(va_i(argp)))
-                addstr2buff(addr(buff), addr(bf[0]) + UTF8BUFFSZ + -(len), uint64(len))
+            case('f') {
+                {
+                    // a 'lua_Number'
+                    var num : TValue
+                    {
+                        var io : TValue? = addr(num)
+                        io.value_.n = va_d(argp)
+                        io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
+                    }
+                    addnum2buff(addr(buff), addr(num))
+                    break
+                }
             }
-        } elif (_cond == '%') {
-            addstr2buff(addr(buff), cstr("%"), 1ul)
-        } else {
-            luaG_runerror`va(L, cstr("invalid option '%%%c' to 'lua_pushfstring'"), (int(e[1]),))
+            case('p') {
+                {
+                    // a pointer
+                    // enough space for '%p'
+                    var sz : int = int(3ul * uint64(typeinfo sizeof(type<void?>)) + 8ul)
+                    var bf : uint8? = getbuff(addr(buff), sz)
+                    var p : void? = reinterpret<void?>(va_p(argp))
+                    var len : int = snprintf(bf, uint64(sz), cstr("%p"), p)
+                    addr(buff).blen += len
+                    break
+                }
+            }
+            case('U') {
+                {
+                    // a 'long' as a UTF-8 sequence
+                    var bf : uint8[8]
+                    var len : int = luaO_utf8esc(addr(bf[0]), uint64(va_i(argp)))
+                    addstr2buff(addr(buff), addr(bf[0]) + UTF8BUFFSZ + -(len), uint64(len))
+                    break
+                }
+            }
+            case('%') {
+                addstr2buff(addr(buff), cstr("%"), 1ul)
+                break
+            }
+            case(_) {
+                luaG_runerror`va(L, cstr("invalid option '%%%c' to 'lua_pushfstring'"), (int(e[1]),))
+            }
         }
         // skip '%' and the specifier
         fmt = e + 2
@@ -661,25 +693,26 @@ def luaO_chunkid(var out : uint8?; var source : uint8?; var srclen : uint64) {
     // free space in buffer
     var bufflen : uint64 = uint64(LUA_IDSIZE)
     // 'literal' source
-    if (int(deref(source)) == '=') {
+    if (*source == '=') {
         // small enough?
         if (srclen <= bufflen) {
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1), srclen * uint64(typeinfo sizeof(type<uint8>)))
         } else {
             // truncate it
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1), (bufflen - 1ul) * uint64(typeinfo sizeof(type<uint8>)))
-            out = out + (bufflen - 1ul)
-            deref(out) = uint8('\0')
+            out += bufflen - 1ul
+            *out = uint8('\0')
         }
-    } elif (int(deref(source)) == '@') {
+    } elif (*source == '@') {
         // file name
         // small enough?
         if (srclen <= bufflen) {
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1), srclen * uint64(typeinfo sizeof(type<uint8>)))
         } else {
             // add '...' before rest of name
-            crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(cstr("...")), (uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul) * uint64(typeinfo sizeof(type<uint8>)))
-            out = out + (uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul)
+            crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(cstr("...")),
+                    (uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul) * uint64(typeinfo sizeof(type<uint8>)))
+            out += uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul
             bufflen -= uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1 + srclen + -int64(bufflen)), bufflen * uint64(typeinfo sizeof(type<uint8>)))
         }
@@ -688,15 +721,16 @@ def luaO_chunkid(var out : uint8?; var source : uint8?; var srclen : uint64) {
         // find first new line (if any)
         var nl : uint8? = crt::strchr(source, '\n')
         // add prefix
-        crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(cstr("[string \"")), (uint64(typeinfo sizeof(type<uint8[10]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul) * uint64(typeinfo sizeof(type<uint8>)))
-        out = out + (uint64(typeinfo sizeof(type<uint8[10]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul)
+        crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(cstr("[string \"")),
+                (uint64(typeinfo sizeof(type<uint8[10]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul) * uint64(typeinfo sizeof(type<uint8>)))
+        out += uint64(typeinfo sizeof(type<uint8[10]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul
         // save space for prefix+suffix+'\0'
         bufflen -= uint64(typeinfo sizeof(type<uint8[15]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul + 1ul
         // small one-line source?
         if (srclen < bufflen && nl == null) {
             // keep it
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source), srclen * uint64(typeinfo sizeof(type<uint8>)))
-            out = out + srclen
+            out += srclen
         } else {
             // stop at first newline
             if (nl != null) {
@@ -706,11 +740,13 @@ def luaO_chunkid(var out : uint8?; var source : uint8?; var srclen : uint64) {
                 srclen = bufflen
             }
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source), srclen * uint64(typeinfo sizeof(type<uint8>)))
-            out = out + srclen
-            crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(cstr("...")), (uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul) * uint64(typeinfo sizeof(type<uint8>)))
-            out = out + (uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul)
+            out += srclen
+            crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(cstr("...")),
+                    (uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul) * uint64(typeinfo sizeof(type<uint8>)))
+            out += uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul
         }
-        crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(cstr("\"]")), (uint64(typeinfo sizeof(type<uint8[3]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul + 1ul) * uint64(typeinfo sizeof(type<uint8>)))
+        crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(cstr("\"]")),
+                (uint64(typeinfo sizeof(type<uint8[3]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul + 1ul) * uint64(typeinfo sizeof(type<uint8>)))
     }
 }
 

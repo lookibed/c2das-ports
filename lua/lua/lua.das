@@ -9,7 +9,9 @@ require c_runtime/c_args
 require c_runtime/c_function
 require c_runtime/c_jit_build
 require c_runtime/c_signal
+require c_runtime/c_switch
 require c_runtime/cstr
+require c_runtime/int_of
 require c_runtime/printf
 require c_runtime/variadic
 require c_types
@@ -81,14 +83,16 @@ def private laction(i : int) {
 def private print_usage(var badoption : uint8?) {
     fprintf(crt::c_stderr(), cstr("%s: "), progname)
     crt::fflush(crt::c_stderr())
-    if (int(badoption[1]) == 'e' || int(badoption[1]) == 'l') {
+    if (badoption[1] == 'e' || badoption[1] == 'l') {
         fprintf(crt::c_stderr(), cstr("'%s' needs argument\n"), badoption)
         crt::fflush(crt::c_stderr())
     } else {
         fprintf(crt::c_stderr(), cstr("unrecognized option '%s'\n"), badoption)
         crt::fflush(crt::c_stderr())
     }
-    fprintf(crt::c_stderr(), cstr("usage: %s [options] [script [args]]\nAvailable options are:\n  -e stat   execute string 'stat'\n  -i        enter interactive mode after executing 'script'\n  -l mod    require library 'mod' into global 'mod'\n  -l g=mod  require library 'mod' into global 'g'\n  -v        show version information\n  -E        ignore environment variables\n  -W        turn warnings on\n  --        stop handling options\n  -         stop handling options and execute stdin\n"), progname)
+    fprintf(crt::c_stderr(),
+            cstr("usage: %s [options] [script [args]]\nAvailable options are:\n  -e stat   execute string 'stat'\n  -i        enter interactive mode after executing 'script'\n  -l mod    require library 'mod' into global 'mod'\n  -l g=mod  require library 'mod' into global 'g'\n  -v        show version information\n  -E        ignore environment variables\n  -W        turn warnings on\n  --        stop handling options\n  -         stop handling options and execute stdin\n"),
+            progname)
     crt::fflush(crt::c_stderr())
 }
 
@@ -166,7 +170,8 @@ def private docall(var L : lua_State?; narg : int; nres : int) : int {
 
 [c_function]
 def private print_version {
-    crt::fwrite(reinterpret<void?>(cstr("Lua 5.4.8  Copyright (C) 1994-2025 Lua.org, PUC-Rio")), uint64(typeinfo sizeof(type<uint8>)), crt::strlen(cstr("Lua 5.4.8  Copyright (C) 1994-2025 Lua.org, PUC-Rio")), crt::c_stdout())
+    crt::fwrite(reinterpret<void?>(cstr("Lua 5.4.8  Copyright (C) 1994-2025 Lua.org, PUC-Rio")), uint64(typeinfo sizeof(type<uint8>)),
+            crt::strlen(cstr("Lua 5.4.8  Copyright (C) 1994-2025 Lua.org, PUC-Rio")), crt::c_stdout())
     crt::fwrite(reinterpret<void?>(cstr("\n")), uint64(typeinfo sizeof(type<uint8>)), 1ul, crt::c_stdout())
     crt::fflush(crt::c_stdout())
 }
@@ -221,12 +226,12 @@ def private dolibrary(var L : lua_State?; var globname : uint8?) : int {
         // module name is equal to global name
         modname = globname
         // look for a suffix mark
-        suffix = crt::strchr(modname, int(deref(cstr("-"))))
+        suffix = crt::strchr(modname, int(*cstr("-")))
     } else {
         // global name ends here
-        deref(modname) = uint8('\0')
+        *modname = uint8('\0')
         // module name starts after the '='
-        modname = modname + 1
+        modname++
     }
     lua_getglobal(L, cstr("require"))
     lua_pushstring(L, modname)
@@ -236,7 +241,7 @@ def private dolibrary(var L : lua_State?; var globname : uint8?) : int {
         // is there a suffix mark?
         if (suffix != null) {
             // remove suffix from global name
-            deref(suffix) = uint8('\0')
+            *suffix = uint8('\0')
         }
         // globname = require(modname)
         lua_setglobal(L, globname)
@@ -299,98 +304,91 @@ def private collectargs(var argv : uint8 ??; var first : int?) : int {
         }
     } else {
         // no program name
-        deref(first) = -1
+        *first = -1
         return 0
     }
     // handle arguments
     i = 1
     while (argv[i] != null) {
-        deref(first) = i
+        *first = i
         // not an option?
-        if (int(argv[i][0]) != '-') {
+        if (argv[i][0] != '-') {
             // stop handling options
             return args
         }
         // else check option
-        let _cond = int(argv[i][1])
-        while (true) {
-            var _flag = false
-            if (_cond == '-') {
+        c_switch(int(argv[i][1])) {
+            case('-') {
                 // '--'
                 // extra characters after '--'?
-                if (int(argv[i][2]) != '\0') {
+                if (argv[i][2] != '\0') {
                     // invalid option
                     return has_error
                 }
-                deref(first) = i + 1
+                *first = i + 1
                 return args
             }
-            if (_cond == '\0') {
+            case('\0') {
                 // '-'
                 // script "name" is '-'
                 return args
             }
-            if (_cond == 'E') {
+            case('E') {
                 // extra characters?
-                if (int(argv[i][2]) != '\0') {
+                if (argv[i][2] != '\0') {
                     // invalid option
                     return has_error
                 }
                 args |= has_E
                 break
             }
-            if (_cond == 'W') {
+            case('W') {
                 // extra characters?
-                if (int(argv[i][2]) != '\0') {
+                if (argv[i][2] != '\0') {
                     // invalid option
                     return has_error
                 }
                 break
             }
-            _flag ||= _cond == 'i'
-            if (_flag) {
+            case('i') {
                 // (-i implies -v) FALLTHROUGH
                 args |= has_i
             }
-            _flag ||= _cond == 'v'
-            if (_flag) {
+            case('v') {
                 // extra characters?
-                if (int(argv[i][2]) != '\0') {
+                if (argv[i][2] != '\0') {
                     // invalid option
                     return has_error
                 }
                 args |= has_v
                 break
             }
-            _flag ||= _cond == 'e'
-            if (_flag) {
+            case('e') {
                 // FALLTHROUGH
                 args |= has_e
             }
-            _flag ||= _cond == 'l'
-            if (_flag) {
+            case('l') {
                 // both options need an argument
                 // no concatenated argument?
-                if (int(argv[i][2]) == '\0') {
+                if (argv[i][2] == '\0') {
                     // try next 'argv'
                     i++
-                    if (argv[i] == null || int(argv[i][0]) == '-') {
+                    if (argv[i] == null || argv[i][0] == '-') {
                         // no next argument or it is another option
                         return has_error
                     }
                 }
                 break
             }
-            if (!(_cond == '-' || _cond == '\0' || _cond == 'E' || _cond == 'W' || _cond == 'i' || _cond == 'v' || _cond == 'e' || _cond == 'l')) {
+            case(_) {
                 // invalid option
                 return has_error
             }
-            break
         }
         i++
     }
     // no script name
-    deref(first) = 0
+    *first = 0
     return args
 }
 
@@ -404,24 +402,28 @@ def private runargs(var L : lua_State?; var argv : uint8 ??; n : int) : int {
     while (i < n) {
         var option : int = int(argv[i][1])
         // already checked
-        let _cond = option
-        if (_cond == 'e' || _cond == 'l') {
-            {
-                var status : int
-                // both options need an argument
-                var extra : uint8? = argv[i] + 2
-                if (int(deref(extra)) == '\0') {
-                    i++
-                    extra = argv[i]
-                }
-                status = (option == 'e') ? dostring(L, extra, cstr("=(command line)")) : dolibrary(L, extra)
-                if (status != LUA_OK) {
-                    return 0
+        c_switch(option) {
+            case('e', 'l') {
+                {
+                    var status : int
+                    // both options need an argument
+                    var extra : uint8? = argv[i] + 2
+                    if (*extra == '\0') {
+                        i++
+                        extra = argv[i]
+                    }
+                    status = (option == 'e') ? dostring(L, extra, cstr("=(command line)")) : dolibrary(L, extra)
+                    if (status != LUA_OK) {
+                        return 0
+                    }
+                    break
                 }
             }
-        } elif (_cond == 'W') {
-            // warnings on
-            lua_warning(L, cstr("@on"), 0)
+            case('W') {
+                // warnings on
+                lua_warning(L, cstr("@on"), 0)
+                break
+            }
         }
         i++
     }
@@ -439,7 +441,7 @@ def private handle_luainit(var L : lua_State?) : int {
     }
     if (init == null) {
         return LUA_OK
-    } elif (int(init[0]) == '@') {
+    } elif (init[0] == '@') {
         return dofile(L, init + 1)
     } else {
         return dostring(L, init, name)
@@ -488,7 +490,7 @@ def private pushline(var L : lua_State?; firstline : int) : int {
     var prmt : uint8? = get_prompt(L, firstline)
     crt::fputs(prmt, crt::c_stdout())
     crt::fflush(crt::c_stdout())
-    var readstatus : int = crt::fgets(b, LUA_MAXINPUT, crt::c_stdin()) != null ? 1 : 0
+    var readstatus : int = int_of(crt::fgets(b, LUA_MAXINPUT, crt::c_stdin()) != null)
     // remove prompt
     lua_settop(L, -1 - 1)
     if (readstatus == 0) {
@@ -497,13 +499,13 @@ def private pushline(var L : lua_State?; firstline : int) : int {
     }
     l = crt::strlen(b)
     // line ends with newline?
-    if (l > 0ul && int(b[l - 1ul]) == '\n') {
+    if (l > 0ul && b[l - 1ul] == '\n') {
         // remove it
         l--
         b[l] = uint8('\0')
     }
     // for compatibility with 5.2, ...
-    if (firstline != 0 && int(b[0]) == '=') {
+    if (firstline != 0 && b[0] == '=') {
         // change '=' to 'return'
         lua_pushfstring`va(L, cstr("return %s"), (b + 1,))
     } else {
@@ -525,7 +527,7 @@ def private addreturn(var L : lua_State?) : int {
         lua_rotate(L, -2, -1)
         lua_settop(L, -1 - 1)
         // non empty?
-        if (int(line[0]) != '\0') {
+        if (line[0] != '\0') {
             // keep history
         }
     } else {
@@ -545,7 +547,7 @@ def private multiline(var L : lua_State?) : int {
         var line : uint8? = lua_tolstring(L, 1, addr(len))
         // try it
         var status : int = luaL_loadbufferx(L, line, len, cstr("=stdin"), null)
-        if (!(incomplete(L, status) != 0) || !(pushline(L, 0) != 0)) {
+        if (incomplete(L, status) == 0 || pushline(L, 0) == 0) {
             // keep history
             // should not or cannot try to add continuation line
             return status
@@ -570,7 +572,7 @@ def private multiline(var L : lua_State?) : int {
 def private loadline(var L : lua_State?) : int {
     var status : int
     lua_settop(L, 0)
-    if (!(pushline(L, 1) != 0)) {
+    if (pushline(L, 1) == 0) {
         // no input
         return -1
     }
@@ -666,7 +668,7 @@ def private pmain(var L : lua_State?) : int {
     // ...in generational mode
     lua_gc`va(L, LUA_GCGEN, (0, 0))
     // no option '-E'?
-    if (!((args & has_E) != 0)) {
+    if ((args & has_E) == 0) {
         // run LUA_INIT
         if (handle_luainit(L) != LUA_OK) {
             // error running LUA_INIT
@@ -674,7 +676,7 @@ def private pmain(var L : lua_State?) : int {
         }
     }
     // execute arguments -e and -l
-    if (!(runargs(L, argv, optlim) != 0)) {
+    if (runargs(L, argv, optlim) == 0) {
         // something failed
         return 0
     }
@@ -689,7 +691,7 @@ def private pmain(var L : lua_State?) : int {
     if ((args & has_i) != 0) {
         // do read-eval-print loop
         doREPL(L)
-    } elif (script < 1 && !((args & (has_e | has_v)) != 0)) {
+    } elif (script < 1 && (args & (has_e | has_v)) == 0) {
         // no active option?
         // running in interactive mode?
         if (1 != 0) {

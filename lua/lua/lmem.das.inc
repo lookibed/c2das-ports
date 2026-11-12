@@ -2,7 +2,7 @@
 [c_function]
 def luaM_growaux_(var L : lua_State?; var _c_block : void?; nelems : int; var psize : int?; size_elems : int; limit : int; var what : uint8?) : void? {
     var newblock : void?
-    var size : int = deref(psize)
+    var size : int = *psize
     // does one extra element still fit?
     if (nelems + 1 <= size) {
         // nothing to be done
@@ -24,9 +24,9 @@ def luaM_growaux_(var L : lua_State?; var _c_block : void?; nelems : int; var ps
         }
     }
     // 'limit' ensures that multiplication will not overflow
-    newblock = luaM_saferealloc_(L, _c_block, uint64(deref(psize)) * uint64(size_elems), uint64(size) * uint64(size_elems))
+    newblock = luaM_saferealloc_(L, _c_block, uint64(*psize) * uint64(size_elems), uint64(size) * uint64(size_elems))
     // update only when everything else is OK
-    deref(psize) = size
+    *psize = size
     return newblock
 }
 
@@ -37,10 +37,10 @@ def luaM_growaux_(var L : lua_State?; var _c_block : void?; nelems : int; var ps
 [c_function]
 def luaM_shrinkvector_(var L : lua_State?; var _c_block : void?; var size : int?; final_n : int; size_elem : int) : void? {
     var newblock : void?
-    var oldsize : uint64 = uint64(deref(size) * size_elem)
+    var oldsize : uint64 = uint64(*size * size_elem)
     var newsize : uint64 = uint64(final_n * size_elem)
     newblock = luaM_saferealloc_(L, _c_block, oldsize, newsize)
-    deref(size) = final_n
+    *size = final_n
     return newblock
 }
 
@@ -60,7 +60,7 @@ def luaM_free_(var L : lua_State?; var _c_block : void?; osize : uint64) {
 [c_function]
 def private tryagain(var L : lua_State?; var _c_block : void?; osize : uint64; nsize : uint64) : void? {
     var g : global_State? = L.l_G
-    if ((int(addr(g.nilvalue).tt_) & 15) == LUA_TNIL && !(g.gcstopem != 0)) {
+    if ((int(addr(g.nilvalue).tt_) & 15) == LUA_TNIL && g.gcstopem == 0) {
         // try to free some memory...
         luaC_fullgc(L, 1)
         // try again

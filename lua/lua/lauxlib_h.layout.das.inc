@@ -6,7 +6,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < func > (type<luaL_Reg>) == 8, "luaL_Reg.func: clang puts it at 8")
     static_assert(typeinfo sizeof(type<anon_1106>) == 1024 && typeinfo alignof(type<anon_1106>) == 8, "anon_1106: clang lays it out as size 1024, align 8")
     static_assert(typeinfo offsetof < _storage > (type<anon_1106>) == 0, "anon_1106: every member sits at 0")
-    static_assert(typeinfo sizeof(type<luaL_Buffer>) == 1056 && typeinfo alignof(type<luaL_Buffer>) == 8, "luaL_Buffer: clang lays it out as size 1056, align 8")
+    static_assert(typeinfo sizeof(type<luaL_Buffer>) == 1056 && typeinfo alignof(type<luaL_Buffer>) == 8,
+            "luaL_Buffer: clang lays it out as size 1056, align 8")
     static_assert(typeinfo offsetof < b > (type<luaL_Buffer>) == 0, "luaL_Buffer.b: clang puts it at 0")
     static_assert(typeinfo offsetof < size > (type<luaL_Buffer>) == 8, "luaL_Buffer.size: clang puts it at 8")
     static_assert(typeinfo offsetof < n > (type<luaL_Buffer>) == 16, "luaL_Buffer.n: clang puts it at 16")

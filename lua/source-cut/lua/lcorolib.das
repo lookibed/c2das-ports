@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/c_switch
 require c_runtime/cstr
 require c_runtime/variadic
 require lapi
@@ -15,7 +16,11 @@ require lobject_h_cluster
 require lstate
 
 var private statname : uint8? [4] = fixed_array<uint8?>(cstr("running"), cstr("dead"), cstr("suspended"), cstr("normal"))
-var private co_funcs : luaL_Reg[9] = fixed_array(luaL_Reg(name = cstr("create"), func = @@luaB_cocreate), luaL_Reg(name = cstr("resume"), func = @@luaB_coresume), luaL_Reg(name = cstr("running"), func = @@luaB_corunning), luaL_Reg(name = cstr("status"), func = @@luaB_costatus), luaL_Reg(name = cstr("wrap"), func = @@luaB_cowrap), luaL_Reg(name = cstr("yield"), func = @@luaB_yield), luaL_Reg(name = cstr("isyieldable"), func = @@luaB_yieldable), luaL_Reg(name = cstr("close"), func = @@luaB_close), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private co_funcs : luaL_Reg[9] = fixed_array(luaL_Reg(name = cstr("create"), func = @@luaB_cocreate),
+        luaL_Reg(name = cstr("resume"), func = @@luaB_coresume), luaL_Reg(name = cstr("running"), func = @@luaB_corunning),
+        luaL_Reg(name = cstr("status"), func = @@luaB_costatus), luaL_Reg(name = cstr("wrap"), func = @@luaB_cowrap),
+        luaL_Reg(name = cstr("yield"), func = @@luaB_yield), luaL_Reg(name = cstr("isyieldable"), func = @@luaB_yieldable),
+        luaL_Reg(name = cstr("close"), func = @@luaB_close), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
 let private LUA_OK = 0
 let private LUA_YIELD = 1
@@ -44,7 +49,7 @@ def private getco(var L : lua_State?) : lua_State? {
 def private auxresume(var L : lua_State?; var co : lua_State?; narg : int) : int {
     var status : int
     var nres : int
-    if (!(lua_checkstack(co, narg) != 0)) {
+    if (lua_checkstack(co, narg) == 0) {
         lua_pushstring(L, cstr("too many arguments to resume"))
         // error flag
         return -1
@@ -52,7 +57,7 @@ def private auxresume(var L : lua_State?; var co : lua_State?; narg : int) : int
     lua_xmove(L, co, narg)
     status = lua_resume(co, L, narg, addr(nres))
     if (status == LUA_OK || status == LUA_YIELD) {
-        if (!(lua_checkstack(L, nres + 1) != 0)) {
+        if (lua_checkstack(L, nres + 1) == 0) {
             // remove results anyway
             lua_settop(co, -nres - 1)
             lua_pushstring(L, cstr("too many results to resume"))
@@ -140,14 +145,11 @@ def private auxstatus(var L : lua_State?; var co : lua_State?) : int {
     if (intptr(L) == intptr(co)) {
         return COS_RUN
     } else {
-        let _cond = lua_status(co)
-        while (true) {
-            var _flag = false
-            if (_cond == 1) {
+        c_switch(lua_status(co)) {
+            case(1) {
                 return COS_YIELD
             }
-            _flag ||= _cond == 0
-            if (_flag) {
+            case(0) {
                 {
                     var ar : lua_Debug
                     // does it have frames?
@@ -162,12 +164,10 @@ def private auxstatus(var L : lua_State?; var co : lua_State?) : int {
                     }
                 }
             }
-            _flag ||= !(_cond == 1 || _cond == 0)
-            if (_flag) {
+            case(_) {
                 // some error occurred
                 return COS_DEAD
             }
-            break
         }
     }
     return 0
@@ -194,12 +194,8 @@ def private luaB_corunning(var L : lua_State?) : int {
 def private luaB_close(var L : lua_State?) : int {
     var co : lua_State? = getco(L)
     var status : int = auxstatus(L, co)
-    let _cond = status
-    while (true) {
-        var _flag = false
-        _flag ||= _cond == 1
-        _flag ||= _cond == 2
-        if (_flag) {
+    c_switch(status) {
+        case(1, 2) {
             status = lua_closethread(co, L)
             if (status == LUA_OK) {
                 lua_pushboolean(L, 1)
@@ -211,12 +207,10 @@ def private luaB_close(var L : lua_State?) : int {
                 return 2
             }
         }
-        _flag ||= !(_cond == 1 || _cond == 2)
-        if (_flag) {
+        case(_) {
             // normal or running coroutine
             return luaL_error`va(L, cstr("cannot close a %s coroutine"), (statname[status],))
         }
-        break
     }
     return 0
 }

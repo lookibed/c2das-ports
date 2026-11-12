@@ -9,9 +9,11 @@ require c_runtime/c_args
 require c_runtime/c_exit
 require c_runtime/c_function
 require c_runtime/c_jit_build
+require c_runtime/c_switch
 require c_runtime/cstr
 require c_runtime/cstr_array
 require c_runtime/enum_from_int
+require c_runtime/int_of
 require c_runtime/printf
 require c_types
 require crt
@@ -35,7 +37,16 @@ def private c2das_dialect {
     c_long_bits = 64
 }
 
-var private opnames : uint8? [84] = fixed_array<uint8?>(cstr("MOVE"), cstr("LOADI"), cstr("LOADF"), cstr("LOADK"), cstr("LOADKX"), cstr("LOADFALSE"), cstr("LFALSESKIP"), cstr("LOADTRUE"), cstr("LOADNIL"), cstr("GETUPVAL"), cstr("SETUPVAL"), cstr("GETTABUP"), cstr("GETTABLE"), cstr("GETI"), cstr("GETFIELD"), cstr("SETTABUP"), cstr("SETTABLE"), cstr("SETI"), cstr("SETFIELD"), cstr("NEWTABLE"), cstr("SELF"), cstr("ADDI"), cstr("ADDK"), cstr("SUBK"), cstr("MULK"), cstr("MODK"), cstr("POWK"), cstr("DIVK"), cstr("IDIVK"), cstr("BANDK"), cstr("BORK"), cstr("BXORK"), cstr("SHRI"), cstr("SHLI"), cstr("ADD"), cstr("SUB"), cstr("MUL"), cstr("MOD"), cstr("POW"), cstr("DIV"), cstr("IDIV"), cstr("BAND"), cstr("BOR"), cstr("BXOR"), cstr("SHL"), cstr("SHR"), cstr("MMBIN"), cstr("MMBINI"), cstr("MMBINK"), cstr("UNM"), cstr("BNOT"), cstr("NOT"), cstr("LEN"), cstr("CONCAT"), cstr("CLOSE"), cstr("TBC"), cstr("JMP"), cstr("EQ"), cstr("LT"), cstr("LE"), cstr("EQK"), cstr("EQI"), cstr("LTI"), cstr("LEI"), cstr("GTI"), cstr("GEI"), cstr("TEST"), cstr("TESTSET"), cstr("CALL"), cstr("TAILCALL"), cstr("RETURN"), cstr("RETURN0"), cstr("RETURN1"), cstr("FORLOOP"), cstr("FORPREP"), cstr("TFORPREP"), cstr("TFORCALL"), cstr("TFORLOOP"), cstr("SETLIST"), cstr("CLOSURE"), cstr("VARARG"), cstr("VARARGPREP"), cstr("EXTRAARG"), null)
+var private opnames : uint8? [84] = fixed_array<uint8?>(cstr("MOVE"), cstr("LOADI"), cstr("LOADF"), cstr("LOADK"), cstr("LOADKX"), cstr("LOADFALSE"),
+        cstr("LFALSESKIP"), cstr("LOADTRUE"), cstr("LOADNIL"), cstr("GETUPVAL"), cstr("SETUPVAL"), cstr("GETTABUP"), cstr("GETTABLE"), cstr("GETI"),
+        cstr("GETFIELD"), cstr("SETTABUP"), cstr("SETTABLE"), cstr("SETI"), cstr("SETFIELD"), cstr("NEWTABLE"), cstr("SELF"), cstr("ADDI"), cstr("ADDK"),
+        cstr("SUBK"), cstr("MULK"), cstr("MODK"), cstr("POWK"), cstr("DIVK"), cstr("IDIVK"), cstr("BANDK"), cstr("BORK"), cstr("BXORK"), cstr("SHRI"),
+        cstr("SHLI"), cstr("ADD"), cstr("SUB"), cstr("MUL"), cstr("MOD"), cstr("POW"), cstr("DIV"), cstr("IDIV"), cstr("BAND"), cstr("BOR"), cstr("BXOR"),
+        cstr("SHL"), cstr("SHR"), cstr("MMBIN"), cstr("MMBINI"), cstr("MMBINK"), cstr("UNM"), cstr("BNOT"), cstr("NOT"), cstr("LEN"), cstr("CONCAT"),
+        cstr("CLOSE"), cstr("TBC"), cstr("JMP"), cstr("EQ"), cstr("LT"), cstr("LE"), cstr("EQK"), cstr("EQI"), cstr("LTI"), cstr("LEI"), cstr("GTI"),
+        cstr("GEI"), cstr("TEST"), cstr("TESTSET"), cstr("CALL"), cstr("TAILCALL"), cstr("RETURN"), cstr("RETURN0"), cstr("RETURN1"), cstr("FORLOOP"),
+        cstr("FORPREP"), cstr("TFORPREP"), cstr("TFORCALL"), cstr("TFORLOOP"), cstr("SETLIST"), cstr("CLOSURE"), cstr("VARARG"), cstr("VARARGPREP"),
+        cstr("EXTRAARG"), null)
 var private listing : int = 0
 var private dumping : int = 1
 var private stripping : int = 0
@@ -72,18 +83,20 @@ def private fatal(var message : uint8?) {
 
 [c_function]
 def private cannot(var what : uint8?) {
-    fprintf(crt::c_stderr(), cstr("%s: cannot %s %s: %s\n"), progname, what, output, crt::strerror(deref(crt::c_errno_location())))
+    fprintf(crt::c_stderr(), cstr("%s: cannot %s %s: %s\n"), progname, what, output, crt::strerror(*crt::c_errno_location()))
     c_exit(1)
 }
 
 [c_function]
 def private usage(var message : uint8?) {
-    if (int(deref(message)) == '-') {
+    if (*message == '-') {
         fprintf(crt::c_stderr(), cstr("%s: unrecognized option '%s'\n"), progname, message)
     } else {
         fprintf(crt::c_stderr(), cstr("%s: %s\n"), progname, message)
     }
-    fprintf(crt::c_stderr(), cstr("usage: %s [options] [filenames]\nAvailable options are:\n  -l       list (use -l -l for full listing)\n  -o name  output to file 'name' (default is \"%s\")\n  -p       parse only\n  -s       strip debug information\n  -v       show version information\n  --       stop handling options\n  -        stop handling options and process stdin\n"), progname, addr(Output[0]))
+    fprintf(crt::c_stderr(),
+            cstr("usage: %s [options] [filenames]\nAvailable options are:\n  -l       list (use -l -l for full listing)\n  -o name  output to file 'name' (default is \"%s\")\n  -p       parse only\n  -s       strip debug information\n  -v       show version information\n  --       stop handling options\n  -        stop handling options and process stdin\n"),
+            progname, addr(Output[0]))
     c_exit(1)
 }
 
@@ -91,13 +104,13 @@ def private usage(var message : uint8?) {
 def private doargs(argc : int; var argv : uint8 ??) : int {
     var i : int
     var version : int = 0
-    if (argv[0] != null && int(deref(argv[0])) != 0) {
+    if (argv[0] != null && *argv[0] != 0) {
         progname = argv[0]
     }
     i = 1
     while (i < argc) {
         // end of options; keep it
-        if (int(deref(argv[i])) != '-') {
+        if (*argv[i] != '-') {
             break
         } elif (crt::strcmp(argv[i], cstr("--")) == 0) {
             // end of options; skip it
@@ -116,7 +129,7 @@ def private doargs(argc : int; var argv : uint8 ??) : int {
             // output file
             i++
             output = argv[i]
-            if (output == null || int(deref(output)) == 0 || (int(deref(output)) == '-' && int(output[1]) != 0)) {
+            if (output == null || *output == 0 || (*output == '-' && output[1] != 0)) {
                 usage(cstr("'-o' needs argument"))
             }
             if (crt::strcmp(argv[i], cstr("-")) == 0) {
@@ -137,7 +150,7 @@ def private doargs(argc : int; var argv : uint8 ??) : int {
         }
         i++
     }
-    if (i == argc && (listing != 0 || !(dumping != 0))) {
+    if (i == argc && (listing != 0 || dumping == 0)) {
         dumping = 0
         i--
         argv[i] = addr(Output[0])
@@ -153,13 +166,13 @@ def private doargs(argc : int; var argv : uint8 ??) : int {
 
 [c_function]
 def private reader(var L : lua_State?; var ud : void?; var size : uint64?) : uint8? {
-    let _t0 = deref(reinterpret<int?>(ud))
-    deref(reinterpret<int?>(ud))--
+    let _t0 = *reinterpret<int?>(ud)
+    (*reinterpret<int?>(ud))--
     if (_t0 != 0) {
-        deref(size) = uint64(typeinfo sizeof(type<uint8[20]>)) - 1ul
+        *size = uint64(typeinfo sizeof(type<uint8[20]>)) - 1ul
         return cstr("(function()end)();\n")
     } else {
-        deref(size) = 0ul
+        *size = 0ul
         return null
     }
 }
@@ -189,7 +202,7 @@ def private combine(var L : lua_State?; n : int) : Proto? {
 
 [c_function]
 def private writer(var L : lua_State?; var p : void?; size : uint64; var u : void?) : int {
-    return (crt::fwrite(p, size, 1ul, reinterpret<void?>(reinterpret<_IO_FILE?>(u))) != 1ul) && (size != 0ul) ? 1 : 0
+    return int_of((crt::fwrite(p, size, 1ul, reinterpret<void?>(reinterpret<_IO_FILE?>(u))) != 1ul) && (size != 0ul))
 }
 
 [c_function]
@@ -198,7 +211,7 @@ def private pmain(var L : lua_State?) : int {
     var argv : uint8 ?? = reinterpret<uint8 ??>(lua_touserdata(L, 2))
     var f : Proto?
     tmname = addr(L.l_G.tmname[0])
-    if (!(lua_checkstack(L, argc) != 0)) {
+    if (lua_checkstack(L, argc) == 0) {
         fatal(cstr("too many input files"))
     }
     for (i in range(argc)) {
@@ -209,7 +222,7 @@ def private pmain(var L : lua_State?) : int {
     }
     f = combine(L, argc)
     if (listing != 0) {
-        PrintFunction(f, listing > 1 ? 1 : 0)
+        PrintFunction(f, int_of(listing > 1))
     }
     if (dumping != 0) {
         var D : _IO_FILE? = (output == null) ? reinterpret<_IO_FILE?>(crt::c_stdout()) : reinterpret<_IO_FILE?>(crt::fopen(output, cstr("wb")))
@@ -232,7 +245,7 @@ def c_main(var argc : int; var argv : uint8 ??) : int {
     var L : lua_State?
     var i : int = doargs(argc, argv)
     argc -= i
-    argv = argv + i
+    argv += i
     if (argc <= 0) {
         usage(cstr("no input files given"))
     }
@@ -253,34 +266,54 @@ def c_main(var argc : int; var argv : uint8 ??) : int {
 [c_function]
 def private PrintString(var ts : TString?) {
     var s : uint8? = addr(ts.contents[0])
-    var n : uint64 = int(ts.shrlen) != 255 ? uint64(ts.shrlen) : ts.u.lnglen
+    var n : uint64 = ts.shrlen != 255 ? uint64(ts.shrlen) : ts.u.lnglen
     printf(cstr("\""))
     for (i in urange64(n)) {
-        var c : int = int(uint8(s[i]))
-        let _cond = c
-        if (_cond == '"') {
-            printf(cstr("\\\""))
-        } elif (_cond == '\\') {
-            printf(cstr("\\\\"))
-        } elif (_cond == '\a') {
-            printf(cstr("\\a"))
-        } elif (_cond == '\b') {
-            printf(cstr("\\b"))
-        } elif (_cond == '\f') {
-            printf(cstr("\\f"))
-        } elif (_cond == '\n') {
-            printf(cstr("\\n"))
-        } elif (_cond == '\r') {
-            printf(cstr("\\r"))
-        } elif (_cond == '\t') {
-            printf(cstr("\\t"))
-        } elif (_cond == '\v') {
-            printf(cstr("\\v"))
-        } else {
-            if (crt::isprint(c) != 0) {
-                printf(cstr("%c"), c)
-            } else {
-                printf(cstr("\\%03d"), c)
+        var c : int = int(s[i])
+        c_switch(c) {
+            case('"') {
+                printf(cstr("\\\""))
+                break
+            }
+            case('\\') {
+                printf(cstr("\\\\"))
+                break
+            }
+            case('\a') {
+                printf(cstr("\\a"))
+                break
+            }
+            case('\b') {
+                printf(cstr("\\b"))
+                break
+            }
+            case('\f') {
+                printf(cstr("\\f"))
+                break
+            }
+            case('\n') {
+                printf(cstr("\\n"))
+                break
+            }
+            case('\r') {
+                printf(cstr("\\r"))
+                break
+            }
+            case('\t') {
+                printf(cstr("\\t"))
+                break
+            }
+            case('\v') {
+                printf(cstr("\\v"))
+                break
+            }
+            case(_) {
+                if (crt::isprint(c) != 0) {
+                    printf(cstr("%c"), c)
+                } else {
+                    printf(cstr("\\%03d"), c)
+                }
+                break
             }
         }
     }
@@ -290,20 +323,32 @@ def private PrintString(var ts : TString?) {
 [c_function]
 def private PrintType(var f : Proto?; i : int) {
     var o : TValue? = addr(f.k[i])
-    let _cond = int(o.tt_) & 63
-    if (_cond == 0) {
-        printf(cstr("N"))
-    } elif (_cond == 1 || _cond == 17) {
-        printf(cstr("B"))
-    } elif (_cond == 19) {
-        printf(cstr("F"))
-    } elif (_cond == 3) {
-        printf(cstr("I"))
-    } elif (_cond == 4 || _cond == 20) {
-        printf(cstr("S"))
-    } else {
-        // cannot happen
-        printf(cstr("?%d"), int(o.tt_) & 63)
+    c_switch(int(o.tt_) & 63) {
+        case(0) {
+            printf(cstr("N"))
+            break
+        }
+        case(1, 17) {
+            printf(cstr("B"))
+            break
+        }
+        case(19) {
+            printf(cstr("F"))
+            break
+        }
+        case(3) {
+            printf(cstr("I"))
+            break
+        }
+        case(4, 20) {
+            printf(cstr("S"))
+            break
+        }
+        case(_) {
+            // cannot happen
+            printf(cstr("?%d"), int(o.tt_) & 63)
+            break
+        }
     }
     printf(cstr("\t"))
 }
@@ -311,29 +356,43 @@ def private PrintType(var f : Proto?; i : int) {
 [c_function]
 def private PrintConstant(var f : Proto?; i : int) {
     var o : TValue? = addr(f.k[i])
-    let _cond = int(o.tt_) & 63
-    if (_cond == 0) {
-        printf(cstr("nil"))
-    } elif (_cond == 1) {
-        printf(cstr("false"))
-    } elif (_cond == 17) {
-        printf(cstr("true"))
-    } elif (_cond == 19) {
-        {
-            var buff : uint8[100]
-            sprintf(addr(buff[0]), cstr("%.14g"), o.value_.n)
-            printf(cstr("%s"), addr(buff[0]))
-            if (int(buff[crt::strspn(addr(buff[0]), cstr("-0123456789"))]) == '\0') {
-                printf(cstr(".0"))
+    c_switch(int(o.tt_) & 63) {
+        case(0) {
+            printf(cstr("nil"))
+            break
+        }
+        case(1) {
+            printf(cstr("false"))
+            break
+        }
+        case(17) {
+            printf(cstr("true"))
+            break
+        }
+        case(19) {
+            {
+                var buff : uint8[100]
+                sprintf(addr(buff[0]), cstr("%.14g"), o.value_.n)
+                printf(cstr("%s"), addr(buff[0]))
+                if (buff[crt::strspn(addr(buff[0]), cstr("-0123456789"))] == '\0') {
+                    printf(cstr(".0"))
+                }
+                break
             }
         }
-    } elif (_cond == 3) {
-        printf(cstr("%lld"), o.value_.i)
-    } elif (_cond == 4 || _cond == 20) {
-        PrintString(addr(reinterpret<GCUnion?>(o.value_.gc).ts))
-    } else {
-        // cannot happen
-        printf(cstr("?%d"), int(o.tt_) & 63)
+        case(3) {
+            printf(cstr("%lld"), o.value_.i)
+            break
+        }
+        case(4, 20) {
+            PrintString(addr(reinterpret<GCUnion?>(o.value_.gc).ts))
+            break
+        }
+        case(_) {
+            // cannot happen
+            printf(cstr("?%d"), int(o.tt_) & 63)
+            break
+        }
     }
 }
 
@@ -361,275 +420,441 @@ def private PrintCode(var f : Proto?) {
             printf(cstr("[-]\t"))
         }
         printf(cstr("%-9s\t"), opnames[int(o)])
-        let _cond = o
-        if (_cond == OpCode.OP_MOVE) {
-            printf(cstr("%d %d"), a, b)
-        } elif (_cond == OpCode.OP_LOADI) {
-            printf(cstr("%d %d"), a, sbx)
-        } elif (_cond == OpCode.OP_LOADF) {
-            printf(cstr("%d %d"), a, sbx)
-        } elif (_cond == OpCode.OP_LOADK) {
-            printf(cstr("%d %d"), a, bx)
-            printf(cstr("\t; "))
-            PrintConstant(f, bx)
-        } elif (_cond == OpCode.OP_LOADKX) {
-            printf(cstr("%d"), a)
-            printf(cstr("\t; "))
-            PrintConstant(f, int((code[pc + 1] >> uint(POS_A)) & (~(~0u << uint(SIZE_Ax)) << 0u)))
-        } elif (_cond == OpCode.OP_LOADFALSE) {
-            printf(cstr("%d"), a)
-        } elif (_cond == OpCode.OP_LFALSESKIP) {
-            printf(cstr("%d"), a)
-        } elif (_cond == OpCode.OP_LOADTRUE) {
-            printf(cstr("%d"), a)
-        } elif (_cond == OpCode.OP_LOADNIL) {
-            printf(cstr("%d %d"), a, b)
-            printf(cstr("\t; %d out"), b + 1)
-        } elif (_cond == OpCode.OP_GETUPVAL) {
-            printf(cstr("%d %d"), a, b)
-            printf(cstr("\t; %s"), f.upvalues[b].name != null ? addr(f.upvalues[b].name.contents[0]) : cstr("-"))
-        } elif (_cond == OpCode.OP_SETUPVAL) {
-            printf(cstr("%d %d"), a, b)
-            printf(cstr("\t; %s"), f.upvalues[b].name != null ? addr(f.upvalues[b].name.contents[0]) : cstr("-"))
-        } elif (_cond == OpCode.OP_GETTABUP) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; %s"), f.upvalues[b].name != null ? addr(f.upvalues[b].name.contents[0]) : cstr("-"))
-            printf(cstr(" "))
-            PrintConstant(f, c)
-        } elif (_cond == OpCode.OP_GETTABLE) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_GETI) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_GETFIELD) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; "))
-            PrintConstant(f, c)
-        } elif (_cond == OpCode.OP_SETTABUP) {
-            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
-            printf(cstr("\t; %s"), f.upvalues[a].name != null ? addr(f.upvalues[a].name.contents[0]) : cstr("-"))
-            printf(cstr(" "))
-            PrintConstant(f, b)
-            if (isk != 0) {
+        c_switch(o) {
+            case(OpCode.OP_MOVE) {
+                printf(cstr("%d %d"), a, b)
+                break
+            }
+            case(OpCode.OP_LOADI) {
+                printf(cstr("%d %d"), a, sbx)
+                break
+            }
+            case(OpCode.OP_LOADF) {
+                printf(cstr("%d %d"), a, sbx)
+                break
+            }
+            case(OpCode.OP_LOADK) {
+                printf(cstr("%d %d"), a, bx)
+                printf(cstr("\t; "))
+                PrintConstant(f, bx)
+                break
+            }
+            case(OpCode.OP_LOADKX) {
+                printf(cstr("%d"), a)
+                printf(cstr("\t; "))
+                PrintConstant(f, int((code[pc + 1] >> uint(POS_A)) & (~(~0u << uint(SIZE_Ax)) << 0u)))
+                break
+            }
+            case(OpCode.OP_LOADFALSE) {
+                printf(cstr("%d"), a)
+                break
+            }
+            case(OpCode.OP_LFALSESKIP) {
+                printf(cstr("%d"), a)
+                break
+            }
+            case(OpCode.OP_LOADTRUE) {
+                printf(cstr("%d"), a)
+                break
+            }
+            case(OpCode.OP_LOADNIL) {
+                printf(cstr("%d %d"), a, b)
+                printf(cstr("\t; %d out"), b + 1)
+                break
+            }
+            case(OpCode.OP_GETUPVAL) {
+                printf(cstr("%d %d"), a, b)
+                printf(cstr("\t; %s"), f.upvalues[b].name != null ? addr(f.upvalues[b].name.contents[0]) : cstr("-"))
+                break
+            }
+            case(OpCode.OP_SETUPVAL) {
+                printf(cstr("%d %d"), a, b)
+                printf(cstr("\t; %s"), f.upvalues[b].name != null ? addr(f.upvalues[b].name.contents[0]) : cstr("-"))
+                break
+            }
+            case(OpCode.OP_GETTABUP) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; %s"), f.upvalues[b].name != null ? addr(f.upvalues[b].name.contents[0]) : cstr("-"))
                 printf(cstr(" "))
                 PrintConstant(f, c)
+                break
             }
-        } elif (_cond == OpCode.OP_SETTABLE) {
-            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
-            if (isk != 0) {
+            case(OpCode.OP_GETTABLE) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_GETI) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_GETFIELD) {
+                printf(cstr("%d %d %d"), a, b, c)
                 printf(cstr("\t; "))
                 PrintConstant(f, c)
+                break
             }
-        } elif (_cond == OpCode.OP_SETI) {
-            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
-            if (isk != 0) {
-                printf(cstr("\t; "))
-                PrintConstant(f, c)
-            }
-        } elif (_cond == OpCode.OP_SETFIELD) {
-            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
-            printf(cstr("\t; "))
-            PrintConstant(f, b)
-            if (isk != 0) {
+            case(OpCode.OP_SETTABUP) {
+                printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
+                printf(cstr("\t; %s"), f.upvalues[a].name != null ? addr(f.upvalues[a].name.contents[0]) : cstr("-"))
                 printf(cstr(" "))
-                PrintConstant(f, c)
+                PrintConstant(f, b)
+                if (isk != 0) {
+                    printf(cstr(" "))
+                    PrintConstant(f, c)
+                }
+                break
             }
-        } elif (_cond == OpCode.OP_NEWTABLE) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; %d"), c + int((code[pc + 1] >> uint(POS_A)) & (~(~0u << uint(SIZE_Ax)) << 0u)) * (MAXARG_C + 1))
-        } elif (_cond == OpCode.OP_SELF) {
-            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
-            if (isk != 0) {
+            case(OpCode.OP_SETTABLE) {
+                printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
+                if (isk != 0) {
+                    printf(cstr("\t; "))
+                    PrintConstant(f, c)
+                }
+                break
+            }
+            case(OpCode.OP_SETI) {
+                printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
+                if (isk != 0) {
+                    printf(cstr("\t; "))
+                    PrintConstant(f, c)
+                }
+                break
+            }
+            case(OpCode.OP_SETFIELD) {
+                printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
                 printf(cstr("\t; "))
-                PrintConstant(f, c)
+                PrintConstant(f, b)
+                if (isk != 0) {
+                    printf(cstr(" "))
+                    PrintConstant(f, c)
+                }
+                break
             }
-        } elif (_cond == OpCode.OP_ADDI) {
-            printf(cstr("%d %d %d"), a, b, sc)
-        } elif (_cond == OpCode.OP_ADDK) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; "))
-            PrintConstant(f, c)
-        } elif (_cond == OpCode.OP_SUBK) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; "))
-            PrintConstant(f, c)
-        } elif (_cond == OpCode.OP_MULK) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; "))
-            PrintConstant(f, c)
-        } elif (_cond == OpCode.OP_MODK) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; "))
-            PrintConstant(f, c)
-        } elif (_cond == OpCode.OP_POWK) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; "))
-            PrintConstant(f, c)
-        } elif (_cond == OpCode.OP_DIVK) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; "))
-            PrintConstant(f, c)
-        } elif (_cond == OpCode.OP_IDIVK) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; "))
-            PrintConstant(f, c)
-        } elif (_cond == OpCode.OP_BANDK) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; "))
-            PrintConstant(f, c)
-        } elif (_cond == OpCode.OP_BORK) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; "))
-            PrintConstant(f, c)
-        } elif (_cond == OpCode.OP_BXORK) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; "))
-            PrintConstant(f, c)
-        } elif (_cond == OpCode.OP_SHRI) {
-            printf(cstr("%d %d %d"), a, b, sc)
-        } elif (_cond == OpCode.OP_SHLI) {
-            printf(cstr("%d %d %d"), a, b, sc)
-        } elif (_cond == OpCode.OP_ADD) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_SUB) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_MUL) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_MOD) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_POW) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_DIV) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_IDIV) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_BAND) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_BOR) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_BXOR) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_SHL) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_SHR) {
-            printf(cstr("%d %d %d"), a, b, c)
-        } elif (_cond == OpCode.OP_MMBIN) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; %s"), addr(tmname[c].contents[0]))
-        } elif (_cond == OpCode.OP_MMBINI) {
-            printf(cstr("%d %d %d %d"), a, sb, c, isk)
-            printf(cstr("\t; %s"), addr(tmname[c].contents[0]))
-            if (isk != 0) {
-                printf(cstr(" flip"))
-            }
-        } elif (_cond == OpCode.OP_MMBINK) {
-            printf(cstr("%d %d %d %d"), a, b, c, isk)
-            printf(cstr("\t; %s "), addr(tmname[c].contents[0]))
-            PrintConstant(f, b)
-            if (isk != 0) {
-                printf(cstr(" flip"))
-            }
-        } elif (_cond == OpCode.OP_UNM) {
-            printf(cstr("%d %d"), a, b)
-        } elif (_cond == OpCode.OP_BNOT) {
-            printf(cstr("%d %d"), a, b)
-        } elif (_cond == OpCode.OP_NOT) {
-            printf(cstr("%d %d"), a, b)
-        } elif (_cond == OpCode.OP_LEN) {
-            printf(cstr("%d %d"), a, b)
-        } elif (_cond == OpCode.OP_CONCAT) {
-            printf(cstr("%d %d"), a, b)
-        } elif (_cond == OpCode.OP_CLOSE) {
-            printf(cstr("%d"), a)
-        } elif (_cond == OpCode.OP_TBC) {
-            printf(cstr("%d"), a)
-        } elif (_cond == OpCode.OP_JMP) {
-            printf(cstr("%d"), int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ)
-            printf(cstr("\t; to %d"), int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ + pc + 2)
-        } elif (_cond == OpCode.OP_EQ) {
-            printf(cstr("%d %d %d"), a, b, isk)
-        } elif (_cond == OpCode.OP_LT) {
-            printf(cstr("%d %d %d"), a, b, isk)
-        } elif (_cond == OpCode.OP_LE) {
-            printf(cstr("%d %d %d"), a, b, isk)
-        } elif (_cond == OpCode.OP_EQK) {
-            printf(cstr("%d %d %d"), a, b, isk)
-            printf(cstr("\t; "))
-            PrintConstant(f, b)
-        } elif (_cond == OpCode.OP_EQI) {
-            printf(cstr("%d %d %d"), a, sb, isk)
-        } elif (_cond == OpCode.OP_LTI) {
-            printf(cstr("%d %d %d"), a, sb, isk)
-        } elif (_cond == OpCode.OP_LEI) {
-            printf(cstr("%d %d %d"), a, sb, isk)
-        } elif (_cond == OpCode.OP_GTI) {
-            printf(cstr("%d %d %d"), a, sb, isk)
-        } elif (_cond == OpCode.OP_GEI) {
-            printf(cstr("%d %d %d"), a, sb, isk)
-        } elif (_cond == OpCode.OP_TEST) {
-            printf(cstr("%d %d"), a, isk)
-        } elif (_cond == OpCode.OP_TESTSET) {
-            printf(cstr("%d %d %d"), a, b, isk)
-        } elif (_cond == OpCode.OP_CALL) {
-            printf(cstr("%d %d %d"), a, b, c)
-            printf(cstr("\t; "))
-            if (b == 0) {
-                printf(cstr("all in "))
-            } else {
-                printf(cstr("%d in "), b - 1)
-            }
-            if (c == 0) {
-                printf(cstr("all out"))
-            } else {
-                printf(cstr("%d out"), c - 1)
-            }
-        } elif (_cond == OpCode.OP_TAILCALL) {
-            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
-            printf(cstr("\t; %d in"), b - 1)
-        } elif (_cond == OpCode.OP_RETURN) {
-            printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
-            printf(cstr("\t; "))
-            if (b == 0) {
-                printf(cstr("all out"))
-            } else {
-                printf(cstr("%d out"), b - 1)
-            }
-        } elif (_cond == OpCode.OP_RETURN0) {
-        } elif (_cond == OpCode.OP_RETURN1) {
-            printf(cstr("%d"), a)
-        } elif (_cond == OpCode.OP_FORLOOP) {
-            printf(cstr("%d %d"), a, bx)
-            printf(cstr("\t; to %d"), pc - bx + 2)
-        } elif (_cond == OpCode.OP_FORPREP) {
-            printf(cstr("%d %d"), a, bx)
-            printf(cstr("\t; exit to %d"), pc + bx + 3)
-        } elif (_cond == OpCode.OP_TFORPREP) {
-            printf(cstr("%d %d"), a, bx)
-            printf(cstr("\t; to %d"), pc + bx + 2)
-        } elif (_cond == OpCode.OP_TFORCALL) {
-            printf(cstr("%d %d"), a, c)
-        } elif (_cond == OpCode.OP_TFORLOOP) {
-            printf(cstr("%d %d"), a, bx)
-            printf(cstr("\t; to %d"), pc - bx + 2)
-        } elif (_cond == OpCode.OP_SETLIST) {
-            printf(cstr("%d %d %d"), a, b, c)
-            if (isk != 0) {
+            case(OpCode.OP_NEWTABLE) {
+                printf(cstr("%d %d %d"), a, b, c)
                 printf(cstr("\t; %d"), c + int((code[pc + 1] >> uint(POS_A)) & (~(~0u << uint(SIZE_Ax)) << 0u)) * (MAXARG_C + 1))
+                break
             }
-        } elif (_cond == OpCode.OP_CLOSURE) {
-            printf(cstr("%d %d"), a, bx)
-            printf(cstr("\t; %p"), reinterpret<void?>(f.p[bx]))
-        } elif (_cond == OpCode.OP_VARARG) {
-            printf(cstr("%d %d"), a, c)
-            printf(cstr("\t; "))
-            if (c == 0) {
-                printf(cstr("all out"))
-            } else {
-                printf(cstr("%d out"), c - 1)
+            case(OpCode.OP_SELF) {
+                printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
+                if (isk != 0) {
+                    printf(cstr("\t; "))
+                    PrintConstant(f, c)
+                }
+                break
             }
-        } elif (_cond == OpCode.OP_VARARGPREP) {
-            printf(cstr("%d"), a)
-        } elif (_cond == OpCode.OP_EXTRAARG) {
-            printf(cstr("%d"), ax)
+            case(OpCode.OP_ADDI) {
+                printf(cstr("%d %d %d"), a, b, sc)
+                break
+            }
+            case(OpCode.OP_ADDK) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; "))
+                PrintConstant(f, c)
+                break
+            }
+            case(OpCode.OP_SUBK) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; "))
+                PrintConstant(f, c)
+                break
+            }
+            case(OpCode.OP_MULK) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; "))
+                PrintConstant(f, c)
+                break
+            }
+            case(OpCode.OP_MODK) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; "))
+                PrintConstant(f, c)
+                break
+            }
+            case(OpCode.OP_POWK) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; "))
+                PrintConstant(f, c)
+                break
+            }
+            case(OpCode.OP_DIVK) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; "))
+                PrintConstant(f, c)
+                break
+            }
+            case(OpCode.OP_IDIVK) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; "))
+                PrintConstant(f, c)
+                break
+            }
+            case(OpCode.OP_BANDK) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; "))
+                PrintConstant(f, c)
+                break
+            }
+            case(OpCode.OP_BORK) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; "))
+                PrintConstant(f, c)
+                break
+            }
+            case(OpCode.OP_BXORK) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; "))
+                PrintConstant(f, c)
+                break
+            }
+            case(OpCode.OP_SHRI) {
+                printf(cstr("%d %d %d"), a, b, sc)
+                break
+            }
+            case(OpCode.OP_SHLI) {
+                printf(cstr("%d %d %d"), a, b, sc)
+                break
+            }
+            case(OpCode.OP_ADD) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_SUB) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_MUL) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_MOD) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_POW) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_DIV) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_IDIV) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_BAND) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_BOR) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_BXOR) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_SHL) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_SHR) {
+                printf(cstr("%d %d %d"), a, b, c)
+                break
+            }
+            case(OpCode.OP_MMBIN) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; %s"), addr(tmname[c].contents[0]))
+                break
+            }
+            case(OpCode.OP_MMBINI) {
+                printf(cstr("%d %d %d %d"), a, sb, c, isk)
+                printf(cstr("\t; %s"), addr(tmname[c].contents[0]))
+                if (isk != 0) {
+                    printf(cstr(" flip"))
+                }
+                break
+            }
+            case(OpCode.OP_MMBINK) {
+                printf(cstr("%d %d %d %d"), a, b, c, isk)
+                printf(cstr("\t; %s "), addr(tmname[c].contents[0]))
+                PrintConstant(f, b)
+                if (isk != 0) {
+                    printf(cstr(" flip"))
+                }
+                break
+            }
+            case(OpCode.OP_UNM) {
+                printf(cstr("%d %d"), a, b)
+                break
+            }
+            case(OpCode.OP_BNOT) {
+                printf(cstr("%d %d"), a, b)
+                break
+            }
+            case(OpCode.OP_NOT) {
+                printf(cstr("%d %d"), a, b)
+                break
+            }
+            case(OpCode.OP_LEN) {
+                printf(cstr("%d %d"), a, b)
+                break
+            }
+            case(OpCode.OP_CONCAT) {
+                printf(cstr("%d %d"), a, b)
+                break
+            }
+            case(OpCode.OP_CLOSE) {
+                printf(cstr("%d"), a)
+                break
+            }
+            case(OpCode.OP_TBC) {
+                printf(cstr("%d"), a)
+                break
+            }
+            case(OpCode.OP_JMP) {
+                printf(cstr("%d"), int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ)
+                printf(cstr("\t; to %d"), int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ + pc + 2)
+                break
+            }
+            case(OpCode.OP_EQ) {
+                printf(cstr("%d %d %d"), a, b, isk)
+                break
+            }
+            case(OpCode.OP_LT) {
+                printf(cstr("%d %d %d"), a, b, isk)
+                break
+            }
+            case(OpCode.OP_LE) {
+                printf(cstr("%d %d %d"), a, b, isk)
+                break
+            }
+            case(OpCode.OP_EQK) {
+                printf(cstr("%d %d %d"), a, b, isk)
+                printf(cstr("\t; "))
+                PrintConstant(f, b)
+                break
+            }
+            case(OpCode.OP_EQI) {
+                printf(cstr("%d %d %d"), a, sb, isk)
+                break
+            }
+            case(OpCode.OP_LTI) {
+                printf(cstr("%d %d %d"), a, sb, isk)
+                break
+            }
+            case(OpCode.OP_LEI) {
+                printf(cstr("%d %d %d"), a, sb, isk)
+                break
+            }
+            case(OpCode.OP_GTI) {
+                printf(cstr("%d %d %d"), a, sb, isk)
+                break
+            }
+            case(OpCode.OP_GEI) {
+                printf(cstr("%d %d %d"), a, sb, isk)
+                break
+            }
+            case(OpCode.OP_TEST) {
+                printf(cstr("%d %d"), a, isk)
+                break
+            }
+            case(OpCode.OP_TESTSET) {
+                printf(cstr("%d %d %d"), a, b, isk)
+                break
+            }
+            case(OpCode.OP_CALL) {
+                printf(cstr("%d %d %d"), a, b, c)
+                printf(cstr("\t; "))
+                if (b == 0) {
+                    printf(cstr("all in "))
+                } else {
+                    printf(cstr("%d in "), b - 1)
+                }
+                if (c == 0) {
+                    printf(cstr("all out"))
+                } else {
+                    printf(cstr("%d out"), c - 1)
+                }
+                break
+            }
+            case(OpCode.OP_TAILCALL) {
+                printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
+                printf(cstr("\t; %d in"), b - 1)
+                break
+            }
+            case(OpCode.OP_RETURN) {
+                printf(cstr("%d %d %d%s"), a, b, c, isk != 0 ? cstr("k") : addr(c2das_empty[0]))
+                printf(cstr("\t; "))
+                if (b == 0) {
+                    printf(cstr("all out"))
+                } else {
+                    printf(cstr("%d out"), b - 1)
+                }
+                break
+            }
+            case(OpCode.OP_RETURN0) {
+                break
+            }
+            case(OpCode.OP_RETURN1) {
+                printf(cstr("%d"), a)
+                break
+            }
+            case(OpCode.OP_FORLOOP) {
+                printf(cstr("%d %d"), a, bx)
+                printf(cstr("\t; to %d"), pc - bx + 2)
+                break
+            }
+            case(OpCode.OP_FORPREP) {
+                printf(cstr("%d %d"), a, bx)
+                printf(cstr("\t; exit to %d"), pc + bx + 3)
+                break
+            }
+            case(OpCode.OP_TFORPREP) {
+                printf(cstr("%d %d"), a, bx)
+                printf(cstr("\t; to %d"), pc + bx + 2)
+                break
+            }
+            case(OpCode.OP_TFORCALL) {
+                printf(cstr("%d %d"), a, c)
+                break
+            }
+            case(OpCode.OP_TFORLOOP) {
+                printf(cstr("%d %d"), a, bx)
+                printf(cstr("\t; to %d"), pc - bx + 2)
+                break
+            }
+            case(OpCode.OP_SETLIST) {
+                printf(cstr("%d %d %d"), a, b, c)
+                if (isk != 0) {
+                    printf(cstr("\t; %d"), c + int((code[pc + 1] >> uint(POS_A)) & (~(~0u << uint(SIZE_Ax)) << 0u)) * (MAXARG_C + 1))
+                }
+                break
+            }
+            case(OpCode.OP_CLOSURE) {
+                printf(cstr("%d %d"), a, bx)
+                printf(cstr("\t; %p"), reinterpret<void?>(f.p[bx]))
+                break
+            }
+            case(OpCode.OP_VARARG) {
+                printf(cstr("%d %d"), a, c)
+                printf(cstr("\t; "))
+                if (c == 0) {
+                    printf(cstr("all out"))
+                } else {
+                    printf(cstr("%d out"), c - 1)
+                }
+                break
+            }
+            case(OpCode.OP_VARARGPREP) {
+                printf(cstr("%d"), a)
+                break
+            }
+            case(OpCode.OP_EXTRAARG) {
+                printf(cstr("%d"), ax)
+                break
+            }
         }
         printf(cstr("\n"))
     }
@@ -638,16 +863,20 @@ def private PrintCode(var f : Proto?) {
 [c_function]
 def private PrintHeader(var f : Proto?) {
     var s : uint8? = f.source != null ? addr(f.source.contents[0]) : cstr("=?")
-    if (int(deref(s)) == '@' || int(deref(s)) == '=') {
-        s = s + 1
-    } elif (int(deref(s)) == int(cstr("\x1bLua")[0])) {
+    if (*s == '@' || *s == '=') {
+        s++
+    } elif (*s == cstr("\x1bLua")[0]) {
         s = cstr("(bstring)")
     } else {
         s = cstr("(string)")
     }
-    printf(cstr("\n%s <%s:%d,%d> (%d instruction%s at %p)\n"), (f.linedefined == 0) ? cstr("main") : cstr("function"), s, f.linedefined, f.lastlinedefined, f.sizecode, f.sizecode == 1 ? addr(c2das_empty[0]) : cstr("s"), reinterpret<void?>(f))
-    printf(cstr("%d%s param%s, %d slot%s, %d upvalue%s, "), int(f.numparams), f.is_vararg != 0 ? cstr("+") : addr(c2das_empty[0]), int(f.numparams) == 1 ? addr(c2das_empty[0]) : cstr("s"), int(f.maxstacksize), int(f.maxstacksize) == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizeupvalues, f.sizeupvalues == 1 ? addr(c2das_empty[0]) : cstr("s"))
-    printf(cstr("%d local%s, %d constant%s, %d function%s\n"), f.sizelocvars, f.sizelocvars == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizek, f.sizek == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizep, f.sizep == 1 ? addr(c2das_empty[0]) : cstr("s"))
+    printf(cstr("\n%s <%s:%d,%d> (%d instruction%s at %p)\n"), (f.linedefined == 0) ? cstr("main") : cstr("function"), s, f.linedefined, f.lastlinedefined,
+            f.sizecode, f.sizecode == 1 ? addr(c2das_empty[0]) : cstr("s"), reinterpret<void?>(f))
+    printf(cstr("%d%s param%s, %d slot%s, %d upvalue%s, "), int(f.numparams), f.is_vararg != 0 ? cstr("+") : addr(c2das_empty[0]),
+            f.numparams == 1 ? addr(c2das_empty[0]) : cstr("s"), int(f.maxstacksize), f.maxstacksize == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizeupvalues,
+            f.sizeupvalues == 1 ? addr(c2das_empty[0]) : cstr("s"))
+    printf(cstr("%d local%s, %d constant%s, %d function%s\n"), f.sizelocvars, f.sizelocvars == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizek,
+            f.sizek == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizep, f.sizep == 1 ? addr(c2das_empty[0]) : cstr("s"))
 }
 
 [c_function]
@@ -669,7 +898,8 @@ def private PrintDebug(var f : Proto?) {
     n = f.sizeupvalues
     printf(cstr("upvalues (%d) for %p:\n"), n, reinterpret<void?>(f))
     for (i in range(n)) {
-        printf(cstr("\t%d\t%s\t%d\t%d\n"), i, f.upvalues[i].name != null ? addr(f.upvalues[i].name.contents[0]) : cstr("-"), int(f.upvalues[i].instack), int(f.upvalues[i].idx))
+        printf(cstr("\t%d\t%s\t%d\t%d\n"), i, f.upvalues[i].name != null ? addr(f.upvalues[i].name.contents[0]) : cstr("-"), int(f.upvalues[i].instack),
+                int(f.upvalues[i].idx))
     }
 }
 

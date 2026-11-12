@@ -20,7 +20,12 @@ require lstrlib
 require ltablib
 require lutf8lib
 
-var private loadedlibs : luaL_Reg[11] = fixed_array(luaL_Reg(name = cstr("_G"), func = @@luaopen_base), luaL_Reg(name = cstr("package"), func = @@luaopen_package), luaL_Reg(name = cstr("coroutine"), func = @@luaopen_coroutine), luaL_Reg(name = cstr("table"), func = @@luaopen_table), luaL_Reg(name = cstr("io"), func = @@luaopen_io), luaL_Reg(name = cstr("os"), func = @@luaopen_os), luaL_Reg(name = cstr("string"), func = @@luaopen_string), luaL_Reg(name = cstr("math"), func = @@luaopen_math), luaL_Reg(name = cstr("utf8"), func = @@luaopen_utf8), luaL_Reg(name = cstr("debug"), func = @@luaopen_debug), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private loadedlibs : luaL_Reg[11] = fixed_array(luaL_Reg(name = cstr("_G"), func = @@luaopen_base),
+        luaL_Reg(name = cstr("package"), func = @@luaopen_package), luaL_Reg(name = cstr("coroutine"), func = @@luaopen_coroutine),
+        luaL_Reg(name = cstr("table"), func = @@luaopen_table), luaL_Reg(name = cstr("io"), func = @@luaopen_io),
+        luaL_Reg(name = cstr("os"), func = @@luaopen_os), luaL_Reg(name = cstr("string"), func = @@luaopen_string),
+        luaL_Reg(name = cstr("math"), func = @@luaopen_math), luaL_Reg(name = cstr("utf8"), func = @@luaopen_utf8),
+        luaL_Reg(name = cstr("debug"), func = @@luaopen_debug), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
 [c_function]
 def luaL_openlibs(var L : lua_State?) {
@@ -31,7 +36,7 @@ def luaL_openlibs(var L : lua_State?) {
         luaL_requiref(L, lib.name, lib.func, 1)
         // remove lib
         lua_settop(L, -1 - 1)
-        lib = lib + 1
+        lib++
     }
 }
 

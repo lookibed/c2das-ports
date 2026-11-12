@@ -3,7 +3,9 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_do_while
 require c_runtime/c_function
+require c_runtime/c_switch
 require c_runtime/cstr
 require c_runtime/variadic
 require c_types
@@ -13,9 +15,24 @@ require lauxlib
 require lauxlib_h
 require lobject_h_cluster
 
-var private luaB_collectgarbage_opts : uint8? [11] = fixed_array<uint8?>(cstr("stop"), cstr("restart"), cstr("collect"), cstr("count"), cstr("step"), cstr("setpause"), cstr("setstepmul"), cstr("isrunning"), cstr("generational"), cstr("incremental"), null)
+var private luaB_collectgarbage_opts : uint8? [11] = fixed_array<uint8?>(cstr("stop"), cstr("restart"), cstr("collect"), cstr("count"), cstr("step"),
+        cstr("setpause"), cstr("setstepmul"), cstr("isrunning"), cstr("generational"), cstr("incremental"), null)
 var private luaB_collectgarbage_optsnum : int[10] = fixed_array(0, 1, 2, 3, 5, 6, 7, 9, 10, 11)
-var private base_funcs : luaL_Reg[26] = fixed_array(luaL_Reg(name = cstr("assert"), func = @@luaB_assert), luaL_Reg(name = cstr("collectgarbage"), func = @@luaB_collectgarbage), luaL_Reg(name = cstr("dofile"), func = @@luaB_dofile), luaL_Reg(name = cstr("error"), func = @@luaB_error), luaL_Reg(name = cstr("getmetatable"), func = @@luaB_getmetatable), luaL_Reg(name = cstr("ipairs"), func = @@luaB_ipairs), luaL_Reg(name = cstr("loadfile"), func = @@luaB_loadfile), luaL_Reg(name = cstr("load"), func = @@luaB_load), luaL_Reg(name = cstr("next"), func = @@luaB_next), luaL_Reg(name = cstr("pairs"), func = @@luaB_pairs), luaL_Reg(name = cstr("pcall"), func = @@luaB_pcall), luaL_Reg(name = cstr("print"), func = @@luaB_print), luaL_Reg(name = cstr("warn"), func = @@luaB_warn), luaL_Reg(name = cstr("rawequal"), func = @@luaB_rawequal), luaL_Reg(name = cstr("rawlen"), func = @@luaB_rawlen), luaL_Reg(name = cstr("rawget"), func = @@luaB_rawget), luaL_Reg(name = cstr("rawset"), func = @@luaB_rawset), luaL_Reg(name = cstr("select"), func = @@luaB_select), luaL_Reg(name = cstr("setmetatable"), func = @@luaB_setmetatable), luaL_Reg(name = cstr("tonumber"), func = @@luaB_tonumber), luaL_Reg(name = cstr("tostring"), func = @@luaB_tostring), luaL_Reg(name = cstr("type"), func = @@luaB_type), luaL_Reg(name = cstr("xpcall"), func = @@luaB_xpcall), luaL_Reg(name = cstr("_G"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("_VERSION"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private base_funcs : luaL_Reg[26] = fixed_array(luaL_Reg(name = cstr("assert"), func = @@luaB_assert),
+        luaL_Reg(name = cstr("collectgarbage"), func = @@luaB_collectgarbage), luaL_Reg(name = cstr("dofile"), func = @@luaB_dofile),
+        luaL_Reg(name = cstr("error"), func = @@luaB_error), luaL_Reg(name = cstr("getmetatable"), func = @@luaB_getmetatable),
+        luaL_Reg(name = cstr("ipairs"), func = @@luaB_ipairs), luaL_Reg(name = cstr("loadfile"), func = @@luaB_loadfile),
+        luaL_Reg(name = cstr("load"), func = @@luaB_load), luaL_Reg(name = cstr("next"), func = @@luaB_next),
+        luaL_Reg(name = cstr("pairs"), func = @@luaB_pairs), luaL_Reg(name = cstr("pcall"), func = @@luaB_pcall),
+        luaL_Reg(name = cstr("print"), func = @@luaB_print), luaL_Reg(name = cstr("warn"), func = @@luaB_warn),
+        luaL_Reg(name = cstr("rawequal"), func = @@luaB_rawequal), luaL_Reg(name = cstr("rawlen"), func = @@luaB_rawlen),
+        luaL_Reg(name = cstr("rawget"), func = @@luaB_rawget), luaL_Reg(name = cstr("rawset"), func = @@luaB_rawset),
+        luaL_Reg(name = cstr("select"), func = @@luaB_select), luaL_Reg(name = cstr("setmetatable"), func = @@luaB_setmetatable),
+        luaL_Reg(name = cstr("tonumber"), func = @@luaB_tonumber), luaL_Reg(name = cstr("tostring"), func = @@luaB_tostring),
+        luaL_Reg(name = cstr("type"), func = @@luaB_type), luaL_Reg(name = cstr("xpcall"), func = @@luaB_xpcall),
+        luaL_Reg(name = cstr("_G"), func = default<function<(var a0 : lua_State?) : int>>),
+        luaL_Reg(name = cstr("_VERSION"), func = default<function<(var a0 : lua_State?) : int>>),
+        luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
 let private LUA_TNUMBER = 3
 let private LUA_TSTRING = 4
@@ -89,33 +106,30 @@ def private b_str2int(var s : uint8?; base : int; var pn : int64?) : uint8? {
     var n : uint64 = 0ul
     var neg : int = 0
     // skip initial spaces
-    s = s + crt::strspn(s, cstr(" \f\n\r\t\v"))
+    s += crt::strspn(s, cstr(" \f\n\r\t\v"))
     // handle sign
-    if (int(deref(s)) == '-') {
-        s = s + 1
+    if (*s == '-') {
+        s++
         neg = 1
-    } elif (int(deref(s)) == '+') {
-        s = s + 1
+    } elif (*s == '+') {
+        s++
     }
     // no digit?
-    if (!(crt::isalnum(int(uint8(deref(s)))) != 0)) {
+    if (crt::isalnum(int(*s)) == 0) {
         return null
     }
-    while (true) {
-        var digit : int = crt::isdigit(int(uint8(deref(s)))) != 0 ? int(deref(s)) - '0' : (crt::toupper(int(uint8(deref(s)))) - 'A') + 10
+    c_do_while(crt::isalnum(int(*s)) != 0) {
+        var digit : int = crt::isdigit(int(*s)) != 0 ? int(*s) - '0' : (crt::toupper(int(*s)) - 'A') + 10
         // invalid numeral
         if (digit >= base) {
             return null
         }
         n = n * uint64(base) + uint64(digit)
-        s = s + 1
-        if (!(crt::isalnum(int(uint8(deref(s)))) != 0)) {
-            break
-        }
+        s++
     }
     // skip trailing spaces
-    s = s + crt::strspn(s, cstr(" \f\n\r\t\v"))
-    deref(pn) = int64(neg != 0 ? (uint64(0u) - n) : n)
+    s += crt::strspn(s, cstr(" \f\n\r\t\v"))
+    *pn = int64(neg != 0 ? (uint64(0u) - n) : n)
     return s
 }
 
@@ -175,7 +189,7 @@ def private luaB_error(var L : lua_State?) : int {
 
 def private luaB_getmetatable(var L : lua_State?) : int {
     luaL_checkany(L, 1)
-    if (!(lua_getmetatable(L, 1) != 0)) {
+    if (lua_getmetatable(L, 1) == 0) {
         lua_pushnil(L)
         // no metatable
         return 1
@@ -241,9 +255,8 @@ def private pushmode(var L : lua_State?; oldmode : int) : int {
 [c_function]
 def private luaB_collectgarbage(var L : lua_State?) : int {
     var o : int = luaB_collectgarbage_optsnum[luaL_checkoption(L, 1, cstr("collect"), addr(luaB_collectgarbage_opts[0]))]
-    let _cond = o
-    while (true) {
-        if (_cond == 3) {
+    c_switch(o) {
+        case(3) {
             {
                 var k : int = lua_gc`va(L, o, VaNone())
                 var b : int = lua_gc`va(L, LUA_GCCOUNTB, VaNone())
@@ -254,7 +267,7 @@ def private luaB_collectgarbage(var L : lua_State?) : int {
                 return 1
             }
         }
-        if (_cond == 5) {
+        case(5) {
             {
                 var step : int = int(luaL_optinteger(L, 2, 0l))
                 var res : int = lua_gc`va(L, o, (step,))
@@ -265,7 +278,7 @@ def private luaB_collectgarbage(var L : lua_State?) : int {
                 return 1
             }
         }
-        if (_cond == 6 || _cond == 7) {
+        case(6, 7) {
             {
                 var p : int = int(luaL_optinteger(L, 2, 0l))
                 var previous : int = lua_gc`va(L, o, (p,))
@@ -276,7 +289,7 @@ def private luaB_collectgarbage(var L : lua_State?) : int {
                 return 1
             }
         }
-        if (_cond == 9) {
+        case(9) {
             {
                 var res : int = lua_gc`va(L, o, VaNone())
                 if (res == -1) {
@@ -286,14 +299,14 @@ def private luaB_collectgarbage(var L : lua_State?) : int {
                 return 1
             }
         }
-        if (_cond == 10) {
+        case(10) {
             {
                 var minormul : int = int(luaL_optinteger(L, 2, 0l))
                 var majormul : int = int(luaL_optinteger(L, 3, 0l))
                 return pushmode(L, lua_gc`va(L, o, (minormul, majormul)))
             }
         }
-        if (_cond == 11) {
+        case(11) {
             {
                 var pause : int = int(luaL_optinteger(L, 2, 0l))
                 var stepmul : int = int(luaL_optinteger(L, 3, 0l))
@@ -301,7 +314,7 @@ def private luaB_collectgarbage(var L : lua_State?) : int {
                 return pushmode(L, lua_gc`va(L, o, (pause, stepmul, stepsize)))
             }
         }
-        if (!(_cond == 3 || _cond == 5 || _cond == 6 || _cond == 7 || _cond == 9 || _cond == 10 || _cond == 11)) {
+        case(_) {
             {
                 var res : int = lua_gc`va(L, o, VaNone())
                 if (res == -1) {
@@ -311,7 +324,6 @@ def private luaB_collectgarbage(var L : lua_State?) : int {
                 return 1
             }
         }
-        break
     }
     // invalid call (inside a finalizer)
     lua_pushnil(L)
@@ -389,7 +401,7 @@ def private load_aux(var L : lua_State?; status : int; envidx : int) : int {
             // environment for loaded function
             lua_pushvalue(L, envidx)
             // set it as 1st upvalue
-            if (!(lua_setupvalue(L, -2, 1) != null)) {
+            if (lua_setupvalue(L, -2, 1) == null) {
                 // remove 'env' if not used by previous call
                 lua_settop(L, -1 - 1)
             }
@@ -429,9 +441,9 @@ def private generic_reader(var L : lua_State?; var ud : void?; var size : uint64
     if (lua_type(L, -1) == LUA_TNIL) {
         // pop result
         lua_settop(L, -1 - 1)
-        deref(size) = 0ul
+        *size = 0ul
         return null
-    } elif (!(lua_isstring(L, -1) != 0)) {
+    } elif (lua_isstring(L, -1) == 0) {
         luaL_error`va(L, cstr("reader function must return a string"), VaNone())
     }
     // save string in reserved slot
@@ -502,7 +514,7 @@ def private luaB_assert(var L : lua_State?) : int {
 [c_function]
 def private luaB_select(var L : lua_State?) : int {
     var n : int = lua_gettop(L)
-    if (lua_type(L, 1) == LUA_TSTRING && int(deref(lua_tolstring(L, 1, null))) == '#') {
+    if (lua_type(L, 1) == LUA_TSTRING && *lua_tolstring(L, 1, null) == '#') {
         lua_pushinteger(L, int64(n - 1))
         return 1
     } else {

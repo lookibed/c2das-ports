@@ -6,6 +6,7 @@ options stack = 8388608
 require c_runtime/c_exit
 require c_runtime/c_function
 require c_runtime/cstr
+require c_runtime/int_of
 require c_runtime/variadic
 require crt
 require lapi
@@ -23,8 +24,14 @@ struct tm {
 include loslib.layout.das.inc
 
 var private os_setlocale_cat : int[6] = fixed_array(6, 3, 0, 4, 1, 2)
-var private os_setlocale_catnames : uint8? [7] = fixed_array<uint8?>(cstr("all"), cstr("collate"), cstr("ctype"), cstr("monetary"), cstr("numeric"), cstr("time"), null)
-var private syslib : luaL_Reg[12] = fixed_array(luaL_Reg(name = cstr("clock"), func = @@os_clock), luaL_Reg(name = cstr("date"), func = @@os_date), luaL_Reg(name = cstr("difftime"), func = @@os_difftime), luaL_Reg(name = cstr("execute"), func = @@os_execute), luaL_Reg(name = cstr("exit"), func = @@os_exit), luaL_Reg(name = cstr("getenv"), func = @@os_getenv), luaL_Reg(name = cstr("remove"), func = @@os_remove), luaL_Reg(name = cstr("rename"), func = @@os_rename), luaL_Reg(name = cstr("setlocale"), func = @@os_setlocale), luaL_Reg(name = cstr("time"), func = @@os_time), luaL_Reg(name = cstr("tmpname"), func = @@os_tmpname), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private os_setlocale_catnames : uint8? [7] = fixed_array<uint8?>(cstr("all"), cstr("collate"), cstr("ctype"), cstr("monetary"), cstr("numeric"),
+        cstr("time"), null)
+var private syslib : luaL_Reg[12] = fixed_array(luaL_Reg(name = cstr("clock"), func = @@os_clock), luaL_Reg(name = cstr("date"), func = @@os_date),
+        luaL_Reg(name = cstr("difftime"), func = @@os_difftime), luaL_Reg(name = cstr("execute"), func = @@os_execute),
+        luaL_Reg(name = cstr("exit"), func = @@os_exit), luaL_Reg(name = cstr("getenv"), func = @@os_getenv),
+        luaL_Reg(name = cstr("remove"), func = @@os_remove), luaL_Reg(name = cstr("rename"), func = @@os_rename),
+        luaL_Reg(name = cstr("setlocale"), func = @@os_setlocale), luaL_Reg(name = cstr("time"), func = @@os_time),
+        luaL_Reg(name = cstr("tmpname"), func = @@os_tmpname), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
 let private LUA_TNIL = 0
 let private SIZETIMEFMT = 250
@@ -37,7 +44,7 @@ let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64
 def private os_execute(var L : lua_State?) : int {
     var cmd : uint8? = luaL_optlstring(L, 1, null, null)
     var stat : int
-    deref(crt::c_errno_location()) = 0
+    *crt::c_errno_location() = 0
     stat = crt::system(cmd)
     if (cmd != null) {
         return luaL_execresult(L, stat)
@@ -51,23 +58,23 @@ def private os_execute(var L : lua_State?) : int {
 [c_function]
 def private os_remove(var L : lua_State?) : int {
     var filename : uint8? = luaL_checklstring(L, 1, null)
-    deref(crt::c_errno_location()) = 0
-    return luaL_fileresult(L, crt::remove(filename) == 0 ? 1 : 0, filename)
+    *crt::c_errno_location() = 0
+    return luaL_fileresult(L, int_of(crt::remove(filename) == 0), filename)
 }
 
 [c_function]
 def private os_rename(var L : lua_State?) : int {
     var fromname : uint8? = luaL_checklstring(L, 1, null)
     var toname : uint8? = luaL_checklstring(L, 2, null)
-    deref(crt::c_errno_location()) = 0
-    return luaL_fileresult(L, crt::rename(fromname, toname) == 0 ? 1 : 0, null)
+    *crt::c_errno_location() = 0
+    return luaL_fileresult(L, int_of(crt::rename(fromname, toname) == 0), null)
 }
 
 [c_function]
 def private os_tmpname(var L : lua_State?) : int {
     var buff : uint8[20]
     var err : int
-    err = crt::tmpnam(addr(buff[0])) == null ? 1 : 0
+    err = int_of(crt::tmpnam(addr(buff[0])) == null)
     if (err != 0) {
         return luaL_error`va(L, cstr("unable to generate a unique filename"), VaNone())
     }
@@ -137,7 +144,7 @@ def private getfield(var L : lua_State?; var key : uint8?; d : int; delta : int)
     var t : int = lua_getfield(L, -1, key)
     var res : int64 = lua_tointegerx(L, -1, addr(isnum))
     // field is not an integer?
-    if (!(isnum != 0)) {
+    if (isnum == 0) {
         // some other value?
         if (t != LUA_TNIL) {
             return luaL_error`va(L, cstr("field '%s' is not an integer"), (key,))
@@ -161,9 +168,9 @@ def private checkoption(var L : lua_State?; var conv : uint8?; convlen : int64; 
     var option : uint8? = cstr("aAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%||EcECExEXEyEYOdOeOHOIOmOMOSOuOUOVOwOWOy")
     // length of options being checked
     var oplen : int = 1
-    while (int(deref(option)) != '\0' && int64(oplen) <= convlen) {
+    while (*option != '\0' && int64(oplen) <= convlen) {
         // next block?
-        if (int(deref(option)) == '|') {
+        if (*option == '|') {
             // will check options with next length (+1)
             oplen++
         } elif (crt::memcmp(reinterpret<void?>(conv), reinterpret<void?>(option), uint64(oplen)) == 0) {
@@ -174,7 +181,7 @@ def private checkoption(var L : lua_State?; var conv : uint8?; convlen : int64; 
             // return next item
             return conv + oplen
         }
-        option = option + oplen
+        option += oplen
     }
     luaL_argerror(L, 1, lua_pushfstring`va(L, cstr("invalid conversion specifier '%%%s'"), (conv,)))
     // to avoid warnings
@@ -183,8 +190,8 @@ def private checkoption(var L : lua_State?; var conv : uint8?; convlen : int64; 
 
 def private l_checktime(var L : lua_State?; arg : int) : int64 {
     var t : int64 = luaL_checkinteger(L, arg)
-    let _t0 = int64(int64(t)) == t || luaL_argerror(L, arg, cstr("time out-of-bounds")) != 0
-    return int64(t)
+    let _t0 = t == t || luaL_argerror(L, arg, cstr("time out-of-bounds")) != 0
+    return t
 }
 
 [c_function]
@@ -197,11 +204,11 @@ def private os_date(var L : lua_State?) : int {
     var tmr : tm
     var stm : tm?
     // UTC?
-    if (int(deref(s)) == '!') {
+    if (*s == '!') {
         let _t0 = addr(tmr).tm_sec
         stm = reinterpret<tm?>(crt::gmtime(addr(t)))
         // skip '!'
-        s = s + 1
+        s++
     } else {
         let _t1 = addr(tmr).tm_sec
         stm = reinterpret<tm?>(crt::localtime(addr(t)))
@@ -222,18 +229,18 @@ def private os_date(var L : lua_State?) : int {
         luaL_buffinit(L, addr(b))
         while (intptr(s) < intptr(se)) {
             // not a conversion specifier?
-            if (int(deref(s)) != '%') {
+            if (*s != '%') {
                 let _t2 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), 1ul) != null
                 let _t3 = addr(b).n
                 addr(b).n++
                 var _t4 = s
-                s = s + 1
-                addr(b).b[_t3] = deref(_t4)
+                s++
+                addr(b).b[_t3] = *_t4
             } else {
                 var reslen : uint64
                 var buff : uint8? = luaL_prepbuffsize(addr(b), uint64(SIZETIMEFMT))
                 // skip '%'
-                s = s + 1
+                s++
                 // copy specifier to 'cc'
                 s = checkoption(L, s, int64(se - s), addr(cc[0]) + 1)
                 reslen = crt::strftime(buff, uint64(SIZETIMEFMT), addr(cc[0]), reinterpret<void?>(stm))
@@ -268,10 +275,10 @@ def private os_time(var L : lua_State?) : int {
         // update fields with normalized values
         setallfields(L, addr(ts))
     }
-    if (t != int64(int64(t)) || t == -1l) {
+    if (t != t || t == -1l) {
         return luaL_error`va(L, cstr("time result cannot be represented in this installation"), VaNone())
     }
-    lua_pushinteger(L, int64(t))
+    lua_pushinteger(L, t)
     return 1
 }
 

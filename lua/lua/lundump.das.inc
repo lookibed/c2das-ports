@@ -23,8 +23,8 @@ def private loadByte(var S : LoadState?) : uint8 {
     var _t2 : int
     if (_t0 > 0ul) {
         var _t1 = S.Z.p
-        S.Z.p = S.Z.p + 1
-        _t2 = int(uint8(deref(_t1)))
+        S.Z.p++
+        _t2 = int(*_t1)
     } else {
         _t2 = luaZ_fill(S.Z)
     }
@@ -39,15 +39,12 @@ def private loadUnsigned(var S : LoadState?; var limit : uint64) : uint64 {
     var x : uint64 = 0ul
     var b : int
     limit >>= 7ul
-    while (true) {
+    c_do_while((b & 128) == 0) {
         b = int(loadByte(S))
         if (x >= limit) {
             error(S, cstr("integer overflow"))
         }
         x = (x << 7ul) | uint64(b & 127)
-        if (!((b & 128) == 0)) {
-            break
-        }
     }
     return x
 }
@@ -107,7 +104,7 @@ def private loadStringN(var S : LoadState?; var p : Proto?) : TString? {
             // load directly in final place
             loadBlock(S, reinterpret<void?>(addr(ts.contents[0])), size * uint64(typeinfo sizeof(type<uint8>)))
             // pop string
-            L.top.p = L.top.p - 1
+            L.top.p--
         }
     }
     if ((int(p.marked) & (1 << BLACKBIT)) != 0 && (int(ts.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
@@ -151,34 +148,47 @@ def private loadConstants(var S : LoadState?; var f : Proto?) {
     for (i in range(n)) {
         var o : TValue? = addr(f.k[i])
         var t : int = int(loadByte(S))
-        let _cond = t
-        if (_cond == 0) {
-            o.tt_ = uint8(LUA_TNIL | (0 << 4))
-        } elif (_cond == 1) {
-            o.tt_ = uint8(LUA_TBOOLEAN | (0 << 4))
-        } elif (_cond == 17) {
-            o.tt_ = uint8(LUA_TBOOLEAN | (1 << 4))
-        } elif (_cond == 19) {
-            {
-                var io : TValue? = o
-                io.value_.n = loadNumber(S)
-                io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
+        c_switch(t) {
+            case(0) {
+                o.tt_ = uint8(LUA_TNIL | (0 << 4))
+                break
             }
-        } elif (_cond == 3) {
-            {
-                var io : TValue? = o
-                io.value_.i = loadInteger(S)
-                io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+            case(1) {
+                o.tt_ = uint8(LUA_TBOOLEAN | (0 << 4))
+                break
             }
-        } elif (_cond == 4 || _cond == 20) {
-            {
-                var io : TValue? = o
-                var x_ : TString? = loadString(S, f)
-                io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-                io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
-                let _t0 = S.L
+            case(17) {
+                o.tt_ = uint8(LUA_TBOOLEAN | (1 << 4))
+                break
             }
-        } else {
+            case(19) {
+                {
+                    var io : TValue? = o
+                    io.value_.n = loadNumber(S)
+                    io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
+                }
+                break
+            }
+            case(3) {
+                {
+                    var io : TValue? = o
+                    io.value_.i = loadInteger(S)
+                    io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+                }
+                break
+            }
+            case(4, 20) {
+                {
+                    var io : TValue? = o
+                    var x_ : TString? = loadString(S, f)
+                    io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
+                    io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
+                    let _t0 = S.L
+                }
+                break
+            }
+            case(_) {
+            }
         }
     }
 }
@@ -239,7 +249,8 @@ def private loadDebug(var S : LoadState?; var f : Proto?) {
     f.sizelineinfo = n
     loadBlock(S, reinterpret<void?>(f.lineinfo), uint64(n) * uint64(typeinfo sizeof(type<int8>)))
     n = loadInt(S)
-    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + 1ul > MAX_SIZET / uint64(typeinfo sizeof(type<AbsLineInfo>))) {
+    if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) &&
+            uint64(n) + 1ul > MAX_SIZET / uint64(typeinfo sizeof(type<AbsLineInfo>))) {
         luaM_toobig(S.L)
     }
     f.abslineinfo = reinterpret<AbsLineInfo?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<AbsLineInfo>)), 0))
@@ -337,9 +348,9 @@ def private checkHeader(var S : LoadState?) {
 def luaU_undump(var L : lua_State?; var Z : Zio?; var name : uint8?) : LClosure? {
     var S : LoadState
     var cl : LClosure?
-    if (int(deref(name)) == '@' || int(deref(name)) == '=') {
+    if (*name == '@' || *name == '=') {
         S.name = name + 1
-    } elif (int(deref(name)) == int(cstr("\x1bLua")[0])) {
+    } elif (*name == cstr("\x1bLua")[0]) {
         S.name = cstr("binary string")
     } else {
         S.name = name

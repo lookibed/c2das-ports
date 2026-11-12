@@ -3,7 +3,9 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_do_while
 require c_runtime/c_function
+require c_runtime/c_switch
 require c_runtime/cstr
 require c_runtime/printf
 require c_runtime/variadic
@@ -39,7 +41,8 @@ struct LoadS {
 
 include lauxlib.layout.das.inc
 
-var private boxmt : luaL_Reg[3] = fixed_array(luaL_Reg(name = cstr("__gc"), func = @@boxgc), luaL_Reg(name = cstr("__close"), func = @@boxgc), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private boxmt : luaL_Reg[3] = fixed_array(luaL_Reg(name = cstr("__gc"), func = @@boxgc), luaL_Reg(name = cstr("__close"), func = @@boxgc),
+        luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
 let private LUA_TTABLE = 5
 let private LUA_TSTRING = 4
@@ -137,14 +140,14 @@ def private pushfuncname(var L : lua_State?; var ar : lua_Debug?) {
         // remove name
         lua_rotate(L, -2, -1)
         lua_settop(L, -1 - 1)
-    } elif (int(deref(ar.namewhat)) != '\0') {
+    } elif (*ar.namewhat != '\0') {
         // is there a name from code?
         // use it
         lua_pushfstring`va(L, cstr("%s '%s'"), (ar.namewhat, ar.name))
-    } elif (int(deref(ar.what)) == 'm') {
+    } elif (*ar.what == 'm') {
         // main?
         lua_pushstring(L, cstr("main chunk"))
-    } elif (int(deref(ar.what)) != 'C') {
+    } elif (*ar.what != 'C') {
         // for Lua functions, use <file:line>
         lua_pushfstring`va(L, cstr("function <%s:%d>"), (addr(ar.short_src[0]), ar.linedefined))
     } else {
@@ -193,7 +196,7 @@ def luaL_traceback(var L : lua_State?; var L1 : lua_State?; var msg : uint8?; va
     while (true) {
         let _t2 = level
         level++
-        if (!(lua_getstack(L1, _t2, addr(ar)) != 0)) {
+        if (lua_getstack(L1, _t2, addr(ar)) == 0) {
             break
         }
         // too many levels?
@@ -229,7 +232,7 @@ def luaL_traceback(var L : lua_State?; var L1 : lua_State?; var msg : uint8?; va
 def luaL_argerror(var L : lua_State?; var arg : int; var extramsg : uint8?) : int {
     var ar : lua_Debug
     // no stack frame?
-    if (!(lua_getstack(L, 0, addr(ar)) != 0)) {
+    if (lua_getstack(L, 0, addr(ar)) == 0) {
         return luaL_error`va(L, cstr("bad argument #%d (%s)"), (arg, extramsg))
     }
     lua_getinfo(L, cstr("n"), addr(ar))
@@ -304,7 +307,7 @@ def luaL_error(var L : lua_State?; var fmt : uint8?; va : va_args) : int {
 [c_function]
 def luaL_fileresult(var L : lua_State?; stat : int; var fname : uint8?) : int {
     // calls to Lua API may change this value
-    var en : int = deref(crt::c_errno_location())
+    var en : int = *crt::c_errno_location()
     if (stat != 0) {
         lua_pushboolean(L, 1)
         return 1
@@ -325,14 +328,14 @@ def luaL_fileresult(var L : lua_State?; stat : int; var fname : uint8?) : int {
 [c_function]
 def luaL_execresult(var L : lua_State?; stat : int) : int {
     // error with an 'errno'?
-    if (stat != 0 && deref(crt::c_errno_location()) != 0) {
+    if (stat != 0 && *crt::c_errno_location() != 0) {
         return luaL_fileresult(L, 0, null)
     } else {
         // type of termination
         var what : uint8? = cstr("exit")
         // interpret result
         // successful termination?
-        if (int(deref(what)) == 'e' && stat == 0) {
+        if (*what == 'e' && stat == 0) {
             lua_pushboolean(L, 1)
         } else {
             lua_pushnil(L)
@@ -376,7 +379,7 @@ def luaL_testudata(var L : lua_State?; ud : int; var tname : uint8?) : void? {
             // get correct metatable
             lua_getfield(L, LUA_REGISTRYINDEX, tname)
             // not the same?
-            if (!(lua_rawequal(L, -1, -2) != 0)) {
+            if (lua_rawequal(L, -1, -2) == 0) {
                 // value is a userdata with wrong metatable
                 p = null
             }
@@ -415,7 +418,7 @@ def luaL_checkoption(var L : lua_State?; arg : int; var _c_def : uint8?; var lst
 // this extra space, Lua will generate the same 'stack overflow' error,
 // but without 'msg'.)
 def luaL_checkstack(var L : lua_State?; space : int; var msg : uint8?) {
-    if (!(lua_checkstack(L, space) != 0)) {
+    if (lua_checkstack(L, space) == 0) {
         if (msg != null) {
             luaL_error`va(L, cstr("stack overflow (%s)"), (msg,))
         } else {
@@ -438,7 +441,7 @@ def luaL_checkany(var L : lua_State?; arg : int) {
 
 def luaL_checklstring(var L : lua_State?; arg : int; var len : uint64?) : uint8? {
     var s : uint8? = lua_tolstring(L, arg, len)
-    if (!(s != null)) {
+    if (s == null) {
         tag_error(L, arg, LUA_TSTRING)
     }
     return s
@@ -448,7 +451,7 @@ def luaL_checklstring(var L : lua_State?; arg : int; var len : uint64?) : uint8?
 def luaL_optlstring(var L : lua_State?; arg : int; var _c_def : uint8?; var len : uint64?) : uint8? {
     if (lua_type(L, arg) <= 0) {
         if (len != null) {
-            deref(len) = _c_def != null ? crt::strlen(_c_def) : 0ul
+            *len = _c_def != null ? crt::strlen(_c_def) : 0ul
         }
         return _c_def
     } else {
@@ -460,7 +463,7 @@ def luaL_optlstring(var L : lua_State?; arg : int; var _c_def : uint8?; var len 
 def luaL_checknumber(var L : lua_State?; arg : int) : double {
     var isnum : int
     var d : double = lua_tonumberx(L, arg, addr(isnum))
-    if (!(isnum != 0)) {
+    if (isnum == 0) {
         tag_error(L, arg, LUA_TNUMBER)
     }
     return d
@@ -482,7 +485,7 @@ def private interror(var L : lua_State?; arg : int) {
 def luaL_checkinteger(var L : lua_State?; arg : int) : int64 {
     var isnum : int
     var d : int64 = lua_tointegerx(L, arg, addr(isnum))
-    if (!(isnum != 0)) {
+    if (isnum == 0) {
         interror(L, arg)
     }
     return d
@@ -714,7 +717,7 @@ def private getF(var L : lua_State?; var ud : void?; var size : uint64?) : uint8
     // are there pre-read characters to be read?
     if (lf.n > 0) {
         // return them (chars already in buffer)
-        deref(size) = uint64(lf.n)
+        *size = uint64(lf.n)
         // no more pre-read characters
         lf.n = 0
     } else {
@@ -726,14 +729,14 @@ def private getF(var L : lua_State?; var ud : void?; var size : uint64?) : uint8
             return null
         }
         // read block
-        deref(size) = crt::fread(reinterpret<void?>(addr(lf.buff[0])), 1ul, uint64(typeinfo sizeof(type<uint8[8192]>)), reinterpret<void?>(lf.f))
+        *size = crt::fread(reinterpret<void?>(addr(lf.buff[0])), 1ul, uint64(typeinfo sizeof(type<uint8[8192]>)), reinterpret<void?>(lf.f))
     }
     return addr(lf.buff[0])
 }
 
 [c_function]
 def private errfile(var L : lua_State?; var what : uint8?; fnameindex : int) : int {
-    var err : int = deref(crt::c_errno_location())
+    var err : int = *crt::c_errno_location()
     var filename : uint8? = lua_tolstring(L, fnameindex, null) + 1
     if (err != 0) {
         lua_pushfstring`va(L, cstr("cannot %s %s: %s"), (what, filename, crt::strerror(err)))
@@ -771,19 +774,16 @@ def private skipBOM(var f : _IO_FILE?) : int {
 // a first-line comment).
 [c_function]
 def private skipcomment(var f : _IO_FILE?; var cp : int?) : int {
-    deref(cp) = skipBOM(f)
-    var c : int = deref(cp)
+    *cp = skipBOM(f)
+    var c : int = *cp
     // first line is a comment (Unix exec. file)?
     if (c == '#') {
         // skip first line
-        while (true) {
+        c_do_while(c != -1 && c != '\n') {
             c = crt::getc(reinterpret<void?>(f))
-            if (!(c != -1 && c != '\n')) {
-                break
-            }
         }
         // next character after comment, if present
-        deref(cp) = crt::getc(reinterpret<void?>(f))
+        *cp = crt::getc(reinterpret<void?>(f))
         // there was a comment
         return 1
     } else {
@@ -805,7 +805,7 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
         lf.f = reinterpret<_IO_FILE?>(crt::c_stdin())
     } else {
         lua_pushfstring`va(L, cstr("@%s"), (filename,))
-        deref(crt::c_errno_location()) = 0
+        *crt::c_errno_location() = 0
         lf.f = reinterpret<_IO_FILE?>(crt::fopen(filename, cstr("r")))
         if (lf.f == null) {
             return errfile(L, cstr("open"), fnameindex)
@@ -825,7 +825,7 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
         lf.n = 0
         // "real" file?
         if (filename != null) {
-            deref(crt::c_errno_location()) = 0
+            *crt::c_errno_location() = 0
             // reopen in binary mode
             lf.f = reinterpret<_IO_FILE?>(crt::freopen(filename, cstr("rb"), reinterpret<void?>(lf.f)))
             if (lf.f == null) {
@@ -841,7 +841,7 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
         lf.n++
         lf.buff[_t1] = uint8(c)
     }
-    deref(crt::c_errno_location()) = 0
+    *crt::c_errno_location() = 0
     status = lua_load(L, @@getF, reinterpret<void?>(addr(lf)), lua_tolstring(L, -1, null), mode)
     readstatus = crt::ferror(reinterpret<void?>(lf.f))
     // close file (even in case of errors)
@@ -865,7 +865,7 @@ def private getS(var L : lua_State?; var ud : void?; var size : uint64?) : uint8
     if (ls.size == 0ul) {
         return null
     }
-    deref(size) = ls.size
+    *size = ls.size
     ls.size = 0ul
     return ls.s
 }
@@ -885,7 +885,7 @@ def luaL_loadstring(var L : lua_State?; var s : uint8?) : int {
 
 def luaL_getmetafield(var L : lua_State?; obj : int; var event : uint8?) : int {
     // no metatable?
-    if (!(lua_getmetatable(L, obj) != 0)) {
+    if (lua_getmetatable(L, obj) == 0) {
         return LUA_TNIL
     } else {
         var tt : int
@@ -922,7 +922,7 @@ def luaL_len(var L : lua_State?; idx : int) : int64 {
     var isnum : int
     lua_len(L, idx)
     l = lua_tointegerx(L, -1, addr(isnum))
-    if (!(isnum != 0)) {
+    if (isnum == 0) {
         luaL_error`va(L, cstr("object length is not an integer"), VaNone())
     }
     // remove object
@@ -934,33 +934,43 @@ def luaL_tolstring(var L : lua_State?; var idx : int; var len : uint64?) : uint8
     idx = lua_absindex(L, idx)
     // metafield?
     if (luaL_callmeta(L, idx, cstr("__tostring")) != 0) {
-        if (!(lua_isstring(L, -1) != 0)) {
+        if (lua_isstring(L, -1) == 0) {
             luaL_error`va(L, cstr("'__tostring' must return a string"), VaNone())
         }
     } else {
-        let _cond = lua_type(L, idx)
-        if (_cond == 3) {
-            if (lua_isinteger(L, idx) != 0) {
-                lua_pushfstring`va(L, cstr("%I"), (lua_tointegerx(L, idx, null),))
-            } else {
-                lua_pushfstring`va(L, cstr("%f"), (lua_tonumberx(L, idx, null),))
+        c_switch(lua_type(L, idx)) {
+            case(3) {
+                if (lua_isinteger(L, idx) != 0) {
+                    lua_pushfstring`va(L, cstr("%I"), (lua_tointegerx(L, idx, null),))
+                } else {
+                    lua_pushfstring`va(L, cstr("%f"), (lua_tonumberx(L, idx, null),))
+                }
+                break
             }
-        } elif (_cond == 4) {
-            lua_pushvalue(L, idx)
-        } elif (_cond == 1) {
-            lua_pushstring(L, lua_toboolean(L, idx) != 0 ? cstr("true") : cstr("false"))
-        } elif (_cond == 0) {
-            lua_pushstring(L, cstr("nil"))
-        } else {
-            {
-                // try name
-                var tt : int = luaL_getmetafield(L, idx, cstr("__name"))
-                var kind : uint8? = (tt == LUA_TSTRING) ? lua_tolstring(L, -1, null) : lua_typename(L, lua_type(L, idx))
-                lua_pushfstring`va(L, cstr("%s: %p"), (kind, lua_topointer(L, idx)))
-                if (tt != LUA_TNIL) {
-                    // remove '__name'
-                    lua_rotate(L, -2, -1)
-                    lua_settop(L, -1 - 1)
+            case(4) {
+                lua_pushvalue(L, idx)
+                break
+            }
+            case(1) {
+                lua_pushstring(L, lua_toboolean(L, idx) != 0 ? cstr("true") : cstr("false"))
+                break
+            }
+            case(0) {
+                lua_pushstring(L, cstr("nil"))
+                break
+            }
+            case(_) {
+                {
+                    // try name
+                    var tt : int = luaL_getmetafield(L, idx, cstr("__name"))
+                    var kind : uint8? = (tt == LUA_TSTRING) ? lua_tolstring(L, -1, null) : lua_typename(L, lua_type(L, idx))
+                    lua_pushfstring`va(L, cstr("%s: %p"), (kind, lua_topointer(L, idx)))
+                    if (tt != LUA_TNIL) {
+                        // remove '__name'
+                        lua_rotate(L, -2, -1)
+                        lua_settop(L, -1 - 1)
+                    }
+                    break
                 }
             }
         }
@@ -988,7 +998,7 @@ def luaL_setfuncs(var L : lua_State?; var l : luaL_Reg?; nup : int) {
             lua_pushcclosure(L, l.func, nup)
         }
         lua_setfield(L, -(nup + 2), l.name)
-        l = l + 1
+        l++
     }
     // remove upvalues
     lua_settop(L, -nup - 1)
@@ -1023,7 +1033,7 @@ def luaL_requiref(var L : lua_State?; var modname : uint8?; openf : function<(va
     // LOADED[modname]
     lua_getfield(L, -1, modname)
     // package not already loaded?
-    if (!(lua_toboolean(L, -1) != 0)) {
+    if (lua_toboolean(L, -1) == 0) {
         // remove field
         lua_settop(L, -1 - 1)
         lua_pushcclosure(L, openf, 0)
@@ -1106,8 +1116,8 @@ def private checkcontrol(var L : lua_State?; var message : uint8?; tocont : int)
     var _t1 = tocont != 0
     if (!_t1) {
         var _t0 = message
-        message = message + 1
-        _t1 = int(deref(_t0)) != '@'
+        message++
+        _t1 = *_t0 != '@'
     }
     if (_t1) {
         return 0

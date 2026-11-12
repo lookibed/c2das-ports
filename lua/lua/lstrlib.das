@@ -3,9 +3,12 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_do_while
 require c_runtime/c_function
+require c_runtime/c_switch
 require c_runtime/c_union
 require c_runtime/cstr
+require c_runtime/int_of
 require c_runtime/printf
 require c_runtime/variadic
 require c_types
@@ -84,9 +87,22 @@ struct cD {
 
 include lstrlib.layout.das.inc
 
-var private stringmetamethods : luaL_Reg[10] = fixed_array(luaL_Reg(name = cstr("__add"), func = @@arith_add), luaL_Reg(name = cstr("__sub"), func = @@arith_sub), luaL_Reg(name = cstr("__mul"), func = @@arith_mul), luaL_Reg(name = cstr("__mod"), func = @@arith_mod), luaL_Reg(name = cstr("__pow"), func = @@arith_pow), luaL_Reg(name = cstr("__div"), func = @@arith_div), luaL_Reg(name = cstr("__idiv"), func = @@arith_idiv), luaL_Reg(name = cstr("__unm"), func = @@arith_unm), luaL_Reg(name = cstr("__index"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private stringmetamethods : luaL_Reg[10] = fixed_array(luaL_Reg(name = cstr("__add"), func = @@arith_add),
+        luaL_Reg(name = cstr("__sub"), func = @@arith_sub), luaL_Reg(name = cstr("__mul"), func = @@arith_mul),
+        luaL_Reg(name = cstr("__mod"), func = @@arith_mod), luaL_Reg(name = cstr("__pow"), func = @@arith_pow),
+        luaL_Reg(name = cstr("__div"), func = @@arith_div), luaL_Reg(name = cstr("__idiv"), func = @@arith_idiv),
+        luaL_Reg(name = cstr("__unm"), func = @@arith_unm), luaL_Reg(name = cstr("__index"), func = default<function<(var a0 : lua_State?) : int>>),
+        luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 var private nativeendian : anon_1451
-var private strlib : luaL_Reg[18] = fixed_array(luaL_Reg(name = cstr("byte"), func = @@str_byte), luaL_Reg(name = cstr("char"), func = @@str_char), luaL_Reg(name = cstr("dump"), func = @@str_dump), luaL_Reg(name = cstr("find"), func = @@str_find), luaL_Reg(name = cstr("format"), func = @@str_format), luaL_Reg(name = cstr("gmatch"), func = @@gmatch), luaL_Reg(name = cstr("gsub"), func = @@str_gsub), luaL_Reg(name = cstr("len"), func = @@str_len), luaL_Reg(name = cstr("lower"), func = @@str_lower), luaL_Reg(name = cstr("match"), func = @@str_match), luaL_Reg(name = cstr("rep"), func = @@str_rep), luaL_Reg(name = cstr("reverse"), func = @@str_reverse), luaL_Reg(name = cstr("sub"), func = @@str_sub), luaL_Reg(name = cstr("upper"), func = @@str_upper), luaL_Reg(name = cstr("pack"), func = @@str_pack), luaL_Reg(name = cstr("packsize"), func = @@str_packsize), luaL_Reg(name = cstr("unpack"), func = @@str_unpack), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private strlib : luaL_Reg[18] = fixed_array(luaL_Reg(name = cstr("byte"), func = @@str_byte), luaL_Reg(name = cstr("char"), func = @@str_char),
+        luaL_Reg(name = cstr("dump"), func = @@str_dump), luaL_Reg(name = cstr("find"), func = @@str_find),
+        luaL_Reg(name = cstr("format"), func = @@str_format), luaL_Reg(name = cstr("gmatch"), func = @@gmatch),
+        luaL_Reg(name = cstr("gsub"), func = @@str_gsub), luaL_Reg(name = cstr("len"), func = @@str_len), luaL_Reg(name = cstr("lower"), func = @@str_lower),
+        luaL_Reg(name = cstr("match"), func = @@str_match), luaL_Reg(name = cstr("rep"), func = @@str_rep),
+        luaL_Reg(name = cstr("reverse"), func = @@str_reverse), luaL_Reg(name = cstr("sub"), func = @@str_sub),
+        luaL_Reg(name = cstr("upper"), func = @@str_upper), luaL_Reg(name = cstr("pack"), func = @@str_pack),
+        luaL_Reg(name = cstr("packsize"), func = @@str_packsize), luaL_Reg(name = cstr("unpack"), func = @@str_unpack),
+        luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
 [init]
 def private c2das_init_globals {
@@ -118,7 +134,7 @@ let private MAX_FORMAT = 32
 let private MAX_ITEMF = 110 + 308
 let private MAXINTSIZE = 16
 let private MC = (1 << 8) - 1
-let private SZINT = int(uint64(typeinfo sizeof(type<int64>)))
+let private SZINT = typeinfo sizeof(type<int64>)
 let private LUAL_PACKPADBYTE = 0
 let private LUA_VERSION_NUM = 504
 let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64(typeinfo sizeof(type<double>))
@@ -206,7 +222,7 @@ def private str_lower(var L : lua_State?) : int {
     var p : uint8? = luaL_buffinitsize(L, addr(b), l)
     i = 0ul
     while (i < l) {
-        p[i] = uint8(crt::tolower(int(uint8(s[i]))))
+        p[i] = uint8(crt::tolower(int(s[i])))
         i++
     }
     luaL_pushresultsize(addr(b), l)
@@ -222,7 +238,7 @@ def private str_upper(var L : lua_State?) : int {
     var p : uint8? = luaL_buffinitsize(L, addr(b), l)
     i = 0ul
     while (i < l) {
-        p[i] = uint8(crt::toupper(int(uint8(s[i]))))
+        p[i] = uint8(crt::toupper(int(s[i])))
         i++
     }
     luaL_pushresultsize(addr(b), l)
@@ -238,7 +254,7 @@ def private str_rep(var L : lua_State?) : int {
     var sep : uint8? = luaL_optlstring(L, 3, addr(c2das_empty[0]), addr(lsep))
     if (n <= 0l) {
         lua_pushstring(L, addr(c2das_empty[0]))
-    } elif (l + lsep < l || uint64(l + lsep) > uint64(uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int>)) ? MAX_SIZET : 2147483647ul) / uint64(n)) {
+    } elif (l + lsep < l || l + lsep > (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int>)) ? MAX_SIZET : 2147483647ul) / uint64(n)) {
         return luaL_error`va(L, cstr("resulting string too large"), VaNone())
     } else {
         var totallen : uint64 = uint64(n) * l + uint64(n - 1l) * lsep
@@ -252,11 +268,11 @@ def private str_rep(var L : lua_State?) : int {
                 break
             }
             crt::memcpy(reinterpret<void?>(p), reinterpret<void?>(s), l * uint64(typeinfo sizeof(type<uint8>)))
-            p = p + l
+            p += l
             // empty 'memcpy' is not that cheap
             if (lsep > 0ul) {
                 crt::memcpy(reinterpret<void?>(p), reinterpret<void?>(sep), lsep * uint64(typeinfo sizeof(type<uint8>)))
-                p = p + lsep
+                p += lsep
             }
         }
         // last copy (not followed by separator)
@@ -285,7 +301,7 @@ def private str_byte(var L : lua_State?) : int {
     n = int(pose - posi) + 1
     luaL_checkstack(L, n, cstr("string slice too long"))
     for (i in range(n)) {
-        lua_pushinteger(L, int64(uint8(s[posi + uint64(i) - 1ul])))
+        lua_pushinteger(L, int64(s[posi + uint64(i) - 1ul]))
     }
     return n
 }
@@ -301,7 +317,7 @@ def private str_char(var L : lua_State?) : int {
     while (i <= n) {
         var c : uint64 = uint64(luaL_checkinteger(L, i))
         let _t0 = c <= uint64(127 * 2 + 1) || luaL_argerror(L, i, cstr("value out of range")) != 0
-        p[i - 1] = uint8(uint8(c))
+        p[i - 1] = uint8(c)
         i++
     }
     luaL_pushresultsize(addr(b), uint64(n))
@@ -311,7 +327,7 @@ def private str_char(var L : lua_State?) : int {
 [c_function]
 def private writer(var L : lua_State?; var b : void?; size : uint64; var ud : void?) : int {
     var state : str_Writer? = reinterpret<str_Writer?>(ud)
-    if (!(state.init != 0)) {
+    if (state.init == 0) {
         state.init = 1
         luaL_buffinit(L, addr(state.B))
     }
@@ -344,7 +360,7 @@ def private tonum(var L : lua_State?; arg : int) : int {
         // check whether it is a numerical string
         var len : uint64
         var s : uint8? = lua_tolstring(L, arg, addr(len))
-        return (s != null && lua_stringtonumber(L, s) == len + 1ul) ? 1 : 0
+        return int_of(s != null && lua_stringtonumber(L, s) == len + 1ul)
     }
 }
 
@@ -352,7 +368,7 @@ def private tonum(var L : lua_State?; arg : int) : int {
 def private trymt(var L : lua_State?; var mtname : uint8?) {
     // back to the original arguments
     lua_settop(L, 2)
-    if (lua_type(L, 2) == LUA_TSTRING || !(luaL_getmetafield(L, 2, mtname) != 0)) {
+    if (lua_type(L, 2) == LUA_TSTRING || luaL_getmetafield(L, 2, mtname) == 0) {
         luaL_error`va(L, cstr("attempt to %s a '%s' with a '%s'"), (mtname + 2, lua_typename(L, lua_type(L, -2)), lua_typename(L, lua_type(L, -1))))
     }
     // put metamethod before arguments
@@ -426,99 +442,122 @@ def private capture_to_close(var ms : MatchState?) : int {
 [c_function]
 def private classend(var ms : MatchState?; var p : uint8?) : uint8? {
     var _t0 = p
-    p = p + 1
-    let _cond = int(deref(_t0))
-    if (_cond == '%') {
-        if (intptr(p) == intptr(ms.p_end)) {
-            luaL_error`va(ms.L, cstr("malformed pattern (ends with '%%')"), VaNone())
-        }
-        return p + 1
-    } elif (_cond == '[') {
-        if (int(deref(p)) == '^') {
-            p = p + 1
-        }
-        // look for a ']'
-        while (true) {
+    p++
+    c_switch(int(*_t0)) {
+        case('%') {
             if (intptr(p) == intptr(ms.p_end)) {
-                luaL_error`va(ms.L, cstr("malformed pattern (missing ']')"), VaNone())
+                luaL_error`va(ms.L, cstr("malformed pattern (ends with '%%')"), VaNone())
             }
-            var _t1 = p
-            p = p + 1
-            if (int(deref(_t1)) == L_ESC && intptr(p) < intptr(ms.p_end)) {
-                // skip escapes (e.g. '%]')
-                p = p + 1
-            }
-            if (!(int(deref(p)) != ']')) {
-                break
-            }
+            return p + 1
         }
-        return p + 1
-    } else {
-        return p
+        case('[') {
+            if (*p == '^') {
+                p++
+            }
+            // look for a ']'
+            c_do_while(*p != ']') {
+                if (intptr(p) == intptr(ms.p_end)) {
+                    luaL_error`va(ms.L, cstr("malformed pattern (missing ']')"), VaNone())
+                }
+                var _t1 = p
+                p++
+                if (int(*_t1) == L_ESC && intptr(p) < intptr(ms.p_end)) {
+                    // skip escapes (e.g. '%]')
+                    p++
+                }
+            }
+            return p + 1
+        }
+        case(_) {
+            return p
+        }
     }
 }
 
 [c_function]
 def private match_class(c : int; cl : int) : int {
     var res : int
-    let _cond = crt::tolower(cl)
-    if (_cond == 'a') {
-        res = crt::isalpha(c)
-    } elif (_cond == 'c') {
-        res = crt::iscntrl(c)
-    } elif (_cond == 'd') {
-        res = crt::isdigit(c)
-    } elif (_cond == 'g') {
-        res = crt::isgraph(c)
-    } elif (_cond == 'l') {
-        res = crt::islower(c)
-    } elif (_cond == 'p') {
-        res = crt::ispunct(c)
-    } elif (_cond == 's') {
-        res = crt::isspace(c)
-    } elif (_cond == 'u') {
-        res = crt::isupper(c)
-    } elif (_cond == 'w') {
-        res = crt::isalnum(c)
-    } elif (_cond == 'x') {
-        res = crt::isxdigit(c)
-    } elif (_cond == 'z') {
-        // deprecated option
-        res = (c == 0) ? 1 : 0
-    } else {
-        return (cl == c) ? 1 : 0
+    c_switch(crt::tolower(cl)) {
+        case('a') {
+            res = crt::isalpha(c)
+            break
+        }
+        case('c') {
+            res = crt::iscntrl(c)
+            break
+        }
+        case('d') {
+            res = crt::isdigit(c)
+            break
+        }
+        case('g') {
+            res = crt::isgraph(c)
+            break
+        }
+        case('l') {
+            res = crt::islower(c)
+            break
+        }
+        case('p') {
+            res = crt::ispunct(c)
+            break
+        }
+        case('s') {
+            res = crt::isspace(c)
+            break
+        }
+        case('u') {
+            res = crt::isupper(c)
+            break
+        }
+        case('w') {
+            res = crt::isalnum(c)
+            break
+        }
+        case('x') {
+            res = crt::isxdigit(c)
+            break
+        }
+        case('z') {
+            // deprecated option
+            res = int_of(c == 0)
+            break
+        }
+        case(_) {
+            return int_of(cl == c)
+        }
     }
-    return crt::islower(cl) != 0 ? res : (!(res != 0) ? 1 : 0)
+    return crt::islower(cl) != 0 ? res : int_of(res == 0)
 }
 
 [c_function]
 def private matchbracketclass(c : int; var p : uint8?; var ec : uint8?) : int {
     var sig : int = 1
-    if (int(p[1]) == '^') {
+    if (p[1] == '^') {
         sig = 0
         // skip the '^'
-        p = p + 1
+        p++
     }
     while (true) {
-        p = p + 1
+        p++
         if (!(intptr(p) < intptr(ec))) {
             break
         }
-        if (int(deref(p)) == L_ESC) {
-            p = p + 1
-            if (match_class(c, int(uint8(deref(p)))) != 0) {
+        if (int(*p) == L_ESC) {
+            p++
+            if (match_class(c, int(*p)) != 0) {
                 return sig
             }
-        } elif ((int(p[1]) == '-') && (intptr(p + 2) < intptr(ec))) {
-            p = p + 2
-            if (int(uint8(deref(p - 2))) <= c && c <= int(uint8(deref(p)))) {
+        } elif ((p[1] == '-') && (intptr(p + 2) < intptr(ec))) {
+            p += 2
+            if (int(*(p - 2)) <= c && c <= int(*p)) {
                 return sig
             }
-        } elif (int(uint8(deref(p))) == c) {
+        } elif (int(*p) == c) {
             return sig
         }
     }
-    return !(sig != 0) ? 1 : 0
+    return int_of(sig == 0)
 }
 
 [c_function]
@@ -526,17 +565,21 @@ def private singlematch(var ms : MatchState?; var s : uint8?; var p : uint8?; va
     if (intptr(s) >= intptr(ms.src_end)) {
         return 0
     } else {
-        var c : int = int(uint8(deref(s)))
-        let _cond = int(deref(p))
-        if (_cond == '.') {
-            // matches any char
-            return 1
-        } elif (_cond == '%') {
-            return match_class(c, int(uint8(p[1])))
-        } elif (_cond == '[') {
-            return matchbracketclass(c, p, ep - 1)
-        } else {
-            return (int(uint8(deref(p))) == c) ? 1 : 0
+        var c : int = int(*s)
+        c_switch(int(*p)) {
+            case('.') {
+                // matches any char
+                return 1
+            }
+            case('%') {
+                return match_class(c, int(p[1]))
+            }
+            case('[') {
+                return matchbracketclass(c, p, ep - 1)
+            }
+            case(_) {
+                return int_of(int(*p) == c)
+            }
         }
     }
 }
@@ -546,23 +589,23 @@ def private matchbalance(var ms : MatchState?; var s : uint8?; var p : uint8?) :
     if (intptr(p) >= intptr(ms.p_end - 1)) {
         luaL_error`va(ms.L, cstr("malformed pattern (missing arguments to '%%b')"), VaNone())
     }
-    if (int(deref(s)) != int(deref(p))) {
+    if (*s != *p) {
         return null
     } else {
-        var b : int = int(deref(p))
+        var b : int = int(*p)
         var e : int = int(p[1])
         var cont : int = 1
         while (true) {
-            s = s + 1
+            s++
             if (!(intptr(s) < intptr(ms.src_end))) {
                 break
             }
-            if (int(deref(s)) == e) {
+            if (int(*s) == e) {
                 cont--
                 if (cont == 0) {
                     return s + 1
                 }
-            } elif (int(deref(s)) == b) {
+            } elif (int(*s) == b) {
                 cont++
             }
         }
@@ -598,7 +641,7 @@ def private min_expand(var ms : MatchState?; var s : uint8?; var p : uint8?; var
             return res
         } elif (singlematch(ms, s, p, ep) != 0) {
             // try with one more repetition
-            s = s + 1
+            s++
         } else {
             return null
         }
@@ -663,7 +706,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
     // using goto to optimize tail recursion
     // end of pattern?
     if (intptr(p) != intptr(ms.p_end)) {
-        var _cond = int(deref(p))
+        var _cond = int(*p)
         var _goto = 0
         while (true) {
             label 3:  // re-dispatch
@@ -671,7 +714,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
             if (_cond == '(') {
                 // start capture
                 // position capture?
-                if (int(p[1]) == ')') {
+                if (p[1] == ')') {
                     s = start_capture(ms, s, p + 2, CAP_POSITION)
                 } else {
                     s = start_capture(ms, s, p + 1, CAP_UNFINISHED)
@@ -696,53 +739,58 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                 break
             }
             if (_cond == '%') {
-                {
-                    // escaped sequences not in the format class[*+?-]?
-                    let _cond2 = int(p[1])
-                    if (_cond2 == 'b') {
+                // escaped sequences not in the format class[*+?-]?
+                c_switch(int(p[1])) {
+                    case('b') {
                         // balanced string?
                         s = matchbalance(ms, s, p + 2)
                         if (s != null) {
                             // return match(ms, s, p + 4);
-                            p = p + 4
+                            p += 4
                             goto label 1
                         }
-                    } elif (_cond2 == 'f') {
+                        // else fail (s == NULL)
+                        break
+                    }
+                    case('f') {
                         {
-                            // else fail (s == NULL)
                             // frontier?
                             var ep : uint8?
                             var previous : uint8
-                            p = p + 2
-                            if (int(deref(p)) != '[') {
+                            p += 2
+                            if (*p != '[') {
                                 luaL_error`va(ms.L, cstr("missing '[' after '%%f' in pattern"), VaNone())
                             }
                             // points to what is next
                             ep = classend(ms, p)
-                            previous = uint8((intptr(s) == intptr(ms.src_init)) ? '\0' : int(deref(s - 1)))
-                            if (!(matchbracketclass(int(uint8(previous)), p, ep - 1) != 0) && matchbracketclass(int(uint8(deref(s))), p, ep - 1) != 0) {
+                            previous = uint8((intptr(s) == intptr(ms.src_init)) ? '\0' : int(*(s - 1)))
+                            if (matchbracketclass(int(previous), p, ep - 1) == 0 && matchbracketclass(int(*s), p, ep - 1) != 0) {
                                 // return match(ms, s, ep);
                                 p = ep
                                 goto label 1
                             }
                             // match failed
                             s = null
+                            break
                         }
-                    } elif (_cond2 == '0' || _cond2 == '1' || _cond2 == '2' || _cond2 == '3' || _cond2 == '4' || _cond2 == '5' || _cond2 == '6' || _cond2 == '7' || _cond2 == '8' || _cond2 == '9') {
+                    }
+                    case('0', '1', '2', '3', '4', '5', '6', '7', '8', '9') {
                         // capture results (%0-%9)?
-                        s = match_capture(ms, s, int(uint8(p[1])))
+                        s = match_capture(ms, s, int(p[1]))
                         if (s != null) {
                             // return match(ms, s, p + 2)
-                            p = p + 2
+                            p += 2
                             goto label 1
                         }
-                    } else {
+                        break
+                    }
+                    case(_) {
                         _goto = 1
                         _cond = 35
                         goto label 3
                     }
-                    break
                 }
+                break
             }
             _flag ||= _goto == 0 && !(_cond == '(' || _cond == ')' || _cond == '$' || _cond == '%')
             _flag ||= _goto == 1  // dflt
@@ -753,9 +801,9 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                     // points to optional suffix
                     var ep : uint8? = classend(ms, p)
                     // does not match at least once?
-                    if (!(singlematch(ms, s, p, ep) != 0)) {
+                    if (singlematch(ms, s, p, ep) == 0) {
                         // accept empty?
-                        if (int(deref(ep)) == '*' || int(deref(ep)) == '?' || int(deref(ep)) == '-') {
+                        if (*ep == '*' || *ep == '?' || *ep == '-') {
                             // return match(ms, s, ep + 1);
                             p = ep + 1
                             goto label 1
@@ -767,10 +815,8 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                     } else {
                         // matched once
                         // handle optional suffix
-                        let _cond3 = int(deref(ep))
-                        while (true) {
-                            var _flag3 = false
-                            if (_cond3 == '?') {
+                        c_switch(int(*ep)) {
+                            case('?') {
                                 {
                                     // optional
                                     var res : uint8?
@@ -785,32 +831,29 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                                     break
                                 }
                             }
-                            _flag3 ||= _cond3 == '+'
-                            if (_flag3) {
+                            case('+') {
                                 // 1 or more repetitions
                                 // 1 match already done
-                                s = s + 1
+                                s++
                             }
-                            _flag3 ||= _cond3 == '*'
-                            if (_flag3) {
+                            case('*') {
                                 // FALLTHROUGH
                                 // 0 or more repetitions
                                 s = max_expand(ms, s, p, ep)
                                 break
                             }
-                            if (_cond3 == '-') {
+                            case('-') {
                                 // 0 or more repetitions (minimum)
                                 s = min_expand(ms, s, p, ep)
                                 break
                             }
-                            if (!(_cond3 == '?' || _cond3 == '+' || _cond3 == '*' || _cond3 == '-')) {
+                            case(_) {
                                 // no suffix
                                 // return match(ms, s + 1, ep);
-                                s = s + 1
+                                s++
                                 p = ep
                                 goto label 1
                             }
-                            break
                         }
                     }
                     break
@@ -841,14 +884,14 @@ def private lmemfind(var s1 : uint8?; var l1 : uint64; var s2 : uint8?; var l2 :
         while (true) {
             var _t0 = l1 > 0ul
             if (_t0) {
-                init = reinterpret<uint8?>(crt::memchr(reinterpret<void?>(s1), int(deref(s2)), l1))
+                init = reinterpret<uint8?>(crt::memchr(reinterpret<void?>(s1), int(*s2), l1))
                 _t0 = init != null
             }
             if (!(_t0)) {
                 break
             }
             // 1st char is already checked
-            init = init + 1
+            init++
             if (crt::memcmp(reinterpret<void?>(init), reinterpret<void?>(s2 + 1), l2) == 0) {
                 return init - 1
             } else {
@@ -873,15 +916,15 @@ def private get_onecapture(var ms : MatchState?; i : int; var s : uint8?; var e 
         if (i != 0) {
             luaL_error`va(ms.L, cstr("invalid capture index %%%d"), (i + 1,))
         }
-        deref(cap) = s
+        *cap = s
         return uint64(int64(e - s))
     } else {
         var capl : int64 = ms._c_capture[i].len
-        deref(cap) = ms._c_capture[i].init
+        *cap = ms._c_capture[i].init
         if (capl == int64(CAP_UNFINISHED)) {
             luaL_error`va(ms.L, cstr("unfinished capture"), VaNone())
         } elif (capl == int64(CAP_POSITION)) {
-            lua_pushinteger(ms.L, int64(int64(ms._c_capture[i].init - ms.src_init) + 1l))
+            lua_pushinteger(ms.L, int64(ms._c_capture[i].init - ms.src_init) + 1l)
         }
         return uint64(capl)
     }
@@ -898,7 +941,7 @@ def private push_onecapture(var ms : MatchState?; i : int; var s : uint8?; var e
 }
 
 def private push_captures(var ms : MatchState?; var s : uint8?; var e : uint8?) : int {
-    var nlevels : int = (int(ms.level) == 0 && s != null) ? 1 : int(ms.level)
+    var nlevels : int = (ms.level == 0 && s != null) ? 1 : int(ms.level)
     luaL_checkstack(ms.L, nlevels, cstr("too many captures"))
     for (i in range(nlevels)) {
         push_onecapture(ms, i, s, e)
@@ -911,16 +954,13 @@ def private push_captures(var ms : MatchState?; var s : uint8?; var e : uint8?) 
 [c_function]
 def private nospecials(var p : uint8?; l : uint64) : int {
     var upto : uint64 = 0ul
-    while (true) {
+    c_do_while(upto <= l) {
         if (crt::strpbrk(p + upto, cstr("^$*+?.([%-")) != null) {
             // pattern has a special character
             return 0
         }
         // may have more after \0
         upto += crt::strlen(p + upto) + 1ul
-        if (!(upto <= l)) {
-            break
-        }
     }
     // no special chars found
     return 1
@@ -957,17 +997,17 @@ def private str_find_aux(var L : lua_State?; find : int) : int {
         // do a plain search
         var s2 : uint8? = lmemfind(s + init, ls - init, p, lp)
         if (s2 != null) {
-            lua_pushinteger(L, int64(int64(s2 - s) + 1l))
+            lua_pushinteger(L, int64(s2 - s) + 1l)
             lua_pushinteger(L, int64(uint64(int64(s2 - s)) + lp))
             return 2
         }
     } else {
         var ms : MatchState
         var s1 : uint8? = s + init
-        var anchor : int = (int(deref(p)) == '^') ? 1 : 0
+        var anchor : int = int_of(*p == '^')
         if (anchor != 0) {
             // skip anchor character
-            p = p + 1
+            p++
             lp--
         }
         prepstate(addr(ms), L, s, ls, p, lp)
@@ -978,17 +1018,17 @@ def private str_find_aux(var L : lua_State?; find : int) : int {
             if (res != null) {
                 if (find != 0) {
                     // start
-                    lua_pushinteger(L, int64(int64(s1 - s) + 1l))
+                    lua_pushinteger(L, int64(s1 - s) + 1l)
                     // end
-                    lua_pushinteger(L, int64(int64(res - s)))
+                    lua_pushinteger(L, int64(res - s))
                     return push_captures(addr(ms), null, null) + 2
                 } else {
                     return push_captures(addr(ms), s1, res)
                 }
             }
             var _t0 = s1
-            s1 = s1 + 1
-            if (!(intptr(_t0) < intptr(ms.src_end) && !(anchor != 0))) {
+            s1++
+            if (!(intptr(_t0) < intptr(ms.src_end) && anchor == 0)) {
                 break
             }
         }
@@ -1021,7 +1061,7 @@ def private gmatch_aux(var L : lua_State?) : int {
             gm.src = gm.lastmatch
             return push_captures(addr(gm.ms), src, e)
         }
-        src = src + 1
+        src++
     }
     // not found
     return 0
@@ -1064,20 +1104,20 @@ def private add_s(var ms : MatchState?; var b : luaL_Buffer?; var s : uint8?; va
         }
         luaL_addlstring(b, news, uint64(int64(p - news)))
         // skip ESC
-        p = p + 1
+        p++
         // '%%'
-        if (int(deref(p)) == L_ESC) {
+        if (int(*p) == L_ESC) {
             let _t0 = b.n < b.size || luaL_prepbuffsize(b, 1ul) != null
             let _t1 = b.n
             b.n++
-            b.b[_t1] = deref(p)
-        } elif (int(deref(p)) == '0') {
+            b.b[_t1] = *p
+        } elif (*p == '0') {
             // '%0'
             luaL_addlstring(b, s, uint64(int64(e - s)))
-        } elif (crt::isdigit(int(uint8(deref(p)))) != 0) {
+        } elif (crt::isdigit(int(*p)) != 0) {
             // '%n'
             var cap : uint8?
-            var resl : int64 = int64(get_onecapture(ms, int(deref(p)) - '1', s, e, addr(cap)))
+            var resl : int64 = int64(get_onecapture(ms, int(*p) - '1', s, e, addr(cap)))
             if (resl == int64(CAP_POSITION)) {
                 // add position to accumulated result
                 luaL_addvalue(b)
@@ -1099,39 +1139,44 @@ def private add_s(var ms : MatchState?; var b : luaL_Buffer?; var s : uint8?; va
 [c_function]
 def private add_value(var ms : MatchState?; var b : luaL_Buffer?; var s : uint8?; var e : uint8?; tr : int) : int {
     var L : lua_State? = ms.L
-    let _cond = tr
-    if (_cond == 6) {
-        {
-            // call the function
-            var n : int
-            // push the function
-            lua_pushvalue(L, 3)
-            // all captures as arguments
-            n = push_captures(ms, s, e)
-            // call it
-            lua_callk(L, n, 1, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+    c_switch(tr) {
+        case(6) {
+            {
+                // call the function
+                var n : int
+                // push the function
+                lua_pushvalue(L, 3)
+                // all captures as arguments
+                n = push_captures(ms, s, e)
+                // call it
+                lua_callk(L, n, 1, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+                break
+            }
         }
-    } elif (_cond == 5) {
-        // index the table
-        // first capture is the index
-        push_onecapture(ms, 0, s, e)
-        lua_gettable(L, 3)
-    } else {
-        // LUA_TNUMBER or LUA_TSTRING
-        // add value to the buffer
-        add_s(ms, b, s, e)
-        // something changed
-        return 1
+        case(5) {
+            // index the table
+            // first capture is the index
+            push_onecapture(ms, 0, s, e)
+            lua_gettable(L, 3)
+            break
+        }
+        case(_) {
+            // LUA_TNUMBER or LUA_TSTRING
+            // add value to the buffer
+            add_s(ms, b, s, e)
+            // something changed
+            return 1
+        }
     }
     // nil or false?
-    if (!(lua_toboolean(L, -1) != 0)) {
+    if (lua_toboolean(L, -1) == 0) {
         // remove value
         lua_settop(L, -1 - 1)
         // keep original text
         luaL_addlstring(b, s, uint64(int64(e - s)))
         // no changes
         return 0
-    } elif (!(lua_isstring(L, -1) != 0)) {
+    } elif (lua_isstring(L, -1) == 0) {
         return luaL_error`va(L, cstr("invalid replacement value (a %s)"), (lua_typename(L, lua_type(L, -1)),))
     } else {
         // add result to accumulator
@@ -1155,7 +1200,7 @@ def private str_gsub(var L : lua_State?) : int {
     var tr : int = lua_type(L, 3)
     // max replacements
     var max_s : int64 = luaL_optinteger(L, 4, int64(srcl + 1ul))
-    var anchor : int = (int(deref(p)) == '^') ? 1 : 0
+    var anchor : int = int_of(*p == '^')
     // replacement count
     var n : int64 = 0l
     // change flag
@@ -1166,7 +1211,7 @@ def private str_gsub(var L : lua_State?) : int {
     luaL_buffinit(L, addr(b))
     if (anchor != 0) {
         // skip anchor character
-        p = p + 1
+        p++
         lp--
     }
     prepstate(addr(ms), L, src, srcl, p, lp)
@@ -1187,8 +1232,8 @@ def private str_gsub(var L : lua_State?) : int {
             let _t2 = addr(b).n
             addr(b).n++
             var _t3 = src
-            src = src + 1
-            addr(b).b[_t2] = deref(_t3)
+            src++
+            addr(b).b[_t2] = *_t3
         } else {
             // end of subject
             break
@@ -1198,7 +1243,7 @@ def private str_gsub(var L : lua_State?) : int {
         }
     }
     // no changes?
-    if (!(changed != 0)) {
+    if (changed == 0) {
         // return original string
         lua_pushvalue(L, 1)
     } else {
@@ -1221,10 +1266,10 @@ def private addquoted(var b : luaL_Buffer?; var s : uint8?; var len : uint64) {
     while (true) {
         let _t2 = len
         len--
-        if (!(_t2 != 0)) {
+        if (_t2 == 0) {
             break
         }
-        if (int(deref(s)) == '"' || int(deref(s)) == '\\' || int(deref(s)) == '\n') {
+        if (*s == '"' || *s == '\\' || *s == '\n') {
             let _t3 = b.n < b.size || luaL_prepbuffsize(b, 1ul) != null
             let _t4 = b.n
             b.n++
@@ -1232,22 +1277,22 @@ def private addquoted(var b : luaL_Buffer?; var s : uint8?; var len : uint64) {
             let _t5 = b.n < b.size || luaL_prepbuffsize(b, 1ul) != null
             let _t6 = b.n
             b.n++
-            b.b[_t6] = deref(s)
-        } elif (crt::iscntrl(int(uint8(deref(s)))) != 0) {
+            b.b[_t6] = *s
+        } elif (crt::iscntrl(int(*s)) != 0) {
             var buff : uint8[10]
-            if (!(crt::isdigit(int(uint8(s[1]))) != 0)) {
-                snprintf(addr(buff[0]), uint64(typeinfo sizeof(type<uint8[10]>)), cstr("\\%d"), int(uint8(deref(s))))
+            if (crt::isdigit(int(s[1])) == 0) {
+                snprintf(addr(buff[0]), uint64(typeinfo sizeof(type<uint8[10]>)), cstr("\\%d"), int(*s))
             } else {
-                snprintf(addr(buff[0]), uint64(typeinfo sizeof(type<uint8[10]>)), cstr("\\%03d"), int(uint8(deref(s))))
+                snprintf(addr(buff[0]), uint64(typeinfo sizeof(type<uint8[10]>)), cstr("\\%03d"), int(*s))
             }
             luaL_addstring(b, addr(buff[0]))
         } else {
             let _t7 = b.n < b.size || luaL_prepbuffsize(b, 1ul) != null
             let _t8 = b.n
             b.n++
-            b.b[_t8] = deref(s)
+            b.b[_t8] = *s
         }
-        s = s + 1
+        s++
     }
     let _t9 = b.n < b.size || luaL_prepbuffsize(b, 1ul) != null
     let _t10 = b.n
@@ -1283,7 +1328,7 @@ def private quotefloat(var L : lua_State?; var buff : uint8?; n : double) : int 
             var ppoint : uint8? = reinterpret<uint8?>(crt::memchr(reinterpret<void?>(buff), int(point), uint64(nb)))
             // change it to a dot
             if (ppoint != null) {
-                deref(ppoint) = uint8('.')
+                *ppoint = uint8('.')
             }
         }
         return nb
@@ -1294,46 +1339,53 @@ def private quotefloat(var L : lua_State?; var buff : uint8?; n : double) : int 
 
 [c_function]
 def private addliteral(var L : lua_State?; var b : luaL_Buffer?; arg : int) {
-    let _cond = lua_type(L, arg)
-    if (_cond == 4) {
-        {
-            var len : uint64
-            var s : uint8? = lua_tolstring(L, arg, addr(len))
-            addquoted(b, s, len)
-        }
-    } elif (_cond == 3) {
-        {
-            var buff : uint8? = luaL_prepbuffsize(b, uint64(MAX_ITEM))
-            var nb : int
-            // float?
-            if (!(lua_isinteger(L, arg) != 0)) {
-                nb = quotefloat(L, buff, lua_tonumberx(L, arg, null))
-            } else {
-                // integers
-                var n : int64 = lua_tointegerx(L, arg, null)
-                // corner case?
-                var format : uint8? = (n == -9223372036854775807l - 1l) ? cstr("0x%llx") : cstr("%lld")
-                // use hex
-                // else use default format
-                nb = snprintf(buff, uint64(MAX_ITEM), format, n)
+    c_switch(lua_type(L, arg)) {
+        case(4) {
+            {
+                var len : uint64
+                var s : uint8? = lua_tolstring(L, arg, addr(len))
+                addquoted(b, s, len)
+                break
             }
-            b.n += uint64(nb)
         }
-    } elif (_cond == 0 || _cond == 1) {
-        luaL_tolstring(L, arg, null)
-        luaL_addvalue(b)
-    } else {
-        luaL_argerror(L, arg, cstr("value has no literal form"))
+        case(3) {
+            {
+                var buff : uint8? = luaL_prepbuffsize(b, uint64(MAX_ITEM))
+                var nb : int
+                // float?
+                if (lua_isinteger(L, arg) == 0) {
+                    nb = quotefloat(L, buff, lua_tonumberx(L, arg, null))
+                } else {
+                    // integers
+                    var n : int64 = lua_tointegerx(L, arg, null)
+                    // corner case?
+                    var format : uint8? = (n == -9223372036854775807l - 1l) ? cstr("0x%llx") : cstr("%lld")
+                    // use hex
+                    // else use default format
+                    nb = snprintf(buff, uint64(MAX_ITEM), format, n)
+                }
+                b.n += uint64(nb)
+                break
+            }
+        }
+        case(0, 1) {
+            luaL_tolstring(L, arg, null)
+            luaL_addvalue(b)
+            break
+        }
+        case(_) {
+            luaL_argerror(L, arg, cstr("value has no literal form"))
+        }
     }
 }
 
 [c_function]
 def private get2digits(var s : uint8?) : uint8? {
-    if (crt::isdigit(int(uint8(deref(s)))) != 0) {
-        s = s + 1
+    if (crt::isdigit(int(*s)) != 0) {
+        s++
         // (2 digits at most)
-        if (crt::isdigit(int(uint8(deref(s)))) != 0) {
-            s = s + 1
+        if (crt::isdigit(int(*s)) != 0) {
+            s++
         }
     }
     return s
@@ -1348,19 +1400,19 @@ def private checkformat(var L : lua_State?; var form : uint8?; var flags : uint8
     // skip '%'
     var spec : uint8? = form + 1
     // skip flags
-    spec = spec + crt::strspn(spec, flags)
+    spec += crt::strspn(spec, flags)
     // a width cannot start with '0'
-    if (int(deref(spec)) != '0') {
+    if (*spec != '0') {
         // skip width
         spec = get2digits(spec)
-        if (int(deref(spec)) == '.' && precision != 0) {
-            spec = spec + 1
+        if (*spec == '.' && precision != 0) {
+            spec++
             // skip precision
             spec = get2digits(spec)
         }
     }
     // did not go to the end?
-    if (!(crt::isalpha(int(uint8(deref(spec)))) != 0)) {
+    if (crt::isalpha(int(*spec)) == 0) {
         luaL_error`va(L, cstr("invalid conversion specification: '%s'"), (form,))
     }
 }
@@ -1378,8 +1430,8 @@ def private getformat(var L : lua_State?; var strfrmt : uint8?; var form : uint8
         luaL_error`va(L, cstr("invalid format (too long)"), VaNone())
     }
     var _t0 = form
-    form = form + 1
-    deref(_t0) = uint8('%')
+    form++
+    *_t0 = uint8('%')
     crt::memcpy(reinterpret<void?>(form), reinterpret<void?>(strfrmt), len * uint64(typeinfo sizeof(type<uint8>)))
     form[len] = uint8('\0')
     return strfrmt + len + -(1)
@@ -1407,23 +1459,23 @@ def private str_format(var L : lua_State?) : int {
     var b : luaL_Buffer
     luaL_buffinit(L, addr(b))
     while (intptr(strfrmt) < intptr(strfrmt_end)) {
-        if (int(deref(strfrmt)) != L_ESC) {
+        if (int(*strfrmt) != L_ESC) {
             let _t0 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), 1ul) != null
             let _t1 = addr(b).n
             addr(b).n++
             var _t2 = strfrmt
-            strfrmt = strfrmt + 1
-            addr(b).b[_t1] = deref(_t2)
+            strfrmt++
+            addr(b).b[_t1] = *_t2
         } else {
-            strfrmt = strfrmt + 1
-            if (int(deref(strfrmt)) == L_ESC) {
+            strfrmt++
+            if (int(*strfrmt) == L_ESC) {
                 // %%
                 let _t3 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), 1ul) != null
                 let _t4 = addr(b).n
                 addr(b).n++
                 var _t5 = strfrmt
-                strfrmt = strfrmt + 1
-                addr(b).b[_t4] = deref(_t5)
+                strfrmt++
+                addr(b).b[_t4] = *_t5
             } else {
                 // format item
                 // to store the format ('%...')
@@ -1440,8 +1492,8 @@ def private str_format(var L : lua_State?) : int {
                 }
                 strfrmt = getformat(L, strfrmt, addr(form[0]))
                 var _t6 = strfrmt
-                strfrmt = strfrmt + 1
-                var _cond = int(deref(_t6))
+                strfrmt++
+                var _cond = int(*_t6)
                 var _goto = 0
                 while (true) {
                     label 2:  // re-dispatch
@@ -1523,7 +1575,7 @@ def private str_format(var L : lua_State?) : int {
                     }
                     if (_cond == 'q') {
                         // modifiers?
-                        if (int(form[2]) != '\0') {
+                        if (form[2] != '\0') {
                             return luaL_error`va(L, cstr("specifier '%%q' cannot have modifiers"), VaNone())
                         }
                         addliteral(L, addr(b), arg)
@@ -1534,7 +1586,7 @@ def private str_format(var L : lua_State?) : int {
                             var l : uint64
                             var s : uint8? = luaL_tolstring(L, arg, addr(l))
                             // no modifiers?
-                            if (int(form[2]) == '\0') {
+                            if (form[2] == '\0') {
                                 // keep entire string
                                 luaL_addvalue(addr(b))
                             } else {
@@ -1571,24 +1623,22 @@ def private str_format(var L : lua_State?) : int {
 // Read an integer numeral from string 'fmt' or return 'df' if
 // there is no numeral
 def private digit(c : int) : int {
-    return '0' <= c && c <= '9' ? 1 : 0
+    return int_of('0' <= c && c <= '9')
 }
 
 [c_function]
 def private getnum(var fmt : uint8 ??; df : int) : int {
     // no number?
-    if (!(digit(int(deref(deref(fmt)))) != 0)) {
+    if (digit(int(**fmt)) == 0) {
         // return default value
         return df
     } else {
         var a : int = 0
-        while (true) {
-            var _t0 = deref(fmt)
-            deref(fmt) = deref(fmt) + 1
-            a = a * 10 + (int(deref(_t0)) - '0')
-            if (!(digit(int(deref(deref(fmt)))) != 0 && a <= (int(uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int>)) ? MAX_SIZET : 2147483647ul) - 9) / 10)) {
-                break
-            }
+        c_do_while(digit(int(**fmt)) != 0 &&
+                a <= (int(uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int>)) ? MAX_SIZET : 2147483647ul) - 9) / 10) {
+            var _t0 = *fmt
+            (*fmt)++
+            a = a * 10 + (int(*_t0) - '0')
         }
         return a
     }
@@ -1615,84 +1665,114 @@ def private initheader(var L : lua_State?; var h : Header?) {
 [c_function]
 def private getoption(var h : Header?; var fmt : uint8 ??; var size : int?) : KOption {
     // dummy structure to get native alignment requirements
-    var _t0 = deref(fmt)
-    deref(fmt) = deref(fmt) + 1
-    var opt : int = int(deref(_t0))
+    var _t0 = *fmt
+    (*fmt)++
+    var opt : int = int(*_t0)
     // default
-    deref(size) = 0
-    let _cond = opt
-    if (_cond == 'b') {
-        deref(size) = int(uint64(typeinfo sizeof(type<uint8>)))
-        return KOption.Kint
-    } elif (_cond == 'B') {
-        deref(size) = int(uint64(typeinfo sizeof(type<uint8>)))
-        return KOption.Kuint
-    } elif (_cond == 'h') {
-        deref(size) = int(uint64(typeinfo sizeof(type<int16>)))
-        return KOption.Kint
-    } elif (_cond == 'H') {
-        deref(size) = int(uint64(typeinfo sizeof(type<int16>)))
-        return KOption.Kuint
-    } elif (_cond == 'l') {
-        deref(size) = int(uint64(typeinfo sizeof(type<int64>)))
-        return KOption.Kint
-    } elif (_cond == 'L') {
-        deref(size) = int(uint64(typeinfo sizeof(type<int64>)))
-        return KOption.Kuint
-    } elif (_cond == 'j') {
-        deref(size) = int(uint64(typeinfo sizeof(type<int64>)))
-        return KOption.Kint
-    } elif (_cond == 'J') {
-        deref(size) = int(uint64(typeinfo sizeof(type<int64>)))
-        return KOption.Kuint
-    } elif (_cond == 'T') {
-        deref(size) = int(uint64(typeinfo sizeof(type<uint64>)))
-        return KOption.Kuint
-    } elif (_cond == 'f') {
-        deref(size) = int(uint64(typeinfo sizeof(type<float>)))
-        return KOption.Kfloat
-    } elif (_cond == 'n') {
-        deref(size) = int(uint64(typeinfo sizeof(type<double>)))
-        return KOption.Knumber
-    } elif (_cond == 'd') {
-        deref(size) = int(uint64(typeinfo sizeof(type<double>)))
-        return KOption.Kdouble
-    } elif (_cond == 'i') {
-        deref(size) = getnumlimit(h, fmt, int(uint64(typeinfo sizeof(type<int>))))
-        return KOption.Kint
-    } elif (_cond == 'I') {
-        deref(size) = getnumlimit(h, fmt, int(uint64(typeinfo sizeof(type<int>))))
-        return KOption.Kuint
-    } elif (_cond == 's') {
-        deref(size) = getnumlimit(h, fmt, int(uint64(typeinfo sizeof(type<uint64>))))
-        return KOption.Kstring
-    } elif (_cond == 'c') {
-        deref(size) = getnum(fmt, -1)
-        if (deref(size) == -1) {
-            luaL_error`va(h.L, cstr("missing size for format option 'c'"), VaNone())
+    *size = 0
+    c_switch(opt) {
+        case('b') {
+            *size = typeinfo sizeof(type<uint8>)
+            return KOption.Kint
         }
-        return KOption.Kchar
-    } elif (_cond == 'z') {
-        return KOption.Kzstr
-    } elif (_cond == 'x') {
-        deref(size) = 1
-        return KOption.Kpadding
-    } elif (_cond == 'X') {
-        return KOption.Kpaddalign
-    } elif (_cond == ' ') {
-    } elif (_cond == '<') {
-        h.islittle = 1
-    } elif (_cond == '>') {
-        h.islittle = 0
-    } elif (_cond == '=') {
-        h.islittle = int(nativeendian.little)
-    } elif (_cond == '!') {
-        {
-            var maxalign : int = int(uint64(typeinfo offsetof < u > (type<cD>)))
-            h.maxalign = getnumlimit(h, fmt, maxalign)
+        case('B') {
+            *size = typeinfo sizeof(type<uint8>)
+            return KOption.Kuint
         }
-    } else {
-        luaL_error`va(h.L, cstr("invalid format option '%c'"), (opt,))
+        case('h') {
+            *size = typeinfo sizeof(type<int16>)
+            return KOption.Kint
+        }
+        case('H') {
+            *size = typeinfo sizeof(type<int16>)
+            return KOption.Kuint
+        }
+        case('l') {
+            *size = typeinfo sizeof(type<int64>)
+            return KOption.Kint
+        }
+        case('L') {
+            *size = typeinfo sizeof(type<int64>)
+            return KOption.Kuint
+        }
+        case('j') {
+            *size = typeinfo sizeof(type<int64>)
+            return KOption.Kint
+        }
+        case('J') {
+            *size = typeinfo sizeof(type<int64>)
+            return KOption.Kuint
+        }
+        case('T') {
+            *size = typeinfo sizeof(type<uint64>)
+            return KOption.Kuint
+        }
+        case('f') {
+            *size = typeinfo sizeof(type<float>)
+            return KOption.Kfloat
+        }
+        case('n') {
+            *size = typeinfo sizeof(type<double>)
+            return KOption.Knumber
+        }
+        case('d') {
+            *size = typeinfo sizeof(type<double>)
+            return KOption.Kdouble
+        }
+        case('i') {
+            *size = getnumlimit(h, fmt, typeinfo sizeof(type<int>))
+            return KOption.Kint
+        }
+        case('I') {
+            *size = getnumlimit(h, fmt, typeinfo sizeof(type<int>))
+            return KOption.Kuint
+        }
+        case('s') {
+            *size = getnumlimit(h, fmt, typeinfo sizeof(type<uint64>))
+            return KOption.Kstring
+        }
+        case('c') {
+            *size = getnum(fmt, -1)
+            if (*size == -1) {
+                luaL_error`va(h.L, cstr("missing size for format option 'c'"), VaNone())
+            }
+            return KOption.Kchar
+        }
+        case('z') {
+            return KOption.Kzstr
+        }
+        case('x') {
+            *size = 1
+            return KOption.Kpadding
+        }
+        case('X') {
+            return KOption.Kpaddalign
+        }
+        case(' ') {
+            break
+        }
+        case('<') {
+            h.islittle = 1
+            break
+        }
+        case('>') {
+            h.islittle = 0
+            break
+        }
+        case('=') {
+            h.islittle = int(nativeendian.little)
+            break
+        }
+        case('!') {
+            {
+                var maxalign : int = int(uint64(typeinfo offsetof < u > (type<cD>)))
+                h.maxalign = getnumlimit(h, fmt, maxalign)
+                break
+            }
+        }
+        case(_) {
+            luaL_error`va(h.L, cstr("invalid format option '%c'"), (opt,))
+        }
     }
     return KOption.Knop
 }
@@ -1708,16 +1788,16 @@ def private getoption(var h : Header?; var fmt : uint8 ??; var size : int?) : KO
 def private getdetails(var h : Header?; totalsize : uint64; var fmt : uint8 ??; var psize : int?; var ntoalign : int?) : KOption {
     var opt : KOption = getoption(h, fmt, psize)
     // usually, alignment follows size
-    var align : int = deref(psize)
+    var align : int = *psize
     // 'X' gets alignment from following option
     if (opt == KOption.Kpaddalign) {
-        if (int(deref(deref(fmt))) == '\0' || getoption(h, fmt, addr(align)) == KOption.Kchar || align == 0) {
+        if (**fmt == '\0' || getoption(h, fmt, addr(align)) == KOption.Kchar || align == 0) {
             luaL_argerror(h.L, 1, cstr("invalid next option for option 'X'"))
         }
     }
     // need no alignment?
     if (align <= 1 || opt == KOption.Kchar) {
-        deref(ntoalign) = 0
+        *ntoalign = 0
     } else {
         // enforce maximum alignment
         if (align > h.maxalign) {
@@ -1727,7 +1807,7 @@ def private getdetails(var h : Header?; totalsize : uint64; var fmt : uint8 ??; 
         if ((align & align - 1) != 0) {
             luaL_argerror(h.L, 1, cstr("format asks for alignment not power of 2"))
         }
-        deref(ntoalign) = (align - int(totalsize & uint64(align - 1))) & (align - 1)
+        *ntoalign = (align - int(totalsize & uint64(align - 1))) & (align - 1)
     }
     return opt
 }
@@ -1763,7 +1843,7 @@ def private copywithendian(var dest : uint8?; var src : uint8?; var size : int; 
     if (islittle == int(nativeendian.little)) {
         crt::memcpy(reinterpret<void?>(dest), reinterpret<void?>(src), uint64(size))
     } else {
-        dest = dest + (size - 1)
+        dest += size - 1
         while (true) {
             let _t0 = size
             size--
@@ -1771,10 +1851,10 @@ def private copywithendian(var dest : uint8?; var src : uint8?; var size : int; 
                 break
             }
             var _t1 = dest
-            dest = dest - 1
+            dest--
             var _t2 = src
-            src = src + 1
-            deref(_t1) = deref(_t2)
+            src++
+            *_t1 = *_t2
         }
     }
 }
@@ -1793,7 +1873,7 @@ def private str_pack(var L : lua_State?) : int {
     // mark to separate arguments from string buffer
     lua_pushnil(L)
     luaL_buffinit(L, addr(b))
-    while (int(deref(fmt)) != '\0') {
+    while (*fmt != '\0') {
         var size : int
         var ntoalign : int
         var opt : KOption = getdetails(addr(h), totalsize, addr(fmt), addr(size), addr(ntoalign))
@@ -1811,10 +1891,8 @@ def private str_pack(var L : lua_State?) : int {
             addr(b).b[_t2] = uint8(LUAL_PACKPADBYTE)
         }
         arg++
-        let _cond = opt
-        while (true) {
-            var _flag = false
-            if (_cond == KOption.Kint) {
+        c_switch(opt) {
+            case(KOption.Kint) {
                 {
                     // signed integers
                     var n : int64 = luaL_checkinteger(L, arg)
@@ -1823,11 +1901,11 @@ def private str_pack(var L : lua_State?) : int {
                         var lim : int64 = 1l << int64((size * 8) - 1)
                         let _t3 = -lim <= n && n < lim || luaL_argerror(L, arg, cstr("integer overflow")) != 0
                     }
-                    packint(addr(b), uint64(n), h.islittle, size, (n < 0l) ? 1 : 0)
+                    packint(addr(b), uint64(n), h.islittle, size, int_of(n < 0l))
                     break
                 }
             }
-            if (_cond == KOption.Kuint) {
+            case(KOption.Kuint) {
                 {
                     // unsigned integers
                     var n : int64 = luaL_checkinteger(L, arg)
@@ -1839,43 +1917,43 @@ def private str_pack(var L : lua_State?) : int {
                     break
                 }
             }
-            if (_cond == KOption.Kfloat) {
+            case(KOption.Kfloat) {
                 {
                     // C float
                     // get argument
                     var f : float = float(luaL_checknumber(L, arg))
                     var buff : uint8? = luaL_prepbuffsize(addr(b), uint64(typeinfo sizeof(type<float>)))
                     // move 'f' to final result, correcting endianness if needed
-                    copywithendian(buff, reinterpret<uint8?>(addr(f)), int(uint64(typeinfo sizeof(type<float>))), h.islittle)
+                    copywithendian(buff, reinterpret<uint8?>(addr(f)), typeinfo sizeof(type<float>), h.islittle)
                     addr(b).n += uint64(size)
                     break
                 }
             }
-            if (_cond == KOption.Knumber) {
+            case(KOption.Knumber) {
                 {
                     // Lua float
                     // get argument
                     var f : double = luaL_checknumber(L, arg)
                     var buff : uint8? = luaL_prepbuffsize(addr(b), uint64(typeinfo sizeof(type<double>)))
                     // move 'f' to final result, correcting endianness if needed
-                    copywithendian(buff, reinterpret<uint8?>(addr(f)), int(uint64(typeinfo sizeof(type<double>))), h.islittle)
+                    copywithendian(buff, reinterpret<uint8?>(addr(f)), typeinfo sizeof(type<double>), h.islittle)
                     addr(b).n += uint64(size)
                     break
                 }
             }
-            if (_cond == KOption.Kdouble) {
+            case(KOption.Kdouble) {
                 {
                     // C double
                     // get argument
                     var f : double = luaL_checknumber(L, arg)
                     var buff : uint8? = luaL_prepbuffsize(addr(b), uint64(typeinfo sizeof(type<double>)))
                     // move 'f' to final result, correcting endianness if needed
-                    copywithendian(buff, reinterpret<uint8?>(addr(f)), int(uint64(typeinfo sizeof(type<double>))), h.islittle)
+                    copywithendian(buff, reinterpret<uint8?>(addr(f)), typeinfo sizeof(type<double>), h.islittle)
                     addr(b).n += uint64(size)
                     break
                 }
             }
-            if (_cond == KOption.Kchar) {
+            case(KOption.Kchar) {
                 {
                     // fixed-size string
                     var len : uint64
@@ -1898,20 +1976,21 @@ def private str_pack(var L : lua_State?) : int {
                     break
                 }
             }
-            if (_cond == KOption.Kstring) {
+            case(KOption.Kstring) {
                 {
                     // strings with length count
                     var len : uint64
                     var s : uint8? = luaL_checklstring(L, arg, addr(len))
-                    let _t9 = size >= int(uint64(typeinfo sizeof(type<uint64>))) || len < (1ul << uint64(size * 8)) || luaL_argerror(L, arg, cstr("string length does not fit in given size")) != 0
+                    let _t9 = size >= typeinfo sizeof(type<uint64>) || len < (1ul << uint64(size * 8)) || luaL_argerror(L, arg,
+                            cstr("string length does not fit in given size")) != 0
                     // pack length
-                    packint(addr(b), uint64(len), h.islittle, size, 0)
+                    packint(addr(b), len, h.islittle, size, 0)
                     luaL_addlstring(addr(b), s, len)
                     totalsize += len
                     break
                 }
             }
-            if (_cond == KOption.Kzstr) {
+            case(KOption.Kzstr) {
                 {
                     // zero-terminated string
                     var len : uint64
@@ -1927,22 +2006,18 @@ def private str_pack(var L : lua_State?) : int {
                     break
                 }
             }
-            _flag ||= _cond == KOption.Kpadding
-            if (_flag) {
+            case(KOption.Kpadding) {
                 // FALLTHROUGH
                 let _t13 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), 1ul) != null
                 let _t14 = addr(b).n
                 addr(b).n++
                 addr(b).b[_t14] = uint8(LUAL_PACKPADBYTE)
             }
-            _flag ||= _cond == KOption.Kpaddalign
-            _flag ||= _cond == KOption.Knop
-            if (_flag) {
+            case(KOption.Kpaddalign, KOption.Knop) {
                 // undo increment
                 arg--
                 break
             }
-            break
         }
     }
     luaL_pushresult(addr(b))
@@ -1957,14 +2032,16 @@ def private str_packsize(var L : lua_State?) : int {
     // accumulate total size of result
     var totalsize : uint64 = 0ul
     initheader(L, addr(h))
-    while (int(deref(fmt)) != '\0') {
+    while (*fmt != '\0') {
         var size : int
         var ntoalign : int
         var opt : KOption = getdetails(addr(h), totalsize, addr(fmt), addr(size), addr(ntoalign))
         let _t0 = opt != KOption.Kstring && opt != KOption.Kzstr || luaL_argerror(L, 1, cstr("variable-length format")) != 0
         // total space used by option
         size += ntoalign
-        let _t1 = totalsize <= (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int>)) ? MAX_SIZET : 2147483647ul) - uint64(size) || luaL_argerror(L, 1, cstr("format result too large")) != 0
+        let _t1 = totalsize <= (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int>)) ? MAX_SIZET :
+                    2147483647ul) - uint64(size) || luaL_argerror(L,
+                1, cstr("format result too large")) != 0
         totalsize += uint64(size)
     }
     lua_pushinteger(L, int64(totalsize))
@@ -1985,7 +2062,7 @@ def private unpackint(var L : lua_State?; var str : uint8?; islittle : int; size
     i = limit - 1
     while (i >= 0) {
         res <<= 8ul
-        res |= uint64(uint8(str[islittle != 0 ? i : size - 1 - i]))
+        res |= uint64(str[islittle != 0 ? i : size - 1 - i])
         i--
     }
     // real size smaller than lua_Integer?
@@ -1998,9 +2075,9 @@ def private unpackint(var L : lua_State?; var str : uint8?; islittle : int; size
         }
     } elif (size > SZINT) {
         // must check unread bytes
-        var mask : int = (!(issigned != 0) || int64(res) >= 0l) ? 0 : MC
+        var mask : int = (issigned == 0 || int64(res) >= 0l) ? 0 : MC
         for (i1 in range(limit, size)) {
-            if (int(uint8(str[islittle != 0 ? i1 : size - 1 - i1])) != mask) {
+            if (int(str[islittle != 0 ? i1 : size - 1 - i1]) != mask) {
                 luaL_error`va(L, cstr("%d-byte integer does not fit into Lua Integer"), (size,))
             }
         }
@@ -2019,7 +2096,7 @@ def private str_unpack(var L : lua_State?) : int {
     var n : int = 0
     let _t0 = pos <= ld || luaL_argerror(L, 3, cstr("initial position out of string")) != 0
     initheader(L, addr(h))
-    while (int(deref(fmt)) != '\0') {
+    while (*fmt != '\0') {
         var size : int
         var ntoalign : int
         var opt : KOption = getdetails(addr(h), pos, addr(fmt), addr(size), addr(ntoalign))
@@ -2029,51 +2106,67 @@ def private str_unpack(var L : lua_State?) : int {
         // stack space for item + next position
         luaL_checkstack(L, 2, cstr("too many results"))
         n++
-        let _cond = opt
-        if (_cond == KOption.Kint || _cond == KOption.Kuint) {
-            {
-                var res : int64 = unpackint(L, data + pos, h.islittle, size, (opt == KOption.Kint) ? 1 : 0)
-                lua_pushinteger(L, res)
+        c_switch(opt) {
+            case(KOption.Kint, KOption.Kuint) {
+                {
+                    var res : int64 = unpackint(L, data + pos, h.islittle, size, int_of(opt == KOption.Kint))
+                    lua_pushinteger(L, res)
+                    break
+                }
             }
-        } elif (_cond == KOption.Kfloat) {
-            {
-                var f : float
-                copywithendian(reinterpret<uint8?>(addr(f)), data + pos, int(uint64(typeinfo sizeof(type<float>))), h.islittle)
-                lua_pushnumber(L, double(f))
+            case(KOption.Kfloat) {
+                {
+                    var f : float
+                    copywithendian(reinterpret<uint8?>(addr(f)), data + pos, typeinfo sizeof(type<float>), h.islittle)
+                    lua_pushnumber(L, double(f))
+                    break
+                }
             }
-        } elif (_cond == KOption.Knumber) {
-            {
-                var f : double
-                copywithendian(reinterpret<uint8?>(addr(f)), data + pos, int(uint64(typeinfo sizeof(type<double>))), h.islittle)
-                lua_pushnumber(L, f)
+            case(KOption.Knumber) {
+                {
+                    var f : double
+                    copywithendian(reinterpret<uint8?>(addr(f)), data + pos, typeinfo sizeof(type<double>), h.islittle)
+                    lua_pushnumber(L, f)
+                    break
+                }
             }
-        } elif (_cond == KOption.Kdouble) {
-            {
-                var f : double
-                copywithendian(reinterpret<uint8?>(addr(f)), data + pos, int(uint64(typeinfo sizeof(type<double>))), h.islittle)
-                lua_pushnumber(L, f)
+            case(KOption.Kdouble) {
+                {
+                    var f : double
+                    copywithendian(reinterpret<uint8?>(addr(f)), data + pos, typeinfo sizeof(type<double>), h.islittle)
+                    lua_pushnumber(L, f)
+                    break
+                }
             }
-        } elif (_cond == KOption.Kchar) {
-            lua_pushlstring(L, data + pos, uint64(size))
-        } elif (_cond == KOption.Kstring) {
-            {
-                var len : uint64 = uint64(unpackint(L, data + pos, h.islittle, size, 0))
-                let _t2 = len <= ld - pos - uint64(size) || luaL_argerror(L, 2, cstr("data string too short")) != 0
-                lua_pushlstring(L, data + pos + size, len)
-                // skip string
-                pos += len
+            case(KOption.Kchar) {
+                lua_pushlstring(L, data + pos, uint64(size))
+                break
             }
-        } elif (_cond == KOption.Kzstr) {
-            {
-                var len : uint64 = crt::strlen(data + pos)
-                let _t3 = pos + len < ld || luaL_argerror(L, 2, cstr("unfinished string for format 'z'")) != 0
-                lua_pushlstring(L, data + pos, len)
-                // skip string plus final '\0'
-                pos += len + 1ul
+            case(KOption.Kstring) {
+                {
+                    var len : uint64 = uint64(unpackint(L, data + pos, h.islittle, size, 0))
+                    let _t2 = len <= ld - pos - uint64(size) || luaL_argerror(L, 2, cstr("data string too short")) != 0
+                    lua_pushlstring(L, data + pos + size, len)
+                    // skip string
+                    pos += len
+                    break
+                }
             }
-        } elif (_cond == KOption.Kpaddalign || _cond == KOption.Kpadding || _cond == KOption.Knop) {
-            // undo increment
-            n--
+            case(KOption.Kzstr) {
+                {
+                    var len : uint64 = crt::strlen(data + pos)
+                    let _t3 = pos + len < ld || luaL_argerror(L, 2, cstr("unfinished string for format 'z'")) != 0
+                    lua_pushlstring(L, data + pos, len)
+                    // skip string plus final '\0'
+                    pos += len + 1ul
+                    break
+                }
+            }
+            case(KOption.Kpaddalign, KOption.Kpadding, KOption.Knop) {
+                // undo increment
+                n--
+                break
+            }
         }
         pos += uint64(size)
     }

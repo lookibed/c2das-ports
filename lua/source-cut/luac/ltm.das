@@ -4,8 +4,10 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/c_switch
 require c_runtime/cstr
 require c_runtime/cstr_array
+require c_runtime/int_of
 require lobject_h_cluster
 require lstring
 require ltable
@@ -14,11 +16,15 @@ require luac_link
 
 var luaT_typenames_ : uint8? [12]
 var private udatatypename : uint8[9] = cstr_array("userdata", 9)
-var private luaT_init_luaT_eventname : uint8? [25] = fixed_array<uint8?>(cstr("__index"), cstr("__newindex"), cstr("__gc"), cstr("__mode"), cstr("__len"), cstr("__eq"), cstr("__add"), cstr("__sub"), cstr("__mul"), cstr("__mod"), cstr("__pow"), cstr("__div"), cstr("__idiv"), cstr("__band"), cstr("__bor"), cstr("__bxor"), cstr("__shl"), cstr("__shr"), cstr("__unm"), cstr("__bnot"), cstr("__lt"), cstr("__le"), cstr("__concat"), cstr("__call"), cstr("__close"))
+var private luaT_init_luaT_eventname : uint8? [25] = fixed_array<uint8?>(cstr("__index"), cstr("__newindex"), cstr("__gc"), cstr("__mode"), cstr("__len"),
+        cstr("__eq"), cstr("__add"), cstr("__sub"), cstr("__mul"), cstr("__mod"), cstr("__pow"), cstr("__div"), cstr("__idiv"), cstr("__band"), cstr("__bor"),
+        cstr("__bxor"), cstr("__shl"), cstr("__shr"), cstr("__unm"), cstr("__bnot"), cstr("__lt"), cstr("__le"), cstr("__concat"), cstr("__call"),
+        cstr("__close"))
 
 [init]
 def private c2das_init_globals {
-    luaT_typenames_ = fixed_array<uint8?>(cstr("no value"), cstr("nil"), cstr("boolean"), unsafe(addr(udatatypename[0])), cstr("number"), cstr("string"), cstr("table"), cstr("function"), unsafe(addr(udatatypename[0])), cstr("thread"), cstr("upvalue"), cstr("proto"))
+    luaT_typenames_ = fixed_array<uint8?>(cstr("no value"), cstr("nil"), cstr("boolean"), unsafe(addr(udatatypename[0])), cstr("number"), cstr("string"),
+            cstr("table"), cstr("function"), unsafe(addr(udatatypename[0])), cstr("thread"), cstr("upvalue"), cstr("proto"))
 }
 
 let private LUA_TNIL = 0
@@ -48,7 +54,7 @@ def luaT_gettm(var events : Table?; event : TMS; var ename : TString?) : TValue?
     // no tag method?
     if ((int(tm.tt_) & 15) == LUA_TNIL) {
         // cache this fact
-        events.flags = uint8(int(events.flags) | int(uint8(1u << uint(int(event)))))
+        events.flags = uint8(int(events.flags) | int(uint8(1u << uint(event))))
         return null
     } else {
         return tm
@@ -58,13 +64,18 @@ def luaT_gettm(var events : Table?; event : TMS; var ename : TString?) : TValue?
 [c_function]
 def luaT_gettmbyobj(var L : lua_State?; var o : TValue?; event : TMS) : TValue? {
     var mt : Table?
-    let _cond = int(o.tt_) & 15
-    if (_cond == 5) {
-        mt = addr(reinterpret<GCUnion?>(o.value_.gc).h).metatable
-    } elif (_cond == 7) {
-        mt = addr(reinterpret<GCUnion?>(o.value_.gc).u).metatable
-    } else {
-        mt = L.l_G.mt[int(o.tt_) & 15]
+    c_switch(int(o.tt_) & 15) {
+        case(5) {
+            mt = addr(reinterpret<GCUnion?>(o.value_.gc).h).metatable
+            break
+        }
+        case(7) {
+            mt = addr(reinterpret<GCUnion?>(o.value_.gc).u).metatable
+            break
+        }
+        case(_) {
+            mt = L.l_G.mt[int(o.tt_) & 15]
+        }
     }
     return mt != null ? luaH_getshortstr(mt, L.l_G.tmname[int(event)]) : reinterpret<TValue?>(addr(L.l_G.nilvalue))
 }
@@ -133,7 +144,7 @@ def luaT_callTM(var L : lua_State?; var f : TValue?; var p1 : TValue?; var p2 : 
     }
     L.top.p = func + 4
     // metamethod may yield only when called from Lua code
-    if (!((int(L.ci.callstatus) & (CIST_C | CIST_HOOKED)) != 0)) {
+    if ((int(L.ci.callstatus) & (CIST_C | CIST_HOOKED)) == 0) {
         luaD_call(L, func, 0)
     } else {
         luaD_callnoyield(L, func, 0)
@@ -165,9 +176,9 @@ def luaT_callTMres(var L : lua_State?; var f : TValue?; var p1 : TValue?; var p2
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
-    L.top.p = L.top.p + 3
+    L.top.p += 3
     // metamethod may yield only when called from Lua code
-    if (!((int(L.ci.callstatus) & (CIST_C | CIST_HOOKED)) != 0)) {
+    if ((int(L.ci.callstatus) & (CIST_C | CIST_HOOKED)) == 0) {
         luaD_call(L, func, 1)
     } else {
         luaD_callnoyield(L, func, 1)
@@ -176,7 +187,7 @@ def luaT_callTMres(var L : lua_State?; var f : TValue?; var p1 : TValue?; var p2
     {
         // move result to its place
         var io1 : TValue? = addr(res.val)
-        L.top.p = L.top.p - 1
+        L.top.p--
         var io2 : TValue? = addr(L.top.p.val)
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
@@ -198,29 +209,19 @@ def private callbinTM(var L : lua_State?; var p1 : TValue?; var p2 : TValue?; va
 }
 
 def luaT_trybinTM(var L : lua_State?; var p1 : TValue?; var p2 : TValue?; var res : StackValue?; event : TMS) {
-    if (!(callbinTM(L, p1, p2, res, event) != 0)) {
-        let _cond = event
-        while (true) {
-            var _flag = false
-            _flag ||= _cond == TMS.TM_BAND
-            _flag ||= _cond == TMS.TM_BOR
-            _flag ||= _cond == TMS.TM_BXOR
-            _flag ||= _cond == TMS.TM_SHL
-            _flag ||= _cond == TMS.TM_SHR
-            _flag ||= _cond == TMS.TM_BNOT
-            if (_flag) {
+    if (callbinTM(L, p1, p2, res, event) == 0) {
+        c_switch(event) {
+            case(TMS.TM_BAND, TMS.TM_BOR, TMS.TM_BXOR, TMS.TM_SHL, TMS.TM_SHR, TMS.TM_BNOT) {
                 if ((int(p1.tt_) & 15) == LUA_TNUMBER && (int(p2.tt_) & 15) == LUA_TNUMBER) {
                     luaG_tointerror(L, p1, p2)
                 } else {
                     luaG_opinterror(L, p1, p2, cstr("perform bitwise operation on"))
                 }
             }
-            _flag ||= !(_cond == TMS.TM_BAND || _cond == TMS.TM_BOR || _cond == TMS.TM_BXOR || _cond == TMS.TM_SHL || _cond == TMS.TM_SHR || _cond == TMS.TM_BNOT)
-            if (_flag) {
+            case(_) {
                 // calls never return, but to avoid warnings: FALLTHROUGH
                 luaG_opinterror(L, p1, p2, cstr("perform arithmetic on"))
             }
-            break
         }
     }
 }
@@ -228,7 +229,7 @@ def luaT_trybinTM(var L : lua_State?; var p1 : TValue?; var p2 : TValue?; var re
 [c_function]
 def luaT_tryconcatTM(var L : lua_State?) {
     var top : StackValue? = L.top.p
-    if (!(callbinTM(L, addr((top - 2).val), addr((top - 1).val), top - 2, TMS.TM_CONCAT) != 0)) {
+    if (callbinTM(L, addr((top - 2).val), addr((top - 1).val), top - 2, TMS.TM_CONCAT) == 0) {
         luaG_concaterror(L, addr((top - 2).val), addr((top - 1).val))
     }
 }
@@ -263,7 +264,7 @@ def luaT_trybiniTM(var L : lua_State?; var p1 : TValue?; i2 : int64; flip : int;
 def luaT_callorderTM(var L : lua_State?; var p1 : TValue?; var p2 : TValue?; event : TMS) : int {
     // try original event
     if (callbinTM(L, p1, p2, L.top.p, event) != 0) {
-        return !(int(addr(L.top.p.val).tt_) == (LUA_TBOOLEAN | (0 << 4)) || (int(addr(L.top.p.val).tt_) & 15) == LUA_TNIL) ? 1 : 0
+        return int_of(!(int(addr(L.top.p.val).tt_) == (LUA_TBOOLEAN | (0 << 4)) || (int(addr(L.top.p.val).tt_) & 15) == LUA_TNIL))
     }
     // try '!(p2 < p1)' for '(p1 <= p2)'
     // mark it is doing 'lt' for 'le'
@@ -316,7 +317,7 @@ def luaT_adjustvarargs(var L : lua_State?; nfixparams : int; var ci : CallInfo?;
     {
         // copy function to the top of the stack
         var _t0 = L.top.p
-        L.top.p = L.top.p + 1
+        L.top.p++
         var io1 : TValue? = addr(_t0.val)
         var io2 : TValue? = addr(ci.func.p.val)
         io1.value_ = io2.value_
@@ -327,7 +328,7 @@ def luaT_adjustvarargs(var L : lua_State?; nfixparams : int; var ci : CallInfo?;
     while (i <= nfixparams) {
         {
             var _t1 = L.top.p
-            L.top.p = L.top.p + 1
+            L.top.p++
             var io1 : TValue? = addr(_t1.val)
             var io2 : TValue? = addr((ci.func.p + i).val)
             io1.value_ = io2.value_
@@ -337,8 +338,8 @@ def luaT_adjustvarargs(var L : lua_State?; nfixparams : int; var ci : CallInfo?;
         addr((ci.func.p + i).val).tt_ = uint8(LUA_TNIL | (0 << 4))
         i++
     }
-    ci.func.p = ci.func.p + (actual + 1)
-    ci.top.p = ci.top.p + (actual + 1)
+    ci.func.p += actual + 1
+    ci.top.p += actual + 1
 }
 
 [c_function]

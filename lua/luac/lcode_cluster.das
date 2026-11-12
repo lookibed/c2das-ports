@@ -3,12 +3,15 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_do_while
 require c_runtime/c_exit
 require c_runtime/c_function
+require c_runtime/c_switch
 require c_runtime/c_volatile
 require c_runtime/cstr
 require c_runtime/cstr_array
 require c_runtime/enum_from_int
+require c_runtime/int_of
 require c_runtime/printf
 require c_runtime/setjmp
 require c_runtime/variadic
@@ -226,6 +229,7 @@ include lcode_cluster.layout.das.inc
 [init]
 def private c2das_init_globals {
     dummynode_.u = NodeKey(tt_ = uint8(0 | (1 << 4)), key_tt = uint8(0 | (0 << 4)), next = 0)
-    luaT_typenames_ = fixed_array<uint8?>(cstr("no value"), cstr("nil"), cstr("boolean"), unsafe(addr(udatatypename[0])), cstr("number"), cstr("string"), cstr("table"), cstr("function"), unsafe(addr(udatatypename[0])), cstr("thread"), cstr("upvalue"), cstr("proto"))
+    luaT_typenames_ = fixed_array<uint8?>(cstr("no value"), cstr("nil"), cstr("boolean"), unsafe(addr(udatatypename[0])), cstr("number"), cstr("string"),
+            cstr("table"), cstr("function"), unsafe(addr(udatatypename[0])), cstr("thread"), cstr("upvalue"), cstr("proto"))
 }
 

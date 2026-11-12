@@ -4,8 +4,10 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/c_switch
 require c_runtime/cstr
 require c_runtime/cstr_array
+require c_runtime/int_of
 require c_runtime/variadic
 require ldebug
 require ldo
@@ -141,7 +143,7 @@ def lua_xmove(var from : lua_State?; var to : lua_State?; n : int) {
     if (intptr(from) == intptr(to)) {
         return
     }
-    from.top.p = from.top.p - n
+    from.top.p -= n
     for (i in range(n)) {
         {
             var io1 : TValue? = addr(to.top.p.val)
@@ -150,7 +152,7 @@ def lua_xmove(var from : lua_State?; var to : lua_State?; n : int) {
             io1.tt_ = io2.tt_
         }
         // stack already checked by previous 'api_check'
-        to.top.p = to.top.p + 1
+        to.top.p++
     }
 }
 
@@ -190,7 +192,7 @@ def lua_settop(var L : lua_State?; idx : int) {
         while (diff > 0l) {
             // clear new slots
             var _t0 = L.top.p
-            L.top.p = L.top.p + 1
+            L.top.p++
             addr(_t0.val).tt_ = uint8(LUA_TNIL | (0 << 4))
             diff--
         }
@@ -240,8 +242,8 @@ def private reverse(var L : lua_State?; var from : StackValue?; var to : StackVa
             io1.value_ = io2.value_
             io1.tt_ = io2.tt_
         }
-        from = from + 1
-        to = to - 1
+        from++
+        to--
     }
 }
 
@@ -281,8 +283,10 @@ def lua_copy(var L : lua_State?; fromidx : int; toidx : int) {
     // function upvalue?
     if (toidx < LUA_REGISTRYINDEX) {
         if ((int(fr.tt_) & BIT_ISCOLLECTABLE) != 0) {
-            if ((int(addr(reinterpret<GCUnion?>(addr(L.ci.func.p.val).value_.gc).cl.c).marked) & (1 << BLACKBIT)) != 0 && (int(fr.value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-                luaC_barrier_(L, addr(reinterpret<GCUnion?>(addr(reinterpret<GCUnion?>(addr(L.ci.func.p.val).value_.gc).cl.c)).gc), addr(reinterpret<GCUnion?>(fr.value_.gc).gc))
+            if ((int(addr(reinterpret<GCUnion?>(addr(L.ci.func.p.val).value_.gc).cl.c).marked) & (1 << BLACKBIT)) != 0 &&
+                    (int(fr.value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+                luaC_barrier_(L, addr(reinterpret<GCUnion?>(addr(reinterpret<GCUnion?>(addr(L.ci.func.p.val).value_.gc).cl.c)).gc),
+                        addr(reinterpret<GCUnion?>(fr.value_.gc).gc))
             }
         }
     }
@@ -298,7 +302,7 @@ def lua_pushvalue(var L : lua_State?; idx : int) {
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
 }
 
 [c_function]
@@ -313,12 +317,12 @@ def lua_typename(var L : lua_State?; t : int) : uint8? {
 
 def lua_iscfunction(var L : lua_State?; idx : int) : int {
     var o : TValue? = index2value(L, idx)
-    return (int(o.tt_) == (LUA_TFUNCTION | (1 << 4)) || (int(o.tt_) == ((LUA_TFUNCTION | (2 << 4)) | BIT_ISCOLLECTABLE))) ? 1 : 0
+    return int_of(int(o.tt_) == (LUA_TFUNCTION | (1 << 4)) || (int(o.tt_) == ((LUA_TFUNCTION | (2 << 4)) | BIT_ISCOLLECTABLE)))
 }
 
 def lua_isinteger(var L : lua_State?; idx : int) : int {
     var o : TValue? = index2value(L, idx)
-    return int(o.tt_) == (LUA_TNUMBER | (0 << 4)) ? 1 : 0
+    return int_of(int(o.tt_) == (LUA_TNUMBER | (0 << 4)))
 }
 
 [c_function]
@@ -327,7 +331,7 @@ def lua_isnumber(var L : lua_State?; idx : int) : int {
     var o : TValue? = index2value(L, idx)
     var _t0 : int
     if (int(o.tt_) == (LUA_TNUMBER | (1 << 4))) {
-        deref(addr(n)) = o.value_.n
+        *addr(n) = o.value_.n
         _t0 = 1
     } else {
         _t0 = luaV_tonumber_(o, addr(n))
@@ -337,19 +341,21 @@ def lua_isnumber(var L : lua_State?; idx : int) : int {
 
 def lua_isstring(var L : lua_State?; idx : int) : int {
     var o : TValue? = index2value(L, idx)
-    return ((int(o.tt_) & 15) == LUA_TSTRING || (int(o.tt_) & 15) == LUA_TNUMBER) ? 1 : 0
+    return int_of((int(o.tt_) & 15) == LUA_TSTRING || (int(o.tt_) & 15) == LUA_TNUMBER)
 }
 
 def lua_isuserdata(var L : lua_State?; idx : int) : int {
     var o : TValue? = index2value(L, idx)
-    return (int(o.tt_) == ((LUA_TUSERDATA | (0 << 4)) | BIT_ISCOLLECTABLE) || int(o.tt_) == (LUA_TLIGHTUSERDATA | (0 << 4))) ? 1 : 0
+    return int_of(int(o.tt_) == ((LUA_TUSERDATA | (0 << 4)) | BIT_ISCOLLECTABLE) || int(o.tt_) == (LUA_TLIGHTUSERDATA | (0 << 4)))
 }
 
 [c_function]
 def lua_rawequal(var L : lua_State?; index1 : int; index2 : int) : int {
     var o1 : TValue? = index2value(L, index1)
     var o2 : TValue? = index2value(L, index2)
-    return ((!((int(o1.tt_) & 15) == LUA_TNIL) || intptr(o1) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue)))) && (!((int(o2.tt_) & 15) == LUA_TNIL) || intptr(o2) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue))))) ? luaV_equalobj(null, o1, o2) : 0
+    return ((!((int(o1.tt_) & 15) == LUA_TNIL) || intptr(o1) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue)))) &&
+                (!((int(o2.tt_) & 15) == LUA_TNIL) || intptr(o2) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue))))) ? luaV_equalobj(null,
+            o1, o2) : 0
 }
 
 [c_function]
@@ -364,12 +370,12 @@ def lua_arith(var L : lua_State?; op : int) {
             io1.value_ = io2.value_
             io1.tt_ = io2.tt_
         }
-        L.top.p = L.top.p + 1
+        L.top.p++
     }
     // first operand at top - 2, second at top - 1; result go to top - 2
     luaO_arith(L, op, addr((L.top.p - 2).val), addr((L.top.p - 1).val), L.top.p - 2)
     // remove second operand
-    L.top.p = L.top.p - 1
+    L.top.p--
 }
 
 [c_function]
@@ -380,15 +386,23 @@ def lua_compare(var L : lua_State?; index1 : int; index2 : int; op : int) : int 
     // may call tag method
     o1 = index2value(L, index1)
     o2 = index2value(L, index2)
-    if ((!((int(o1.tt_) & 15) == LUA_TNIL) || intptr(o1) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue)))) && (!((int(o2.tt_) & 15) == LUA_TNIL) || intptr(o2) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue))))) {
-        let _cond = op
-        if (_cond == 0) {
-            i = luaV_equalobj(L, o1, o2)
-        } elif (_cond == 1) {
-            i = luaV_lessthan(L, o1, o2)
-        } elif (_cond == 2) {
-            i = luaV_lessequal(L, o1, o2)
-        } else {
+    if ((!((int(o1.tt_) & 15) == LUA_TNIL) || intptr(o1) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue)))) &&
+            (!((int(o2.tt_) & 15) == LUA_TNIL) || intptr(o2) != intptr(reinterpret<TValue?>(addr(L.l_G.nilvalue))))) {
+        c_switch(op) {
+            case(0) {
+                i = luaV_equalobj(L, o1, o2)
+                break
+            }
+            case(1) {
+                i = luaV_lessthan(L, o1, o2)
+                break
+            }
+            case(2) {
+                i = luaV_lessequal(L, o1, o2)
+                break
+            }
+            case(_) {
+            }
         }
     }
     return i
@@ -398,7 +412,7 @@ def lua_compare(var L : lua_State?; index1 : int; index2 : int; op : int) : int 
 def lua_stringtonumber(var L : lua_State?; var s : uint8?) : uint64 {
     var sz : uint64 = luaO_str2num(s, addr(L.top.p.val))
     if (sz != 0ul) {
-        L.top.p = L.top.p + 1
+        L.top.p++
     }
     return sz
 }
@@ -409,14 +423,14 @@ def lua_tonumberx(var L : lua_State?; idx : int; var pisnum : int?) : double {
     var o : TValue? = index2value(L, idx)
     var _t0 : int
     if (int(o.tt_) == (LUA_TNUMBER | (1 << 4))) {
-        deref(addr(n)) = o.value_.n
+        *addr(n) = o.value_.n
         _t0 = 1
     } else {
         _t0 = luaV_tonumber_(o, addr(n))
     }
     var isnum : int = _t0
     if (pisnum != null) {
-        deref(pisnum) = isnum
+        *pisnum = isnum
     }
     return n
 }
@@ -427,21 +441,21 @@ def lua_tointegerx(var L : lua_State?; idx : int; var pisnum : int?) : int64 {
     var o : TValue? = index2value(L, idx)
     var _t0 : int
     if (int(o.tt_) == (LUA_TNUMBER | (0 << 4))) {
-        deref(addr(res)) = o.value_.i
+        *addr(res) = o.value_.i
         _t0 = 1
     } else {
         _t0 = luaV_tointeger(o, addr(res), F2Imod.F2Ieq)
     }
     var isnum : int = _t0
     if (pisnum != null) {
-        deref(pisnum) = isnum
+        *pisnum = isnum
     }
     return res
 }
 
 def lua_toboolean(var L : lua_State?; idx : int) : int {
     var o : TValue? = index2value(L, idx)
-    return !(int(o.tt_) == (LUA_TBOOLEAN | (0 << 4)) || (int(o.tt_) & 15) == LUA_TNIL) ? 1 : 0
+    return int_of(!(int(o.tt_) == (LUA_TBOOLEAN | (0 << 4)) || (int(o.tt_) & 15) == LUA_TNIL))
 }
 
 [c_function]
@@ -452,7 +466,7 @@ def lua_tolstring(var L : lua_State?; idx : int; var len : uint64?) : uint8? {
         // not convertible?
         if (!((int(o.tt_) & 15) == LUA_TNUMBER)) {
             if (len != null) {
-                deref(len) = 0ul
+                *len = 0ul
             }
             return null
         }
@@ -464,7 +478,7 @@ def lua_tolstring(var L : lua_State?; idx : int; var len : uint64?) : uint8? {
         o = index2value(L, idx)
     }
     if (len != null) {
-        deref(len) = int(addr(reinterpret<GCUnion?>(o.value_.gc).ts).shrlen) != 255 ? uint64(addr(reinterpret<GCUnion?>(o.value_.gc).ts).shrlen) : addr(reinterpret<GCUnion?>(o.value_.gc).ts).u.lnglen
+        *len = addr(reinterpret<GCUnion?>(o.value_.gc).ts).shrlen != 255 ? uint64(addr(reinterpret<GCUnion?>(o.value_.gc).ts).shrlen) : addr(reinterpret<GCUnion?>(o.value_.gc).ts).u.lnglen
     }
     return addr(addr(reinterpret<GCUnion?>(o.value_.gc).ts).contents[0])
 }
@@ -472,17 +486,22 @@ def lua_tolstring(var L : lua_State?; idx : int; var len : uint64?) : uint8? {
 [c_function]
 def lua_rawlen(var L : lua_State?; idx : int) : uint64 {
     var o : TValue? = index2value(L, idx)
-    let _cond = int(o.tt_) & 63
-    if (_cond == 4) {
-        return uint64(addr(reinterpret<GCUnion?>(o.value_.gc).ts).shrlen)
-    } elif (_cond == 20) {
-        return uint64(addr(reinterpret<GCUnion?>(o.value_.gc).ts).u.lnglen)
-    } elif (_cond == 7) {
-        return uint64(addr(reinterpret<GCUnion?>(o.value_.gc).u).len)
-    } elif (_cond == 5) {
-        return luaH_getn(addr(reinterpret<GCUnion?>(o.value_.gc).h))
-    } else {
-        return 0ul
+    c_switch(int(o.tt_) & 63) {
+        case(4) {
+            return uint64(addr(reinterpret<GCUnion?>(o.value_.gc).ts).shrlen)
+        }
+        case(20) {
+            return addr(reinterpret<GCUnion?>(o.value_.gc).ts).u.lnglen
+        }
+        case(7) {
+            return addr(reinterpret<GCUnion?>(o.value_.gc).u).len
+        }
+        case(5) {
+            return luaH_getn(addr(reinterpret<GCUnion?>(o.value_.gc).h))
+        }
+        case(_) {
+            return 0ul
+        }
     }
 }
 
@@ -501,13 +520,19 @@ def lua_tocfunction(var L : lua_State?; idx : int) : function<(var a0 : lua_Stat
 
 [c_function]
 def private touserdata(var o : TValue?) : void? {
-    let _cond = int(o.tt_) & 15
-    if (_cond == 7) {
-        return reinterpret<void?>(reinterpret<uint8?>(addr(reinterpret<GCUnion?>(o.value_.gc).u)) + (int(addr(reinterpret<GCUnion?>(o.value_.gc).u).nuvalue) == 0 ? uint64(typeinfo offsetof < bindata > (type<Udata0>)) : uint64(typeinfo offsetof < uv > (type<Udata>)) + uint64(typeinfo sizeof(type<UValue>)) * uint64(addr(reinterpret<GCUnion?>(o.value_.gc).u).nuvalue)))
-    } elif (_cond == 2) {
-        return o.value_.p
-    } else {
-        return null
+    c_switch(int(o.tt_) & 15) {
+        case(7) {
+            return reinterpret<void?>(reinterpret<uint8?>(addr(reinterpret<GCUnion?>(o.value_.gc).u)) + (addr(reinterpret<GCUnion?>(o.value_.gc).u).nuvalue == 0 ?
+                    uint64(typeinfo offsetof < bindata > (type<Udata0>)) :
+                    uint64(typeinfo offsetof < uv > (type<Udata>)) + uint64(typeinfo sizeof(type<UValue>)) *
+                        uint64(addr(reinterpret<GCUnion?>(o.value_.gc).u).nuvalue)))
+        }
+        case(2) {
+            return o.value_.p
+        }
+        case(_) {
+            return null
+        }
     }
 }
 
@@ -530,24 +555,28 @@ def lua_tothread(var L : lua_State?; idx : int) : lua_State? {
 [c_function]
 def lua_topointer(var L : lua_State?; idx : int) : void? {
     var o : TValue? = index2value(L, idx)
-    let _cond = int(o.tt_) & 63
-    if (_cond == 22) {
-        return reinterpret<void?>(uint64(uint64(intptr(o.value_.f))))
-    } elif (_cond == 7 || _cond == 2) {
-        return touserdata(o)
-    } else {
-        if ((int(o.tt_) & BIT_ISCOLLECTABLE) != 0) {
-            return reinterpret<void?>(o.value_.gc)
-        } else {
-            return null
+    c_switch(int(o.tt_) & 63) {
+        case(22) {
+            return reinterpret<void?>(uint64(uint64(intptr(o.value_.f))))
+        }
+        case(7, 2) {
+            return touserdata(o)
+        }
+        case(_) {
+            if ((int(o.tt_) & BIT_ISCOLLECTABLE) != 0) {
+                return reinterpret<void?>(o.value_.gc)
+            } else {
+                return null
+            }
         }
     }
+    return null
 }
 
 [c_function]
 def lua_pushnil(var L : lua_State?) {
     addr(L.top.p.val).tt_ = uint8(LUA_TNIL | (0 << 4))
-    L.top.p = L.top.p + 1
+    L.top.p++
 }
 
 [c_function]
@@ -557,7 +586,7 @@ def lua_pushnumber(var L : lua_State?; n : double) {
         io.value_.n = n
         io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
 }
 
 [c_function]
@@ -567,7 +596,7 @@ def lua_pushinteger(var L : lua_State?; n : int64) {
         io.value_.i = n
         io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
 }
 
 // Pushes on the stack a string with given length. Avoid using 's' when
@@ -583,7 +612,7 @@ def lua_pushlstring(var L : lua_State?; var s : uint8?; len : uint64) : uint8? {
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
         io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
     if (L.l_G.GCdebt > 0l) {
         luaC_step(L)
     }
@@ -606,7 +635,7 @@ def lua_pushstring(var L : lua_State?; var s : uint8?) : uint8? {
         // internal copy's address
         s = addr(ts.contents[0])
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
     if (L.l_G.GCdebt > 0l) {
         luaC_step(L)
     }
@@ -642,16 +671,16 @@ def lua_pushcclosure(var L : lua_State?; fn : function<(var a0 : lua_State?) : i
             io.value_.f = fn
             io.tt_ = uint8(LUA_TFUNCTION | (1 << 4))
         }
-        L.top.p = L.top.p + 1
+        L.top.p++
     } else {
         var cl : CClosure?
         cl = luaF_newCclosure(L, n)
         cl.f = fn
-        L.top.p = L.top.p - n
+        L.top.p -= n
         while (true) {
             let _t0 = n
             n--
-            if (!(_t0 != 0)) {
+            if (_t0 == 0) {
                 break
             }
             {
@@ -668,7 +697,7 @@ def lua_pushcclosure(var L : lua_State?; fn : function<(var a0 : lua_State?) : i
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
             io.tt_ = uint8((LUA_TFUNCTION | (2 << 4)) | BIT_ISCOLLECTABLE)
         }
-        L.top.p = L.top.p + 1
+        L.top.p++
         if (L.l_G.GCdebt > 0l) {
             luaC_step(L)
         }
@@ -682,7 +711,7 @@ def lua_pushboolean(var L : lua_State?; b : int) {
     } else {
         addr(L.top.p.val).tt_ = uint8(LUA_TBOOLEAN | (0 << 4))
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
 }
 
 [c_function]
@@ -692,7 +721,7 @@ def lua_pushlightuserdata(var L : lua_State?; var p : void?) {
         io.value_.p = p
         io.tt_ = uint8(LUA_TLIGHTUSERDATA | (0 << 4))
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
 }
 
 [c_function]
@@ -703,8 +732,8 @@ def lua_pushthread(var L : lua_State?) : int {
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
         io.tt_ = uint8((LUA_TTHREAD | (0 << 4)) | BIT_ISCOLLECTABLE)
     }
-    L.top.p = L.top.p + 1
-    return (intptr(L.l_G.mainthread) == intptr(L)) ? 1 : 0
+    L.top.p++
+    return int_of(intptr(L.l_G.mainthread) == intptr(L))
 }
 
 [c_function]
@@ -717,7 +746,7 @@ def private auxgetstr(var L : lua_State?; var t : TValue?; var k : uint8?) : int
         _t0 = 0
     } else {
         slot = luaH_getstr(addr(reinterpret<GCUnion?>(t.value_.gc).h), str)
-        _t0 = !((int(slot.tt_) & 15) == LUA_TNIL) ? 1 : 0
+        _t0 = int_of(!((int(slot.tt_) & 15) == LUA_TNIL))
     }
     if (_t0 != 0) {
         {
@@ -726,7 +755,7 @@ def private auxgetstr(var L : lua_State?; var t : TValue?; var k : uint8?) : int
             io1.value_ = io2.value_
             io1.tt_ = io2.tt_
         }
-        L.top.p = L.top.p + 1
+        L.top.p++
     } else {
         {
             var io : TValue? = addr(L.top.p.val)
@@ -734,7 +763,7 @@ def private auxgetstr(var L : lua_State?; var t : TValue?; var k : uint8?) : int
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
             io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
         }
-        L.top.p = L.top.p + 1
+        L.top.p++
         luaV_finishget(L, t, addr((L.top.p - 1).val), L.top.p - 1, slot)
     }
     return int(addr((L.top.p - 1).val).tt_) & 15
@@ -758,7 +787,7 @@ def lua_gettable(var L : lua_State?; idx : int) : int {
         _t0 = 0
     } else {
         slot = luaH_get(addr(reinterpret<GCUnion?>(t.value_.gc).h), addr((L.top.p - 1).val))
-        _t0 = !((int(slot.tt_) & 15) == LUA_TNIL) ? 1 : 0
+        _t0 = int_of(!((int(slot.tt_) & 15) == LUA_TNIL))
     }
     if (_t0 != 0) {
         {
@@ -787,8 +816,9 @@ def lua_geti(var L : lua_State?; idx : int; n : int64) : int {
         slot = null
         _t0 = 0
     } else {
-        slot = uint64(n) - uint64(1u) < uint64(addr(reinterpret<GCUnion?>(t.value_.gc).h).alimit) ? reinterpret<TValue?>(addr(addr(reinterpret<GCUnion?>(t.value_.gc).h)._c_array[n - 1l])) : luaH_getint(addr(reinterpret<GCUnion?>(t.value_.gc).h), n)
-        _t0 = !((int(slot.tt_) & 15) == LUA_TNIL) ? 1 : 0
+        slot = uint64(n) - uint64(1u) < uint64(addr(reinterpret<GCUnion?>(t.value_.gc).h).alimit) ? reinterpret<TValue?>(addr(addr(reinterpret<GCUnion?>(t.value_.gc).h)._c_array[n - 1l])) : luaH_getint(addr(reinterpret<GCUnion?>(t.value_.gc).h),
+                n)
+        _t0 = int_of(!((int(slot.tt_) & 15) == LUA_TNIL))
     }
     if (_t0 != 0) {
         {
@@ -806,7 +836,7 @@ def lua_geti(var L : lua_State?; idx : int; n : int64) : int {
         }
         luaV_finishget(L, t, addr(aux), L.top.p, slot)
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
     return int(addr((L.top.p - 1).val).tt_) & 15
 }
 
@@ -821,7 +851,7 @@ def private finishrawget(var L : lua_State?; var val : TValue?) : int {
         io1.value_ = io2.value_
         io1.tt_ = io2.tt_
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
     return int(addr((L.top.p - 1).val).tt_) & 15
 }
 
@@ -838,7 +868,7 @@ def lua_rawget(var L : lua_State?; idx : int) : int {
     t = gettable(L, idx)
     val = luaH_get(t, addr((L.top.p - 1).val))
     // remove key
-    L.top.p = L.top.p - 1
+    L.top.p--
     return finishrawget(L, val)
 }
 
@@ -871,7 +901,7 @@ def lua_createtable(var L : lua_State?; narray : int; nrec : int) {
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
         io.tt_ = uint8((LUA_TTABLE | (0 << 4)) | BIT_ISCOLLECTABLE)
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
     if (narray > 0 || nrec > 0) {
         luaH_resize(L, t, uint(narray), uint(nrec))
     }
@@ -886,13 +916,19 @@ def lua_getmetatable(var L : lua_State?; objindex : int) : int {
     var mt : Table?
     var res : int = 0
     obj = index2value(L, objindex)
-    let _cond = int(obj.tt_) & 15
-    if (_cond == 5) {
-        mt = addr(reinterpret<GCUnion?>(obj.value_.gc).h).metatable
-    } elif (_cond == 7) {
-        mt = addr(reinterpret<GCUnion?>(obj.value_.gc).u).metatable
-    } else {
-        mt = L.l_G.mt[int(obj.tt_) & 15]
+    c_switch(int(obj.tt_) & 15) {
+        case(5) {
+            mt = addr(reinterpret<GCUnion?>(obj.value_.gc).h).metatable
+            break
+        }
+        case(7) {
+            mt = addr(reinterpret<GCUnion?>(obj.value_.gc).u).metatable
+            break
+        }
+        case(_) {
+            mt = L.l_G.mt[int(obj.tt_) & 15]
+            break
+        }
     }
     if (mt != null) {
         {
@@ -901,7 +937,7 @@ def lua_getmetatable(var L : lua_State?; objindex : int) : int {
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
             io.tt_ = uint8((LUA_TTABLE | (0 << 4)) | BIT_ISCOLLECTABLE)
         }
-        L.top.p = L.top.p + 1
+        L.top.p++
         res = 1
     }
     return res
@@ -924,7 +960,7 @@ def lua_getiuservalue(var L : lua_State?; idx : int; n : int) : int {
         }
         t = int(addr(L.top.p.val).tt_) & 15
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
     return t
 }
 
@@ -939,7 +975,7 @@ def private auxsetstr(var L : lua_State?; var t : TValue?; var k : uint8?) {
         _t0 = 0
     } else {
         slot = luaH_getstr(addr(reinterpret<GCUnion?>(t.value_.gc).h), str)
-        _t0 = !((int(slot.tt_) & 15) == LUA_TNIL) ? 1 : 0
+        _t0 = int_of(!((int(slot.tt_) & 15) == LUA_TNIL))
     }
     if (_t0 != 0) {
         {
@@ -949,12 +985,13 @@ def private auxsetstr(var L : lua_State?; var t : TValue?; var k : uint8?) {
             io1.tt_ = io2.tt_
         }
         if ((int(addr((L.top.p - 1).val).tt_) & BIT_ISCOLLECTABLE) != 0) {
-            if ((int(t.value_.gc.marked) & (1 << BLACKBIT)) != 0 && (int(addr((L.top.p - 1).val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            if ((int(t.value_.gc.marked) & (1 << BLACKBIT)) != 0 &&
+                    (int(addr((L.top.p - 1).val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
                 luaC_barrierback_(L, t.value_.gc)
             }
         }
         // pop value
-        L.top.p = L.top.p - 1
+        L.top.p--
     } else {
         {
             // push 'str' (to make it a TValue)
@@ -963,10 +1000,10 @@ def private auxsetstr(var L : lua_State?; var t : TValue?; var k : uint8?) {
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
             io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
         }
-        L.top.p = L.top.p + 1
+        L.top.p++
         luaV_finishset(L, t, addr((L.top.p - 1).val), addr((L.top.p - 2).val), slot)
         // pop value and key
-        L.top.p = L.top.p - 2
+        L.top.p -= 2
     }
     // lock done by caller
 }
@@ -990,7 +1027,7 @@ def lua_settable(var L : lua_State?; idx : int) {
         _t0 = 0
     } else {
         slot = luaH_get(addr(reinterpret<GCUnion?>(t.value_.gc).h), addr((L.top.p - 2).val))
-        _t0 = !((int(slot.tt_) & 15) == LUA_TNIL) ? 1 : 0
+        _t0 = int_of(!((int(slot.tt_) & 15) == LUA_TNIL))
     }
     if (_t0 != 0) {
         {
@@ -1000,7 +1037,8 @@ def lua_settable(var L : lua_State?; idx : int) {
             io1.tt_ = io2.tt_
         }
         if ((int(addr((L.top.p - 1).val).tt_) & BIT_ISCOLLECTABLE) != 0) {
-            if ((int(t.value_.gc.marked) & (1 << BLACKBIT)) != 0 && (int(addr((L.top.p - 1).val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            if ((int(t.value_.gc.marked) & (1 << BLACKBIT)) != 0 &&
+                    (int(addr((L.top.p - 1).val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
                 luaC_barrierback_(L, t.value_.gc)
             }
         }
@@ -1008,7 +1046,7 @@ def lua_settable(var L : lua_State?; idx : int) {
         luaV_finishset(L, t, addr((L.top.p - 2).val), addr((L.top.p - 1).val), slot)
     }
     // pop index and value
-    L.top.p = L.top.p - 2
+    L.top.p -= 2
 }
 
 def lua_setfield(var L : lua_State?; idx : int; var k : uint8?) {
@@ -1026,8 +1064,9 @@ def lua_seti(var L : lua_State?; idx : int; n : int64) {
         slot = null
         _t0 = 0
     } else {
-        slot = uint64(n) - uint64(1u) < uint64(addr(reinterpret<GCUnion?>(t.value_.gc).h).alimit) ? reinterpret<TValue?>(addr(addr(reinterpret<GCUnion?>(t.value_.gc).h)._c_array[n - 1l])) : luaH_getint(addr(reinterpret<GCUnion?>(t.value_.gc).h), n)
-        _t0 = !((int(slot.tt_) & 15) == LUA_TNIL) ? 1 : 0
+        slot = uint64(n) - uint64(1u) < uint64(addr(reinterpret<GCUnion?>(t.value_.gc).h).alimit) ? reinterpret<TValue?>(addr(addr(reinterpret<GCUnion?>(t.value_.gc).h)._c_array[n - 1l])) : luaH_getint(addr(reinterpret<GCUnion?>(t.value_.gc).h),
+                n)
+        _t0 = int_of(!((int(slot.tt_) & 15) == LUA_TNIL))
     }
     if (_t0 != 0) {
         {
@@ -1037,7 +1076,8 @@ def lua_seti(var L : lua_State?; idx : int; n : int64) {
             io1.tt_ = io2.tt_
         }
         if ((int(addr((L.top.p - 1).val).tt_) & BIT_ISCOLLECTABLE) != 0) {
-            if ((int(t.value_.gc.marked) & (1 << BLACKBIT)) != 0 && (int(addr((L.top.p - 1).val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            if ((int(t.value_.gc.marked) & (1 << BLACKBIT)) != 0 &&
+                    (int(addr((L.top.p - 1).val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
                 luaC_barrierback_(L, t.value_.gc)
             }
         }
@@ -1051,7 +1091,7 @@ def lua_seti(var L : lua_State?; idx : int; n : int64) {
         luaV_finishset(L, t, addr(aux), addr((L.top.p - 1).val), slot)
     }
     // pop value
-    L.top.p = L.top.p - 1
+    L.top.p--
 }
 
 [c_function]
@@ -1061,11 +1101,12 @@ def private aux_rawset(var L : lua_State?; idx : int; var key : TValue?; n : int
     luaH_set(L, t, key, addr((L.top.p - 1).val))
     t.flags = uint8(uint(t.flags) & ~maskflags)
     if ((int(addr((L.top.p - 1).val).tt_) & BIT_ISCOLLECTABLE) != 0) {
-        if ((int(addr(reinterpret<GCUnion?>(t).gc).marked) & (1 << BLACKBIT)) != 0 && (int(addr((L.top.p - 1).val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+        if ((int(addr(reinterpret<GCUnion?>(t).gc).marked) & (1 << BLACKBIT)) != 0 &&
+                (int(addr((L.top.p - 1).val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
             luaC_barrierback_(L, addr(reinterpret<GCUnion?>(t).gc))
         }
     }
-    L.top.p = L.top.p - n
+    L.top.p -= n
 }
 
 [c_function]
@@ -1090,11 +1131,12 @@ def lua_rawseti(var L : lua_State?; idx : int; n : int64) {
     t = gettable(L, idx)
     luaH_setint(L, t, n, addr((L.top.p - 1).val))
     if ((int(addr((L.top.p - 1).val).tt_) & BIT_ISCOLLECTABLE) != 0) {
-        if ((int(addr(reinterpret<GCUnion?>(t).gc).marked) & (1 << BLACKBIT)) != 0 && (int(addr((L.top.p - 1).val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+        if ((int(addr(reinterpret<GCUnion?>(t).gc).marked) & (1 << BLACKBIT)) != 0 &&
+                (int(addr((L.top.p - 1).val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
             luaC_barrierback_(L, addr(reinterpret<GCUnion?>(t).gc))
         }
     }
-    L.top.p = L.top.p - 1
+    L.top.p--
 }
 
 [c_function]
@@ -1107,27 +1149,34 @@ def lua_setmetatable(var L : lua_State?; objindex : int) : int {
     } else {
         mt = addr(reinterpret<GCUnion?>(addr((L.top.p - 1).val).value_.gc).h)
     }
-    let _cond = int(obj.tt_) & 15
-    if (_cond == 5) {
-        addr(reinterpret<GCUnion?>(obj.value_.gc).h).metatable = mt
-        if (mt != null) {
-            if ((int(obj.value_.gc.marked) & (1 << BLACKBIT)) != 0 && (int(mt.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-                luaC_barrier_(L, addr(reinterpret<GCUnion?>(obj.value_.gc).gc), addr(reinterpret<GCUnion?>(mt).gc))
+    c_switch(int(obj.tt_) & 15) {
+        case(5) {
+            addr(reinterpret<GCUnion?>(obj.value_.gc).h).metatable = mt
+            if (mt != null) {
+                if ((int(obj.value_.gc.marked) & (1 << BLACKBIT)) != 0 && (int(mt.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+                    luaC_barrier_(L, addr(reinterpret<GCUnion?>(obj.value_.gc).gc), addr(reinterpret<GCUnion?>(mt).gc))
+                }
+                luaC_checkfinalizer(L, obj.value_.gc, mt)
             }
-            luaC_checkfinalizer(L, obj.value_.gc, mt)
+            break
         }
-    } elif (_cond == 7) {
-        addr(reinterpret<GCUnion?>(obj.value_.gc).u).metatable = mt
-        if (mt != null) {
-            if ((int(addr(reinterpret<GCUnion?>(obj.value_.gc).u).marked) & (1 << BLACKBIT)) != 0 && (int(mt.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-                luaC_barrier_(L, addr(reinterpret<GCUnion?>(addr(reinterpret<GCUnion?>(obj.value_.gc).u)).gc), addr(reinterpret<GCUnion?>(mt).gc))
+        case(7) {
+            addr(reinterpret<GCUnion?>(obj.value_.gc).u).metatable = mt
+            if (mt != null) {
+                if ((int(addr(reinterpret<GCUnion?>(obj.value_.gc).u).marked) & (1 << BLACKBIT)) != 0 &&
+                        (int(mt.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+                    luaC_barrier_(L, addr(reinterpret<GCUnion?>(addr(reinterpret<GCUnion?>(obj.value_.gc).u)).gc), addr(reinterpret<GCUnion?>(mt).gc))
+                }
+                luaC_checkfinalizer(L, obj.value_.gc, mt)
             }
-            luaC_checkfinalizer(L, obj.value_.gc, mt)
+            break
         }
-    } else {
-        L.l_G.mt[int(obj.tt_) & 15] = mt
+        case(_) {
+            L.l_G.mt[int(obj.tt_) & 15] = mt
+            break
+        }
     }
-    L.top.p = L.top.p - 1
+    L.top.p--
     return 1
 }
 
@@ -1147,13 +1196,14 @@ def lua_setiuservalue(var L : lua_State?; idx : int; n : int) : int {
             io1.tt_ = io2.tt_
         }
         if ((int(addr((L.top.p - 1).val).tt_) & BIT_ISCOLLECTABLE) != 0) {
-            if ((int(o.value_.gc.marked) & (1 << BLACKBIT)) != 0 && (int(addr((L.top.p - 1).val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            if ((int(o.value_.gc.marked) & (1 << BLACKBIT)) != 0 &&
+                    (int(addr((L.top.p - 1).val).value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
                 luaC_barrierback_(L, o.value_.gc)
             }
         }
         res = 1
     }
-    L.top.p = L.top.p - 1
+    L.top.p--
     return res
 }
 
@@ -1186,7 +1236,8 @@ def private f_call(var L : lua_State?; var ud : void?) {
 }
 
 [c_function]
-def lua_pcallk(var L : lua_State?; nargs : int; nresults : int; errfunc : int; ctx : int64; k : function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>) : int {
+def lua_pcallk(var L : lua_State?; nargs : int; nresults : int; errfunc : int; ctx : int64;
+               k : function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>) : int {
     var c : CallS
     var status : int
     var func : int64
@@ -1232,10 +1283,11 @@ def lua_pcallk(var L : lua_State?; nargs : int; nresults : int; errfunc : int; c
 }
 
 [c_function]
-def lua_load(var L : lua_State?; reader : function<(var a0 : lua_State?; var a1 : void?; var a2 : uint64?) : uint8?>; var data : void?; var chunkname : uint8?; var mode : uint8?) : int {
+def lua_load(var L : lua_State?; reader : function<(var a0 : lua_State?; var a1 : void?; var a2 : uint64?) : uint8?>; var data : void?; var chunkname : uint8?;
+             var mode : uint8?) : int {
     var z : Zio
     var status : int
-    if (!(chunkname != null)) {
+    if (chunkname == null) {
         chunkname = cstr("?")
     }
     luaZ_init(L, addr(z), reader, data)
@@ -1266,7 +1318,8 @@ def lua_load(var L : lua_State?; reader : function<(var a0 : lua_State?; var a1 
 }
 
 [c_function]
-def lua_dump(var L : lua_State?; writer : function<(var a0 : lua_State?; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var data : void?; strip : int) : int {
+def lua_dump(var L : lua_State?; writer : function<(var a0 : lua_State?; var a1 : void?; a2 : uint64; var a3 : void?) : int>; var data : void?;
+             strip : int) : int {
     var status : int
     var o : TValue?
     o = addr((L.top.p - 1).val)
@@ -1294,96 +1347,119 @@ def lua_gc(var L : lua_State?; what : int; va : va_args) : int {
         return -1
     }
     argp = va_begin(va)
-    let _cond = what
-    if (_cond == 0) {
-        // stopped by the user
-        g.gcstp = uint8(GCSTPUSR)
-    } elif (_cond == 1) {
-        luaE_setdebt(g, 0l)
-        // (GCSTPGC must be already zero here)
-        g.gcstp = 0u8
-    } elif (_cond == 2) {
-        luaC_fullgc(L, 0)
-    } elif (_cond == 3) {
-        // GC values are expressed in Kbytes: #bytes/2^10
-        res = int(uint64(g.totalbytes + g.GCdebt) >> 10ul)
-    } elif (_cond == 4) {
-        res = int(uint64(g.totalbytes + g.GCdebt) & 1023ul)
-    } elif (_cond == 5) {
-        {
-            var data : int = int(va_i(argp))
-            // =1 to signal that it did an actual step
-            var debt : int64 = 1l
-            var oldstp : uint8 = g.gcstp
-            // allow GC to run (GCSTPGC must be zero here)
+    c_switch(what) {
+        case(0) {
+            // stopped by the user
+            g.gcstp = uint8(GCSTPUSR)
+            break
+        }
+        case(1) {
+            luaE_setdebt(g, 0l)
+            // (GCSTPGC must be already zero here)
             g.gcstp = 0u8
-            if (data == 0) {
-                // do a basic step
-                luaE_setdebt(g, 0l)
-                luaC_step(L)
-            } else {
-                // add 'data' to total debt
-                debt = int64(data) * 1024l + g.GCdebt
-                luaE_setdebt(g, debt)
-                if (L.l_G.GCdebt > 0l) {
+            break
+        }
+        case(2) {
+            luaC_fullgc(L, 0)
+            break
+        }
+        case(3) {
+            // GC values are expressed in Kbytes: #bytes/2^10
+            res = int(uint64(g.totalbytes + g.GCdebt) >> 10ul)
+            break
+        }
+        case(4) {
+            res = int(uint64(g.totalbytes + g.GCdebt) & 1023ul)
+            break
+        }
+        case(5) {
+            {
+                var data : int = int(va_i(argp))
+                // =1 to signal that it did an actual step
+                var debt : int64 = 1l
+                var oldstp : uint8 = g.gcstp
+                // allow GC to run (GCSTPGC must be zero here)
+                g.gcstp = 0u8
+                if (data == 0) {
+                    // do a basic step
+                    luaE_setdebt(g, 0l)
                     luaC_step(L)
+                } else {
+                    // add 'data' to total debt
+                    debt = int64(data) * 1024l + g.GCdebt
+                    luaE_setdebt(g, debt)
+                    if (L.l_G.GCdebt > 0l) {
+                        luaC_step(L)
+                    }
                 }
-            }
-            // restore previous state
-            g.gcstp = oldstp
-            // end of cycle?
-            if (debt > 0l && int(g.gcstate) == GCSpause) {
-                // signal it
-                res = 1
+                // restore previous state
+                g.gcstp = oldstp
+                // end of cycle?
+                if (debt > 0l && int(g.gcstate) == GCSpause) {
+                    // signal it
+                    res = 1
+                }
+                break
             }
         }
-    } elif (_cond == 6) {
-        {
-            var data : int = int(va_i(argp))
-            res = int(g.gcpause) * 4
-            g.gcpause = uint8(data / 4)
+        case(6) {
+            {
+                var data : int = int(va_i(argp))
+                res = int(g.gcpause) * 4
+                g.gcpause = uint8(data / 4)
+                break
+            }
         }
-    } elif (_cond == 7) {
-        {
-            var data : int = int(va_i(argp))
-            res = int(g.gcstepmul) * 4
-            g.gcstepmul = uint8(data / 4)
+        case(7) {
+            {
+                var data : int = int(va_i(argp))
+                res = int(g.gcstepmul) * 4
+                g.gcstepmul = uint8(data / 4)
+                break
+            }
         }
-    } elif (_cond == 9) {
-        res = int(g.gcstp) == 0 ? 1 : 0
-    } elif (_cond == 10) {
-        {
-            var minormul : int = int(va_i(argp))
-            var majormul : int = int(va_i(argp))
-            res = int(g.gckind) == KGC_GEN || g.lastatomic != 0ul ? LUA_GCGEN : LUA_GCINC
-            if (minormul != 0) {
-                g.genminormul = uint8(minormul)
-            }
-            if (majormul != 0) {
-                g.genmajormul = uint8(majormul / 4)
-            }
-            luaC_changemode(L, KGC_GEN)
+        case(9) {
+            res = int_of(g.gcstp == 0)
+            break
         }
-    } elif (_cond == 11) {
-        {
-            var pause : int = int(va_i(argp))
-            var stepmul : int = int(va_i(argp))
-            var stepsize : int = int(va_i(argp))
-            res = int(g.gckind) == KGC_GEN || g.lastatomic != 0ul ? LUA_GCGEN : LUA_GCINC
-            if (pause != 0) {
-                g.gcpause = uint8(pause / 4)
+        case(10) {
+            {
+                var minormul : int = int(va_i(argp))
+                var majormul : int = int(va_i(argp))
+                res = int(g.gckind) == KGC_GEN || g.lastatomic != 0ul ? LUA_GCGEN : LUA_GCINC
+                if (minormul != 0) {
+                    g.genminormul = uint8(minormul)
+                }
+                if (majormul != 0) {
+                    g.genmajormul = uint8(majormul / 4)
+                }
+                luaC_changemode(L, KGC_GEN)
+                break
             }
-            if (stepmul != 0) {
-                g.gcstepmul = uint8(stepmul / 4)
-            }
-            if (stepsize != 0) {
-                g.gcstepsize = uint8(stepsize)
-            }
-            luaC_changemode(L, KGC_INC)
         }
-    } else {
-        // invalid option
-        res = -1
+        case(11) {
+            {
+                var pause : int = int(va_i(argp))
+                var stepmul : int = int(va_i(argp))
+                var stepsize : int = int(va_i(argp))
+                res = int(g.gckind) == KGC_GEN || g.lastatomic != 0ul ? LUA_GCGEN : LUA_GCINC
+                if (pause != 0) {
+                    g.gcpause = uint8(pause / 4)
+                }
+                if (stepmul != 0) {
+                    g.gcstepmul = uint8(stepmul / 4)
+                }
+                if (stepsize != 0) {
+                    g.gcstepsize = uint8(stepsize)
+                }
+                luaC_changemode(L, KGC_INC)
+                break
+            }
+        }
+        case(_) {
+            // invalid option
+            res = -1
+        }
     }
     return res
 }
@@ -1393,7 +1469,8 @@ def lua_error(var L : lua_State?) : int {
     var errobj : TValue?
     errobj = addr((L.top.p - 1).val)
     // error object is the memory error message?
-    if (int(errobj.tt_) == ((LUA_TSTRING | (0 << 4)) | BIT_ISCOLLECTABLE) && intptr(addr(reinterpret<GCUnion?>(errobj.value_.gc).ts)) == intptr(L.l_G.memerrmsg)) {
+    if (int(errobj.tt_) == ((LUA_TSTRING | (0 << 4)) | BIT_ISCOLLECTABLE) &&
+            intptr(addr(reinterpret<GCUnion?>(errobj.value_.gc).ts)) == intptr(L.l_G.memerrmsg)) {
         // raise a memory error
         luaD_throw(L, LUA_ERRMEM)
     } else {
@@ -1412,11 +1489,11 @@ def lua_next(var L : lua_State?; idx : int) : int {
     t = gettable(L, idx)
     more = luaH_next(L, t, L.top.p - 1)
     if (more != 0) {
-        L.top.p = L.top.p + 1
+        L.top.p++
     } else {
         // no more elements
         // remove key
-        L.top.p = L.top.p - 1
+        L.top.p -= 1
     }
     return more
 }
@@ -1448,7 +1525,7 @@ def lua_concat(var L : lua_State?; n : int) {
             io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
             io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
         }
-        L.top.p = L.top.p + 1
+        L.top.p++
     }
     if (L.l_G.GCdebt > 0l) {
         luaC_step(L)
@@ -1460,14 +1537,14 @@ def lua_len(var L : lua_State?; idx : int) {
     var t : TValue?
     t = index2value(L, idx)
     luaV_objlen(L, L.top.p, t)
-    L.top.p = L.top.p + 1
+    L.top.p++
 }
 
 [c_function]
 def lua_getallocf(var L : lua_State?; var ud : void ??) : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 : uint64) : void?> {
     var f : function<(var a0 : void?; var a1 : void?; a2 : uint64; a3 : uint64) : void?>
     if (ud != null) {
-        deref(ud) = L.l_G.ud
+        *ud = L.l_G.ud
     }
     f = L.l_G.frealloc
     return f
@@ -1497,50 +1574,54 @@ def lua_newuserdatauv(var L : lua_State?; size : uint64; nuvalue : int) : void? 
         io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
         io.tt_ = uint8((LUA_TUSERDATA | (0 << 4)) | BIT_ISCOLLECTABLE)
     }
-    L.top.p = L.top.p + 1
+    L.top.p++
     if (L.l_G.GCdebt > 0l) {
         luaC_step(L)
     }
-    return reinterpret<void?>(reinterpret<uint8?>(u) + (int(u.nuvalue) == 0 ? uint64(typeinfo offsetof < bindata > (type<Udata0>)) : uint64(typeinfo offsetof < uv > (type<Udata>)) + uint64(typeinfo sizeof(type<UValue>)) * uint64(u.nuvalue)))
+    return reinterpret<void?>(reinterpret<uint8?>(u) + (u.nuvalue == 0 ? uint64(typeinfo offsetof < bindata > (type<Udata0>)) :
+            uint64(typeinfo offsetof < uv > (type<Udata>)) + uint64(typeinfo sizeof(type<UValue>)) * uint64(u.nuvalue)))
 }
 
 [c_function]
 def private aux_upvalue(var fi : TValue?; n : int; var val : TValue ??; var owner : GCObject ??) : uint8? {
-    let _cond = int(fi.tt_) & 63
-    if (_cond == 38) {
-        {
-            // C closure
-            var f : CClosure? = addr(reinterpret<GCUnion?>(fi.value_.gc).cl.c)
-            if (!(uint(n) - 1u < uint(f.nupvalues))) {
-                // 'n' not in [1, f->nupvalues]
-                return null
+    c_switch(int(fi.tt_) & 63) {
+        case(38) {
+            {
+                // C closure
+                var f : CClosure? = addr(reinterpret<GCUnion?>(fi.value_.gc).cl.c)
+                if (!(uint(n) - 1u < uint(f.nupvalues))) {
+                    // 'n' not in [1, f->nupvalues]
+                    return null
+                }
+                *val = addr(addr(f.upvalue[0])[n - 1])
+                if (owner != null) {
+                    *owner = addr(reinterpret<GCUnion?>(f).gc)
+                }
+                return addr(c2das_empty[0])
             }
-            deref(val) = addr(addr(f.upvalue[0])[n - 1])
-            if (owner != null) {
-                deref(owner) = addr(reinterpret<GCUnion?>(f).gc)
-            }
-            return addr(c2das_empty[0])
         }
-    } elif (_cond == 6) {
-        {
-            // Lua closure
-            var f : LClosure? = addr(reinterpret<GCUnion?>(fi.value_.gc).cl.l)
-            var name : TString?
-            var p : Proto? = f.p
-            if (!(uint(n) - 1u < uint(p.sizeupvalues))) {
-                // 'n' not in [1, p->sizeupvalues]
-                return null
+        case(6) {
+            {
+                // Lua closure
+                var f : LClosure? = addr(reinterpret<GCUnion?>(fi.value_.gc).cl.l)
+                var name : TString?
+                var p : Proto? = f.p
+                if (!(uint(n) - 1u < uint(p.sizeupvalues))) {
+                    // 'n' not in [1, p->sizeupvalues]
+                    return null
+                }
+                *val = addr(f.upvals[0])[n - 1].v.p
+                if (owner != null) {
+                    *owner = addr(reinterpret<GCUnion?>(addr(f.upvals[0])[n - 1]).gc)
+                }
+                name = p.upvalues[n - 1].name
+                return (name == null) ? cstr("(no name)") : addr(name.contents[0])
             }
-            deref(val) = addr(f.upvals[0])[n - 1].v.p
-            if (owner != null) {
-                deref(owner) = addr(reinterpret<GCUnion?>(addr(f.upvals[0])[n - 1]).gc)
-            }
-            name = p.upvalues[n - 1].name
-            return (name == null) ? cstr("(no name)") : addr(name.contents[0])
         }
-    } else {
-        // not a closure
-        return null
+        case(_) {
+            // not a closure
+            return null
+        }
     }
 }
 
@@ -1557,7 +1638,7 @@ def lua_getupvalue(var L : lua_State?; funcindex : int; n : int) : uint8? {
             io1.value_ = io2.value_
             io1.tt_ = io2.tt_
         }
-        L.top.p = L.top.p + 1
+        L.top.p++
     }
     return name
 }
@@ -1573,7 +1654,7 @@ def lua_setupvalue(var L : lua_State?; funcindex : int; n : int) : uint8? {
     fi = index2value(L, funcindex)
     name = aux_upvalue(fi, n, addr(val), addr(owner))
     if (name != null) {
-        L.top.p = L.top.p - 1
+        L.top.p--
         {
             var io1 : TValue? = val
             var io2 : TValue? = addr(L.top.p.val)
@@ -1595,7 +1676,7 @@ def private getupvalref(var L : lua_State?; fidx : int; n : int; var pf : LClosu
     var fi : TValue? = index2value(L, fidx)
     f = addr(reinterpret<GCUnion?>(fi.value_.gc).cl.l)
     if (pf != null) {
-        deref(pf) = f
+        *pf = f
     }
     if (1 <= n && n <= f.p.sizeupvalues) {
         // get its upvalue pointer
@@ -1608,15 +1689,12 @@ def private getupvalref(var L : lua_State?; fidx : int; n : int; var pf : LClosu
 [c_function]
 def lua_upvalueid(var L : lua_State?; fidx : int; n : int) : void? {
     var fi : TValue? = index2value(L, fidx)
-    let _cond = int(fi.tt_) & 63
-    while (true) {
-        var _flag = false
-        if (_cond == 6) {
+    c_switch(int(fi.tt_) & 63) {
+        case(6) {
             // lua closure
-            return reinterpret<void?>(deref(getupvalref(L, fidx, n, null)))
+            return reinterpret<void?>(*getupvalref(L, fidx, n, null))
         }
-        _flag ||= _cond == 38
-        if (_flag) {
+        case(38) {
             {
                 // C closure
                 var f : CClosure? = addr(reinterpret<GCUnion?>(fi.value_.gc).cl.c)
@@ -1625,17 +1703,15 @@ def lua_upvalueid(var L : lua_State?; fidx : int; n : int) : void? {
                 }
             }
         }
-        _flag ||= _cond == 22
-        if (_flag) {
+        case(22) {
             // else
             // FALLTHROUGH
             // light C functions have no upvalues
             return null
         }
-        if (!(_cond == 6 || _cond == 38 || _cond == 22)) {
+        case(_) {
             return null
         }
-        break
     }
     return null
 }
@@ -1645,9 +1721,9 @@ def lua_upvaluejoin(var L : lua_State?; fidx1 : int; n1 : int; fidx2 : int; n2 :
     var f1 : LClosure?
     var up1 : UpVal ?? = getupvalref(L, fidx1, n1, addr(f1))
     var up2 : UpVal ?? = getupvalref(L, fidx2, n2, null)
-    deref(up1) = deref(up2)
-    if ((int(f1.marked) & (1 << BLACKBIT)) != 0 && (int(deref(up1).marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-        luaC_barrier_(L, addr(reinterpret<GCUnion?>(f1).gc), addr(reinterpret<GCUnion?>(deref(up1)).gc))
+    *up1 = *up2
+    if ((int(f1.marked) & (1 << BLACKBIT)) != 0 && (int((*up1).marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+        luaC_barrier_(L, addr(reinterpret<GCUnion?>(f1).gc), addr(reinterpret<GCUnion?>(*up1).gc))
     }
 }
 

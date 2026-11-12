@@ -4,7 +4,9 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/c_switch
 require c_runtime/cstr
+require c_runtime/int_of
 require c_runtime/variadic
 require crt
 require lapi
@@ -19,8 +21,23 @@ struct RanState {
 
 include lmathlib.layout.das.inc
 
-var private randfuncs : luaL_Reg[3] = fixed_array(luaL_Reg(name = cstr("random"), func = @@math_random), luaL_Reg(name = cstr("randomseed"), func = @@math_randomseed), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
-var private mathlib : luaL_Reg[28] = fixed_array(luaL_Reg(name = cstr("abs"), func = @@math_abs), luaL_Reg(name = cstr("acos"), func = @@math_acos), luaL_Reg(name = cstr("asin"), func = @@math_asin), luaL_Reg(name = cstr("atan"), func = @@math_atan), luaL_Reg(name = cstr("ceil"), func = @@math_ceil), luaL_Reg(name = cstr("cos"), func = @@math_cos), luaL_Reg(name = cstr("deg"), func = @@math_deg), luaL_Reg(name = cstr("exp"), func = @@math_exp), luaL_Reg(name = cstr("tointeger"), func = @@math_toint), luaL_Reg(name = cstr("floor"), func = @@math_floor), luaL_Reg(name = cstr("fmod"), func = @@math_fmod), luaL_Reg(name = cstr("ult"), func = @@math_ult), luaL_Reg(name = cstr("log"), func = @@math_log), luaL_Reg(name = cstr("max"), func = @@math_max), luaL_Reg(name = cstr("min"), func = @@math_min), luaL_Reg(name = cstr("modf"), func = @@math_modf), luaL_Reg(name = cstr("rad"), func = @@math_rad), luaL_Reg(name = cstr("sin"), func = @@math_sin), luaL_Reg(name = cstr("sqrt"), func = @@math_sqrt), luaL_Reg(name = cstr("tan"), func = @@math_tan), luaL_Reg(name = cstr("type"), func = @@math_type), luaL_Reg(name = cstr("random"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("randomseed"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("pi"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("huge"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("maxinteger"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = cstr("mininteger"), func = default<function<(var a0 : lua_State?) : int>>), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private randfuncs : luaL_Reg[3] = fixed_array(luaL_Reg(name = cstr("random"), func = @@math_random),
+        luaL_Reg(name = cstr("randomseed"), func = @@math_randomseed), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
+var private mathlib : luaL_Reg[28] = fixed_array(luaL_Reg(name = cstr("abs"), func = @@math_abs), luaL_Reg(name = cstr("acos"), func = @@math_acos),
+        luaL_Reg(name = cstr("asin"), func = @@math_asin), luaL_Reg(name = cstr("atan"), func = @@math_atan), luaL_Reg(name = cstr("ceil"), func = @@math_ceil),
+        luaL_Reg(name = cstr("cos"), func = @@math_cos), luaL_Reg(name = cstr("deg"), func = @@math_deg), luaL_Reg(name = cstr("exp"), func = @@math_exp),
+        luaL_Reg(name = cstr("tointeger"), func = @@math_toint), luaL_Reg(name = cstr("floor"), func = @@math_floor),
+        luaL_Reg(name = cstr("fmod"), func = @@math_fmod), luaL_Reg(name = cstr("ult"), func = @@math_ult), luaL_Reg(name = cstr("log"), func = @@math_log),
+        luaL_Reg(name = cstr("max"), func = @@math_max), luaL_Reg(name = cstr("min"), func = @@math_min), luaL_Reg(name = cstr("modf"), func = @@math_modf),
+        luaL_Reg(name = cstr("rad"), func = @@math_rad), luaL_Reg(name = cstr("sin"), func = @@math_sin), luaL_Reg(name = cstr("sqrt"), func = @@math_sqrt),
+        luaL_Reg(name = cstr("tan"), func = @@math_tan), luaL_Reg(name = cstr("type"), func = @@math_type),
+        luaL_Reg(name = cstr("random"), func = default<function<(var a0 : lua_State?) : int>>),
+        luaL_Reg(name = cstr("randomseed"), func = default<function<(var a0 : lua_State?) : int>>),
+        luaL_Reg(name = cstr("pi"), func = default<function<(var a0 : lua_State?) : int>>),
+        luaL_Reg(name = cstr("huge"), func = default<function<(var a0 : lua_State?) : int>>),
+        luaL_Reg(name = cstr("maxinteger"), func = default<function<(var a0 : lua_State?) : int>>),
+        luaL_Reg(name = cstr("mininteger"), func = default<function<(var a0 : lua_State?) : int>>),
+        luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
 let private LUA_OPLT = 1
 let private LUA_TNUMBER = 3
@@ -97,7 +114,7 @@ def private pushnumint(var L : lua_State?; d : double) {
     // does 'd' fit in an integer?
     var _t0 = d >= double(-9223372036854775807l - 1l) && d < -double(-9223372036854775807l - 1l)
     if (_t0) {
-        deref(addr(n)) = int64(d)
+        *addr(n) = int64(d)
         _t0 = 1 != 0
     }
     if (_t0) {
@@ -177,7 +194,7 @@ def private math_sqrt(var L : lua_State?) : int {
 def private math_ult(var L : lua_State?) : int {
     var a : int64 = luaL_checkinteger(L, 1)
     var b : int64 = luaL_checkinteger(L, 2)
-    lua_pushboolean(L, uint64(a) < uint64(b) ? 1 : 0)
+    lua_pushboolean(L, int_of(uint64(a) < uint64(b)))
     return 1
 }
 
@@ -324,7 +341,7 @@ def private project(var ran : uint64; n : uint64; var state : RanState?) : uint6
                 break
             }
             // not inside [0..n]? try again
-            ran = uint64(nextrand(addr(state.s[0])) & 18446744073709551615ul)
+            ran = nextrand(addr(state.s[0])) & 18446744073709551615ul
         }
         return ran
     }
@@ -339,43 +356,49 @@ def private math_random(var L : lua_State?) : int {
     // next pseudo-random value
     var rv : uint64 = nextrand(addr(state.s[0]))
     // check number of arguments
-    let _cond = lua_gettop(L)
-    if (_cond == 0) {
-        // no arguments
-        // float between 0 and 1
-        lua_pushnumber(L, I2d(rv))
-        return 1
-    } elif (_cond == 1) {
-        // only upper limit
-        low = 1l
-        up = luaL_checkinteger(L, 1)
-        // single 0 as argument?
-        if (up == 0l) {
-            // full random integer
-            lua_pushinteger(L, int64(uint64(rv & 18446744073709551615ul)))
+    c_switch(lua_gettop(L)) {
+        case(0) {
+            // no arguments
+            // float between 0 and 1
+            lua_pushnumber(L, I2d(rv))
             return 1
         }
-    } elif (_cond == 2) {
-        // lower and upper limits
-        low = luaL_checkinteger(L, 1)
-        up = luaL_checkinteger(L, 2)
-    } else {
-        return luaL_error`va(L, cstr("wrong number of arguments"), VaNone())
+        case(1) {
+            // only upper limit
+            low = 1l
+            up = luaL_checkinteger(L, 1)
+            // single 0 as argument?
+            if (up == 0l) {
+                // full random integer
+                lua_pushinteger(L, int64(rv & 18446744073709551615ul))
+                return 1
+            }
+            break
+        }
+        case(2) {
+            // lower and upper limits
+            low = luaL_checkinteger(L, 1)
+            up = luaL_checkinteger(L, 2)
+            break
+        }
+        case(_) {
+            return luaL_error`va(L, cstr("wrong number of arguments"), VaNone())
+        }
     }
     // random integer in the interval [low, up]
     let _t0 = low <= up || luaL_argerror(L, 1, cstr("interval is empty")) != 0
     // project random integer into the interval [0, up - low]
-    p = project(uint64(rv & 18446744073709551615ul), uint64(up) - uint64(low), state)
+    p = project(rv & 18446744073709551615ul, uint64(up) - uint64(low), state)
     lua_pushinteger(L, int64(p + uint64(low)))
     return 1
 }
 
 [c_function]
 def private setseed(var L : lua_State?; var state : uint64?; n1 : uint64; n2 : uint64) {
-    state[0] = uint64(n1)
+    state[0] = n1
     // avoid a zero state
     state[1] = 255ul
-    state[2] = uint64(n2)
+    state[2] = n2
     state[3] = 0ul
     for (i in range(16)) {
         // discard initial values to "spread" seed
@@ -391,7 +414,7 @@ def private setseed(var L : lua_State?; var state : uint64?; n1 : uint64; n2 : u
 [c_function]
 def private randseed(var L : lua_State?; var state : RanState?) {
     var seed1 : uint64 = uint64(crt::time(null))
-    var seed2 : uint64 = uint64(uint64(intptr(L)))
+    var seed2 : uint64 = uint64(intptr(L))
     setseed(L, addr(state.s[0]), seed1, seed2)
 }
 

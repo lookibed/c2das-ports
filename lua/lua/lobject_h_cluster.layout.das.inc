@@ -166,7 +166,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < u2 > (type<CallInfo>) == 56, "CallInfo.u2: clang puts it at 56")
     static_assert(typeinfo offsetof < nresults > (type<CallInfo>) == 60, "CallInfo.nresults: clang puts it at 60")
     static_assert(typeinfo offsetof < callstatus > (type<CallInfo>) == 62, "CallInfo.callstatus: clang puts it at 62")
-    static_assert(typeinfo sizeof(type<global_State>) == 1416 && typeinfo alignof(type<global_State>) == 8, "global_State: clang lays it out as size 1416, align 8")
+    static_assert(typeinfo sizeof(type<global_State>) == 1416 && typeinfo alignof(type<global_State>) == 8,
+            "global_State: clang lays it out as size 1416, align 8")
     static_assert(typeinfo offsetof < frealloc > (type<global_State>) == 0, "global_State.frealloc: clang puts it at 0")
     static_assert(typeinfo offsetof < ud > (type<global_State>) == 8, "global_State.ud: clang puts it at 8")
     static_assert(typeinfo offsetof < totalbytes > (type<global_State>) == 16, "global_State.totalbytes: clang puts it at 16")
