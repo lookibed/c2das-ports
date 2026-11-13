@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# The demo-sync oracle: plays demo1-3 of freedoom2.wad headless with one variant's modules and
+# holds each tic line ("tic=<n> cs=<game state hash> fb=<frame hash>") to the native build's
+# reference log in ref/. Exit 0 when every demo is in sync and ends in `timed N gametics`.
+#
+#   ./check.sh <ugly|processed> [interp|jit] [options] [-- extra program arguments]
+#     --demo N        only demo N (repeatable; default 1 2 3)
+#     --state-only    compare tic and cs only; count the tics whose frame (fb) differs
+#     --grep PREFIX   per demo, the count and sha256 of the output lines starting with PREFIX
+#     --keep DIR      keep each demo's full output as DIR/demo<N>.txt
+#     -- ARGS...      appended to the program's command line after `-timedemo demo<N>`
+#
+# Environment: C2DAS (required) a c2das-re checkout with scripts/build_crt.sh run and
+# doom/fetch.sh run; DASLANG (default $DASLANG_ROOT/bin/daslang, DASLANG_ROOT default
+# /root/daScript) the daslang that checkout's VERSIONS.md pins; WAD (default
+# $C2DAS/doom/fetch/wads/freedoom2.wad); TIMEOUT seconds per demo (default 900).
+set -euo pipefail
+here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+usage() { sed -n '6,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2; exit 2; }
+[ $# -ge 1 ] || usage
+variant=$1; shift
+case "$variant" in ugly|processed) ;; *) usage ;; esac
+tier=interp
+if [ $# -ge 1 ] && { [ "$1" = interp ] || [ "$1" = jit ]; }; then tier=$1; shift; fi
+demos=(); state_only=0; grep_prefix=""; keep=""; extra=()
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --demo) demos+=("$2"); shift 2 ;;
+        --state-only) state_only=1; shift ;;
+        --grep) grep_prefix=$2; shift 2 ;;
+        --keep) keep=$2; shift 2 ;;
+        --) shift; extra=("$@"); break ;;
+        *) usage ;;
+    esac
+done
+[ ${#demos[@]} -gt 0 ] || demos=(1 2 3)
+: "${C2DAS:?set C2DAS to a c2das-re checkout with scripts/build_crt.sh and doom/fetch.sh run}"
+C2DAS=$(cd "$C2DAS" && pwd)
+DASLANG=${DASLANG:-${DASLANG_ROOT:-/root/daScript}/bin/daslang}
+WAD=${WAD:-$C2DAS/doom/fetch/wads/freedoom2.wad}
+TIMEOUT=${TIMEOUT:-900}
+[ -x "$DASLANG" ] || { echo "check: no daslang at $DASLANG (set DASLANG or DASLANG_ROOT)" >&2; exit 2; }
+[ -f "$WAD" ] || { echo "check: no wad at $WAD (run doom/fetch.sh in $C2DAS, or set WAD)" >&2; exit 2; }
+ls "$C2DAS"/dasCRuntime/*.shared_module > /dev/null 2>&1 || { echo "check: crt not built in $C2DAS (run scripts/build_crt.sh)" >&2; exit 2; }
+main="$here/$variant/doom/doom_main.das"
+jit=(); [ "$tier" = jit ] && jit=(-jit)
+[ -n "$keep" ] && mkdir -p "$keep"
+tmp=$(mktemp -d)
+trap 'rm -rf "${tmp:?}"' EXIT
+ln -s "$(cd "$(dirname "$WAD")" && pwd)/$(basename "$WAD")" "$tmp/doom2.wad"
+fail=0
+for demo in "${demos[@]}"; do
+    ref="$here/ref/freedoom2_demo$demo.log"
+    [ -f "$ref" ] || { echo "demo$demo: no reference log $ref" >&2; fail=1; continue; }
+    out="$tmp/demo$demo.txt"
+    rc=0
+    (cd "$tmp" && DOOMWADDIR="$tmp" timeout "$TIMEOUT" "$DASLANG" -load_module "$C2DAS/dasCRuntime" -load_module "$C2DAS/c_runtime" "${jit[@]}" "$main" -- -timedemo "demo$demo" "${extra[@]}") > "$out" 2>&1 || rc=$?
+    [ -n "$keep" ] && cp "$out" "$keep/demo$demo.txt"
+    if [ "$state_only" = 1 ]; then fields='$1" "$2'; else fields='$1" "$2" "$3'; fi
+    grep '^tic=' "$ref" | awk "{print $fields}" > "$tmp/want"
+    grep '^tic=' "$out" | awk "{print $fields}" > "$tmp/got" || true
+    want_n=$(wc -l < "$tmp/want"); got_n=$(wc -l < "$tmp/got")
+    first=$(cmp "$tmp/want" "$tmp/got" 2>/dev/null | sed -n 's/.* line \([0-9]*\).*/\1/p' || true)
+    if [ -z "$first" ] && [ "$want_n" != "$got_n" ]; then first=$(( (want_n < got_n ? want_n : got_n) + 1 )); fi
+    verdict=""
+    if [ -n "$first" ]; then
+        verdict="DESYNC at tic line $first: want '$(sed -n "${first}p" "$tmp/want")', got '$(sed -n "${first}p" "$tmp/got")'"
+        err=$(grep -i -m1 -E 'error|exception|panic' "$out" | grep -v 'timed [0-9]* gametics' || true)
+        [ -n "$err" ] && verdict="$verdict; first error: $err"
+    elif ! grep -q "timed $want_n gametics" "$out"; then
+        verdict="all $want_n tics in sync but the run did not end in 'timed $want_n gametics' (exit $rc)"
+        err=$(grep -i -m1 -E 'error|exception|panic' "$out" || true)
+        [ -n "$err" ] && verdict="$verdict; first error: $err"
+    fi
+    if [ -n "$verdict" ]; then
+        echo "demo$demo $variant $tier: $verdict"
+        fail=1
+    else
+        msg="$want_n tics in sync"
+        if [ "$state_only" = 1 ]; then
+            fbdiff=$(paste -d' ' <(grep '^tic=' "$ref" | awk '{print $3}') <(grep '^tic=' "$out" | awk '{print $3}') | awk '$1 != $2' | wc -l)
+            msg="$want_n tics, game state in sync; frame differs on $fbdiff tics"
+        fi
+        echo "demo$demo $variant $tier: $msg"
+    fi
+    if [ -n "$grep_prefix" ]; then
+        P="$grep_prefix" awk 'index($0, ENVIRON["P"]) == 1' "$out" > "$tmp/matched"
+        lines=$(wc -l < "$tmp/matched")
+        sum=$(sha256sum < "$tmp/matched" | cut -c1-16)
+        echo "demo$demo $variant $tier: $lines lines starting '$grep_prefix', sha256 $sum"
+    fi
+done
+exit $fail
