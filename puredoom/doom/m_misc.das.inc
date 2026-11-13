@@ -134,14 +134,12 @@ def M_LoadDefaults {
     var isstring : doom_boolean
     // set everything to base values
     // numdefaults = sizeof(defaults)/sizeof(defaults[0]);
-    i = 0
-    while (i < numdefaults) {
-        if (defaults[i].defaultvalue == 65535) {
-            *defaults[i].text_location = defaults[i].default_text_value
+    for (i1 in range(numdefaults)) {
+        if (defaults[i1].defaultvalue == 65535) {
+            *defaults[i1].text_location = defaults[i1].default_text_value
         } else {
-            *defaults[i].location = defaults[i].defaultvalue
+            *defaults[i1].location = defaults[i1].defaultvalue
         }
-        i++
     }
     // check for a custom default file
     i = M_CheckParm(cstr("-config"))
@@ -217,17 +215,15 @@ def M_LoadDefaults {
                     // sscanf(strparm, "%i", &parm);
                     parm = doom_atoi(addr(strparm[0]))
                 }
-                i = 0
-                while (i < numdefaults) {
-                    if (doom_strcmp(addr(_c_def[0]), defaults[i].name) == 0) {
+                for (i1 in range(numdefaults)) {
+                    if (doom_strcmp(addr(_c_def[0]), defaults[i1].name) == 0) {
                         if (int(isstring) == 0) {
-                            *defaults[i].location = parm
+                            *defaults[i1].location = parm
                         } else {
-                            *defaults[i].text_location = newstring
+                            *defaults[i1].text_location = newstring
                         }
                         break
                     }
-                    i++
                 }
             }
         }

@@ -28,7 +28,7 @@ def private loadByte(var S : LoadState?) : uint8 {
     } else {
         _t2 = luaZ_fill(S.Z)
     }
-    var b : int = _t2
+    let b : int = _t2
     if (b == EOZ) {
         error(S, cstr("truncated chunk"))
     }
@@ -95,10 +95,10 @@ def private loadStringN(var S : LoadState?; var p : Proto?) : TString? {
             ts = luaS_createlngstrobj(L, size)
             {
                 // anchor it ('loadVector' can GC)
-                var io : TValue? = addr(L.top.p.val)
+                var io : TValue? = s2v(L.top.p)
                 var x_ : TString? = ts
-                io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-                io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
+                io.value_.gc = obj2gco(x_)
+                settt_(io, ctb(x_.tt))
             }
             luaD_inctop(L)
             // load directly in final place
@@ -107,9 +107,7 @@ def private loadStringN(var S : LoadState?; var p : Proto?) : TString? {
             L.top.p--
         }
     }
-    if ((int(p.marked) & (1 << BLACKBIT)) != 0 && (int(ts.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-        luaC_barrier_(L, addr(reinterpret<GCUnion?>(p).gc), addr(reinterpret<GCUnion?>(ts).gc))
-    }
+    luaC_objbarrier(L, p, ts)
     return ts
 }
 
@@ -125,7 +123,7 @@ def private loadString(var S : LoadState?; var p : Proto?) : TString? {
 
 [c_function]
 def private loadCode(var S : LoadState?; var f : Proto?) {
-    var n : int = loadInt(S)
+    let n : int = loadInt(S)
     if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + 1ul > MAX_SIZET / uint64(typeinfo sizeof(type<uint>))) {
         luaM_toobig(S.L)
     }
@@ -136,36 +134,36 @@ def private loadCode(var S : LoadState?; var f : Proto?) {
 
 [c_function]
 def private loadConstants(var S : LoadState?; var f : Proto?) {
-    var n : int = loadInt(S)
+    let n : int = loadInt(S)
     if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + 1ul > MAX_SIZET / uint64(typeinfo sizeof(type<TValue>))) {
         luaM_toobig(S.L)
     }
     f.k = reinterpret<TValue?>(luaM_malloc_(S.L, uint64(n) * uint64(typeinfo sizeof(type<TValue>)), 0))
     f.sizek = n
     for (i in range(n)) {
-        addr(f.k[i]).tt_ = uint8(LUA_TNIL | (0 << 4))
+        setnilvalue(addr(f.k[i]))
     }
     for (i in range(n)) {
         var o : TValue? = addr(f.k[i])
-        var t : int = int(loadByte(S))
+        let t : int = int(loadByte(S))
         c_switch(t) {
             case(0) {
-                o.tt_ = uint8(LUA_TNIL | (0 << 4))
+                settt_(o, LUA_TNIL | (0 << 4))
                 break
             }
             case(1) {
-                o.tt_ = uint8(LUA_TBOOLEAN | (0 << 4))
+                settt_(o, LUA_TBOOLEAN | (0 << 4))
                 break
             }
             case(17) {
-                o.tt_ = uint8(LUA_TBOOLEAN | (1 << 4))
+                settt_(o, LUA_TBOOLEAN | (1 << 4))
                 break
             }
             case(19) {
                 {
                     var io : TValue? = o
                     io.value_.n = loadNumber(S)
-                    io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
+                    settt_(io, LUA_TNUMBER | (1 << 4))
                 }
                 break
             }
@@ -173,7 +171,7 @@ def private loadConstants(var S : LoadState?; var f : Proto?) {
                 {
                     var io : TValue? = o
                     io.value_.i = loadInteger(S)
-                    io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+                    settt_(io, LUA_TNUMBER | (0 << 4))
                 }
                 break
             }
@@ -195,7 +193,7 @@ def private loadConstants(var S : LoadState?; var f : Proto?) {
 
 [c_function]
 def private loadProtos(var S : LoadState?; var f : Proto?) {
-    var n : int = loadInt(S)
+    let n : int = loadInt(S)
     if (uint64(typeinfo sizeof(type<int>)) >= uint64(typeinfo sizeof(type<uint64>)) && uint64(n) + 1ul > MAX_SIZET / uint64(typeinfo sizeof(type<Proto?>))) {
         luaM_toobig(S.L)
     }
@@ -206,8 +204,8 @@ def private loadProtos(var S : LoadState?; var f : Proto?) {
     }
     for (i in range(n)) {
         f.p[i] = luaF_newproto(S.L)
-        if ((int(f.marked) & (1 << BLACKBIT)) != 0 && (int(f.p[i].marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-            luaC_barrier_(S.L, addr(reinterpret<GCUnion?>(f).gc), addr(reinterpret<GCUnion?>(f.p[i]).gc))
+        if (isblack(f) != 0 && iswhite(f.p[i]) != 0) {
+            luaC_barrier_(S.L, obj2gco(f), obj2gco(f.p[i]))
         }
         loadFunction(S, f.p[i], f.source)
     }
@@ -308,7 +306,7 @@ def private loadFunction(var S : LoadState?; var f : Proto?; var psource : TStri
 def private checkliteral(var S : LoadState?; var s : uint8?; var msg : uint8?) {
     // larger than both
     var buff : uint8[12]
-    var len : uint64 = crt::strlen(s)
+    let len : uint64 = crt::strlen(s)
     loadBlock(S, reinterpret<void?>(addr(buff[0])), len * uint64(typeinfo sizeof(type<uint8>)))
     if (crt::memcmp(reinterpret<void?>(s), reinterpret<void?>(addr(buff[0])), len) != 0) {
         error(S, msg)
@@ -360,15 +358,15 @@ def luaU_undump(var L : lua_State?; var Z : Zio?; var name : uint8?) : LClosure?
     checkHeader(addr(S))
     cl = luaF_newLclosure(L, int(loadByte(addr(S))))
     {
-        var io : TValue? = addr(L.top.p.val)
+        var io : TValue? = s2v(L.top.p)
         var x_ : LClosure? = cl
-        io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8((LUA_TFUNCTION | (0 << 4)) | BIT_ISCOLLECTABLE)
+        io.value_.gc = obj2gco(x_)
+        settt_(io, ctb(LUA_TFUNCTION | (0 << 4)))
     }
     luaD_inctop(L)
     cl.p = luaF_newproto(L)
-    if ((int(cl.marked) & (1 << BLACKBIT)) != 0 && (int(cl.p.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-        luaC_barrier_(L, addr(reinterpret<GCUnion?>(cl).gc), addr(reinterpret<GCUnion?>(cl.p).gc))
+    if (isblack(cl) != 0 && iswhite(cl.p) != 0) {
+        luaC_barrier_(L, obj2gco(cl), obj2gco(cl.p))
     }
     loadFunction(addr(S), cl.p, null)
     return cl

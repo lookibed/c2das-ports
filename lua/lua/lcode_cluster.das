@@ -6,6 +6,7 @@ options stack = 8388608
 require c_runtime/c_do_while
 require c_runtime/c_exit
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/c_switch
 require c_runtime/c_volatile
 require c_runtime/cstr
@@ -208,6 +209,671 @@ let private MAXTAGLOOP = 2000
 let private NBM = 53
 let private MAXINTFITSF = 1ul << uint64(NBM)
 let private NBITS = int(uint64(typeinfo sizeof(type<int64>)) * 8ul)
+
+// lcode.c:39: #define hasjumps(e) ((e)->t != (e)->f)
+[c_macro]
+def private hasjumps(e) => e.t != e.f
+
+// lcode.h:48: #define luaK_codeABC(fs,o,a,b,c) luaK_codeABCk(fs,o,a,b,c,0)
+[c_macro]
+def private luaK_codeABC(var fs; o; a; b; c) {
+    luaK_codeABCk(fs, o, a, b, c, 0)
+}
+
+// lopcodes.h:385: #define testTMode(m) (luaP_opmodes[m] & (1 << 4))
+[c_macro]
+def private testTMode(m) => int(luaP_opmodes[int(m)]) & (1 << 4)
+
+// lvm.h:75: #define luaV_rawequalobj(t1,t2) luaV_equalobj(NULL,t1,t2)
+[c_macro]
+def private luaV_rawequalobj(var t1; var t2) => luaV_equalobj(null, t1, t2)
+
+// lobject.h:344: #define setivalue(obj,x) { TValue *io=(obj); val_(io).i=(x); settt_(io, LUA_VNUMINT); }
+[c_macro]
+def private setivalue(var obj : TValue?; x : int) {
+    var io : TValue? = obj
+    io.value_.i = int64(x)
+    settt_(io, LUA_TNUMBER | (0 << 4))
+}
+
+// lobject.h:344: #define setivalue(obj,x) { TValue *io=(obj); val_(io).i=(x); settt_(io, LUA_VNUMINT); }
+[c_macro]
+def private setivalue(var obj : TValue?; x : uint8) {
+    var io : TValue? = obj
+    io.value_.i = int64(x)
+    settt_(io, LUA_TNUMBER | (0 << 4))
+}
+
+// lobject.h:344: #define setivalue(obj,x) { TValue *io=(obj); val_(io).i=(x); settt_(io, LUA_VNUMINT); }
+[c_macro]
+def private setivalue(var obj : TValue?; x : uint64) {
+    var io : TValue? = obj
+    io.value_.i = int64(x)
+    settt_(io, LUA_TNUMBER | (0 << 4))
+}
+
+// lobject.h:344: #define setivalue(obj,x) { TValue *io=(obj); val_(io).i=(x); settt_(io, LUA_VNUMINT); }
+[c_macro]
+def private setivalue(var obj : TValue?; x : int64) {
+    var io : TValue? = obj
+    io.value_.i = x
+    settt_(io, LUA_TNUMBER | (0 << 4))
+}
+
+// lgc.h:179: #define luaC_barrier(L,p,v) ( iscollectable(v) ? luaC_objbarrier(L,p,gcvalue(v)) : cast_void(0))
+[c_macro, c_function]
+def private luaC_barrier(var L; var p; var v) {
+    if (iscollectable(v) != 0) {
+        if ((int(p.marked) & (1 << BLACKBIT)) != 0 && (int(gcvalue(v).marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            luaC_barrier_(L, addr(reinterpret<GCUnion?>(p).gc), addr(reinterpret<GCUnion?>(gcvalue(v)).gc))
+        }
+    }
+}
+
+// lobject.h:338: #define setfltvalue(obj,x) { TValue *io=(obj); val_(io).n=(x); settt_(io, LUA_VNUMFLT); }
+[c_macro]
+def private setfltvalue(var obj; x) {
+    var io : TValue? = obj
+    io.value_.n = x
+    settt_(io, LUA_TNUMBER | (1 << 4))
+}
+
+// lcode.h:55: #define getinstruction(fs,e) ((fs)->f->code[(e)->u.info])
+[c_macro, c_function]
+def private getinstruction(fs; e) => fs.f.code[e.u.info]
+
+// llimits.h:350: #define luai_numeq(a,b) ((a)==(b))
+[c_macro]
+def private luai_numeq(a; b) => a == b
+
+// llimits.h:355: #define luai_numisnan(a) (!luai_numeq((a), (a)))
+[c_macro]
+def private luai_numisnan(a) => !luai_numeq(a, a)
+
+// ldebug.h:18: #define ci_func(ci) (clLvalue(s2v((ci)->func.p)))
+[c_macro]
+def private ci_func(var ci) : LClosure? => clLvalue(s2v(ci.func.p))
+
+// ldebug.h:14: #define pcRel(pc, p) (cast_int((pc) - (p)->code) - 1)
+[c_macro, c_function]
+def private pcRel(pc; p) => int(int64(pc - p.code)) - 1
+
+// ldebug.h:21: #define resethookcount(L) (L->hookcount = L->basehookcount)
+[c_macro]
+def private resethookcount(var L) {
+    L.hookcount = L.basehookcount
+}
+
+// lapi.h:16: #define api_incr_top(L) {L->top.p++; api_check(L, L->top.p <= L->ci->top.p, "stack overflow");}
+[c_macro, c_function]
+def private api_incr_top(var L) {
+    L.top.p++
+}
+
+// ldebug.c:34: #define LuaClosure(f) ((f) != NULL && (f)->c.tt == LUA_VLCL)
+[c_macro, c_function]
+def private LuaClosure(f) => f != null && int(f.c.tt) == (LUA_TFUNCTION | (0 << 4))
+
+// lopcodes.h:388: #define testMMMode(m) (luaP_opmodes[m] & (1 << 7))
+[c_macro]
+def private testMMMode(m) => int(luaP_opmodes[int(m)]) & (1 << 7)
+
+// lopcodes.h:384: #define testAMode(m) (luaP_opmodes[m] & (1 << 3))
+[c_macro]
+def private testAMode(m) => int(luaP_opmodes[int(m)]) & (1 << 3)
+
+// lvm.h:17: #define cvt2str(o) ttisnumber(o)
+[c_macro]
+def private cvt2str(o) => ttisnumber(o)
+
+// ldo.h:37: #define restorestack(L,n) cast(StkId, cast_charp(L->stack.p) + (n))
+[c_macro, c_function]
+def private restorestack(var L; n) : StackValue? => reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + n)
+
+// lgc.h:172: #define luaC_checkGC(L) luaC_condGC(L,(void)0,(void)0)
+[c_macro]
+def private luaC_checkGC(var L) {
+    if (G(L).GCdebt > 0l) {
+        luaC_step(L)
+    }
+}
+
+// lopcodes.h:386: #define testITMode(m) (luaP_opmodes[m] & (1 << 5))
+[c_macro]
+def private testITMode(m) => int(luaP_opmodes[int(m)]) & (1 << 5)
+
+// ldo.h:36: #define savestack(L,pt) (cast_charp(pt) - cast_charp(L->stack.p))
+[c_macro, c_function]
+def private savestack(var L; var pt) => int64(reinterpret<uint8?>(pt) - reinterpret<uint8?>(L.stack.p))
+
+// lfunc.h:35: #define uplevel(up) check_exp(upisopen(up), cast(StkId, (up)->v.p))
+[c_macro, c_function]
+def private uplevel(var up) : StackValue? => reinterpret<StackValue?>(up.v.p)
+
+// llimits.h:146: #define cast_charp(i) cast(char *, (i))
+[c_macro, c_function]
+def private cast_charp(var i) : uint8? => reinterpret<uint8?>(i)
+
+// lmem.h:17: #define luaM_error(L) luaD_throw(L, LUA_ERRMEM)
+[c_macro]
+def private luaM_error(var L) {
+    luaD_throw(L, LUA_ERRMEM)
+}
+
+// lapi.h:46: #define hastocloseCfunc(n) ((n) < LUA_MULTRET)
+[c_macro]
+def private hastocloseCfunc(n) => n < LUA_MULTRET
+
+// lapi.h:50: #define decodeNresults(n) (-(n) - 3)
+[c_macro]
+def private decodeNresults(n) => -n - 3
+
+// ldo.c:506: #define next_ci(L) (L->ci->next ? L->ci->next : luaE_extendCI(L))
+[c_macro]
+def private next_ci(var L) : CallInfo? => L.ci.next != null ? L.ci.next : luaE_extendCI(L)
+
+// ldo.c:38: #define errorstatus(s) ((s) > LUA_YIELD)
+[c_macro]
+def private errorstatus(s) => s > LUA_YIELD
+
+// lmem.h:52: #define luaM_reallocvchar(L,b,on,n) cast_charp(luaM_saferealloc_(L, (b), (on)*sizeof(char), (n)*sizeof(char)))
+[c_macro, c_function]
+def private luaM_reallocvchar(var L; var b; on;
+                              n) : uint8? => reinterpret<uint8?>(luaM_saferealloc_(L, reinterpret<void?>(b), on * uint64(typeinfo sizeof(type<uint8>)),
+            uint64(n) * uint64(typeinfo sizeof(type<uint8>))))
+
+// lzio.h:39: #define luaZ_resizebuffer(L, buff, size) ((buff)->buffer = luaM_reallocvchar(L, (buff)->buffer, (buff)->buffsize, size), (buff)->buffsize = size)
+[c_macro, c_function]
+def private luaZ_resizebuffer(var L : lua_State?; var buff : Mbuffer?; size : int) {
+    buff.buffer = luaM_reallocvchar(L, buff.buffer, buff.buffsize, size)
+    buff.buffsize = uint64(size)
+}
+
+// lzio.h:39: #define luaZ_resizebuffer(L, buff, size) ((buff)->buffer = luaM_reallocvchar(L, (buff)->buffer, (buff)->buffsize, size), (buff)->buffsize = size)
+[c_macro, c_function]
+def private luaZ_resizebuffer(var L : lua_State?; var buff : Mbuffer?; size : uint64) {
+    buff.buffer = reinterpret<uint8?>(luaM_saferealloc_(L, reinterpret<void?>(buff.buffer), buff.buffsize * uint64(typeinfo sizeof(type<uint8>)),
+            size * uint64(typeinfo sizeof(type<uint8>))))
+    buff.buffsize = size
+}
+
+// lzio.h:44: #define luaZ_freebuffer(L, buff) luaZ_resizebuffer(L, buff, 0)
+[c_macro]
+def private luaZ_freebuffer(var L; var buff) {
+    luaZ_resizebuffer(L, buff, 0)
+}
+
+// lgc.h:63: #define bitmask(b) (1<<(b))
+[c_macro]
+def private bitmask(b : int) => 1 << b
+
+// lgc.h:63: #define bitmask(b) (1<<(b))
+[c_macro]
+def private bitmask(b : uint8) => 1 << int(b)
+
+// lgc.h:62: #define testbits(x,m) ((x) & (m))
+[c_macro]
+def private testbits(x : uint8; m : int) => int(x) & m
+
+// lgc.h:62: #define testbits(x,m) ((x) & (m))
+[c_macro]
+def private testbits(x : int; m : int) => x & m
+
+// lgc.h:67: #define testbit(x,b) testbits(x, bitmask(b))
+[c_macro]
+def private testbit(x; b) => testbits(x, bitmask(b))
+
+// lgc.h:88: #define isblack(x) testbit((x)->marked, BLACKBIT)
+[c_macro]
+def private isblack(x) => testbit(x.marked, BLACKBIT)
+
+// lgc.h:87: #define iswhite(x) testbits((x)->marked, WHITEBITS)
+[c_macro]
+def private iswhite(x) => testbits(x.marked, (1 << WHITE0BIT) | (1 << WHITE1BIT))
+
+// lgc.h:175: #define luaC_objbarrier(L,p,o) ( (isblack(p) && iswhite(o)) ? luaC_barrier_(L,obj2gco(p),obj2gco(o)) : cast_void(0))
+[c_macro]
+def private luaC_objbarrier(var L; var p; var o) {
+    if (isblack(p) != 0 && iswhite(o) != 0) {
+        luaC_barrier_(L, obj2gco(p), obj2gco(o))
+    }
+}
+
+// lgc.h:99: #define nw2black(x) check_exp(!iswhite(x), l_setbit((x)->marked, BLACKBIT))
+[c_macro]
+def private nw2black(var x) {
+    x.marked = uint8(int(x.marked) | bitmask(BLACKBIT))
+}
+
+// lgc.c:75: #define set2gray(x) resetbits(x->marked, maskcolors)
+[c_macro]
+def private set2gray(var x) {
+    x.marked = uint8(int(x.marked) & int(uint8(~maskcolors)))
+}
+
+// lgc.c:99: #define markobject(g,t) { if (iswhite(t)) reallymarkobject(g, obj2gco(t)); }
+[c_macro]
+def private markobject(var g; var t) {
+    if (iswhite(t) != 0) {
+        reallymarkobject(g, obj2gco(t))
+    }
+}
+
+// lgc.h:54: #define keepinvariant(g) ((g)->gcstate <= GCSatomic)
+[c_macro]
+def private keepinvariant(g) => int(g.gcstate) <= GCSatomic
+
+// lgc.h:116: #define getage(o) ((o)->marked & AGEBITS)
+[c_macro]
+def private getage(o) => int(o.marked) & AGEBITS
+
+// lgc.h:118: #define isold(o) (getage(o) > G_SURVIVAL)
+[c_macro]
+def private isold(o) => getage(o) > G_SURVIVAL
+
+// lgc.h:102: #define luaC_white(g) cast_byte((g)->currentwhite & WHITEBITS)
+[c_macro]
+def private luaC_white(g) => uint8(int(g.currentwhite) & ((1 << WHITE0BIT) | (1 << WHITE1BIT)))
+
+// lgc.c:71: #define makewhite(g,x) (x->marked = cast_byte((x->marked & ~maskcolors) | luaC_white(g)))
+[c_macro]
+def private makewhite(g; var x) {
+    x.marked = uint8((int(x.marked) & ~maskcolors) | int(luaC_white(g)))
+}
+
+// lmem.h:64: #define luaM_newobject(L,tag,s) luaM_malloc_(L, (s), tag)
+[c_macro]
+def private luaM_newobject(var L; tag; s) : void? => luaM_malloc_(L, s, tag)
+
+// lgc.c:79: #define set2black(x) (x->marked = cast_byte((x->marked & ~WHITEBITS) | bitmask(BLACKBIT)))
+[c_macro]
+def private set2black(var x) {
+    x.marked = uint8((int(x.marked) & ~((1 << WHITE0BIT) | (1 << WHITE1BIT))) | bitmask(BLACKBIT))
+}
+
+// lfunc.h:32: #define upisopen(up) ((up)->v.p != &(up)->u.value)
+[c_macro, c_function]
+def private upisopen(up) => intptr(up.v.p) != intptr(addr(up.u.value))
+
+// lgc.h:120: #define changeage(o,f,t) check_exp(getage(o) == (f), (o)->marked ^= ((f)^(t)))
+[c_macro]
+def private changeage(var o; f; t) {
+    o.marked = uint8(int(o.marked) ^ (f ^ t))
+}
+
+// ltable.h:13: #define gnode(t,i) (&(t)->node[i])
+[c_macro, c_function]
+def private gnode(var t; i) : Node? => addr(t.node[i])
+
+// lgc.c:122: #define gnodelast(h) gnode(h, cast_sizet(sizenode(h)))
+[c_macro]
+def private gnodelast(var h) : Node? => gnode(h, uint64(sizenode(h)))
+
+// ltable.h:14: #define gval(n) (&(n)->i_val)
+[c_macro, c_function]
+def private gval(var n) : TValue? => addr(n.i_val)
+
+// lgc.c:97: #define markkey(g, n) { if keyiswhite(n) reallymarkobject(g,gckey(n)); }
+[c_macro]
+def private markkey(var g; var n) {
+    if ((int(n.u.key_tt) & BIT_ISCOLLECTABLE) != 0 && (int(gckey(n).marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+        reallymarkobject(g, gckey(n))
+    }
+}
+
+// ltable.h:27: #define isdummy(t) ((t)->lastfree == NULL)
+[c_macro, c_function]
+def private isdummy(t) => t.lastfree == null
+
+// ltable.h:31: #define allocsizenode(t) (isdummy(t) ? 0 : sizenode(t))
+[c_macro]
+def private allocsizenode(t) => isdummy(t) ? 0 : sizenode(t)
+
+// lgc.c:105: #define markobjectN(g,t) { if (t) markobject(g,t); }
+[c_macro]
+def private markobjectN(var g; var t) {
+    if (t != null) {
+        if (iswhite(t) != 0) {
+            reallymarkobject(g, obj2gco(t))
+        }
+    }
+}
+
+// lgc.c:91: #define gcvalueN(o) (iscollectable(o) ? gcvalue(o) : NULL)
+[c_macro]
+def private gcvalueN(var o) : GCObject? => iscollectable(o) != 0 ? o.value_.gc : null
+
+// lmem.h:55: #define luaM_freemem(L, b, s) luaM_free_(L, (b), (s))
+[c_macro, c_function]
+def private luaM_freemem(var L : lua_State?; var b : LClosure?; s : int) {
+    luaM_free_(L, reinterpret<void?>(b), uint64(s))
+}
+
+// lmem.h:55: #define luaM_freemem(L, b, s) luaM_free_(L, (b), (s))
+[c_macro, c_function]
+def private luaM_freemem(var L : lua_State?; var b : CClosure?; s : int) {
+    luaM_free_(L, reinterpret<void?>(b), uint64(s))
+}
+
+// lmem.h:55: #define luaM_freemem(L, b, s) luaM_free_(L, (b), (s))
+[c_macro, c_function]
+def private luaM_freemem(var L : lua_State?; var b : GCObject?; s : uint64) {
+    luaM_free_(L, reinterpret<void?>(b), s)
+}
+
+// lmem.h:55: #define luaM_freemem(L, b, s) luaM_free_(L, (b), (s))
+[c_macro, c_function]
+def private luaM_freemem(var L : lua_State?; var b : TString?; s : uint64) {
+    luaM_free_(L, reinterpret<void?>(b), s)
+}
+
+// lgc.h:94: #define otherwhite(g) ((g)->currentwhite ^ WHITEBITS)
+[c_macro]
+def private otherwhite(g) => int(g.currentwhite) ^ ((1 << WHITE0BIT) | (1 << WHITE1BIT))
+
+// lgc.h:95: #define isdeadm(ow,m) ((m) & (ow))
+[c_macro]
+def private isdeadm(ow : int; m : int) => m & ow
+
+// lgc.h:95: #define isdeadm(ow,m) ((m) & (ow))
+[c_macro]
+def private isdeadm(ow : int; m : uint8) => int(m) & ow
+
+// lgc.h:42: #define issweepphase(g) (GCSswpallgc <= (g)->gcstate && (g)->gcstate <= GCSswpend)
+[c_macro]
+def private issweepphase(g) => GCSswpallgc <= int(g.gcstate) && int(g.gcstate) <= GCSswpend
+
+// ltm.h:61: #define notm(tm) ttisnil(tm)
+[c_macro]
+def private notm(tm) => ttisnil(tm)
+
+// lgc.h:92: #define tofinalize(x) testbit((x)->marked, FINALIZEDBIT)
+[c_macro]
+def private tofinalize(x) => testbit(x.marked, FINALIZEDBIT)
+
+// ltm.h:64: #define gfasttm(g,et,e) ((et) == NULL ? NULL : ((et)->flags & (1u<<(e))) ? NULL : luaT_gettm(et, e, (g)->tmname[e]))
+[c_macro, c_function]
+def private gfasttm(var g; var et;
+                    e) : TValue? => et == null ? default<TValue?> : ((uint(et.flags) & (1u << uint(TMS.TM_GC))) != 0 ? default<TValue?> :
+            luaT_gettm(et, TMS.TM_GC, g.tmname[e]))
+
+// lgc.h:135: #define getgcparam(p) ((p) * 4)
+[c_macro]
+def private getgcparam(p) => int(p) * 4
+
+// lgc.h:117: #define setage(o,a) ((o)->marked = cast_byte(((o)->marked & (~AGEBITS)) | a))
+[c_macro]
+def private setage(var o : GCObject?; a : int) {
+    o.marked = uint8((int(o.marked) & ~AGEBITS) | a)
+}
+
+// lgc.h:117: #define setage(o,a) ((o)->marked = cast_byte(((o)->marked & (~AGEBITS)) | a))
+[c_macro]
+def private setage(var o : GCObject?; a : uint8) {
+    o.marked = uint8((int(o.marked) & ~AGEBITS) | int(a))
+}
+
+// lgc.h:158: #define gcrunning(g) ((g)->gcstp == 0)
+[c_macro]
+def private gcrunning(g) => g.gcstp == 0
+
+// lgc.h:149: #define isdecGCmodegen(g) (g->gckind == KGC_GEN || g->lastatomic != 0)
+[c_macro]
+def private isdecGCmodegen(g) => int(g.gckind) == KGC_GEN || g.lastatomic != 0ul
+
+// lctype.h:46: #define MASK(B) (1 << (B))
+[c_macro]
+def private MASK(B) => 1 << B
+
+// lctype.h:52: #define testprop(c,p) (luai_ctype_[(c)+1] & (p))
+[c_macro]
+def private testprop(c : int; p : int) => int(luai_ctype_[c + 1]) & p
+
+// lctype.h:52: #define testprop(c,p) (luai_ctype_[(c)+1] & (p))
+[c_macro]
+def private testprop(c : uint8; p : int) => int(luai_ctype_[int(c) + 1]) & p
+
+// lctype.h:61: #define lisprint(c) testprop(c, MASK(PRINTBIT))
+[c_macro]
+def private lisprint(c) => testprop(c, MASK(PRINTBIT))
+
+// ltable.h:35: #define nodefromval(v) cast(Node *, (v))
+[c_macro, c_function]
+def private nodefromval(var v) : GCUnion? => reinterpret<GCUnion?>(reinterpret<Node?>(v).u.key_val.gc)
+
+// llex.c:32: #define next(ls) (ls->current = zgetc(ls->z))
+[c_macro, c_function]
+def private next_m(var ls) {
+    let _t0 = ls.z.n
+    ls.z.n--
+    var _t2 : int
+    if (_t0 > 0ul) {
+        var _t1 = ls.z.p
+        ls.z.p++
+        _t2 = int(*_t1)
+    } else {
+        _t2 = luaZ_fill(ls.z)
+    }
+    ls.current = _t2
+}
+
+// llex.c:36: #define currIsNewline(ls) (ls->current == '\n' || ls->current == '\r')
+[c_macro]
+def private currIsNewline(ls) => ls.current == '\n' || ls.current == '\r'
+
+// llex.c:51: #define save_and_next(ls) (save(ls, ls->current), next(ls))
+[c_macro]
+def private save_and_next(var ls) {
+    save(ls, ls.current)
+    next_m(ls)
+}
+
+// lctype.h:62: #define lisxdigit(c) testprop(c, MASK(XDIGITBIT))
+[c_macro]
+def private lisxdigit(c) => testprop(c, MASK(XDIGITBIT))
+
+// lctype.h:57: #define lislalpha(c) testprop(c, MASK(ALPHABIT))
+[c_macro]
+def private lislalpha(c) => testprop(c, MASK(ALPHABIT))
+
+// lctype.h:59: #define lisdigit(c) testprop(c, MASK(DIGITBIT))
+[c_macro]
+def private lisdigit(c) => testprop(c, MASK(DIGITBIT))
+
+// lctype.h:60: #define lisspace(c) testprop(c, MASK(SPACEBIT))
+[c_macro]
+def private lisspace(c) => testprop(c, MASK(SPACEBIT))
+
+// lctype.h:58: #define lislalnum(c) testprop(c, (MASK(ALPHABIT) | MASK(DIGITBIT)))
+[c_macro]
+def private lislalnum(c) => testprop(c, MASK(ALPHABIT) | MASK(DIGITBIT))
+
+// lstring.h:35: #define isreserved(s) ((s)->tt == LUA_VSHRSTR && (s)->extra > 0)
+[c_macro]
+def private isreserved(s) => int(s.tt) == (LUA_TSTRING | (0 << 4)) && int(s.extra) > 0
+
+// lmem.c:47: #define callfrealloc(g,block,os,ns) ((*g->frealloc)(g->ud, block, os, ns))
+[c_macro]
+def private callfrealloc(var g : global_State?; var _c_block : void?; os : uint64; ns : int) {
+    invoke(g.frealloc, g.ud, _c_block, os, uint64(ns))
+}
+
+// lmem.c:47: #define callfrealloc(g,block,os,ns) ((*g->frealloc)(g->ud, block, os, ns))
+[c_macro]
+def private callfrealloc(var g : global_State?; var _c_block : void?; os : uint64; ns : uint64) : void? => invoke(g.frealloc, g.ud, _c_block, os, ns)
+
+// lmem.c:47: #define callfrealloc(g,block,os,ns) ((*g->frealloc)(g->ud, block, os, ns))
+[c_macro]
+def private callfrealloc(var g : global_State?; var _c_block : void?; os : int; ns : uint64) : void? => invoke(g.frealloc, g.ud, _c_block, uint64(os), ns)
+
+// lmem.c:58: #define cantryagain(g) (completestate(g) && !g->gcstopem)
+[c_macro]
+def private cantryagain(g) => completestate(g) && g.gcstopem == 0
+
+// lmem.c:76: #define firsttry(g,block,os,ns) callfrealloc(g, block, os, ns)
+[c_macro]
+def private firsttry(var g; var _c_block; os; ns) : void? => callfrealloc(g, _c_block, os, ns)
+
+// lvm.h:116: #define luaV_shiftr(x,y) luaV_shiftl(x,intop(-, 0, y))
+[c_macro]
+def private luaV_shiftr(x; y) => luaV_shiftl(x, int64(0) - y)
+
+// luaconf.h:418: #define l_floor(x) (l_mathop(floor)(x))
+[c_macro]
+def private l_floor(x) => math::floor(x)
+
+// lctype.h:71: #define ltolower(c) check_exp(('A' <= (c) && (c) <= 'Z') || (c) == ((c) | ('A' ^ 'a')), (c) | ('A' ^ 'a'))
+[c_macro]
+def private ltolower(c : int) => c | ('A' ^ 'a')
+
+// lctype.h:71: #define ltolower(c) check_exp(('A' <= (c) && (c) <= 'Z') || (c) == ((c) | ('A' ^ 'a')), (c) | ('A' ^ 'a'))
+[c_macro]
+def private ltolower(c : uint8) => int(c) | ('A' ^ 'a')
+
+// luaconf.h:484: #define lua_str2number(s,p) strtod((s), (p))
+[c_macro, c_function]
+def private lua_str2number(var s; var p) => crt::strtod(s, p)
+
+// luaconf.h:610: #define lua_strx2number(s,p) lua_str2number(s,p)
+[c_macro]
+def private lua_strx2number(var s; var p) => lua_str2number(s, p)
+
+// luaconf.h:671: #define lua_getlocaledecpoint() (localeconv()->decimal_point[0])
+[c_macro, c_function]
+def private lua_getlocaledecpoint() => reinterpret<lconv?>(crt::localeconv()).decimal_point[0]
+
+// lobject.c:446: #define addsize(b,sz) ((b)->blen += (sz))
+[c_macro]
+def private addsize(var b; sz) {
+    b.blen += sz
+}
+
+// luaconf.h:618: #define lua_pointer2str(buff,sz,p) l_sprintf(buff,sz,"%p",p)
+[c_macro]
+def private lua_pointer2str(var buff; sz; var p) => snprintf(buff, uint64(sz), cstr("%p"), p)
+
+// lobject.c:565: #define addstr(a,b,l) ( memcpy(a,b,(l) * sizeof(char)), a += (l) )
+[c_macro, c_function]
+def private addstr(var a : auto&; var b; l) {
+    crt::memcpy(reinterpret<void?>(a), reinterpret<void?>(b), l * uint64(typeinfo sizeof(type<uint8>)))
+    a += l
+}
+
+// lparser.c:43: #define eqstr(a,b) ((a) == (b))
+[c_macro]
+def private eqstr(a; b) => intptr(a) == intptr(b)
+
+// lcode.h:58: #define luaK_setmultret(fs,e) luaK_setreturns(fs, e, LUA_MULTRET)
+[c_macro]
+def private luaK_setmultret(var fs; var e) {
+    luaK_setreturns(fs, e, LUA_MULTRET)
+}
+
+// lparser.c:38: #define hasmultret(k) ((k) == VCALL || (k) == VVARARG)
+[c_macro]
+def private hasmultret(k) => k == expkind.VCALL || k == expkind.VVARARG
+
+// lparser.c:504: #define enterlevel(ls) luaE_incCstack(ls->L)
+[c_macro]
+def private enterlevel(var ls) {
+    luaE_incCstack(ls.L)
+}
+
+// lparser.c:507: #define leavelevel(ls) ((ls)->L->nCcalls--)
+[c_macro]
+def private leavelevel(var ls) {
+    ls.L.nCcalls--
+}
+
+// lcode.h:60: #define luaK_jumpto(fs,t) luaK_patchlist(fs, luaK_jump(fs), t)
+[c_macro]
+def private luaK_jumpto(var fs; t) {
+    luaK_patchlist(fs, luaK_jump(fs), t)
+}
+
+// lstate.c:67: #define addbuff(b,p,e) { size_t t = cast_sizet(e); memcpy(b + p, &t, sizeof(t)); p += sizeof(t); }
+[c_macro, c_function]
+def private addbuff(var b : auto&; var p : auto&; e) {
+    var t : uint64 = uint64(intptr(e))
+    crt::memcpy(reinterpret<void?>(addr(b[0]) + p), reinterpret<void?>(addr(t)), uint64(typeinfo sizeof(type<uint64>)))
+    p = int(uint64(p) + uint64(typeinfo sizeof(type<uint64>)))
+}
+
+// lgc.h:96: #define isdead(g,v) isdeadm(otherwhite(g), (v)->marked)
+[c_macro]
+def private isdead(g; v) => isdeadm(otherwhite(g), v.marked)
+
+// lgc.h:98: #define changewhite(x) ((x)->marked ^= WHITEBITS)
+[c_macro]
+def private changewhite(var x) {
+    x.marked = uint8(int(x.marked) ^ ((1 << WHITE0BIT) | (1 << WHITE1BIT)))
+}
+
+// ltable.c:81: #define hashmod(t,n) (gnode(t, ((n) % ((sizenode(t)-1)|1))))
+[c_macro]
+def private hashmod(var t : Table?; n : int) : Node? => gnode(t, n % (sizenode(t) - 1 | 1))
+
+// ltable.c:81: #define hashmod(t,n) (gnode(t, ((n) % ((sizenode(t)-1)|1))))
+[c_macro]
+def private hashmod(var t : Table?; n : uint64) : Node? => gnode(t, n % uint64(sizenode(t) - 1 | 1))
+
+// ltable.c:75: #define hashpow2(t,n) (gnode(t, lmod((n), sizenode(t))))
+[c_macro]
+def private hashpow2(var t; n) : Node? => gnode(t, lmod(n, sizenode(t)))
+
+// ltable.c:84: #define hashstr(t,str) hashpow2(t, (str)->hash)
+[c_macro]
+def private hashstr(var t; str) : Node? => hashpow2(t, str.hash)
+
+// ltable.c:85: #define hashboolean(t,p) hashpow2(t, p)
+[c_macro]
+def private hashboolean(var t; p) : Node? => hashpow2(t, p)
+
+// ltable.c:244: #define limitequalsasize(t) (isrealasize(t) || ispow2((t)->alimit))
+[c_macro]
+def private limitequalsasize(t) => isrealasize(t) || (t.alimit & t.alimit - 1u) == 0u
+
+// ltable.h:15: #define gnext(n) ((n)->u.next)
+[c_macro]
+def private gnext(n) => n.u.next
+
+// ltable.c:290: #define limitasasize(t) check_exp(isrealasize(t), t->alimit)
+[c_macro]
+def private limitasasize(t) => t.alimit
+
+// lstring.h:41: #define eqshrstr(a,b) check_exp((a)->tt == LUA_VSHRSTR, (a) == (b))
+[c_macro]
+def private eqshrstr(a; b) => intptr(a) == intptr(b)
+
+// llimits.h:66: #define ispow2(x) (((x) & ((x) - 1)) == 0)
+[c_macro]
+def private ispow2(x) => (x & x - 1u) == 0u
+
+// ltm.h:69: #define ttypename(x) luaT_typenames_[(x) + 1]
+[c_macro]
+def private ttypename(x) : uint8? => luaT_typenames_[x + 1]
+
+// lvm.h:24: #define cvt2num(o) ttisstring(o)
+[c_macro]
+def private cvt2num(o) => ttisstring(o)
+
+// llimits.h:351: #define luai_numlt(a,b) ((a)<(b))
+[c_macro]
+def private luai_numlt(a : int; b : double) => double(a) < b
+
+// llimits.h:351: #define luai_numlt(a,b) ((a)<(b))
+[c_macro]
+def private luai_numlt(a : double; b : double) => a < b
+
+// llimits.h:352: #define luai_numle(a,b) ((a)<=(b))
+[c_macro]
+def private luai_numle(a; b) => a <= b
+
+// ltable.h:23: #define invalidateTMcache(t) ((t)->flags &= ~maskflags)
+[c_macro]
+def private invalidateTMcache(var t) {
+    t.flags = uint8(uint(t.flags) & ~maskflags)
+}
 
 include lcode.das.inc
 include ldebug.das.inc

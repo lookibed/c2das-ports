@@ -12,7 +12,7 @@ def luaK_semerror(var ls : LexState?; var msg : uint8?) {
 // If expression is a numeric constant, fills 'v' with its value
 // and returns 1. Otherwise, returns 0.
 def private tonumeral(var e : expdesc?; var v : TValue?) : int {
-    if (e.t != e.f) {
+    if (hasjumps(e)) {
         // not a numeral
         return 0
     }
@@ -21,7 +21,7 @@ def private tonumeral(var e : expdesc?; var v : TValue?) : int {
             if (v != null) {
                 var io : TValue? = v
                 io.value_.i = e.u.ival
-                io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+                settt_(io, LUA_TNUMBER | (0 << 4))
             }
             return 1
         }
@@ -29,7 +29,7 @@ def private tonumeral(var e : expdesc?; var v : TValue?) : int {
             if (v != null) {
                 var io : TValue? = v
                 io.value_.n = e.u.nval
-                io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
+                settt_(io, LUA_TNUMBER | (1 << 4))
             }
             return 1
         }
@@ -47,31 +47,30 @@ def private const2val(var fs : FuncState?; var e : expdesc?) : TValue? {
 
 // If expression is a constant, fills 'v' with its value
 // and returns 1. Otherwise, returns 0.
-[c_function]
 def luaK_exp2const(var fs : FuncState?; var e : expdesc?; var v : TValue?) : int {
-    if (e.t != e.f) {
+    if (hasjumps(e)) {
         // not a constant
         return 0
     }
     c_switch(e.k) {
         case(expkind.VFALSE) {
-            v.tt_ = uint8(LUA_TBOOLEAN | (0 << 4))
+            setbfvalue(v)
             return 1
         }
         case(expkind.VTRUE) {
-            v.tt_ = uint8(LUA_TBOOLEAN | (1 << 4))
+            setbtvalue(v)
             return 1
         }
         case(expkind.VNIL) {
-            v.tt_ = uint8(LUA_TNIL | (0 << 4))
+            setnilvalue(v)
             return 1
         }
         case(expkind.VKSTR) {
             {
                 var io : TValue? = v
                 var x_ : TString? = e.u.strval
-                io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-                io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
+                io.value_.gc = obj2gco(x_)
+                settt_(io, ctb(x_.tt))
                 let _t0 = fs.ls.L
             }
             return 1
@@ -81,7 +80,7 @@ def luaK_exp2const(var fs : FuncState?; var e : expdesc?; var v : TValue?) : int
                 var io1 : TValue? = v
                 var io2 : TValue? = const2val(fs, e)
                 io1.value_ = io2.value_
-                io1.tt_ = io2.tt_
+                settt_(io1, io2.tt_)
                 let _t1 = fs.ls.L
             }
             return 1
@@ -116,10 +115,10 @@ def luaK_nil(var fs : FuncState?; var from : int; n : int) {
     var l : int = from + n - 1
     var previous : uint? = previousinstruction(fs)
     // previous is LOADNIL?
-    if (enum_from_int(type<OpCode>, int((*previous >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))) == OpCode.OP_LOADNIL) {
+    if (GET_OPCODE(*previous) == OpCode.OP_LOADNIL) {
         // get previous range
-        var pfrom : int = int((*previous >> uint(POS_A)) & (~(~0u << uint(SIZE_A)) << 0u))
-        var pl : int = pfrom + int((*previous >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u))
+        let pfrom : int = GETARG_A(*previous)
+        let pl : int = pfrom + GETARG_B(*previous)
         if ((pfrom <= from && from <= pl + 1) || (from <= pfrom && pfrom <= l + 1)) {
             // can connect both?
             // from = min(from, pfrom)
@@ -144,7 +143,7 @@ def luaK_nil(var fs : FuncState?; var from : int; n : int) {
 // a list of jumps.
 [c_function]
 def private getjump(var fs : FuncState?; pc : int) : int {
-    var offset : int = int((fs.f.code[pc] >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ
+    let offset : int = GETARG_sJ(fs.f.code[pc])
     // point to itself represents end of list
     if (offset == NO_JUMP) {
         // end of list
@@ -160,11 +159,11 @@ def private getjump(var fs : FuncState?; pc : int) : int {
 [c_function]
 def private fixjump(var fs : FuncState?; pc : int; dest : int) {
     var jmp : uint? = addr(fs.f.code[pc])
-    var offset : int = dest - (pc + 1)
+    let offset : int = dest - (pc + 1)
     if (!(-OFFSET_sJ <= offset && offset <= MAXARG_sJ - OFFSET_sJ)) {
         luaX_syntaxerror(fs.ls, cstr("control structure too long"))
     }
-    *jmp = (*jmp & ~(~(~0u << uint(SIZE_sJ)) << uint(POS_A))) | ((uint(offset + OFFSET_sJ) << uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << uint(POS_A)))
+    *jmp = (*jmp & MASK0(SIZE_sJ, POS_A)) | ((uint(offset + OFFSET_sJ) << uint(POS_A)) & MASK1(SIZE_sJ, POS_A))
 }
 
 // Concatenate jump-list 'l2' into jump-list 'l1'
@@ -216,7 +215,7 @@ def luaK_ret(var fs : FuncState?; first : int; nret : int) {
             break
         }
     }
-    luaK_codeABCk(fs, op, first, nret + 1, 0, 0)
+    luaK_codeABC(fs, op, first, nret + 1, 0)
 }
 
 // Code a "conditional jump", that is, a test or comparison opcode
@@ -239,7 +238,7 @@ def luaK_getlabel(var fs : FuncState?) : int {
 [c_function]
 def private getjumpcontrol(var fs : FuncState?; pc : int) : uint? {
     var pi : uint? = addr(fs.f.code[pc])
-    if (pc >= 1 && (int(luaP_opmodes[int(enum_from_int(type<OpCode>, int((*(pi - 1) >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))))]) & (1 << 4)) != 0) {
+    if (pc >= 1 && testTMode(GET_OPCODE(*(pi - 1))) != 0) {
         return pi - 1
     } else {
         return pi
@@ -282,7 +281,7 @@ def private removevalues(var fs : FuncState?; var list : int) {
 // values in 'reg'), other tests jump to 'dtarget'.
 def private patchlistaux(var fs : FuncState?; var list : int; vtarget : int; reg : int; dtarget : int) {
     while (list != NO_JUMP) {
-        var next : int = getjump(fs, list)
+        let next : int = getjump(fs, list)
         if (patchtestreg(fs, list, reg) != 0) {
             fixjump(fs, list, vtarget)
         } else {
@@ -302,7 +301,7 @@ def luaK_patchlist(var fs : FuncState?; list : int; target : int) {
 
 def luaK_patchtohere(var fs : FuncState?; list : int) {
     // mark "here" as a jump target
-    var hr : int = luaK_getlabel(fs)
+    let hr : int = luaK_getlabel(fs)
     luaK_patchlist(fs, list, hr)
 }
 
@@ -315,7 +314,7 @@ def luaK_patchtohere(var fs : FuncState?; list : int) {
 def private savelineinfo(var fs : FuncState?; var f : Proto?; line : int) {
     var linedif : int = line - fs.previousline
     // last instruction coded
-    var pc : int = fs.pc - 1
+    let pc : int = fs.pc - 1
     var _t1 = crt::abs(linedif) >= LIMLINEDIFF
     if (!_t1) {
         let _t0 = fs.iwthabs
@@ -353,7 +352,7 @@ def private savelineinfo(var fs : FuncState?; var f : Proto?; line : int) {
 def private removelastlineinfo(var fs : FuncState?) {
     var f : Proto? = fs.f
     // last instruction coded
-    var pc : int = fs.pc - 1
+    let pc : int = fs.pc - 1
     // relative line info?
     if (int(f.lineinfo[pc]) != ABSLINEINFO) {
         // correct last line saved
@@ -396,24 +395,24 @@ def luaK_code(var fs : FuncState?; i : uint) : int {
 // Format and emit an 'iABC' instruction. (Assertions check consistency
 // of parameters versus opcode.)
 def luaK_codeABCk(var fs : FuncState?; o : OpCode; a : int; b : int; c : int; k : int) : int {
-    return luaK_code(fs, (uint(o) << uint(POS_OP)) | (uint(a) << uint(POS_A)) | (uint(b) << uint(POS_B)) | (uint(c) << uint(POS_C)) | (uint(k) << uint(POS_k)))
+    return luaK_code(fs, CREATE_ABCk(o, a, b, c, k))
 }
 
 // Format and emit an 'iABx' instruction.
 def luaK_codeABx(var fs : FuncState?; o : OpCode; a : int; bc : uint) : int {
-    return luaK_code(fs, (uint(o) << uint(POS_OP)) | (uint(a) << uint(POS_A)) | (bc << uint(POS_k)))
+    return luaK_code(fs, CREATE_ABx(o, a, bc))
 }
 
 // Format and emit an 'iAsBx' instruction.
 def private codeAsBx(var fs : FuncState?; o : OpCode; a : int; bc : int) : int {
-    var b : uint = uint(bc + OFFSET_sBx)
-    return luaK_code(fs, (uint(o) << uint(POS_OP)) | (uint(a) << uint(POS_A)) | (b << uint(POS_k)))
+    let b : uint = uint(bc + OFFSET_sBx)
+    return luaK_code(fs, CREATE_ABx(o, a, b))
 }
 
 // Format and emit an 'isJ' instruction.
 def private codesJ(var fs : FuncState?; o : OpCode; sj : int; k : int) : int {
-    var j : uint = uint(sj + OFFSET_sJ)
-    return luaK_code(fs, (uint(o) << uint(POS_OP)) | (j << uint(POS_A)) | (uint(k) << uint(POS_k)))
+    let j : uint = uint(sj + OFFSET_sJ)
+    return luaK_code(fs, CREATE_sJ(o, j, k))
 }
 
 // Emit an "extra argument" instruction (format 'iAx')
@@ -428,7 +427,7 @@ def private luaK_codek(var fs : FuncState?; reg : int; k : int) : int {
     if (k <= MAXARG_Bx) {
         return luaK_codeABx(fs, OpCode.OP_LOADK, reg, uint(k))
     } else {
-        var p : int = luaK_codeABx(fs, OpCode.OP_LOADKX, reg, 0u)
+        let p : int = luaK_codeABx(fs, OpCode.OP_LOADKX, reg, 0u)
         codeextraarg(fs, k)
         return p
     }
@@ -437,7 +436,7 @@ def private luaK_codek(var fs : FuncState?; reg : int; k : int) : int {
 // Check register-stack level, keeping track of its maximum size
 // in field 'maxstacksize'
 def luaK_checkstack(var fs : FuncState?; n : int) {
-    var newstack : int = int(fs.freereg) + n
+    let newstack : int = int(fs.freereg) + n
     if (newstack > int(fs.f.maxstacksize)) {
         if (newstack >= MAXREGS) {
             luaX_syntaxerror(fs.ls, cstr("function or expression needs too many registers"))
@@ -482,8 +481,8 @@ def private freeexp(var fs : FuncState?; var e : expdesc?) {
 // Free registers used by expressions 'e1' and 'e2' (if any) in proper
 // order.
 def private freeexps(var fs : FuncState?; var e1 : expdesc?; var e2 : expdesc?) {
-    var r1 : int = (e1.k == expkind.VNONRELOC) ? e1.u.info : -1
-    var r2 : int = (e2.k == expkind.VNONRELOC) ? e2.u.info : -1
+    let r1 : int = (e1.k == expkind.VNONRELOC) ? e1.u.info : -1
+    let r2 : int = (e2.k == expkind.VNONRELOC) ? e2.u.info : -1
     freeregs(fs, r1, r2)
 }
 
@@ -504,10 +503,10 @@ def private addk(var fs : FuncState?; var key : TValue?; var v : TValue?) : int 
     var k : int
     var oldsize : int
     // is there an index there?
-    if (int(idx.tt_) == (LUA_TNUMBER | (0 << 4))) {
-        k = int(idx.value_.i)
+    if (ttisinteger(idx)) {
+        k = int(ivalue(idx))
         // correct value? (warning: must distinguish floats from integers!)
-        if (k < fs.nk && (int(addr(f.k[k]).tt_) & 63) == (int(v.tt_) & 63) && luaV_equalobj(null, addr(f.k[k]), v) != 0) {
+        if (k < fs.nk && ttypetag(addr(f.k[k])) == ttypetag(v) && luaV_rawequalobj(addr(f.k[k]), v) != 0) {
             // reuse index
             return k
         }
@@ -515,13 +514,9 @@ def private addk(var fs : FuncState?; var key : TValue?; var v : TValue?) : int 
     // constant not found; create a new entry
     oldsize = f.sizek
     k = fs.nk
-    {
-        // numerical value does not need GC barrier;
-        // table has no metatable, so it does not need to invalidate cache
-        var io : TValue? = addr(val)
-        io.value_.i = int64(k)
-        io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
-    }
+    setivalue(addr(val), k)
+    // numerical value does not need GC barrier;
+    // table has no metatable, so it does not need to invalidate cache
     luaH_finishset(L, fs.ls.h, key, idx, addr(val))
     f.k = reinterpret<TValue?>(luaM_growaux_(L, reinterpret<void?>(f.k), k, addr(f.sizek), typeinfo sizeof(type<TValue>),
             int(uint64(MAXARG_Ax) <= MAX_SIZET / uint64(typeinfo sizeof(type<TValue>)) ? uint(MAXARG_Ax) :
@@ -536,14 +531,10 @@ def private addk(var fs : FuncState?; var key : TValue?; var v : TValue?) : int 
         var io1 : TValue? = addr(f.k[k])
         var io2 : TValue? = v
         io1.value_ = io2.value_
-        io1.tt_ = io2.tt_
+        settt_(io1, io2.tt_)
     }
     fs.nk++
-    if ((int(v.tt_) & BIT_ISCOLLECTABLE) != 0) {
-        if ((int(f.marked) & (1 << BLACKBIT)) != 0 && (int(v.value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-            luaC_barrier_(L, addr(reinterpret<GCUnion?>(f).gc), addr(reinterpret<GCUnion?>(v.value_.gc).gc))
-        }
-    }
+    luaC_barrier(L, f, v)
     return k
 }
 
@@ -554,8 +545,8 @@ def private stringK(var fs : FuncState?; var s : TString?) : int {
     {
         var io : TValue? = addr(o)
         var x_ : TString? = s
-        io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
+        io.value_.gc = obj2gco(x_)
+        settt_(io, ctb(x_.tt))
         let _t0 = fs.ls.L
     }
     // use string itself as key
@@ -566,11 +557,7 @@ def private stringK(var fs : FuncState?; var s : TString?) : int {
 [c_function]
 def private luaK_intK(var fs : FuncState?; n : int64) : int {
     var o : TValue
-    {
-        var io : TValue? = addr(o)
-        io.value_.i = n
-        io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
-    }
+    setivalue(addr(o), n)
     // use integer itself as key
     return addk(fs, addr(o), addr(o))
 }
@@ -588,27 +575,19 @@ def private luaK_intK(var fs : FuncState?; n : int64) : int {
 def private luaK_numberK(var fs : FuncState?; r : double) : int {
     var o : TValue
     var ik : int64
-    {
-        var io : TValue? = addr(o)
-        io.value_.n = r
-        io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
-    }
+    setfltvalue(addr(o), r)
     // not an integral value?
     if (luaV_flttointeger(r, addr(ik), F2Imod.F2Ieq) == 0) {
         // use number itself as key
         return addk(fs, addr(o), addr(o))
     } else {
         // must build an alternative key
-        var nbm : int = 53
-        var q : double = crt::ldexp(1.0lf, -nbm + 1)
+        let nbm : int = 53
+        let q : double = crt::ldexp(1.0lf, -nbm + 1)
         // new key
-        var k : double = (ik == 0l) ? q : r + r * q
+        let k : double = (ik == 0l) ? q : r + r * q
         var kv : TValue
-        {
-            var io : TValue? = addr(kv)
-            io.value_.n = k
-            io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
-        }
+        setfltvalue(addr(kv), k)
         // result is not an integral value, unless value is too large
         return addk(fs, addr(kv), addr(o))
     }
@@ -637,13 +616,13 @@ def private boolT(var fs : FuncState?) : int {
 def private nilK(var fs : FuncState?) : int {
     var k : TValue
     var v : TValue
-    addr(v).tt_ = uint8(LUA_TNIL | (0 << 4))
+    setnilvalue(addr(v))
     {
         // cannot use nil as key; instead use table itself to represent nil
         var io : TValue? = addr(k)
         var x_ : Table? = fs.ls.h
-        io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8((LUA_TTABLE | (0 << 4)) | BIT_ISCOLLECTABLE)
+        io.value_.gc = obj2gco(x_)
+        settt_(io, ctb(LUA_TTABLE | (0 << 4)))
         let _t0 = fs.ls.L
     }
     return addk(fs, addr(k), addr(v))
@@ -680,17 +659,16 @@ def private luaK_float(var fs : FuncState?; reg : int; f : double) {
 }
 
 // Convert a constant in 'v' into an expression description 'e'
-[c_function]
 def private const2exp(var v : TValue?; var e : expdesc?) {
-    c_switch(int(v.tt_) & 63) {
+    c_switch(ttypetag(v)) {
         case(3) {
             e.k = expkind.VKINT
-            e.u.ival = v.value_.i
+            e.u.ival = ivalue(v)
             break
         }
         case(19) {
             e.k = expkind.VKFLT
-            e.u.nval = v.value_.n
+            e.u.nval = fltvalue(v)
             break
         }
         case(1) {
@@ -707,7 +685,7 @@ def private const2exp(var v : TValue?; var e : expdesc?) {
         }
         case(4, 20) {
             e.k = expkind.VKSTR
-            e.u.strval = addr(reinterpret<GCUnion?>(v.value_.gc).ts)
+            e.u.strval = tsvalue(v)
             break
         }
         case(_) {
@@ -751,9 +729,10 @@ def luaK_setoneret(var fs : FuncState?; var e : expdesc?) {
         // already returns 1 value
         // result has fixed position
         e.k = expkind.VNONRELOC
-        e.u.info = int((fs.f.code[e.u.info] >> uint(POS_A)) & (~(~0u << uint(SIZE_A)) << 0u))
+        e.u.info = GETARG_A(fs.f.code[e.u.info])
     } elif (e.k == expkind.VVARARG) {
-        fs.f.code[e.u.info] = (fs.f.code[e.u.info] & ~(~(~0u << uint(SIZE_C)) << uint(POS_C))) | ((2u << uint(POS_C)) & (~(~0u << uint(SIZE_C)) << uint(POS_C)))
+        fs.f.code[e.u.info] = (getinstruction(fs, e) & ~(~(~0u << uint(SIZE_C)) << uint(POS_C))) | ((2u << uint(POS_C)) &
+                (~(~0u << uint(SIZE_C)) << uint(POS_C)))
         // can relocate its simple result
         e.k = expkind.VRELOC
     }
@@ -770,7 +749,7 @@ def luaK_dischargevars(var fs : FuncState?; var e : expdesc?) {
         case(expkind.VLOCAL) {
             {
                 // already in a register
-                var temp : int = int(e.u._c_var.ridx)
+                let temp : int = int(e.u._c_var.ridx)
                 // (can't do a direct assignment; values overlap)
                 e.u.info = temp
                 // becomes a non-relocatable value
@@ -900,8 +879,8 @@ def private code_loadbool(var fs : FuncState?; A : int; op : OpCode) : int {
 [c_function]
 def private need_value(var fs : FuncState?; var list : int) : int {
     while (list != NO_JUMP) {
-        var i : uint = *getjumpcontrol(fs, list)
-        if (enum_from_int(type<OpCode>, int((i >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))) != OpCode.OP_TESTSET) {
+        let i : uint = *getjumpcontrol(fs, list)
+        if (GET_OPCODE(i) != OpCode.OP_TESTSET) {
             return 1
         }
         list = getjump(fs, list)
@@ -923,7 +902,7 @@ def private exp2reg(var fs : FuncState?; var e : expdesc?; reg : int) {
         // put this jump in 't' list
         luaK_concat(fs, addr(e.t), e.u.info)
     }
-    if (e.t != e.f) {
+    if (hasjumps(e)) {
         // position after whole expression
         var final : int
         // position of an eventual LOAD false
@@ -931,7 +910,7 @@ def private exp2reg(var fs : FuncState?; var e : expdesc?; reg : int) {
         // position of an eventual LOAD true
         var p_t : int = NO_JUMP
         if (need_value(fs, e.t) != 0 || need_value(fs, e.f) != 0) {
-            var fj : int = (e.k == expkind.VJMP) ? NO_JUMP : luaK_jump(fs)
+            let fj : int = (e.k == expkind.VJMP) ? NO_JUMP : luaK_jump(fs)
             // skip next inst.
             p_f = code_loadbool(fs, reg, OpCode.OP_LFALSESKIP)
             p_t = code_loadbool(fs, reg, OpCode.OP_LOADTRUE)
@@ -963,7 +942,7 @@ def luaK_exp2anyreg(var fs : FuncState?; var e : expdesc?) : int {
     // expression already has a register?
     if (e.k == expkind.VNONRELOC) {
         // no jumps?
-        if (!(e.t != e.f)) {
+        if (!hasjumps(e)) {
             // result is already in a register
             return e.u.info
         }
@@ -985,7 +964,7 @@ def luaK_exp2anyreg(var fs : FuncState?; var e : expdesc?) : int {
 // Ensures final expression result is either in a register
 // or in an upvalue.
 def luaK_exp2anyregup(var fs : FuncState?; var e : expdesc?) {
-    if (e.k != expkind.VUPVAL || e.t != e.f) {
+    if (e.k != expkind.VUPVAL || hasjumps(e)) {
         luaK_exp2anyreg(fs, e)
     }
 }
@@ -993,7 +972,7 @@ def luaK_exp2anyregup(var fs : FuncState?; var e : expdesc?) {
 // Ensures final expression result is either in a register
 // or it is a constant.
 def luaK_exp2val(var fs : FuncState?; var e : expdesc?) {
-    if (e.k == expkind.VJMP || e.t != e.f) {
+    if (e.k == expkind.VJMP || hasjumps(e)) {
         luaK_exp2anyreg(fs, e)
     } else {
         luaK_dischargevars(fs, e)
@@ -1003,7 +982,7 @@ def luaK_exp2val(var fs : FuncState?; var e : expdesc?) {
 // Try to make 'e' a K expression with an index in the range of R/K
 // indices. Return true iff succeeded.
 def private luaK_exp2K(var fs : FuncState?; var e : expdesc?) : int {
-    if (!(e.t != e.f)) {
+    if (!hasjumps(e)) {
         var info : int
         // move constants to 'k'
         c_switch(e.k) {
@@ -1067,7 +1046,7 @@ def private exp2RK(var fs : FuncState?; var e : expdesc?) : int {
 }
 
 def private codeABRK(var fs : FuncState?; o : OpCode; a : int; b : int; var ec : expdesc?) {
-    var k : int = exp2RK(fs, ec)
+    let k : int = exp2RK(fs, ec)
     luaK_codeABCk(fs, o, a, b, ec.u.info, k)
 }
 
@@ -1082,7 +1061,7 @@ def luaK_storevar(var fs : FuncState?; var _c_var : expdesc?; var ex : expdesc?)
         }
         case(expkind.VUPVAL) {
             {
-                var e : int = luaK_exp2anyreg(fs, ex)
+                let e : int = luaK_exp2anyreg(fs, ex)
                 luaK_codeABCk(fs, OpCode.OP_SETUPVAL, e, _c_var.u.info, 0, 0)
                 break
             }
@@ -1131,21 +1110,20 @@ def luaK_self(var fs : FuncState?; var e : expdesc?; var key : expdesc?) {
 [c_function]
 def private negatecondition(var fs : FuncState?; var e : expdesc?) {
     var pc : uint? = getjumpcontrol(fs, e.u.info)
-    *pc = (*pc & ~(~(~0u << 1u) << uint(POS_k))) | ((uint(int((*pc >> uint(POS_k)) & (~(~0u << 1u) << 0u)) ^ 1) << uint(POS_k)) & (~(~0u << 1u) << uint(POS_k)))
+    *pc = (*pc & ~(~(~0u << 1u) << uint(POS_k))) | ((uint(GETARG_k(*pc) ^ 1) << uint(POS_k)) & (~(~0u << 1u) << uint(POS_k)))
 }
 
 // Emit instruction to jump if 'e' is 'cond' (that is, if 'cond'
 // is true, code will jump if 'e' is true.) Return jump position.
 // Optimize when 'e' is 'not' something, inverting the condition
 // and removing the 'not'.
-[c_function]
 def private jumponcond(var fs : FuncState?; var e : expdesc?; cond : int) : int {
     if (e.k == expkind.VRELOC) {
-        var ie : uint = fs.f.code[e.u.info]
-        if (enum_from_int(type<OpCode>, int((ie >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))) == OpCode.OP_NOT) {
+        let ie : uint = getinstruction(fs, e)
+        if (GET_OPCODE(ie) == OpCode.OP_NOT) {
             // remove previous OP_NOT
             removelastinstruction(fs)
-            return condjump(fs, OpCode.OP_TEST, int((ie >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u)), 0, 0, int_of(cond == 0))
+            return condjump(fs, OpCode.OP_TEST, GETARG_B(ie), 0, 0, int_of(cond == 0))
         }
     }
     // else go through
@@ -1247,7 +1225,7 @@ def private codenot(var fs : FuncState?; var e : expdesc?) {
     }
     {
         // interchange true and false lists
-        var temp : int = e.f
+        let temp : int = e.f
         e.f = e.t
         e.t = temp
     }
@@ -1259,13 +1237,12 @@ def private codenot(var fs : FuncState?; var e : expdesc?) {
 // Check whether expression 'e' is a short literal string
 [c_function]
 def private isKstr(var fs : FuncState?; var e : expdesc?) : int {
-    return int_of(e.k == expkind.VK && !(e.t != e.f) && e.u.info <= MAXARG_B &&
-            int(addr(fs.f.k[e.u.info]).tt_) == ((LUA_TSTRING | (0 << 4)) | BIT_ISCOLLECTABLE))
+    return int_of(e.k == expkind.VK && !hasjumps(e) && e.u.info <= MAXARG_B && ttisshrstring(addr(fs.f.k[e.u.info])))
 }
 
 // Check whether expression 'e' is a literal integer.
 def private isKint(var e : expdesc?) : int {
-    return int_of(e.k == expkind.VKINT && !(e.t != e.f))
+    return int_of(e.k == expkind.VKINT && !hasjumps(e))
 }
 
 // Check whether expression 'e' is a literal integer in
@@ -1293,7 +1270,7 @@ def private isSCnumber(var e : expdesc?; var pi : int?; var isfloat : int?) : in
         // not a number
         return 0
     }
-    if (!(e.t != e.f) && fitsC(i) != 0) {
+    if (!hasjumps(e) && fitsC(i) != 0) {
         *pi = int(i) + OFFSET_sC
         return 1
     } else {
@@ -1316,7 +1293,7 @@ def luaK_indexed(var fs : FuncState?; var t : expdesc?; var k : expdesc?) {
     }
     if (t.k == expkind.VUPVAL) {
         // upvalue index
-        var temp : int = t.u.info
+        let temp : int = t.u.info
         // (can't do a direct assignment; values overlap)
         t.u.ind.t = uint8(temp)
         // literal short string
@@ -1356,7 +1333,7 @@ def private validop(op : int; var v1 : TValue?; var v2 : TValue?) : int {
         }
         case(5, 6, 3) {
             // division by 0
-            return int_of((int(v2.tt_) == (LUA_TNUMBER | (0 << 4)) ? double(v2.value_.i) : v2.value_.n) != 0.0lf)
+            return int_of(nvalue(v2) != 0.0lf)
         }
         case(_) {
             // everything else is valid
@@ -1378,13 +1355,13 @@ def private constfolding(var fs : FuncState?; op : int; var e1 : expdesc?; var e
     }
     // does operation
     luaO_rawarith(fs.ls.L, op, addr(v1), addr(v2), addr(res))
-    if (int(addr(res).tt_) == (LUA_TNUMBER | (0 << 4))) {
+    if (ttisinteger(addr(res))) {
         e1.k = expkind.VKINT
-        e1.u.ival = addr(res).value_.i
+        e1.u.ival = ivalue(addr(res))
     } else {
         // folds neither NaN nor 0.0 (to avoid problems with -0.0)
-        var n : double = addr(res).value_.n
-        if (!(n == n) || n == 0.0lf) {
+        let n : double = fltvalue(addr(res))
+        if (luai_numisnan(n) || n == 0.0lf) {
             return 0
         }
         e1.k = expkind.VKFLT
@@ -1413,7 +1390,7 @@ def private binopr2TM(opr : BinOpr) : TMS {
 // Expression to produce final result will be encoded in 'e'.
 def private codeunexpval(var fs : FuncState?; op : OpCode; var e : expdesc?; line : int) {
     // opcodes operate only on registers
-    var r : int = luaK_exp2anyreg(fs, e)
+    let r : int = luaK_exp2anyreg(fs, e)
     freeexp(fs, e)
     // generate opcode
     e.u.info = luaK_codeABCk(fs, op, 0, r, 0, 0)
@@ -1428,8 +1405,8 @@ def private codeunexpval(var fs : FuncState?; op : OpCode; var e : expdesc?; lin
 // Expression to produce final result will be encoded in 'e1'.
 def private finishbinexpval(var fs : FuncState?; var e1 : expdesc?; var e2 : expdesc?; op : OpCode; v2 : int; flip : int; line : int; mmop : OpCode;
                             event : TMS) {
-    var v1 : int = luaK_exp2anyreg(fs, e1)
-    var pc : int = luaK_codeABCk(fs, op, 0, v1, v2, 0)
+    let v1 : int = luaK_exp2anyreg(fs, e1)
+    let pc : int = luaK_codeABCk(fs, op, 0, v1, v2, 0)
     freeexps(fs, e1, e2)
     e1.u.info = pc
     // all those operations are relocatable
@@ -1443,9 +1420,9 @@ def private finishbinexpval(var fs : FuncState?; var e1 : expdesc?; var e2 : exp
 // Emit code for binary expressions that "produce values" over
 // two registers.
 def private codebinexpval(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var e2 : expdesc?; line : int) {
-    var op : OpCode = binopr2op(opr, BinOpr.OPR_ADD, OpCode.OP_ADD)
+    let op : OpCode = binopr2op(opr, BinOpr.OPR_ADD, OpCode.OP_ADD)
     // make sure 'e2' is in a register
-    var v2 : int = luaK_exp2anyreg(fs, e2)
+    let v2 : int = luaK_exp2anyreg(fs, e2)
     // 'e1' must be already in a register or it is a constant
     finishbinexpval(fs, e1, e2, op, v2, 0, line, OpCode.OP_MMBIN, binopr2TM(opr))
 }
@@ -1453,16 +1430,16 @@ def private codebinexpval(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; 
 // Code binary operators with immediate operands.
 def private codebini(var fs : FuncState?; op : OpCode; var e1 : expdesc?; var e2 : expdesc?; flip : int; line : int; event : TMS) {
     // immediate operand
-    var v2 : int = int(e2.u.ival) + OFFSET_sC
+    let v2 : int = int2sC(int(e2.u.ival))
     finishbinexpval(fs, e1, e2, op, v2, flip, line, OpCode.OP_MMBINI, event)
 }
 
 // Code binary operators with K operand.
 def private codebinK(var fs : FuncState?; opr : BinOpr; var e1 : expdesc?; var e2 : expdesc?; flip : int; line : int) {
-    var event : TMS = binopr2TM(opr)
+    let event : TMS = binopr2TM(opr)
     // K index
-    var v2 : int = e2.u.info
-    var op : OpCode = binopr2op(opr, BinOpr.OPR_ADD, OpCode.OP_ADDK)
+    let v2 : int = e2.u.info
+    let op : OpCode = binopr2op(opr, BinOpr.OPR_ADD, OpCode.OP_ADDK)
     finishbinexpval(fs, e1, e2, op, v2, flip, line, OpCode.OP_MMBINK, event)
 }
 
@@ -1474,16 +1451,16 @@ def private finishbinexpneg(var fs : FuncState?; var e1 : expdesc?; var e2 : exp
         // not an integer constant
         return 0
     } else {
-        var i2 : int64 = e2.u.ival
+        let i2 : int64 = e2.u.ival
         if (!(fitsC(i2) != 0 && fitsC(-i2) != 0)) {
             // not in the proper range
             return 0
         } else {
             // operating a small integer constant
-            var v2 : int = int(i2)
-            finishbinexpval(fs, e1, e2, op, -v2 + OFFSET_sC, 0, line, OpCode.OP_MMBINI, event)
+            let v2 : int = int(i2)
+            finishbinexpval(fs, e1, e2, op, int2sC(-v2), 0, line, OpCode.OP_MMBINI, event)
             // correct metamethod argument
-            fs.f.code[fs.pc - 1] = (fs.f.code[fs.pc - 1] & ~(~(~0u << uint(SIZE_B)) << uint(POS_B))) | ((uint(v2 + OFFSET_sC) << uint(POS_B)) &
+            fs.f.code[fs.pc - 1] = (fs.f.code[fs.pc - 1] & ~(~(~0u << uint(SIZE_B)) << uint(POS_B))) | ((uint(int2sC(v2)) << uint(POS_B)) &
                     (~(~0u << uint(SIZE_B)) << uint(POS_B)))
             // successfully coded
             return 1
@@ -1706,9 +1683,9 @@ def luaK_infix(var fs : FuncState?; op : BinOpr; var v : expdesc?) {
 def private codeconcat(var fs : FuncState?; var e1 : expdesc?; var e2 : expdesc?; line : int) {
     var ie2 : uint? = previousinstruction(fs)
     // is 'e2' a concatenation?
-    if (enum_from_int(type<OpCode>, int((*ie2 >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))) == OpCode.OP_CONCAT) {
+    if (GET_OPCODE(*ie2) == OpCode.OP_CONCAT) {
         // # of elements concatenated in 'e2'
-        var n : int = int((*ie2 >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u))
+        let n : int = GETARG_B(*ie2)
         freeexp(fs, e2)
         // correct first element ('e1')
         *ie2 = (*ie2 & ~(~(~0u << uint(SIZE_A)) << uint(POS_A))) | ((uint(e1.u.info) << uint(POS_A)) & (~(~0u << uint(SIZE_A)) << uint(POS_A)))
@@ -1727,7 +1704,7 @@ def private codeconcat(var fs : FuncState?; var e1 : expdesc?; var e2 : expdesc?
 [c_function]
 def luaK_posfix(var fs : FuncState?; var opr : BinOpr; var e1 : expdesc?; var e2 : expdesc?; line : int) {
     luaK_dischargevars(fs, e2)
-    if (uint(opr) <= uint(BinOpr.OPR_SHR) && constfolding(fs, int(uint(opr) + uint(LUA_OPADD)), e1, e2) != 0) {
+    if (foldbinop(opr) && constfolding(fs, int(uint(opr) + uint(LUA_OPADD)), e1, e2) != 0) {
         // done by folding
         return
     }
@@ -1823,13 +1800,13 @@ def luaK_fixline(var fs : FuncState?; line : int) {
 def luaK_settablesize(var fs : FuncState?; pc : int; ra : int; asize : int; hsize : int) {
     var inst : uint? = addr(fs.f.code[pc])
     // hash size
-    var rb : int = (hsize != 0) ? luaO_ceillog2(uint(hsize)) + 1 : 0
+    let rb : int = (hsize != 0) ? luaO_ceillog2(uint(hsize)) + 1 : 0
     // higher bits of array size
-    var extra : int = asize / (MAXARG_C + 1)
+    let extra : int = asize / (MAXARG_C + 1)
     // lower bits of array size
-    var rc : int = asize % (MAXARG_C + 1)
+    let rc : int = asize % (MAXARG_C + 1)
     // true iff needs extra argument
-    var k : int = int_of(extra > 0)
+    let k : int = int_of(extra > 0)
     *inst = (uint(OpCode.OP_NEWTABLE) << uint(POS_OP)) | (uint(ra) << uint(POS_A)) | (uint(rb) << uint(POS_B)) | (uint(rc) << uint(POS_C)) | (uint(k) <<
             uint(POS_k))
     inst[1] = (uint(OpCode.OP_EXTRAARG) << uint(POS_OP)) | (uint(extra) << uint(POS_A))
@@ -1847,7 +1824,7 @@ def luaK_setlist(var fs : FuncState?; base : int; var nelems : int; var tostore 
     if (nelems <= MAXARG_C) {
         luaK_codeABCk(fs, OpCode.OP_SETLIST, base, tostore, nelems, 0)
     } else {
-        var extra : int = nelems / (MAXARG_C + 1)
+        let extra : int = nelems / (MAXARG_C + 1)
         nelems %= MAXARG_C + 1
         luaK_codeABCk(fs, OpCode.OP_SETLIST, base, tostore, nelems, 1)
         codeextraarg(fs, extra)
@@ -1861,11 +1838,11 @@ def luaK_setlist(var fs : FuncState?; base : int; var nelems : int; var tostore 
 def private finaltarget(var code : uint?; var i : int) : int {
     // avoid infinite loops
     for (count in range(100)) {
-        var pc : uint = code[i]
-        if (enum_from_int(type<OpCode>, int((pc >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u))) != OpCode.OP_JMP) {
+        let pc : uint = code[i]
+        if (GET_OPCODE(pc) != OpCode.OP_JMP) {
             break
         } else {
-            i += int((pc >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ + 1
+            i += GETARG_sJ(pc) + 1
         }
     }
     return i
@@ -1880,7 +1857,7 @@ def luaK_finish(var fs : FuncState?) {
     i = 0
     while (i < fs.pc) {
         var pc : uint? = addr(p.code[i])
-        c_switch(enum_from_int(type<OpCode>, int((*pc >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u)))) {
+        c_switch(GET_OPCODE(*pc)) {
             case(OpCode.OP_RETURN0, OpCode.OP_RETURN1) {
                 if (!(fs.needclose != 0 || p.is_vararg != 0)) {
                     // no extra work
@@ -1905,7 +1882,7 @@ def luaK_finish(var fs : FuncState?) {
             }
             case(OpCode.OP_JMP) {
                 {
-                    var target : int = finaltarget(p.code, i)
+                    let target : int = finaltarget(p.code, i)
                     fixjump(fs, i, target)
                     break
                 }

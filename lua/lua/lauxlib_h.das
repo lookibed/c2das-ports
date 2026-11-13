@@ -3,6 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_macro
 require c_runtime/c_union
 require c_types
 require lobject_h_cluster
@@ -33,4 +34,30 @@ struct luaL_Stream {
 }
 
 include lauxlib_h.layout.das.inc
+
+// lauxlib.h:211: #define luaL_addsize(B,s) ((B)->n += (s))
+[c_macro]
+def luaL_addsize(var B : luaL_Buffer?; s : uint64) {
+    B.n += s
+}
+
+// lauxlib.h:211: #define luaL_addsize(B,s) ((B)->n += (s))
+[c_macro]
+def luaL_addsize(var B : luaL_Buffer?; s : int) {
+    B.n += uint64(s)
+}
+
+// lauxlib.h:204: #define luaL_buffaddr(bf) ((bf)->b)
+[c_macro]
+def luaL_buffaddr(var bf) : uint8? => bf.b
+
+// lauxlib.h:203: #define luaL_bufflen(bf) ((bf)->n)
+[c_macro]
+def luaL_bufflen(bf) => bf.n
+
+// lauxlib.h:213: #define luaL_buffsub(B,s) ((B)->n -= (s))
+[c_macro]
+def luaL_buffsub(var B; s) {
+    B.n -= uint64(s)
+}
 

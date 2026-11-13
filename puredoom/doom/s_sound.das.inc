@@ -346,7 +346,7 @@ def S_StopMusic {
         I_UnRegisterSong(mus_playing_s_sound.handle)
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(mus_playing_s_sound.data) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/s_sound.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1113/doom/work/src/s_sound.c:"))
             doom_concat(addr(buf[0]), doom_itoa(567, 10))
             I_Error(addr(buf[0]))
         }
@@ -358,7 +358,6 @@ def S_StopMusic {
 
 [c_function]
 def S_StopChannel(cnum : int) {
-    var i : int
     var c : channel_t? = addr(channels_s_sound[cnum])
     if (c.sfxinfo != null) {
         // stop the sound playing
@@ -367,12 +366,10 @@ def S_StopChannel(cnum : int) {
         }
         // check to see
         // if other channels are playing the sound
-        i = 0
-        while (i < numChannels) {
+        for (i in range(numChannels)) {
             if (cnum != i && intptr(c.sfxinfo) == intptr(channels_s_sound[i].sfxinfo)) {
                 break
             }
-            i++
         }
         // degrade usefulness of sound data
         c.sfxinfo.usefulness--

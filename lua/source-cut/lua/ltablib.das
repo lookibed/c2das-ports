@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/c_switch
 require c_runtime/cstr
 require c_runtime/int_of
@@ -33,6 +34,42 @@ let private RANLIMIT = 100u
 let private LUA_TFUNCTION = 6
 let private LUA_VERSION_NUM = 504
 let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64(typeinfo sizeof(type<double>))
+
+// lua.h:376: #define lua_pop(L,n) lua_settop(L, -(n)-1)
+[c_macro]
+def private lua_pop(var L; n) {
+    lua_settop(L, -n - 1)
+}
+
+// lua.h:391: #define lua_isnoneornil(L, n) (lua_type(L, (n)) <= 0)
+[c_macro]
+def private lua_isnoneornil(var L; n) => lua_type(L, n) <= 0
+
+// lauxlib.h:142: #define luaL_typename(L,i) lua_typename(L, lua_type(L,(i)))
+[c_macro]
+def private luaL_typename(var L; i) : uint8? => lua_typename(L, lua_type(L, i))
+
+// lua.h:401: #define lua_insert(L,idx) lua_rotate(L, (idx), 1)
+[c_macro]
+def private lua_insert(var L; idx) {
+    lua_rotate(L, idx, 1)
+}
+
+// lua.h:387: #define lua_isnil(L,n) (lua_type(L, (n)) == LUA_TNIL)
+[c_macro]
+def private lua_isnil(var L; n) => lua_type(L, n) == LUA_TNIL
+
+// lua.h:294: #define lua_call(L,n,r) lua_callk(L, (n), (r), 0, NULL)
+[c_macro]
+def private lua_call(var L; n; r) {
+    lua_callk(L, n, r, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+}
+
+// lauxlib.h:47: #define luaL_checkversion(L) luaL_checkversion_(L, LUA_VERSION_NUM, LUAL_NUMSIZES)
+[c_macro]
+def private luaL_checkversion(var L) {
+    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+}
 
 def private checkfield(var L : lua_State?; var key : uint8?; n : int) : int {
     lua_pushstring(L, key)
@@ -76,7 +113,7 @@ def private checktab(var L : lua_State?; arg : int; what : int) {
         }
         if (_t5) {
             // pop metatable and tested metamethods
-            lua_settop(L, -n - 1)
+            lua_pop(L, n)
         } else {
             // force an error
             luaL_checktype(L, arg, LUA_TTABLE)
@@ -127,7 +164,7 @@ def private tinsert(var L : lua_State?) : int {
 
 def private tremove(var L : lua_State?) : int {
     checktab(L, 1, TAB_RW | TAB_L)
-    var size : int64 = luaL_len(L, 1)
+    let size : int64 = luaL_len(L, 1)
     var pos : int64 = luaL_optinteger(L, 2, size)
     // validate 'pos' if given
     if (pos != size) {
@@ -153,11 +190,11 @@ def private tremove(var L : lua_State?) : int {
 // "possible" means destination after original range, or smaller
 // than origin, or copying to another table.
 def private tmove(var L : lua_State?) : int {
-    var f : int64 = luaL_checkinteger(L, 2)
-    var e : int64 = luaL_checkinteger(L, 3)
-    var t : int64 = luaL_checkinteger(L, 4)
+    let f : int64 = luaL_checkinteger(L, 2)
+    let e : int64 = luaL_checkinteger(L, 3)
+    let t : int64 = luaL_checkinteger(L, 4)
     // destination table
-    var tt : int = !(lua_type(L, 5) <= 0) ? 5 : 1
+    let tt : int = !lua_isnoneornil(L, 5) ? 5 : 1
     checktab(L, 1, TAB_R)
     checktab(L, tt, TAB_W)
     // otherwise, nothing to move
@@ -190,7 +227,7 @@ def private tmove(var L : lua_State?) : int {
 def private addfield(var L : lua_State?; var b : luaL_Buffer?; i : int64) {
     lua_geti(L, 1, i)
     if (lua_isstring(L, -1) == 0) {
-        luaL_error`va(L, cstr("invalid value (%s) at index %I in table for 'concat'"), (lua_typename(L, lua_type(L, -1)), i))
+        luaL_error`va(L, cstr("invalid value (%s) at index %I in table for 'concat'"), (luaL_typename(L, -1), i))
     }
     luaL_addvalue(b)
 }
@@ -221,11 +258,11 @@ def private tconcat(var L : lua_State?) : int {
 def private tpack(var L : lua_State?) : int {
     var i : int
     // number of elements to pack
-    var n : int = lua_gettop(L)
+    let n : int = lua_gettop(L)
     // create result table
     lua_createtable(L, n, 1)
     // put it at index 1
-    lua_rotate(L, 1, 1)
+    lua_insert(L, 1)
     // assign elements
     i = n
     while (i >= 1) {
@@ -242,7 +279,7 @@ def private tpack(var L : lua_State?) : int {
 def private tunpack(var L : lua_State?) : int {
     var n : uint64
     var i : int64 = luaL_optinteger(L, 2, 1l)
-    var e : int64 = lua_type(L, 3) <= 0 ? luaL_len(L, 1) : luaL_checkinteger(L, 3)
+    let e : int64 = lua_isnoneornil(L, 3) ? luaL_len(L, 1) : luaL_checkinteger(L, 3)
     // empty range
     if (i > e) {
         return 0
@@ -299,7 +336,7 @@ def private set2(var L : lua_State?; i : uint; j : uint) {
 // index 'b' (according to the order of the sort).
 def private sort_comp(var L : lua_State?; a : int; b : int) : int {
     // no function?
-    if (lua_type(L, 2) == LUA_TNIL) {
+    if (lua_isnil(L, 2)) {
         // a < b
         return lua_compare(L, a, b, LUA_OPLT)
     } else {
@@ -312,11 +349,11 @@ def private sort_comp(var L : lua_State?; a : int; b : int) : int {
         // -2 to compensate function and 'a'
         lua_pushvalue(L, b - 2)
         // call function
-        lua_callk(L, 2, 1, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+        lua_call(L, 2, 1)
         // get result
         res = lua_toboolean(L, -1)
         // pop result
-        lua_settop(L, -1 - 1)
+        lua_pop(L, 1)
         return res
     }
 }
@@ -345,7 +382,7 @@ def private partition(var L : lua_State?; lo : uint; up : uint) : uint {
                 luaL_error`va(L, cstr("invalid order function for sorting"), VaNone())
             }
             // remove a[i]
-            lua_settop(L, -1 - 1)
+            lua_pop(L, 1)
         }
         // after the loop, a[i] >= P and a[lo .. i - 1] < P
         // next loop: repeat --j while P < a[j]
@@ -360,14 +397,14 @@ def private partition(var L : lua_State?; lo : uint; up : uint) : uint {
                 luaL_error`va(L, cstr("invalid order function for sorting"), VaNone())
             }
             // remove a[j]
-            lua_settop(L, -1 - 1)
+            lua_pop(L, 1)
         }
         // after the loop, a[j] <= P and a[j + 1 .. up] >= P
         // no elements out of place?
         if (j < i) {
             // a[lo .. i - 1] <= P <= a[j + 1 .. i .. up]
             // pop a[j]
-            lua_settop(L, -1 - 1)
+            lua_pop(L, 1)
             // swap pivot (a[up - 1]) with a[i] to satisfy pos-condition
             set2(L, up - 1u, i)
             return i
@@ -382,8 +419,8 @@ def private partition(var L : lua_State?; lo : uint; up : uint) : uint {
 // "randomized" by 'rnd'
 def private choosePivot(lo : uint; up : uint; rnd : uint) : uint {
     // range/4
-    var r4 : uint = (up - lo) / 4u
-    var p : uint = rnd % (r4 * 2u) + (lo + r4)
+    let r4 : uint = (up - lo) / 4u
+    let p : uint = rnd % (r4 * 2u) + (lo + r4)
     return p
 }
 
@@ -404,7 +441,7 @@ def private auxsort(var L : lua_State?; var lo : uint; var up : uint; var rnd : 
             set2(L, lo, up)
         } else {
             // remove both values
-            lua_settop(L, -2 - 1)
+            lua_pop(L, 2)
         }
         // only 2 elements?
         if (up - lo == 1u) {
@@ -427,14 +464,14 @@ def private auxsort(var L : lua_State?; var lo : uint; var up : uint; var rnd : 
             set2(L, p, lo)
         } else {
             // remove a[lo]
-            lua_settop(L, -1 - 1)
+            lua_pop(L, 1)
             lua_geti(L, 1, int64(up))
             // a[up] < a[p]?
             if (sort_comp(L, -1, -2) != 0) {
                 // swap a[up] - a[p]
                 set2(L, p, up)
             } else {
-                lua_settop(L, -2 - 1)
+                lua_pop(L, 2)
             }
         }
         // only 3 elements?
@@ -478,12 +515,12 @@ def private auxsort(var L : lua_State?; var lo : uint; var up : uint; var rnd : 
 
 def private sort(var L : lua_State?) : int {
     checktab(L, 1, TAB_RW | TAB_L)
-    var n : int64 = luaL_len(L, 1)
+    let n : int64 = luaL_len(L, 1)
     // non-trivial interval?
     if (n > 1l) {
         let _t0 = n < 2147483647l || luaL_argerror(L, 1, cstr("array too big")) != 0
         // is there a 2nd argument?
-        if (!(lua_type(L, 2) <= 0)) {
+        if (!lua_isnoneornil(L, 2)) {
             // must be a function
             luaL_checktype(L, 2, LUA_TFUNCTION)
         }
@@ -496,7 +533,7 @@ def private sort(var L : lua_State?) : int {
 
 [c_function]
 def luaopen_table(var L : lua_State?) : int {
-    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+    luaL_checkversion(L)
     lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[8]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - 1ul))
     luaL_setfuncs(L, addr(tab_funcs[0]), 0)
     return 1

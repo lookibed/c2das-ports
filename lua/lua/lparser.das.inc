@@ -31,7 +31,7 @@ def private error_expected(var ls : LexState?; token : int) {
 def private errorlimit(var fs : FuncState?; limit : int; var what : uint8?) {
     var L : lua_State? = fs.ls.L
     var msg : uint8?
-    var line : int = fs.f.linedefined
+    let line : int = fs.f.linedefined
     var _c_where : uint8? = (line == 0) ? reinterpret<uint8?>(cstr("main function")) : luaO_pushfstring`va(L, cstr("function at line %d"), (line,))
     msg = luaO_pushfstring`va(L, cstr("too many %s (limit is %d) in %s"), (what, limit, _c_where))
     luaX_syntaxerror(fs.ls, msg)
@@ -124,8 +124,8 @@ def private registerlocalvar(var ls : LexState?; var fs : FuncState?; var varnam
     }
     f.locvars[int(fs.ndebugvars)].varname = varname
     f.locvars[int(fs.ndebugvars)].startpc = fs.pc
-    if ((int(f.marked) & (1 << BLACKBIT)) != 0 && (int(varname.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-        luaC_barrier_(ls.L, addr(reinterpret<GCUnion?>(f).gc), addr(reinterpret<GCUnion?>(varname).gc))
+    if (isblack(f) != 0 && iswhite(varname) != 0) {
+        luaC_barrier_(ls.L, obj2gco(f), obj2gco(varname))
     }
     let _t1 = fs.ndebugvars
     fs.ndebugvars = int16(int(fs.ndebugvars) + 1)
@@ -197,7 +197,7 @@ def private localdebuginfo(var fs : FuncState?; vidx : int) : LocVar? {
         // no debug info. for constants
         return null
     } else {
-        var idx : int = int(vd.vd.pidx)
+        let idx : int = int(vd.vd.pidx)
         return addr(fs.f.locvars[idx])
     }
 }
@@ -260,7 +260,7 @@ def private adjustlocalvars(var ls : LexState?; nvars : int) {
     for (i in range(nvars)) {
         let _t0 = fs.nactvar
         fs.nactvar = uint8(uint(fs.nactvar) + 1)
-        var vidx : int = int(_t0)
+        let vidx : int = int(_t0)
         var _c_var : Vardesc? = getlocalvardesc(fs, vidx)
         let _t1 = reglevel
         reglevel++
@@ -287,14 +287,11 @@ def private removevars(var fs : FuncState?; tolevel : int) {
 // with the given 'name'.
 [c_function]
 def private searchupvalue(var fs : FuncState?; var name : TString?) : int {
-    var i : int
     var up : Upvaldesc? = fs.f.upvalues
-    i = 0
-    while (i < int(fs.nups)) {
-        if (intptr(up[i].name) == intptr(name)) {
+    for (i in range(int(fs.nups))) {
+        if (eqstr(up[i].name, name)) {
             return i
         }
-        i++
     }
     // not found
     return -1
@@ -334,8 +331,8 @@ def private newupvalue(var fs : FuncState?; var name : TString?; var v : expdesc
         up.kind = prev.f.upvalues[v.u.info].kind
     }
     up.name = name
-    if ((int(fs.f.marked) & (1 << BLACKBIT)) != 0 && (int(name.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-        luaC_barrier_(fs.ls.L, addr(reinterpret<GCUnion?>(fs.f).gc), addr(reinterpret<GCUnion?>(name).gc))
+    if (isblack(fs.f) != 0 && iswhite(name) != 0) {
+        luaC_barrier_(fs.ls.L, obj2gco(fs.f), obj2gco(name))
     }
     return int(fs.nups) - 1
 }
@@ -349,7 +346,7 @@ def private searchvar(var fs : FuncState?; var n : TString?; var _c_var : expdes
     while (i >= 0) {
         var vd : Vardesc? = getlocalvardesc(fs, i)
         // found?
-        if (intptr(n) == intptr(vd.vd.name)) {
+        if (eqstr(n, vd.vd.name)) {
             // compile-time constant?
             if (int(vd.vd.kind) == RDKCTC) {
                 init_exp(_c_var, expkind.VCONST, fs.firstlocal + i)
@@ -395,7 +392,7 @@ def private singlevaraux(var fs : FuncState?; var n : TString?; var _c_var : exp
         init_exp(_c_var, expkind.VVOID, 0)
     } else {
         // look up locals at current level
-        var v : int = searchvar(fs, n, _c_var)
+        let v : int = searchvar(fs, n, _c_var)
         // found?
         if (v >= 0) {
             if (v == int(expkind.VLOCAL) && base == 0) {
@@ -453,7 +450,7 @@ def private singlevar(var ls : LexState?; var _c_var : expdesc?) {
 def private adjust_assign(var ls : LexState?; nvars : int; nexps : int; var e : expdesc?) {
     var fs : FuncState? = ls.fs
     // extra values needed
-    var needed : int = nvars - nexps
+    let needed : int = nvars - nexps
     // last expression has multiple returns?
     if (e.k == expkind.VCALL || e.k == expkind.VVARARG) {
         // discount last expression itself
@@ -523,17 +520,14 @@ def private solvegoto(var ls : LexState?; g : int; var _c_label : Labeldesc?) {
 // Search for an active label with the given name.
 [c_function]
 def private findlabel(var ls : LexState?; var name : TString?) : Labeldesc? {
-    var i : int
     var dyd : Dyndata? = ls.dyd
     // check labels in current function for a match
-    i = ls.fs.firstlabel
-    while (i < dyd._c_label.n) {
+    for (i in range(ls.fs.firstlabel, dyd._c_label.n)) {
         var lb : Labeldesc? = addr(dyd._c_label.arr[i])
         // correct label?
-        if (intptr(lb.name) == intptr(name)) {
+        if (eqstr(lb.name, name)) {
             return lb
         }
-        i++
     }
     // label not found
     return null
@@ -542,7 +536,7 @@ def private findlabel(var ls : LexState?; var name : TString?) : Labeldesc? {
 // Adds a new label/goto in the corresponding list.
 [c_function]
 def private newlabelentry(var ls : LexState?; var l : Labellist?; var name : TString?; line : int; pc : int) : int {
-    var n : int = l.n
+    let n : int = l.n
     l.arr = reinterpret<Labeldesc?>(luaM_growaux_(ls.L, reinterpret<void?>(l.arr), n, addr(l.size), typeinfo sizeof(type<Labeldesc>),
             int(32767ul <= MAX_SIZET / uint64(typeinfo sizeof(type<Labeldesc>)) ? 32767u : uint(MAX_SIZET / uint64(typeinfo sizeof(type<Labeldesc>)))),
             cstr("labels/gotos")))
@@ -569,7 +563,7 @@ def private solvegotos(var ls : LexState?; var lb : Labeldesc?) : int {
     var i : int = ls.fs.bl.firstgoto
     var needsclose : int = 0
     while (i < gl.n) {
-        if (intptr(gl.arr[i].name) == intptr(lb.name)) {
+        if (eqstr(gl.arr[i].name, lb.name)) {
             needsclose |= int(gl.arr[i].close)
             // will remove 'i' from the list
             solvegoto(ls, i, lb)
@@ -589,7 +583,7 @@ def private solvegotos(var ls : LexState?; var lb : Labeldesc?) : int {
 def private createlabel(var ls : LexState?; var name : TString?; line : int; last : int) : int {
     var fs : FuncState? = ls.fs
     var ll : Labellist? = addr(ls.dyd._c_label)
-    var l : int = newlabelentry(ls, ll, name, line, luaK_getlabel(fs))
+    let l : int = newlabelentry(ls, ll, name, line, luaK_getlabel(fs))
     // label is last no-op statement in the block?
     if (last != 0) {
         // assume that locals are already out of scope
@@ -656,7 +650,7 @@ def private leaveblock(var fs : FuncState?) {
     var ls : LexState? = fs.ls
     var hasclose : int = 0
     // level outside the block
-    var stklevel : int = reglevel(fs, int(bl.nactvar))
+    let stklevel : int = reglevel(fs, int(bl.nactvar))
     // remove block locals
     removevars(fs, int(bl.nactvar))
     // back to level on entry
@@ -712,9 +706,7 @@ def private addprototype(var ls : LexState?) : Proto? {
     fs.np++
     clp = luaF_newproto(L)
     f.p[_t1] = clp
-    if ((int(f.marked) & (1 << BLACKBIT)) != 0 && (int(clp.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-        luaC_barrier_(L, addr(reinterpret<GCUnion?>(f).gc), addr(reinterpret<GCUnion?>(clp).gc))
-    }
+    luaC_objbarrier(L, f, clp)
     return clp
 }
 
@@ -729,7 +721,6 @@ def private codeclosure(var ls : LexState?; var v : expdesc?) {
     luaK_exp2nextreg(fs, v)
 }
 
-[c_function]
 def private open_func(var ls : LexState?; var fs : FuncState?; var bl : BlockCnt?) {
     var f : Proto? = fs.f
     // linked list of funcstates
@@ -752,8 +743,8 @@ def private open_func(var ls : LexState?; var fs : FuncState?; var bl : BlockCnt
     fs.firstlabel = ls.dyd._c_label.n
     fs.bl = null
     f.source = ls.source
-    if ((int(f.marked) & (1 << BLACKBIT)) != 0 && (int(f.source.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-        luaC_barrier_(ls.L, addr(reinterpret<GCUnion?>(f).gc), addr(reinterpret<GCUnion?>(f.source).gc))
+    if (isblack(f) != 0 && iswhite(f.source) != 0) {
+        luaC_barrier_(ls.L, obj2gco(f), obj2gco(f.source))
     }
     // registers 0/1 are always valid
     f.maxstacksize = 2u8
@@ -780,9 +771,7 @@ def private close_func(var ls : LexState?) {
     f.upvalues = reinterpret<Upvaldesc?>(luaM_shrinkvector_(L, reinterpret<void?>(f.upvalues), addr(f.sizeupvalues), int(fs.nups),
             typeinfo sizeof(type<Upvaldesc>)))
     ls.fs = fs.prev
-    if (L.l_G.GCdebt > 0l) {
-        luaC_step(L)
-    }
+    luaC_checkGC(L)
 }
 
 // check whether current token is in the follow set of a block.
@@ -839,7 +828,7 @@ def private yindex(var ls : LexState?; var v : expdesc?) {
 def private recfield(var ls : LexState?; var cc : ConsControl?) {
     // recfield -> (NAME | '['exp']') = exp
     var fs : FuncState? = ls.fs
-    var reg : int = int(ls.fs.freereg)
+    let reg : int = int(ls.fs.freereg)
     var tab : expdesc
     var key : expdesc
     var val : expdesc
@@ -883,7 +872,7 @@ def private lastlistfield(var fs : FuncState?; var cc : ConsControl?) {
         return
     }
     if (cc.v.k == expkind.VCALL || cc.v.k == expkind.VVARARG) {
-        luaK_setreturns(fs, addr(cc.v), LUA_MULTRET)
+        luaK_setmultret(fs, addr(cc.v))
         luaK_setlist(fs, cc.t.u.info, cc.na, LUA_MULTRET)
         // do not count last expression (unknown number of elements)
         cc.na--
@@ -932,8 +921,8 @@ def private constructor(var ls : LexState?; var t : expdesc?) {
     // constructor -> '{' [ field { sep field } [sep] ] '}'
     // sep -> ',' | ';'
     var fs : FuncState? = ls.fs
-    var line : int = ls.linenumber
-    var pc : int = luaK_codeABCk(fs, OpCode.OP_NEWTABLE, 0, 0, 0, 0)
+    let line : int = ls.linenumber
+    let pc : int = luaK_codeABCk(fs, OpCode.OP_NEWTABLE, 0, 0, 0, 0)
     var cc : ConsControl
     // space for extra arg.
     luaK_code(fs, 0u)
@@ -1042,7 +1031,7 @@ def private funcargs(var ls : LexState?; var f : expdesc?) {
     var args : expdesc
     var base : int
     var nparams : int
-    var line : int = ls.linenumber
+    let line : int = ls.linenumber
     c_switch(ls.t.token) {
         case('(') {
             // funcargs -> '(' [ explist ] ')'
@@ -1052,8 +1041,8 @@ def private funcargs(var ls : LexState?; var f : expdesc?) {
                 args.k = expkind.VVOID
             } else {
                 explist(ls, addr(args))
-                if (args.k == expkind.VCALL || args.k == expkind.VVARARG) {
-                    luaK_setreturns(fs, addr(args), LUA_MULTRET)
+                if (hasmultret(args.k)) {
+                    luaK_setmultret(fs, addr(args))
                 }
             }
             check_match(ls, ')', '(', line)
@@ -1077,7 +1066,7 @@ def private funcargs(var ls : LexState?; var f : expdesc?) {
     }
     // base register for call
     base = f.u.info
-    if (args.k == expkind.VCALL || args.k == expkind.VVARARG) {
+    if (hasmultret(args.k)) {
         // open call
         nparams = LUA_MULTRET
     } else {
@@ -1098,7 +1087,7 @@ def private primaryexp(var ls : LexState?; var v : expdesc?) {
     c_switch(ls.t.token) {
         case('(') {
             {
-                var line : int = ls.linenumber
+                let line : int = ls.linenumber
                 luaX_next(ls)
                 expr(ls, v)
                 check_match(ls, ')', '(', line)
@@ -1319,11 +1308,11 @@ def private getbinopr(op : int) : BinOpr {
 def private subexpr(var ls : LexState?; var v : expdesc?; limit : int) : BinOpr {
     var op : BinOpr
     var uop : UnOpr
-    luaE_incCstack(ls.L)
+    enterlevel(ls)
     uop = getunopr(ls.t.token)
     // prefix (unary) operator?
     if (uop != UnOpr.OPR_NOUNOPR) {
-        var line : int = ls.linenumber
+        let line : int = ls.linenumber
         // skip operator
         luaX_next(ls)
         subexpr(ls, v, UNARY_PRIORITY)
@@ -1336,7 +1325,7 @@ def private subexpr(var ls : LexState?; var v : expdesc?; limit : int) : BinOpr 
     while (op != BinOpr.OPR_NOBINOPR && int(priority[int(op)].left) > limit) {
         var v2 : expdesc
         var nextop : BinOpr
-        var line : int = ls.linenumber
+        let line : int = ls.linenumber
         // skip operator
         luaX_next(ls)
         luaK_infix(ls.fs, op, v)
@@ -1345,7 +1334,7 @@ def private subexpr(var ls : LexState?; var v : expdesc?; limit : int) : BinOpr 
         luaK_posfix(ls.fs, op, v, addr(v2), line)
         op = nextop
     }
-    ls.L.nCcalls--
+    leavelevel(ls)
     // return first untreated operator
     return op
 }
@@ -1371,7 +1360,7 @@ def private _c_block(var ls : LexState?) {
 def private check_conflict(var ls : LexState?; var lh : LHS_assign?; var v : expdesc?) {
     var fs : FuncState? = ls.fs
     // eventual position to save local variable
-    var extra : int = int(fs.freereg)
+    let extra : int = int(fs.freereg)
     var conflict : int = 0
     // check all previous assignments
     while (lh != null) {
@@ -1431,13 +1420,13 @@ def private restassign(var ls : LexState?; var lh : LHS_assign?; nvars : int) {
         var nv : LHS_assign
         nv.prev = lh
         suffixedexp(ls, addr(nv.v))
-        if (!(uint(expkind.VINDEXED) <= uint(nv.v.k) && uint(nv.v.k) <= uint(expkind.VINDEXSTR))) {
+        if (!vkisindexed(nv.v.k)) {
             check_conflict(ls, lh, addr(nv.v))
         }
         // control recursion depth
-        luaE_incCstack(ls.L)
+        enterlevel(ls)
         restassign(ls, addr(nv), nvars + 1)
-        ls.L.nCcalls--
+        leavelevel(ls)
     } else {
         // restassign -> '=' explist
         var nexps : int
@@ -1475,7 +1464,7 @@ def private cond(var ls : LexState?) : int {
 [c_function]
 def private gotostat(var ls : LexState?) {
     var fs : FuncState? = ls.fs
-    var line : int = ls.linenumber
+    let line : int = ls.linenumber
     // label's name
     var name : TString? = str_checkname(ls)
     var lb : Labeldesc? = findlabel(ls, name)
@@ -1487,7 +1476,7 @@ def private gotostat(var ls : LexState?) {
         // found a label
         // backward jump; will be resolved here
         // label level
-        var lblevel : int = reglevel(fs, int(lb.nactvar))
+        let lblevel : int = reglevel(fs, int(lb.nactvar))
         // leaving the scope of a variable?
         if (luaY_nvarstack(fs) > lblevel) {
             luaK_codeABCk(fs, OpCode.OP_CLOSE, lblevel, 0, 0, 0)
@@ -1499,7 +1488,7 @@ def private gotostat(var ls : LexState?) {
 
 // Break statement. Semantically equivalent to "goto break".
 def private breakstat(var ls : LexState?) {
-    var line : int = ls.linenumber
+    let line : int = ls.linenumber
     // skip break
     luaX_next(ls)
     newgotoentry(ls, luaS_newlstr(ls.L, cstr("break"), uint64(typeinfo sizeof(type<uint8[6]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul), line,
@@ -1546,7 +1535,7 @@ def private whilestat(var ls : LexState?; line : int) {
     enterblock(fs, addr(bl), 1u8)
     checknext(ls, int(RESERVED.TK_DO))
     _c_block(ls)
-    luaK_patchlist(fs, luaK_jump(fs), whileinit)
+    luaK_jumpto(fs, whileinit)
     check_match(ls, int(RESERVED.TK_END), int(RESERVED.TK_WHILE), line)
     leaveblock(fs)
     // false conditions finish the loop
@@ -1558,7 +1547,7 @@ def private repeatstat(var ls : LexState?; line : int) {
     // repeatstat -> REPEAT block UNTIL cond
     var condexit : int
     var fs : FuncState? = ls.fs
-    var repeat_init : int = luaK_getlabel(fs)
+    let repeat_init : int = luaK_getlabel(fs)
     var bl1 : BlockCnt
     var bl2 : BlockCnt
     // loop block
@@ -1576,7 +1565,7 @@ def private repeatstat(var ls : LexState?; line : int) {
     // upvalues?
     if (bl2.upval != 0) {
         // normal exit must jump over fix
-        var exit : int = luaK_jump(fs)
+        let exit : int = luaK_jump(fs)
         // repetition must close upvalues
         luaK_patchtohere(fs, condexit)
         luaK_codeABCk(fs, OpCode.OP_CLOSE, reglevel(fs, int(bl2.nactvar)), 0, 0, 0)
@@ -1613,7 +1602,7 @@ def private fixforjump(var fs : FuncState?; pc : int; dest : int; back : int) {
     if (offset > MAXARG_Bx) {
         luaX_syntaxerror(fs.ls, cstr("control structure too long"))
     }
-    *jmp = (*jmp & ~(~(~0u << uint(SIZE_Bx)) << uint(POS_k))) | ((uint(offset) << uint(POS_k)) & (~(~0u << uint(SIZE_Bx)) << uint(POS_k)))
+    *jmp = (*jmp & MASK0(SIZE_Bx, POS_k)) | ((uint(offset) << uint(POS_k)) & MASK1(SIZE_Bx, POS_k))
 }
 
 // Generate code for a 'for' loop.
@@ -1647,7 +1636,7 @@ def private forbody(var ls : LexState?; base : int; line : int; nvars : int; isg
 def private fornum(var ls : LexState?; var varname : TString?; line : int) {
     // fornum -> NAME = exp,exp[,exp] forbody
     var fs : FuncState? = ls.fs
-    var base : int = int(fs.freereg)
+    let base : int = int(fs.freereg)
     new_localvar(ls, luaX_newstring(ls, cstr("(for state)"), uint64(typeinfo sizeof(type<uint8[12]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul))
     new_localvar(ls, luaX_newstring(ls, cstr("(for state)"), uint64(typeinfo sizeof(type<uint8[12]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul))
     new_localvar(ls, luaX_newstring(ls, cstr("(for state)"), uint64(typeinfo sizeof(type<uint8[12]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul))
@@ -1679,7 +1668,7 @@ def private forlist(var ls : LexState?; var indexname : TString?) {
     // gen, state, control, toclose, 'indexname'
     var nvars : int = 5
     var line : int
-    var base : int = int(fs.freereg)
+    let base : int = int(fs.freereg)
     // create control variables
     new_localvar(ls, luaX_newstring(ls, cstr("(for state)"), uint64(typeinfo sizeof(type<uint8[12]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul))
     new_localvar(ls, luaX_newstring(ls, cstr("(for state)"), uint64(typeinfo sizeof(type<uint8[12]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul))
@@ -1748,7 +1737,7 @@ def private test_then_block(var ls : LexState?; var escapelist : int?) {
     checknext(ls, int(RESERVED.TK_THEN))
     // 'if x then break' ?
     if (ls.t.token == int(RESERVED.TK_BREAK)) {
-        var line : int = ls.linenumber
+        let line : int = ls.linenumber
         // will jump if condition is true
         luaK_goiffalse(ls.fs, addr(v))
         // skip 'break'
@@ -1812,7 +1801,7 @@ def private localfunc(var ls : LexState?) {
     var b : expdesc
     var fs : FuncState? = ls.fs
     // function's variable index
-    var fvar : int = int(fs.nactvar)
+    let fvar : int = int(fs.nactvar)
     // new local variable
     new_localvar(ls, str_checkname(ls))
     // enter its scope
@@ -1971,7 +1960,7 @@ def private retstat(var ls : LexState?) {
     } else {
         // optional return values
         nret = explist(ls, addr(e))
-        if (e.k == expkind.VCALL || e.k == expkind.VVARARG) {
+        if (hasmultret(e.k)) {
             luaK_setreturns(fs, addr(e), LUA_MULTRET)
             // tail call?
             if (e.k == expkind.VCALL && nret == 1 && fs.bl.insidetbc == 0) {
@@ -1998,8 +1987,8 @@ def private retstat(var ls : LexState?) {
 
 def private statement(var ls : LexState?) {
     // may be needed for error messages
-    var line : int = ls.linenumber
-    luaE_incCstack(ls.L)
+    let line : int = ls.linenumber
+    enterlevel(ls)
     c_switch(ls.t.token) {
         case(';') {
             // stat -> ';' (empty statement)
@@ -2086,7 +2075,7 @@ def private statement(var ls : LexState?) {
     }
     // free registers
     ls.fs.freereg = uint8(luaY_nvarstack(ls.fs))
-    ls.L.nCcalls--
+    leavelevel(ls)
 }
 
 // compiles the main function, which is a regular vararg function with an
@@ -2104,8 +2093,8 @@ def private mainfunc(var ls : LexState?; var fs : FuncState?) {
     env.idx = 0u8
     env.kind = uint8(VDKREG)
     env.name = ls.envn
-    if ((int(fs.f.marked) & (1 << BLACKBIT)) != 0 && (int(env.name.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-        luaC_barrier_(ls.L, addr(reinterpret<GCUnion?>(fs.f).gc), addr(reinterpret<GCUnion?>(env.name).gc))
+    if (isblack(fs.f) != 0 && iswhite(env.name) != 0) {
+        luaC_barrier_(ls.L, obj2gco(fs.f), obj2gco(env.name))
     }
     // read first token
     luaX_next(ls)
@@ -2123,31 +2112,31 @@ def luaY_parser(var L : lua_State?; var z : Zio?; var buff : Mbuffer?; var dyd :
     var cl : LClosure? = luaF_newLclosure(L, 1)
     {
         // anchor it (to avoid being collected)
-        var io : TValue? = addr(L.top.p.val)
+        var io : TValue? = s2v(L.top.p)
         var x_ : LClosure? = cl
-        io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8((LUA_TFUNCTION | (0 << 4)) | BIT_ISCOLLECTABLE)
+        io.value_.gc = obj2gco(x_)
+        settt_(io, ctb(LUA_TFUNCTION | (0 << 4)))
     }
     luaD_inctop(L)
     // create table for scanner
     lexstate.h = luaH_new(L)
     {
         // anchor it
-        var io : TValue? = addr(L.top.p.val)
+        var io : TValue? = s2v(L.top.p)
         var x_ : Table? = lexstate.h
-        io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8((LUA_TTABLE | (0 << 4)) | BIT_ISCOLLECTABLE)
+        io.value_.gc = obj2gco(x_)
+        settt_(io, ctb(LUA_TTABLE | (0 << 4)))
     }
     luaD_inctop(L)
     cl.p = luaF_newproto(L)
     funcstate.f = cl.p
-    if ((int(cl.marked) & (1 << BLACKBIT)) != 0 && (int(cl.p.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-        luaC_barrier_(L, addr(reinterpret<GCUnion?>(cl).gc), addr(reinterpret<GCUnion?>(cl.p).gc))
+    if (isblack(cl) != 0 && iswhite(cl.p) != 0) {
+        luaC_barrier_(L, obj2gco(cl), obj2gco(cl.p))
     }
     // create and anchor TString
     funcstate.f.source = luaS_new(L, name)
-    if ((int(funcstate.f.marked) & (1 << BLACKBIT)) != 0 && (int(funcstate.f.source.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-        luaC_barrier_(L, addr(reinterpret<GCUnion?>(funcstate.f).gc), addr(reinterpret<GCUnion?>(funcstate.f.source).gc))
+    if (isblack(funcstate.f) != 0 && iswhite(funcstate.f.source) != 0) {
+        luaC_barrier_(L, obj2gco(funcstate.f), obj2gco(funcstate.f.source))
     }
     lexstate.buff = buff
     lexstate.dyd = dyd

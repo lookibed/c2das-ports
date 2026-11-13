@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/cstr
 require lapi
 require lauxlib
@@ -27,6 +28,12 @@ var private loadedlibs : luaL_Reg[11] = fixed_array(luaL_Reg(name = cstr("_G"), 
         luaL_Reg(name = cstr("math"), func = @@luaopen_math), luaL_Reg(name = cstr("utf8"), func = @@luaopen_utf8),
         luaL_Reg(name = cstr("debug"), func = @@luaopen_debug), luaL_Reg(name = null, func = default<function<(var a0 : lua_State?) : int>>))
 
+// lua.h:376: #define lua_pop(L,n) lua_settop(L, -(n)-1)
+[c_macro]
+def private lua_pop(var L; n) {
+    lua_settop(L, -n - 1)
+}
+
 [c_function]
 def luaL_openlibs(var L : lua_State?) {
     var lib : luaL_Reg?
@@ -35,7 +42,7 @@ def luaL_openlibs(var L : lua_State?) {
     while (lib.func != null) {
         luaL_requiref(L, lib.name, lib.func, 1)
         // remove lib
-        lua_settop(L, -1 - 1)
+        lua_pop(L, 1)
         lib++
     }
 }

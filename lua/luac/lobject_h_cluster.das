@@ -3,9 +3,465 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/c_union
 require c_runtime/setjmp
 require ltm_h
+
+let private LUA_TBOOLEAN = 1
+let private LUA_TNIL = 0
+let private BIT_ISCOLLECTABLE = 1 << 6
+let private LUA_TNUMBER = 3
+let private LUA_TSTRING = 4
+let private CIST_C = 1 << 1
+let private LUA_TFUNCTION = 6
+let private CIST_RECST = 10
+let private CIST_OAH = 1 << 0
+let private LUA_NUMTYPES = 9
+let private LUA_EXTRASPACE = uint64(typeinfo sizeof(type<void?>))
+let private BITRAS = 1 << 7
+let private LUA_TTABLE = 5
+let private LUA_TUSERDATA = 7
+let private CIST_HOOKED = 1 << 3
+let private LUA_TLIGHTUSERDATA = 2
+let private LUA_TTHREAD = 8
+let private LUA_TDEADKEY = LUA_NUMTYPES + 2
+
+// lobject.h:114: #define settt_(o,t) ((o)->tt_=(t))
+[c_macro]
+def settt_(var o : TValue?; t : int) {
+    o.tt_ = uint8(t)
+}
+
+// lobject.h:114: #define settt_(o,t) ((o)->tt_=(t))
+[c_macro]
+def settt_(var o : TValue?; t : uint8) {
+    o.tt_ = t
+}
+
+// lobject.h:250: #define setbfvalue(obj) settt_(obj, LUA_VFALSE)
+[c_macro]
+def setbfvalue(var obj) {
+    settt_(obj, LUA_TBOOLEAN | (0 << 4))
+}
+
+// lobject.h:251: #define setbtvalue(obj) settt_(obj, LUA_VTRUE)
+[c_macro]
+def setbtvalue(var obj) {
+    settt_(obj, LUA_TBOOLEAN | (1 << 4))
+}
+
+// lobject.h:200: #define setnilvalue(obj) settt_(obj, LUA_VNIL)
+[c_macro]
+def setnilvalue(var obj) {
+    settt_(obj, LUA_TNIL | (0 << 4))
+}
+
+// lstate.h:390: #define obj2gco(v) check_exp((v)->tt >= LUA_TSTRING, &(cast_u(v)->gc))
+[c_macro, c_function]
+def obj2gco(var v) : GCObject? => addr(reinterpret<GCUnion?>(v).gc)
+
+// lobject.h:303: #define ctb(t) ((t) | BIT_ISCOLLECTABLE)
+[c_macro]
+def ctb(t : uint8) => int(t) | BIT_ISCOLLECTABLE
+
+// lobject.h:303: #define ctb(t) ((t) | BIT_ISCOLLECTABLE)
+[c_macro]
+def ctb(t : int) => t | BIT_ISCOLLECTABLE
+
+// lobject.h:77: #define rawtt(o) ((o)->tt_)
+[c_macro]
+def rawtt(o) => o.tt_
+
+// lobject.h:91: #define checktag(o,t) (rawtt(o) == (t))
+[c_macro]
+def checktag(o; t) => int(rawtt(o)) == t
+
+// lobject.h:328: #define ttisinteger(o) checktag((o), LUA_VNUMINT)
+[c_macro]
+def ttisinteger(o) => checktag(o, LUA_TNUMBER | (0 << 4))
+
+// lobject.h:333: #define ivalue(o) check_exp(ttisinteger(o), val_(o).i)
+[c_macro]
+def ivalue(var o) => o.value_.i
+
+// lobject.h:83: #define withvariant(t) ((t) & 0x3F)
+[c_macro]
+def withvariant(t) => int(t) & 63
+
+// lobject.h:84: #define ttypetag(o) withvariant(rawtt(o))
+[c_macro]
+def ttypetag(o) => int(rawtt(o)) & 63
+
+// lobject.h:300: #define iscollectable(o) (rawtt(o) & BIT_ISCOLLECTABLE)
+[c_macro]
+def iscollectable(o) => int(rawtt(o)) & BIT_ISCOLLECTABLE
+
+// lobject.h:305: #define gcvalue(o) check_exp(iscollectable(o), val_(o).gc)
+[c_macro]
+def gcvalue(var o) : GCObject? => o.value_.gc
+
+// lobject.h:332: #define fltvalue(o) check_exp(ttisfloat(o), val_(o).n)
+[c_macro]
+def fltvalue(var o) => o.value_.n
+
+// lstate.h:373: #define gco2ts(o) check_exp(novariant((o)->tt) == LUA_TSTRING, &((cast_u(o))->ts))
+[c_macro, c_function]
+def gco2ts(var o) : TString? => addr(reinterpret<GCUnion?>(o).ts)
+
+// lobject.h:369: #define tsvalue(o) check_exp(ttisstring(o), gco2ts(val_(o).gc))
+[c_macro]
+def tsvalue(var o) : TString? => gco2ts(o.value_.gc)
+
+// lobject.h:364: #define ttisshrstring(o) checktag((o), ctb(LUA_VSHRSTR))
+[c_macro]
+def ttisshrstring(o) => checktag(o, ctb(LUA_TSTRING | (0 << 4)))
+
+// lobject.h:330: #define nvalue(o) check_exp(ttisnumber(o), (ttisinteger(o) ? cast_num(ivalue(o)) : fltvalue(o)))
+[c_macro]
+def nvalue(var o) => ttisinteger(o) ? double(ivalue(o)) : fltvalue(o)
+
+// lobject.h:172: #define s2v(o) (&(o)->val)
+[c_macro, c_function]
+def s2v(var o) : TValue? => addr(o.val)
+
+// lobject.h:602: #define clLvalue(o) check_exp(ttisLclosure(o), gco2lcl(val_(o).gc))
+[c_macro, c_function]
+def clLvalue(var o) : LClosure? => addr(reinterpret<GCUnion?>(o.value_.gc).cl.l)
+
+// lstate.h:376: #define gco2lcl(o) check_exp((o)->tt == LUA_VLCL, &((cast_u(o))->cl.l))
+[c_macro, c_function]
+def gco2lcl(var o) : LClosure? => addr(reinterpret<GCUnion?>(o).cl.l)
+
+// lstate.h:241: #define isLua(ci) (!((ci)->callstatus & CIST_C))
+[c_macro]
+def isLua(ci) => (int(ci.callstatus) & CIST_C) == 0
+
+// lobject.h:593: #define ttisLclosure(o) checktag((o), ctb(LUA_VLCL))
+[c_macro]
+def ttisLclosure(o) => checktag(o, ctb(LUA_TFUNCTION | (0 << 4)))
+
+// lobject.h:599: #define isLfunction(o) ttisLclosure(o)
+[c_macro]
+def isLfunction(o) => ttisLclosure(o)
+
+// lobject.h:595: #define ttisCclosure(o) checktag((o), ctb(LUA_VCCL))
+[c_macro]
+def ttisCclosure(o) => checktag(o, ctb(LUA_TFUNCTION | (2 << 4)))
+
+// lobject.h:596: #define ttisclosure(o) (ttisLclosure(o) || ttisCclosure(o))
+[c_macro]
+def ttisclosure(o) => ttisLclosure(o) || ttisCclosure(o)
+
+// lobject.h:80: #define novariant(t) ((t) & 0x0F)
+[c_macro]
+def novariant(t : uint8) => int(t) & 15
+
+// lobject.h:80: #define novariant(t) ((t) & 0x0F)
+[c_macro]
+def novariant(t : int) => t & 15
+
+// lobject.h:87: #define ttype(o) (novariant(rawtt(o)))
+[c_macro]
+def ttype(o) => int(rawtt(o)) & 15
+
+// lobject.h:92: #define checktype(o,t) (ttype(o) == (t))
+[c_macro]
+def checktype(o; t) => ttype(o) == t
+
+// lobject.h:363: #define ttisstring(o) checktype((o), LUA_TSTRING)
+[c_macro]
+def ttisstring(o) => checktype(o, LUA_TSTRING)
+
+// lstate.h:335: #define G(L) (L->l_G)
+[c_macro]
+def G(var L) : global_State? => L.l_G
+
+// lobject.h:326: #define ttisnumber(o) checktype((o), LUA_TNUMBER)
+[c_macro]
+def ttisnumber(o) => checktype(o, LUA_TNUMBER)
+
+// lobject.h:410: #define tsslen(s) ((s)->shrlen != 0xFF ? (s)->shrlen : (s)->u.lnglen)
+[c_macro]
+def tsslen(s) => s.shrlen != 255 ? uint64(s.shrlen) : s.u.lnglen
+
+// lstate.h:147: #define stacksize(th) cast_int((th)->stack_last.p - (th)->stack.p)
+[c_macro, c_function]
+def stacksize(th) => int(int64(th.stack_last.p - th.stack.p))
+
+// lobject.h:193: #define ttisnil(v) checktype((v), LUA_TNIL)
+[c_macro]
+def ttisnil(v) => checktype(v, LUA_TNIL)
+
+// lstate.h:377: #define gco2ccl(o) check_exp((o)->tt == LUA_VCCL, &((cast_u(o))->cl.c))
+[c_macro, c_function]
+def gco2ccl(var o) : CClosure? => addr(reinterpret<GCUnion?>(o).cl.c)
+
+// lobject.h:604: #define clCvalue(o) check_exp(ttisCclosure(o), gco2ccl(val_(o).gc))
+[c_macro]
+def clCvalue(var o) : CClosure? => gco2ccl(o.value_.gc)
+
+// lobject.h:603: #define fvalue(o) check_exp(ttislcf(o), val_(o).f)
+[c_macro]
+def fvalue(var o) => o.value_.f
+
+// lstate.h:107: #define getCcalls(L) ((L)->nCcalls & 0xffff)
+[c_macro]
+def getCcalls(L) => L.nCcalls & 65535u
+
+// lstate.h:233: #define getcistrecst(ci) (((ci)->callstatus >> CIST_RECST) & 7)
+[c_macro]
+def getcistrecst(ci) => (int(ci.callstatus) >> CIST_RECST) & 7
+
+// lstate.h:248: #define getoah(st) ((st) & CIST_OAH)
+[c_macro]
+def getoah(st) => int(st) & CIST_OAH
+
+// lstate.h:234: #define setcistrecst(ci,st) check_exp(((st) & 7) == (st), ((ci)->callstatus = ((ci)->callstatus & ~(7 << CIST_RECST)) | ((st) << CIST_RECST)))
+[c_macro]
+def setcistrecst(var ci; st) {
+    ci.callstatus = uint16((int(ci.callstatus) & ~(7 << CIST_RECST)) | (st << CIST_RECST))
+}
+
+// lstate.h:104: #define yieldable(L) (((L)->nCcalls & 0xffff0000) == 0)
+[c_macro]
+def yieldable(L) => (L.nCcalls & 4294901760u) == 0u
+
+// lstate.h:111: #define incnny(L) ((L)->nCcalls += 0x10000)
+[c_macro]
+def incnny(var L) {
+    L.nCcalls += 65536u
+}
+
+// lstate.h:114: #define decnny(L) ((L)->nCcalls -= 0x10000)
+[c_macro]
+def decnny(var L) {
+    L.nCcalls -= 65536u
+}
+
+// lstate.h:383: #define gco2upv(o) check_exp((o)->tt == LUA_VUPVAL, &((cast_u(o))->upv))
+[c_macro, c_function]
+def gco2upv(var o) : UpVal? => addr(reinterpret<GCUnion?>(o).upv)
+
+// lobject.h:243: #define ttisfalse(o) checktag((o), LUA_VFALSE)
+[c_macro]
+def ttisfalse(o) => checktag(o, LUA_TBOOLEAN | (0 << 4))
+
+// lstate.h:381: #define gco2p(o) check_exp((o)->tt == LUA_VPROTO, &((cast_u(o))->p))
+[c_macro, c_function]
+def gco2p(var o) : Proto? => addr(reinterpret<GCUnion?>(o).p)
+
+// lstate.h:380: #define gco2t(o) check_exp((o)->tt == LUA_VTABLE, &((cast_u(o))->h))
+[c_macro, c_function]
+def gco2t(var o) : Table? => addr(reinterpret<GCUnion?>(o).h)
+
+// lstate.h:382: #define gco2th(o) check_exp((o)->tt == LUA_VTHREAD, &((cast_u(o))->th))
+[c_macro, c_function]
+def gco2th(var o) : lua_State? => addr(reinterpret<GCUnion?>(o).th)
+
+// lstate.h:375: #define gco2u(o) check_exp((o)->tt == LUA_VUSERDATA, &((cast_u(o))->u))
+[c_macro, c_function]
+def gco2u(var o) : Udata? => addr(reinterpret<GCUnion?>(o).u)
+
+// lobject.h:753: #define keytt(node) ((node)->u.key_tt)
+[c_macro]
+def keytt(node) => node.u.key_tt
+
+// lobject.h:764: #define keyiscollectable(n) (keytt(n) & BIT_ISCOLLECTABLE)
+[c_macro]
+def keyiscollectable(n) => int(keytt(n)) & BIT_ISCOLLECTABLE
+
+// lobject.h:776: #define setdeadkey(node) (keytt(node) = LUA_TDEADKEY)
+[c_macro]
+def setdeadkey(var node) {
+    node.u.key_tt = uint8(LUA_TDEADKEY)
+}
+
+// lobject.h:790: #define twoto(x) (1<<(x))
+[c_macro]
+def twoto(x : uint8) => 1 << int(x)
+
+// lobject.h:790: #define twoto(x) (1<<(x))
+[c_macro]
+def twoto(x : int) => 1 << x
+
+// lobject.h:791: #define sizenode(t) (twoto((t)->lsizenode))
+[c_macro]
+def sizenode(t) => twoto(t.lsizenode)
+
+// lobject.h:217: #define isempty(v) ttisnil(v)
+[c_macro]
+def isempty(v) => ttisnil(v)
+
+// lobject.h:766: #define gckey(n) (keyval(n).gc)
+[c_macro]
+def gckey(var n) : GCObject? => n.u.key_val.gc
+
+// lobject.h:767: #define gckeyN(n) (keyiscollectable(n) ? gckey(n) : NULL)
+[c_macro]
+def gckeyN(var n) : GCObject? => keyiscollectable(n) != 0 ? n.u.key_val.gc : null
+
+// lobject.h:225: #define setempty(v) settt_(v, LUA_VEMPTY)
+[c_macro]
+def setempty(var v) {
+    settt_(v, LUA_TNIL | (1 << 4))
+}
+
+// lstate.h:394: #define gettotalbytes(g) cast(lu_mem, (g)->totalbytes + (g)->GCdebt)
+[c_macro]
+def gettotalbytes(g) => uint64(g.totalbytes + g.GCdebt)
+
+// lobject.h:760: #define keystrval(node) (gco2ts(keyval(node).gc))
+[c_macro, c_function]
+def keystrval(var node : GCUnion?) : TString? => addr(node.ts)
+
+// lobject.h:760: #define keystrval(node) (gco2ts(keyval(node).gc))
+[c_macro, c_function]
+def keystrval(var node : Node?) : TString? => gco2ts(node.u.key_val.gc)
+
+// lstate.h:341: #define completestate(g) ttisnil(&g->nilvalue)
+[c_macro, c_function]
+def completestate(g) => ttisnil(addr(g.nilvalue))
+
+// lobject.h:327: #define ttisfloat(o) checktag((o), LUA_VNUMFLT)
+[c_macro]
+def ttisfloat(o) => checktag(o, LUA_TNUMBER | (1 << 4))
+
+// lua.h:371: #define lua_getextraspace(L) ((void *)((char *)(L) - LUA_EXTRASPACE))
+[c_macro, c_function]
+def lua_getextraspace(var L) : void? => reinterpret<void?>(reinterpret<uint8?>(L) + -int64(LUA_EXTRASPACE))
+
+// lobject.h:786: #define lmod(s,size) (check_exp((size&(size-1))==0, (cast_int((s) & ((size)-1)))))
+[c_macro]
+def lmod(s : uint; size : int) => int(s & uint(size - 1))
+
+// lobject.h:786: #define lmod(s,size) (check_exp((size&(size-1))==0, (cast_int((s) & ((size)-1)))))
+[c_macro]
+def lmod(s : int; size : int) => s & size - 1
+
+// lobject.h:434: #define pvalue(o) check_exp(ttislightuserdata(o), val_(o).p)
+[c_macro]
+def pvalue(var o) : void? => o.value_.p
+
+// lobject.h:777: #define keyisdead(node) (keytt(node) == LUA_TDEADKEY)
+[c_macro]
+def keyisdead(node) => int(keytt(node)) == LUA_TDEADKEY
+
+// lobject.h:758: #define keyival(node) (keyval(node).i)
+[c_macro]
+def keyival(var node) => node.u.key_val.i
+
+// lobject.h:732: #define isrealasize(t) (!((t)->flags & BITRAS))
+[c_macro]
+def isrealasize(t) => (int(t.flags) & BITRAS) == 0
+
+// lobject.h:733: #define setrealasize(t) ((t)->flags &= cast_byte(~BITRAS))
+[c_macro]
+def setrealasize(var t) {
+    t.flags = uint8(int(t.flags) & int(uint8(~BITRAS)))
+}
+
+// lobject.h:203: #define isabstkey(v) checktag((v), LUA_VABSTKEY)
+[c_macro]
+def isabstkey(v) => checktag(v, LUA_TNIL | (2 << 4))
+
+// lobject.h:757: #define keyisinteger(node) (keytt(node) == LUA_VNUMINT)
+[c_macro]
+def keyisinteger(node) => int(keytt(node)) == (LUA_TNUMBER | (0 << 4))
+
+// lobject.h:762: #define setnilkey(node) (keytt(node) = LUA_TNIL)
+[c_macro]
+def setnilkey(var node) {
+    node.u.key_tt = uint8(LUA_TNIL)
+}
+
+// lobject.h:756: #define keyisnil(node) (keytt(node) == LUA_TNIL)
+[c_macro]
+def keyisnil(node) => int(keytt(node)) == LUA_TNIL
+
+// lobject.h:759: #define keyisshrstr(node) (keytt(node) == ctb(LUA_VSHRSTR))
+[c_macro]
+def keyisshrstr(node) => int(keytt(node)) == ctb(LUA_TSTRING | (0 << 4))
+
+// lobject.h:734: #define setnorealasize(t) ((t)->flags |= BITRAS)
+[c_macro]
+def setnorealasize(var t) {
+    t.flags = uint8(int(t.flags) | BITRAS)
+}
+
+// lobject.h:682: #define hvalue(o) check_exp(ttistable(o), gco2t(val_(o).gc))
+[c_macro, c_function]
+def hvalue(var o) : Table? => addr(reinterpret<GCUnion?>(o.value_.gc).h)
+
+// lobject.h:435: #define uvalue(o) check_exp(ttisfulluserdata(o), gco2u(val_(o).gc))
+[c_macro, c_function]
+def uvalue(var o) : Udata? => addr(reinterpret<GCUnion?>(o.value_.gc).u)
+
+// lobject.h:680: #define ttistable(o) checktag((o), ctb(LUA_VTABLE))
+[c_macro]
+def ttistable(o) => checktag(o, ctb(LUA_TTABLE | (0 << 4)))
+
+// lobject.h:432: #define ttisfulluserdata(o) checktag((o), ctb(LUA_VUSERDATA))
+[c_macro]
+def ttisfulluserdata(o) => checktag(o, ctb(LUA_TUSERDATA | (0 << 4)))
+
+// lstate.h:244: #define isLuacode(ci) (!((ci)->callstatus & (CIST_C | CIST_HOOKED)))
+[c_macro]
+def isLuacode(ci) => (int(ci.callstatus) & (CIST_C | CIST_HOOKED)) == 0
+
+// lobject.h:341: #define chgfltvalue(obj,x) { TValue *io=(obj); lua_assert(ttisfloat(io)); val_(io).n=(x); }
+[c_macro]
+def chgfltvalue(var obj; x) {
+    var io : TValue? = obj
+    io.value_.n = x
+}
+
+// lobject.h:592: #define ttisfunction(o) checktype(o, LUA_TFUNCTION)
+[c_macro]
+def ttisfunction(o) => checktype(o, LUA_TFUNCTION)
+
+// lobject.h:247: #define l_isfalse(o) (ttisfalse(o) || ttisnil(o))
+[c_macro]
+def l_isfalse(o) => ttisfalse(o) || ttisnil(o)
+
+// lobject.h:347: #define chgivalue(obj,x) { TValue *io=(obj); lua_assert(ttisinteger(io)); val_(io).i=(x); }
+[c_macro]
+def chgivalue(var obj : TValue?; x : uint64) {
+    var io : TValue? = obj
+    io.value_.i = int64(x)
+}
+
+// lobject.h:347: #define chgivalue(obj,x) { TValue *io=(obj); lua_assert(ttisinteger(io)); val_(io).i=(x); }
+[c_macro]
+def chgivalue(var obj : TValue?; x : int64) {
+    var io : TValue? = obj
+    io.value_.i = x
+}
+
+// lobject.h:594: #define ttislcf(o) checktag((o), LUA_VLCF)
+[c_macro]
+def ttislcf(o) => checktag(o, LUA_TFUNCTION | (1 << 4))
+
+// lobject.h:431: #define ttislightuserdata(o) checktag((o), LUA_VLIGHTUSERDATA)
+[c_macro]
+def ttislightuserdata(o) => checktag(o, LUA_TLIGHTUSERDATA | (0 << 4))
+
+// lobject.h:264: #define ttisthread(o) checktag((o), ctb(LUA_VTHREAD))
+[c_macro]
+def ttisthread(o) => checktag(o, ctb(LUA_TTHREAD | (0 << 4)))
+
+// lobject.h:615: #define setfvalue(obj,x) { TValue *io=(obj); val_(io).f=(x); settt_(io, LUA_VLCF); }
+[c_macro]
+def setfvalue(var obj; x) {
+    var io : TValue? = obj
+    io.value_.f = x
+    settt_(io, LUA_TFUNCTION | (1 << 4))
+}
+
+// lobject.h:667: #define getproto(o) (clLvalue(o)->p)
+[c_macro]
+def getproto(var o) : Proto? => clLvalue(o).p
 
 include lobject_h.das.inc
 include lstate_h.das.inc

@@ -334,7 +334,7 @@ def doom_itoa(k : int; radix : int) : uint8? {
         }
     } else {
         while (i != 0) {
-            var k1 : int = i & 15
+            let k1 : int = i & 15
             if (k1 >= 10) {
                 idx--
                 itoa_buf[idx] = uint8('A' + ((i & 15) - 10))
@@ -369,7 +369,7 @@ def doom_ptoa(var p : void?) : uint8? {
     idx++
     itoa_buf[_t1] = uint8('x')
     while (i != 0) {
-        var k : int = int(i & 15ul)
+        let k : int = int(i & 15ul)
         if (k >= 10) {
             let _t2 = idx
             idx++
@@ -392,13 +392,9 @@ def doom_fprint(var handle : void?; var str : uint8?) : int {
 
 [c_function]
 def private get_default(var name : uint8?) : default_t? {
-    {
-        var i : int = 0
-        while (i < numdefaults) {
-            if (doom_strcmp(defaults[i].name, name) == 0) {
-                return addr(defaults[0]) + end_index(i, 40)
-            }
-            i++
+    for (i in range(numdefaults)) {
+        if (doom_strcmp(defaults[i].name, name) == 0) {
+            return addr(defaults[0]) + end_index(i, 40)
         }
     }
     return null
@@ -511,7 +507,7 @@ def doom_init(argc : int; var argv : uint8 ??; flags : int) {
 }
 
 def doom_update {
-    var now : int = I_GetTime()
+    let now : int = I_GetTime()
     var delta_time : int = now - last_update_time
     while (true) {
         let _t0 = delta_time
@@ -566,8 +562,8 @@ def doom_get_framebuffer(channels : int) : uint8? {
         i = 0
         len = SCREENWIDTH * SCREENHEIGHT
         while (i < len) {
-            var k : int = i * 3
-            var kpal : int = int(screen_buffer[i]) * 3
+            let k : int = i * 3
+            let kpal : int = int(screen_buffer[i]) * 3
             final_screen_buffer[k + 0] = screen_palette[kpal + 0]
             final_screen_buffer[k + 1] = screen_palette[kpal + 1]
             final_screen_buffer[k + 2] = screen_palette[kpal + 2]
@@ -578,8 +574,8 @@ def doom_get_framebuffer(channels : int) : uint8? {
         i = 0
         len = SCREENWIDTH * SCREENHEIGHT
         while (i < len) {
-            var k : int = i * 4
-            var kpal : int = int(screen_buffer[i]) * 3
+            let k : int = i * 4
+            let kpal : int = int(screen_buffer[i]) * 3
             final_screen_buffer[k + 0] = screen_palette[kpal + 0]
             final_screen_buffer[k + 1] = screen_palette[kpal + 1]
             final_screen_buffer[k + 2] = screen_palette[kpal + 2]

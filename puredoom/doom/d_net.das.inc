@@ -569,15 +569,13 @@ def TryRunTics {
     NetUpdate()
     lowtic = DOOM_MAXINT
     numplaying = 0
-    i = 0
-    while (i < int(doomcom.numnodes)) {
-        if (int(nodeingame[i]) != 0) {
+    for (i1 in range(int(doomcom.numnodes))) {
+        if (int(nodeingame[i1]) != 0) {
             numplaying++
-            if (nettics[i] < lowtic) {
-                lowtic = nettics[i]
+            if (nettics[i1] < lowtic) {
+                lowtic = nettics[i1]
             }
         }
-        i++
     }
     availabletics = lowtic - gametic / ticdup
     // decide how many tics to run
@@ -634,12 +632,10 @@ def TryRunTics {
     while (lowtic < gametic / ticdup + counts) {
         NetUpdate()
         lowtic = DOOM_MAXINT
-        i = 0
-        while (i < int(doomcom.numnodes)) {
-            if (uint(nodeingame[i]) != 0 && nettics[i] < lowtic) {
-                lowtic = nettics[i]
+        for (i1 in range(int(doomcom.numnodes))) {
+            if (uint(nodeingame[i1]) != 0 && nettics[i1] < lowtic) {
+                lowtic = nettics[i1]
             }
-            i++
         }
         if (lowtic < gametic / ticdup) {
             I_Error(cstr("Error: TryRunTics: lowtic < gametic"))

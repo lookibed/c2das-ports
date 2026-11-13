@@ -89,14 +89,11 @@ def R_MapPlane(y : int; x1 : int; x2 : int) {
 // At begining of frame.
 [c_function]
 def R_ClearPlanes {
-    var i : int
     var angle : uint
     // opening / clipping determination
-    i = 0
-    while (i < viewwidth) {
+    for (i in range(viewwidth)) {
         floorclip[i] = int16(viewheight)
         ceilingclip[i] = int16(-1)
-        i++
     }
     lastvisplane = addr(visplanes[0])
     lastopening = addr(openings[0])
@@ -292,7 +289,7 @@ def R_DrawPlanes {
             }
             if (reinterpret<memblock_s?>(ds_source + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
                 var buf : uint8[260]
-                doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/r_plane.c:"))
+                doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1113/doom/work/src/r_plane.c:"))
                 doom_concat(addr(buf[0]), doom_itoa(454, 10))
                 I_Error(addr(buf[0]))
             }

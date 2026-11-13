@@ -9,13 +9,10 @@ var myargv : uint8 ??
 // or 0 if not present
 [c_function]
 def M_CheckParm(var check : uint8?) : int {
-    var i : int
-    i = 1
-    while (i < myargc) {
+    for (i in range(1, myargc)) {
         if (doom_strcasecmp(check, myargv[i]) == 0) {
             return i
         }
-        i++
     }
     return 0
 }

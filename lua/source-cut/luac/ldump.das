@@ -5,6 +5,7 @@ options solid_context
 options stack = 8388608
 require c_runtime/c_do_while
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/c_switch
 require c_runtime/cstr
 require lobject_h_cluster
@@ -71,7 +72,7 @@ def private dumpString(var D : DumpState?; var s : TString?) {
     if (s == null) {
         dumpSize(D, 0ul)
     } else {
-        var size : uint64 = s.shrlen != 255 ? uint64(s.shrlen) : s.u.lnglen
+        let size : uint64 = tsslen(s)
         var str : uint8? = addr(s.contents[0])
         dumpSize(D, size + 1ul)
         dumpBlock(D, reinterpret<void?>(str), size * uint64(typeinfo sizeof(type<uint8>)))
@@ -86,23 +87,23 @@ def private dumpCode(var D : DumpState?; var f : Proto?) {
 
 [c_function]
 def private dumpConstants(var D : DumpState?; var f : Proto?) {
-    var n : int = f.sizek
+    let n : int = f.sizek
     dumpInt(D, n)
     for (i in range(n)) {
         var o : TValue? = addr(f.k[i])
-        var tt : int = int(o.tt_) & 63
+        let tt : int = withvariant(o.tt_)
         dumpByte(D, tt)
         c_switch(tt) {
             case(19) {
-                dumpNumber(D, o.value_.n)
+                dumpNumber(D, fltvalue(o))
                 break
             }
             case(3) {
-                dumpInteger(D, o.value_.i)
+                dumpInteger(D, ivalue(o))
                 break
             }
             case(4, 20) {
-                dumpString(D, addr(reinterpret<GCUnion?>(o.value_.gc).ts))
+                dumpString(D, tsvalue(o))
                 break
             }
             case(_) {
@@ -113,7 +114,7 @@ def private dumpConstants(var D : DumpState?; var f : Proto?) {
 
 [c_function]
 def private dumpProtos(var D : DumpState?; var f : Proto?) {
-    var n : int = f.sizep
+    let n : int = f.sizep
     dumpInt(D, n)
     for (i in range(n)) {
         dumpFunction(D, f.p[i], f.source)
@@ -122,7 +123,7 @@ def private dumpProtos(var D : DumpState?; var f : Proto?) {
 
 [c_function]
 def private dumpUpvalues(var D : DumpState?; var f : Proto?) {
-    var n : int = f.sizeupvalues
+    let n : int = f.sizeupvalues
     dumpInt(D, n)
     for (i in range(n)) {
         dumpByte(D, int(f.upvalues[i].instack))

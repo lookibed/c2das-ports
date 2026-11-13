@@ -9,6 +9,7 @@ require c_runtime/c_bounds
 require c_runtime/c_do_while
 require c_runtime/c_exit
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/c_switch
 require c_runtime/c_union
 require c_runtime/cstr
@@ -2252,15 +2253,91 @@ let private MP4D_HANDLER_TYPE_VIDE = 1986618469
 let private MAX_FILE_BYTES = 4 * 1024 * 1024
 let private _IONBF = 2
 
+// h264bsd_util.h:127: #define MIN(a, b) (((a) < (b)) ? (a) : (b))
+[c_macro]
+def private MIN(a : uint; b : int) => a < uint(b) ? a : uint(b)
+
+// h264bsd_util.h:127: #define MIN(a, b) (((a) < (b)) ? (a) : (b))
+[c_macro]
+def private MIN(a : uint; b : uint) => a < b ? a : b
+
+// h264bsd_util.h:127: #define MIN(a, b) (((a) < (b)) ? (a) : (b))
+[c_macro]
+def private MIN(a : int; b : int) => a < b ? a : b
+
+// h264bsd_cavlc.c:61: #define INFO(vlc) (((vlc) >> 4) & 0xF)
+[c_macro]
+def private INFO(vlc) => (vlc >> 4u) & 15u
+
+// h264bsd_cavlc.c:67: #define TOTAL_COEFF(coeffToken) (((coeffToken) >> 11) & 0x1F)
+[c_macro]
+def private TOTAL_COEFF(coeffToken) => (coeffToken >> 11u) & 31u
+
+// h264bsd_cavlc.c:64: #define TRAILING_ONES(coeffToken) ((coeffToken>>5) & 0x3F)
+[c_macro]
+def private TRAILING_ONES(coeffToken) => (coeffToken >> 5u) & 63u
+
+// h264bsd_slice_header.h:55: #define IS_P_SLICE(sliceType) (((sliceType) == P_SLICE) || ((sliceType) == P_SLICE + 5))
+[c_macro]
+def private IS_P_SLICE(sliceType) => sliceType == uint(anon_104.P_SLICE) || sliceType == uint(int(anon_104.P_SLICE) + 5)
+
+// h264bsd_slice_header.h:59: #define IS_I_SLICE(sliceType) (((sliceType) == I_SLICE) || ((sliceType) == I_SLICE + 5))
+[c_macro]
+def private IS_I_SLICE(sliceType) => sliceType == uint(anon_104.I_SLICE) || sliceType == uint(int(anon_104.I_SLICE) + 5)
+
+// h264bsd_util.h:139: #define CLIP1(z) (((z) < 0) ? 0 : (((z) > 255) ? 255 : (z)))
+[c_macro]
+def private CLIP1(z) => z < 0 ? 0 : (z > 255 ? 255 : z)
+
+// h264bsd_util.h:133: #define ABS(a) (((a) < 0) ? -(a) : (a))
+[c_macro]
+def private ABS(a) => a < 0 ? -a : a
+
+// h264bsd_util.h:136: #define CLIP3(x,y,z) (((z) < (x)) ? (x) : (((z) > (y)) ? (y) : (z)))
+[c_macro]
+def private CLIP3(x; y; z) => z < x ? x : (z > y ? y : z)
+
+// h264bsd_nal_unit.h:44: #define IS_IDR_NAL_UNIT(pNalUnit) ((pNalUnit)->nalUnitType == NAL_CODED_SLICE_IDR)
+[c_macro]
+def private IS_IDR_NAL_UNIT(pNalUnit) => pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR
+
+// h264bsd_util.h:130: #define MAX(a, b) (((a) > (b)) ? (a) : (b))
+[c_macro]
+def private MAX(a : uint; b : int) => a > uint(b) ? a : uint(b)
+
+// h264bsd_util.h:130: #define MAX(a, b) (((a) > (b)) ? (a) : (b))
+[c_macro]
+def private MAX(a : int; b : int) => a > b ? a : b
+
+// h264bsd_util.h:75: #define IS_RESIDUAL_EMPTY(residual) ((residual)[0] == EMPTY_RESIDUAL_INDICATOR)
+[c_macro, c_function]
+def private IS_RESIDUAL_EMPTY(residual) => residual[0] == EMPTY_RESIDUAL_INDICATOR
+
+// minimp4.h:22: #define MINIMP4_MIN(x, y) ((x) < (y) ? (x) : (y))
+[c_macro]
+def private MINIMP4_MIN(x : int; y : int) => x < y ? x : y
+
+// minimp4.h:22: #define MINIMP4_MIN(x, y) ((x) < (y) ? (x) : (y))
+[c_macro]
+def private MINIMP4_MIN(x : uint64; y : uint64) => x < y ? x : y
+
+// minimp4.h:22: #define MINIMP4_MIN(x, y) ((x) < (y) ? (x) : (y))
+[c_macro]
+def private MINIMP4_MIN(x : uint64; y : int) => x < uint64(y) ? x : uint64(y)
+
+// minimp4.h:22: #define MINIMP4_MIN(x, y) ((x) < (y) ? (x) : (y))
+[c_macro]
+def private MINIMP4_MIN(x : uint64; y : uint) => x < uint64(y) ? x : uint64(y)
+
 def shim_reset_heap {
     h264_file_all__heap_offset = 8ul
 }
 
 [c_function]
 def malloc1(size : uint64) : void? {
-    var aligned_header : uint64 = (uint64(typeinfo sizeof(type<HeapHeader>)) + uint64(7u)) & ~uint64(7u)
-    var aligned_size : uint64 = (size + uint64(7u)) & ~uint64(7u)
-    var total : uint64 = aligned_header + aligned_size
+    let aligned_header : uint64 = (uint64(typeinfo sizeof(type<HeapHeader>)) + uint64(7u)) & ~uint64(7u)
+    let aligned_size : uint64 = (size + uint64(7u)) & ~uint64(7u)
+    let total : uint64 = aligned_header + aligned_size
     var header : HeapHeader? = null
     if ((h264_file_all__heap_offset + total) > uint64(typeinfo sizeof(type<uint8[33554432]>))) {
         return null
@@ -2279,7 +2356,7 @@ def realloc1(var ptr : void?; size : uint64) : void? {
     var result : void? = malloc1(size)
     var old_size : uint64 = 0ul
     var copy_size : uint64 = 0ul
-    var aligned_header : uint64 = (uint64(typeinfo sizeof(type<HeapHeader>)) + uint64(7u)) & ~uint64(7u)
+    let aligned_header : uint64 = (uint64(typeinfo sizeof(type<HeapHeader>)) + uint64(7u)) & ~uint64(7u)
     if (result == null) {
         return null
     }
@@ -2298,7 +2375,7 @@ def realloc1(var ptr : void?; size : uint64) : void? {
 
 [c_function]
 def calloc1(count : uint64; size : uint64) : void? {
-    var total : uint64 = count * size
+    let total : uint64 = count * size
     var result : void? = malloc1(total)
     if (result == null) {
         return null
@@ -2384,7 +2461,7 @@ def strlen1(var src : uint8?) : uint64 {
 
 [c_function]
 def strdup(var src : uint8?) : uint8? {
-    var length : uint64 = strlen1(src)
+    let length : uint64 = strlen1(src)
     var copy : uint8? = reinterpret<uint8?>(malloc1(length + uint64(1u)))
     if (copy == null) {
         return null
@@ -2458,7 +2535,7 @@ def h264bsdExtractNalUnit(var pByteStream : uint8?; len : uint; var pStrmData : 
             }
             if ((byte == 1) && (zeroCount >= 2u)) {
                 pStrmData.strmBuffSize = byteCount - initByteCount - zeroCount - 1u
-                zeroCount -= zeroCount < 3u ? zeroCount : 3u
+                zeroCount -= MIN(zeroCount, 3)
                 break
             } elif (byte != 0) {
                 if (zeroCount >= 3u) {
@@ -2764,7 +2841,7 @@ def private h264_file_all__DecodeRunBefore(bits : uint; zerosLeft : uint) : uint
             } elif (bits != 0) {
                 value = 235u
             }
-            if (((value >> 4u) & 15u) > zerosLeft) {
+            if (INFO(value) > zerosLeft) {
                 value = 0u
             }
             break
@@ -2810,11 +2887,11 @@ def h264bsdDecodeResidualBlockCavlc(var pStrmData : strmData_t?; var coeffLevel 
     }
     bufferValue <<= tmp & 31u
     bufferBits -= tmp & 31u
-    totalCoeff = (tmp >> 11u) & 31u
+    totalCoeff = TOTAL_COEFF(tmp)
     if (totalCoeff > maxNumCoeff) {
         return uint(HANTRO_NOK)
     }
-    trailingOnes = (tmp >> 5u) & 63u
+    trailingOnes = TRAILING_ONES(tmp)
     if (totalCoeff != 0u) {
         i = 0u
         // nonzero coefficients: +/- 1
@@ -2918,7 +2995,7 @@ def h264bsdDecodeResidualBlockCavlc(var pStrmData : strmData_t?; var coeffLevel 
             }
             bufferValue <<= zerosLeft & 15u
             bufferBits -= zerosLeft & 15u
-            zerosLeft = (zerosLeft >> 4u) & 15u
+            zerosLeft = INFO(zerosLeft)
         } else {
             zerosLeft = 0u
         }
@@ -2938,7 +3015,7 @@ def h264bsdDecodeResidualBlockCavlc(var pStrmData : strmData_t?; var coeffLevel 
                 }
                 bufferValue <<= tmp & 15u
                 bufferBits -= tmp & 15u
-                run[i1] = (tmp >> 4u) & 15u
+                run[i1] = INFO(tmp)
                 let _t0 = run[i1]
                 run[i1]++
                 zerosLeft -= _t0
@@ -2988,7 +3065,7 @@ def h264bsdConceal(var pStorage : storage?; var currImage : image_t?; sliceType 
     height = currImage.height
     refData = null
     // use reference picture with smallest available index
-    if (sliceType == uint(anon_104.P_SLICE) || sliceType == uint(int(anon_104.P_SLICE) + 5) || (pStorage.intraConcealmentFlag != 0u)) {
+    if (IS_P_SLICE(sliceType) || (pStorage.intraConcealmentFlag != 0u)) {
         i = 0u
         c_do_while(refData == null) {
             refData = h264bsdGetRefPicData(addr(pStorage.dpb[0]), i)
@@ -3012,8 +3089,7 @@ def h264bsdConceal(var pStorage : storage?; var currImage : image_t?; sliceType 
     }
     // whole picture lost -> copy previous or set grey
     if (i == pStorage.picSizeInMbs) {
-        if (((sliceType == uint(anon_104.I_SLICE) || sliceType == uint(int(anon_104.I_SLICE) + 5)) && (pStorage.intraConcealmentFlag == 0u)) ||
-                refData == null) {
+        if ((IS_I_SLICE(sliceType) && (pStorage.intraConcealmentFlag == 0u)) || refData == null) {
             memset1(reinterpret<void?>(currImage.data), 128, uint64(width * height * 384u))
         } else {
             memcpy1(reinterpret<void?>(currImage.data), reinterpret<void?>(refData), uint64(width * height * 384u))
@@ -3124,7 +3200,7 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
     pMb.filterOffsetA = 0
     pMb.filterOffsetB = 0
     pMb.chromaQpIndexOffset = 0
-    if (sliceType == uint(anon_104.I_SLICE) || sliceType == uint(int(anon_104.I_SLICE) + 5)) {
+    if (IS_I_SLICE(sliceType)) {
         memset1(reinterpret<void?>(addr(data[0])), 0, uint64(typeinfo sizeof(type<uint8[384]>)))
     } else {
         var mv : mv_t = mv_t(hor = int16(0), ver = int16(0))
@@ -3352,7 +3428,7 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
         // lint -e734 CLIP1 macro results in value that fits into 8 bits
         var _t32 = pData
         pData++
-        *_t32 = uint8(tmp < 0 ? 0 : (tmp > 255 ? 255 : tmp))
+        *_t32 = uint8(CLIP1(tmp))
         // lint +e734
         i++
         if ((i & 63u) == 0) {
@@ -3504,7 +3580,7 @@ def private h264_file_all__ConcealMb(var pMb : mbStorage?; var currImage : image
             // lint -e734 CLIP1 macro results in value that fits into 8 bits
             var _t49 = pData
             pData++
-            *_t49 = uint8(tmp < 0 ? 0 : (tmp > 255 ? 255 : tmp))
+            *_t49 = uint8(CLIP1(tmp))
             // lint +e734
             i++
             if ((i & 15u) == 0) {
@@ -3651,8 +3727,7 @@ def private h264_file_all__InnerBoundaryStrength(var mb1 : mbStorage?; ind1 : ui
     mv4 = int(mb1.mv[ind2].ver)
     if (tmp1 != 0 || tmp2 != 0) {
         return 2u
-    } elif ((uint(mv1 - mv2 < 0 ? -(mv1 - mv2) : mv1 - mv2) >= 4u) || (uint(mv3 - mv4 < 0 ? -(mv3 - mv4) : mv3 - mv4) >= 4u) ||
-            (intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb1.refAddr[ind2 >> 2u]))) {
+    } elif ((uint(ABS(mv1 - mv2)) >= 4u) || (uint(ABS(mv3 - mv4)) >= 4u) || (intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb1.refAddr[ind2 >> 2u]))) {
         return 1u
     } else {
         return 0u
@@ -3675,8 +3750,7 @@ def InnerBoundaryStrength2(var mb1 : mbStorage?; ind1 : uint; ind2 : uint) : uin
     tmp2 = int(mb1.mv[ind2].hor)
     tmp3 = int(mb1.mv[ind1].ver)
     tmp4 = int(mb1.mv[ind2].ver)
-    if ((uint(tmp1 - tmp2 < 0 ? -(tmp1 - tmp2) : tmp1 - tmp2) >= 4u) || (uint(tmp3 - tmp4 < 0 ? -(tmp3 - tmp4) : tmp3 - tmp4) >= 4u) ||
-            (intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb1.refAddr[ind2 >> 2u]))) {
+    if ((uint(ABS(tmp1 - tmp2)) >= 4u) || (uint(ABS(tmp3 - tmp4)) >= 4u) || (intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb1.refAddr[ind2 >> 2u]))) {
         return 1u
     } else {
         return 0u
@@ -3788,8 +3862,8 @@ def private h264_file_all__FilterVerLumaEdge(var data : uint8?; bS : uint; var t
     var q2 : int
     var tmpFlag : uint
     var clp : uint8? = addr(h264bsdClip[0]) + 512
-    var alpha : uint = thresholds.alpha
-    var beta : uint = thresholds.beta
+    let alpha : uint = thresholds.alpha
+    let beta : uint = thresholds.beta
     var val : int
     // Code
     if (bS < 4u) {
@@ -3801,22 +3875,21 @@ def private h264_file_all__FilterVerLumaEdge(var data : uint8?; bS : uint; var t
             p0 = int(data[-1])
             q0 = int(data[0])
             q1 = int(data[1])
-            if ((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha) && (uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta) &&
-                    (uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta)) {
+            if ((uint(ABS(p0 - q0)) < alpha) && (uint(ABS(p1 - p0)) < beta) && (uint(ABS(q1 - q0)) < beta)) {
                 p2 = int(data[-3])
                 q2 = int(data[2])
-                if (uint(p2 - p0 < 0 ? -(p2 - p0) : p2 - p0) < beta) {
+                if (uint(ABS(p2 - p0)) < beta) {
                     val = (p2 + ((p0 + q0 + 1) >> 1) - (p1 << 1)) >> 1
-                    data[-2] = uint8(p1 + (val < -tc ? -tc : (val > tc ? tc : val)))
+                    data[-2] = uint8(p1 + CLIP3(-tc, tc, val))
                     tmp++
                 }
-                if (uint(q2 - q0 < 0 ? -(q2 - q0) : q2 - q0) < beta) {
+                if (uint(ABS(q2 - q0)) < beta) {
                     val = (q2 + ((p0 + q0 + 1) >> 1) - (q1 << 1)) >> 1
-                    data[1] = uint8(q1 + (val < -tc ? -tc : (val > tc ? tc : val)))
+                    data[1] = uint8(q1 + CLIP3(-tc, tc, val))
                     tmp++
                 }
                 val = (((q0 - p0) << 2) + (p1 - q1) + 4) >> 3
-                delta = val < -tmp ? -tmp : (val > tmp ? tmp : val)
+                delta = CLIP3(-tmp, tmp, val)
                 p0 = int(clp[p0 + delta])
                 q0 = int(clp[q0 - delta])
                 tmp = tc
@@ -3834,12 +3907,11 @@ def private h264_file_all__FilterVerLumaEdge(var data : uint8?; bS : uint; var t
             p0 = int(data[-1])
             q0 = int(data[0])
             q1 = int(data[1])
-            if ((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha) && (uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta) &&
-                    (uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta)) {
-                tmpFlag = uint((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < ((alpha >> 2u) + 2u)) ? HANTRO_TRUE : HANTRO_FALSE)
+            if ((uint(ABS(p0 - q0)) < alpha) && (uint(ABS(p1 - p0)) < beta) && (uint(ABS(q1 - q0)) < beta)) {
+                tmpFlag = uint((uint(ABS(p0 - q0)) < ((alpha >> 2u) + 2u)) ? HANTRO_TRUE : HANTRO_FALSE)
                 p2 = int(data[-3])
                 q2 = int(data[2])
-                if (tmpFlag != 0 && uint(p2 - p0 < 0 ? -(p2 - p0) : p2 - p0) < beta) {
+                if (tmpFlag != 0 && uint(ABS(p2 - p0)) < beta) {
                     tmp = p1 + p0 + q0
                     data[-1] = uint8((p2 + 2 * tmp + q1 + 4) >> 3)
                     data[-2] = uint8((p2 + tmp + 2) >> 2)
@@ -3847,7 +3919,7 @@ def private h264_file_all__FilterVerLumaEdge(var data : uint8?; bS : uint; var t
                 } else {
                     data[-1] = uint8((2 * p1 + p0 + q1 + 2) >> 2)
                 }
-                if (tmpFlag != 0 && uint(q2 - q0 < 0 ? -(q2 - q0) : q2 - q0) < beta) {
+                if (tmpFlag != 0 && uint(ABS(q2 - q0)) < beta) {
                     tmp = p0 + q0 + q1
                     data[0] = uint8((p1 + 2 * tmp + q2 + 4) >> 3)
                     data[1] = uint8((tmp + q2 + 2) >> 2)
@@ -3894,23 +3966,22 @@ def private h264_file_all__FilterHorLumaEdge(var data : uint8?; bS : uint; var t
         p0 = data[-imageWidth]
         q0 = data[0]
         q1 = data[imageWidth]
-        if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) &&
-                (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) &&
-                (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
+        if ((uint(ABS(int(p0) - int(q0))) < thresholds.alpha) && (uint(ABS(int(p1) - int(p0))) < thresholds.beta) &&
+                (uint(ABS(int(q1) - int(q0))) < thresholds.beta)) {
             p2 = data[-imageWidth * 3]
-            if (uint(int(p2) - int(p0) < 0 ? -(int(p2) - int(p0)) : int(p2) - int(p0)) < thresholds.beta) {
+            if (uint(ABS(int(p2) - int(p0))) < thresholds.beta) {
                 val = (int(p2) + ((int(p0) + int(q0) + 1) >> 1) - (int(p1) << 1)) >> 1
-                data[-imageWidth * 2] = uint8(int(p1) + (val < -tc ? -tc : (val > tc ? tc : val)))
+                data[-imageWidth * 2] = uint8(int(p1) + CLIP3(-tc, tc, val))
                 tmp++
             }
             q2 = data[imageWidth * 2]
-            if (uint(int(q2) - int(q0) < 0 ? -(int(q2) - int(q0)) : int(q2) - int(q0)) < thresholds.beta) {
+            if (uint(ABS(int(q2) - int(q0))) < thresholds.beta) {
                 val = (int(q2) + ((int(p0) + int(q0) + 1) >> 1) - (int(q1) << 1)) >> 1
-                data[imageWidth] = uint8(int(q1) + (val < -tc ? -tc : (val > tc ? tc : val)))
+                data[imageWidth] = uint8(int(q1) + CLIP3(-tc, tc, val))
                 tmp++
             }
             val = (((int(q0) - int(p0)) << 2) + (int(p1) - int(q1)) + 4) >> 3
-            delta = val < -tmp ? -tmp : (val > tmp ? tmp : val)
+            delta = CLIP3(-tmp, tmp, val)
             p0 = clp[int(p0) + delta]
             q0 = clp[int(q0) - delta]
             tmp = tc
@@ -3943,8 +4014,8 @@ def private h264_file_all__FilterHorLuma(var data : uint8?; bS : uint; var thres
     var q2 : int
     var tmpFlag : uint
     var clp : uint8? = addr(h264bsdClip[0]) + 512
-    var alpha : uint = thresholds.alpha
-    var beta : uint = thresholds.beta
+    let alpha : uint = thresholds.alpha
+    let beta : uint = thresholds.beta
     var val : int
     // Code
     // if (sample ++ % (1024 * 64) == 0) {
@@ -3959,22 +4030,21 @@ def private h264_file_all__FilterHorLuma(var data : uint8?; bS : uint; var thres
             p0 = int(data[-imageWidth])
             q0 = int(data[0])
             q1 = int(data[imageWidth])
-            if ((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha) && (uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta) &&
-                    (uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta)) {
+            if ((uint(ABS(p0 - q0)) < alpha) && (uint(ABS(p1 - p0)) < beta) && (uint(ABS(q1 - q0)) < beta)) {
                 p2 = int(data[-imageWidth * 3])
-                if (uint(p2 - p0 < 0 ? -(p2 - p0) : p2 - p0) < beta) {
+                if (uint(ABS(p2 - p0)) < beta) {
                     val = (p2 + ((p0 + q0 + 1) >> 1) - (p1 << 1)) >> 1
-                    data[-imageWidth * 2] = uint8(p1 + (val < -tc ? -tc : (val > tc ? tc : val)))
+                    data[-imageWidth * 2] = uint8(p1 + CLIP3(-tc, tc, val))
                     tmp++
                 }
                 q2 = int(data[imageWidth * 2])
-                if (uint(q2 - q0 < 0 ? -(q2 - q0) : q2 - q0) < beta) {
+                if (uint(ABS(q2 - q0)) < beta) {
                     val = (q2 + ((p0 + q0 + 1) >> 1) - (q1 << 1)) >> 1
-                    data[imageWidth] = uint8(q1 + (val < -tc ? -tc : (val > tc ? tc : val)))
+                    data[imageWidth] = uint8(q1 + CLIP3(-tc, tc, val))
                     tmp++
                 }
                 val = (((q0 - p0) << 2) + (p1 - q1) + 4) >> 3
-                delta = val < -tmp ? -tmp : (val > tmp ? tmp : val)
+                delta = CLIP3(-tmp, tmp, val)
                 p0 = int(clp[p0 + delta])
                 q0 = int(clp[q0 - delta])
                 tmp = tc
@@ -3991,12 +4061,11 @@ def private h264_file_all__FilterHorLuma(var data : uint8?; bS : uint; var thres
             p0 = int(data[-imageWidth])
             q0 = int(data[0])
             q1 = int(data[imageWidth])
-            if ((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha) && (uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta) &&
-                    (uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta)) {
-                tmpFlag = uint((uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < ((alpha >> 2u) + 2u)) ? HANTRO_TRUE : HANTRO_FALSE)
+            if ((uint(ABS(p0 - q0)) < alpha) && (uint(ABS(p1 - p0)) < beta) && (uint(ABS(q1 - q0)) < beta)) {
+                tmpFlag = uint((uint(ABS(p0 - q0)) < ((alpha >> 2u) + 2u)) ? HANTRO_TRUE : HANTRO_FALSE)
                 p2 = int(data[-imageWidth * 3])
                 q2 = int(data[imageWidth * 2])
-                if (tmpFlag != 0 && uint(p2 - p0 < 0 ? -(p2 - p0) : p2 - p0) < beta) {
+                if (tmpFlag != 0 && uint(ABS(p2 - p0)) < beta) {
                     tmp = p1 + p0 + q0
                     data[-imageWidth] = uint8((p2 + 2 * tmp + q1 + 4) >> 3)
                     data[-imageWidth * 2] = uint8((p2 + tmp + 2) >> 2)
@@ -4004,7 +4073,7 @@ def private h264_file_all__FilterHorLuma(var data : uint8?; bS : uint; var thres
                 } else {
                     data[-imageWidth] = uint8((2 * p1 + p0 + q1 + 2) >> 2)
                 }
-                if (tmpFlag != 0 && uint(q2 - q0 < 0 ? -(q2 - q0) : q2 - q0) < beta) {
+                if (tmpFlag != 0 && uint(ABS(q2 - q0)) < beta) {
                     tmp = p0 + q0 + q1
                     data[0] = uint8((p1 + 2 * tmp + q2 + 4) >> 3)
                     data[imageWidth] = uint8((tmp + q2 + 2) >> 2)
@@ -4039,13 +4108,11 @@ def private h264_file_all__FilterVerChromaEdge(var data : uint8?; bS : uint; var
     p0 = data[-1]
     q0 = data[0]
     q1 = data[1]
-    if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) &&
-            (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) &&
-            (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
+    if ((uint(ABS(int(p0) - int(q0))) < thresholds.alpha) && (uint(ABS(int(p1) - int(p0))) < thresholds.beta) &&
+            (uint(ABS(int(q1) - int(q0))) < thresholds.beta)) {
         if (bS < 4u) {
             tc = int(thresholds.tc0[bS - 1u]) + 1
-            delta = ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) < -tc ? -tc : (((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) > tc ?
-                    tc : ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3))
+            delta = CLIP3(-tc, tc, (int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3)
             p0 = clp[int(p0) + delta]
             q0 = clp[int(q0) - delta]
             data[-1] = p0
@@ -4060,13 +4127,11 @@ def private h264_file_all__FilterVerChromaEdge(var data : uint8?; bS : uint; var
     p0 = data[-1]
     q0 = data[0]
     q1 = data[1]
-    if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) &&
-            (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) &&
-            (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
+    if ((uint(ABS(int(p0) - int(q0))) < thresholds.alpha) && (uint(ABS(int(p1) - int(p0))) < thresholds.beta) &&
+            (uint(ABS(int(q1) - int(q0))) < thresholds.beta)) {
         if (bS < 4u) {
             tc = int(thresholds.tc0[bS - 1u]) + 1
-            delta = ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) < -tc ? -tc : (((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) > tc ?
-                    tc : ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3))
+            delta = CLIP3(-tc, tc, (int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3)
             p0 = clp[int(p0) + delta]
             q0 = clp[int(q0) - delta]
             data[-1] = p0
@@ -4102,11 +4167,9 @@ def private h264_file_all__FilterHorChromaEdge(var data : uint8?; bS : uint; var
         p0 = data[-width]
         q0 = data[0]
         q1 = data[width]
-        if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) &&
-                (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) &&
-                (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
-            delta = ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) < -tc ? -tc : (((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) > tc ?
-                    tc : ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3))
+        if ((uint(ABS(int(p0) - int(q0))) < thresholds.alpha) && (uint(ABS(int(p1) - int(p0))) < thresholds.beta) &&
+                (uint(ABS(int(q1) - int(q0))) < thresholds.beta)) {
+            delta = CLIP3(-tc, tc, (int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3)
             p0 = clp[int(p0) + delta]
             q0 = clp[int(q0) - delta]
             data[-width] = p0
@@ -4143,12 +4206,9 @@ def private h264_file_all__FilterHorChroma(var data : uint8?; bS : uint; var thr
             p0 = data[-width]
             q0 = data[0]
             q1 = data[width]
-            if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) &&
-                    (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) &&
-                    (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
-                delta = ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) < -tc ? -tc : (((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3) >
-                            tc ?
-                        tc : ((int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3))
+            if ((uint(ABS(int(p0) - int(q0))) < thresholds.alpha) && (uint(ABS(int(p1) - int(p0))) < thresholds.beta) &&
+                    (uint(ABS(int(q1) - int(q0))) < thresholds.beta)) {
+                delta = CLIP3(-tc, tc, (int(q0) - int(p0) << 2) + (int(p1) - int(q1)) + 4 >> 3)
                 p0 = clp[int(p0) + delta]
                 q0 = clp[int(q0) - delta]
                 data[-width] = p0
@@ -4164,9 +4224,8 @@ def private h264_file_all__FilterHorChroma(var data : uint8?; bS : uint; var thr
             p0 = data[-width]
             q0 = data[0]
             q1 = data[width]
-            if ((uint(int(p0) - int(q0) < 0 ? -(int(p0) - int(q0)) : int(p0) - int(q0)) < thresholds.alpha) &&
-                    (uint(int(p1) - int(p0) < 0 ? -(int(p1) - int(p0)) : int(p1) - int(p0)) < thresholds.beta) &&
-                    (uint(int(q1) - int(q0) < 0 ? -(int(q1) - int(q0)) : int(q1) - int(q0)) < thresholds.beta)) {
+            if ((uint(ABS(int(p0) - int(q0))) < thresholds.alpha) && (uint(ABS(int(p1) - int(p0))) < thresholds.beta) &&
+                    (uint(ABS(int(q1) - int(q0))) < thresholds.beta)) {
                 data[-width] = uint8((2 * int(p1) + int(p0) + int(q1) + 2) >> 2)
                 data[0] = uint8((2 * int(q1) + int(q0) + int(p1) + 2) >> 2)
             }
@@ -4463,7 +4522,7 @@ def private h264_file_all__GetChromaEdgeThresholds(var thresholds : edgeThreshol
     var qpTmp : uint
     // Code
     qp = mb.qpY
-    qp = h264bsdQpC[int(qp) + chromaQpIndexOffset < 0 ? 0 : (int(qp) + chromaQpIndexOffset > 51 ? 51 : int(qp) + chromaQpIndexOffset)]
+    qp = h264bsdQpC[CLIP3(0, 51, int(qp) + chromaQpIndexOffset)]
     indexA = uint(int(qp) + mb.filterOffsetA < 0 ? 0 : (int(qp) + mb.filterOffsetA > 51 ? 51 : int(qp) + mb.filterOffsetA))
     indexB = uint(int(qp) + mb.filterOffsetB < 0 ? 0 : (int(qp) + mb.filterOffsetB > 51 ? 51 : int(qp) + mb.filterOffsetB))
     thresholds[int(anon_245.INNER)].alpha = uint(h264_file_all__alphas[indexA])
@@ -4472,7 +4531,7 @@ def private h264_file_all__GetChromaEdgeThresholds(var thresholds : edgeThreshol
     if ((filteringFlags & uint(FILTER_TOP_EDGE)) != 0) {
         qpTmp = mb.mbB.qpY
         if (qpTmp != mb.qpY) {
-            qpTmp = h264bsdQpC[int(qpTmp) + chromaQpIndexOffset < 0 ? 0 : (int(qpTmp) + chromaQpIndexOffset > 51 ? 51 : int(qpTmp) + chromaQpIndexOffset)]
+            qpTmp = h264bsdQpC[CLIP3(0, 51, int(qpTmp) + chromaQpIndexOffset)]
             qpAv = (qp + qpTmp + 1u) >> 1u
             indexA = uint(int(qpAv) + mb.filterOffsetA < 0 ? 0 : (int(qpAv) + mb.filterOffsetA > 51 ? 51 : int(qpAv) + mb.filterOffsetA))
             indexB = uint(int(qpAv) + mb.filterOffsetB < 0 ? 0 : (int(qpAv) + mb.filterOffsetB > 51 ? 51 : int(qpAv) + mb.filterOffsetB))
@@ -4488,7 +4547,7 @@ def private h264_file_all__GetChromaEdgeThresholds(var thresholds : edgeThreshol
     if ((filteringFlags & uint(FILTER_LEFT_EDGE)) != 0) {
         qpTmp = mb.mbA.qpY
         if (qpTmp != mb.qpY) {
-            qpTmp = h264bsdQpC[int(qpTmp) + chromaQpIndexOffset < 0 ? 0 : (int(qpTmp) + chromaQpIndexOffset > 51 ? 51 : int(qpTmp) + chromaQpIndexOffset)]
+            qpTmp = h264bsdQpC[CLIP3(0, 51, int(qpTmp) + chromaQpIndexOffset)]
             qpAv = (qp + qpTmp + 1u) >> 1u
             indexA = uint(int(qpAv) + mb.filterOffsetA < 0 ? 0 : (int(qpAv) + mb.filterOffsetA > 51 ? 51 : int(qpAv) + mb.filterOffsetA))
             indexB = uint(int(qpAv) + mb.filterOffsetB < 0 ? 0 : (int(qpAv) + mb.filterOffsetB > 51 ? 51 : int(qpAv) + mb.filterOffsetB))
@@ -4781,8 +4840,7 @@ def h264bsdDecode(var pStorage : storage?; var byteStrm : uint8?; len : uint; pi
                     // store old activeSpsId and return headers ready
                     // indication if activeSps changes
                     spsId = pStorage.activeSpsId
-                    tmp = h264bsdActivateParamSets(pStorage, ppsId,
-                            uint(addr(nalUnit).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR ? HANTRO_TRUE : HANTRO_FALSE))
+                    tmp = h264bsdActivateParamSets(pStorage, ppsId, uint(IS_IDR_NAL_UNIT(addr(nalUnit)) ? HANTRO_TRUE : HANTRO_FALSE))
                     if (tmp != uint(HANTRO_OK)) {
                         pStorage.activePpsId = uint(MAX_NUM_PIC_PARAM_SETS)
                         pStorage.activePps = null
@@ -4830,7 +4888,7 @@ def h264bsdDecode(var pStorage : storage?; var byteStrm : uint8?; len : uint; pi
                     return uint(anon_277.H264BSD_ERROR)
                 }
                 if (h264bsdIsStartOfPicture(pStorage) != 0) {
-                    if (!(addr(nalUnit).nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR)) {
+                    if (!IS_IDR_NAL_UNIT(addr(nalUnit))) {
                         tmp = h264bsdCheckGapsInFrameNum(addr(pStorage.dpb[0]), pStorage.sliceHeader[1].frameNum,
                                 uint(nalUnit.nalRefIdc != 0u ? HANTRO_TRUE : HANTRO_FALSE), pStorage.activeSps.gapsInFrameNumValueAllowedFlag)
                         if (tmp != uint(HANTRO_OK)) {
@@ -4969,10 +5027,10 @@ def h264bsdNextOutputPicture(var pStorage : storage?; var picId : uint?; var isI
 // ------------------------------------------------------------------------------
 [c_function]
 def h264bsdNextOutputPictureRGBA(var pStorage : storage?; var picId : uint?; var isIdrPic : uint?; var numErrMbs : uint?) : uint? {
-    var width : uint = h264bsdPicWidth(pStorage) * 16u
-    var height : uint = h264bsdPicHeight(pStorage) * 16u
+    let width : uint = h264bsdPicWidth(pStorage) * 16u
+    let height : uint = h264bsdPicHeight(pStorage) * 16u
     var data : uint8? = h264bsdNextOutputPicture(pStorage, picId, isIdrPic, numErrMbs)
-    var rgbSize : uint64 = uint64(typeinfo sizeof(type<uint>)) * uint64(width) * uint64(height)
+    let rgbSize : uint64 = uint64(typeinfo sizeof(type<uint>)) * uint64(width) * uint64(height)
     if (data == null) {
         return null
     }
@@ -5005,10 +5063,10 @@ def h264bsdNextOutputPictureRGBA(var pStorage : storage?; var picId : uint?; var
 // ------------------------------------------------------------------------------
 [c_function]
 def h264bsdNextOutputPictureBGRA(var pStorage : storage?; var picId : uint?; var isIdrPic : uint?; var numErrMbs : uint?) : uint? {
-    var width : uint = h264bsdPicWidth(pStorage) * 16u
-    var height : uint = h264bsdPicHeight(pStorage) * 16u
+    let width : uint = h264bsdPicWidth(pStorage) * 16u
+    let height : uint = h264bsdPicHeight(pStorage) * 16u
     var data : uint8? = h264bsdNextOutputPicture(pStorage, picId, isIdrPic, numErrMbs)
-    var rgbSize : uint64 = uint64(typeinfo sizeof(type<uint>)) * uint64(width) * uint64(height)
+    let rgbSize : uint64 = uint64(typeinfo sizeof(type<uint>)) * uint64(width) * uint64(height)
     if (data == null) {
         return null
     }
@@ -5041,10 +5099,10 @@ def h264bsdNextOutputPictureBGRA(var pStorage : storage?; var picId : uint?; var
 // ------------------------------------------------------------------------------
 [c_function]
 def h264bsdNextOutputPictureYCbCrA(var pStorage : storage?; var picId : uint?; var isIdrPic : uint?; var numErrMbs : uint?) : uint? {
-    var width : uint = h264bsdPicWidth(pStorage) * 16u
-    var height : uint = h264bsdPicHeight(pStorage) * 16u
+    let width : uint = h264bsdPicWidth(pStorage) * 16u
+    let height : uint = h264bsdPicHeight(pStorage) * 16u
     var data : uint8? = h264bsdNextOutputPicture(pStorage, picId, isIdrPic, numErrMbs)
-    var rgbSize : uint64 = uint64(typeinfo sizeof(type<uint>)) * uint64(width) * uint64(height)
+    let rgbSize : uint64 = uint64(typeinfo sizeof(type<uint>)) * uint64(width) * uint64(height)
     if (data == null) {
         return null
     }
@@ -5265,24 +5323,23 @@ def h264bsdFree(var pStorage : storage?) {
 
 [c_function]
 def h264bsdConvertToRGBA(width : uint; height : uint; var data : uint8?; var pOutput : uint?) {
-    var w : int = int(width)
-    var h : int = int(height)
+    let w : int = int(width)
+    let h : int = int(height)
     var x : int = 0
     var y : int = 0
-    var ySize : uint64 = uint64(w * h)
-    var cbSize : uint64 = uint64(w / 2 * h / 2)
+    let ySize : uint64 = uint64(w * h)
+    let cbSize : uint64 = uint64(w / 2 * h / 2)
     var luma : uint8? = data
     var cb : uint8? = data + ySize
     var cr : uint8? = data + ySize + cbSize
     var rgba : uint? = pOutput
     while (y < h) {
-        var c : int = int(*luma) - 16
-        var d : int = int(*cb) - 128
-        var e : int = int(*cr) - 128
-        var r : uint = uint((298 * c + 409 * e + 128 >> 8) < 0 ? 0 : ((298 * c + 409 * e + 128 >> 8) > 255 ? 255 : (298 * c + 409 * e + 128 >> 8)))
-        var g : uint = uint((298 * c - 100 * d - 208 * e + 128 >> 8) < 0 ? 0 :
-                ((298 * c - 100 * d - 208 * e + 128 >> 8) > 255 ? 255 : (298 * c - 100 * d - 208 * e + 128 >> 8)))
-        var b : uint = uint((298 * c + 516 * d + 128 >> 8) < 0 ? 0 : ((298 * c + 516 * d + 128 >> 8) > 255 ? 255 : (298 * c + 516 * d + 128 >> 8)))
+        let c : int = int(*luma) - 16
+        let d : int = int(*cb) - 128
+        let e : int = int(*cr) - 128
+        let r : uint = uint(CLIP1(298 * c + 409 * e + 128 >> 8))
+        let g : uint = uint(CLIP1(298 * c - 100 * d - 208 * e + 128 >> 8))
+        let b : uint = uint(CLIP1(298 * c + 516 * d + 128 >> 8))
         var pixel : uint = 255u
         pixel = (pixel << 8u) + b
         pixel = (pixel << 8u) + g
@@ -5309,24 +5366,23 @@ def h264bsdConvertToRGBA(width : uint; height : uint; var data : uint8?; var pOu
 
 [c_function]
 def h264bsdConvertToBGRA(width : uint; height : uint; var data : uint8?; var pOutput : uint?) {
-    var w : int = int(width)
-    var h : int = int(height)
+    let w : int = int(width)
+    let h : int = int(height)
     var x : int = 0
     var y : int = 0
-    var ySize : uint64 = uint64(w * h)
-    var cbSize : uint64 = uint64(w / 2 * h / 2)
+    let ySize : uint64 = uint64(w * h)
+    let cbSize : uint64 = uint64(w / 2 * h / 2)
     var luma : uint8? = data
     var cb : uint8? = data + ySize
     var cr : uint8? = data + ySize + cbSize
     var bgra : uint? = pOutput
     while (y < h) {
-        var c : int = int(*luma) - 16
-        var d : int = int(*cb) - 128
-        var e : int = int(*cr) - 128
-        var r : uint = uint((298 * c + 409 * e + 128 >> 8) < 0 ? 0 : ((298 * c + 409 * e + 128 >> 8) > 255 ? 255 : (298 * c + 409 * e + 128 >> 8)))
-        var g : uint = uint((298 * c - 100 * d - 208 * e + 128 >> 8) < 0 ? 0 :
-                ((298 * c - 100 * d - 208 * e + 128 >> 8) > 255 ? 255 : (298 * c - 100 * d - 208 * e + 128 >> 8)))
-        var b : uint = uint((298 * c + 516 * d + 128 >> 8) < 0 ? 0 : ((298 * c + 516 * d + 128 >> 8) > 255 ? 255 : (298 * c + 516 * d + 128 >> 8)))
+        let c : int = int(*luma) - 16
+        let d : int = int(*cb) - 128
+        let e : int = int(*cr) - 128
+        let r : uint = uint(CLIP1(298 * c + 409 * e + 128 >> 8))
+        let g : uint = uint(CLIP1(298 * c - 100 * d - 208 * e + 128 >> 8))
+        let b : uint = uint(CLIP1(298 * c + 516 * d + 128 >> 8))
         var pixel : uint = 255u
         pixel = (pixel << 8u) + r
         pixel = (pixel << 8u) + g
@@ -5353,12 +5409,12 @@ def h264bsdConvertToBGRA(width : uint; height : uint; var data : uint8?; var pOu
 
 [c_function]
 def h264bsdConvertToYCbCrA(width : uint; height : uint; var data : uint8?; var pOutput : uint?) {
-    var w : int = int(width)
-    var h : int = int(height)
+    let w : int = int(width)
+    let h : int = int(height)
     var x : int = 0
     var y : int = 0
-    var ySize : uint64 = uint64(w * h)
-    var cbSize : uint64 = uint64(w / 2 * h / 2)
+    let ySize : uint64 = uint64(w * h)
+    let cbSize : uint64 = uint64(w / 2 * h / 2)
     var luma : uint8? = data
     var cb : uint8? = data + ySize
     var cr : uint8? = data + ySize + cbSize
@@ -5841,7 +5897,6 @@ def private h264_file_all__SlidingWindowRefPicMarking(var dpb : dpbStorage_t?) :
     // Variables
     var index : int
     var picNum : int
-    var i : uint
     // Code
     if (dpb.numRefFrames < dpb.maxRefFrames) {
         return uint(HANTRO_OK)
@@ -5849,15 +5904,13 @@ def private h264_file_all__SlidingWindowRefPicMarking(var dpb : dpbStorage_t?) :
         index = -1
         picNum = 0
         // find the oldest short term picture
-        i = 0u
-        while (i < dpb.numRefFrames) {
+        for (i in urange(dpb.numRefFrames)) {
             if (dpb.buffer[i].status == dpbPictureStatus_e.NON_EXISTING || dpb.buffer[i].status == dpbPictureStatus_e.SHORT_TERM) {
                 if (dpb.buffer[i].picNum < picNum || index == -1) {
                     index = int(i)
                     picNum = dpb.buffer[i].picNum
                 }
             }
-            i++
         }
         if (index >= 0) {
             dpb.buffer[index].status = dpbPictureStatus_e.UNUSED
@@ -5877,7 +5930,7 @@ def h264bsdInitDpb(var dpb : dpbStorage_t?; picSizeInMbs : uint; dpbSize : uint;
     var i : uint
     // Code
     dpb.maxLongTermFrameIdx = uint(anon_105.NO_LONG_TERM_FRAME_INDICES)
-    dpb.maxRefFrames = maxRefFrames > 1u ? maxRefFrames : 1u
+    dpb.maxRefFrames = MAX(maxRefFrames, 1)
     if (noReordering != 0) {
         dpb.dpbSize = dpb.maxRefFrames
     } else {
@@ -6289,7 +6342,6 @@ def h264bsdWriteOutputBlocks(var image : image_t?; mbNum : uint; var data : uint
     var tmp : uint8?
     var row : uint
     var col : uint
-    var _c_block : uint
     var x : uint
     var y : uint
     var pRes : int?
@@ -6309,13 +6361,13 @@ def h264bsdWriteOutputBlocks(var image : image_t?; mbNum : uint; var data : uint
     cb = image.data + picSize * 256u + row * picWidth * 64u + col * 8u
     cr = cb + picSize * 64u
     picWidth *= 16u
-    for (_c_block1 in urange(16u)) {
-        x = h264bsdBlockX[_c_block1]
-        y = h264bsdBlockY[_c_block1]
-        pRes = addr(residual[_c_block1][0])
+    for (_c_block in urange(16u)) {
+        x = h264bsdBlockX[_c_block]
+        y = h264bsdBlockY[_c_block]
+        pRes = addr(residual[_c_block][0])
         tmp = data + y * 16u + x
         imageBlock = lum + y * picWidth + x
-        if (pRes[0] == EMPTY_RESIDUAL_INDICATOR) {
+        if (IS_RESIDUAL_EMPTY(pRes)) {
             // lint -e826
             var in32 : int? = reinterpret<int?>(tmp)
             var out32 : int? = reinterpret<int?>(imageBlock)
@@ -6370,8 +6422,7 @@ def h264bsdWriteOutputBlocks(var image : image_t?; mbNum : uint; var data : uint
         }
     }
     picWidth /= 2u
-    _c_block = 16u
-    while (_c_block <= 23u) {
+    for (_c_block in urange(16u, 24u)) {
         x = h264bsdBlockX[_c_block & 3u]
         y = h264bsdBlockY[_c_block & 3u]
         pRes = addr(residual[_c_block][0])
@@ -6383,7 +6434,7 @@ def h264bsdWriteOutputBlocks(var image : image_t?; mbNum : uint; var data : uint
         }
         tmp += y * 8u + x
         imageBlock += y * picWidth + x
-        if (pRes[0] == EMPTY_RESIDUAL_INDICATOR) {
+        if (IS_RESIDUAL_EMPTY(pRes)) {
             // lint -e826
             var in32 : int? = reinterpret<int?>(tmp)
             var out32 : int? = reinterpret<int?>(imageBlock)
@@ -6434,7 +6485,6 @@ def h264bsdWriteOutputBlocks(var image : image_t?; mbNum : uint; var data : uint
                 i--
             }
         }
-        _c_block++
     }
 }
 
@@ -7443,7 +7493,7 @@ def h264bsdAddResidual(var data : uint8?; var residual : int?; blockNum : uint) 
     var tmp : uint8?
     var clp : uint8? = addr(h264bsdClip[0]) + 512
     // Code
-    if (residual[0] == EMPTY_RESIDUAL_INDICATOR) {
+    if (IS_RESIDUAL_EMPTY(residual)) {
         return
     }
     if (blockNum < 16u) {
@@ -7579,7 +7629,7 @@ def private h264_file_all__Intra16x16PlanePrediction(var data : uint8?; var abov
     for (i1 in range(16)) {
         for (j in range(16)) {
             tmp = (a + b * (j - 7) + c * (i1 - 7) + 16) >> 5
-            data[i1 * 16 + j] = uint8(tmp < 0 ? 0 : (tmp > 255 ? 255 : tmp))
+            data[i1 * 16 + j] = uint8(CLIP1(tmp))
         }
     }
 }
@@ -8191,7 +8241,7 @@ def private h264_file_all__DetermineIntra4x4PredMode(var pMbLayer : macroblockLa
         } else {
             mode2 = 2u
         }
-        mode1 = mode1 < mode2 ? mode1 : mode2
+        mode1 = MIN(mode1, mode2)
     }
     if (pMbLayer.mbPred.prevIntra4x4PredModeFlag[index] == 0) {
         if (pMbLayer.mbPred.remIntra4x4PredMode[index] < mode1) {
@@ -8214,7 +8264,7 @@ def h264bsdDecodeMacroblockLayer(var pStrmData : strmData_t?; var pMbLayer : mac
     // Code
     memset1(reinterpret<void?>(pMbLayer), 0, uint64(typeinfo sizeof(type<macroblockLayer_t>)))
     tmp = h264bsdDecodeExpGolombUnsigned(pStrmData, addr(value))
-    if (sliceType == uint(anon_104.I_SLICE) || sliceType == uint(int(anon_104.I_SLICE) + 5)) {
+    if (IS_I_SLICE(sliceType)) {
         if ((value + 6u) > 31u || tmp != uint(HANTRO_OK)) {
             return uint(HANTRO_NOK)
         }
@@ -9008,7 +9058,7 @@ def h264bsdDecodePicOrderCnt(var poc : pocStorage_t?; var sps : seqParamSet_t?; 
     c_switch(sps.picOrderCntType) {
         case(0u) {
             // set prevPicOrderCnt values for IDR frame
-            if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
+            if (IS_IDR_NAL_UNIT(pNalUnit)) {
                 poc.prevPicOrderCntMsb = 0
                 poc.prevPicOrderCntLsb = 0u
             }
@@ -9064,7 +9114,7 @@ def h264bsdDecodePicOrderCnt(var poc : pocStorage_t?; var sps : seqParamSet_t?; 
         }
         case(1u) {
             // step 1 (in the description in the standard)
-            if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
+            if (IS_IDR_NAL_UNIT(pNalUnit)) {
                 frameNumOffset = 0u
             } elif (poc.prevFrameNum > pSliceHeader.frameNum) {
                 frameNumOffset = poc.prevFrameNumOffset + sps.maxFrameNum
@@ -9131,7 +9181,7 @@ def h264bsdDecodePicOrderCnt(var poc : pocStorage_t?; var sps : seqParamSet_t?; 
         case(_) {
             // case 2
             // derive frameNumOffset
-            if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
+            if (IS_IDR_NAL_UNIT(pNalUnit)) {
                 frameNumOffset = 0u
             } elif (poc.prevFrameNum > pSliceHeader.frameNum) {
                 frameNumOffset = poc.prevFrameNumOffset + sps.maxFrameNum
@@ -9140,7 +9190,7 @@ def h264bsdDecodePicOrderCnt(var poc : pocStorage_t?; var sps : seqParamSet_t?; 
             }
             // derive picOrderCnt (type 2 has same value for top and bottom
             // field order cnts)
-            if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
+            if (IS_IDR_NAL_UNIT(pNalUnit)) {
                 picOrderCnt = 0
             } elif (pNalUnit.nalRefIdc == 0u) {
                 picOrderCnt = 2 * int(frameNumOffset + pSliceHeader.frameNum) - 1
@@ -9393,7 +9443,6 @@ def h264bsdInterpolateChromaHor(var pRef : uint8?; var predPartChroma : uint8?; 
     var val : uint
     var ptrA : uint8?
     var cbr : uint8?
-    var comp : uint
     var _c_block : uint8[144]
     // Code
     if ((x0 < 0) || (uint(x0) + chromaPartWidth + 1u > width) || (y0 < 0) || (uint(y0) + chromaPartHeight > height)) {
@@ -9408,8 +9457,7 @@ def h264bsdInterpolateChromaHor(var pRef : uint8?; var predPartChroma : uint8?; 
         height = chromaPartHeight
     }
     val = 8u - xFrac
-    comp = 0u
-    while (comp <= 1u) {
+    for (comp in urange(2u)) {
         ptrA = pRef + (comp * height + uint(y0)) * width + x0
         cbr = predPartChroma + comp * 8u * 8u
         // 2x2 pels per iteration
@@ -9450,7 +9498,6 @@ def h264bsdInterpolateChromaHor(var pRef : uint8?; var predPartChroma : uint8?; 
             ptrA += 2u * width - chromaPartWidth
             y--
         }
-        comp++
     }
 }
 
@@ -9467,7 +9514,6 @@ def h264bsdInterpolateChromaVer(var pRef : uint8?; var predPartChroma : uint8?; 
     var val : uint
     var ptrA : uint8?
     var cbr : uint8?
-    var comp : uint
     var _c_block : uint8[144]
     // Code
     if ((x0 < 0) || (uint(x0) + chromaPartWidth > width) || (y0 < 0) || (uint(y0) + chromaPartHeight + 1u > height)) {
@@ -9482,8 +9528,7 @@ def h264bsdInterpolateChromaVer(var pRef : uint8?; var predPartChroma : uint8?; 
         height = chromaPartHeight + 1u
     }
     val = 8u - yFrac
-    comp = 0u
-    while (comp <= 1u) {
+    for (comp in urange(2u)) {
         ptrA = pRef + (comp * height + uint(y0)) * width + x0
         cbr = predPartChroma + comp * 8u * 8u
         // 2x2 pels per iteration
@@ -9524,7 +9569,6 @@ def h264bsdInterpolateChromaVer(var pRef : uint8?; var predPartChroma : uint8?; 
             ptrA += 2u * width - chromaPartWidth
             y--
         }
-        comp++
     }
 }
 
@@ -9542,8 +9586,7 @@ def h264bsdInterpolateChromaHorVer(var ref : uint8?; var predPartChroma : uint8?
     var tmp6 : uint
     var valX : uint
     var valY : uint
-    var plus32 : uint = 32u
-    var comp : uint
+    let plus32 : uint = 32u
     var ptrA : uint8?
     var cbr : uint8?
     // Code
@@ -9560,8 +9603,7 @@ def h264bsdInterpolateChromaHorVer(var ref : uint8?; var predPartChroma : uint8?
     }
     valX = 8u - xFrac
     valY = 8u - yFrac
-    comp = 0u
-    while (comp <= 1u) {
+    for (comp in urange(2u)) {
         ptrA = ref + (comp * height + uint(y0)) * width + x0
         cbr = predPartChroma + comp * 8u * 8u
         // 2x2 pels per iteration
@@ -9619,7 +9661,6 @@ def h264bsdInterpolateChromaHorVer(var ref : uint8?; var predPartChroma : uint8?
             ptrA += 2u * width - chromaPartWidth
             y--
         }
-        comp++
     }
 }
 
@@ -10719,7 +10760,7 @@ def h264bsdInterpolateMidHorQuarter(var ref : uint8?; var mb : uint8?; var x0 : 
     var ptrC : uint8?
     var ptrV : uint8?
     var _c_table : int[336]
-    var tableWidth : int = int(partWidth) + 5
+    let tableWidth : int = int(partWidth) + 5
     var clp : uint8? = addr(h264bsdClip[0]) + 512
     // Code
     if ((x0 < 0) || (uint(x0) + partWidth + 5u > width) || (y0 < 0) || (uint(y0) + partHeight + 5u > height)) {
@@ -12432,13 +12473,12 @@ def private h264_file_all__GetDpbSize(picSizeInMbs : uint; levelIdc : uint) : ui
         return uint(anon_544.INVALID_DPB_SIZE)
     }
     tmp /= picSizeInMbs * 384u
-    return tmp < 16u ? tmp : 16u
+    return MIN(tmp, 16)
 }
 
 [c_function]
 def h264bsdCompareSeqParamSets(var pSps1 : seqParamSet_t?; var pSps2 : seqParamSet_t?) : uint {
     // Variables
-    var i : uint
     // Code
     // first compare parameters whose existence does not depend on other
     // parameters and only compare the rest of the params if these are equal
@@ -12457,12 +12497,10 @@ def h264bsdCompareSeqParamSets(var pSps1 : seqParamSet_t?; var pSps2 : seqParamS
                     pSps1.numRefFramesInPicOrderCntCycle != pSps2.numRefFramesInPicOrderCntCycle) {
                 return 1u
             } else {
-                i = 0u
-                while (i < pSps1.numRefFramesInPicOrderCntCycle) {
+                for (i in urange(pSps1.numRefFramesInPicOrderCntCycle)) {
                     if (pSps1.offsetForRefFrame[i] != pSps2.offsetForRefFrame[i]) {
                         return 1u
                     }
-                    i++
                 }
             }
         }
@@ -12735,22 +12773,22 @@ def private h264_file_all__DecodeBoxOutMap(var map : uint?; sliceGroupChangeDire
             map[uint(y) * picWidth + uint(x)] = 0u
         }
         if (xDir == -1 && x == leftBound) {
-            leftBound = leftBound - 1 > 0 ? leftBound - 1 : 0
+            leftBound = MAX(leftBound - 1, 0)
             x = leftBound
             xDir = 0
             yDir = 2 * int(sliceGroupChangeDirectionFlag) - 1
         } elif (xDir == 1 && x == rightBound) {
-            rightBound = rightBound + 1 < int(picWidth) - 1 ? rightBound + 1 : int(picWidth) - 1
+            rightBound = MIN(rightBound + 1, int(picWidth) - 1)
             x = rightBound
             xDir = 0
             yDir = 1 - 2 * int(sliceGroupChangeDirectionFlag)
         } elif (yDir == -1 && y == topBound) {
-            topBound = topBound - 1 > 0 ? topBound - 1 : 0
+            topBound = MAX(topBound - 1, 0)
             y = topBound
             xDir = 1 - 2 * int(sliceGroupChangeDirectionFlag)
             yDir = 0
         } elif (yDir == 1 && y == bottomBound) {
-            bottomBound = bottomBound + 1 < int(picHeight) - 1 ? bottomBound + 1 : int(picHeight) - 1
+            bottomBound = MIN(bottomBound + 1, int(picHeight) - 1)
             y = bottomBound
             xDir = 2 * int(sliceGroupChangeDirectionFlag) - 1
             yDir = 0
@@ -12879,8 +12917,8 @@ def h264bsdDecodeSliceHeader(var pStrmData : strmData_t?; var pSliceHeader : sli
     // slice type has to be either I or P slice. P slice is not allowed when
     // current NAL unit is an IDR NAL unit or num_ref_frames is 0
     if (!(pSliceHeader.sliceType == uint(anon_104.I_SLICE) || pSliceHeader.sliceType == uint(int(anon_104.I_SLICE) + 5)) &&
-            (!(pSliceHeader.sliceType == uint(anon_104.P_SLICE) || pSliceHeader.sliceType == uint(int(anon_104.P_SLICE) + 5)) ||
-                pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR || pSeqParamSet.numRefFrames == 0)) {
+            (!(pSliceHeader.sliceType == uint(anon_104.P_SLICE) || pSliceHeader.sliceType == uint(int(anon_104.P_SLICE) + 5)) || IS_IDR_NAL_UNIT(pNalUnit) ||
+                pSeqParamSet.numRefFrames == 0)) {
         return uint(HANTRO_NOK)
     }
     tmp = h264bsdDecodeExpGolombUnsigned(pStrmData, addr(value))
@@ -12901,11 +12939,11 @@ def h264bsdDecodeSliceHeader(var pStrmData : strmData_t?; var pSliceHeader : sli
     if (tmp == END_OF_STREAM) {
         return uint(HANTRO_NOK)
     }
-    if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR && tmp != 0u) {
+    if (IS_IDR_NAL_UNIT(pNalUnit) && tmp != 0u) {
         return uint(HANTRO_NOK)
     }
     pSliceHeader.frameNum = tmp
-    if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR) {
+    if (IS_IDR_NAL_UNIT(pNalUnit)) {
         tmp = h264bsdDecodeExpGolombUnsigned(pStrmData, addr(value))
         if (tmp != uint(HANTRO_OK)) {
             return tmp
@@ -12936,7 +12974,7 @@ def h264bsdDecodeSliceHeader(var pStrmData : strmData_t?; var pSliceHeader : sli
         }
         // check that picOrderCnt for IDR picture will be zero. See
         // DecodePicOrderCnt function to understand the logic here
-        if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR &&
+        if (IS_IDR_NAL_UNIT(pNalUnit) &&
                 ((pSliceHeader.picOrderCntLsb > pSeqParamSet.maxPicOrderCntLsb / 2u) ||
                     (int(pSliceHeader.picOrderCntLsb) < int(pSliceHeader.picOrderCntLsb) + pSliceHeader.deltaPicOrderCntBottom ?
                             int(pSliceHeader.picOrderCntLsb) : int(pSliceHeader.picOrderCntLsb) + pSliceHeader.deltaPicOrderCntBottom) !=
@@ -12959,7 +12997,7 @@ def h264bsdDecodeSliceHeader(var pStrmData : strmData_t?; var pSliceHeader : sli
         }
         // check that picOrderCnt for IDR picture will be zero. See
         // DecodePicOrderCnt function to understand the logic here
-        if (pNalUnit.nalUnitType == nalUnitType_e.NAL_CODED_SLICE_IDR &&
+        if (IS_IDR_NAL_UNIT(pNalUnit) &&
                 (pSliceHeader.deltaPicOrderCnt[0] < pSliceHeader.deltaPicOrderCnt[0] + pSeqParamSet.offsetForTopToBottomField +
                             pSliceHeader.deltaPicOrderCnt[1] ?
                         pSliceHeader.deltaPicOrderCnt[0] :
@@ -14126,29 +14164,24 @@ def h264bsdCheckAccessUnitBoundary(var strm : strmData_t?; var nuNext : nalUnit_
 // ------------------------------------------------------------------------------
 [c_function]
 def private h264_file_all__CheckPps(var pps : picParamSet_t?; var sps : seqParamSet_t?) : uint {
-    var i : uint
     var picSize : uint
     picSize = sps.picWidthInMbs * sps.picHeightInMbs
     // check slice group params
     if (pps.numSliceGroups > 1u) {
         if (pps.sliceGroupMapType == 0u) {
-            i = 0u
-            while (i < pps.numSliceGroups) {
+            for (i in urange(pps.numSliceGroups)) {
                 if (pps.runLength[i] > picSize) {
                     return uint(HANTRO_NOK)
                 }
-                i++
             }
         } elif (pps.sliceGroupMapType == 2u) {
-            i = 0u
-            while (i < pps.numSliceGroups - 1u) {
+            for (i in urange(pps.numSliceGroups - 1u)) {
                 if (pps.topLeft[i] > pps.bottomRight[i] || pps.bottomRight[i] >= picSize) {
                     return uint(HANTRO_NOK)
                 }
                 if ((pps.topLeft[i] % sps.picWidthInMbs) > (pps.bottomRight[i] % sps.picWidthInMbs)) {
                     return uint(HANTRO_NOK)
                 }
-                i++
             }
         } elif (pps.sliceGroupMapType > 2u && pps.sliceGroupMapType < 6u) {
             if (pps.sliceGroupChangeRate > picSize) {
@@ -14194,11 +14227,11 @@ def h264bsdShowBits32(var pStrmData : strmData_t?) : uint {
     bits = int(pStrmData.strmBuffSize) * 8 - int(pStrmData.strmBuffReadBits)
     // at least 32-bits in the buffer
     if (bits >= 32) {
-        var bitPosInWord : uint = pStrmData.bitPosInWord
+        let bitPosInWord : uint = pStrmData.bitPosInWord
         out = (uint(pStrm[0]) << 24u) | (uint(pStrm[1]) << 16u) | (uint(pStrm[2]) << 8u) | uint(pStrm[3])
         if (bitPosInWord != 0) {
-            var byte : uint = uint(pStrm[4])
-            var tmp : uint = 8u - bitPosInWord
+            let byte : uint = uint(pStrm[4])
+            let tmp : uint = 8u - bitPosInWord
             out <<= bitPosInWord
             out |= byte >> tmp
         }
@@ -15279,7 +15312,7 @@ def MP4E_open(sequential_mode_flag : int; enable_fragmentation : int; var token 
 [c_function]
 def MP4E_add_track(var mux : MP4E_mux_tag?; var track_data : MP4E_track_t?) : int {
     var tr : track_t?
-    var ntr : int = int(uint64(mux.tracks.bytes) / uint64(typeinfo sizeof(type<track_t>)))
+    let ntr : int = int(uint64(mux.tracks.bytes) / uint64(typeinfo sizeof(type<track_t>)))
     if (mux == null || track_data == null) {
         return MP4E_STATUS_BAD_ARGUMENTS
     }
@@ -15315,7 +15348,7 @@ def private h264_file_all__append_mem(var v : minimp4_vector_t?; var mem : void?
     var p : uint8? = v.data
     i = 0
     while (i + 2 < v.bytes) {
-        var cb : int = int(p[i]) * 256 + int(p[i + 1])
+        let cb : int = int(p[i]) * 256 + int(p[i + 1])
         if (cb == bytes && memcmp1(reinterpret<void?>(p + i + 2), mem, uint64(cb)) == 0) {
             return 1
         }
@@ -15334,7 +15367,7 @@ def private h264_file_all__items_count(var v : minimp4_vector_t?) : int {
     var p : uint8? = v.data
     i = 0
     while (i + 2 < v.bytes) {
-        var cb : int = int(p[i]) * 256 + int(p[i + 1])
+        let cb : int = int(p[i]) * 256 + int(p[i + 1])
         count++
         i += 2 + cb
     }
@@ -15423,7 +15456,7 @@ def private h264_file_all__write_pending_data(var mux : MP4E_mux_tag?; var tr : 
         p++
         *_t9 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 0))
         {
-            var err : int = invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(addr(base[0])), uint64(int64(p - addr(base[0]))), mux.token)
+            let err : int = invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(addr(base[0])), uint64(int64(p - addr(base[0]))), mux.token)
             if (err != 0) {
                 return err
             }
@@ -15435,7 +15468,7 @@ def private h264_file_all__write_pending_data(var mux : MP4E_mux_tag?; var tr : 
         smpl_desc.offset = uint64(mux.write_pos)
         {
             // Write data
-            var err : int = invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(tr.pending_sample.data), uint64(tr.pending_sample.bytes), mux.token)
+            let err : int = invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(tr.pending_sample.data), uint64(tr.pending_sample.bytes), mux.token)
             if (err != 0) {
                 return err
             }
@@ -15898,7 +15931,7 @@ def private h264_file_all__mp4e_write_fragment_header(var mux : MP4E_mux_tag?; t
     pdata_offset[2] = uint8(int64(p - addr(base[0])) + 8l >> int64(8 * 1))
     pdata_offset[3] = uint8(int64(p - addr(base[0])) + 8l)
     {
-        var err : int = invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(addr(base[0])), uint64(int64(p - addr(base[0]))), mux.token)
+        let err : int = invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(addr(base[0])), uint64(int64(p - addr(base[0]))), mux.token)
         if (err != 0) {
             return err
         }
@@ -15936,7 +15969,7 @@ def private h264_file_all__mp4e_write_mdat_box(var mux : MP4E_mux_tag?; size : u
     p++
     *_t7 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 0))
     {
-        var err : int = invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(addr(base[0])), uint64(int64(p - addr(base[0]))), mux.token)
+        let err : int = invoke(mux.write_callback, mux.write_pos, reinterpret<void?>(addr(base[0])), uint64(int64(p - addr(base[0]))), mux.token)
         if (err != 0) {
             return err
         }
@@ -15959,27 +15992,27 @@ def MP4E_put_sample(var mux : MP4E_mux_tag?; track_num : int; var data : void?; 
         mux.fragments_count++
         if (_t0 == 0) {
             // write file headers before 1st sample
-            var err : int = h264_file_all__mp4e_flush_index(mux)
+            let err : int = h264_file_all__mp4e_flush_index(mux)
             if (err != 0) {
                 return err
             }
         }
         {
             // write MOOF + MDAT + sample data
-            var err : int = h264_file_all__mp4e_write_fragment_header(mux, track_num, data_bytes, duration, kind)
+            let err : int = h264_file_all__mp4e_write_fragment_header(mux, track_num, data_bytes, duration, kind)
             if (err != 0) {
                 return err
             }
         }
         {
             // write MDAT box for each sample
-            var err : int = h264_file_all__mp4e_write_mdat_box(mux, uint(data_bytes + 8))
+            let err : int = h264_file_all__mp4e_write_mdat_box(mux, uint(data_bytes + 8))
             if (err != 0) {
                 return err
             }
         }
         {
-            var err : int = invoke(mux.write_callback, mux.write_pos, data, uint64(data_bytes), mux.token)
+            let err : int = invoke(mux.write_callback, mux.write_pos, data, uint64(data_bytes), mux.token)
             if (err != 0) {
                 return err
             }
@@ -15989,7 +16022,7 @@ def MP4E_put_sample(var mux : MP4E_mux_tag?; track_num : int; var data : void?; 
     }
     if (kind != MP4E_SAMPLE_CONTINUATION) {
         if (mux.sequential_mode_flag != 0) {
-            var err : int = h264_file_all__write_pending_data(mux, tr)
+            let err : int = h264_file_all__write_pending_data(mux, tr)
             if (err != 0) {
                 return err
             }
@@ -16015,7 +16048,7 @@ def MP4E_put_sample(var mux : MP4E_mux_tag?; track_num : int; var data : void?; 
         }
     } else {
         {
-            var err : int = invoke(mux.write_callback, mux.write_pos, data, uint64(data_bytes), mux.token)
+            let err : int = invoke(mux.write_callback, mux.write_pos, data, uint64(data_bytes), mux.token)
             if (err != 0) {
                 return err
             }
@@ -16065,7 +16098,7 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
     var base : uint8?
     var p : uint8?
     var index_bytes : uint
-    var ntracks : uint = uint(uint64(mux.tracks.bytes) / uint64(typeinfo sizeof(type<track_t>)))
+    let ntracks : uint = uint(uint64(mux.tracks.bytes) / uint64(typeinfo sizeof(type<track_t>)))
     var i : int
     var err : int
     // How much memory needed for indexes
@@ -16088,7 +16121,7 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
         index_bytes += uint(tr.vsps.bytes)
         index_bytes += uint(tr.vpps.bytes)
         {
-            var err1 : int = h264_file_all__write_pending_data(mux, tr)
+            let err1 : int = h264_file_all__write_pending_data(mux, tr)
             if (err1 != 0) {
                 return err1
             }
@@ -16105,8 +16138,8 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
         // Second is optional duration update at beginning of file in fragmentation mode.
         // This can be avoided using "till eof" size code, but in this case indexes must be
         // written before the mdat....
-        var size : int64 = int64(uint64(mux.write_pos) - uint64(typeinfo sizeof(type<uint8[24]>)))
-        var size_limit : int64 = int64(uint64(4294967294u))
+        let size : int64 = int64(uint64(mux.write_pos) - uint64(typeinfo sizeof(type<uint8[24]>)))
+        let size_limit : int64 = int64(uint64(4294967294u))
         if (size > size_limit) {
             var _t0 = p
             p++
@@ -16207,7 +16240,7 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
             *_t31 = uint8(uint(anon_644.BOX_mdat) >> uint(8 * 0))
         }
         {
-            var err2 : int = invoke(mux.write_callback, int64(uint64(typeinfo sizeof(type<uint8[24]>))), reinterpret<void?>(base), uint64(int64(p - base)),
+            let err2 : int = invoke(mux.write_callback, int64(uint64(typeinfo sizeof(type<uint8[24]>))), reinterpret<void?>(base), uint64(int64(p - base)),
                     mux.token)
             if (err2 != 0) {
                 return err2
@@ -16575,7 +16608,7 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
     (*stack)[3] = uint8(int64(p - *stack))
     for (ntr in urange(ntracks)) {
         var tr : track_t? = reinterpret<track_t?>(mux.tracks.data) + ntr
-        var duration : uint = h264_file_all__get_duration(tr)
+        let duration : uint = h264_file_all__get_duration(tr)
         var samples_count : int = int(uint64(tr.smpl.bytes) / uint64(typeinfo sizeof(type<sample_t>)))
         var sample : sample_t? = reinterpret<sample_t?>(tr.smpl.data)
         var handler_type : uint
@@ -17032,7 +17065,7 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
         p++
         *_t273 = uint8(duration >> uint(8 * 0))
         {
-            var lang_code : int = ((int(tr.info.language[0]) & 31) << 10) | ((int(tr.info.language[1]) & 31) << 5) | (int(tr.info.language[2]) & 31)
+            let lang_code : int = ((int(tr.info.language[0]) & 31) << 10) | ((int(tr.info.language[1]) & 31) << 5) | (int(tr.info.language[2]) & 31)
             // language
             var _t274 = p
             p++
@@ -17626,9 +17659,9 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
             if (tr.vsps.bytes > 0) {
                 // - two bytes size field
                 var dsi_bytes : int = tr.vsps.bytes - 2
-                var dsi_size_size : int = h264_file_all__od_size_of_size(dsi_bytes)
+                let dsi_size_size : int = h264_file_all__od_size_of_size(dsi_bytes)
                 var dcd_bytes : int = dsi_bytes + dsi_size_size + 1 + (1 + 1 + 3 + 4 + 4)
-                var dcd_size_size : int = h264_file_all__od_size_of_size(dcd_bytes)
+                let dcd_size_size : int = h264_file_all__od_size_of_size(dcd_bytes)
                 var esd_bytes : int = dcd_bytes + dcd_size_size + 1 + 3
                 // OD_ESD
                 var _t439 = p
@@ -17761,8 +17794,8 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
         }
         if (tr.info.track_media_kind == track_media_kind_t.e_video &&
                 (uint(MP4_OBJECT_TYPE_AVC) == tr.info.object_type_indication || uint(MP4_OBJECT_TYPE_HEVC) == tr.info.object_type_indication)) {
-            var numOfSequenceParameterSets : int = h264_file_all__items_count(addr(tr.vsps))
-            var numOfPictureParameterSets : int = h264_file_all__items_count(addr(tr.vpps))
+            let numOfSequenceParameterSets : int = h264_file_all__items_count(addr(tr.vsps))
+            let numOfPictureParameterSets : int = h264_file_all__items_count(addr(tr.vpps))
             if (uint(MP4_OBJECT_TYPE_AVC) == tr.info.object_type_indication) {
                 var _t467 = stack
                 stack++
@@ -18015,7 +18048,7 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
                     i++
                 }
             } else {
-                var numOfVPS : int = h264_file_all__items_count(addr(tr.vpps))
+                let numOfVPS : int = h264_file_all__items_count(addr(tr.vpps))
                 var _t538 = stack
                 stack++
                 *_t538 = p
@@ -18941,7 +18974,7 @@ def private h264_file_all__mp4e_flush_index(var mux : MP4E_mux_tag?) : int {
     }
     if (mux.enable_fragmentation != 0) {
         var tr : track_t? = reinterpret<track_t?>(mux.tracks.data) + 0
-        var movie_duration : uint = h264_file_all__get_duration(tr)
+        let movie_duration : uint = h264_file_all__get_duration(tr)
         var _t775 = stack
         stack++
         *_t775 = p
@@ -19169,7 +19202,7 @@ def private h264_file_all__flush_bits(var bs : bit_reader_t?; n : int) {
 }
 
 def private h264_file_all__get_bits(var bs : bit_reader_t?; n : int) : uint {
-    var retval : uint = h264_file_all__show_bits(bs, n)
+    let retval : uint = h264_file_all__show_bits(bs, n)
     h264_file_all__flush_bits(bs, n)
     return retval
 }
@@ -19250,7 +19283,7 @@ def private h264_file_all__h264e_bs_get_pos_bits(var bs : bs_t?) : uint {
 }
 
 def private h264_file_all__h264e_bs_byte_align(var bs : bs_t?) : uint {
-    var pos : int = int(h264_file_all__h264e_bs_get_pos_bits(bs))
+    let pos : int = int(h264_file_all__h264e_bs_get_pos_bits(bs))
     h264_file_all__h264e_bs_put_bits(bs, uint(-pos & 7), 0u)
     return uint(pos + (-pos & 7))
 }
@@ -19362,7 +19395,7 @@ def private h264_file_all__nal_put_esc(var d : uint8?; var s : uint8?; n : int) 
     for (i in range(n)) {
         var _t0 = s
         s++
-        var byte : uint8 = *_t0
+        let byte : uint8 = *_t0
         if (cntz == 2 && int(byte) <= 3) {
             let _t1 = j
             j++
@@ -19386,7 +19419,7 @@ def private h264_file_all__copy_bits(var bs : bit_reader_t?; var bd : bs_t?) {
     var bits : uint
     var bit_count : int = h264_file_all__remaining_bits(bs)
     while (bit_count > 7) {
-        cb = uint(bit_count - 7 < 8 ? bit_count - 7 : 8)
+        cb = uint(MINIMP4_MIN(bit_count - 7, 8))
         bits = h264_file_all__get_bits(bs, int(cb))
         h264_file_all__h264e_bs_put_bits(bd, cb, bits)
         bit_count = int(uint(bit_count) - cb)
@@ -19444,8 +19477,8 @@ def private h264_file_all__patch_pps(var h : h264_sps_id_patcher_t?; var bs : bi
 }
 
 def private h264_file_all__patch_slice_header(var h : h264_sps_id_patcher_t?; var bs : bit_reader_t?; var bd : bs_t?) {
-    var first_mb_in_slice : uint = uint(h264_file_all__ue_bits(bs))
-    var slice_type : uint = uint(h264_file_all__ue_bits(bs))
+    let first_mb_in_slice : uint = uint(h264_file_all__ue_bits(bs))
+    let slice_type : uint = uint(h264_file_all__ue_bits(bs))
     var pps_id : uint = uint(h264_file_all__ue_bits(bs))
     pps_id = uint(h.map_pps[pps_id])
     let _t0 = pps_id <= 255u
@@ -19462,7 +19495,7 @@ def private h264_file_all__transcode_nalu(var h : h264_sps_id_patcher_t?; var sr
     var bdt : bs_t[1]
     var bs : bit_reader_t[1]
     var bd : bs_t[1]
-    var payload_type : int = int(src[0]) & 31
+    let payload_type : int = int(src[0]) & 31
     *dst = *src
     h264_file_all__h264e_bs_init_bits(addr(bd[0]), reinterpret<void?>(dst + 1))
     h264_file_all__init_bits(addr(bs[0]), reinterpret<void?>(src + 1), uint(nalu_bytes - 1))
@@ -19471,8 +19504,8 @@ def private h264_file_all__transcode_nalu(var h : h264_sps_id_patcher_t?; var sr
     c_switch(payload_type) {
         case(7) {
             {
-                var cb : int = h264_file_all__change_sps_id(addr(bst[0]), addr(bdt[0]), 0, addr(old_id))
-                var id : int = h264_file_all__find_mem_cache(addr(h.sps_cache[0]), addr(h.sps_bytes[0]), MINIMP4_MAX_SPS, reinterpret<void?>(dst + 1), cb)
+                let cb : int = h264_file_all__change_sps_id(addr(bst[0]), addr(bdt[0]), 0, addr(old_id))
+                let id : int = h264_file_all__find_mem_cache(addr(h.sps_cache[0]), addr(h.sps_bytes[0]), MINIMP4_MAX_SPS, reinterpret<void?>(dst + 1), cb)
                 if (id == -1) {
                     return 0
                 }
@@ -19483,8 +19516,8 @@ def private h264_file_all__transcode_nalu(var h : h264_sps_id_patcher_t?; var sr
         }
         case(8) {
             {
-                var cb : int = h264_file_all__patch_pps(h, addr(bst[0]), addr(bdt[0]), 0, addr(old_id))
-                var id : int = h264_file_all__find_mem_cache(addr(h.pps_cache[0]), addr(h.pps_bytes[0]), MINIMP4_MAX_PPS, reinterpret<void?>(dst + 1), cb)
+                let cb : int = h264_file_all__patch_pps(h, addr(bst[0]), addr(bdt[0]), 0, addr(old_id))
+                let id : int = h264_file_all__find_mem_cache(addr(h.pps_cache[0]), addr(h.pps_bytes[0]), MINIMP4_MAX_PPS, reinterpret<void?>(dst + 1), cb)
                 if (id == -1) {
                     return 0
                 }
@@ -19591,8 +19624,8 @@ def mp4_h26x_write_close(var h : mp4_h26x_writer_tag?) {
 
 [c_function]
 def private h264_file_all__mp4_h265_write_nal(var h : mp4_h26x_writer_tag?; var nal : uint8?; sizeof_nal : int; timeStamp90kHz_next : uint) : int {
-    var payload_type : int = (int(nal[0]) >> 1) & 63
-    var is_intra : int = int_of(payload_type >= HEVC_NAL_BLA_W_LP && payload_type <= HEVC_NAL_CRA_NUT)
+    let payload_type : int = (int(nal[0]) >> 1) & 63
+    let is_intra : int = int_of(payload_type >= HEVC_NAL_BLA_W_LP && payload_type <= HEVC_NAL_CRA_NUT)
     var err : int = MP4E_STATUS_OK
     // printf("payload_type=%d, intra=%d\n", payload_type, is_intra);
     if (is_intra != 0 && h.need_sps == 0 && h.need_pps == 0 && h.need_vps == 0) {
@@ -19662,7 +19695,7 @@ def mp4_h26x_write_nal(var h : mp4_h26x_writer_tag?; var nal : uint8?; length : 
             }
             if (h.is_hevc != 0) {
                 {
-                    var err1 : int = h264_file_all__mp4_h265_write_nal(h, nal, sizeof_nal, timeStamp90kHz_next)
+                    let err1 : int = h264_file_all__mp4_h265_write_nal(h, nal, sizeof_nal, timeStamp90kHz_next)
                     if (err1 != 0) {
                         return err1
                     }
@@ -19726,7 +19759,7 @@ def mp4_h26x_write_nal(var h : mp4_h26x_writer_tag?; var nal : uint8?; length : 
                     if (h.need_pps == 0 && h.need_idr == 0) {
                         var bs : bit_reader_t[1]
                         h264_file_all__init_bits(addr(bs[0]), reinterpret<void?>(nal + 1), uint(sizeof_nal - 4 - 1))
-                        var first_mb_in_slice : uint = uint(h264_file_all__ue_bits(addr(bs[0])))
+                        let first_mb_in_slice : uint = uint(h264_file_all__ue_bits(addr(bs[0])))
                         // unsigned slice_type = ue_bits(bs);
                         var sample_kind : int = MP4E_SAMPLE_DEFAULT
                         nal2[0] = uint8((sizeof_nal - 4) >> 24)
@@ -19996,7 +20029,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 {
                     // ISO/IEC 14496-1 Page 38. Section 8.17.2 - Sample Size Box.
                     var size : int = 0
-                    var sample_size : uint = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
+                    let sample_size : uint = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                     tr.sample_count = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                     tr.entry_size = reinterpret<uint?>(malloc1(uint64(tr.sample_count * 4u)))
                     if (tr.entry_size == null) {
@@ -20056,7 +20089,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                     tr.sample_to_chunk[i].samples_per_chunk = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                     {
                         // sample_description_index
-                        var t : uint64 = payload_bytes < 4ul ? payload_bytes : 4ul
+                        let t : uint64 = MINIMP4_MIN(payload_bytes, 4)
                         h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                         payload_bytes -= t
                     }
@@ -20066,7 +20099,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
             }
             case(1937011827u) {
                 {
-                    var count : uint = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
+                    let count : uint = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                     var j : uint
                     var k : uint = 0u
                     var ts : uint = 0u
@@ -20091,8 +20124,8 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                     }
                     i = 0u
                     while (i < count) {
-                        var sc : uint = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
-                        var d : int = int(h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag)))
+                        let sc : uint = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
+                        let d : int = int(h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag)))
                         if (k + sc > ts_count) {
                             ts_count = k + sc
                             tr.timestamp = reinterpret<uint?>(realloc1(reinterpret<void?>(tr.timestamp),
@@ -20115,11 +20148,11 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
             }
             case(1668576371u) {
                 {
-                    var count : uint = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
+                    let count : uint = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                     i = 0u
                     while (i < count) {
-                        var sc : int = int(h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag)))
-                        var d : int = int(h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag)))
+                        let sc : int = int(h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag)))
+                        let d : int = int(h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag)))
                         i++
                     }
                 }
@@ -20158,8 +20191,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
             }
             case(1836476516u) {
                 {
-                    var t : uint64 = payload_bytes < uint64((FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 :
-                            4 + 4) ? payload_bytes : uint64((FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 : 4 + 4)
+                    let t : uint64 = MINIMP4_MIN(payload_bytes, (FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 : 4 + 4)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -20167,8 +20199,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 mp4.duration_hi = ((FullAtomVersionAndFlags >> 24u) == 1u) ? h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag)) : 0u
                 mp4.duration_lo = h264_file_all__read_payload(mp4, 4u, addr(payload_bytes), addr(eof_flag))
                 {
-                    var t : uint64 = payload_bytes < uint64(4 + 2 + 2 + 4 * 2 + 4 * 9 + 4 * 6 + 4) ? payload_bytes : uint64(4 + 2 + 2 + 4 * 2 + 4 * 9 + 4 * 6 +
-                            4)
+                    let t : uint64 = MINIMP4_MIN(payload_bytes, 4 + 2 + 2 + 4 * 2 + 4 * 9 + 4 * 6 + 4)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -20176,8 +20207,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
             }
             case(1835296868u) {
                 {
-                    var t : uint64 = payload_bytes < uint64((FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 :
-                            4 + 4) ? payload_bytes : uint64((FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 : 4 + 4)
+                    let t : uint64 = MINIMP4_MIN(payload_bytes, (FullAtomVersionAndFlags >> 24u) == 1u ? 8 + 8 : 4 + 4)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -20200,7 +20230,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 if (tr != null) {
                     {
                         // pre_defined
-                        var t : uint64 = payload_bytes < 4ul ? payload_bytes : 4ul
+                        let t : uint64 = MINIMP4_MIN(payload_bytes, 4)
                         h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                         payload_bytes -= t
                     }
@@ -20220,7 +20250,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                     }
                 }
                 {
-                    var t : uint64 = payload_bytes < uint64(4 + 4) ? payload_bytes : uint64(4 + 4)
+                    let t : uint64 = MINIMP4_MIN(payload_bytes, 4 + 4)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -20255,7 +20285,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
             case(1937011556u) {
                 {
                     // entry_count, BOX_mp4a & BOX_mp4v boxes follows immediately
-                    var t : uint64 = payload_bytes < 4ul ? payload_bytes : 4ul
+                    let t : uint64 = MINIMP4_MIN(payload_bytes, 4)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -20273,7 +20303,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 {
                     // Base SampleEntry
-                    var t : uint64 = payload_bytes < uint64(6 * 1 + 2) ? payload_bytes : uint64(6 * 1 + 2)
+                    let t : uint64 = MINIMP4_MIN(payload_bytes, 6 * 1 + 2)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -20290,14 +20320,14 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 {
                     // Base SampleEntry
-                    var t : uint64 = payload_bytes < uint64(6 * 1 + 2 + 4 * 2) ? payload_bytes : uint64(6 * 1 + 2 + 4 * 2)
+                    let t : uint64 = MINIMP4_MIN(payload_bytes, 6 * 1 + 2 + 4 * 2)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
                 tr.SampleDescription.audio.channelcount = h264_file_all__read_payload(mp4, 2u, addr(payload_bytes), addr(eof_flag))
                 {
                     // samplesize
-                    var t : uint64 = payload_bytes < uint64(2 + 2 + 2) ? payload_bytes : uint64(2 + 2 + 2)
+                    let t : uint64 = MINIMP4_MIN(payload_bytes, 2 + 2 + 2)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -20318,7 +20348,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 }
                 {
                     // Base SampleEntry
-                    var t : uint64 = payload_bytes < uint64(6 * 1 + 2 + 2 + 2 + 4 * 3) ? payload_bytes : uint64(6 * 1 + 2 + 2 + 2 + 4 * 3)
+                    let t : uint64 = MINIMP4_MIN(payload_bytes, 6 * 1 + 2 + 2 + 2 + 4 * 3)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -20328,7 +20358,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                     // frame_count is always 1
                     // compressorname is rarely set..
                     // frame_count compressorname
-                    var t : uint64 = payload_bytes < uint64(4 + 4 + 4 + 2 + 32 + 2 + 2) ? payload_bytes : uint64(4 + 4 + 4 + 2 + 32 + 2 + 2)
+                    let t : uint64 = MINIMP4_MIN(payload_bytes, 4 + 4 + 4 + 2 + 32 + 2 + 2)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -20351,12 +20381,12 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 {
                     var spspps : int
                     var p : uint8? = tr.dsi
-                    var configurationVersion : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
-                    var AVCProfileIndication : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
-                    var profile_compatibility : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
-                    var AVCLevelIndication : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
+                    let configurationVersion : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
+                    let AVCProfileIndication : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
+                    let profile_compatibility : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
+                    let AVCLevelIndication : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
                     // bit(6) reserved =
-                    var lengthSizeMinusOne : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag)) & 3u
+                    let lengthSizeMinusOne : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag)) & 3u
                     spspps = 0
                     while (spspps < 2) {
                         var numOfSequenceParameterSets : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
@@ -20370,7 +20400,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                         i = 0u
                         while (i < numOfSequenceParameterSets) {
                             var k : uint
-                            var sequenceParameterSetLength : uint = h264_file_all__read_payload(mp4, 2u, addr(payload_bytes), addr(eof_flag))
+                            let sequenceParameterSetLength : uint = h264_file_all__read_payload(mp4, 2u, addr(payload_bytes), addr(eof_flag))
                             var _t3 = p
                             p++
                             *_t3 = uint8(sequenceParameterSetLength >> 8u)
@@ -20395,22 +20425,22 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 {
                     // MP4D_AVC_SUPPORTED
                     // ES_ID(2) + flags(1)
-                    var flags : uint = h264_file_all__read_payload(mp4, 3u, addr(payload_bytes), addr(eof_flag))
+                    let flags : uint = h264_file_all__read_payload(mp4, 3u, addr(payload_bytes), addr(eof_flag))
                     // steamdependflag
                     if ((flags & 128u) != 0) {
                         {
                             // dependsOnESID
-                            var t : uint64 = payload_bytes < 2ul ? payload_bytes : 2ul
+                            let t : uint64 = MINIMP4_MIN(payload_bytes, 2)
                             h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                             payload_bytes -= t
                         }
                     }
                     // urlflag
                     if ((flags & 64u) != 0) {
-                        var bytecount : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
+                        let bytecount : uint = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag))
                         {
                             // skip URL
-                            var t : uint64 = payload_bytes < uint64(bytecount) ? payload_bytes : uint64(bytecount)
+                            let t : uint64 = MINIMP4_MIN(payload_bytes, bytecount)
                             h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                             payload_bytes -= t
                         }
@@ -20419,7 +20449,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                     if ((flags & 32u) != 0) {
                         {
                             // OCRESID
-                            var t : uint64 = payload_bytes < 2ul ? payload_bytes : 2ul
+                            let t : uint64 = MINIMP4_MIN(payload_bytes, 2)
                             h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                             payload_bytes -= t
                         }
@@ -20434,7 +20464,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 tr.stream_type = h264_file_all__read_payload(mp4, 1u, addr(payload_bytes), addr(eof_flag)) >> 2u
                 {
                     // bufferSizeDB maxBitrate
-                    var t : uint64 = payload_bytes < uint64(3 + 4) ? payload_bytes : uint64(3 + 4)
+                    let t : uint64 = MINIMP4_MIN(payload_bytes, 3 + 4)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -20471,7 +20501,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
         // Read tag is tag pointer is set
         if (ptag != null && *ptag == null && payload_bytes > 16ul) {
             {
-                var t : uint64 = payload_bytes < uint64(4 + 4 + 4 + 4) ? payload_bytes : uint64(4 + 4 + 4 + 4)
+                let t : uint64 = MINIMP4_MIN(payload_bytes, 4 + 4 + 4 + 4)
                 h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                 payload_bytes -= t
             }
@@ -20542,7 +20572,7 @@ def MP4D_open(var mp4 : MP4D_demux_tag?; read_callback : function<(a0 : int64; v
                 eof_flag = 1
             } else {
                 {
-                    var t : uint64 = payload_bytes < payload_bytes ? payload_bytes : payload_bytes
+                    let t : uint64 = MINIMP4_MIN(payload_bytes, payload_bytes)
                     h264_file_all__my_fseek(mp4, t, addr(eof_flag))
                     payload_bytes -= t
                 }
@@ -20596,7 +20626,7 @@ def private h264_file_all__sample_to_chunk(var tr : MP4D_track_t?; nsample : uin
 def MP4D_frame_offset(var mp4 : MP4D_demux_tag?; ntrack : uint; nsample : uint; var frame_bytes : uint?; var timestamp : uint?; var duration : uint?) : uint64 {
     var tr : MP4D_track_t? = mp4.track + ntrack
     var ns : uint
-    var nchunk : int = h264_file_all__sample_to_chunk(tr, nsample, addr(ns))
+    let nchunk : int = h264_file_all__sample_to_chunk(tr, nsample, addr(ns))
     var offset : uint64
     if (nchunk < 0) {
         *frame_bytes = 0u
@@ -20977,14 +21007,11 @@ def h264mp4_probe_mp4d_open_track_count : int {
 
 [c_function]
 def private h264_file_all__find_avc_track(var mp4 : MP4D_demux_tag?) : int {
-    var index : uint = 0u
-    index = 0u
-    while (index < mp4.track_count) {
+    for (index in urange(mp4.track_count)) {
         var track : MP4D_track_t? = mp4.track + index
         if (track.handler_type == uint(MP4D_HANDLER_TYPE_VIDE) && track.object_type_indication == uint(MP4_OBJECT_TYPE_AVC)) {
             return int(index)
         }
-        index++
     }
     return -1
 }
@@ -21016,7 +21043,7 @@ def private h264_file_all__detect_track_length_size(var mp4 : MP4D_demux_tag?; t
                 break
             }
             var frame_bytes : uint = 0u
-            var offset : uint64 = MP4D_frame_offset(mp4, uint(track_index), sample_index, addr(frame_bytes), null, null)
+            let offset : uint64 = MP4D_frame_offset(mp4, uint(track_index), sample_index, addr(frame_bytes), null, null)
             if (frame_bytes == 0u) {
                 continue
             }
@@ -21155,7 +21182,7 @@ def private h264_file_all__decode_access_unit(var state : DecoderState?; var byt
     *picture_ready = 0
     while (offset < length) {
         var read_bytes : uint = 0u
-        var result : uint = h264bsdDecode(state.storage, bytes + offset, uint(length - offset), 0u, addr(read_bytes))
+        let result : uint = h264bsdDecode(state.storage, bytes + offset, uint(length - offset), 0u, addr(read_bytes))
         if (result == uint(anon_277.H264BSD_ERROR) || result == uint(anon_277.H264BSD_PARAM_SET_ERROR) || result == uint(anon_277.H264BSD_MEMALLOC_ERROR)) {
             return 0
         }
@@ -21212,7 +21239,7 @@ def private h264_file_all__decode_summary(var bytes : uint8?; length : int; fram
     sample_index = 0
     while (sample_index < int(mp4.track[track_index].sample_count)) {
         var frame_bytes : uint = 0u
-        var offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
+        let offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
         var annexb_bytes : int = 0
         if ((offset + uint64(frame_bytes)) > uint64(uint(length))) {
             MP4D_close(addr(mp4))
@@ -21248,8 +21275,8 @@ def private h264_file_all__decode_summary(var bytes : uint8?; length : int; fram
     sample_index = 0
     while (sample_index < int(mp4.track[track_index].sample_count)) {
         var frame_bytes : uint = 0u
-        var offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
-        var sample_length : int = h264_file_all__build_annexb_sample(addr(mp4), track_index, bytes + offset, int(frame_bytes), int_of(sample_index == 0),
+        let offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
+        let sample_length : int = h264_file_all__build_annexb_sample(addr(mp4), track_index, bytes + offset, int(frame_bytes), int_of(sample_index == 0),
                 scratch, max_sample_bytes, track_length_size)
         var picture_ready : int = 0
         if (sample_length < 0) {
@@ -21265,8 +21292,8 @@ def private h264_file_all__decode_summary(var bytes : uint8?; length : int; fram
             return 0
         }
         if (picture_ready != 0) {
-            var picture_bytes : int = (state.width * state.height * 3) / 2
-            var frame_hash : uint = h264_file_all__fold_bytes(state.picture, picture_bytes)
+            let picture_bytes : int = (state.width * state.height * 3) / 2
+            let frame_hash : uint = h264_file_all__fold_bytes(state.picture, picture_bytes)
             if (summary.frame_count == 0) {
                 summary.first_hash = frame_hash
                 summary.width = state.width
@@ -21327,8 +21354,8 @@ def private h264_file_all__decode_frame_yuv(var bytes : uint8?; length : int; fr
     sample_index = 0
     while (sample_index < int(mp4.track[track_index].sample_count)) {
         var frame_bytes : uint = 0u
-        var offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
-        var annexb_bytes : int = h264_file_all__sample_annexb_size(bytes + offset, int(frame_bytes), track_length_size)
+        let offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
+        let annexb_bytes : int = h264_file_all__sample_annexb_size(bytes + offset, int(frame_bytes), track_length_size)
         if (annexb_bytes < 0) {
             MP4D_close(addr(mp4))
             return 0
@@ -21357,8 +21384,8 @@ def private h264_file_all__decode_frame_yuv(var bytes : uint8?; length : int; fr
     sample_index = 0
     while (sample_index < int(mp4.track[track_index].sample_count)) {
         var frame_bytes : uint = 0u
-        var offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
-        var sample_length : int = h264_file_all__build_annexb_sample(addr(mp4), track_index, bytes + offset, int(frame_bytes), int_of(sample_index == 0),
+        let offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
+        let sample_length : int = h264_file_all__build_annexb_sample(addr(mp4), track_index, bytes + offset, int(frame_bytes), int_of(sample_index == 0),
                 scratch, max_sample_bytes, track_length_size)
         var picture_ready : int = 0
         if (sample_length < 0) {
@@ -21841,10 +21868,10 @@ def h264mp4_probe_annexb_byte(byte_index : int) : int {
 }
 
 def h264mp4_probe_annexb_word(byte_index : int) : int {
-    var b0 : int = h264mp4_probe_annexb_byte(byte_index)
-    var b1 : int = h264mp4_probe_annexb_byte(byte_index + 1)
-    var b2 : int = h264mp4_probe_annexb_byte(byte_index + 2)
-    var b3 : int = h264mp4_probe_annexb_byte(byte_index + 3)
+    let b0 : int = h264mp4_probe_annexb_byte(byte_index)
+    let b1 : int = h264mp4_probe_annexb_byte(byte_index + 1)
+    let b2 : int = h264mp4_probe_annexb_byte(byte_index + 2)
+    let b3 : int = h264mp4_probe_annexb_byte(byte_index + 3)
     if (b0 < 0 || b1 < 0 || b2 < 0 || b3 < 0) {
         return -1
     }
@@ -22058,8 +22085,8 @@ def h264mp4_probe_sample0_idr_stage(field : int) : int {
         sample_index = 0
         while (sample_index < int(mp4.track[track_index].sample_count)) {
             var frame_bytes : uint = 0u
-            var sample_offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
-            var annexb_bytes : int = h264_file_all__sample_annexb_size(addr(h264_file_all__sample_mp4_bytes[0]) + sample_offset, int(frame_bytes),
+            let sample_offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
+            let annexb_bytes : int = h264_file_all__sample_annexb_size(addr(h264_file_all__sample_mp4_bytes[0]) + sample_offset, int(frame_bytes),
                     track_length_size)
             if (annexb_bytes < 0) {
                 MP4D_close(addr(mp4))
@@ -22083,7 +22110,7 @@ def h264mp4_probe_sample0_idr_stage(field : int) : int {
     }
     {
         var frame_bytes : uint = 0u
-        var sample_offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), 0u, addr(frame_bytes), null, null)
+        let sample_offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), 0u, addr(frame_bytes), null, null)
         sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + sample_offset, int(frame_bytes),
                 1, scratch, max_sample_bytes, track_length_size)
     }
@@ -22261,8 +22288,8 @@ def h264mp4_probe_decode_until_sample(target_sample : int; field : int) : int {
     sample_index = 0
     while (sample_index < int(mp4.track[track_index].sample_count)) {
         var frame_bytes : uint = 0u
-        var offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
-        var annexb_bytes : int = h264_file_all__sample_annexb_size(addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), track_length_size)
+        let offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
+        let annexb_bytes : int = h264_file_all__sample_annexb_size(addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes), track_length_size)
         if (annexb_bytes < 0) {
             MP4D_close(addr(mp4))
             return -5
@@ -22286,7 +22313,7 @@ def h264mp4_probe_decode_until_sample(target_sample : int; field : int) : int {
     sample_index = 0
     while (sample_index < int(mp4.track[track_index].sample_count)) {
         var frame_bytes : uint = 0u
-        var offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
+        let offset : uint64 = MP4D_frame_offset(addr(mp4), uint(track_index), uint(sample_index), addr(frame_bytes), null, null)
         last_sample_length = h264_file_all__build_annexb_sample(addr(mp4), track_index, addr(h264_file_all__sample_mp4_bytes[0]) + offset, int(frame_bytes),
                 int_of(sample_index == 0), scratch, max_sample_bytes, track_length_size)
         if (last_sample_length < 0) {
@@ -22300,7 +22327,7 @@ def h264mp4_probe_decode_until_sample(target_sample : int; field : int) : int {
         last_decode_offset = 0
         while (last_decode_offset < last_sample_length) {
             var read_bytes : uint = 0u
-            var result : uint = h264bsdDecode(state.storage, scratch + last_decode_offset, uint(last_sample_length - last_decode_offset), 0u, addr(read_bytes))
+            let result : uint = h264bsdDecode(state.storage, scratch + last_decode_offset, uint(last_sample_length - last_decode_offset), 0u, addr(read_bytes))
             last_result = int(result)
             last_read_bytes = int(read_bytes)
             if (result == uint(anon_277.H264BSD_ERROR) || result == uint(anon_277.H264BSD_PARAM_SET_ERROR) || result == uint(anon_277.H264BSD_MEMALLOC_ERROR)) {
@@ -22514,7 +22541,7 @@ def h264mp4_frames_begin_bytes(var source : uint8?; length : int) : int {
     sample_index = 0
     while (sample_index < int(h264_file_all__frames.mp4.track[h264_file_all__frames.track_index].sample_count)) {
         var frame_bytes : uint = 0u
-        var offset : uint64 = MP4D_frame_offset(addr(h264_file_all__frames.mp4), uint(h264_file_all__frames.track_index), uint(sample_index), addr(frame_bytes),
+        let offset : uint64 = MP4D_frame_offset(addr(h264_file_all__frames.mp4), uint(h264_file_all__frames.track_index), uint(sample_index), addr(frame_bytes),
                 null, null)
         var annexb_bytes : int = 0
         if ((offset + uint64(frame_bytes)) > uint64(uint(h264_file_all__frames.input.length))) {
@@ -22562,9 +22589,9 @@ def h264mp4_frames_next : int {
     }
     while (h264_file_all__frames.sample_index < int(h264_file_all__frames.mp4.track[h264_file_all__frames.track_index].sample_count)) {
         var frame_bytes : uint = 0u
-        var offset : uint64 = MP4D_frame_offset(addr(h264_file_all__frames.mp4), uint(h264_file_all__frames.track_index),
+        let offset : uint64 = MP4D_frame_offset(addr(h264_file_all__frames.mp4), uint(h264_file_all__frames.track_index),
                 uint(h264_file_all__frames.sample_index), addr(frame_bytes), null, null)
-        var sample_length : int = h264_file_all__build_annexb_sample(addr(h264_file_all__frames.mp4), h264_file_all__frames.track_index,
+        let sample_length : int = h264_file_all__build_annexb_sample(addr(h264_file_all__frames.mp4), h264_file_all__frames.track_index,
                 h264_file_all__frames.input.bytes + offset, int(frame_bytes), int_of(h264_file_all__frames.sample_index == 0), h264_file_all__frames.scratch,
                 h264_file_all__frames.max_sample_bytes, h264_file_all__frames.track_length_size)
         var picture_ready : int = 0
@@ -22576,7 +22603,7 @@ def h264mp4_frames_next : int {
             return 0
         }
         if (picture_ready != 0) {
-            var picture_bytes : int = (h264_file_all__frames.state.width * h264_file_all__frames.state.height * 3) / 2
+            let picture_bytes : int = (h264_file_all__frames.state.width * h264_file_all__frames.state.height * 3) / 2
             h264_file_all__frames.hash = h264_file_all__fold_bytes(h264_file_all__frames.state.picture, picture_bytes)
             h264_file_all__frames.frame_index += 1
             return 1

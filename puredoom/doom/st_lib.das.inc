@@ -24,8 +24,8 @@ def STlib_initNum(var n : st_number_t?; x : int; y : int; var pl : uint8 ??; var
 def STlib_drawNum(var n : st_number_t?; refresh : doom_boolean) {
     var numdigits : int = n.width
     var num : int = *n.num
-    var w : int = int(read_patch_t_width(n.p[0], 0))
-    var h : int = int(read_patch_t_height(n.p[0], 0))
+    let w : int = int(read_patch_t_width(n.p[0], 0))
+    let h : int = int(read_patch_t_height(n.p[0], 0))
     var x : int = n.x
     var neg : int
     n.oldnum = *n.num

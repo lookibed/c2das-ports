@@ -129,7 +129,6 @@ def EV_StartLightStrobing(var line : line_s?) {
 // TURN LINE'S TAG LIGHTS OFF
 [c_function]
 def EV_TurnTagLightsOff(var line : line_s?) {
-    var i : int
     var j : int
     var min : int
     var sector : sector_t?
@@ -140,19 +139,14 @@ def EV_TurnTagLightsOff(var line : line_s?) {
     while (j < numsectors) {
         if (sector.tag == line.tag) {
             min = int(sector.lightlevel)
-            i = 0
-            while (i < sector.linecount) {
-                {
-                    templine = sector.lines[i]
-                    tsec = getNextSector(templine, sector)
-                    if (tsec == null) {
-                        continue
-                    }
-                    if (int(tsec.lightlevel) < min) {
-                        min = int(tsec.lightlevel)
-                    }
-                } finally {
-                    i++
+            for (i in range(sector.linecount)) {
+                templine = sector.lines[i]
+                tsec = getNextSector(templine, sector)
+                if (tsec == null) {
+                    continue
+                }
+                if (int(tsec.lightlevel) < min) {
+                    min = int(tsec.lightlevel)
                 }
             }
             sector.lightlevel = int16(min)
@@ -166,7 +160,6 @@ def EV_TurnTagLightsOff(var line : line_s?) {
 [c_function]
 def EV_LightTurnOn(var line : line_s?; var bright : int) {
     var i : int
-    var j : int
     var sector : sector_t?
     var temp : sector_t?
     var templine : line_s?
@@ -178,19 +171,14 @@ def EV_LightTurnOn(var line : line_s?; var bright : int) {
             // for highest light level
             // surrounding sector
             if (bright == 0) {
-                j = 0
-                while (j < sector.linecount) {
-                    {
-                        templine = sector.lines[j]
-                        temp = getNextSector(templine, sector)
-                        if (temp == null) {
-                            continue
-                        }
-                        if (int(temp.lightlevel) > bright) {
-                            bright = int(temp.lightlevel)
-                        }
-                    } finally {
-                        j++
+                for (j in range(sector.linecount)) {
+                    templine = sector.lines[j]
+                    temp = getNextSector(templine, sector)
+                    if (temp == null) {
+                        continue
+                    }
+                    if (int(temp.lightlevel) > bright) {
+                        bright = int(temp.lightlevel)
                     }
                 }
             }

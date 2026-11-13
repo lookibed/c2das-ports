@@ -266,7 +266,7 @@ def P_NewChaseDir(var actor : mobj_s?) {
         }
     }
     // try other directions
-    if (P_Random() > 200 || (deltay < 0 ? -deltay : deltay) > (deltax < 0 ? -deltax : deltax)) {
+    if (P_Random() > 200 || doom_abs(deltay) > doom_abs(deltax)) {
         tdir = int(d[1])
         d[1] = d[2]
         d[2] = enum_from_int(type<dirtype_t>, tdir)
@@ -300,15 +300,13 @@ def P_NewChaseDir(var actor : mobj_s?) {
     }
     // randomly determine direction of search
     if ((P_Random() & 1) != 0) {
-        tdir = int(dirtype_t.DI_EAST)
-        while (tdir <= int(dirtype_t.DI_SOUTHEAST)) {
-            if (uint(tdir) != uint(turnaround)) {
-                actor.movedir = tdir
+        for (tdir1 in range(int(dirtype_t.DI_EAST), int(dirtype_t.DI_SOUTHEAST) + 1)) {
+            if (uint(tdir1) != uint(turnaround)) {
+                actor.movedir = tdir1
                 if (int(P_TryWalk(actor)) != 0) {
                     return
                 }
             }
-            tdir++
         }
     } else {
         tdir = int(dirtype_t.DI_SOUTHEAST)

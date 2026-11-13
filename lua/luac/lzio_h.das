@@ -3,6 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_macro
 require lobject_h_cluster
 
 struct Mbuffer {
@@ -19,4 +20,35 @@ struct Zio {
 }
 
 include lzio_h.layout.das.inc
+
+// lzio.h:29: #define luaZ_initbuffer(L, buff) ((buff)->buffer = NULL, (buff)->buffsize = 0)
+[c_macro]
+def luaZ_initbuffer(L; var buff) {
+    buff.buffer = null
+    buff.buffsize = 0ul
+}
+
+// lzio.h:33: #define luaZ_bufflen(buff) ((buff)->n)
+[c_macro]
+def luaZ_bufflen(buff) => buff.n
+
+// lzio.h:32: #define luaZ_sizebuffer(buff) ((buff)->buffsize)
+[c_macro]
+def luaZ_sizebuffer(buff) => buff.buffsize
+
+// lzio.h:31: #define luaZ_buffer(buff) ((buff)->buffer)
+[c_macro]
+def luaZ_buffer(var buff) : uint8? => buff.buffer
+
+// lzio.h:36: #define luaZ_resetbuffer(buff) ((buff)->n = 0)
+[c_macro]
+def luaZ_resetbuffer(var buff) {
+    buff.n = 0ul
+}
+
+// lzio.h:35: #define luaZ_buffremove(buff,i) ((buff)->n -= (i))
+[c_macro]
+def luaZ_buffremove(var buff; i) {
+    buff.n -= uint64(i)
+}
 

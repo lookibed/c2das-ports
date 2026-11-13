@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/cstr
 require c_runtime/variadic
 require lobject_h_cluster
@@ -12,6 +13,34 @@ require lua_link
 let private MINSIZEARRAY = 4
 let private LUA_TNIL = 0
 let private LUA_ERRMEM = 4
+
+// lmem.c:47: #define callfrealloc(g,block,os,ns) ((*g->frealloc)(g->ud, block, os, ns))
+[c_macro]
+def private callfrealloc(var g : global_State?; var _c_block : void?; os : uint64; ns : int) {
+    invoke(g.frealloc, g.ud, _c_block, os, uint64(ns))
+}
+
+// lmem.c:47: #define callfrealloc(g,block,os,ns) ((*g->frealloc)(g->ud, block, os, ns))
+[c_macro]
+def private callfrealloc(var g : global_State?; var _c_block : void?; os : uint64; ns : uint64) : void? => invoke(g.frealloc, g.ud, _c_block, os, ns)
+
+// lmem.c:47: #define callfrealloc(g,block,os,ns) ((*g->frealloc)(g->ud, block, os, ns))
+[c_macro]
+def private callfrealloc(var g : global_State?; var _c_block : void?; os : int; ns : uint64) : void? => invoke(g.frealloc, g.ud, _c_block, uint64(os), ns)
+
+// lmem.c:58: #define cantryagain(g) (completestate(g) && !g->gcstopem)
+[c_macro]
+def private cantryagain(g) => completestate(g) && g.gcstopem == 0
+
+// lmem.c:76: #define firsttry(g,block,os,ns) callfrealloc(g, block, os, ns)
+[c_macro]
+def private firsttry(var g; var _c_block; os; ns) : void? => callfrealloc(g, _c_block, os, ns)
+
+// lmem.h:17: #define luaM_error(L) luaD_throw(L, LUA_ERRMEM)
+[c_macro]
+def private luaM_error(var L) {
+    luaD_throw(L, LUA_ERRMEM)
+}
 
 [c_function]
 def luaM_growaux_(var L : lua_State?; var _c_block : void?; nelems : int; var psize : int?; size_elems : int; limit : int; var what : uint8?) : void? {
@@ -51,8 +80,8 @@ def luaM_growaux_(var L : lua_State?; var _c_block : void?; nelems : int; var ps
 [c_function]
 def luaM_shrinkvector_(var L : lua_State?; var _c_block : void?; var size : int?; final_n : int; size_elem : int) : void? {
     var newblock : void?
-    var oldsize : uint64 = uint64(*size * size_elem)
-    var newsize : uint64 = uint64(final_n * size_elem)
+    let oldsize : uint64 = uint64(*size * size_elem)
+    let newsize : uint64 = uint64(final_n * size_elem)
     newblock = luaM_saferealloc_(L, _c_block, oldsize, newsize)
     *size = final_n
     return newblock
@@ -64,21 +93,20 @@ def luaM_toobig(var L : lua_State?) {
 
 // Free memory
 def luaM_free_(var L : lua_State?; var _c_block : void?; osize : uint64) {
-    var g : global_State? = L.l_G
-    invoke(g.frealloc, g.ud, _c_block, osize, 0ul)
+    var g : global_State? = G(L)
+    callfrealloc(g, _c_block, osize, 0)
     g.GCdebt = int64(uint64(g.GCdebt) - osize)
 }
 
 // In case of allocation fail, this function will do an emergency
 // collection to free some memory and then try the allocation again.
-[c_function]
 def private tryagain(var L : lua_State?; var _c_block : void?; osize : uint64; nsize : uint64) : void? {
-    var g : global_State? = L.l_G
-    if ((int(addr(g.nilvalue).tt_) & 15) == LUA_TNIL && g.gcstopem == 0) {
+    var g : global_State? = G(L)
+    if (cantryagain(g)) {
         // try to free some memory...
         luaC_fullgc(L, 1)
         // try again
-        return invoke(g.frealloc, g.ud, _c_block, osize, nsize)
+        return callfrealloc(g, _c_block, osize, nsize)
     } else {
         // cannot run an emergency collection
         return null
@@ -88,8 +116,8 @@ def private tryagain(var L : lua_State?; var _c_block : void?; osize : uint64; n
 // Generic allocation routine.
 def luaM_realloc_(var L : lua_State?; var _c_block : void?; osize : uint64; nsize : uint64) : void? {
     var newblock : void?
-    var g : global_State? = L.l_G
-    newblock = invoke(g.frealloc, g.ud, _c_block, osize, nsize)
+    var g : global_State? = G(L)
+    newblock = firsttry(g, _c_block, osize, nsize)
     if (newblock == null && nsize > 0ul) {
         newblock = tryagain(L, _c_block, osize, nsize)
         // still no memory?
@@ -106,7 +134,7 @@ def luaM_saferealloc_(var L : lua_State?; var _c_block : void?; osize : uint64; 
     var newblock : void? = luaM_realloc_(L, _c_block, osize, nsize)
     // allocation failed?
     if (newblock == null && nsize > 0ul) {
-        luaD_throw(L, LUA_ERRMEM)
+        luaM_error(L)
     }
     return newblock
 }
@@ -116,12 +144,12 @@ def luaM_malloc_(var L : lua_State?; size : uint64; tag : int) : void? {
         // that's all
         return null
     } else {
-        var g : global_State? = L.l_G
-        var newblock : void? = invoke(g.frealloc, g.ud, null, uint64(tag), size)
+        var g : global_State? = G(L)
+        var newblock : void? = firsttry(g, null, tag, size)
         if (newblock == null) {
             newblock = tryagain(L, null, uint64(tag), size)
             if (newblock == null) {
-                luaD_throw(L, LUA_ERRMEM)
+                luaM_error(L)
             }
         }
         g.GCdebt = int64(uint64(g.GCdebt) + size)

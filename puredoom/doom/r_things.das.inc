@@ -346,7 +346,7 @@ def R_ProjectSprite(var thing : mobj_s?) {
     gyt = FixedMul(tr_y, viewcos)
     tx = -(gyt + gxt)
     // too far off the side?
-    if ((tx < 0 ? -tx : tx) > (tz << 2)) {
+    if (doom_abs(tx) > (tz << 2)) {
         return
     }
     // decide which patch to use for sprite relative to player

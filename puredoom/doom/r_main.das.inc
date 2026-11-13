@@ -267,7 +267,6 @@ def R_InitTables {
 // R_InitTextureMapping
 def R_InitTextureMapping {
     var i : int
-    var x : int
     var t : int
     var focallength : int
     // Use tangent table to generate viewangletox:
@@ -297,14 +296,12 @@ def R_InitTextureMapping {
     // Scan viewangletox[] to generate xtoviewangle[]:
     // xtoviewangle will give the smallest view angle
     // that maps to x.
-    x = 0
-    while (x <= viewwidth) {
+    for (x in range(viewwidth + 1)) {
         i = 0
         while (viewangletox[i] > x) {
             i++
         }
         xtoviewangle[x] = uint((i << ANGLETOFINESHIFT) - ANG90)
-        x++
     }
     // Take out the fencepost cases from viewangletox.
     i = 0
@@ -393,16 +390,14 @@ def R_ExecuteSetViewSize {
     pspritescale = FRACUNIT * viewwidth / SCREENWIDTH
     pspriteiscale = FRACUNIT * SCREENWIDTH / viewwidth
     // thing clipping
-    i = 0
-    while (i < viewwidth) {
-        screenheightarray[i] = int16(viewheight)
-        i++
+    for (i1 in range(viewwidth)) {
+        screenheightarray[i1] = int16(viewheight)
     }
     // planes
     i = 0
     while (i < viewheight) {
         dy = ((i - viewheight / 2) << FRACBITS) + FRACUNIT / 2
-        dy = dy < 0 ? -dy : dy
+        dy = doom_abs(dy)
         yslope[i] = FixedDiv((viewwidth << detailshift) / 2 * FRACUNIT, dy)
         i++
     }

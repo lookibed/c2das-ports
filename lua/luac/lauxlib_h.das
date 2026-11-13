@@ -3,6 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_macro
 require c_runtime/c_union
 require c_types
 require lobject_h_cluster
@@ -33,4 +34,10 @@ struct luaL_Stream {
 }
 
 include lauxlib_h.layout.das.inc
+
+// lauxlib.h:211: #define luaL_addsize(B,s) ((B)->n += (s))
+[c_macro]
+def luaL_addsize(var B; s) {
+    B.n += s
+}
 

@@ -124,7 +124,7 @@ def G_BuildTiccmd(var cmd : ticcmd_t?) {
     cmd.consistancy = consistancy[consoleplayer][maketic % BACKUPTICS]
     strafe = enum_from_int(type<doom_boolean>, int_of(uint(gamekeydown[key_strafe]) != 0 || uint(mousebuttons[mousebstrafe]) != 0 ||
             uint(joybuttons[joybstrafe]) != 0))
-    var running : doom_boolean = enum_from_int(type<doom_boolean>, always_run != 0 ?
+    let running : doom_boolean = enum_from_int(type<doom_boolean>, always_run != 0 ?
             (uint(gamekeydown[key_speed]) != 0 ? int(doom_boolean._c_false) : int(doom_boolean._c_true)) :
             (uint(gamekeydown[key_speed]) != 0 ? int(doom_boolean._c_true) : int(doom_boolean._c_false)))
     speed = int_of(uint(running) != 0 || uint(joybuttons[joybspeed]) != 0)
@@ -1104,7 +1104,6 @@ def G_DoNewGame {
 }
 
 def G_InitNew(var skill : skill_t; var episode : int; var map : int) {
-    var i : int
     if (int(paused) != 0) {
         paused = doom_boolean._c_false
         S_ResumeSound()
@@ -1145,27 +1144,23 @@ def G_InitNew(var skill : skill_t; var episode : int; var map : int) {
         respawnmonsters = doom_boolean._c_false
     }
     if (uint(fastparm) != 0 || (skill == skill_t.sk_nightmare && gameskill != skill_t.sk_nightmare)) {
-        i = int(statenum_t.S_SARG_RUN1)
-        while (i <= int(statenum_t.S_SARG_PAIN2)) {
+        for (i in range(int(statenum_t.S_SARG_RUN1), int(statenum_t.S_SARG_PAIN2) + 1)) {
             states[i].tics >>= 1l
-            i++
         }
         mobjinfo[int(mobjtype_t.MT_BRUISERSHOT)].speed = 20 * FRACUNIT
         mobjinfo[int(mobjtype_t.MT_HEADSHOT)].speed = 20 * FRACUNIT
         mobjinfo[int(mobjtype_t.MT_TROOPSHOT)].speed = 20 * FRACUNIT
     } elif (skill != skill_t.sk_nightmare && gameskill == skill_t.sk_nightmare) {
-        i = int(statenum_t.S_SARG_RUN1)
-        while (i <= int(statenum_t.S_SARG_PAIN2)) {
+        for (i in range(int(statenum_t.S_SARG_RUN1), int(statenum_t.S_SARG_PAIN2) + 1)) {
             states[i].tics <<= 1l
-            i++
         }
         mobjinfo[int(mobjtype_t.MT_BRUISERSHOT)].speed = 15 * FRACUNIT
         mobjinfo[int(mobjtype_t.MT_HEADSHOT)].speed = 10 * FRACUNIT
         mobjinfo[int(mobjtype_t.MT_TROOPSHOT)].speed = 10 * FRACUNIT
     }
     // force players to be initialized upon first level load
-    for (i1 in range(MAXPLAYERS)) {
-        players[i1].playerstate = playerstate_t.PST_REBORN
+    for (i in range(MAXPLAYERS)) {
+        players[i].playerstate = playerstate_t.PST_REBORN
     }
     // will be set false if a demo
     usergame = doom_boolean._c_true
@@ -1328,7 +1323,7 @@ def G_DoPlayDemo {
     demobuffer = demo_p
     var _t0 = demo_p
     demo_p++
-    var demo_version : uint8 = *_t0
+    let demo_version : uint8 = *_t0
     if (int(demo_version) != int(anon_82.VERSION) && demo_version != 109) {
         // Demos seem to run fine with version 109
         // doom_print("Demo is from a different game version! Demo Verson = %i, this version = %i\n", (int)demo_version, VERSION);
@@ -1411,7 +1406,7 @@ def G_CheckDemoStatus : doom_boolean {
         }
         if (reinterpret<memblock_s?>(demobuffer + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/g_game.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1113/doom/work/src/g_game.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1689, 10))
             I_Error(addr(buf[0]))
         }

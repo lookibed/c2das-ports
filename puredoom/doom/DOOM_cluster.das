@@ -8,6 +8,7 @@ require c_runtime/c_bounds
 require c_runtime/c_do_while
 require c_runtime/c_exit
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/c_switch
 require c_runtime/c_union
 require c_runtime/cstr
@@ -350,6 +351,38 @@ let private NUMMAPS = 9
 let private ZONEID = 1919505
 let private MEM_ALIGN = uint64(typeinfo sizeof(type<void?>))
 let private MINFRAGMENT = 64
+
+// am_map.c:111: #define FTOM(x) FixedMul(((x)<<16),scale_ftom)
+[c_macro]
+def private FTOM(x) => FixedMul(x << 16, scale_ftom)
+
+// am_map.c:112: #define MTOF(x) (FixedMul((x),scale_mtof)>>16)
+[c_macro]
+def private MTOF(x) => FixedMul(x, scale_mtof) >> 16
+
+// am_map.c:114: #define CXMTOF(x) (f_x + MTOF((x)-m_x))
+[c_macro]
+def private CXMTOF(x) => f_x + MTOF(x - m_x)
+
+// am_map.c:115: #define CYMTOF(y) (f_y + (f_h - MTOF((y)-m_y)))
+[c_macro]
+def private CYMTOF(y) => f_y + (f_h - MTOF(y - m_y))
+
+// am_map.c:982: #define PUTDOT(xx,yy,cc) fb[(yy)*f_w+(xx)]=(cc)
+[c_macro, c_function]
+def private PUTDOT(xx; yy; cc) {
+    fb[yy * f_w + xx] = uint8(cc)
+}
+
+// doom_config.h:17: #define doom_abs(x) ((x) < 0 ? -(x) : (x))
+[c_macro]
+def private doom_abs(x) => x < 0 ? -x : x
+
+// p_saveg.c:36: #define PADSAVEP() save_p += (4 - ((long long)save_p & 3)) & 3
+[c_macro, c_function]
+def private PADSAVEP() {
+    save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+}
 
 include DOOM.das.inc
 include am_map.das.inc

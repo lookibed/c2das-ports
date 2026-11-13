@@ -5,6 +5,7 @@ options solid_context
 options stack = 8388608
 require c_runtime/c_do_while
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/c_switch
 require c_runtime/c_union
 require c_runtime/cstr
@@ -139,6 +140,76 @@ let private LUAL_PACKPADBYTE = 0
 let private LUA_VERSION_NUM = 504
 let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64(typeinfo sizeof(type<double>))
 
+// lauxlib.h:142: #define luaL_typename(L,i) lua_typename(L, lua_type(L,(i)))
+[c_macro]
+def private luaL_typename(var L; i) : uint8? => lua_typename(L, lua_type(L, i))
+
+// lua.h:401: #define lua_insert(L,idx) lua_rotate(L, (idx), 1)
+[c_macro]
+def private lua_insert(var L; idx) {
+    lua_rotate(L, idx, 1)
+}
+
+// lua.h:294: #define lua_call(L,n,r) lua_callk(L, (n), (r), 0, NULL)
+[c_macro]
+def private lua_call(var L; n; r) {
+    lua_callk(L, n, r, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+}
+
+// lauxlib.h:166: #define luaL_pushfail(L) lua_pushnil(L)
+[c_macro]
+def private luaL_pushfail(var L) {
+    lua_pushnil(L)
+}
+
+// lua.h:376: #define lua_pop(L,n) lua_settop(L, -(n)-1)
+[c_macro]
+def private lua_pop(var L; n) {
+    lua_settop(L, -n - 1)
+}
+
+// luaconf.h:671: #define lua_getlocaledecpoint() (localeconv()->decimal_point[0])
+[c_macro, c_function]
+def private lua_getlocaledecpoint() => reinterpret<lconv?>(crt::localeconv()).decimal_point[0]
+
+// lua.h:373: #define lua_tonumber(L,i) lua_tonumberx(L,(i),NULL)
+[c_macro]
+def private lua_tonumber(var L; i) => lua_tonumberx(L, i, null)
+
+// lua.h:374: #define lua_tointeger(L,i) lua_tointegerx(L,(i),NULL)
+[c_macro]
+def private lua_tointeger(var L; i) => lua_tointegerx(L, i, null)
+
+// luaconf.h:597: #define l_sprintf(s,sz,f,i) snprintf(s,sz,f,i)
+[c_macro, c_function]
+def private l_sprintf(var s : uint8?; sz : int; var f : uint8?; var i : int64) => snprintf(s, uint64(sz), f, i)
+
+// luaconf.h:597: #define l_sprintf(s,sz,f,i) snprintf(s,sz,f,i)
+[c_macro, c_function]
+def private l_sprintf(var s : uint8?; sz : int; var f : uint8[32]&; var i : int) => snprintf(s, uint64(sz), addr(f[0]), i)
+
+// luaconf.h:597: #define l_sprintf(s,sz,f,i) snprintf(s,sz,f,i)
+[c_macro, c_function]
+def private l_sprintf(var s : uint8?; sz : int; var f : uint8[32]&; var i : int64) => snprintf(s, uint64(sz), addr(f[0]), i)
+
+// luaconf.h:597: #define l_sprintf(s,sz,f,i) snprintf(s,sz,f,i)
+[c_macro, c_function]
+def private l_sprintf(var s : uint8?; sz : int; var f : uint8[32]&; var i : double) => snprintf(s, uint64(sz), addr(f[0]), i)
+
+// luaconf.h:597: #define l_sprintf(s,sz,f,i) snprintf(s,sz,f,i)
+[c_macro, c_function]
+def private l_sprintf(var s : uint8?; sz : int; var f : uint8[32]&; var i : void?) => snprintf(s, uint64(sz), addr(f[0]), i)
+
+// lauxlib.h:139: #define luaL_checkstring(L,n) (luaL_checklstring(L, (n), NULL))
+[c_macro]
+def private luaL_checkstring(var L; n) : uint8? => luaL_checklstring(L, n, null)
+
+// lauxlib.h:47: #define luaL_checkversion(L) luaL_checkversion_(L, LUA_VERSION_NUM, LUAL_NUMSIZES)
+[c_macro]
+def private luaL_checkversion(var L) {
+    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+}
+
 [c_function]
 def private str_len(var L : lua_State?) : int {
     var l : uint64
@@ -171,7 +242,7 @@ def private posrelatI(pos : int64; len : uint64) : uint64 {
 // with default value 'def'.
 // Negative means back from end: clip result to [0, len]
 def private getendpos(var L : lua_State?; arg : int; _c_def : int64; len : uint64) : uint64 {
-    var pos : int64 = luaL_optinteger(L, arg, _c_def)
+    let pos : int64 = luaL_optinteger(L, arg, _c_def)
     if (pos > int64(len)) {
         return len
     } elif (pos >= 0l) {
@@ -187,8 +258,8 @@ def private getendpos(var L : lua_State?; arg : int; _c_def : int64; len : uint6
 def private str_sub(var L : lua_State?) : int {
     var l : uint64
     var s : uint8? = luaL_checklstring(L, 1, addr(l))
-    var start : uint64 = posrelatI(luaL_checkinteger(L, 2), l)
-    var end : uint64 = getendpos(L, 3, -1l, l)
+    let start : uint64 = posrelatI(luaL_checkinteger(L, 2), l)
+    let end : uint64 = getendpos(L, 3, -1l, l)
     if (start <= end) {
         lua_pushlstring(L, s + start + -(1), (end - start) + 1ul)
     } else {
@@ -200,14 +271,11 @@ def private str_sub(var L : lua_State?) : int {
 [c_function]
 def private str_reverse(var L : lua_State?) : int {
     var l : uint64
-    var i : uint64
     var b : luaL_Buffer
     var s : uint8? = luaL_checklstring(L, 1, addr(l))
     var p : uint8? = luaL_buffinitsize(L, addr(b), l)
-    i = 0ul
-    while (i < l) {
+    for (i in urange64(l)) {
         p[i] = s[l - i - 1ul]
-        i++
     }
     luaL_pushresultsize(addr(b), l)
     return 1
@@ -216,14 +284,11 @@ def private str_reverse(var L : lua_State?) : int {
 [c_function]
 def private str_lower(var L : lua_State?) : int {
     var l : uint64
-    var i : uint64
     var b : luaL_Buffer
     var s : uint8? = luaL_checklstring(L, 1, addr(l))
     var p : uint8? = luaL_buffinitsize(L, addr(b), l)
-    i = 0ul
-    while (i < l) {
+    for (i in urange64(l)) {
         p[i] = uint8(crt::tolower(int(s[i])))
-        i++
     }
     luaL_pushresultsize(addr(b), l)
     return 1
@@ -232,14 +297,11 @@ def private str_lower(var L : lua_State?) : int {
 [c_function]
 def private str_upper(var L : lua_State?) : int {
     var l : uint64
-    var i : uint64
     var b : luaL_Buffer
     var s : uint8? = luaL_checklstring(L, 1, addr(l))
     var p : uint8? = luaL_buffinitsize(L, addr(b), l)
-    i = 0ul
-    while (i < l) {
+    for (i in urange64(l)) {
         p[i] = uint8(crt::toupper(int(s[i])))
-        i++
     }
     luaL_pushresultsize(addr(b), l)
     return 1
@@ -257,7 +319,7 @@ def private str_rep(var L : lua_State?) : int {
     } elif (l + lsep < l || l + lsep > (uint64(typeinfo sizeof(type<uint64>)) < uint64(typeinfo sizeof(type<int>)) ? MAX_SIZET : 2147483647ul) / uint64(n)) {
         return luaL_error`va(L, cstr("resulting string too large"), VaNone())
     } else {
-        var totallen : uint64 = uint64(n) * l + uint64(n - 1l) * lsep
+        let totallen : uint64 = uint64(n) * l + uint64(n - 1l) * lsep
         var b : luaL_Buffer
         var p : uint8? = luaL_buffinitsize(L, addr(b), totallen)
         // first n-1 copies (followed by separator)
@@ -286,9 +348,9 @@ def private str_rep(var L : lua_State?) : int {
 def private str_byte(var L : lua_State?) : int {
     var l : uint64
     var s : uint8? = luaL_checklstring(L, 1, addr(l))
-    var pi : int64 = luaL_optinteger(L, 2, 1l)
-    var posi : uint64 = posrelatI(pi, l)
-    var pose : uint64 = getendpos(L, 3, pi, l)
+    let pi : int64 = luaL_optinteger(L, 2, 1l)
+    let posi : uint64 = posrelatI(pi, l)
+    let pose : uint64 = getendpos(L, 3, pi, l)
     var n : int
     // empty interval; return no values
     if (posi > pose) {
@@ -309,13 +371,13 @@ def private str_byte(var L : lua_State?) : int {
 [c_function]
 def private str_char(var L : lua_State?) : int {
     // number of arguments
-    var n : int = lua_gettop(L)
+    let n : int = lua_gettop(L)
     var i : int
     var b : luaL_Buffer
     var p : uint8? = luaL_buffinitsize(L, addr(b), uint64(n))
     i = 1
     while (i <= n) {
-        var c : uint64 = uint64(luaL_checkinteger(L, i))
+        let c : uint64 = uint64(luaL_checkinteger(L, i))
         let _t0 = c <= uint64(127 * 2 + 1) || luaL_argerror(L, i, cstr("value out of range")) != 0
         p[i - 1] = uint8(c)
         i++
@@ -338,7 +400,7 @@ def private writer(var L : lua_State?; var b : void?; size : uint64; var ud : vo
 [c_function]
 def private str_dump(var L : lua_State?) : int {
     var state : str_Writer
-    var strip : int = lua_toboolean(L, 2)
+    let strip : int = lua_toboolean(L, 2)
     luaL_checktype(L, 1, LUA_TFUNCTION)
     // ensure function is on the top of the stack
     lua_settop(L, 1)
@@ -369,12 +431,12 @@ def private trymt(var L : lua_State?; var mtname : uint8?) {
     // back to the original arguments
     lua_settop(L, 2)
     if (lua_type(L, 2) == LUA_TSTRING || luaL_getmetafield(L, 2, mtname) == 0) {
-        luaL_error`va(L, cstr("attempt to %s a '%s' with a '%s'"), (mtname + 2, lua_typename(L, lua_type(L, -2)), lua_typename(L, lua_type(L, -1))))
+        luaL_error`va(L, cstr("attempt to %s a '%s' with a '%s'"), (mtname + 2, luaL_typename(L, -2), luaL_typename(L, -1)))
     }
     // put metamethod before arguments
-    lua_rotate(L, -3, 1)
+    lua_insert(L, -3)
     // call metamethod
-    lua_callk(L, 2, 1, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+    lua_call(L, 2, 1)
 }
 
 def private arith(var L : lua_State?; op : int; var mtname : uint8?) : int {
@@ -565,7 +627,7 @@ def private singlematch(var ms : MatchState?; var s : uint8?; var p : uint8?; va
     if (intptr(s) >= intptr(ms.src_end)) {
         return 0
     } else {
-        var c : int = int(*s)
+        let c : int = int(*s)
         c_switch(int(*p)) {
             case('.') {
                 // matches any char
@@ -592,8 +654,8 @@ def private matchbalance(var ms : MatchState?; var s : uint8?; var p : uint8?) :
     if (*s != *p) {
         return null
     } else {
-        var b : int = int(*p)
-        var e : int = int(p[1])
+        let b : int = int(*p)
+        let e : int = int(p[1])
         var cont : int = 1
         while (true) {
             s++
@@ -652,7 +714,7 @@ def private min_expand(var ms : MatchState?; var s : uint8?; var p : uint8?; var
 [c_function]
 def private start_capture(var ms : MatchState?; var s : uint8?; var p : uint8?; what : int) : uint8? {
     var res : uint8?
-    var level : int = int(ms.level)
+    let level : int = int(ms.level)
     if (level >= LUA_MAXCAPTURES) {
         luaL_error`va(ms.L, cstr("too many captures"), VaNone())
     }
@@ -670,7 +732,7 @@ def private start_capture(var ms : MatchState?; var s : uint8?; var p : uint8?; 
 
 [c_function]
 def private end_capture(var ms : MatchState?; var s : uint8?; var p : uint8?) : uint8? {
-    var l : int = capture_to_close(ms)
+    let l : int = capture_to_close(ms)
     var res : uint8?
     // close capture
     ms._c_capture[l].len = int64(s - ms._c_capture[l].init)
@@ -919,7 +981,7 @@ def private get_onecapture(var ms : MatchState?; i : int; var s : uint8?; var e 
         *cap = s
         return uint64(int64(e - s))
     } else {
-        var capl : int64 = ms._c_capture[i].len
+        let capl : int64 = ms._c_capture[i].len
         *cap = ms._c_capture[i].init
         if (capl == int64(CAP_UNFINISHED)) {
             luaL_error`va(ms.L, cstr("unfinished capture"), VaNone())
@@ -934,14 +996,14 @@ def private get_onecapture(var ms : MatchState?; i : int; var s : uint8?; var e 
 [c_function]
 def private push_onecapture(var ms : MatchState?; i : int; var s : uint8?; var e : uint8?) {
     var cap : uint8?
-    var l : int64 = int64(get_onecapture(ms, i, s, e, addr(cap)))
+    let l : int64 = int64(get_onecapture(ms, i, s, e, addr(cap)))
     if (l != int64(CAP_POSITION)) {
         lua_pushlstring(ms.L, cap, uint64(l))
     }
 }
 
 def private push_captures(var ms : MatchState?; var s : uint8?; var e : uint8?) : int {
-    var nlevels : int = (ms.level == 0 && s != null) ? 1 : int(ms.level)
+    let nlevels : int = (ms.level == 0 && s != null) ? 1 : int(ms.level)
     luaL_checkstack(ms.L, nlevels, cstr("too many captures"))
     for (i in range(nlevels)) {
         push_onecapture(ms, i, s, e)
@@ -985,11 +1047,11 @@ def private str_find_aux(var L : lua_State?; find : int) : int {
     var lp : uint64
     var s : uint8? = luaL_checklstring(L, 1, addr(ls))
     var p : uint8? = luaL_checklstring(L, 2, addr(lp))
-    var init : uint64 = posrelatI(luaL_optinteger(L, 3, 1l), ls) - 1ul
+    let init : uint64 = posrelatI(luaL_optinteger(L, 3, 1l), ls) - 1ul
     // start after string's end?
     if (init > ls) {
         // cannot find anything
-        lua_pushnil(L)
+        luaL_pushfail(L)
         return 1
     }
     // explicit request or no special characters?
@@ -1004,7 +1066,7 @@ def private str_find_aux(var L : lua_State?; find : int) : int {
     } else {
         var ms : MatchState
         var s1 : uint8? = s + init
-        var anchor : int = int_of(*p == '^')
+        let anchor : int = int_of(*p == '^')
         if (anchor != 0) {
             // skip anchor character
             p++
@@ -1034,7 +1096,7 @@ def private str_find_aux(var L : lua_State?; find : int) : int {
         }
     }
     // not found
-    lua_pushnil(L)
+    luaL_pushfail(L)
     return 1
 }
 
@@ -1048,7 +1110,7 @@ def private str_match(var L : lua_State?) : int {
 
 [c_function]
 def private gmatch_aux(var L : lua_State?) : int {
-    var gm : GMatchState? = reinterpret<GMatchState?>(lua_touserdata(L, LUA_REGISTRYINDEX - 3))
+    var gm : GMatchState? = reinterpret<GMatchState?>(lua_touserdata(L, lua_upvalueindex(3)))
     var src : uint8?
     gm.ms.L = L
     src = gm.src
@@ -1117,7 +1179,7 @@ def private add_s(var ms : MatchState?; var b : luaL_Buffer?; var s : uint8?; va
         } elif (crt::isdigit(int(*p)) != 0) {
             // '%n'
             var cap : uint8?
-            var resl : int64 = int64(get_onecapture(ms, int(*p) - '1', s, e, addr(cap)))
+            let resl : int64 = int64(get_onecapture(ms, int(*p) - '1', s, e, addr(cap)))
             if (resl == int64(CAP_POSITION)) {
                 // add position to accumulated result
                 luaL_addvalue(b)
@@ -1149,7 +1211,7 @@ def private add_value(var ms : MatchState?; var b : luaL_Buffer?; var s : uint8?
                 // all captures as arguments
                 n = push_captures(ms, s, e)
                 // call it
-                lua_callk(L, n, 1, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+                lua_call(L, n, 1)
                 break
             }
         }
@@ -1171,13 +1233,13 @@ def private add_value(var ms : MatchState?; var b : luaL_Buffer?; var s : uint8?
     // nil or false?
     if (lua_toboolean(L, -1) == 0) {
         // remove value
-        lua_settop(L, -1 - 1)
+        lua_pop(L, 1)
         // keep original text
         luaL_addlstring(b, s, uint64(int64(e - s)))
         // no changes
         return 0
     } elif (lua_isstring(L, -1) == 0) {
-        return luaL_error`va(L, cstr("invalid replacement value (a %s)"), (lua_typename(L, lua_type(L, -1)),))
+        return luaL_error`va(L, cstr("invalid replacement value (a %s)"), (luaL_typename(L, -1),))
     } else {
         // add result to accumulator
         luaL_addvalue(b)
@@ -1197,10 +1259,10 @@ def private str_gsub(var L : lua_State?) : int {
     // end of last match
     var lastmatch : uint8? = null
     // replacement type
-    var tr : int = lua_type(L, 3)
+    let tr : int = lua_type(L, 3)
     // max replacements
-    var max_s : int64 = luaL_optinteger(L, 4, int64(srcl + 1ul))
-    var anchor : int = int_of(*p == '^')
+    let max_s : int64 = luaL_optinteger(L, 4, int64(srcl + 1ul))
+    let anchor : int = int_of(*p == '^')
     // replacement count
     var n : int64 = 0l
     // change flag
@@ -1319,12 +1381,12 @@ def private quotefloat(var L : lua_State?; var buff : uint8?; n : double) : int 
         s = cstr("(0/0)")
     } else {
         // format number as hexadecimal
-        var nb : int = snprintf(buff, uint64(MAX_ITEM), cstr("%a"), n)
+        let nb : int = snprintf(buff, uint64(MAX_ITEM), cstr("%a"), n)
         // ensures that 'buff' string uses a dot as the radix character
         // no dot?
         if (crt::memchr(reinterpret<void?>(buff), '.', uint64(nb)) == null) {
             // try locale point
-            var point : uint8 = reinterpret<lconv?>(crt::localeconv()).decimal_point[0]
+            let point : uint8 = lua_getlocaledecpoint()
             var ppoint : uint8? = reinterpret<uint8?>(crt::memchr(reinterpret<void?>(buff), int(point), uint64(nb)))
             // change it to a dot
             if (ppoint != null) {
@@ -1354,17 +1416,17 @@ def private addliteral(var L : lua_State?; var b : luaL_Buffer?; arg : int) {
                 var nb : int
                 // float?
                 if (lua_isinteger(L, arg) == 0) {
-                    nb = quotefloat(L, buff, lua_tonumberx(L, arg, null))
+                    nb = quotefloat(L, buff, lua_tonumber(L, arg))
                 } else {
                     // integers
-                    var n : int64 = lua_tointegerx(L, arg, null)
+                    let n : int64 = lua_tointeger(L, arg)
                     // corner case?
                     var format : uint8? = (n == -9223372036854775807l - 1l) ? cstr("0x%llx") : cstr("%lld")
                     // use hex
                     // else use default format
-                    nb = snprintf(buff, uint64(MAX_ITEM), format, n)
+                    nb = l_sprintf(buff, MAX_ITEM, format, n)
                 }
-                b.n += uint64(nb)
+                luaL_addsize(b, nb)
                 break
             }
         }
@@ -1440,9 +1502,9 @@ def private getformat(var L : lua_State?; var strfrmt : uint8?; var form : uint8
 // add length modifier into formats
 [c_function]
 def private addlenmod(var form : uint8?; var lenmod : uint8?) {
-    var l : uint64 = crt::strlen(form)
-    var lm : uint64 = crt::strlen(lenmod)
-    var spec : uint8 = form[l - 1ul]
+    let l : uint64 = crt::strlen(form)
+    let lm : uint64 = crt::strlen(lenmod)
+    let spec : uint8 = form[l - 1ul]
     crt::strcpy(form + l + -(1), lenmod)
     form[l + lm - 1ul] = spec
     form[l + lm] = uint8('\0')
@@ -1450,7 +1512,7 @@ def private addlenmod(var form : uint8?; var lenmod : uint8?) {
 
 [c_function]
 def private str_format(var L : lua_State?) : int {
-    var top : int = lua_gettop(L)
+    let top : int = lua_gettop(L)
     var arg : int = 1
     var sfl : uint64
     var strfrmt : uint8? = luaL_checklstring(L, arg, addr(sfl))
@@ -1500,7 +1562,7 @@ def private str_format(var L : lua_State?) : int {
                     var _flag = false
                     if (_cond == 'c') {
                         checkformat(L, addr(form[0]), cstr("-"), 0)
-                        nb = snprintf(buff, uint64(maxitem), addr(form[0]), int(luaL_checkinteger(L, arg)))
+                        nb = l_sprintf(buff, maxitem, form, int(luaL_checkinteger(L, arg)))
                         break
                     }
                     if (_cond == 'd' || _cond == 'i') {
@@ -1525,17 +1587,17 @@ def private str_format(var L : lua_State?) : int {
                     if (_flag) {
                         _goto = 0
                         {
-                            var n : int64 = luaL_checkinteger(L, arg)
+                            let n : int64 = luaL_checkinteger(L, arg)
                             checkformat(L, addr(form[0]), flags, 1)
                             addlenmod(addr(form[0]), cstr("ll"))
-                            nb = snprintf(buff, uint64(maxitem), addr(form[0]), n)
+                            nb = l_sprintf(buff, maxitem, form, n)
                             break
                         }
                     }
                     if (_cond == 'a' || _cond == 'A') {
                         checkformat(L, addr(form[0]), cstr("-+#0 "), 1)
                         addlenmod(addr(form[0]), addr(c2das_empty[0]))
-                        nb = snprintf(buff, uint64(maxitem), addr(form[0]), luaL_checknumber(L, arg))
+                        nb = l_sprintf(buff, maxitem, form, luaL_checknumber(L, arg))
                         break
                     }
                     _flag ||= _cond == 'f'
@@ -1551,10 +1613,10 @@ def private str_format(var L : lua_State?) : int {
                     if (_flag) {
                         {
                             // FALLTHROUGH
-                            var n : double = luaL_checknumber(L, arg)
+                            let n : double = luaL_checknumber(L, arg)
                             checkformat(L, addr(form[0]), cstr("-+#0 "), 1)
                             addlenmod(addr(form[0]), addr(c2das_empty[0]))
-                            nb = snprintf(buff, uint64(maxitem), addr(form[0]), n)
+                            nb = l_sprintf(buff, maxitem, form, n)
                             break
                         }
                     }
@@ -1569,7 +1631,7 @@ def private str_format(var L : lua_State?) : int {
                                 // format it as a string
                                 form[crt::strlen(addr(form[0])) - 1ul] = uint8('s')
                             }
-                            nb = snprintf(buff, uint64(maxitem), addr(form[0]), p)
+                            nb = l_sprintf(buff, maxitem, form, p)
                             break
                         }
                     }
@@ -1600,7 +1662,7 @@ def private str_format(var L : lua_State?) : int {
                                     // format the string into 'buff'
                                     nb = snprintf(buff, uint64(maxitem), addr(form[0]), s)
                                     // remove result from 'luaL_tolstring'
-                                    lua_settop(L, -1 - 1)
+                                    lua_pop(L, 1)
                                 }
                             }
                             break
@@ -1612,7 +1674,7 @@ def private str_format(var L : lua_State?) : int {
                     }
                     break
                 }
-                addr(b).n += uint64(nb)
+                luaL_addsize(addr(b), nb)
             }
         }
     }
@@ -1647,7 +1709,7 @@ def private getnum(var fmt : uint8 ??; df : int) : int {
 // Read an integer numeral and raises an error if it is larger
 // than the maximum size for integers.
 def private getnumlimit(var h : Header?; var fmt : uint8 ??; df : int) : int {
-    var sz : int = getnum(fmt, df)
+    let sz : int = getnum(fmt, df)
     if (sz > MAXINTSIZE || sz <= 0) {
         return luaL_error`va(h.L, cstr("integral size (%d) out of limits [1,%d]"), (sz, MAXINTSIZE))
     }
@@ -1667,7 +1729,7 @@ def private getoption(var h : Header?; var fmt : uint8 ??; var size : int?) : KO
     // dummy structure to get native alignment requirements
     var _t0 = *fmt
     (*fmt)++
-    var opt : int = int(*_t0)
+    let opt : int = int(*_t0)
     // default
     *size = 0
     c_switch(opt) {
@@ -1765,7 +1827,7 @@ def private getoption(var h : Header?; var fmt : uint8 ??; var size : int?) : KO
         }
         case('!') {
             {
-                var maxalign : int = int(uint64(typeinfo offsetof < u > (type<cD>)))
+                let maxalign : int = int(uint64(typeinfo offsetof < u > (type<cD>)))
                 h.maxalign = getnumlimit(h, fmt, maxalign)
                 break
             }
@@ -1786,7 +1848,7 @@ def private getoption(var h : Header?; var fmt : uint8 ??; var size : int?) : KO
 // despite its size.
 [c_function]
 def private getdetails(var h : Header?; totalsize : uint64; var fmt : uint8 ??; var psize : int?; var ntoalign : int?) : KOption {
-    var opt : KOption = getoption(h, fmt, psize)
+    let opt : KOption = getoption(h, fmt, psize)
     // usually, alignment follows size
     var align : int = *psize
     // 'X' gets alignment from following option
@@ -1833,7 +1895,7 @@ def private packint(var b : luaL_Buffer?; var n : uint64; islittle : int; size :
         }
     }
     // add result to buffer
-    b.n += uint64(size)
+    luaL_addsize(b, size)
 }
 
 // Copy 'size' bytes from 'src' to 'dest', correcting endianness if
@@ -1864,7 +1926,7 @@ def private str_pack(var L : lua_State?) : int {
     var b : luaL_Buffer
     var h : Header
     // format string
-    var fmt : uint8? = luaL_checklstring(L, 1, null)
+    var fmt : uint8? = luaL_checkstring(L, 1)
     // current argument to pack
     var arg : int = 1
     // accumulate total size of result
@@ -1876,7 +1938,7 @@ def private str_pack(var L : lua_State?) : int {
     while (*fmt != '\0') {
         var size : int
         var ntoalign : int
-        var opt : KOption = getdetails(addr(h), totalsize, addr(fmt), addr(size), addr(ntoalign))
+        let opt : KOption = getdetails(addr(h), totalsize, addr(fmt), addr(size), addr(ntoalign))
         totalsize += uint64(ntoalign + size)
         while (true) {
             let _t0 = ntoalign
@@ -1895,10 +1957,10 @@ def private str_pack(var L : lua_State?) : int {
             case(KOption.Kint) {
                 {
                     // signed integers
-                    var n : int64 = luaL_checkinteger(L, arg)
+                    let n : int64 = luaL_checkinteger(L, arg)
                     // need overflow check?
                     if (size < SZINT) {
-                        var lim : int64 = 1l << int64((size * 8) - 1)
+                        let lim : int64 = 1l << int64((size * 8) - 1)
                         let _t3 = -lim <= n && n < lim || luaL_argerror(L, arg, cstr("integer overflow")) != 0
                     }
                     packint(addr(b), uint64(n), h.islittle, size, int_of(n < 0l))
@@ -1908,7 +1970,7 @@ def private str_pack(var L : lua_State?) : int {
             case(KOption.Kuint) {
                 {
                     // unsigned integers
-                    var n : int64 = luaL_checkinteger(L, arg)
+                    let n : int64 = luaL_checkinteger(L, arg)
                     // need overflow check?
                     if (size < SZINT) {
                         let _t4 = uint64(n) < (1ul << uint64(size * 8)) || luaL_argerror(L, arg, cstr("unsigned overflow")) != 0
@@ -1925,7 +1987,7 @@ def private str_pack(var L : lua_State?) : int {
                     var buff : uint8? = luaL_prepbuffsize(addr(b), uint64(typeinfo sizeof(type<float>)))
                     // move 'f' to final result, correcting endianness if needed
                     copywithendian(buff, reinterpret<uint8?>(addr(f)), typeinfo sizeof(type<float>), h.islittle)
-                    addr(b).n += uint64(size)
+                    luaL_addsize(addr(b), size)
                     break
                 }
             }
@@ -1937,7 +1999,7 @@ def private str_pack(var L : lua_State?) : int {
                     var buff : uint8? = luaL_prepbuffsize(addr(b), uint64(typeinfo sizeof(type<double>)))
                     // move 'f' to final result, correcting endianness if needed
                     copywithendian(buff, reinterpret<uint8?>(addr(f)), typeinfo sizeof(type<double>), h.islittle)
-                    addr(b).n += uint64(size)
+                    luaL_addsize(addr(b), size)
                     break
                 }
             }
@@ -1949,7 +2011,7 @@ def private str_pack(var L : lua_State?) : int {
                     var buff : uint8? = luaL_prepbuffsize(addr(b), uint64(typeinfo sizeof(type<double>)))
                     // move 'f' to final result, correcting endianness if needed
                     copywithendian(buff, reinterpret<uint8?>(addr(f)), typeinfo sizeof(type<double>), h.islittle)
-                    addr(b).n += uint64(size)
+                    luaL_addsize(addr(b), size)
                     break
                 }
             }
@@ -2028,14 +2090,14 @@ def private str_pack(var L : lua_State?) : int {
 def private str_packsize(var L : lua_State?) : int {
     var h : Header
     // format string
-    var fmt : uint8? = luaL_checklstring(L, 1, null)
+    var fmt : uint8? = luaL_checkstring(L, 1)
     // accumulate total size of result
     var totalsize : uint64 = 0ul
     initheader(L, addr(h))
     while (*fmt != '\0') {
         var size : int
         var ntoalign : int
-        var opt : KOption = getdetails(addr(h), totalsize, addr(fmt), addr(size), addr(ntoalign))
+        let opt : KOption = getdetails(addr(h), totalsize, addr(fmt), addr(size), addr(ntoalign))
         let _t0 = opt != KOption.Kstring && opt != KOption.Kzstr || luaL_argerror(L, 1, cstr("variable-length format")) != 0
         // total space used by option
         size += ntoalign
@@ -2058,7 +2120,7 @@ def private str_packsize(var L : lua_State?) : int {
 def private unpackint(var L : lua_State?; var str : uint8?; islittle : int; size : int; issigned : int) : int64 {
     var res : uint64 = 0ul
     var i : int
-    var limit : int = (size <= SZINT) ? size : SZINT
+    let limit : int = (size <= SZINT) ? size : SZINT
     i = limit - 1
     while (i >= 0) {
         res <<= 8ul
@@ -2069,13 +2131,13 @@ def private unpackint(var L : lua_State?; var str : uint8?; islittle : int; size
     if (size < SZINT) {
         // needs sign extension?
         if (issigned != 0) {
-            var mask : uint64 = 1ul << uint64(size * 8 - 1)
+            let mask : uint64 = 1ul << uint64(size * 8 - 1)
             // do sign extension
             res = (res ^ mask) - mask
         }
     } elif (size > SZINT) {
         // must check unread bytes
-        var mask : int = (issigned == 0 || int64(res) >= 0l) ? 0 : MC
+        let mask : int = (issigned == 0 || int64(res) >= 0l) ? 0 : MC
         for (i1 in range(limit, size)) {
             if (int(str[islittle != 0 ? i1 : size - 1 - i1]) != mask) {
                 luaL_error`va(L, cstr("%d-byte integer does not fit into Lua Integer"), (size,))
@@ -2088,7 +2150,7 @@ def private unpackint(var L : lua_State?; var str : uint8?; islittle : int; size
 [c_function]
 def private str_unpack(var L : lua_State?) : int {
     var h : Header
-    var fmt : uint8? = luaL_checklstring(L, 1, null)
+    var fmt : uint8? = luaL_checkstring(L, 1)
     var ld : uint64
     var data : uint8? = luaL_checklstring(L, 2, addr(ld))
     var pos : uint64 = posrelatI(luaL_optinteger(L, 3, 1l), ld) - 1ul
@@ -2099,7 +2161,7 @@ def private str_unpack(var L : lua_State?) : int {
     while (*fmt != '\0') {
         var size : int
         var ntoalign : int
-        var opt : KOption = getdetails(addr(h), pos, addr(fmt), addr(size), addr(ntoalign))
+        let opt : KOption = getdetails(addr(h), pos, addr(fmt), addr(size), addr(ntoalign))
         let _t1 = uint64(ntoalign) + uint64(size) <= ld - pos || luaL_argerror(L, 2, cstr("data string too short")) != 0
         // skip alignment
         pos += uint64(ntoalign)
@@ -2109,7 +2171,7 @@ def private str_unpack(var L : lua_State?) : int {
         c_switch(opt) {
             case(KOption.Kint, KOption.Kuint) {
                 {
-                    var res : int64 = unpackint(L, data + pos, h.islittle, size, int_of(opt == KOption.Kint))
+                    let res : int64 = unpackint(L, data + pos, h.islittle, size, int_of(opt == KOption.Kint))
                     lua_pushinteger(L, res)
                     break
                 }
@@ -2144,7 +2206,7 @@ def private str_unpack(var L : lua_State?) : int {
             }
             case(KOption.Kstring) {
                 {
-                    var len : uint64 = uint64(unpackint(L, data + pos, h.islittle, size, 0))
+                    let len : uint64 = uint64(unpackint(L, data + pos, h.islittle, size, 0))
                     let _t2 = len <= ld - pos - uint64(size) || luaL_argerror(L, 2, cstr("data string too short")) != 0
                     lua_pushlstring(L, data + pos + size, len)
                     // skip string
@@ -2154,7 +2216,7 @@ def private str_unpack(var L : lua_State?) : int {
             }
             case(KOption.Kzstr) {
                 {
-                    var len : uint64 = crt::strlen(data + pos)
+                    let len : uint64 = crt::strlen(data + pos)
                     let _t3 = pos + len < ld || luaL_argerror(L, 2, cstr("unfinished string for format 'z'")) != 0
                     lua_pushlstring(L, data + pos, len)
                     // skip string plus final '\0'
@@ -2187,19 +2249,19 @@ def private createmetatable(var L : lua_State?) {
     // set table as metatable for strings
     lua_setmetatable(L, -2)
     // pop dummy string
-    lua_settop(L, -1 - 1)
+    lua_pop(L, 1)
     // get string library
     lua_pushvalue(L, -2)
     // metatable.__index = string
     lua_setfield(L, -2, cstr("__index"))
     // pop metatable
-    lua_settop(L, -1 - 1)
+    lua_pop(L, 1)
 }
 
 // Open string library
 [c_function]
 def luaopen_string(var L : lua_State?) : int {
-    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+    luaL_checkversion(L)
     lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[18]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - 1ul))
     luaL_setfuncs(L, addr(strlib[0]), 0)
     createmetatable(L)

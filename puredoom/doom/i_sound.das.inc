@@ -761,8 +761,8 @@ def I_TickSong : uint64 {
     if (mus_delay <= 0) {
         let _t1 = mus_offset
         mus_offset++
-        var event : int = int(mus_data[_t1])
-        var _c_type : int = (event & 112) >> 4
+        let event : int = int(mus_data[_t1])
+        let _c_type : int = (event & 112) >> 4
         var channel : int = event & 15
         // Percussion is 9 on GM
         if (channel == 15) {
@@ -775,7 +775,7 @@ def I_TickSong : uint64 {
                 {
                     let _t2 = mus_offset
                     mus_offset++
-                    var note : int = int(mus_data[_t2]) & 127
+                    let note : int = int(mus_data[_t2]) & 127
                     midi_event = uint64(128 | channel | (note << 8))
                     break
                 }
@@ -784,8 +784,8 @@ def I_TickSong : uint64 {
                 {
                     let _t3 = mus_offset
                     mus_offset++
-                    var note_bytes : int = int(mus_data[_t3])
-                    var note : int = note_bytes & 127
+                    let note_bytes : int = int(mus_data[_t3])
+                    let note : int = note_bytes & 127
                     var vol : int = 127
                     if ((note_bytes & 128) != 0) {
                         let _t4 = mus_offset
@@ -800,9 +800,9 @@ def I_TickSong : uint64 {
                 {
                     let _t5 = mus_offset
                     mus_offset++
-                    var bend_amount : int = int(mus_data[_t5]) * 64
-                    var l : int = bend_amount & 127
-                    var m : int = (bend_amount & 65408) >> 7
+                    let bend_amount : int = int(mus_data[_t5]) * 64
+                    let l : int = bend_amount & 127
+                    let m : int = (bend_amount & 65408) >> 7
                     midi_event = uint64(224 | channel | (l << 8) | (m << 16))
                     break
                 }
@@ -811,7 +811,7 @@ def I_TickSong : uint64 {
                 {
                     let _t6 = mus_offset
                     mus_offset++
-                    var controller : int = int(mus_data[_t6]) & 127
+                    let controller : int = int(mus_data[_t6]) & 127
                     c_switch(controller) {
                         case(10) {
                             midi_event = uint64(176 | channel | (120 << 8))
@@ -845,10 +845,10 @@ def I_TickSong : uint64 {
                 {
                     let _t7 = mus_offset
                     mus_offset++
-                    var controller : int = int(mus_data[_t7]) & 127
+                    let controller : int = int(mus_data[_t7]) & 127
                     let _t8 = mus_offset
                     mus_offset++
-                    var value : int = int(mus_data[_t8]) & 127
+                    let value : int = int(mus_data[_t8]) & 127
                     c_switch(controller) {
                         case(0) {
                             midi_event = uint64(192 | channel | (value << 8))
@@ -913,7 +913,7 @@ def I_TickSong : uint64 {
                 {
                     let _t9 = mus_offset
                     mus_offset++
-                    var dummy : int = int(mus_data[_t9])
+                    let dummy : int = int(mus_data[_t9])
                     break
                 }
             }

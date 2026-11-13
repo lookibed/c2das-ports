@@ -12,8 +12,8 @@ var ptflags : int
 // P_AproxDistance
 // Gives an estimation of distance (not exact)
 def P_AproxDistance(var dx : int; var dy : int) : int {
-    dx = dx < 0 ? -dx : dx
-    dy = dy < 0 ? -dy : dy
+    dx = doom_abs(dx)
+    dy = doom_abs(dy)
     if (dx < dy) {
         return dx + dy - (dx >> 1)
     }
@@ -515,11 +515,11 @@ def P_PathTraverse(var x1 : int; var y1 : int; var x2 : int; var y2 : int; flags
     if (xt2 > xt1) {
         mapxstep = 1
         partial = FRACUNIT - ((x1 >> MAPBTOFRAC) & (FRACUNIT - 1))
-        ystep = FixedDiv(y2 - y1, x2 - x1 < 0 ? -(x2 - x1) : x2 - x1)
+        ystep = FixedDiv(y2 - y1, doom_abs(x2 - x1))
     } elif (xt2 < xt1) {
         mapxstep = -1
         partial = (x1 >> MAPBTOFRAC) & (FRACUNIT - 1)
-        ystep = FixedDiv(y2 - y1, x2 - x1 < 0 ? -(x2 - x1) : x2 - x1)
+        ystep = FixedDiv(y2 - y1, doom_abs(x2 - x1))
     } else {
         mapxstep = 0
         partial = FRACUNIT
@@ -529,11 +529,11 @@ def P_PathTraverse(var x1 : int; var y1 : int; var x2 : int; var y2 : int; flags
     if (yt2 > yt1) {
         mapystep = 1
         partial = FRACUNIT - ((y1 >> MAPBTOFRAC) & (FRACUNIT - 1))
-        xstep = FixedDiv(x2 - x1, y2 - y1 < 0 ? -(y2 - y1) : y2 - y1)
+        xstep = FixedDiv(x2 - x1, doom_abs(y2 - y1))
     } elif (yt2 < yt1) {
         mapystep = -1
         partial = (y1 >> MAPBTOFRAC) & (FRACUNIT - 1)
-        xstep = FixedDiv(x2 - x1, y2 - y1 < 0 ? -(y2 - y1) : y2 - y1)
+        xstep = FixedDiv(x2 - x1, doom_abs(y2 - y1))
     } else {
         mapystep = 0
         partial = FRACUNIT

@@ -5,6 +5,7 @@ options solid_context
 options stack = 8388608
 require c_runtime/c_do_while
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/c_switch
 require c_runtime/cstr
 require c_runtime/printf
@@ -64,10 +65,114 @@ let private LUA_ERRERR = 5
 let private LUA_ERRFILE = LUA_ERRERR + 1
 let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64(typeinfo sizeof(type<double>))
 
+// lua.h:385: #define lua_istable(L,n) (lua_type(L, (n)) == LUA_TTABLE)
+[c_macro]
+def private lua_istable(var L; n) => lua_type(L, n) == LUA_TTABLE
+
+// lua.h:376: #define lua_pop(L,n) lua_settop(L, -(n)-1)
+[c_macro]
+def private lua_pop(var L; n) {
+    lua_settop(L, -n - 1)
+}
+
+// lua.h:405: #define lua_replace(L,idx) (lua_copy(L, -1, (idx)), lua_pop(L, 1))
+[c_macro]
+def private lua_replace(var L; idx) {
+    lua_copy(L, -1, idx)
+    lua_pop(L, 1)
+}
+
+// lua.h:398: #define lua_tostring(L,i) lua_tolstring(L, (i), NULL)
+[c_macro]
+def private lua_tostring(var L; i) : uint8? => lua_tolstring(L, i, null)
+
+// lua.h:403: #define lua_remove(L,idx) (lua_rotate(L, (idx), -1), lua_pop(L, 1))
+[c_macro]
+def private lua_remove(var L; idx) {
+    lua_rotate(L, idx, -1)
+    lua_pop(L, 1)
+}
+
+// lauxlib.h:142: #define luaL_typename(L,i) lua_typename(L, lua_type(L,(i)))
+[c_macro]
+def private luaL_typename(var L; i) : uint8? => lua_typename(L, lua_type(L, i))
+
+// lauxlib.h:166: #define luaL_pushfail(L) lua_pushnil(L)
+[c_macro]
+def private luaL_pushfail(var L) {
+    lua_pushnil(L)
+}
+
+// lauxlib.h:150: #define luaL_getmetatable(L,n) (lua_getfield(L, LUA_REGISTRYINDEX, (n)))
+[c_macro]
+def private luaL_getmetatable(var L; var n) => lua_getfield(L, LUA_REGISTRYINDEX, n)
+
+// lauxlib.h:136: #define luaL_argexpected(L,cond,arg,tname) ((void)(luai_likely(cond) || luaL_typeerror(L, (arg), (tname))))
+[c_macro]
+def private luaL_argexpected(var L; cond; arg; var tname) {
+    let _t0 = cond || luaL_typeerror(L, arg, tname) != 0
+}
+
+// lauxlib.h:140: #define luaL_optstring(L,n,d) (luaL_optlstring(L, (n), (d), NULL))
+[c_macro]
+def private luaL_optstring(var L; n; var d) : uint8? => luaL_optlstring(L, n, d, null)
+
+// lauxlib.h:139: #define luaL_checkstring(L,n) (luaL_checklstring(L, (n), NULL))
+[c_macro]
+def private luaL_checkstring(var L; n) : uint8? => luaL_checklstring(L, n, null)
+
+// lua.h:391: #define lua_isnoneornil(L, n) (lua_type(L, (n)) <= 0)
+[c_macro]
+def private lua_isnoneornil(var L; n) => lua_type(L, n) <= 0
+
+// lauxlib.c:518: #define buffonstack(B) ((B)->b != (B)->init.b)
+[c_macro, c_function]
+def private buffonstack(B) => intptr(B.b) != intptr(addr(B.init.b[0]))
+
+// lua.h:401: #define lua_insert(L,idx) lua_rotate(L, (idx), 1)
+[c_macro]
+def private lua_insert(var L; idx) {
+    lua_rotate(L, idx, 1)
+}
+
+// lua.h:387: #define lua_isnil(L,n) (lua_type(L, (n)) == LUA_TNIL)
+[c_macro]
+def private lua_isnil(var L; n) => lua_type(L, n) == LUA_TNIL
+
+// lua.h:374: #define lua_tointeger(L,i) lua_tointegerx(L,(i),NULL)
+[c_macro]
+def private lua_tointeger(var L; i) => lua_tointegerx(L, i, null)
+
+// lauxlib.h:154: #define luaL_loadbuffer(L,s,sz,n) luaL_loadbufferx(L,s,sz,n,NULL)
+[c_macro]
+def private luaL_loadbuffer(var L; var s; sz; var n) => luaL_loadbufferx(L, s, sz, n, null)
+
+// lua.h:294: #define lua_call(L,n,r) lua_callk(L, (n), (r), 0, NULL)
+[c_macro]
+def private lua_call(var L; n; r) {
+    lua_callk(L, n, r, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+}
+
+// lua.h:373: #define lua_tonumber(L,i) lua_tonumberx(L,(i),NULL)
+[c_macro]
+def private lua_tonumber(var L; i) => lua_tonumberx(L, i, null)
+
+// lua.h:378: #define lua_newtable(L) lua_createtable(L, 0, 0)
+[c_macro]
+def private lua_newtable(var L) {
+    lua_createtable(L, 0, 0)
+}
+
+// lua.h:382: #define lua_pushcfunction(L,f) lua_pushcclosure(L, (f), 0)
+[c_macro]
+def private lua_pushcfunction(var L; f) {
+    lua_pushcclosure(L, f, 0)
+}
+
 // Search for 'objidx' in table at index -1. ('objidx' must be an
 // absolute index.) Return 1 + string at top if it found a good name.
 def private findfield(var L : lua_State?; objidx : int; level : int) : int {
-    if (level == 0 || !(lua_type(L, -1) == LUA_TTABLE)) {
+    if (level == 0 || !lua_istable(L, -1)) {
         // not found
         return 0
     }
@@ -80,7 +185,7 @@ def private findfield(var L : lua_State?; objidx : int; level : int) : int {
             // found object?
             if (lua_rawequal(L, objidx, -1) != 0) {
                 // remove value (but keep name)
-                lua_settop(L, -1 - 1)
+                lua_pop(L, 1)
                 return 1
             } elif (findfield(L, objidx, level - 1) != 0) {
                 // try recursively
@@ -88,15 +193,14 @@ def private findfield(var L : lua_State?; objidx : int; level : int) : int {
                 // place '.' between the two names
                 lua_pushstring(L, cstr("."))
                 // (in the slot occupied by table)
-                lua_copy(L, -1, -3)
-                lua_settop(L, -1 - 1)
+                lua_replace(L, -3)
                 // lib_name.field_name
                 lua_concat(L, 3)
                 return 1
             }
         }
         // remove value
-        lua_settop(L, -1 - 1)
+        lua_pop(L, 1)
     }
     // not found
     return 0
@@ -105,21 +209,20 @@ def private findfield(var L : lua_State?; objidx : int; level : int) : int {
 // Search for a name for a function in all loaded modules
 [c_function]
 def private pushglobalfuncname(var L : lua_State?; var ar : lua_Debug?) : int {
-    var top : int = lua_gettop(L)
+    let top : int = lua_gettop(L)
     // push function
     lua_getinfo(L, cstr("f"), ar)
     lua_getfield(L, LUA_REGISTRYINDEX, cstr("_LOADED"))
     // slots for 'findfield'
     luaL_checkstack(L, 6, cstr("not enough stack"))
     if (findfield(L, top + 1, 2) != 0) {
-        var name : uint8? = lua_tolstring(L, -1, null)
+        var name : uint8? = lua_tostring(L, -1)
         // name start with '_G.'?
         if (crt::strncmp(name, cstr("_G."), 3ul) == 0) {
             // push name without prefix
             lua_pushstring(L, name + 3)
             // remove original name
-            lua_rotate(L, -2, -1)
-            lua_settop(L, -1 - 1)
+            lua_remove(L, -2)
         }
         // copy name to proper place
         lua_copy(L, -1, top + 1)
@@ -137,10 +240,9 @@ def private pushglobalfuncname(var L : lua_State?; var ar : lua_Debug?) : int {
 def private pushfuncname(var L : lua_State?; var ar : lua_Debug?) {
     // try first a global name
     if (pushglobalfuncname(L, ar) != 0) {
-        lua_pushfstring`va(L, cstr("function '%s'"), (lua_tolstring(L, -1, null),))
+        lua_pushfstring`va(L, cstr("function '%s'"), (lua_tostring(L, -1),))
         // remove name
-        lua_rotate(L, -2, -1)
-        lua_settop(L, -1 - 1)
+        lua_remove(L, -2)
     } elif (*ar.namewhat != '\0') {
         // is there a name from code?
         // use it
@@ -169,7 +271,7 @@ def private lastlevel(var L : lua_State?) : int {
     }
     // do a binary search
     while (li < le) {
-        var m : int = (li + le) / 2
+        let m : int = (li + le) / 2
         if (lua_getstack(L, m, addr(ar)) != 0) {
             li = m + 1
         } else {
@@ -183,7 +285,7 @@ def private lastlevel(var L : lua_State?) : int {
 def luaL_traceback(var L : lua_State?; var L1 : lua_State?; var msg : uint8?; var level : int) {
     var b : luaL_Buffer
     var ar : lua_Debug
-    var last : int = lastlevel(L1)
+    let last : int = lastlevel(L1)
     var limit2show : int = (last - level > LEVELS1 + LEVELS2) ? LEVELS1 : -1
     luaL_buffinit(L, addr(b))
     if (msg != null) {
@@ -205,7 +307,7 @@ def luaL_traceback(var L : lua_State?; var L1 : lua_State?; var msg : uint8?; va
         limit2show--
         if (_t3 == 0) {
             // number of levels to skip
-            var n : int = last - level - LEVELS2 + 1
+            let n : int = last - level - LEVELS2 + 1
             lua_pushfstring`va(L, cstr("\n\t...\t(skipping %d levels)"), (n,))
             // add warning about skip
             luaL_addvalue(addr(b))
@@ -246,7 +348,7 @@ def luaL_argerror(var L : lua_State?; var arg : int; var extramsg : uint8?) : in
         }
     }
     if (ar.name == null) {
-        ar.name = pushglobalfuncname(L, addr(ar)) != 0 ? lua_tolstring(L, -1, null) : reinterpret<uint8?>(cstr("?"))
+        ar.name = pushglobalfuncname(L, addr(ar)) != 0 ? lua_tostring(L, -1) : reinterpret<uint8?>(cstr("?"))
     }
     return luaL_error`va(L, cstr("bad argument #%d to '%s' (%s)"), (arg, ar.name, extramsg))
 }
@@ -257,13 +359,13 @@ def luaL_typeerror(var L : lua_State?; arg : int; var tname : uint8?) : int {
     var typearg : uint8?
     if (luaL_getmetafield(L, arg, cstr("__name")) == LUA_TSTRING) {
         // use the given type name
-        typearg = lua_tolstring(L, -1, null)
+        typearg = lua_tostring(L, -1)
     } elif (lua_type(L, arg) == LUA_TLIGHTUSERDATA) {
         // special name for messages
         typearg = cstr("light userdata")
     } else {
         // standard name
-        typearg = lua_typename(L, lua_type(L, arg))
+        typearg = luaL_typename(L, arg)
     }
     msg = lua_pushfstring`va(L, cstr("%s expected, got %s"), (tname, typearg))
     return luaL_argerror(L, arg, msg)
@@ -308,13 +410,13 @@ def luaL_error(var L : lua_State?; var fmt : uint8?; va : va_args) : int {
 [c_function]
 def luaL_fileresult(var L : lua_State?; stat : int; var fname : uint8?) : int {
     // calls to Lua API may change this value
-    var en : int = *crt::c_errno_location()
+    let en : int = *crt::c_errno_location()
     if (stat != 0) {
         lua_pushboolean(L, 1)
         return 1
     } else {
         var msg : uint8?
-        lua_pushnil(L)
+        luaL_pushfail(L)
         msg = (en != 0) ? crt::strerror(en) : cstr("(no extra info)")
         if (fname != null) {
             lua_pushfstring`va(L, cstr("%s: %s"), (fname, msg))
@@ -339,7 +441,7 @@ def luaL_execresult(var L : lua_State?; stat : int) : int {
         if (*what == 'e' && stat == 0) {
             lua_pushboolean(L, 1)
         } else {
-            lua_pushnil(L)
+            luaL_pushfail(L)
         }
         lua_pushstring(L, what)
         lua_pushinteger(L, int64(stat))
@@ -350,11 +452,11 @@ def luaL_execresult(var L : lua_State?; stat : int) : int {
 
 def luaL_newmetatable(var L : lua_State?; var tname : uint8?) : int {
     // name already in use?
-    if (lua_getfield(L, LUA_REGISTRYINDEX, tname) != LUA_TNIL) {
+    if (luaL_getmetatable(L, tname) != LUA_TNIL) {
         // leave previous value on top, but return 0
         return 0
     }
-    lua_settop(L, -1 - 1)
+    lua_pop(L, 1)
     // create metatable
     lua_createtable(L, 0, 2)
     lua_pushstring(L, tname)
@@ -385,7 +487,7 @@ def luaL_testudata(var L : lua_State?; ud : int; var tname : uint8?) : void? {
                 p = null
             }
             // remove both metatables
-            lua_settop(L, -2 - 1)
+            lua_pop(L, 2)
             return p
         }
     }
@@ -395,13 +497,13 @@ def luaL_testudata(var L : lua_State?; ud : int; var tname : uint8?) : void? {
 
 def luaL_checkudata(var L : lua_State?; ud : int; var tname : uint8?) : void? {
     var p : void? = luaL_testudata(L, ud, tname)
-    let _t0 = p != null || luaL_typeerror(L, ud, tname) != 0
+    luaL_argexpected(L, p != null, ud, tname)
     return p
 }
 
 [c_function]
 def luaL_checkoption(var L : lua_State?; arg : int; var _c_def : uint8?; var lst : uint8 ??) : int {
-    var name : uint8? = _c_def != null ? luaL_optlstring(L, arg, _c_def, null) : luaL_checklstring(L, arg, null)
+    var name : uint8? = _c_def != null ? luaL_optstring(L, arg, _c_def) : luaL_checkstring(L, arg)
     var i : int
     i = 0
     while (lst[i] != null) {
@@ -450,7 +552,7 @@ def luaL_checklstring(var L : lua_State?; arg : int; var len : uint64?) : uint8?
 
 [c_function]
 def luaL_optlstring(var L : lua_State?; arg : int; var _c_def : uint8?; var len : uint64?) : uint8? {
-    if (lua_type(L, arg) <= 0) {
+    if (lua_isnoneornil(L, arg)) {
         if (len != null) {
             *len = _c_def != null ? crt::strlen(_c_def) : 0ul
         }
@@ -463,7 +565,7 @@ def luaL_optlstring(var L : lua_State?; arg : int; var _c_def : uint8?; var len 
 [c_function]
 def luaL_checknumber(var L : lua_State?; arg : int) : double {
     var isnum : int
-    var d : double = lua_tonumberx(L, arg, addr(isnum))
+    let d : double = lua_tonumberx(L, arg, addr(isnum))
     if (isnum == 0) {
         tag_error(L, arg, LUA_TNUMBER)
     }
@@ -471,7 +573,7 @@ def luaL_checknumber(var L : lua_State?; arg : int) : double {
 }
 
 def luaL_optnumber(var L : lua_State?; arg : int; _c_def : double) : double {
-    return lua_type(L, arg) <= 0 ? _c_def : luaL_checknumber(L, arg)
+    return lua_isnoneornil(L, arg) ? _c_def : luaL_checknumber(L, arg)
 }
 
 def private interror(var L : lua_State?; arg : int) {
@@ -485,7 +587,7 @@ def private interror(var L : lua_State?; arg : int) {
 [c_function]
 def luaL_checkinteger(var L : lua_State?; arg : int) : int64 {
     var isnum : int
-    var d : int64 = lua_tointegerx(L, arg, addr(isnum))
+    let d : int64 = lua_tointegerx(L, arg, addr(isnum))
     if (isnum == 0) {
         interror(L, arg)
     }
@@ -493,7 +595,7 @@ def luaL_checkinteger(var L : lua_State?; arg : int) : int64 {
 }
 
 def luaL_optinteger(var L : lua_State?; arg : int; _c_def : int64) : int64 {
-    return lua_type(L, arg) <= 0 ? _c_def : luaL_checkinteger(L, arg)
+    return lua_isnoneornil(L, arg) ? _c_def : luaL_checkinteger(L, arg)
 }
 
 [c_function]
@@ -559,21 +661,20 @@ def private prepbuffsize(var B : luaL_Buffer?; sz : uint64; boxidx : int) : uint
     } else {
         var L : lua_State? = B.L
         var newbuff : uint8?
-        var newsize : uint64 = newbuffsize(B, sz)
+        let newsize : uint64 = newbuffsize(B, sz)
         // create larger buffer
         // buffer already has a box?
-        if (intptr(B.b) != intptr(addr(B.init.b[0]))) {
+        if (buffonstack(B)) {
             // resize it
             newbuff = reinterpret<uint8?>(resizebox(L, boxidx, newsize))
         } else {
             // no box yet
             // remove placeholder
-            lua_rotate(L, boxidx, -1)
-            lua_settop(L, -1 - 1)
+            lua_remove(L, boxidx)
             // create a new box
             newbox(L)
             // move box to its intended position
-            lua_rotate(L, boxidx, 1)
+            lua_insert(L, boxidx)
             lua_toclose(L, boxidx)
             newbuff = reinterpret<uint8?>(resizebox(L, boxidx, newsize))
             // copy original content
@@ -596,7 +697,7 @@ def luaL_addlstring(var B : luaL_Buffer?; var s : uint8?; l : uint64) {
     if (l > 0ul) {
         var b : uint8? = prepbuffsize(B, l, -1)
         crt::memcpy(reinterpret<void?>(b), reinterpret<void?>(s), l * uint64(typeinfo sizeof(type<uint8>)))
-        B.n += l
+        luaL_addsize(B, l)
     }
 }
 
@@ -605,21 +706,19 @@ def luaL_addstring(var B : luaL_Buffer?; var s : uint8?) {
     luaL_addlstring(B, s, crt::strlen(s))
 }
 
-[c_function]
 def luaL_pushresult(var B : luaL_Buffer?) {
     var L : lua_State? = B.L
     lua_pushlstring(L, B.b, B.n)
-    if (intptr(B.b) != intptr(addr(B.init.b[0]))) {
+    if (buffonstack(B)) {
         // close the box
         lua_closeslot(L, -2)
     }
     // remove box or placeholder from the stack
-    lua_rotate(L, -2, -1)
-    lua_settop(L, -1 - 1)
+    lua_remove(L, -2)
 }
 
 def luaL_pushresultsize(var B : luaL_Buffer?; sz : uint64) {
-    B.n += sz
+    luaL_addsize(B, sz)
     luaL_pushresult(B)
 }
 
@@ -637,9 +736,9 @@ def luaL_addvalue(var B : luaL_Buffer?) {
     var s : uint8? = lua_tolstring(L, -1, addr(len))
     var b : uint8? = prepbuffsize(B, len, -2)
     crt::memcpy(reinterpret<void?>(b), reinterpret<void?>(s), len * uint64(typeinfo sizeof(type<uint8>)))
-    B.n += len
+    luaL_addsize(B, len)
     // pop string
-    lua_settop(L, -1 - 1)
+    lua_pop(L, 1)
 }
 
 [c_function]
@@ -662,9 +761,9 @@ def luaL_buffinitsize(var L : lua_State?; var B : luaL_Buffer?; sz : uint64) : u
 // empty; t[t[freelist]] is the index of the second element; etc.
 def luaL_ref(var L : lua_State?; var t : int) : int {
     var ref : int
-    if (lua_type(L, -1) == LUA_TNIL) {
+    if (lua_isnil(L, -1)) {
         // remove from stack
-        lua_settop(L, -1 - 1)
+        lua_pop(L, 1)
         // 'nil' has a unique fixed reference
         return LUA_REFNIL
     }
@@ -680,10 +779,10 @@ def luaL_ref(var L : lua_State?; var t : int) : int {
     } else {
         // already initialized
         // ref = t[freelist]
-        ref = int(lua_tointegerx(L, -1, null))
+        ref = int(lua_tointeger(L, -1))
     }
     // remove element from stack
-    lua_settop(L, -1 - 1)
+    lua_pop(L, 1)
     // any free element?
     if (ref != 0) {
         // remove it from list
@@ -737,15 +836,14 @@ def private getF(var L : lua_State?; var ud : void?; var size : uint64?) : uint8
 
 [c_function]
 def private errfile(var L : lua_State?; var what : uint8?; fnameindex : int) : int {
-    var err : int = *crt::c_errno_location()
-    var filename : uint8? = lua_tolstring(L, fnameindex, null) + 1
+    let err : int = *crt::c_errno_location()
+    var filename : uint8? = lua_tostring(L, fnameindex) + 1
     if (err != 0) {
         lua_pushfstring`va(L, cstr("cannot %s %s: %s"), (what, filename, crt::strerror(err)))
     } else {
         lua_pushfstring`va(L, cstr("cannot %s %s"), (what, filename))
     }
-    lua_rotate(L, fnameindex, -1)
-    lua_settop(L, -1 - 1)
+    lua_remove(L, fnameindex)
     return LUA_ERRFILE
 }
 
@@ -756,7 +854,7 @@ def private errfile(var L : lua_State?; var what : uint8?; fnameindex : int) : i
 [c_function]
 def private skipBOM(var f : _IO_FILE?) : int {
     // read first character
-    var c : int = crt::getc(reinterpret<void?>(f))
+    let c : int = crt::getc(reinterpret<void?>(f))
     // correct BOM?
     if (c == 239 && crt::getc(reinterpret<void?>(f)) == 187 && crt::getc(reinterpret<void?>(f)) == 191) {
         // ignore BOM and return next char
@@ -800,7 +898,7 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
     var readstatus : int
     var c : int
     // index of filename on the stack
-    var fnameindex : int = lua_gettop(L) + 1
+    let fnameindex : int = lua_gettop(L) + 1
     if (filename == null) {
         lua_pushstring(L, cstr("=stdin"))
         lf.f = reinterpret<_IO_FILE?>(crt::c_stdin())
@@ -843,7 +941,7 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
         lf.buff[_t1] = uint8(c)
     }
     *crt::c_errno_location() = 0
-    status = lua_load(L, @@getF, reinterpret<void?>(addr(lf)), lua_tolstring(L, -1, null), mode)
+    status = lua_load(L, @@getF, reinterpret<void?>(addr(lf)), lua_tostring(L, -1), mode)
     readstatus = crt::ferror(reinterpret<void?>(lf.f))
     // close file (even in case of errors)
     if (filename != null) {
@@ -854,8 +952,7 @@ def luaL_loadfilex(var L : lua_State?; var filename : uint8?; var mode : uint8?)
         lua_settop(L, fnameindex)
         return errfile(L, cstr("read"), fnameindex)
     }
-    lua_rotate(L, fnameindex, -1)
-    lua_settop(L, -1 - 1)
+    lua_remove(L, fnameindex)
     return status
 }
 
@@ -881,7 +978,7 @@ def luaL_loadbufferx(var L : lua_State?; var buff : uint8?; size : uint64; var n
 
 [c_function]
 def luaL_loadstring(var L : lua_State?; var s : uint8?) : int {
-    return luaL_loadbufferx(L, s, crt::strlen(s), s, null)
+    return luaL_loadbuffer(L, s, crt::strlen(s), s)
 }
 
 def luaL_getmetafield(var L : lua_State?; obj : int; var event : uint8?) : int {
@@ -895,11 +992,10 @@ def luaL_getmetafield(var L : lua_State?; obj : int; var event : uint8?) : int {
         // is metafield nil?
         if (tt == LUA_TNIL) {
             // remove metatable and metafield
-            lua_settop(L, -2 - 1)
+            lua_pop(L, 2)
         } else {
             // remove only metatable
-            lua_rotate(L, -2, -1)
-            lua_settop(L, -1 - 1)
+            lua_remove(L, -2)
         }
         // return metafield type
         return tt
@@ -913,7 +1009,7 @@ def luaL_callmeta(var L : lua_State?; var obj : int; var event : uint8?) : int {
         return 0
     }
     lua_pushvalue(L, obj)
-    lua_callk(L, 1, 1, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+    lua_call(L, 1, 1)
     return 1
 }
 
@@ -927,7 +1023,7 @@ def luaL_len(var L : lua_State?; idx : int) : int64 {
         luaL_error`va(L, cstr("object length is not an integer"), VaNone())
     }
     // remove object
-    lua_settop(L, -1 - 1)
+    lua_pop(L, 1)
     return l
 }
 
@@ -942,9 +1038,9 @@ def luaL_tolstring(var L : lua_State?; var idx : int; var len : uint64?) : uint8
         c_switch(lua_type(L, idx)) {
             case(3) {
                 if (lua_isinteger(L, idx) != 0) {
-                    lua_pushfstring`va(L, cstr("%I"), (lua_tointegerx(L, idx, null),))
+                    lua_pushfstring`va(L, cstr("%I"), (lua_tointeger(L, idx),))
                 } else {
-                    lua_pushfstring`va(L, cstr("%f"), (lua_tonumberx(L, idx, null),))
+                    lua_pushfstring`va(L, cstr("%f"), (lua_tonumber(L, idx),))
                 }
                 break
             }
@@ -963,13 +1059,12 @@ def luaL_tolstring(var L : lua_State?; var idx : int; var len : uint64?) : uint8
             case(_) {
                 {
                     // try name
-                    var tt : int = luaL_getmetafield(L, idx, cstr("__name"))
-                    var kind : uint8? = (tt == LUA_TSTRING) ? lua_tolstring(L, -1, null) : lua_typename(L, lua_type(L, idx))
+                    let tt : int = luaL_getmetafield(L, idx, cstr("__name"))
+                    var kind : uint8? = (tt == LUA_TSTRING) ? lua_tostring(L, -1) : luaL_typename(L, idx)
                     lua_pushfstring`va(L, cstr("%s: %p"), (kind, lua_topointer(L, idx)))
                     if (tt != LUA_TNIL) {
                         // remove '__name'
-                        lua_rotate(L, -2, -1)
-                        lua_settop(L, -1 - 1)
+                        lua_remove(L, -2)
                     }
                     break
                 }
@@ -1002,7 +1097,7 @@ def luaL_setfuncs(var L : lua_State?; var l : luaL_Reg?; nup : int) {
         l++
     }
     // remove upvalues
-    lua_settop(L, -nup - 1)
+    lua_pop(L, nup)
 }
 
 // ensure that stack[idx][fname] has a table and push that table
@@ -1013,9 +1108,9 @@ def luaL_getsubtable(var L : lua_State?; var idx : int; var fname : uint8?) : in
         return 1
     } else {
         // remove previous result
-        lua_settop(L, -1 - 1)
+        lua_pop(L, 1)
         idx = lua_absindex(L, idx)
-        lua_createtable(L, 0, 0)
+        lua_newtable(L)
         // copy to be left at top
         lua_pushvalue(L, -1)
         // assign new table to field
@@ -1036,20 +1131,19 @@ def luaL_requiref(var L : lua_State?; var modname : uint8?; openf : function<(va
     // package not already loaded?
     if (lua_toboolean(L, -1) == 0) {
         // remove field
-        lua_settop(L, -1 - 1)
-        lua_pushcclosure(L, openf, 0)
+        lua_pop(L, 1)
+        lua_pushcfunction(L, openf)
         // argument to open function
         lua_pushstring(L, modname)
         // call 'openf' to open module
-        lua_callk(L, 1, 1, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+        lua_call(L, 1, 1)
         // make copy of module (call result)
         lua_pushvalue(L, -1)
         // LOADED[modname] = module
         lua_setfield(L, -3, modname)
     }
     // remove LOADED table
-    lua_rotate(L, -2, -1)
-    lua_settop(L, -1 - 1)
+    lua_remove(L, -2)
     if (glb != 0) {
         // copy of module
         lua_pushvalue(L, -1)
@@ -1061,7 +1155,7 @@ def luaL_requiref(var L : lua_State?; var modname : uint8?; openf : function<(va
 [c_function]
 def luaL_addgsub(var b : luaL_Buffer?; var s : uint8?; var p : uint8?; var r : uint8?) {
     var wild : uint8?
-    var l : uint64 = crt::strlen(p)
+    let l : uint64 = crt::strlen(p)
     while (true) {
         wild = crt::strstr(s, p)
         if (!(wild != null)) {
@@ -1084,7 +1178,7 @@ def luaL_gsub(var L : lua_State?; var s : uint8?; var p : uint8?; var r : uint8?
     luaL_buffinit(L, addr(b))
     luaL_addgsub(addr(b), s, p, r)
     luaL_pushresult(addr(b))
-    return lua_tolstring(L, -1, null)
+    return lua_tostring(L, -1)
 }
 
 [c_function]
@@ -1102,7 +1196,7 @@ def private l_alloc(var ud : void?; var ptr : void?; osize : uint64; nsize : uin
 // with 'lua_type' avoids possible memory errors in 'lua_tostring'.
 [c_function]
 def private _c_panic(var L : lua_State?) : int {
-    var msg : uint8? = (lua_type(L, -1) == LUA_TSTRING) ? lua_tolstring(L, -1, null) : reinterpret<uint8?>(cstr("error object is not a string"))
+    var msg : uint8? = (lua_type(L, -1) == LUA_TSTRING) ? lua_tostring(L, -1) : reinterpret<uint8?>(cstr("error object is not a string"))
     fprintf(crt::c_stderr(), cstr("PANIC: unprotected error in call to Lua API (%s)\n"), msg)
     crt::fflush(crt::c_stderr())
     // return to Lua to abort
@@ -1188,7 +1282,7 @@ def luaL_newstate : lua_State? {
 }
 
 def luaL_checkversion_(var L : lua_State?; ver : double; sz : uint64) {
-    var v : double = lua_version(L)
+    let v : double = lua_version(L)
     // check numeric types
     if (sz != LUAL_NUMSIZES) {
         luaL_error`va(L, cstr("core and library have incompatible numeric types"), VaNone())

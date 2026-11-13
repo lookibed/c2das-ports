@@ -162,8 +162,8 @@ def AM_getIslope(var ml : mline_t?; var _c_is : islope_t?) {
 def AM_activateNewScale {
     m_x += m_w / 2
     m_y += m_h / 2
-    m_w = FixedMul(f_w << 16, scale_ftom)
-    m_h = FixedMul(f_h << 16, scale_ftom)
+    m_w = FTOM(f_w)
+    m_h = FTOM(f_h)
     m_x -= m_w / 2
     m_y -= m_h / 2
     m_x2 = m_x + m_w
@@ -205,15 +205,13 @@ def AM_addMark {
 // sets global variables controlling zoom range.
 [c_function]
 def AM_findMinMaxBoundaries {
-    var i : int
     var a : int
     var b : int
     min_y = DOOM_MAXINT
     min_x = min_y
     max_y = -DOOM_MAXINT
     max_x = max_y
-    i = 0
-    while (i < numvertexes) {
+    for (i in range(numvertexes)) {
         if (vertexes[i].x < min_x) {
             min_x = vertexes[i].x
         } elif (vertexes[i].x > max_x) {
@@ -224,7 +222,6 @@ def AM_findMinMaxBoundaries {
         } elif (vertexes[i].y > max_y) {
             max_y = vertexes[i].y
         }
-        i++
     }
     max_w = max_x - min_x
     max_h = max_y - min_y
@@ -270,8 +267,8 @@ def AM_initVariables {
     m_paninc.x = m_paninc.y
     ftom_zoommul = FRACUNIT
     mtof_zoommul = FRACUNIT
-    m_w = FixedMul(f_w << 16, scale_ftom)
-    m_h = FixedMul(f_h << 16, scale_ftom)
+    m_w = FTOM(f_w)
+    m_h = FTOM(f_h)
     // find player to center on initially
     pnum = consoleplayer
     if (int(playeringame[pnum]) == 0) {
@@ -310,7 +307,7 @@ def AM_unloadPics {
     for (i in range(10)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(marknums[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/am_map.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1113/doom/work/src/am_map.c:"))
             doom_concat(addr(buf[0]), doom_itoa(509, 10))
             I_Error(addr(buf[0]))
         }
@@ -405,7 +402,7 @@ def AM_Responder(var ev : event_t?) : doom_boolean {
             case(172) {
                 // pan left
                 if (followplayer == 0) {
-                    m_paninc.x = -FixedMul(F_PANINC << 16, scale_ftom)
+                    m_paninc.x = -FTOM(F_PANINC)
                 } else {
                     rc = int(doom_boolean._c_false)
                 }
@@ -414,7 +411,7 @@ def AM_Responder(var ev : event_t?) : doom_boolean {
             case(173) {
                 // pan up
                 if (followplayer == 0) {
-                    m_paninc.y = FixedMul(F_PANINC << 16, scale_ftom)
+                    m_paninc.y = FTOM(F_PANINC)
                 } else {
                     rc = int(doom_boolean._c_false)
                 }
@@ -423,7 +420,7 @@ def AM_Responder(var ev : event_t?) : doom_boolean {
             case(175) {
                 // pan down
                 if (followplayer == 0) {
-                    m_paninc.y = -FixedMul(F_PANINC << 16, scale_ftom)
+                    m_paninc.y = -FTOM(F_PANINC)
                 } else {
                     rc = int(doom_boolean._c_false)
                 }
@@ -544,8 +541,8 @@ def AM_changeWindowScale {
 
 def AM_doFollowPlayer {
     if (f_oldloc.x != am_map_plr.mo.x || f_oldloc.y != am_map_plr.mo.y) {
-        m_x = FixedMul((FixedMul(am_map_plr.mo.x, scale_mtof) >> 16) << 16, scale_ftom) - m_w / 2
-        m_y = FixedMul((FixedMul(am_map_plr.mo.y, scale_mtof) >> 16) << 16, scale_ftom) - m_h / 2
+        m_x = FTOM(MTOF(am_map_plr.mo.x)) - m_w / 2
+        m_y = FTOM(MTOF(am_map_plr.mo.y)) - m_h / 2
         m_x2 = m_x + m_w
         m_y2 = m_y + m_h
         f_oldloc.x = am_map_plr.mo.x
@@ -633,10 +630,10 @@ def AM_clipMline(var ml : mline_t?; var fl : fline_t?) : doom_boolean {
         return doom_boolean._c_false
     }
     // transform to frame-buffer coordinates.
-    fl.a.x = f_x + (FixedMul(ml.a.x - m_x, scale_mtof) >> 16)
-    fl.a.y = f_y + (f_h - (FixedMul(ml.a.y - m_y, scale_mtof) >> 16))
-    fl.b.x = f_x + (FixedMul(ml.b.x - m_x, scale_mtof) >> 16)
-    fl.b.y = f_y + (f_h - (FixedMul(ml.b.y - m_y, scale_mtof) >> 16))
+    fl.a.x = CXMTOF(ml.a.x)
+    fl.a.y = CYMTOF(ml.a.y)
+    fl.b.x = CXMTOF(ml.b.x)
+    fl.b.y = CYMTOF(ml.b.y)
     outcode1 = 0
     if (fl.a.y < 0) {
         outcode1 |= int(anon_545.TOP)
@@ -728,7 +725,6 @@ def AM_clipMline(var ml : mline_t?; var fl : fline_t?) : doom_boolean {
 }
 
 // Classic Bresenham w/ whatever optimizations needed for speed
-[c_function]
 def AM_drawFline(var fl : fline_t?; color : int) {
     var x : int
     var y : int
@@ -752,7 +748,7 @@ def AM_drawFline(var fl : fline_t?; color : int) {
     if (ax > ay) {
         d = ay - ax / 2
         while (1 != 0) {
-            fb[y * f_w + x] = uint8(color)
+            PUTDOT(x, y, color)
             if (x == fl.b.x) {
                 return
             }
@@ -766,7 +762,7 @@ def AM_drawFline(var fl : fline_t?; color : int) {
     } else {
         d = ax - ay / 2
         while (1 != 0) {
-            fb[y * f_w + x] = uint8(color)
+            PUTDOT(x, y, color)
             if (y == fl.b.y) {
                 return
             }
@@ -835,48 +831,42 @@ def AM_drawGrid(color : int) {
 // This is LineDef based, not LineSeg based.
 [c_function]
 def AM_drawWalls {
-    var i : int
-    i = 0
-    while (i < numlines) {
-        {
-            AM_drawWalls_l.a.x = lines[i].v1.x
-            AM_drawWalls_l.a.y = lines[i].v1.y
-            AM_drawWalls_l.b.x = lines[i].v2.x
-            AM_drawWalls_l.b.y = lines[i].v2.y
-            if (cheating != 0 || (int(lines[i].flags) & ML_MAPPED) != 0) {
-                if ((int(lines[i].flags) & LINE_NEVERSEE) != 0 && cheating == 0) {
-                    continue
-                }
-                if (lines[i].backsector == null) {
-                    AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + lightlev)
-                } else {
-                    if (lines[i].special == 39) {
-                        // teleporters
-                        AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + WALLRANGE / 2)
-                    } elif ((int(lines[i].flags) & ML_SECRET) != 0) {
-                        // secret door
-                        if (cheating != 0) {
-                            AM_drawMline(addr(AM_drawWalls_l), SECRETWALLCOLORS + lightlev)
-                        } else {
-                            AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + lightlev)
-                        }
-                    } elif (lines[i].backsector.floorheight != lines[i].frontsector.floorheight) {
-                        // floor level change
-                        AM_drawMline(addr(AM_drawWalls_l), FDWALLCOLORS + lightlev)
-                    } elif (lines[i].backsector.ceilingheight != lines[i].frontsector.ceilingheight) {
-                        // ceiling level change
-                        AM_drawMline(addr(AM_drawWalls_l), CDWALLCOLORS + lightlev)
-                    } elif (cheating != 0) {
-                        AM_drawMline(addr(AM_drawWalls_l), TSWALLCOLORS + lightlev)
+    for (i in range(numlines)) {
+        AM_drawWalls_l.a.x = lines[i].v1.x
+        AM_drawWalls_l.a.y = lines[i].v1.y
+        AM_drawWalls_l.b.x = lines[i].v2.x
+        AM_drawWalls_l.b.y = lines[i].v2.y
+        if (cheating != 0 || (int(lines[i].flags) & ML_MAPPED) != 0) {
+            if ((int(lines[i].flags) & LINE_NEVERSEE) != 0 && cheating == 0) {
+                continue
+            }
+            if (lines[i].backsector == null) {
+                AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + lightlev)
+            } else {
+                if (lines[i].special == 39) {
+                    // teleporters
+                    AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + WALLRANGE / 2)
+                } elif ((int(lines[i].flags) & ML_SECRET) != 0) {
+                    // secret door
+                    if (cheating != 0) {
+                        AM_drawMline(addr(AM_drawWalls_l), SECRETWALLCOLORS + lightlev)
+                    } else {
+                        AM_drawMline(addr(AM_drawWalls_l), WALLCOLORS + lightlev)
                     }
-                }
-            } elif (am_map_plr.powers[int(powertype_t.pw_allmap)] != 0) {
-                if ((int(lines[i].flags) & LINE_NEVERSEE) == 0) {
-                    AM_drawMline(addr(AM_drawWalls_l), GRAYS + 3)
+                } elif (lines[i].backsector.floorheight != lines[i].frontsector.floorheight) {
+                    // floor level change
+                    AM_drawMline(addr(AM_drawWalls_l), FDWALLCOLORS + lightlev)
+                } elif (lines[i].backsector.ceilingheight != lines[i].frontsector.ceilingheight) {
+                    // ceiling level change
+                    AM_drawMline(addr(AM_drawWalls_l), CDWALLCOLORS + lightlev)
+                } elif (cheating != 0) {
+                    AM_drawMline(addr(AM_drawWalls_l), TSWALLCOLORS + lightlev)
                 }
             }
-        } finally {
-            i++
+        } elif (am_map_plr.powers[int(powertype_t.pw_allmap)] != 0) {
+            if ((int(lines[i].flags) & LINE_NEVERSEE) == 0) {
+                AM_drawMline(addr(AM_drawWalls_l), GRAYS + 3)
+            }
         }
     }
 }
@@ -955,16 +945,13 @@ def AM_drawPlayers {
 
 [c_function]
 def AM_drawThings(colors : int; colorrange : int) {
-    var i : int
     var t : mobj_s?
-    i = 0
-    while (i < numsectors) {
+    for (i in range(numsectors)) {
         t = sectors[i].thinglist
         while (t != null) {
             AM_drawLineCharacter(addr(thintriangle_guy[0]), int(NUMTHINTRIANGLEGUYLINES), 16 << FRACBITS, t.angle, colors + lightlev, t.x, t.y)
             t = t.snext
         }
-        i++
     }
 }
 
@@ -981,8 +968,8 @@ def AM_drawMarks {
             w = 5
             // because something's wrong with the wad, i guess
             h = 6
-            fx = f_x + (FixedMul(markpoints[i].x - m_x, scale_mtof) >> 16)
-            fy = f_y + (f_h - (FixedMul(markpoints[i].y - m_y, scale_mtof) >> 16))
+            fx = CXMTOF(markpoints[i].x)
+            fy = CYMTOF(markpoints[i].y)
             if (fx >= f_x && fx <= f_w - w && fy >= f_y && fy <= f_h - h) {
                 V_DrawPatch(fx, fy, FB, marknums[i])
             }

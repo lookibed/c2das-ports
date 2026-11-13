@@ -9,6 +9,7 @@ require c_runtime/c_bounds
 require c_runtime/c_do_while
 require c_runtime/c_exit
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/c_switch
 require c_runtime/cstr
 require c_runtime/int_of
@@ -1694,6 +1695,20 @@ let private PLM_AUDIO_SAMPLES_PER_FRAME = 1152
 let private MAX_FILE_BYTES = 4 * 1024 * 1024
 let private _IONBF = 2
 
+// pl_mpeg.c:20: #define PLM_MALLOC(sz) malloc(sz)
+[c_macro, c_function]
+def private PLM_MALLOC(sz) : void? => crt::malloc(sz)
+
+// pl_mpeg.c:21: #define PLM_FREE(ptr) free(ptr)
+[c_macro, c_function]
+def private PLM_FREE(var ptr) {
+    crt::free(reinterpret<void?>(ptr))
+}
+
+// pl_mpeg.c:22: #define PLM_REALLOC(ptr, sz) realloc(ptr, sz)
+[c_macro, c_function]
+def private PLM_REALLOC(var ptr; sz) : void? => crt::realloc(reinterpret<void?>(ptr), sz)
+
 // `abs` is ordinary decoder arithmetic, not part of the raw-memory runtime.
 // Bind the single-header implementation to a local C helper so the target
 // graph never depends on shim.c's reference-side libc implementation.
@@ -1708,7 +1723,7 @@ def plm_create_with_memory(var bytes : uint8?; length : uint64; free_when_done :
 
 [c_function]
 def plm_create_with_buffer(var buffer : plm_buffer_t?; destroy_when_done : int) : plm_t? {
-    var self : plm_t? = reinterpret<plm_t?>(crt::malloc(uint64(typeinfo sizeof(type<plm_t>))))
+    var self : plm_t? = reinterpret<plm_t?>(PLM_MALLOC(uint64(typeinfo sizeof(type<plm_t>))))
     crt::memset(reinterpret<void?>(self), 0, uint64(typeinfo sizeof(type<plm_t>)))
     self.demux = plm_demux_create(buffer, destroy_when_done)
     self.video_enabled = TRUE
@@ -1749,7 +1764,6 @@ def plm_init_decoders(var self : plm_t?) : int {
     return TRUE
 }
 
-[c_function]
 def plm_destroy(var self : plm_t?) {
     if (self.video_decoder != null) {
         plm_video_destroy(self.video_decoder)
@@ -1758,7 +1772,7 @@ def plm_destroy(var self : plm_t?) {
         plm_audio_destroy(self.audio_decoder)
     }
     plm_demux_destroy(self.demux)
-    crt::free(reinterpret<void?>(self))
+    PLM_FREE(self)
 }
 
 def plm_get_audio_enabled(var self : plm_t?) : int {
@@ -1780,7 +1794,7 @@ def plm_has_headers(var self : plm_t?) : int {
 }
 
 def plm_probe(var self : plm_t?; probesize : uint64) : int {
-    var found_streams : int = plm_demux_probe(self.demux, probesize)
+    let found_streams : int = plm_demux_probe(self.demux, probesize)
     if (found_streams == 0) {
         return FALSE
     }
@@ -1905,8 +1919,8 @@ def plm_decode(var self : plm_t?; tick : double) {
     if (plm_init_decoders(self) == 0) {
         return
     }
-    var decode_video : int = int_of(self.video_decode_callback != null && self.video_packet_type != 0)
-    var decode_audio : int = int_of(self.audio_decode_callback != null && self.audio_packet_type != 0)
+    let decode_video : int = int_of(self.video_decode_callback != null && self.video_packet_type != 0)
+    let decode_audio : int = int_of(self.audio_decode_callback != null && self.audio_packet_type != 0)
     if (decode_video == 0 && decode_audio == 0) {
         // Nothing to do here
         return
@@ -1914,8 +1928,8 @@ def plm_decode(var self : plm_t?; tick : double) {
     var did_decode : int = FALSE
     var decode_video_failed : int = FALSE
     var decode_audio_failed : int = FALSE
-    var video_target_time : double = self.time + tick
-    var audio_target_time : double = self.time + tick + self.audio_lead_time
+    let video_target_time : double = self.time + tick
+    let audio_target_time : double = self.time + tick + self.audio_lead_time
     c_do_while(did_decode != 0) {
         did_decode = FALSE
         if (decode_video != 0 && plm_video_get_time(self.video_decoder) < video_target_time) {
@@ -2030,9 +2044,9 @@ def plm_seek_frame(var self : plm_t?; var time : double; seek_exact : int) : plm
     if (self.video_packet_type == 0) {
         return null
     }
-    var _c_type : int = self.video_packet_type
-    var start_time : double = plm_demux_get_start_time(self.demux, _c_type)
-    var duration : double = plm_demux_get_duration(self.demux, _c_type)
+    let _c_type : int = self.video_packet_type
+    let start_time : double = plm_demux_get_start_time(self.demux, _c_type)
+    let duration : double = plm_demux_get_duration(self.demux, _c_type)
     if (time < 0.0lf) {
         time = 0.0lf
     } elif (time > duration) {
@@ -2043,7 +2057,7 @@ def plm_seek_frame(var self : plm_t?; var time : double; seek_exact : int) : plm
         return null
     }
     // Disable writing to the audio buffer while decoding video
-    var previous_audio_packet_type : int = self.audio_packet_type
+    let previous_audio_packet_type : int = self.audio_packet_type
     self.audio_packet_type = 0
     // Clear video buffer and decode the found packet
     plm_video_rewind(self.video_decoder)
@@ -2081,7 +2095,7 @@ def plm_seek(var self : plm_t?; time : double; seek_exact : int) : int {
     // Sync up Audio. This demuxes more packets until the first audio packet
     // with a PTS greater than the current time is found. plm_decode() is then
     // called to decode enough audio data to satisfy the audio_lead_time.
-    var start_time : double = plm_demux_get_start_time(self.demux, self.video_packet_type)
+    let start_time : double = plm_demux_get_start_time(self.demux, self.video_packet_type)
     plm_audio_rewind(self.audio_decoder)
     var packet : plm_packet_t? = null
     while (true) {
@@ -2116,7 +2130,7 @@ def plm_buffer_create_with_callbacks(load_callback : function<(var a0 : plm_buff
 
 [c_function]
 def plm_buffer_create_with_memory(var bytes : uint8?; length : uint64; free_when_done : int) : plm_buffer_t? {
-    var self : plm_buffer_t? = reinterpret<plm_buffer_t?>(crt::malloc(uint64(typeinfo sizeof(type<plm_buffer_t>))))
+    var self : plm_buffer_t? = reinterpret<plm_buffer_t?>(PLM_MALLOC(uint64(typeinfo sizeof(type<plm_buffer_t>))))
     crt::memset(reinterpret<void?>(self), 0, uint64(typeinfo sizeof(type<plm_buffer_t>)))
     self.capacity = length
     self.length = length
@@ -2130,11 +2144,11 @@ def plm_buffer_create_with_memory(var bytes : uint8?; length : uint64; free_when
 
 [c_function]
 def plm_buffer_create_with_capacity(capacity : uint64) : plm_buffer_t? {
-    var self : plm_buffer_t? = reinterpret<plm_buffer_t?>(crt::malloc(uint64(typeinfo sizeof(type<plm_buffer_t>))))
+    var self : plm_buffer_t? = reinterpret<plm_buffer_t?>(PLM_MALLOC(uint64(typeinfo sizeof(type<plm_buffer_t>))))
     crt::memset(reinterpret<void?>(self), 0, uint64(typeinfo sizeof(type<plm_buffer_t>)))
     self.capacity = capacity
     self.free_when_done = TRUE
-    self.bytes = reinterpret<uint8?>(crt::malloc(capacity))
+    self.bytes = reinterpret<uint8?>(PLM_MALLOC(capacity))
     self.mode = plm_buffer_mode.PLM_BUFFER_MODE_RING
     self.discard_read_bytes = TRUE
     return self
@@ -2147,12 +2161,11 @@ def plm_buffer_create_for_appending(initial_capacity : uint64) : plm_buffer_t? {
     return self
 }
 
-[c_function]
 def plm_buffer_destroy(var self : plm_buffer_t?) {
     if (self.free_when_done != 0) {
-        crt::free(reinterpret<void?>(self.bytes))
+        PLM_FREE(self.bytes)
     }
-    crt::free(reinterpret<void?>(self))
+    PLM_FREE(self)
 }
 
 def plm_buffer_get_size(var self : plm_buffer_t?) : uint64 {
@@ -2178,13 +2191,13 @@ def plm_buffer_write(var self : plm_buffer_t?; var bytes : uint8?; length : uint
         }
     }
     // Do we have to resize to fit the new data?
-    var bytes_available : uint64 = self.capacity - self.length
+    let bytes_available : uint64 = self.capacity - self.length
     if (bytes_available < length) {
         var new_size : uint64 = self.capacity
         c_do_while(new_size - self.length < length) {
             new_size *= 2ul
         }
-        self.bytes = reinterpret<uint8?>(crt::realloc(reinterpret<void?>(self.bytes), new_size))
+        self.bytes = reinterpret<uint8?>(PLM_REALLOC(self.bytes, new_size))
         self.capacity = new_size
     }
     crt::memcpy(reinterpret<void?>(self.bytes + self.length), reinterpret<void?>(bytes), length)
@@ -2232,7 +2245,7 @@ def plm_buffer_tell(var self : plm_buffer_t?) : uint64 {
 
 [c_function]
 def plm_buffer_discard_read_bytes(var self : plm_buffer_t?) {
-    var byte_pos : uint64 = self.bit_index >> 3ul
+    let byte_pos : uint64 = self.bit_index >> 3ul
     if (byte_pos == self.length) {
         self.bit_index = 0ul
         self.length = 0ul
@@ -2270,13 +2283,13 @@ def plm_buffer_read(var self : plm_buffer_t?; var count : int) : int {
     }
     var value : int = 0
     while (count != 0) {
-        var current_byte : int = int(self.bytes[self.bit_index >> 3ul])
+        let current_byte : int = int(self.bytes[self.bit_index >> 3ul])
         // Remaining bits in byte
-        var remaining : int = int(8ul - (self.bit_index & 7ul))
+        let remaining : int = int(8ul - (self.bit_index & 7ul))
         // Bits in self run
-        var read : int = remaining < count ? remaining : count
-        var shift : int = remaining - read
-        var mask : int = 255 >> (8 - read)
+        let read : int = remaining < count ? remaining : count
+        let shift : int = remaining - read
+        let mask : int = 255 >> (8 - read)
         value = (value << read) | ((current_byte & (mask << shift)) >> shift)
         self.bit_index += uint64(read)
         count -= read
@@ -2310,7 +2323,7 @@ def plm_buffer_skip_bytes(var self : plm_buffer_t?; v : uint8) : int {
 def plm_buffer_next_start_code(var self : plm_buffer_t?) : int {
     plm_buffer_align(self)
     while (plm_buffer_has(self, uint64(5 << 3)) != 0) {
-        var byte_index : uint64 = self.bit_index >> 3ul
+        let byte_index : uint64 = self.bit_index >> 3ul
         if (self.bytes[byte_index] == 0 && self.bytes[byte_index + 1ul] == 0 && self.bytes[byte_index + 2ul] == 1) {
             self.bit_index = (byte_index + 4ul) << 3ul
             return int(self.bytes[byte_index + 3ul])
@@ -2332,10 +2345,10 @@ def plm_buffer_find_start_code(var self : plm_buffer_t?; code : int) : int {
 }
 
 def plm_buffer_has_start_code(var self : plm_buffer_t?; code : int) : int {
-    var previous_bit_index : uint64 = self.bit_index
-    var previous_discard_read_bytes : int = self.discard_read_bytes
+    let previous_bit_index : uint64 = self.bit_index
+    let previous_discard_read_bytes : int = self.discard_read_bytes
     self.discard_read_bytes = FALSE
-    var current : int = plm_buffer_find_start_code(self, code)
+    let current : int = plm_buffer_find_start_code(self, code)
     self.bit_index = previous_bit_index
     self.discard_read_bytes = previous_discard_read_bytes
     return current
@@ -2345,7 +2358,7 @@ def plm_buffer_peek_non_zero(var self : plm_buffer_t?; bit_count : int) : int {
     if (plm_buffer_has(self, uint64(bit_count)) == 0) {
         return FALSE
     }
-    var val : int = plm_buffer_read(self, bit_count)
+    let val : int = plm_buffer_read(self, bit_count)
     self.bit_index -= uint64(bit_count)
     return int_of(val != 0)
 }
@@ -2366,7 +2379,7 @@ def plm_buffer_read_vlc_uint(var self : plm_buffer_t?; var _c_table : plm_vlc_ui
 
 [c_function]
 def plm_demux_create(var buffer : plm_buffer_t?; destroy_when_done : int) : plm_demux_t? {
-    var self : plm_demux_t? = reinterpret<plm_demux_t?>(crt::malloc(uint64(typeinfo sizeof(type<plm_demux_t>))))
+    var self : plm_demux_t? = reinterpret<plm_demux_t?>(PLM_MALLOC(uint64(typeinfo sizeof(type<plm_demux_t>))))
     crt::memset(reinterpret<void?>(self), 0, uint64(typeinfo sizeof(type<plm_demux_t>)))
     self.buffer = buffer
     self.destroy_buffer_when_done = destroy_when_done
@@ -2377,12 +2390,11 @@ def plm_demux_create(var buffer : plm_buffer_t?; destroy_when_done : int) : plm_
     return self
 }
 
-[c_function]
 def plm_demux_destroy(var self : plm_demux_t?) {
     if (self.destroy_buffer_when_done != 0) {
         plm_buffer_destroy(self.buffer)
     }
-    crt::free(reinterpret<void?>(self))
+    PLM_FREE(self)
 }
 
 def plm_demux_has_headers(var self : plm_demux_t?) : int {
@@ -2434,7 +2446,7 @@ def plm_demux_has_headers(var self : plm_demux_t?) : int {
 }
 
 def plm_demux_probe(var self : plm_demux_t?; probesize : uint64) : int {
-    var previous_pos : int = int(plm_buffer_tell(self.buffer))
+    let previous_pos : int = int(plm_buffer_tell(self.buffer))
     var video_stream : int = FALSE
     var audio_streams : int[4] = fixed_array(FALSE, FALSE, FALSE, FALSE)
     c_do_while(self.start_code != -1 && plm_buffer_tell(self.buffer) - uint64(previous_pos) < probesize) {
@@ -2486,8 +2498,8 @@ def plm_demux_get_start_time(var self : plm_demux_t?; _c_type : int) : double {
     if (self.start_time != double(PLM_PACKET_INVALID_TS)) {
         return self.start_time
     }
-    var previous_pos : int = int(plm_buffer_tell(self.buffer))
-    var previous_start_code : int = self.start_code
+    let previous_pos : int = int(plm_buffer_tell(self.buffer))
+    let previous_start_code : int = self.start_code
     // Find first video PTS
     plm_demux_rewind(self)
     c_do_while(self.start_time == double(PLM_PACKET_INVALID_TS)) {
@@ -2505,16 +2517,16 @@ def plm_demux_get_start_time(var self : plm_demux_t?; _c_type : int) : double {
 }
 
 def plm_demux_get_duration(var self : plm_demux_t?; _c_type : int) : double {
-    var file_size : uint64 = plm_buffer_get_size(self.buffer)
+    let file_size : uint64 = plm_buffer_get_size(self.buffer)
     if (self.duration != double(PLM_PACKET_INVALID_TS) && self.last_file_size == file_size) {
         return self.duration
     }
-    var previous_pos : uint64 = plm_buffer_tell(self.buffer)
-    var previous_start_code : int = self.start_code
+    let previous_pos : uint64 = plm_buffer_tell(self.buffer)
+    let previous_start_code : int = self.start_code
     // Find last video PTS. Start searching 64kb from the end and go further
     // back if needed.
-    var start_range : int64 = int64(64 * 1024)
-    var max_range : int64 = int64(4096 * 1024)
+    let start_range : int64 = int64(64 * 1024)
+    let max_range : int64 = int64(4096 * 1024)
     {
         var _c_range : int64 = start_range
         while (_c_range <= max_range) {
@@ -2568,8 +2580,8 @@ def plm_demux_seek(var self : plm_demux_t?; var seek_time : double; _c_type : in
     // variable bitrates. If significantly more jumps are needed, there's
     // probably something wrong with the file and we just avoid getting into an
     // infinite loop. 32 retries should be enough for anybody.
-    var duration : double = plm_demux_get_duration(self, _c_type)
-    var file_size : int64 = int64(plm_buffer_get_size(self.buffer))
+    let duration : double = plm_demux_get_duration(self, _c_type)
+    let file_size : int64 = int64(plm_buffer_get_size(self.buffer))
     var byterate : int64 = int64(double(file_size) / duration)
     var cur_time : double = self.last_decoded_pts
     var scan_span : double = 1.0lf
@@ -2584,9 +2596,9 @@ def plm_demux_seek(var self : plm_demux_t?; var seek_time : double; _c_type : in
         var found_packet_in_range : int = FALSE
         var last_valid_packet_start : int64 = -1l
         var first_packet_time : double = double(PLM_PACKET_INVALID_TS)
-        var cur_pos : int64 = int64(plm_buffer_tell(self.buffer))
+        let cur_pos : int64 = int64(plm_buffer_tell(self.buffer))
         // Estimate byte offset and jump to it.
-        var offset : int64 = int64((seek_time - cur_time - scan_span) * double(byterate))
+        let offset : int64 = int64((seek_time - cur_time - scan_span) * double(byterate))
         var seek_pos : int64 = cur_pos + offset
         if (seek_pos < 0l) {
             seek_pos = 0l
@@ -2597,7 +2609,7 @@ def plm_demux_seek(var self : plm_demux_t?; var seek_time : double; _c_type : in
         // Scan through all packets up to the seek_time to find the last packet
         // containing an intra frame.
         while (plm_buffer_find_start_code(self.buffer, _c_type) != -1) {
-            var packet_start : int64 = int64(plm_buffer_tell(self.buffer))
+            let packet_start : int64 = int64(plm_buffer_tell(self.buffer))
             var packet : plm_packet_t? = plm_demux_decode_packet(self, _c_type)
             // Skip packet if it has no PTS
             if (packet == null || packet.pts == double(PLM_PACKET_INVALID_TS)) {
@@ -2627,19 +2639,15 @@ def plm_demux_seek(var self : plm_demux_t?; var seek_time : double; _c_type : in
             // later, when we know it's the last intra frame before desired
             // seek time.
             if (force_intra != 0) {
-                {
-                    var i : uint64 = 0ul
-                    while (i < packet.length - 6ul) {
-                        // Find the START_PICTURE code
-                        if (packet.data[i] == 0 && packet.data[i + 1ul] == 0 && packet.data[i + 2ul] == 1 && packet.data[i + 3ul] == 0) {
-                            // Bits 11--13 in the picture header contain the frame
-                            // type, where 1=Intra
-                            if ((int(packet.data[i + 5ul]) & 56) == 8) {
-                                last_valid_packet_start = packet_start
-                            }
-                            break
+                for (i in urange64(packet.length - 6ul)) {
+                    // Find the START_PICTURE code
+                    if (packet.data[i] == 0 && packet.data[i + 1ul] == 0 && packet.data[i + 2ul] == 1 && packet.data[i + 3ul] == 0) {
+                        // Bits 11--13 in the picture header contain the frame
+                        // type, where 1=Intra
+                        if ((int(packet.data[i + 5ul]) & 56) == 8) {
+                            last_valid_packet_start = packet_start
                         }
-                        i++
+                        break
                     }
                 }
             } else {
@@ -2673,7 +2681,7 @@ def plm_demux_decode(var self : plm_demux_t?) : plm_packet_t? {
         return null
     }
     if (self.current_packet.length != 0) {
-        var bits_till_next_packet : uint64 = self.current_packet.length << 3ul
+        let bits_till_next_packet : uint64 = self.current_packet.length << 3ul
         if (plm_buffer_has(self.buffer, bits_till_next_packet) == 0) {
             return null
         }
@@ -2722,7 +2730,7 @@ def plm_demux_decode_packet(var self : plm_demux_t?; _c_type : int) : plm_packet
         plm_buffer_skip(self.buffer, 16ul)
         self.next_packet.length -= 2ul
     }
-    var pts_dts_marker : int = plm_buffer_read(self.buffer, 2)
+    let pts_dts_marker : int = plm_buffer_read(self.buffer, 2)
     if (pts_dts_marker == 3) {
         self.next_packet.pts = plm_demux_decode_time(self)
         self.last_decoded_pts = self.next_packet.pts
@@ -2768,7 +2776,7 @@ def private plmpeg_file_all__plm_clamp(var n : int) : uint8 {
 
 [c_function]
 def plm_video_create_with_buffer(var buffer : plm_buffer_t?; destroy_when_done : int) : plm_video_t? {
-    var self : plm_video_t? = reinterpret<plm_video_t?>(crt::malloc(uint64(typeinfo sizeof(type<plm_video_t>))))
+    var self : plm_video_t? = reinterpret<plm_video_t?>(PLM_MALLOC(uint64(typeinfo sizeof(type<plm_video_t>))))
     crt::memset(reinterpret<void?>(self), 0, uint64(typeinfo sizeof(type<plm_video_t>)))
     self.buffer = buffer
     self.destroy_buffer_when_done = destroy_when_done
@@ -2780,15 +2788,14 @@ def plm_video_create_with_buffer(var buffer : plm_buffer_t?; destroy_when_done :
     return self
 }
 
-[c_function]
 def plm_video_destroy(var self : plm_video_t?) {
     if (self.destroy_buffer_when_done != 0) {
         plm_buffer_destroy(self.buffer)
     }
     if (self.has_sequence_header != 0) {
-        crt::free(reinterpret<void?>(self.frames_data))
+        PLM_FREE(self.frames_data)
     }
-    crt::free(reinterpret<void?>(self))
+    PLM_FREE(self)
 }
 
 def plm_video_get_framerate(var self : plm_video_t?) : double {
@@ -2899,7 +2906,7 @@ def plm_video_has_header(var self : plm_video_t?) : int {
 [c_function]
 def plm_video_decode_sequence_header(var self : plm_video_t?) : int {
     // 64 bit header + 2x 64 byte matrix
-    var max_header_size : int = 64 + 2 * 64 * 8
+    let max_header_size : int = 64 + 2 * 64 * 8
     if (plm_buffer_has(self.buffer, uint64(max_header_size)) == 0) {
         return FALSE
     }
@@ -2915,7 +2922,7 @@ def plm_video_decode_sequence_header(var self : plm_video_t?) : int {
     if (pixel_aspect_ratio_code < 0) {
         pixel_aspect_ratio_code = 0
     }
-    var par_last : int = int(uint64(typeinfo sizeof(type<float[14]>)) / uint64(typeinfo sizeof(type<float>)) - 1ul)
+    let par_last : int = int(uint64(typeinfo sizeof(type<float[14]>)) / uint64(typeinfo sizeof(type<float>)) - 1ul)
     if (pixel_aspect_ratio_code > par_last) {
         pixel_aspect_ratio_code = par_last
     }
@@ -2927,7 +2934,7 @@ def plm_video_decode_sequence_header(var self : plm_video_t?) : int {
     // Load custom intra quant matrix?
     if (plm_buffer_read(self.buffer, 1) != 0) {
         for (i in range(64)) {
-            var idx : int = int(plmpeg_file_all__PLM_VIDEO_ZIG_ZAG[i])
+            let idx : int = int(plmpeg_file_all__PLM_VIDEO_ZIG_ZAG[i])
             self.intra_quant_matrix[idx] = uint8(plm_buffer_read(self.buffer, 8))
         }
     } else {
@@ -2936,7 +2943,7 @@ def plm_video_decode_sequence_header(var self : plm_video_t?) : int {
     // Load custom non intra quant matrix?
     if (plm_buffer_read(self.buffer, 1) != 0) {
         for (i in range(64)) {
-            var idx : int = int(plmpeg_file_all__PLM_VIDEO_ZIG_ZAG[i])
+            let idx : int = int(plmpeg_file_all__PLM_VIDEO_ZIG_ZAG[i])
             self.non_intra_quant_matrix[idx] = uint8(plm_buffer_read(self.buffer, 8))
         }
     } else {
@@ -2951,10 +2958,10 @@ def plm_video_decode_sequence_header(var self : plm_video_t?) : int {
     self.chroma_width = self.mb_width << 3
     self.chroma_height = self.mb_height << 3
     // Allocate one big chunk of data for all 3 frames = 9 planes
-    var luma_plane_size : uint64 = uint64(self.luma_width * self.luma_height)
-    var chroma_plane_size : uint64 = uint64(self.chroma_width * self.chroma_height)
-    var frame_data_size : uint64 = luma_plane_size + 2ul * chroma_plane_size
-    self.frames_data = reinterpret<uint8?>(crt::malloc(frame_data_size * 3ul))
+    let luma_plane_size : uint64 = uint64(self.luma_width * self.luma_height)
+    let chroma_plane_size : uint64 = uint64(self.chroma_width * self.chroma_height)
+    let frame_data_size : uint64 = luma_plane_size + 2ul * chroma_plane_size
+    self.frames_data = reinterpret<uint8?>(PLM_MALLOC(frame_data_size * 3ul))
     plm_video_init_frame(self, addr(self.frame_current), self.frames_data + frame_data_size * 0ul)
     plm_video_init_frame(self, addr(self.frame_forward), self.frames_data + frame_data_size * 1ul)
     plm_video_init_frame(self, addr(self.frame_backward), self.frames_data + frame_data_size * 2ul)
@@ -2964,8 +2971,8 @@ def plm_video_decode_sequence_header(var self : plm_video_t?) : int {
 
 [c_function]
 def plm_video_init_frame(var self : plm_video_t?; var frame : plm_frame_t?; var base : uint8?) {
-    var luma_plane_size : uint64 = uint64(self.luma_width * self.luma_height)
-    var chroma_plane_size : uint64 = uint64(self.chroma_width * self.chroma_height)
+    let luma_plane_size : uint64 = uint64(self.luma_width * self.luma_height)
+    let chroma_plane_size : uint64 = uint64(self.chroma_width * self.chroma_height)
     frame.width = uint(self.width)
     frame.height = uint(self.height)
     frame.y.width = uint(self.luma_width)
@@ -2992,7 +2999,7 @@ def plm_video_decode_picture(var self : plm_video_t?) {
     // Forward full_px, f_code
     if (self.picture_type == plmpeg_file_all__PLM_VIDEO_PICTURE_TYPE_PREDICTIVE || self.picture_type == plmpeg_file_all__PLM_VIDEO_PICTURE_TYPE_B) {
         self.motion_forward.full_px = plm_buffer_read(self.buffer, 1)
-        var f_code : int = plm_buffer_read(self.buffer, 3)
+        let f_code : int = plm_buffer_read(self.buffer, 3)
         if (f_code == 0) {
             // Ignore picture with zero f_code
             return
@@ -3002,7 +3009,7 @@ def plm_video_decode_picture(var self : plm_video_t?) {
     // Backward full_px, f_code
     if (self.picture_type == plmpeg_file_all__PLM_VIDEO_PICTURE_TYPE_B) {
         self.motion_backward.full_px = plm_buffer_read(self.buffer, 1)
-        var f_code : int = plm_buffer_read(self.buffer, 3)
+        let f_code : int = plm_buffer_read(self.buffer, 3)
         if (f_code == 0) {
             // Ignore picture with zero f_code
             return
@@ -3131,7 +3138,7 @@ def plm_video_decode_macroblock(var self : plm_video_t?) {
         plm_video_predict_macroblock(self)
     }
     // Decode blocks
-    var cbp : int = ((self.macroblock_type & 2) !=
+    let cbp : int = ((self.macroblock_type & 2) !=
                 0) ? int(plm_buffer_read_vlc(self.buffer, addr(plmpeg_file_all__PLM_VIDEO_CODE_BLOCK_PATTERN[0]))) : (self.macroblock_intra != 0 ?
             63 : 0)
     {
@@ -3150,7 +3157,7 @@ def plm_video_decode_macroblock(var self : plm_video_t?) {
 def plm_video_decode_motion_vectors(var self : plm_video_t?) {
     // Forward
     if (self.motion_forward.is_set != 0) {
-        var r_size : int = self.motion_forward.r_size
+        let r_size : int = self.motion_forward.r_size
         self.motion_forward.h = plm_video_decode_motion_vector(self, r_size, self.motion_forward.h)
         self.motion_forward.v = plm_video_decode_motion_vector(self, r_size, self.motion_forward.v)
     } elif (self.picture_type == plmpeg_file_all__PLM_VIDEO_PICTURE_TYPE_PREDICTIVE) {
@@ -3159,7 +3166,7 @@ def plm_video_decode_motion_vectors(var self : plm_video_t?) {
         self.motion_forward.v = 0
     }
     if (self.motion_backward.is_set != 0) {
-        var r_size : int = self.motion_backward.r_size
+        let r_size : int = self.motion_backward.r_size
         self.motion_backward.h = plm_video_decode_motion_vector(self, r_size, self.motion_backward.h)
         self.motion_backward.v = plm_video_decode_motion_vector(self, r_size, self.motion_backward.v)
     }
@@ -3167,8 +3174,8 @@ def plm_video_decode_motion_vectors(var self : plm_video_t?) {
 
 [c_function]
 def plm_video_decode_motion_vector(var self : plm_video_t?; r_size : int; var motion : int) : int {
-    var fscale : int = 1 << r_size
-    var m_code : int = int(plm_buffer_read_vlc(self.buffer, addr(plmpeg_file_all__PLM_VIDEO_MOTION[0])))
+    let fscale : int = 1 << r_size
+    let m_code : int = int(plm_buffer_read_vlc(self.buffer, addr(plmpeg_file_all__PLM_VIDEO_MOTION[0])))
     var r : int = 0
     var d : int
     if ((m_code != 0) && (fscale != 1)) {
@@ -3235,14 +3242,14 @@ def plm_video_interpolate_macroblock(var self : plm_video_t?; var s : plm_frame_
 
 [c_function]
 def plm_video_process_macroblock(var self : plm_video_t?; var s : uint8?; var d : uint8?; motion_h : int; motion_v : int; block_size : int; interpolate : int) {
-    var dw : int = self.mb_width * block_size
-    var hp : int = motion_h >> 1
-    var vp : int = motion_v >> 1
-    var odd_h : int = int_of((motion_h & 1) == 1)
-    var odd_v : int = int_of((motion_v & 1) == 1)
+    let dw : int = self.mb_width * block_size
+    let hp : int = motion_h >> 1
+    let vp : int = motion_v >> 1
+    let odd_h : int = int_of((motion_h & 1) == 1)
+    let odd_v : int = int_of((motion_v & 1) == 1)
     var si : uint = uint(((self.mb_row * block_size) + vp) * dw + (self.mb_col * block_size) + hp)
     var di : uint = uint((self.mb_row * dw + self.mb_col) * block_size)
-    var max_address : uint = uint(dw * (self.mb_height * block_size - block_size + 1) - block_size)
+    let max_address : uint = uint(dw * (self.mb_height * block_size - block_size + 1) - block_size)
     if (si > max_address || di > max_address) {
         // corrupt video
         return
@@ -3250,8 +3257,8 @@ def plm_video_process_macroblock(var self : plm_video_t?; var s : uint8?; var d 
     c_switch((interpolate << 2) | (odd_h << 1) | odd_v) {
         case(0) {
             {
-                var dest_scan : int = dw - block_size
-                var source_scan : int = dw - block_size
+                let dest_scan : int = dw - block_size
+                let source_scan : int = dw - block_size
                 for (y in range(block_size)) {
                     for (x in range(block_size)) {
                         d[di] = s[si]
@@ -3266,8 +3273,8 @@ def plm_video_process_macroblock(var self : plm_video_t?; var s : uint8?; var d 
         }
         case(1) {
             {
-                var dest_scan : int = dw - block_size
-                var source_scan : int = dw - block_size
+                let dest_scan : int = dw - block_size
+                let source_scan : int = dw - block_size
                 for (y in range(block_size)) {
                     for (x in range(block_size)) {
                         d[di] = uint8(int(s[si]) + int(s[si + uint(dw)]) + 1 >> 1)
@@ -3282,8 +3289,8 @@ def plm_video_process_macroblock(var self : plm_video_t?; var s : uint8?; var d 
         }
         case(2) {
             {
-                var dest_scan : int = dw - block_size
-                var source_scan : int = dw - block_size
+                let dest_scan : int = dw - block_size
+                let source_scan : int = dw - block_size
                 for (y in range(block_size)) {
                     for (x in range(block_size)) {
                         d[di] = uint8(int(s[si]) + int(s[si + 1u]) + 1 >> 1)
@@ -3298,8 +3305,8 @@ def plm_video_process_macroblock(var self : plm_video_t?; var s : uint8?; var d 
         }
         case(3) {
             {
-                var dest_scan : int = dw - block_size
-                var source_scan : int = dw - block_size
+                let dest_scan : int = dw - block_size
+                let source_scan : int = dw - block_size
                 for (y in range(block_size)) {
                     for (x in range(block_size)) {
                         d[di] = uint8(int(s[si]) + int(s[si + 1u]) + int(s[si + uint(dw)]) + int(s[si + uint(dw) + 1u]) + 2 >> 2)
@@ -3314,8 +3321,8 @@ def plm_video_process_macroblock(var self : plm_video_t?; var s : uint8?; var d 
         }
         case(4) {
             {
-                var dest_scan : int = dw - block_size
-                var source_scan : int = dw - block_size
+                let dest_scan : int = dw - block_size
+                let source_scan : int = dw - block_size
                 for (y in range(block_size)) {
                     for (x in range(block_size)) {
                         d[di] = uint8(int(d[di]) + int(s[si]) + 1 >> 1)
@@ -3330,8 +3337,8 @@ def plm_video_process_macroblock(var self : plm_video_t?; var s : uint8?; var d 
         }
         case(5) {
             {
-                var dest_scan : int = dw - block_size
-                var source_scan : int = dw - block_size
+                let dest_scan : int = dw - block_size
+                let source_scan : int = dw - block_size
                 for (y in range(block_size)) {
                     for (x in range(block_size)) {
                         d[di] = uint8(int(d[di]) + (int(s[si]) + int(s[si + uint(dw)]) + 1 >> 1) + 1 >> 1)
@@ -3346,8 +3353,8 @@ def plm_video_process_macroblock(var self : plm_video_t?; var s : uint8?; var d 
         }
         case(6) {
             {
-                var dest_scan : int = dw - block_size
-                var source_scan : int = dw - block_size
+                let dest_scan : int = dw - block_size
+                let source_scan : int = dw - block_size
                 for (y in range(block_size)) {
                     for (x in range(block_size)) {
                         d[di] = uint8(int(d[di]) + (int(s[si]) + int(s[si + 1u]) + 1 >> 1) + 1 >> 1)
@@ -3362,8 +3369,8 @@ def plm_video_process_macroblock(var self : plm_video_t?; var s : uint8?; var d 
         }
         case(7) {
             {
-                var dest_scan : int = dw - block_size
-                var source_scan : int = dw - block_size
+                let dest_scan : int = dw - block_size
+                let source_scan : int = dw - block_size
                 for (y in range(block_size)) {
                     for (x in range(block_size)) {
                         d[di] = uint8(int(d[di]) + (int(s[si]) + int(s[si + 1u]) + int(s[si + uint(dw)]) + int(s[si + uint(dw) + 1u]) + 2 >> 2) + 1 >> 1)
@@ -3388,12 +3395,12 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
         var predictor : int
         var dct_size : int
         // DC prediction
-        var plane_index : int = _c_block > 3 ? _c_block - 3 : 0
+        let plane_index : int = _c_block > 3 ? _c_block - 3 : 0
         predictor = self.dc_predictor[plane_index]
         dct_size = int(plm_buffer_read_vlc(self.buffer, plmpeg_file_all__PLM_VIDEO_DCT_SIZE[plane_index]))
         // Read DC coeff
         if (dct_size > 0) {
-            var differential : int = plm_buffer_read(self.buffer, dct_size)
+            let differential : int = plm_buffer_read(self.buffer, dct_size)
             if ((differential & (1 << (dct_size - 1))) != 0) {
                 self.block_data[0] = predictor + differential
             } else {
@@ -3415,7 +3422,7 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
     var level : int = 0
     while (TRUE != 0) {
         var run : int = 0
-        var coeff : uint16 = plm_buffer_read_vlc_uint(self.buffer, addr(plmpeg_file_all__PLM_VIDEO_DCT_COEFF[0]))
+        let coeff : uint16 = plm_buffer_read_vlc_uint(self.buffer, addr(plmpeg_file_all__PLM_VIDEO_DCT_COEFF[0]))
         if ((coeff == 1) && (n > 0) && (plm_buffer_read(self.buffer, 1) == 0)) {
             // end_of_block
             break
@@ -3443,7 +3450,7 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
             // invalid
             return
         }
-        var de_zig_zagged : int = int(plmpeg_file_all__PLM_VIDEO_ZIG_ZAG[n])
+        let de_zig_zagged : int = int(plmpeg_file_all__PLM_VIDEO_ZIG_ZAG[n])
         n++
         // Dequantize, oddify, clip
         level = int(uint(level) << 1u)
@@ -3486,10 +3493,10 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
     if (self.macroblock_intra != 0) {
         // Overwrite (no prediction)
         if (n == 1) {
-            var clamped : int = int(plmpeg_file_all__plm_clamp((s[0] + 128) >> 8))
+            let clamped : int = int(plmpeg_file_all__plm_clamp((s[0] + 128) >> 8))
             {
-                var dest_scan : int = dw - 8
-                var source_scan : int = 8 - 8
+                let dest_scan : int = dw - 8
+                let source_scan : int = 8 - 8
                 for (y in range(8)) {
                     for (x in range(8)) {
                         d[di] = uint8(clamped)
@@ -3504,8 +3511,8 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
         } else {
             plm_video_idct(s)
             {
-                var dest_scan : int = dw - 8
-                var source_scan : int = 8 - 8
+                let dest_scan : int = dw - 8
+                let source_scan : int = 8 - 8
                 for (y in range(8)) {
                     for (x in range(8)) {
                         d[di] = plmpeg_file_all__plm_clamp(s[si])
@@ -3521,10 +3528,10 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
     } else {
         // Add data to the predicted macroblock
         if (n == 1) {
-            var value : int = (s[0] + 128) >> 8
+            let value : int = (s[0] + 128) >> 8
             {
-                var dest_scan : int = dw - 8
-                var source_scan : int = 8 - 8
+                let dest_scan : int = dw - 8
+                let source_scan : int = 8 - 8
                 for (y in range(8)) {
                     for (x in range(8)) {
                         d[di] = plmpeg_file_all__plm_clamp(int(d[di]) + value)
@@ -3539,8 +3546,8 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
         } else {
             plm_video_idct(s)
             {
-                var dest_scan : int = dw - 8
-                var source_scan : int = 8 - 8
+                let dest_scan : int = dw - 8
+                let source_scan : int = 8 - 8
                 for (y in range(8)) {
                     for (x in range(8)) {
                         d[di] = plmpeg_file_all__plm_clamp(int(d[di]) + s[si])
@@ -3642,21 +3649,21 @@ def plm_video_idct(var _c_block : int?) {
 
 [c_function]
 def plm_frame_to_rgb(var frame : plm_frame_t?; var dest : uint8?; stride : int) {
-    var cols : int = int(frame.width >> 1u)
-    var rows : int = int(frame.height >> 1u)
-    var yw : int = int(frame.y.width)
-    var cw : int = int(frame.cb.width)
+    let cols : int = int(frame.width >> 1u)
+    let rows : int = int(frame.height >> 1u)
+    let yw : int = int(frame.y.width)
+    let cw : int = int(frame.cb.width)
     for (row in range(rows)) {
         var c_index : int = row * cw
         var y_index : int = row * 2 * yw
         var d_index : int = row * 2 * stride
         for (col in range(cols)) {
             var y : int
-            var cr : int = int(frame.cr.data[c_index]) - 128
-            var cb : int = int(frame.cb.data[c_index]) - 128
-            var r : int = cr * 104597 >> 16
-            var g : int = cb * 25674 + cr * 53278 >> 16
-            var b : int = cb * 132201 >> 16
+            let cr : int = int(frame.cr.data[c_index]) - 128
+            let cb : int = int(frame.cb.data[c_index]) - 128
+            let r : int = cr * 104597 >> 16
+            let g : int = cb * 25674 + cr * 53278 >> 16
+            let b : int = cb * 132201 >> 16
             y = (int(frame.y.data[y_index + 0]) - 16) * 76309 >> 16
             dest[d_index + 0 + 0] = plmpeg_file_all__plm_clamp(y + r)
             dest[d_index + 0 + 1] = plmpeg_file_all__plm_clamp(y - g)
@@ -3682,21 +3689,21 @@ def plm_frame_to_rgb(var frame : plm_frame_t?; var dest : uint8?; stride : int) 
 
 [c_function]
 def plm_frame_to_bgr(var frame : plm_frame_t?; var dest : uint8?; stride : int) {
-    var cols : int = int(frame.width >> 1u)
-    var rows : int = int(frame.height >> 1u)
-    var yw : int = int(frame.y.width)
-    var cw : int = int(frame.cb.width)
+    let cols : int = int(frame.width >> 1u)
+    let rows : int = int(frame.height >> 1u)
+    let yw : int = int(frame.y.width)
+    let cw : int = int(frame.cb.width)
     for (row in range(rows)) {
         var c_index : int = row * cw
         var y_index : int = row * 2 * yw
         var d_index : int = row * 2 * stride
         for (col in range(cols)) {
             var y : int
-            var cr : int = int(frame.cr.data[c_index]) - 128
-            var cb : int = int(frame.cb.data[c_index]) - 128
-            var r : int = cr * 104597 >> 16
-            var g : int = cb * 25674 + cr * 53278 >> 16
-            var b : int = cb * 132201 >> 16
+            let cr : int = int(frame.cr.data[c_index]) - 128
+            let cb : int = int(frame.cb.data[c_index]) - 128
+            let r : int = cr * 104597 >> 16
+            let g : int = cb * 25674 + cr * 53278 >> 16
+            let b : int = cb * 132201 >> 16
             y = (int(frame.y.data[y_index + 0]) - 16) * 76309 >> 16
             dest[d_index + 0 + 2] = plmpeg_file_all__plm_clamp(y + r)
             dest[d_index + 0 + 1] = plmpeg_file_all__plm_clamp(y - g)
@@ -3722,21 +3729,21 @@ def plm_frame_to_bgr(var frame : plm_frame_t?; var dest : uint8?; stride : int) 
 
 [c_function]
 def plm_frame_to_rgba(var frame : plm_frame_t?; var dest : uint8?; stride : int) {
-    var cols : int = int(frame.width >> 1u)
-    var rows : int = int(frame.height >> 1u)
-    var yw : int = int(frame.y.width)
-    var cw : int = int(frame.cb.width)
+    let cols : int = int(frame.width >> 1u)
+    let rows : int = int(frame.height >> 1u)
+    let yw : int = int(frame.y.width)
+    let cw : int = int(frame.cb.width)
     for (row in range(rows)) {
         var c_index : int = row * cw
         var y_index : int = row * 2 * yw
         var d_index : int = row * 2 * stride
         for (col in range(cols)) {
             var y : int
-            var cr : int = int(frame.cr.data[c_index]) - 128
-            var cb : int = int(frame.cb.data[c_index]) - 128
-            var r : int = cr * 104597 >> 16
-            var g : int = cb * 25674 + cr * 53278 >> 16
-            var b : int = cb * 132201 >> 16
+            let cr : int = int(frame.cr.data[c_index]) - 128
+            let cb : int = int(frame.cb.data[c_index]) - 128
+            let r : int = cr * 104597 >> 16
+            let g : int = cb * 25674 + cr * 53278 >> 16
+            let b : int = cb * 132201 >> 16
             y = (int(frame.y.data[y_index + 0]) - 16) * 76309 >> 16
             dest[d_index + 0 + 0] = plmpeg_file_all__plm_clamp(y + r)
             dest[d_index + 0 + 1] = plmpeg_file_all__plm_clamp(y - g)
@@ -3762,21 +3769,21 @@ def plm_frame_to_rgba(var frame : plm_frame_t?; var dest : uint8?; stride : int)
 
 [c_function]
 def plm_frame_to_bgra(var frame : plm_frame_t?; var dest : uint8?; stride : int) {
-    var cols : int = int(frame.width >> 1u)
-    var rows : int = int(frame.height >> 1u)
-    var yw : int = int(frame.y.width)
-    var cw : int = int(frame.cb.width)
+    let cols : int = int(frame.width >> 1u)
+    let rows : int = int(frame.height >> 1u)
+    let yw : int = int(frame.y.width)
+    let cw : int = int(frame.cb.width)
     for (row in range(rows)) {
         var c_index : int = row * cw
         var y_index : int = row * 2 * yw
         var d_index : int = row * 2 * stride
         for (col in range(cols)) {
             var y : int
-            var cr : int = int(frame.cr.data[c_index]) - 128
-            var cb : int = int(frame.cb.data[c_index]) - 128
-            var r : int = cr * 104597 >> 16
-            var g : int = cb * 25674 + cr * 53278 >> 16
-            var b : int = cb * 132201 >> 16
+            let cr : int = int(frame.cr.data[c_index]) - 128
+            let cb : int = int(frame.cb.data[c_index]) - 128
+            let r : int = cr * 104597 >> 16
+            let g : int = cb * 25674 + cr * 53278 >> 16
+            let b : int = cb * 132201 >> 16
             y = (int(frame.y.data[y_index + 0]) - 16) * 76309 >> 16
             dest[d_index + 0 + 2] = plmpeg_file_all__plm_clamp(y + r)
             dest[d_index + 0 + 1] = plmpeg_file_all__plm_clamp(y - g)
@@ -3802,21 +3809,21 @@ def plm_frame_to_bgra(var frame : plm_frame_t?; var dest : uint8?; stride : int)
 
 [c_function]
 def plm_frame_to_argb(var frame : plm_frame_t?; var dest : uint8?; stride : int) {
-    var cols : int = int(frame.width >> 1u)
-    var rows : int = int(frame.height >> 1u)
-    var yw : int = int(frame.y.width)
-    var cw : int = int(frame.cb.width)
+    let cols : int = int(frame.width >> 1u)
+    let rows : int = int(frame.height >> 1u)
+    let yw : int = int(frame.y.width)
+    let cw : int = int(frame.cb.width)
     for (row in range(rows)) {
         var c_index : int = row * cw
         var y_index : int = row * 2 * yw
         var d_index : int = row * 2 * stride
         for (col in range(cols)) {
             var y : int
-            var cr : int = int(frame.cr.data[c_index]) - 128
-            var cb : int = int(frame.cb.data[c_index]) - 128
-            var r : int = cr * 104597 >> 16
-            var g : int = cb * 25674 + cr * 53278 >> 16
-            var b : int = cb * 132201 >> 16
+            let cr : int = int(frame.cr.data[c_index]) - 128
+            let cb : int = int(frame.cb.data[c_index]) - 128
+            let r : int = cr * 104597 >> 16
+            let g : int = cb * 25674 + cr * 53278 >> 16
+            let b : int = cb * 132201 >> 16
             y = (int(frame.y.data[y_index + 0]) - 16) * 76309 >> 16
             dest[d_index + 0 + 1] = plmpeg_file_all__plm_clamp(y + r)
             dest[d_index + 0 + 2] = plmpeg_file_all__plm_clamp(y - g)
@@ -3842,21 +3849,21 @@ def plm_frame_to_argb(var frame : plm_frame_t?; var dest : uint8?; stride : int)
 
 [c_function]
 def plm_frame_to_abgr(var frame : plm_frame_t?; var dest : uint8?; stride : int) {
-    var cols : int = int(frame.width >> 1u)
-    var rows : int = int(frame.height >> 1u)
-    var yw : int = int(frame.y.width)
-    var cw : int = int(frame.cb.width)
+    let cols : int = int(frame.width >> 1u)
+    let rows : int = int(frame.height >> 1u)
+    let yw : int = int(frame.y.width)
+    let cw : int = int(frame.cb.width)
     for (row in range(rows)) {
         var c_index : int = row * cw
         var y_index : int = row * 2 * yw
         var d_index : int = row * 2 * stride
         for (col in range(cols)) {
             var y : int
-            var cr : int = int(frame.cr.data[c_index]) - 128
-            var cb : int = int(frame.cb.data[c_index]) - 128
-            var r : int = cr * 104597 >> 16
-            var g : int = cb * 25674 + cr * 53278 >> 16
-            var b : int = cb * 132201 >> 16
+            let cr : int = int(frame.cr.data[c_index]) - 128
+            let cb : int = int(frame.cb.data[c_index]) - 128
+            let r : int = cr * 104597 >> 16
+            let g : int = cb * 25674 + cr * 53278 >> 16
+            let b : int = cb * 132201 >> 16
             y = (int(frame.y.data[y_index + 0]) - 16) * 76309 >> 16
             dest[d_index + 0 + 3] = plmpeg_file_all__plm_clamp(y + r)
             dest[d_index + 0 + 2] = plmpeg_file_all__plm_clamp(y - g)
@@ -3882,7 +3889,7 @@ def plm_frame_to_abgr(var frame : plm_frame_t?; var dest : uint8?; stride : int)
 
 [c_function]
 def plm_audio_create_with_buffer(var buffer : plm_buffer_t?; destroy_when_done : int) : plm_audio_t? {
-    var self : plm_audio_t? = reinterpret<plm_audio_t?>(crt::malloc(uint64(typeinfo sizeof(type<plm_audio_t>))))
+    var self : plm_audio_t? = reinterpret<plm_audio_t?>(PLM_MALLOC(uint64(typeinfo sizeof(type<plm_audio_t>))))
     crt::memset(reinterpret<void?>(self), 0, uint64(typeinfo sizeof(type<plm_audio_t>)))
     self.samples.count = uint(PLM_AUDIO_SAMPLES_PER_FRAME)
     self.buffer = buffer
@@ -3898,12 +3905,11 @@ def plm_audio_create_with_buffer(var buffer : plm_buffer_t?; destroy_when_done :
     return self
 }
 
-[c_function]
 def plm_audio_destroy(var self : plm_audio_t?) {
     if (self.destroy_buffer_when_done != 0) {
         plm_buffer_destroy(self.buffer)
     }
-    crt::free(reinterpret<void?>(self))
+    PLM_FREE(self)
 }
 
 def plm_audio_has_header(var self : plm_audio_t?) : int {
@@ -3978,7 +3984,7 @@ def plm_audio_decode_header(var self : plm_audio_t?) : int {
         return 0
     }
     plm_buffer_skip_bytes(self.buffer, 0u8)
-    var sync : int = plm_buffer_read(self.buffer, 11)
+    let sync : int = plm_buffer_read(self.buffer, 11)
     // Attempt to resync if no syncword was found. This sucks balls. The MP2
     // stream contains a syncword just before every frame (11 bits set to 1).
     // However, this syncword is not guaranteed to not occur elsewhere in the
@@ -3990,22 +3996,22 @@ def plm_audio_decode_header(var self : plm_audio_t?) : int {
     }
     self.version = plm_buffer_read(self.buffer, 2)
     self.layer = plm_buffer_read(self.buffer, 2)
-    var hasCRC : int = int_of(plm_buffer_read(self.buffer, 1) == 0)
+    let hasCRC : int = int_of(plm_buffer_read(self.buffer, 1) == 0)
     if (self.version != plmpeg_file_all__PLM_AUDIO_MPEG_1 || self.layer != plmpeg_file_all__PLM_AUDIO_LAYER_II) {
         return 0
     }
-    var bitrate_index : int = plm_buffer_read(self.buffer, 4) - 1
+    let bitrate_index : int = plm_buffer_read(self.buffer, 4) - 1
     if (bitrate_index > 13) {
         return 0
     }
-    var samplerate_index : int = plm_buffer_read(self.buffer, 2)
+    let samplerate_index : int = plm_buffer_read(self.buffer, 2)
     if (samplerate_index == 3) {
         return 0
     }
-    var padding : int = plm_buffer_read(self.buffer, 1)
+    let padding : int = plm_buffer_read(self.buffer, 1)
     // f_private
     plm_buffer_skip(self.buffer, 1ul)
-    var mode : int = plm_buffer_read(self.buffer, 2)
+    let mode : int = plm_buffer_read(self.buffer, 2)
     // If we already have a header, make sure the samplerate, bitrate and mode
     // are still the same, otherwise we might have missed sync.
     if (self.has_header != 0 && (self.bitrate_index != bitrate_index || self.samplerate_index != samplerate_index || self.mode != mode)) {
@@ -4030,9 +4036,9 @@ def plm_audio_decode_header(var self : plm_audio_t?) : int {
     }
     // Compute frame size, check if we have enough data to decode the whole
     // frame.
-    var bitrate : int = int(plmpeg_file_all__PLM_AUDIO_BIT_RATE[self.bitrate_index])
-    var samplerate : int = int(plmpeg_file_all__PLM_AUDIO_SAMPLE_RATE[self.samplerate_index])
-    var frame_size : int = (144000 * bitrate / samplerate) + padding
+    let bitrate : int = int(plmpeg_file_all__PLM_AUDIO_BIT_RATE[self.bitrate_index])
+    let samplerate : int = int(plmpeg_file_all__PLM_AUDIO_SAMPLE_RATE[self.samplerate_index])
+    let frame_size : int = (144000 * bitrate / samplerate) + padding
     return frame_size - (hasCRC != 0 ? 6 : 4)
 }
 
@@ -4041,8 +4047,8 @@ def plm_audio_decode_frame(var self : plm_audio_t?) {
     // Prepare the quantizer table lookups
     var tab3 : int = 0
     var sblimit : int = 0
-    var tab1 : int = (self.mode == plmpeg_file_all__PLM_AUDIO_MODE_MONO) ? 0 : 1
-    var tab2 : int = int(plmpeg_file_all__PLM_AUDIO_QUANT_LUT_STEP_1[tab1][self.bitrate_index])
+    let tab1 : int = (self.mode == plmpeg_file_all__PLM_AUDIO_MODE_MONO) ? 0 : 1
+    let tab2 : int = int(plmpeg_file_all__PLM_AUDIO_QUANT_LUT_STEP_1[tab1][self.bitrate_index])
     tab3 = int(plmpeg_file_all__QUANT_LUT_STEP_2[tab2][self.samplerate_index])
     sblimit = tab3 & 63
     tab3 >>= 6
@@ -4063,7 +4069,7 @@ def plm_audio_decode_frame(var self : plm_audio_t?) {
         self.allocation[0][sb] = self.allocation[1][sb]
     }
     // Read scale factor selector information
-    var channels : int = (self.mode == plmpeg_file_all__PLM_AUDIO_MODE_MONO) ? 1 : 2
+    let channels : int = (self.mode == plmpeg_file_all__PLM_AUDIO_MODE_MONO) ? 1 : 2
     for (sb in range(sblimit)) {
         for (ch in range(channels)) {
             if (self.allocation[ch][sb] != null) {
@@ -4191,8 +4197,8 @@ def plm_audio_decode_frame(var self : plm_audio_t?) {
 
 [c_function]
 def plm_audio_read_allocation(var self : plm_audio_t?; sb : int; tab3 : int) : plm_quantizer_spec_t? {
-    var tab4 : int = int(plmpeg_file_all__PLM_AUDIO_QUANT_LUT_STEP_3[tab3][sb])
-    var qtab : int = int(plmpeg_file_all__PLM_AUDIO_QUANT_LUT_STEP_4[tab4 & 15][plm_buffer_read(self.buffer, tab4 >> 4)])
+    let tab4 : int = int(plmpeg_file_all__PLM_AUDIO_QUANT_LUT_STEP_3[tab3][sb])
+    let qtab : int = int(plmpeg_file_all__PLM_AUDIO_QUANT_LUT_STEP_4[tab4 & 15][plm_buffer_read(self.buffer, tab4 >> 4)])
     return qtab != 0 ? (addr(plmpeg_file_all__PLM_AUDIO_QUANT_TAB[0]) + end_index(qtab - 1, 17)) : null
 }
 
@@ -4213,7 +4219,7 @@ def plm_audio_read_samples(var self : plm_audio_t?; ch : int; sb : int; part : i
     if (sf == 63) {
         sf = 0
     } else {
-        var shift : int = (sf / 3) | 0
+        let shift : int = (sf / 3) | 0
         sf = (plmpeg_file_all__PLM_AUDIO_SCALEFACTOR_BASE[sf % 3] + ((1 << shift) >> 1)) >> shift
     }
     // Decode samples
@@ -4232,7 +4238,7 @@ def plm_audio_read_samples(var self : plm_audio_t?; ch : int; sb : int; part : i
         sample[2] = plm_buffer_read(self.buffer, int(q.bits))
     }
     // Postmultiply samples
-    var scale : int = 65536 / (adj + 1)
+    let scale : int = 65536 / (adj + 1)
     adj = ((adj + 1) >> 1) - 1
     val = (adj - sample[0]) * scale
     sample[0] = (val * (sf >> 12) + ((val * (sf & 4095) + 2048) >> 12)) >> 12

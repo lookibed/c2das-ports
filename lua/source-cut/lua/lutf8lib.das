@@ -5,6 +5,7 @@ options solid_context
 options stack = 8388608
 require c_runtime/c_do_while
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/cstr
 require c_runtime/int_of
 require c_runtime/variadic
@@ -23,6 +24,44 @@ let private MAXUTF = 2147483647u
 let private MAXUNICODE = 1114111u
 let private LUA_VERSION_NUM = 504
 let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64(typeinfo sizeof(type<double>))
+
+// lutf8lib.c:41: #define iscont(c) (((c) & 0xC0) == 0x80)
+[c_macro]
+def private iscont(c : uint) => (c & 192u) == 128u
+
+// lutf8lib.c:41: #define iscont(c) (((c) & 0xC0) == 0x80)
+[c_macro]
+def private iscont(c : uint8) => (int(c) & 192) == 128
+
+// lauxlib.h:166: #define luaL_pushfail(L) lua_pushnil(L)
+[c_macro]
+def private luaL_pushfail(var L) {
+    lua_pushnil(L)
+}
+
+// lutf8lib.c:42: #define iscontp(p) iscont(*(p))
+[c_macro, c_function]
+def private iscontp(p) => iscont(*p)
+
+// lua.h:374: #define lua_tointeger(L,i) lua_tointegerx(L,(i),NULL)
+[c_macro]
+def private lua_tointeger(var L; i) => lua_tointegerx(L, i, null)
+
+// lauxlib.h:139: #define luaL_checkstring(L,n) (luaL_checklstring(L, (n), NULL))
+[c_macro]
+def private luaL_checkstring(var L; n) : uint8? => luaL_checklstring(L, n, null)
+
+// lua.h:382: #define lua_pushcfunction(L,f) lua_pushcclosure(L, (f), 0)
+[c_macro]
+def private lua_pushcfunction(var L; f) {
+    lua_pushcclosure(L, f, 0)
+}
+
+// lauxlib.h:47: #define luaL_checkversion(L) luaL_checkversion_(L, LUA_VERSION_NUM, LUAL_NUMSIZES)
+[c_macro]
+def private luaL_checkversion(var L) {
+    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+}
 
 // from strlib
 // translate a relative string position: negative means back from end
@@ -56,9 +95,9 @@ def private utf8_decode(var s : uint8?; var val : uint?; strict : int) : uint8? 
         while ((c & 64u) != 0) {
             // read next byte
             count++
-            var cc : uint = uint(s[count])
+            let cc : uint = uint(s[count])
             // not a continuation byte?
-            if (!((cc & 192u) == 128u)) {
+            if (!iscont(cc)) {
                 // invalid byte sequence
                 return null
             }
@@ -100,7 +139,7 @@ def private utflen(var L : lua_State?) : int {
     var s : uint8? = luaL_checklstring(L, 1, addr(len))
     var posi : int64 = u_posrelat(luaL_optinteger(L, 2, 1l), len)
     var posj : int64 = u_posrelat(luaL_optinteger(L, 3, -1l), len)
-    var lax : int = lua_toboolean(L, 4)
+    let lax : int = lua_toboolean(L, 4)
     var _t0 = 1l <= posi
     if (_t0) {
         posi--
@@ -114,7 +153,7 @@ def private utflen(var L : lua_State?) : int {
         // conversion error?
         if (s1 == null) {
             // return fail ...
-            lua_pushnil(L)
+            luaL_pushfail(L)
             // ... and current position
             lua_pushinteger(L, posi + 1l)
             return 2
@@ -132,9 +171,9 @@ def private utflen(var L : lua_State?) : int {
 def private codepoint(var L : lua_State?) : int {
     var len : uint64
     var s : uint8? = luaL_checklstring(L, 1, addr(len))
-    var posi : int64 = u_posrelat(luaL_optinteger(L, 2, 1l), len)
-    var pose : int64 = u_posrelat(luaL_optinteger(L, 3, posi), len)
-    var lax : int = lua_toboolean(L, 4)
+    let posi : int64 = u_posrelat(luaL_optinteger(L, 2, 1l), len)
+    let pose : int64 = u_posrelat(luaL_optinteger(L, 3, posi), len)
+    let lax : int = lua_toboolean(L, 4)
     var n : int
     var se : uint8?
     let _t0 = posi >= 1l || luaL_argerror(L, 2, cstr("out of bounds")) != 0
@@ -168,7 +207,7 @@ def private codepoint(var L : lua_State?) : int {
 }
 
 def private pushutfchar(var L : lua_State?; arg : int) {
-    var code : uint64 = uint64(luaL_checkinteger(L, arg))
+    let code : uint64 = uint64(luaL_checkinteger(L, arg))
     let _t0 = code <= uint64(MAXUTF) || luaL_argerror(L, arg, cstr("value out of range")) != 0
     lua_pushfstring`va(L, cstr("%U"), (int64(code),))
 }
@@ -177,7 +216,7 @@ def private pushutfchar(var L : lua_State?; arg : int) {
 [c_function]
 def private utfchar(var L : lua_State?) : int {
     // number of arguments
-    var n : int = lua_gettop(L)
+    let n : int = lua_gettop(L)
     // optimize common case of single char
     if (n == 1) {
         pushutfchar(L, 1)
@@ -213,18 +252,18 @@ def private byteoffset(var L : lua_State?) : int {
     let _t1 = _t0 || luaL_argerror(L, 3, cstr("position out of bounds")) != 0
     if (n == 0l) {
         // find beginning of current byte sequence
-        while (posi > 0l && (int(s[posi]) & 192) == 128) {
+        while (posi > 0l && iscont(s[posi])) {
             posi--
         }
     } else {
-        if ((int(s[posi]) & 192) == 128) {
+        if (iscont(s[posi])) {
             return luaL_error`va(L, cstr("initial position is a continuation byte"), VaNone())
         }
         if (n < 0l) {
             // move back
             while (n < 0l && posi > 0l) {
                 // find beginning of previous character
-                c_do_while(posi > 0l && (int(s[posi]) & 192) == 128) {
+                c_do_while(posi > 0l && iscont(s[posi])) {
                     posi--
                 }
                 n++
@@ -234,7 +273,7 @@ def private byteoffset(var L : lua_State?) : int {
             n--
             while (n > 0l && posi < int64(len)) {
                 // find beginning of next character
-                c_do_while((int(s[posi]) & 192) == 128) {
+                c_do_while(iscont(s[posi])) {
                     posi++
                 }
                 // (cannot pass final '\0')
@@ -247,7 +286,7 @@ def private byteoffset(var L : lua_State?) : int {
         lua_pushinteger(L, posi + 1l)
     } else {
         // no such character
-        lua_pushnil(L)
+        luaL_pushfail(L)
     }
     return 1
 }
@@ -256,10 +295,10 @@ def private byteoffset(var L : lua_State?) : int {
 def private iter_aux(var L : lua_State?; strict : int) : int {
     var len : uint64
     var s : uint8? = luaL_checklstring(L, 1, addr(len))
-    var n : uint64 = uint64(lua_tointegerx(L, 2, null))
+    var n : uint64 = uint64(lua_tointeger(L, 2))
     if (n < len) {
         // go to next character
-        while ((int(s[n]) & 192) == 128) {
+        while (iscont(s[n])) {
             n++
         }
     }
@@ -270,7 +309,7 @@ def private iter_aux(var L : lua_State?; strict : int) : int {
     } else {
         var code : uint
         var next : uint8? = utf8_decode(s + n, addr(code), strict)
-        if (next == null || (int(*next) & 192) == 128) {
+        if (next == null || iscontp(next)) {
             return luaL_error`va(L, cstr("invalid UTF-8 code"), VaNone())
         }
         lua_pushinteger(L, int64(n + 1ul))
@@ -287,12 +326,11 @@ def private iter_auxlax(var L : lua_State?) : int {
     return iter_aux(L, 0)
 }
 
-[c_function]
 def private iter_codes(var L : lua_State?) : int {
-    var lax : int = lua_toboolean(L, 2)
-    var s : uint8? = luaL_checklstring(L, 1, null)
-    let _t0 = !((int(*s) & 192) == 128) || luaL_argerror(L, 1, cstr("invalid UTF-8 code")) != 0
-    lua_pushcclosure(L, lax != 0 ? @@iter_auxlax : @@iter_auxstrict, 0)
+    let lax : int = lua_toboolean(L, 2)
+    var s : uint8? = luaL_checkstring(L, 1)
+    let _t0 = !iscontp(s) || luaL_argerror(L, 1, cstr("invalid UTF-8 code")) != 0
+    lua_pushcfunction(L, lax != 0 ? @@iter_auxlax : @@iter_auxstrict)
     lua_pushvalue(L, 1)
     lua_pushinteger(L, 0l)
     return 3
@@ -300,7 +338,7 @@ def private iter_codes(var L : lua_State?) : int {
 
 [c_function]
 def luaopen_utf8(var L : lua_State?) : int {
-    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+    luaL_checkversion(L)
     lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[7]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - 1ul))
     luaL_setfuncs(L, addr(funcs[0]), 0)
     lua_pushlstring(L, cstr("[\0-\x7f\xc2-\xfd][\x80-\xbf]*"), uint64(typeinfo sizeof(type<uint8[15]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul)

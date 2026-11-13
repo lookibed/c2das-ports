@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/c_switch
 require c_runtime/cstr
 require c_runtime/int_of
@@ -49,9 +50,47 @@ let private LUA_TNONE = -1
 let private LUA_VERSION_NUM = 504
 let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64(typeinfo sizeof(type<double>))
 
+// lua.h:374: #define lua_tointeger(L,i) lua_tointegerx(L,(i),NULL)
+[c_macro]
+def private lua_tointeger(var L; i) => lua_tointegerx(L, i, null)
+
+// lauxlib.h:166: #define luaL_pushfail(L) lua_pushnil(L)
+[c_macro]
+def private luaL_pushfail(var L) {
+    lua_pushnil(L)
+}
+
+// lua.h:391: #define lua_isnoneornil(L, n) (lua_type(L, (n)) <= 0)
+[c_macro]
+def private lua_isnoneornil(var L; n) => lua_type(L, n) <= 0
+
+// lmathlib.c:312: #define trim64(x) ((x) & 0xffffffffffffffffu)
+[c_macro]
+def private trim64(x) => x & 18446744073709551615ul
+
+// lmathlib.c:361: #define I2UInt(x) ((lua_Unsigned)trim64(x))
+[c_macro]
+def private I2UInt(x) => trim64(x)
+
+// lua.h:390: #define lua_isnone(L,n) (lua_type(L, (n)) == LUA_TNONE)
+[c_macro]
+def private lua_isnone(var L; n) => lua_type(L, n) == LUA_TNONE
+
+// lua.h:376: #define lua_pop(L,n) lua_settop(L, -(n)-1)
+[c_macro]
+def private lua_pop(var L; n) {
+    lua_settop(L, -n - 1)
+}
+
+// lauxlib.h:47: #define luaL_checkversion(L) luaL_checkversion_(L, LUA_VERSION_NUM, LUAL_NUMSIZES)
+[c_macro]
+def private luaL_checkversion(var L) {
+    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+}
+
 def private math_abs(var L : lua_State?) : int {
     if (lua_isinteger(L, 1) != 0) {
-        var n : int64 = lua_tointegerx(L, 1, null)
+        var n : int64 = lua_tointeger(L, 1)
         if (n < 0l) {
             n = int64(0u) - n
         }
@@ -88,8 +127,8 @@ def private math_acos(var L : lua_State?) : int {
 }
 
 def private math_atan(var L : lua_State?) : int {
-    var y : double = luaL_checknumber(L, 1)
-    var x : double = luaL_optnumber(L, 2, 1.0lf)
+    let y : double = luaL_checknumber(L, 1)
+    let x : double = luaL_optnumber(L, 2, 1.0lf)
     lua_pushnumber(L, math::atan2(y, x))
     return 1
 }
@@ -97,13 +136,13 @@ def private math_atan(var L : lua_State?) : int {
 [c_function]
 def private math_toint(var L : lua_State?) : int {
     var valid : int
-    var n : int64 = lua_tointegerx(L, 1, addr(valid))
+    let n : int64 = lua_tointegerx(L, 1, addr(valid))
     if (valid != 0) {
         lua_pushinteger(L, n)
     } else {
         luaL_checkany(L, 1)
         // value is not convertible to integer
-        lua_pushnil(L)
+        luaL_pushfail(L)
     }
     return 1
 }
@@ -131,7 +170,7 @@ def private math_floor(var L : lua_State?) : int {
         // integer is its own floor
         lua_settop(L, 1)
     } else {
-        var d : double = math::floor(luaL_checknumber(L, 1))
+        let d : double = math::floor(luaL_checknumber(L, 1))
         pushnumint(L, d)
     }
     return 1
@@ -142,7 +181,7 @@ def private math_ceil(var L : lua_State?) : int {
         // integer is its own ceil
         lua_settop(L, 1)
     } else {
-        var d : double = math::ceil(luaL_checknumber(L, 1))
+        let d : double = math::ceil(luaL_checknumber(L, 1))
         pushnumint(L, d)
     }
     return 1
@@ -151,14 +190,14 @@ def private math_ceil(var L : lua_State?) : int {
 [c_function]
 def private math_fmod(var L : lua_State?) : int {
     if (lua_isinteger(L, 1) != 0 && lua_isinteger(L, 2) != 0) {
-        var d : int64 = lua_tointegerx(L, 2, null)
+        let d : int64 = lua_tointeger(L, 2)
         // special cases: -1 or 0
         if (uint64(d) + uint64(1u) <= uint64(1u)) {
             let _t0 = d != 0l || luaL_argerror(L, 2, cstr("zero")) != 0
             // avoid overflow with 0x80000... / -1
             lua_pushinteger(L, 0l)
         } else {
-            lua_pushinteger(L, lua_tointegerx(L, 1, null) % d)
+            lua_pushinteger(L, lua_tointeger(L, 1) % d)
         }
     } else {
         lua_pushnumber(L, crt::fmod(luaL_checknumber(L, 1), luaL_checknumber(L, 2)))
@@ -176,9 +215,9 @@ def private math_modf(var L : lua_State?) : int {
         // no fractional part
         lua_pushnumber(L, 0.0lf)
     } else {
-        var n : double = luaL_checknumber(L, 1)
+        let n : double = luaL_checknumber(L, 1)
         // integer part (rounds toward zero)
-        var ip : double = (n < 0.0lf) ? math::ceil(n) : math::floor(n)
+        let ip : double = (n < 0.0lf) ? math::ceil(n) : math::floor(n)
         pushnumint(L, ip)
         // fractional part (test needed for inf/-inf)
         lua_pushnumber(L, (n == ip) ? 0.0lf : (n - ip))
@@ -192,19 +231,19 @@ def private math_sqrt(var L : lua_State?) : int {
 }
 
 def private math_ult(var L : lua_State?) : int {
-    var a : int64 = luaL_checkinteger(L, 1)
-    var b : int64 = luaL_checkinteger(L, 2)
+    let a : int64 = luaL_checkinteger(L, 1)
+    let b : int64 = luaL_checkinteger(L, 2)
     lua_pushboolean(L, int_of(uint64(a) < uint64(b)))
     return 1
 }
 
 def private math_log(var L : lua_State?) : int {
-    var x : double = luaL_checknumber(L, 1)
+    let x : double = luaL_checknumber(L, 1)
     var res : double
-    if (lua_type(L, 2) <= 0) {
+    if (lua_isnoneornil(L, 2)) {
         res = math::log(x)
     } else {
-        var base : double = luaL_checknumber(L, 2)
+        let base : double = luaL_checknumber(L, 2)
         if (base == 2.0lf) {
             res = math::log2(x)
         } elif (base == 10.0lf) {
@@ -234,7 +273,7 @@ def private math_rad(var L : lua_State?) : int {
 
 def private math_min(var L : lua_State?) : int {
     // number of arguments
-    var n : int = lua_gettop(L)
+    let n : int = lua_gettop(L)
     // index of current minimum value
     var imin : int = 1
     var i : int
@@ -252,7 +291,7 @@ def private math_min(var L : lua_State?) : int {
 
 def private math_max(var L : lua_State?) : int {
     // number of arguments
-    var n : int = lua_gettop(L)
+    let n : int = lua_gettop(L)
     // index of current maximum value
     var imax : int = 1
     var i : int
@@ -273,23 +312,23 @@ def private math_type(var L : lua_State?) : int {
         lua_pushstring(L, lua_isinteger(L, 1) != 0 ? cstr("integer") : cstr("float"))
     } else {
         luaL_checkany(L, 1)
-        lua_pushnil(L)
+        luaL_pushfail(L)
     }
     return 1
 }
 
 // rotate left 'x' by 'n' bits
 def private rotl(x : uint64; n : int) : uint64 {
-    return (x << uint64(n)) | ((x & 18446744073709551615ul) >> uint64(64 - n))
+    return (x << uint64(n)) | (trim64(x) >> uint64(64 - n))
 }
 
 [c_function]
 def private nextrand(var state : uint64?) : uint64 {
-    var state0 : uint64 = state[0]
-    var state1 : uint64 = state[1]
-    var state2 : uint64 = state[2] ^ state0
-    var state3 : uint64 = state[3] ^ state1
-    var res : uint64 = rotl(state1 * 5ul, 7) * 9ul
+    let state0 : uint64 = state[0]
+    let state1 : uint64 = state[1]
+    let state2 : uint64 = state[2] ^ state0
+    let state3 : uint64 = state[3] ^ state1
+    let res : uint64 = rotl(state1 * 5ul, 7) * 9ul
     state[0] = state0 ^ state3
     state[1] = state1 ^ state2
     state[2] = state2 ^ (state1 << 17ul)
@@ -298,7 +337,7 @@ def private nextrand(var state : uint64?) : uint64 {
 }
 
 def private I2d(x : uint64) : double {
-    var sx : int64 = int64((x & 18446744073709551615ul) >> uint64(shift64_FIG))
+    let sx : int64 = int64(trim64(x) >> uint64(shift64_FIG))
     var res : double = double(sx) * scaleFIG
     if (sx < 0l) {
         // correct the two's complement if negative
@@ -341,7 +380,7 @@ def private project(var ran : uint64; n : uint64; var state : RanState?) : uint6
                 break
             }
             // not inside [0..n]? try again
-            ran = nextrand(addr(state.s[0])) & 18446744073709551615ul
+            ran = I2UInt(nextrand(addr(state.s[0])))
         }
         return ran
     }
@@ -352,9 +391,9 @@ def private math_random(var L : lua_State?) : int {
     var low : int64
     var up : int64
     var p : uint64
-    var state : RanState? = reinterpret<RanState?>(lua_touserdata(L, LUA_REGISTRYINDEX - 1))
+    var state : RanState? = reinterpret<RanState?>(lua_touserdata(L, lua_upvalueindex(1)))
     // next pseudo-random value
-    var rv : uint64 = nextrand(addr(state.s[0]))
+    let rv : uint64 = nextrand(addr(state.s[0]))
     // check number of arguments
     c_switch(lua_gettop(L)) {
         case(0) {
@@ -370,7 +409,7 @@ def private math_random(var L : lua_State?) : int {
             // single 0 as argument?
             if (up == 0l) {
                 // full random integer
-                lua_pushinteger(L, int64(rv & 18446744073709551615ul))
+                lua_pushinteger(L, int64(I2UInt(rv)))
                 return 1
             }
             break
@@ -388,7 +427,7 @@ def private math_random(var L : lua_State?) : int {
     // random integer in the interval [low, up]
     let _t0 = low <= up || luaL_argerror(L, 1, cstr("interval is empty")) != 0
     // project random integer into the interval [0, up - low]
-    p = project(rv & 18446744073709551615ul, uint64(up) - uint64(low), state)
+    p = project(I2UInt(rv), uint64(up) - uint64(low), state)
     lua_pushinteger(L, int64(p + uint64(low)))
     return 1
 }
@@ -413,19 +452,19 @@ def private setseed(var L : lua_State?; var state : uint64?; n1 : uint64; n2 : u
 // randomization).
 [c_function]
 def private randseed(var L : lua_State?; var state : RanState?) {
-    var seed1 : uint64 = uint64(crt::time(null))
-    var seed2 : uint64 = uint64(intptr(L))
+    let seed1 : uint64 = uint64(crt::time(null))
+    let seed2 : uint64 = uint64(intptr(L))
     setseed(L, addr(state.s[0]), seed1, seed2)
 }
 
 [c_function]
 def private math_randomseed(var L : lua_State?) : int {
-    var state : RanState? = reinterpret<RanState?>(lua_touserdata(L, LUA_REGISTRYINDEX - 1))
-    if (lua_type(L, 1) == LUA_TNONE) {
+    var state : RanState? = reinterpret<RanState?>(lua_touserdata(L, lua_upvalueindex(1)))
+    if (lua_isnone(L, 1)) {
         randseed(L, state)
     } else {
-        var n1 : int64 = luaL_checkinteger(L, 1)
-        var n2 : int64 = luaL_optinteger(L, 2, 0l)
+        let n1 : int64 = luaL_checkinteger(L, 1)
+        let n2 : int64 = luaL_optinteger(L, 2, 0l)
         setseed(L, addr(state.s[0]), uint64(n1), uint64(n2))
     }
     // return seeds
@@ -439,14 +478,14 @@ def private setrandfunc(var L : lua_State?) {
     // initialize with a "random" seed
     randseed(L, state)
     // remove pushed seeds
-    lua_settop(L, -2 - 1)
+    lua_pop(L, 2)
     luaL_setfuncs(L, addr(randfuncs[0]), 1)
 }
 
 // Open math library
 [c_function]
 def luaopen_math(var L : lua_State?) : int {
-    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+    luaL_checkversion(L)
     lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[28]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - 1ul))
     luaL_setfuncs(L, addr(mathlib[0]), 0)
     lua_pushnumber(L, 3.141592653589793lf)

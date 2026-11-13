@@ -5,7 +5,7 @@ def FixedMul(a : int; b : int) : int {
 
 // FixedDiv, C version.
 def FixedDiv(a : int; b : int) : int {
-    if (((a < 0 ? -a : a) >> 14) >= (b < 0 ? -b : b)) {
+    if ((doom_abs(a) >> 14) >= doom_abs(b)) {
         return (a ^ b) < 0 ? DOOM_MININT : DOOM_MAXINT
     }
     return FixedDiv2(a, b)

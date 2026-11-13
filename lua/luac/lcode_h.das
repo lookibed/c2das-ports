@@ -3,6 +3,7 @@ options gen2
 options indenting = 4
 options solid_context
 options stack = 8388608
+require c_runtime/c_macro
 
 enum BinOpr {
     OPR_ADD
@@ -36,4 +37,8 @@ enum UnOpr {
     OPR_LEN
     OPR_NOUNOPR
 }
+
+// lcode.h:45: #define foldbinop(op) ((op) <= OPR_SHR)
+[c_macro]
+def foldbinop(op) => uint(op) <= uint(BinOpr.OPR_SHR)
 

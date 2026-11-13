@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/cstr
 require c_runtime/variadic
 require lgc
@@ -29,10 +30,65 @@ let private BIT_ISCOLLECTABLE = 1 << 6
 let private LUA_TPROTO = LUA_NUMTYPES + 1
 let private LUA_VPROTO = LUA_TPROTO | (0 << 4)
 
-[c_function]
+// lgc.h:63: #define bitmask(b) (1<<(b))
+[c_macro]
+def private bitmask(b) => 1 << b
+
+// lgc.h:62: #define testbits(x,m) ((x) & (m))
+[c_macro]
+def private testbits(x; m) => int(x) & m
+
+// lgc.h:67: #define testbit(x,b) testbits(x, bitmask(b))
+[c_macro]
+def private testbit(x; b) => testbits(x, bitmask(b))
+
+// lgc.h:88: #define isblack(x) testbit((x)->marked, BLACKBIT)
+[c_macro]
+def private isblack(x) => testbit(x.marked, BLACKBIT)
+
+// lgc.h:87: #define iswhite(x) testbits((x)->marked, WHITEBITS)
+[c_macro]
+def private iswhite(x) => testbits(x.marked, (1 << WHITE0BIT) | (1 << WHITE1BIT))
+
+// lgc.h:175: #define luaC_objbarrier(L,p,o) ( (isblack(p) && iswhite(o)) ? luaC_barrier_(L,obj2gco(p),obj2gco(o)) : cast_void(0))
+[c_macro]
+def private luaC_objbarrier(var L; var p; var o) {
+    if (isblack(p) != 0 && iswhite(o) != 0) {
+        luaC_barrier_(L, obj2gco(p), obj2gco(o))
+    }
+}
+
+// lfunc.h:35: #define uplevel(up) check_exp(upisopen(up), cast(StkId, (up)->v.p))
+[c_macro, c_function]
+def private uplevel(var up) : StackValue? => reinterpret<StackValue?>(up.v.p)
+
+// lgc.h:99: #define nw2black(x) check_exp(!iswhite(x), l_setbit((x)->marked, BLACKBIT))
+[c_macro]
+def private nw2black(var x) {
+    x.marked = uint8(int(x.marked) | bitmask(BLACKBIT))
+}
+
+// lgc.h:179: #define luaC_barrier(L,p,v) ( iscollectable(v) ? luaC_objbarrier(L,p,gcvalue(v)) : cast_void(0))
+[c_macro, c_function]
+def private luaC_barrier(var L; var p; var v) {
+    if (iscollectable(v) != 0) {
+        if ((int(p.marked) & (1 << BLACKBIT)) != 0 && (int(gcvalue(v).marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
+            luaC_barrier_(L, addr(reinterpret<GCUnion?>(p).gc), addr(reinterpret<GCUnion?>(gcvalue(v)).gc))
+        }
+    }
+}
+
+// ldo.h:36: #define savestack(L,pt) (cast_charp(pt) - cast_charp(L->stack.p))
+[c_macro, c_function]
+def private savestack(L; pt) => int64(reinterpret<uint8?>(pt) - reinterpret<uint8?>(L.stack.p))
+
+// ldo.h:37: #define restorestack(L,n) cast(StkId, cast_charp(L->stack.p) + (n))
+[c_macro, c_function]
+def private restorestack(var L; n) : StackValue? => reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + n)
+
 def luaF_newCclosure(var L : lua_State?; nupvals : int) : CClosure? {
     var o : GCObject? = lgc::luaC_newobj(L, LUA_VCCL, uint64(int(uint64(typeinfo offsetof < upvalue > (type<CClosure>))) + typeinfo sizeof(type<TValue>) * nupvals))
-    var c : CClosure? = addr(reinterpret<GCUnion?>(o).cl.c)
+    var c : CClosure? = gco2ccl(o)
     c.nupvalues = uint8(nupvals)
     return c
 }
@@ -40,7 +96,7 @@ def luaF_newCclosure(var L : lua_State?; nupvals : int) : CClosure? {
 [c_function]
 def luaF_newLclosure(var L : lua_State?; var nupvals : int) : LClosure? {
     var o : GCObject? = lgc::luaC_newobj(L, LUA_VLCL, uint64(int(uint64(typeinfo offsetof < upvals > (type<LClosure>))) + typeinfo sizeof(type<TValue?>) * nupvals))
-    var c : LClosure? = addr(reinterpret<GCUnion?>(o).cl.l)
+    var c : LClosure? = gco2lcl(o)
     c.p = null
     c.nupvalues = uint8(nupvals)
     while (true) {
@@ -61,14 +117,12 @@ def luaF_initupvals(var L : lua_State?; var cl : LClosure?) {
     i = 0
     while (i < int(cl.nupvalues)) {
         var o : GCObject? = lgc::luaC_newobj(L, LUA_VUPVAL, uint64(typeinfo sizeof(type<UpVal>)))
-        var uv : UpVal? = addr(reinterpret<GCUnion?>(o).upv)
+        var uv : UpVal? = gco2upv(o)
         // make it closed
         uv.v.p = addr(uv.u.value)
-        uv.v.p.tt_ = uint8(LUA_TNIL | (0 << 4))
+        setnilvalue(uv.v.p)
         addr(cl.upvals[0])[i] = uv
-        if ((int(cl.marked) & (1 << BLACKBIT)) != 0 && (int(uv.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-            luaC_barrier_(L, addr(reinterpret<GCUnion?>(cl).gc), addr(reinterpret<GCUnion?>(uv).gc))
-        }
+        luaC_objbarrier(L, cl, uv)
         i++
     }
 }
@@ -78,10 +132,10 @@ def luaF_initupvals(var L : lua_State?; var cl : LClosure?) {
 [c_function]
 def private newupval(var L : lua_State?; var level : StackValue?; var prev : UpVal ??) : UpVal? {
     var o : GCObject? = lgc::luaC_newobj(L, LUA_VUPVAL, uint64(typeinfo sizeof(type<UpVal>)))
-    var uv : UpVal? = addr(reinterpret<GCUnion?>(o).upv)
+    var uv : UpVal? = gco2upv(o)
     var next : UpVal? = *prev
     // current value lives in the stack
-    uv.v.p = addr(level.val)
+    uv.v.p = s2v(level)
     // link it to list of open upvalues
     uv.u.open.next = next
     uv.u.open.previous = prev
@@ -92,8 +146,8 @@ def private newupval(var L : lua_State?; var level : StackValue?; var prev : UpV
     // thread not in list of threads with upvalues?
     if (!(intptr(L.twups) != intptr(L))) {
         // link it to the list
-        L.twups = L.l_G.twups
-        L.l_G.twups = L
+        L.twups = G(L).twups
+        G(L).twups = L
     }
     return uv
 }
@@ -130,24 +184,24 @@ def private callclosemethod(var L : lua_State?; var obj : TValue?; var err : TVa
     var tm : TValue? = luaT_gettmbyobj(L, obj, TMS.TM_CLOSE)
     {
         // will call metamethod...
-        var io1 : TValue? = addr(top.val)
+        var io1 : TValue? = s2v(top)
         var io2 : TValue? = tm
         io1.value_ = io2.value_
-        io1.tt_ = io2.tt_
+        settt_(io1, io2.tt_)
     }
     {
         // with 'self' as the 1st argument
-        var io1 : TValue? = addr((top + 1).val)
+        var io1 : TValue? = s2v(top + 1)
         var io2 : TValue? = obj
         io1.value_ = io2.value_
-        io1.tt_ = io2.tt_
+        settt_(io1, io2.tt_)
     }
     {
         // and error msg. as 2nd argument
-        var io1 : TValue? = addr((top + 2).val)
+        var io1 : TValue? = s2v(top + 2)
         var io2 : TValue? = err
         io1.value_ = io2.value_
-        io1.tt_ = io2.tt_
+        settt_(io1, io2.tt_)
     }
     // add function and arguments
     L.top.p = top + 3
@@ -162,11 +216,11 @@ def private callclosemethod(var L : lua_State?; var obj : TValue?; var err : TVa
 // an error if not.
 [c_function]
 def private checkclosemth(var L : lua_State?; var level : StackValue?) {
-    var tm : TValue? = luaT_gettmbyobj(L, addr(level.val), TMS.TM_CLOSE)
+    var tm : TValue? = luaT_gettmbyobj(L, s2v(level), TMS.TM_CLOSE)
     // no metamethod?
-    if ((int(tm.tt_) & 15) == LUA_TNIL) {
+    if (ttisnil(tm)) {
         // variable index
-        var idx : int = int(int64(level - L.ci.func.p))
+        let idx : int = int(int64(level - L.ci.func.p))
         var vname : uint8? = luaG_findlocal(L, L.ci, idx, null)
         if (vname == null) {
             vname = cstr("?")
@@ -183,15 +237,15 @@ def private checkclosemth(var L : lua_State?; var level : StackValue?) {
 [c_function]
 def private prepcallclosemth(var L : lua_State?; var level : StackValue?; status : int; yy : int) {
     // value being closed
-    var uv : TValue? = addr(level.val)
+    var uv : TValue? = s2v(level)
     var errobj : TValue?
     if (status == CLOSEKTOP) {
         // error object is nil
-        errobj = addr(L.l_G.nilvalue)
+        errobj = addr(G(L).nilvalue)
     } else {
         // 'luaD_seterrorobj' will set top to level + 2
         // error object goes after 'uv'
-        errobj = addr((level + 1).val)
+        errobj = s2v(level + 1)
         // set error object
         luaD_seterrorobj(L, status, level + 1)
     }
@@ -201,7 +255,7 @@ def private prepcallclosemth(var L : lua_State?; var level : StackValue?; status
 // Insert a variable in the list of to-be-closed variables.
 [c_function]
 def luaF_newtbcupval(var L : lua_State?; var level : StackValue?) {
-    if (int(addr(level.val).tt_) == (LUA_TBOOLEAN | (0 << 4)) || (int(addr(level.val).tt_) & 15) == LUA_TNIL) {
+    if (ttisfalse(s2v(level)) || ttisnil(s2v(level))) {
         // false doesn't need to be closed
         return
     }
@@ -234,7 +288,7 @@ def luaF_closeupval(var L : lua_State?; var level : StackValue?) {
         uv = L.openupval
         var _t0 = uv != null
         if (_t0) {
-            upl = reinterpret<StackValue?>(uv.v.p)
+            upl = uplevel(uv)
             _t0 = intptr(upl) >= intptr(level)
         }
         if (!(_t0)) {
@@ -249,19 +303,15 @@ def luaF_closeupval(var L : lua_State?; var level : StackValue?) {
             var io1 : TValue? = slot
             var io2 : TValue? = uv.v.p
             io1.value_ = io2.value_
-            io1.tt_ = io2.tt_
+            settt_(io1, io2.tt_)
         }
         // now current value lives here
         uv.v.p = slot
         // neither white nor dead?
-        if ((int(uv.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) == 0) {
+        if (iswhite(uv) == 0) {
             // closed upvalues cannot be gray
-            uv.marked = uint8(int(uv.marked) | (1 << BLACKBIT))
-            if ((int(slot.tt_) & BIT_ISCOLLECTABLE) != 0) {
-                if ((int(uv.marked) & (1 << BLACKBIT)) != 0 && (int(slot.value_.gc.marked) & ((1 << WHITE0BIT) | (1 << WHITE1BIT))) != 0) {
-                    luaC_barrier_(L, addr(reinterpret<GCUnion?>(uv).gc), addr(reinterpret<GCUnion?>(slot.value_.gc).gc))
-                }
-            }
+            nw2black(uv)
+            luaC_barrier(L, uv, slot)
         }
     }
 }
@@ -281,9 +331,8 @@ def private poptbclist(var L : lua_State?) {
 
 // Close all upvalues and to-be-closed variables up to the given stack
 // level. Return restored 'level'.
-[c_function]
 def luaF_close(var L : lua_State?; var level : StackValue?; status : int; yy : int) : StackValue? {
-    var levelrel : int64 = int64(reinterpret<uint8?>(level) - reinterpret<uint8?>(L.stack.p))
+    let levelrel : int64 = savestack(L, level)
     // first, close the upvalues
     __::luaF_closeupval(L, level)
     // traverse tbc's down to that level
@@ -294,15 +343,14 @@ def luaF_close(var L : lua_State?; var level : StackValue?; status : int; yy : i
         poptbclist(L)
         // close variable
         prepcallclosemth(L, tbc, status, yy)
-        level = reinterpret<StackValue?>(reinterpret<uint8?>(L.stack.p) + levelrel)
+        level = restorestack(L, levelrel)
     }
     return level
 }
 
-[c_function]
 def luaF_newproto(var L : lua_State?) : Proto? {
     var o : GCObject? = lgc::luaC_newobj(L, LUA_VPROTO, uint64(typeinfo sizeof(type<Proto>)))
-    var f : Proto? = addr(reinterpret<GCUnion?>(o).p)
+    var f : Proto? = gco2p(o)
     f.k = null
     f.sizek = 0
     f.p = null

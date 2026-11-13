@@ -9,6 +9,7 @@ require c_runtime/c_args
 require c_runtime/c_exit
 require c_runtime/c_function
 require c_runtime/c_jit_build
+require c_runtime/c_macro
 require c_runtime/c_switch
 require c_runtime/cstr
 require c_runtime/cstr_array
@@ -74,6 +75,36 @@ let private OFFSET_sBx = MAXARG_Bx >> 1
 let private SIZE_sJ = SIZE_Bx + SIZE_A
 let private MAXARG_sJ = (1 << SIZE_sJ) - 1
 let private OFFSET_sJ = MAXARG_sJ >> 1
+
+// luac.c:141: #define toproto(L,i) getproto(s2v(L->top.p+(i)))
+[c_macro, c_function]
+def private toproto(var L; i) : Proto? => gco2lcl(s2v(L.top.p + i).value_.gc).p
+
+// lua.h:398: #define lua_tostring(L,i) lua_tolstring(L, (i), NULL)
+[c_macro]
+def private lua_tostring(var L; i) : uint8? => lua_tolstring(L, i, null)
+
+// lua.h:374: #define lua_tointeger(L,i) lua_tointegerx(L,(i),NULL)
+[c_macro]
+def private lua_tointeger(var L; i) => lua_tointegerx(L, i, null)
+
+// lauxlib.h:95: #define luaL_loadfile(L,f) luaL_loadfilex(L,f,NULL)
+[c_macro]
+def private luaL_loadfile(var L; var f) => luaL_loadfilex(L, f, null)
+
+// lua.h:382: #define lua_pushcfunction(L,f) lua_pushcclosure(L, (f), 0)
+[c_macro]
+def private lua_pushcfunction(var L; f) {
+    lua_pushcclosure(L, f, 0)
+}
+
+// lua.h:298: #define lua_pcall(L,n,r,f) lua_pcallk(L, (n), (r), (f), 0, NULL)
+[c_macro]
+def private lua_pcall(var L; n; r; f) => lua_pcallk(L, n, r, f, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+
+// luac.c:665: #define SS(x) ((x==1)?"":"s")
+[c_macro, c_function]
+def private SS(x) : uint8? => x == 1 ? addr(c2das_empty[0]) : cstr("s")
 
 [c_function]
 def private fatal(var message : uint8?) {
@@ -180,17 +211,17 @@ def private reader(var L : lua_State?; var ud : void?; var size : uint64?) : uin
 [c_function]
 def private combine(var L : lua_State?; n : int) : Proto? {
     if (n == 1) {
-        return addr(reinterpret<GCUnion?>(addr((L.top.p + -1).val).value_.gc).cl.l).p
+        return toproto(L, -1)
     } else {
         var f : Proto?
         var i : int = n
         if (lua_load(L, @@reader, reinterpret<void?>(addr(i)), cstr("=(luac)"), null) != LUA_OK) {
-            fatal(lua_tolstring(L, -1, null))
+            fatal(lua_tostring(L, -1))
         }
-        f = addr(reinterpret<GCUnion?>(addr((L.top.p + -1).val).value_.gc).cl.l).p
+        f = toproto(L, -1)
         i = 0
         while (i < n) {
-            f.p[i] = addr(reinterpret<GCUnion?>(addr((L.top.p + (i - n - 1)).val).value_.gc).cl.l).p
+            f.p[i] = gco2lcl(s2v(L.top.p + (i - n - 1)).value_.gc).p
             if (f.p[i].sizeupvalues > 0) {
                 f.p[i].upvalues[0].instack = 0u8
             }
@@ -207,17 +238,17 @@ def private writer(var L : lua_State?; var p : void?; size : uint64; var u : voi
 
 [c_function]
 def private pmain(var L : lua_State?) : int {
-    var argc : int = int(lua_tointegerx(L, 1, null))
+    let argc : int = int(lua_tointeger(L, 1))
     var argv : uint8 ?? = reinterpret<uint8 ??>(lua_touserdata(L, 2))
     var f : Proto?
-    tmname = addr(L.l_G.tmname[0])
+    tmname = addr(G(L).tmname[0])
     if (lua_checkstack(L, argc) == 0) {
         fatal(cstr("too many input files"))
     }
     for (i in range(argc)) {
         var filename : uint8? = crt::strcmp(argv[i], cstr("-")) == 0 ? default<uint8?> : argv[i]
-        if (luaL_loadfilex(L, filename, null) != LUA_OK) {
-            fatal(lua_tolstring(L, -1, null))
+        if (luaL_loadfile(L, filename) != LUA_OK) {
+            fatal(lua_tostring(L, -1))
         }
     }
     f = combine(L, argc)
@@ -243,7 +274,7 @@ def private pmain(var L : lua_State?) : int {
 [c_function]
 def c_main(var argc : int; var argv : uint8 ??) : int {
     var L : lua_State?
-    var i : int = doargs(argc, argv)
+    let i : int = doargs(argc, argv)
     argc -= i
     argv += i
     if (argc <= 0) {
@@ -253,11 +284,11 @@ def c_main(var argc : int; var argv : uint8 ??) : int {
     if (L == null) {
         fatal(cstr("cannot create state: not enough memory"))
     }
-    lua_pushcclosure(L, @@pmain, 0)
+    lua_pushcfunction(L, @@pmain)
     lua_pushinteger(L, int64(argc))
     lua_pushlightuserdata(L, reinterpret<void?>(argv))
-    if (lua_pcallk(L, 2, 0, 0, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>) != LUA_OK) {
-        fatal(lua_tolstring(L, -1, null))
+    if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
+        fatal(lua_tostring(L, -1))
     }
     lua_close(L)
     return 0
@@ -266,10 +297,10 @@ def c_main(var argc : int; var argv : uint8 ??) : int {
 [c_function]
 def private PrintString(var ts : TString?) {
     var s : uint8? = addr(ts.contents[0])
-    var n : uint64 = ts.shrlen != 255 ? uint64(ts.shrlen) : ts.u.lnglen
+    let n : uint64 = tsslen(ts)
     printf(cstr("\""))
     for (i in urange64(n)) {
-        var c : int = int(s[i])
+        let c : int = int(s[i])
         c_switch(c) {
             case('"') {
                 printf(cstr("\\\""))
@@ -323,7 +354,7 @@ def private PrintString(var ts : TString?) {
 [c_function]
 def private PrintType(var f : Proto?; i : int) {
     var o : TValue? = addr(f.k[i])
-    c_switch(int(o.tt_) & 63) {
+    c_switch(withvariant(o.tt_)) {
         case(0) {
             printf(cstr("N"))
             break
@@ -346,7 +377,7 @@ def private PrintType(var f : Proto?; i : int) {
         }
         case(_) {
             // cannot happen
-            printf(cstr("?%d"), int(o.tt_) & 63)
+            printf(cstr("?%d"), withvariant(o.tt_))
             break
         }
     }
@@ -356,7 +387,7 @@ def private PrintType(var f : Proto?; i : int) {
 [c_function]
 def private PrintConstant(var f : Proto?; i : int) {
     var o : TValue? = addr(f.k[i])
-    c_switch(int(o.tt_) & 63) {
+    c_switch(withvariant(o.tt_)) {
         case(0) {
             printf(cstr("nil"))
             break
@@ -372,7 +403,7 @@ def private PrintConstant(var f : Proto?; i : int) {
         case(19) {
             {
                 var buff : uint8[100]
-                sprintf(addr(buff[0]), cstr("%.14g"), o.value_.n)
+                sprintf(addr(buff[0]), cstr("%.14g"), fltvalue(o))
                 printf(cstr("%s"), addr(buff[0]))
                 if (buff[crt::strspn(addr(buff[0]), cstr("-0123456789"))] == '\0') {
                     printf(cstr(".0"))
@@ -381,16 +412,16 @@ def private PrintConstant(var f : Proto?; i : int) {
             }
         }
         case(3) {
-            printf(cstr("%lld"), o.value_.i)
+            printf(cstr("%lld"), ivalue(o))
             break
         }
         case(4, 20) {
-            PrintString(addr(reinterpret<GCUnion?>(o.value_.gc).ts))
+            PrintString(tsvalue(o))
             break
         }
         case(_) {
             // cannot happen
-            printf(cstr("?%d"), int(o.tt_) & 63)
+            printf(cstr("?%d"), withvariant(o.tt_))
             break
         }
     }
@@ -399,20 +430,20 @@ def private PrintConstant(var f : Proto?; i : int) {
 [c_function]
 def private PrintCode(var f : Proto?) {
     var code : uint? = f.code
-    var n : int = f.sizecode
+    let n : int = f.sizecode
     for (pc in range(n)) {
-        var i : uint = code[pc]
-        var o : OpCode = enum_from_int(type<OpCode>, int((i >> uint(POS_OP)) & (~(~0u << uint(SIZE_OP)) << 0u)))
-        var a : int = int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_A)) << 0u))
-        var b : int = int((i >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u))
-        var c : int = int((i >> uint(POS_C)) & (~(~0u << uint(SIZE_C)) << 0u))
-        var ax : int = int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_Ax)) << 0u))
-        var bx : int = int((i >> uint(POS_k)) & (~(~0u << uint(SIZE_Bx)) << 0u))
-        var sb : int = int((i >> uint(POS_B)) & (~(~0u << uint(SIZE_B)) << 0u)) - OFFSET_sC
-        var sc : int = int((i >> uint(POS_C)) & (~(~0u << uint(SIZE_C)) << 0u)) - OFFSET_sC
-        var sbx : int = int((i >> uint(POS_k)) & (~(~0u << uint(SIZE_Bx)) << 0u)) - OFFSET_sBx
-        var isk : int = int((i >> uint(POS_k)) & (~(~0u << 1u) << 0u))
-        var line : int = luaG_getfuncline(f, pc)
+        let i : uint = code[pc]
+        let o : OpCode = GET_OPCODE(i)
+        let a : int = GETARG_A(i)
+        let b : int = GETARG_B(i)
+        let c : int = GETARG_C(i)
+        let ax : int = GETARG_Ax(i)
+        let bx : int = GETARG_Bx(i)
+        let sb : int = GETARG_sB(i)
+        let sc : int = GETARG_sC(i)
+        let sbx : int = GETARG_sBx(i)
+        let isk : int = GETARG_k(i)
+        let line : int = luaG_getfuncline(f, pc)
         printf(cstr("\t%d\t"), pc + 1)
         if (line > 0) {
             printf(cstr("[%d]\t"), line)
@@ -714,8 +745,8 @@ def private PrintCode(var f : Proto?) {
                 break
             }
             case(OpCode.OP_JMP) {
-                printf(cstr("%d"), int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ)
-                printf(cstr("\t; to %d"), int((i >> uint(POS_A)) & (~(~0u << uint(SIZE_sJ)) << 0u)) - OFFSET_sJ + pc + 2)
+                printf(cstr("%d"), GETARG_sJ(i))
+                printf(cstr("\t; to %d"), GETARG_sJ(i) + pc + 2)
                 break
             }
             case(OpCode.OP_EQ) {
@@ -872,9 +903,8 @@ def private PrintHeader(var f : Proto?) {
     }
     printf(cstr("\n%s <%s:%d,%d> (%d instruction%s at %p)\n"), (f.linedefined == 0) ? cstr("main") : cstr("function"), s, f.linedefined, f.lastlinedefined,
             f.sizecode, f.sizecode == 1 ? addr(c2das_empty[0]) : cstr("s"), reinterpret<void?>(f))
-    printf(cstr("%d%s param%s, %d slot%s, %d upvalue%s, "), int(f.numparams), f.is_vararg != 0 ? cstr("+") : addr(c2das_empty[0]),
-            f.numparams == 1 ? addr(c2das_empty[0]) : cstr("s"), int(f.maxstacksize), f.maxstacksize == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizeupvalues,
-            f.sizeupvalues == 1 ? addr(c2das_empty[0]) : cstr("s"))
+    printf(cstr("%d%s param%s, %d slot%s, %d upvalue%s, "), int(f.numparams), f.is_vararg != 0 ? cstr("+") : addr(c2das_empty[0]), SS(f.numparams),
+            int(f.maxstacksize), f.maxstacksize == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizeupvalues, f.sizeupvalues == 1 ? addr(c2das_empty[0]) : cstr("s"))
     printf(cstr("%d local%s, %d constant%s, %d function%s\n"), f.sizelocvars, f.sizelocvars == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizek,
             f.sizek == 1 ? addr(c2das_empty[0]) : cstr("s"), f.sizep, f.sizep == 1 ? addr(c2das_empty[0]) : cstr("s"))
 }
@@ -905,7 +935,7 @@ def private PrintDebug(var f : Proto?) {
 
 [c_function]
 def private PrintFunction(var f : Proto?; full : int) {
-    var n : int = f.sizep
+    let n : int = f.sizep
     PrintHeader(f)
     PrintCode(f)
     if (full != 0) {

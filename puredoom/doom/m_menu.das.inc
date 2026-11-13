@@ -564,11 +564,11 @@ def M_DrawReadThis2 {
 def M_DrawSound {
     V_DrawPatchDirect(60, 38, 0, reinterpret<uint8?>(W_CacheLumpName(cstr("M_SVOL"), PU_CACHE)))
     if ((doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) == 0) {
-        var offset : int = (doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) != 0 ? int(anon_829.sfx_vol_no_music) : int(anon_826.sfx_vol)
+        let offset : int = (doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) != 0 ? int(anon_829.sfx_vol_no_music) : int(anon_826.sfx_vol)
         M_DrawThermo(int(SoundDef.x), int(SoundDef.y) + LINEHEIGHT * (offset + 1), 16, snd_SfxVolume)
     }
     if ((doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) == 0) {
-        var offset : int = (doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) != 0 ? int(anon_827.music_vol_no_sfx) : int(anon_826.music_vol)
+        let offset : int = (doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) != 0 ? int(anon_827.music_vol_no_sfx) : int(anon_826.music_vol)
         M_DrawThermo(int(SoundDef.x), int(SoundDef.y) + LINEHEIGHT * (offset + 1), 16, snd_MusicVolume)
     }
 }
@@ -945,7 +945,7 @@ def M_StringWidth(var _c_string : uint8?) : int {
 def M_StringHeight(var _c_string : uint8?) : int {
     var i : int
     var h : int
-    var height : int = int(read_patch_t_height(hu_font[0], 0))
+    let height : int = int(read_patch_t_height(hu_font[0], 0))
     h = height
     i = 0
     while (i < doom_strlen(_c_string)) {
@@ -1387,7 +1387,7 @@ def M_Drawer {
     if ((doom_flags & DOOM_FLAG_MENU_DARKEN_BG) != 0) {
         {
             var j : int = 0
-            var len : int = SCREENWIDTH * SCREENHEIGHT
+            let len : int = SCREENWIDTH * SCREENHEIGHT
             while (j < len) {
                 var color : uint8 = screens[0][j]
                 color = colormaps[int(color) + (20 * 256)]
@@ -1445,8 +1445,8 @@ def M_Ticker {
 // M_Init
 [c_function]
 def M_Init {
-    var hide_mouse : doom_boolean = (doom_flags & DOOM_FLAG_HIDE_MOUSE_OPTIONS) != 0 ? doom_boolean._c_true : doom_boolean._c_false
-    var hide_sound : doom_boolean = ((doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) != 0 &&
+    let hide_mouse : doom_boolean = (doom_flags & DOOM_FLAG_HIDE_MOUSE_OPTIONS) != 0 ? doom_boolean._c_true : doom_boolean._c_false
+    let hide_sound : doom_boolean = ((doom_flags & DOOM_FLAG_HIDE_MUSIC_OPTIONS) != 0 &&
             (doom_flags & DOOM_FLAG_HIDE_SOUND_OPTIONS) != 0) ? doom_boolean._c_true : doom_boolean._c_false
     OptionsMenu = addr(OptionsMenuFull[0])
     if (uint(hide_mouse) != 0 && int(hide_sound) == 0) {

@@ -62,7 +62,7 @@ def private intarith(var L : lua_State?; op : int; v1 : int64; v2 : int64) : int
             return luaV_shiftl(v1, v2)
         }
         case(11) {
-            return luaV_shiftl(v1, int64(0) - v2)
+            return luaV_shiftr(v1, v2)
         }
         case(12) {
             return int64(0) - v1
@@ -94,7 +94,7 @@ def private numarith(var L : lua_State?; op : int; v1 : double; v2 : double) : d
             return v2 == 2.0lf ? v1 * v1 : math::pow(v1, v2)
         }
         case(6) {
-            return math::floor(v1 / v2)
+            return l_floor(v1 / v2)
         }
         case(12) {
             return -v1
@@ -117,8 +117,8 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                 var i1 : int64
                 var i2 : int64
                 var _t0 : int
-                if (int(p1.tt_) == (LUA_TNUMBER | (0 << 4))) {
-                    *addr(i1) = p1.value_.i
+                if (ttisinteger(p1)) {
+                    *addr(i1) = ivalue(p1)
                     _t0 = 1
                 } else {
                     _t0 = luaV_tointegerns(p1, addr(i1), F2Imod.F2Ieq)
@@ -126,8 +126,8 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                 var _t2 = _t0 != 0
                 if (_t2) {
                     var _t1 : int
-                    if (int(p2.tt_) == (LUA_TNUMBER | (0 << 4))) {
-                        *addr(i2) = p2.value_.i
+                    if (ttisinteger(p2)) {
+                        *addr(i2) = ivalue(p2)
                         _t1 = 1
                     } else {
                         _t1 = luaV_tointegerns(p2, addr(i2), F2Imod.F2Ieq)
@@ -138,7 +138,7 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                     {
                         var io : TValue? = res
                         io.value_.i = intarith(L, op, i1, i2)
-                        io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+                        settt_(io, LUA_TNUMBER | (0 << 4))
                     }
                     return 1
                 } else {
@@ -153,13 +153,13 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                 var n1 : double
                 var n2 : double
                 var _t4 : int
-                if (int(p1.tt_) == (LUA_TNUMBER | (1 << 4))) {
-                    n1 = p1.value_.n
+                if (ttisfloat(p1)) {
+                    n1 = fltvalue(p1)
                     _t4 = 1
                 } else {
                     var _t3 : int
-                    if (int(p1.tt_) == (LUA_TNUMBER | (0 << 4))) {
-                        n1 = double(p1.value_.i)
+                    if (ttisinteger(p1)) {
+                        n1 = double(ivalue(p1))
                         _t3 = 1
                     } else {
                         _t3 = 0
@@ -169,13 +169,13 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                 var _t7 = _t4 != 0
                 if (_t7) {
                     var _t6 : int
-                    if (int(p2.tt_) == (LUA_TNUMBER | (1 << 4))) {
-                        n2 = p2.value_.n
+                    if (ttisfloat(p2)) {
+                        n2 = fltvalue(p2)
                         _t6 = 1
                     } else {
                         var _t5 : int
-                        if (int(p2.tt_) == (LUA_TNUMBER | (0 << 4))) {
-                            n2 = double(p2.value_.i)
+                        if (ttisinteger(p2)) {
+                            n2 = double(ivalue(p2))
                             _t5 = 1
                         } else {
                             _t5 = 0
@@ -188,7 +188,7 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                     {
                         var io : TValue? = res
                         io.value_.n = numarith(L, op, n1, n2)
-                        io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
+                        settt_(io, LUA_TNUMBER | (1 << 4))
                     }
                     return 1
                 } else {
@@ -202,22 +202,22 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                 // other operations
                 var n1 : double
                 var n2 : double
-                if (int(p1.tt_) == (LUA_TNUMBER | (0 << 4)) && int(p2.tt_) == (LUA_TNUMBER | (0 << 4))) {
+                if (ttisinteger(p1) && ttisinteger(p2)) {
                     {
                         var io : TValue? = res
-                        io.value_.i = intarith(L, op, p1.value_.i, p2.value_.i)
-                        io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+                        io.value_.i = intarith(L, op, ivalue(p1), ivalue(p2))
+                        settt_(io, LUA_TNUMBER | (0 << 4))
                     }
                     return 1
                 } else {
                     var _t14 : int
-                    if (int(p1.tt_) == (LUA_TNUMBER | (1 << 4))) {
-                        n1 = p1.value_.n
+                    if (ttisfloat(p1)) {
+                        n1 = fltvalue(p1)
                         _t14 = 1
                     } else {
                         var _t13 : int
-                        if (int(p1.tt_) == (LUA_TNUMBER | (0 << 4))) {
-                            n1 = double(p1.value_.i)
+                        if (ttisinteger(p1)) {
+                            n1 = double(ivalue(p1))
                             _t13 = 1
                         } else {
                             _t13 = 0
@@ -227,13 +227,13 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                     var _t17 = _t14 != 0
                     if (_t17) {
                         var _t16 : int
-                        if (int(p2.tt_) == (LUA_TNUMBER | (1 << 4))) {
-                            n2 = p2.value_.n
+                        if (ttisfloat(p2)) {
+                            n2 = fltvalue(p2)
                             _t16 = 1
                         } else {
                             var _t15 : int
-                            if (int(p2.tt_) == (LUA_TNUMBER | (0 << 4))) {
-                                n2 = double(p2.value_.i)
+                            if (ttisinteger(p2)) {
+                                n2 = double(ivalue(p2))
                                 _t15 = 1
                             } else {
                                 _t15 = 0
@@ -246,7 +246,7 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
                         {
                             var io : TValue? = res
                             io.value_.n = numarith(L, op, n1, n2)
-                            io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
+                            settt_(io, LUA_TNUMBER | (1 << 4))
                         }
                         return 1
                     } else {
@@ -260,19 +260,18 @@ def luaO_rawarith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValu
     return 0
 }
 
-[c_function]
 def luaO_arith(var L : lua_State?; op : int; var p1 : TValue?; var p2 : TValue?; var res : StackValue?) {
-    if (luaO_rawarith(L, op, p1, p2, addr(res.val)) == 0) {
+    if (luaO_rawarith(L, op, p1, p2, s2v(res)) == 0) {
         // could not perform raw operation; try metamethod
         luaT_trybinTM(L, p1, p2, res, enum_from_int(type<TMS>, op - LUA_OPADD + int(TMS.TM_ADD)))
     }
 }
 
 def luaO_hexavalue(c : int) : int {
-    if ((int(luai_ctype_[c + 1]) & (1 << DIGITBIT)) != 0) {
+    if (lisdigit(c) != 0) {
         return c - '0'
     } else {
-        return ((c | ('A' ^ 'a')) - 'a') + 10
+        return (ltolower(c) - 'a') + 10
     }
 }
 
@@ -294,13 +293,13 @@ def private isneg(var s : uint8 ??) : int {
 def private l_str2dloc(var s : uint8?; var result : double?; mode : int) : uint8? {
     var endptr : uint8?
     // try to convert
-    *result = (mode == 'x') ? crt::strtod(s, addr(endptr)) : crt::strtod(s, addr(endptr))
+    *result = (mode == 'x') ? lua_strx2number(s, addr(endptr)) : lua_str2number(s, addr(endptr))
     // nothing recognized?
     if (intptr(endptr) == intptr(reinterpret<uint8?>(s))) {
         return null
     }
     // skip trailing spaces
-    while ((int(luai_ctype_[int(*endptr) + 1]) & (1 << SPACEBIT)) != 0) {
+    while (lisspace(*endptr) != 0) {
         endptr++
     }
     // OK iff no trailing chars
@@ -323,7 +322,7 @@ def private l_str2d(var s : uint8?; var result : double?) : uint8? {
     var endptr : uint8?
     // look for special chars
     var pmode : uint8? = crt::strpbrk(s, cstr(".xXnN"))
-    var mode : int = pmode != null ? (int(*pmode) | ('A' ^ 'a')) : 0
+    let mode : int = pmode != null ? ltolower(*pmode) : 0
     // reject 'inf' and 'nan'
     if (mode == 'n') {
         return null
@@ -341,7 +340,7 @@ def private l_str2d(var s : uint8?; var result : double?) : uint8? {
         // copy string to buffer
         crt::strcpy(addr(buff[0]), s)
         // correct decimal point
-        buff[int64(pdot - s)] = reinterpret<lconv?>(crt::localeconv()).decimal_point[0]
+        buff[int64(pdot - s)] = lua_getlocaledecpoint()
         // try again
         endptr = l_str2dloc(addr(buff[0]), result, mode)
         if (endptr != null) {
@@ -358,7 +357,7 @@ def private l_str2int(var s : uint8?; var result : int64?) : uint8? {
     var empty : int = 1
     var neg : int
     // skip initial spaces
-    while ((int(luai_ctype_[int(*s) + 1]) & (1 << SPACEBIT)) != 0) {
+    while (lisspace(*s) != 0) {
         s++
     }
     neg = isneg(addr(s))
@@ -366,15 +365,15 @@ def private l_str2int(var s : uint8?; var result : int64?) : uint8? {
         // hex?
         // skip '0x'
         s += 2
-        while ((int(luai_ctype_[int(*s) + 1]) & (1 << XDIGITBIT)) != 0) {
+        while (lisxdigit(*s) != 0) {
             a = a * 16ul + uint64(luaO_hexavalue(int(*s)))
             empty = 0
             s++
         }
     } else {
         // decimal
-        while ((int(luai_ctype_[int(*s) + 1]) & (1 << DIGITBIT)) != 0) {
-            var d : int = int(*s) - '0'
+        while (lisdigit(*s) != 0) {
+            let d : int = int(*s) - '0'
             // overflow?
             if (a >= MAXBY10 && (a > MAXBY10 || d > MAXLASTD + neg)) {
                 // do not accept it (as integer)
@@ -386,7 +385,7 @@ def private l_str2int(var s : uint8?; var result : int64?) : uint8? {
         }
     }
     // skip trailing spaces
-    while ((int(luai_ctype_[int(*s) + 1]) & (1 << SPACEBIT)) != 0) {
+    while (lisspace(*s) != 0) {
         s++
     }
     // something wrong in the numeral
@@ -409,7 +408,7 @@ def luaO_str2num(var s : uint8?; var o : TValue?) : uint64 {
         {
             var io : TValue? = o
             io.value_.i = i
-            io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+            settt_(io, LUA_TNUMBER | (0 << 4))
         }
     } else {
         // else try as a float
@@ -418,7 +417,7 @@ def luaO_str2num(var s : uint8?; var o : TValue?) : uint64 {
             {
                 var io : TValue? = o
                 io.value_.n = n
-                io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
+                settt_(io, LUA_TNUMBER | (1 << 4))
             }
         } else {
             // conversion failed
@@ -461,15 +460,15 @@ def luaO_utf8esc(var buff : uint8?; var x : uint64) : int {
 [c_function]
 def private tostringbuff(var obj : TValue?; var buff : uint8?) : int {
     var len : int
-    if (int(obj.tt_) == (LUA_TNUMBER | (0 << 4))) {
+    if (ttisinteger(obj)) {
         len = snprintf(buff, uint64(MAXNUMBER2STR), cstr("%lld"), obj.value_.i)
     } else {
-        len = snprintf(buff, uint64(MAXNUMBER2STR), cstr("%.14g"), obj.value_.n)
+        len = snprintf(buff, uint64(MAXNUMBER2STR), cstr("%.14g"), fltvalue(obj))
         // looks like an int?
         if (buff[crt::strspn(buff, cstr("-0123456789"))] == '\0') {
             let _t0 = len
             len++
-            buff[_t0] = reinterpret<lconv?>(crt::localeconv()).decimal_point[0]
+            buff[_t0] = lua_getlocaledecpoint()
             // adds '.0' to result
             let _t1 = len
             len++
@@ -483,12 +482,12 @@ def private tostringbuff(var obj : TValue?; var buff : uint8?) : int {
 [c_function]
 def luaO_tostring(var L : lua_State?; var obj : TValue?) {
     var buff : uint8[44]
-    var len : int = tostringbuff(obj, addr(buff[0]))
+    let len : int = tostringbuff(obj, addr(buff[0]))
     {
         var io : TValue? = obj
         var x_ : TString? = luaS_newlstr(L, addr(buff[0]), uint64(len))
-        io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
+        io.value_.gc = obj2gco(x_)
+        settt_(io, ctb(x_.tt))
     }
 }
 
@@ -503,10 +502,10 @@ def luaO_tostring(var L : lua_State?; var obj : TValue?) {
 def private pushstr(var buff : BuffFS?; var str : uint8?; lstr : uint64) {
     var L : lua_State? = buff.L
     {
-        var io : TValue? = addr(L.top.p.val)
+        var io : TValue? = s2v(L.top.p)
         var x_ : TString? = luaS_newlstr(L, str, lstr)
-        io.value_.gc = addr(reinterpret<GCUnion?>(x_).gc)
-        io.tt_ = uint8(int(x_.tt) | BIT_ISCOLLECTABLE)
+        io.value_.gc = obj2gco(x_)
+        settt_(io, ctb(x_.tt))
     }
     // may use one slot from EXTRA_STACK
     L.top.p++
@@ -549,7 +548,7 @@ def private addstr2buff(var buff : BuffFS?; var str : uint8?; slen : uint64) {
         var bf : uint8? = getbuff(buff, int(slen))
         // add string to buffer
         crt::memcpy(reinterpret<void?>(bf), reinterpret<void?>(str), slen)
-        buff.blen += int(slen)
+        addsize(buff, int(slen))
     } else {
         // string larger than buffer
         // string comes after buffer's content
@@ -563,8 +562,8 @@ def private addstr2buff(var buff : BuffFS?; var str : uint8?; slen : uint64) {
 def private addnum2buff(var buff : BuffFS?; var num : TValue?) {
     var numbuff : uint8? = getbuff(buff, MAXNUMBER2STR)
     // format number into 'numbuff'
-    var len : int = tostringbuff(num, numbuff)
-    buff.blen += len
+    let len : int = tostringbuff(num, numbuff)
+    addsize(buff, len)
 }
 
 // this function handles only '%d', '%c', '%f', '%p', '%s', and '%%'
@@ -613,7 +612,7 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
                     {
                         var io : TValue? = addr(num)
                         io.value_.i = int64(int(va_i(argp)))
-                        io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+                        settt_(io, LUA_TNUMBER | (0 << 4))
                     }
                     addnum2buff(addr(buff), addr(num))
                     break
@@ -626,7 +625,7 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
                     {
                         var io : TValue? = addr(num)
                         io.value_.i = va_i(argp)
-                        io.tt_ = uint8(LUA_TNUMBER | (0 << 4))
+                        settt_(io, LUA_TNUMBER | (0 << 4))
                     }
                     addnum2buff(addr(buff), addr(num))
                     break
@@ -639,7 +638,7 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
                     {
                         var io : TValue? = addr(num)
                         io.value_.n = va_d(argp)
-                        io.tt_ = uint8(LUA_TNUMBER | (1 << 4))
+                        settt_(io, LUA_TNUMBER | (1 << 4))
                     }
                     addnum2buff(addr(buff), addr(num))
                     break
@@ -649,11 +648,11 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
                 {
                     // a pointer
                     // enough space for '%p'
-                    var sz : int = int(3ul * uint64(typeinfo sizeof(type<void?>)) + 8ul)
+                    let sz : int = int(3ul * uint64(typeinfo sizeof(type<void?>)) + 8ul)
                     var bf : uint8? = getbuff(addr(buff), sz)
                     var p : void? = reinterpret<void?>(va_p(argp))
-                    var len : int = snprintf(bf, uint64(sz), cstr("%p"), p)
-                    addr(buff).blen += len
+                    let len : int = lua_pointer2str(bf, sz, p)
+                    addsize(addr(buff), len)
                     break
                 }
             }
@@ -661,7 +660,7 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
                 {
                     // a 'long' as a UTF-8 sequence
                     var bf : uint8[8]
-                    var len : int = luaO_utf8esc(addr(bf[0]), uint64(va_i(argp)))
+                    let len : int = luaO_utf8esc(addr(bf[0]), uint64(va_i(argp)))
                     addstr2buff(addr(buff), addr(bf[0]) + UTF8BUFFSZ + -(len), uint64(len))
                     break
                 }
@@ -681,7 +680,7 @@ def luaO_pushvfstring(var L : lua_State?; var fmt : uint8?; var argp : CVaCursor
     addstr2buff(addr(buff), fmt, crt::strlen(fmt))
     // empty buffer into the stack
     clearbuff(addr(buff))
-    return addr(addr(reinterpret<GCUnion?>(addr((L.top.p - 1).val).value_.gc).ts).contents[0])
+    return addr(tsvalue(s2v(L.top.p - 1)).contents[0])
 }
 
 [variadic]
@@ -704,8 +703,7 @@ def luaO_chunkid(var out : uint8?; var source : uint8?; var srclen : uint64) {
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1), srclen * uint64(typeinfo sizeof(type<uint8>)))
         } else {
             // truncate it
-            crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source + 1), (bufflen - 1ul) * uint64(typeinfo sizeof(type<uint8>)))
-            out += bufflen - 1ul
+            addstr(out, source + 1, bufflen - 1ul)
             *out = uint8('\0')
         }
     } elif (*source == '@') {
@@ -734,8 +732,7 @@ def luaO_chunkid(var out : uint8?; var source : uint8?; var srclen : uint64) {
         // small one-line source?
         if (srclen < bufflen && nl == null) {
             // keep it
-            crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source), srclen * uint64(typeinfo sizeof(type<uint8>)))
-            out += srclen
+            addstr(out, source, srclen)
         } else {
             // stop at first newline
             if (nl != null) {
@@ -744,8 +741,7 @@ def luaO_chunkid(var out : uint8?; var source : uint8?; var srclen : uint64) {
             if (srclen > bufflen) {
                 srclen = bufflen
             }
-            crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(source), srclen * uint64(typeinfo sizeof(type<uint8>)))
-            out += srclen
+            addstr(out, source, srclen)
             crt::memcpy(reinterpret<void?>(out), reinterpret<void?>(cstr("...")),
                     (uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul) * uint64(typeinfo sizeof(type<uint8>)))
             out += uint64(typeinfo sizeof(type<uint8[4]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul

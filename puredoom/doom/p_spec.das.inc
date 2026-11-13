@@ -126,23 +126,17 @@ def getNextSector(var line : line_s?; var sec : sector_t?) : sector_t? {
 // FIND LOWEST FLOOR HEIGHT IN SURROUNDING SECTORS
 [c_function]
 def P_FindLowestFloorSurrounding(var sec : sector_t?) : int {
-    var i : int
     var check : line_s?
     var other : sector_t?
     var floor : int = sec.floorheight
-    i = 0
-    while (i < sec.linecount) {
-        {
-            check = sec.lines[i]
-            other = getNextSector(check, sec)
-            if (other == null) {
-                continue
-            }
-            if (other.floorheight < floor) {
-                floor = other.floorheight
-            }
-        } finally {
-            i++
+    for (i in range(sec.linecount)) {
+        check = sec.lines[i]
+        other = getNextSector(check, sec)
+        if (other == null) {
+            continue
+        }
+        if (other.floorheight < floor) {
+            floor = other.floorheight
         }
     }
     return floor
@@ -152,23 +146,17 @@ def P_FindLowestFloorSurrounding(var sec : sector_t?) : int {
 // FIND HIGHEST FLOOR HEIGHT IN SURROUNDING SECTORS
 [c_function]
 def P_FindHighestFloorSurrounding(var sec : sector_t?) : int {
-    var i : int
     var check : line_s?
     var other : sector_t?
     var floor : int = -500 * FRACUNIT
-    i = 0
-    while (i < sec.linecount) {
-        {
-            check = sec.lines[i]
-            other = getNextSector(check, sec)
-            if (other == null) {
-                continue
-            }
-            if (other.floorheight > floor) {
-                floor = other.floorheight
-            }
-        } finally {
-            i++
+    for (i in range(sec.linecount)) {
+        check = sec.lines[i]
+        other = getNextSector(check, sec)
+        if (other == null) {
+            continue
+        }
+        if (other.floorheight > floor) {
+            floor = other.floorheight
         }
     }
     return floor
@@ -184,7 +172,7 @@ def P_FindNextHighestFloor(var sec : sector_t?; currentheight : int) : int {
     var min : int
     var check : line_s?
     var other : sector_t?
-    var height : int = currentheight
+    let height : int = currentheight
     var heightlist : int[20]
     {
         i = 0
@@ -232,23 +220,17 @@ def P_FindNextHighestFloor(var sec : sector_t?; currentheight : int) : int {
 // FIND LOWEST CEILING IN THE SURROUNDING SECTORS
 [c_function]
 def P_FindLowestCeilingSurrounding(var sec : sector_t?) : int {
-    var i : int
     var check : line_s?
     var other : sector_t?
     var height : int = DOOM_MAXINT
-    i = 0
-    while (i < sec.linecount) {
-        {
-            check = sec.lines[i]
-            other = getNextSector(check, sec)
-            if (other == null) {
-                continue
-            }
-            if (other.ceilingheight < height) {
-                height = other.ceilingheight
-            }
-        } finally {
-            i++
+    for (i in range(sec.linecount)) {
+        check = sec.lines[i]
+        other = getNextSector(check, sec)
+        if (other == null) {
+            continue
+        }
+        if (other.ceilingheight < height) {
+            height = other.ceilingheight
         }
     }
     return height
@@ -257,23 +239,17 @@ def P_FindLowestCeilingSurrounding(var sec : sector_t?) : int {
 // FIND HIGHEST CEILING IN THE SURROUNDING SECTORS
 [c_function]
 def P_FindHighestCeilingSurrounding(var sec : sector_t?) : int {
-    var i : int
     var check : line_s?
     var other : sector_t?
     var height : int = 0
-    i = 0
-    while (i < sec.linecount) {
-        {
-            check = sec.lines[i]
-            other = getNextSector(check, sec)
-            if (other == null) {
-                continue
-            }
-            if (other.ceilingheight > height) {
-                height = other.ceilingheight
-            }
-        } finally {
-            i++
+    for (i in range(sec.linecount)) {
+        check = sec.lines[i]
+        other = getNextSector(check, sec)
+        if (other == null) {
+            continue
+        }
+        if (other.ceilingheight > height) {
+            height = other.ceilingheight
         }
     }
     return height
@@ -282,13 +258,10 @@ def P_FindHighestCeilingSurrounding(var sec : sector_t?) : int {
 // RETURN NEXT SECTOR # THAT LINE TAG REFERS TO
 [c_function]
 def P_FindSectorFromLineTag(var line : line_s?; start : int) : int {
-    var i : int
-    i = start + 1
-    while (i < numsectors) {
+    for (i in range(start + 1, numsectors)) {
         if (sectors[i].tag == line.tag) {
             return i
         }
-        i++
     }
     return -1
 }
@@ -296,24 +269,18 @@ def P_FindSectorFromLineTag(var line : line_s?; start : int) : int {
 // Find minimum light from an adjacent sector
 [c_function]
 def P_FindMinSurroundingLight(var sector : sector_t?; max : int) : int {
-    var i : int
     var min : int
     var line : line_s?
     var check : sector_t?
     min = max
-    i = 0
-    while (i < sector.linecount) {
-        {
-            line = sector.lines[i]
-            check = getNextSector(line, sector)
-            if (check == null) {
-                continue
-            }
-            if (int(check.lightlevel) < min) {
-                min = int(check.lightlevel)
-            }
-        } finally {
-            i++
+    for (i in range(sector.linecount)) {
+        line = sector.lines[i]
+        check = getNextSector(line, sector)
+        if (check == null) {
+            continue
+        }
+        if (int(check.lightlevel) < min) {
+            min = int(check.lightlevel)
         }
     }
     return min
@@ -914,9 +881,8 @@ def P_UpdateSpecials {
         anim++
     }
     // ANIMATE LINE SPECIALS
-    i = 0
-    while (i < int(numlinespecials)) {
-        line = linespeciallist[i]
+    for (i1 in range(int(numlinespecials))) {
+        line = linespeciallist[i1]
         c_switch(int(line.special)) {
             case(48) {
                 // EFFECT FIRSTCOL SCROLL +
@@ -924,7 +890,6 @@ def P_UpdateSpecials {
                 break
             }
         }
-        i++
     }
     // DO BUTTONS
     for (i1 in range(MAXBUTTONS)) {
@@ -1118,17 +1083,15 @@ def P_SpawnSpecials {
     }
     // Init line EFFECTs
     numlinespecials = int16(0)
-    i = 0
-    while (i < numlines) {
-        c_switch(int(lines[i].special)) {
+    for (i1 in range(numlines)) {
+        c_switch(int(lines[i1].special)) {
             case(48) {
                 // EFFECT FIRSTCOL SCROLL+
-                linespeciallist[int(numlinespecials)] = addr(lines[i])
+                linespeciallist[int(numlinespecials)] = addr(lines[i1])
                 numlinespecials = int16(int(numlinespecials) + 1)
                 break
             }
         }
-        i++
     }
     // Init other misc stuff
     for (i1 in range(MAXCEILINGS)) {

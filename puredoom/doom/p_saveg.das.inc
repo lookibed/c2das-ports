@@ -28,7 +28,7 @@ def P_ArchivePlayers {
         if (int(playeringame[i]) == 0) {
             continue
         }
-        save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+        PADSAVEP()
         dest = reinterpret<player_s?>(save_p)
         doom_memcpy(reinterpret<void?>(dest), reinterpret<void?>(addr(players[0]) + end_index(i, 4)), typeinfo sizeof(type<player_s>))
         save_p += uint64(typeinfo sizeof(type<player_s>))
@@ -50,7 +50,7 @@ def P_UnArchivePlayers {
         if (int(playeringame[i]) == 0) {
             continue
         }
-        save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+        PADSAVEP()
         doom_memcpy(reinterpret<void?>(addr(players[0]) + end_index(i, 4)), reinterpret<void?>(save_p), typeinfo sizeof(type<player_s>))
         save_p += uint64(typeinfo sizeof(type<player_s>))
         // will be set when unarc thinker
@@ -240,7 +240,7 @@ def P_ArchiveThinkers {
                 var _t0 = save_p
                 save_p++
                 *_t0 = uint8(thinkerclass_t.tc_mobj)
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 mobj = reinterpret<mobj_s?>(save_p)
                 doom_memcpy(reinterpret<void?>(mobj), reinterpret<void?>(th), typeinfo sizeof(type<mobj_s>))
                 save_p += uint64(typeinfo sizeof(type<mobj_s>))
@@ -291,7 +291,7 @@ def P_UnArchiveThinkers {
                 return
             }
             case(1) {
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 mobj = reinterpret<mobj_s?>(Z_Malloc(typeinfo sizeof(type<mobj_s>), PU_LEVEL, null))
                 doom_memcpy(reinterpret<void?>(mobj), reinterpret<void?>(save_p), typeinfo sizeof(type<mobj_s>))
                 save_p += uint64(typeinfo sizeof(type<mobj_s>))
@@ -355,7 +355,7 @@ def P_ArchiveSpecials {
                     var _t0 = save_p
                     save_p++
                     *_t0 = uint8(anon_940.tc_ceiling)
-                    save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                    PADSAVEP()
                     ceiling = reinterpret<ceiling_t?>(save_p)
                     doom_memcpy(reinterpret<void?>(ceiling), reinterpret<void?>(th), typeinfo sizeof(type<ceiling_t>))
                     save_p += uint64(typeinfo sizeof(type<ceiling_t>))
@@ -367,7 +367,7 @@ def P_ArchiveSpecials {
                 var _t1 = save_p
                 save_p++
                 *_t1 = uint8(anon_940.tc_ceiling)
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 ceiling = reinterpret<ceiling_t?>(save_p)
                 doom_memcpy(reinterpret<void?>(ceiling), reinterpret<void?>(th), typeinfo sizeof(type<ceiling_t>))
                 save_p += uint64(typeinfo sizeof(type<ceiling_t>))
@@ -378,7 +378,7 @@ def P_ArchiveSpecials {
                 var _t2 = save_p
                 save_p++
                 *_t2 = uint8(anon_940.tc_door)
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 door = reinterpret<vldoor_t?>(save_p)
                 doom_memcpy(reinterpret<void?>(door), reinterpret<void?>(th), typeinfo sizeof(type<vldoor_t>))
                 save_p += uint64(typeinfo sizeof(type<vldoor_t>))
@@ -389,7 +389,7 @@ def P_ArchiveSpecials {
                 var _t3 = save_p
                 save_p++
                 *_t3 = uint8(anon_940.tc_floor)
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 floor = reinterpret<floormove_t?>(save_p)
                 doom_memcpy(reinterpret<void?>(floor), reinterpret<void?>(th), typeinfo sizeof(type<floormove_t>))
                 save_p += uint64(typeinfo sizeof(type<floormove_t>))
@@ -400,7 +400,7 @@ def P_ArchiveSpecials {
                 var _t4 = save_p
                 save_p++
                 *_t4 = uint8(anon_940.tc_plat)
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 plat = reinterpret<plat_t?>(save_p)
                 doom_memcpy(reinterpret<void?>(plat), reinterpret<void?>(th), typeinfo sizeof(type<plat_t>))
                 save_p += uint64(typeinfo sizeof(type<plat_t>))
@@ -411,7 +411,7 @@ def P_ArchiveSpecials {
                 var _t5 = save_p
                 save_p++
                 *_t5 = uint8(anon_940.tc_flash)
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 flash = reinterpret<lightflash_t?>(save_p)
                 doom_memcpy(reinterpret<void?>(flash), reinterpret<void?>(th), typeinfo sizeof(type<lightflash_t>))
                 save_p += uint64(typeinfo sizeof(type<lightflash_t>))
@@ -422,7 +422,7 @@ def P_ArchiveSpecials {
                 var _t6 = save_p
                 save_p++
                 *_t6 = uint8(anon_940.tc_strobe)
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 strobe = reinterpret<strobe_t?>(save_p)
                 doom_memcpy(reinterpret<void?>(strobe), reinterpret<void?>(th), typeinfo sizeof(type<strobe_t>))
                 save_p += uint64(typeinfo sizeof(type<strobe_t>))
@@ -433,7 +433,7 @@ def P_ArchiveSpecials {
                 var _t7 = save_p
                 save_p++
                 *_t7 = uint8(anon_940.tc_glow)
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 glow = reinterpret<glow_t?>(save_p)
                 doom_memcpy(reinterpret<void?>(glow), reinterpret<void?>(th), typeinfo sizeof(type<glow_t>))
                 save_p += uint64(typeinfo sizeof(type<glow_t>))
@@ -472,7 +472,7 @@ def P_UnArchiveSpecials {
                 return
             }
             case(0) {
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 ceiling = reinterpret<ceiling_t?>(Z_Malloc(typeinfo sizeof(type<ceiling_t>), PU_LEVEL, null))
                 doom_memcpy(reinterpret<void?>(ceiling), reinterpret<void?>(save_p), typeinfo sizeof(type<ceiling_t>))
                 save_p += uint64(typeinfo sizeof(type<ceiling_t>))
@@ -486,7 +486,7 @@ def P_UnArchiveSpecials {
                 break
             }
             case(1) {
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 door = reinterpret<vldoor_t?>(Z_Malloc(typeinfo sizeof(type<vldoor_t>), PU_LEVEL, null))
                 doom_memcpy(reinterpret<void?>(door), reinterpret<void?>(save_p), typeinfo sizeof(type<vldoor_t>))
                 save_p += uint64(typeinfo sizeof(type<vldoor_t>))
@@ -497,7 +497,7 @@ def P_UnArchiveSpecials {
                 break
             }
             case(2) {
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 floor = reinterpret<floormove_t?>(Z_Malloc(typeinfo sizeof(type<floormove_t>), PU_LEVEL, null))
                 doom_memcpy(reinterpret<void?>(floor), reinterpret<void?>(save_p), typeinfo sizeof(type<floormove_t>))
                 save_p += uint64(typeinfo sizeof(type<floormove_t>))
@@ -508,7 +508,7 @@ def P_UnArchiveSpecials {
                 break
             }
             case(3) {
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 plat = reinterpret<plat_t?>(Z_Malloc(typeinfo sizeof(type<plat_t>), PU_LEVEL, null))
                 doom_memcpy(reinterpret<void?>(plat), reinterpret<void?>(save_p), typeinfo sizeof(type<plat_t>))
                 save_p += uint64(typeinfo sizeof(type<plat_t>))
@@ -522,7 +522,7 @@ def P_UnArchiveSpecials {
                 break
             }
             case(4) {
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 flash = reinterpret<lightflash_t?>(Z_Malloc(typeinfo sizeof(type<lightflash_t>), PU_LEVEL, null))
                 doom_memcpy(reinterpret<void?>(flash), reinterpret<void?>(save_p), typeinfo sizeof(type<lightflash_t>))
                 save_p += uint64(typeinfo sizeof(type<lightflash_t>))
@@ -532,7 +532,7 @@ def P_UnArchiveSpecials {
                 break
             }
             case(5) {
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 strobe = reinterpret<strobe_t?>(Z_Malloc(typeinfo sizeof(type<strobe_t>), PU_LEVEL, null))
                 doom_memcpy(reinterpret<void?>(strobe), reinterpret<void?>(save_p), typeinfo sizeof(type<strobe_t>))
                 save_p += uint64(typeinfo sizeof(type<strobe_t>))
@@ -542,7 +542,7 @@ def P_UnArchiveSpecials {
                 break
             }
             case(6) {
-                save_p += 4l - (int64(intptr(save_p)) & 3l) & 3l
+                PADSAVEP()
                 glow = reinterpret<glow_t?>(Z_Malloc(typeinfo sizeof(type<glow_t>), PU_LEVEL, null))
                 doom_memcpy(reinterpret<void?>(glow), reinterpret<void?>(save_p), typeinfo sizeof(type<glow_t>))
                 save_p += uint64(typeinfo sizeof(type<glow_t>))

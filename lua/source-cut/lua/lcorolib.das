@@ -4,6 +4,7 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/c_switch
 require c_runtime/cstr
 require c_runtime/variadic
@@ -37,6 +38,32 @@ let private LUA_TNONE = -1
 let private LUA_VERSION_NUM = 504
 let private LUAL_NUMSIZES = uint64(typeinfo sizeof(type<int64>)) * 16ul + uint64(typeinfo sizeof(type<double>))
 
+// lua.h:376: #define lua_pop(L,n) lua_settop(L, -(n)-1)
+[c_macro]
+def private lua_pop(var L; n) {
+    lua_settop(L, -n - 1)
+}
+
+// lua.h:401: #define lua_insert(L,idx) lua_rotate(L, (idx), 1)
+[c_macro]
+def private lua_insert(var L; idx) {
+    lua_rotate(L, idx, 1)
+}
+
+// lua.h:316: #define lua_yield(L,n) lua_yieldk(L, (n), 0, NULL)
+[c_macro]
+def private lua_yield(var L; n) => lua_yieldk(L, n, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+
+// lua.h:390: #define lua_isnone(L,n) (lua_type(L, (n)) == LUA_TNONE)
+[c_macro]
+def private lua_isnone(var L; n) => lua_type(L, n) == LUA_TNONE
+
+// lauxlib.h:47: #define luaL_checkversion(L) luaL_checkversion_(L, LUA_VERSION_NUM, LUAL_NUMSIZES)
+[c_macro]
+def private luaL_checkversion(var L) {
+    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+}
+
 def private getco(var L : lua_State?) : lua_State? {
     var co : lua_State? = lua_tothread(L, 1)
     let _t0 = co != null || luaL_typeerror(L, 1, cstr("thread")) != 0
@@ -59,7 +86,7 @@ def private auxresume(var L : lua_State?; var co : lua_State?; narg : int) : int
     if (status == LUA_OK || status == LUA_YIELD) {
         if (lua_checkstack(L, nres + 1) == 0) {
             // remove results anyway
-            lua_settop(co, -nres - 1)
+            lua_pop(co, nres)
             lua_pushstring(L, cstr("too many results to resume"))
             // error flag
             return -1
@@ -81,20 +108,20 @@ def private luaB_coresume(var L : lua_State?) : int {
     r = auxresume(L, co, lua_gettop(L) - 1)
     if (r < 0) {
         lua_pushboolean(L, 0)
-        lua_rotate(L, -2, 1)
+        lua_insert(L, -2)
         // return false + error message
         return 2
     } else {
         lua_pushboolean(L, 1)
-        lua_rotate(L, -(r + 1), 1)
+        lua_insert(L, -(r + 1))
         // return true + 'resume' returns
         return r + 1
     }
 }
 
 def private luaB_auxwrap(var L : lua_State?) : int {
-    var co : lua_State? = lua_tothread(L, LUA_REGISTRYINDEX - 1)
-    var r : int = auxresume(L, co, lua_gettop(L))
+    var co : lua_State? = lua_tothread(L, lua_upvalueindex(1))
+    let r : int = auxresume(L, co, lua_gettop(L))
     // error?
     if (r < 0) {
         var stat : int = lua_status(co)
@@ -110,7 +137,7 @@ def private luaB_auxwrap(var L : lua_State?) : int {
             // ... error object is a string?
             // add extra info, if available
             luaL_where(L, 1)
-            lua_rotate(L, -2, 1)
+            lua_insert(L, -2)
             lua_concat(L, 2)
         }
         // propagate error
@@ -137,7 +164,7 @@ def private luaB_cowrap(var L : lua_State?) : int {
 }
 
 def private luaB_yield(var L : lua_State?) : int {
-    return lua_yieldk(L, lua_gettop(L), 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+    return lua_yield(L, lua_gettop(L))
 }
 
 [c_function]
@@ -180,13 +207,13 @@ def private luaB_costatus(var L : lua_State?) : int {
 }
 
 def private luaB_yieldable(var L : lua_State?) : int {
-    var co : lua_State? = lua_type(L, 1) == LUA_TNONE ? L : getco(L)
+    var co : lua_State? = lua_isnone(L, 1) ? L : getco(L)
     lua_pushboolean(L, lua_isyieldable(co))
     return 1
 }
 
 def private luaB_corunning(var L : lua_State?) : int {
-    var ismain : int = lua_pushthread(L)
+    let ismain : int = lua_pushthread(L)
     lua_pushboolean(L, ismain)
     return 2
 }
@@ -217,7 +244,7 @@ def private luaB_close(var L : lua_State?) : int {
 
 [c_function]
 def luaopen_coroutine(var L : lua_State?) : int {
-    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+    luaL_checkversion(L)
     lua_createtable(L, 0, int(uint64(typeinfo sizeof(type<luaL_Reg[9]>)) / uint64(typeinfo sizeof(type<luaL_Reg>)) - 1ul))
     luaL_setfuncs(L, addr(co_funcs[0]), 0)
     return 1

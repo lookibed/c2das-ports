@@ -437,7 +437,6 @@ def R_DrawViewBorder {
     var top : int
     var side : int
     var ofs : int
-    var i : int
     if (scaledviewwidth == SCREENWIDTH) {
         return
     }
@@ -451,11 +450,9 @@ def R_DrawViewBorder {
     // copy sides using wraparound
     ofs = top * SCREENWIDTH + SCREENWIDTH - side
     side <<= 1
-    i = 1
-    while (i < viewheight) {
+    for (i in range(1, viewheight)) {
         R_VideoErase(uint(ofs), side)
         ofs += SCREENWIDTH
-        i++
     }
     // ?
     V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT)

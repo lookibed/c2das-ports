@@ -325,7 +325,7 @@ def R_GenerateComposite(texnum : int) {
     // it is purgable from zone memory.
     if (reinterpret<memblock_s?>(_c_block + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pub/doom/work/src/r_data.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1113/doom/work/src/r_data.c:"))
         doom_concat(addr(buf[0]), doom_itoa(283, 10))
         I_Error(addr(buf[0]))
     }
@@ -575,10 +575,8 @@ def R_InitTextures {
     }
     // Create translation table for global animation.
     texturetranslation = reinterpret<int?>(Z_Malloc(int(uint64(numtextures + 1) * uint64(typeinfo sizeof(type<int>))), PU_STATIC, null))
-    i = 0
-    while (i < numtextures) {
-        texturetranslation[i] = i
-        i++
+    for (i1 in range(numtextures)) {
+        texturetranslation[i1] = i1
     }
     invoke(doom_free, reinterpret<void?>(patchlookup))
 }
@@ -586,16 +584,13 @@ def R_InitTextures {
 // R_InitFlats
 [c_function]
 def R_InitFlats {
-    var i : int
     firstflat = W_GetNumForName(cstr("F_START")) + 1
     lastflat = W_GetNumForName(cstr("F_END")) - 1
     numflats = lastflat - firstflat + 1
     // Create translation table for global animation.
     flattranslation = reinterpret<int?>(Z_Malloc(int(uint64(numflats + 1) * uint64(typeinfo sizeof(type<int>))), PU_STATIC, null))
-    i = 0
-    while (i < numflats) {
+    for (i in range(numflats)) {
         flattranslation[i] = i
-        i++
     }
 }
 
@@ -679,17 +674,14 @@ def R_FlatNumForName(var name : uint8?) : int {
 // Filter out NoTexture indicator.
 [c_function]
 def R_CheckTextureNumForName(var name : uint8?) : int {
-    var i : int
     // "NoTexture" marker.
     if (name[0] == '-') {
         return 0
     }
-    i = 0
-    while (i < numtextures) {
+    for (i in range(numtextures)) {
         if (doom_strncasecmp(addr(textures[i].name[0]), name, 8) == 0) {
             return i
         }
-        i++
     }
     return -1
 }
@@ -732,11 +724,9 @@ def R_PrecacheLevel {
     // Precache flats.
     flatpresent = reinterpret<uint8?>(invoke(doom_malloc, numflats))
     doom_memset(reinterpret<void?>(flatpresent), 0, numflats)
-    i = 0
-    while (i < numsectors) {
-        flatpresent[int(sectors[i].floorpic)] = 1u8
-        flatpresent[int(sectors[i].ceilingpic)] = 1u8
-        i++
+    for (i1 in range(numsectors)) {
+        flatpresent[int(sectors[i1].floorpic)] = 1u8
+        flatpresent[int(sectors[i1].ceilingpic)] = 1u8
     }
     flatmemory = 0
     i = 0
@@ -751,12 +741,10 @@ def R_PrecacheLevel {
     // Precache textures.
     texturepresent = reinterpret<uint8?>(invoke(doom_malloc, numtextures))
     doom_memset(reinterpret<void?>(texturepresent), 0, numtextures)
-    i = 0
-    while (i < numsides) {
-        texturepresent[int(sides[i].toptexture)] = 1u8
-        texturepresent[int(sides[i].midtexture)] = 1u8
-        texturepresent[int(sides[i].bottomtexture)] = 1u8
-        i++
+    for (i1 in range(numsides)) {
+        texturepresent[int(sides[i1].toptexture)] = 1u8
+        texturepresent[int(sides[i1].midtexture)] = 1u8
+        texturepresent[int(sides[i1].bottomtexture)] = 1u8
     }
     // Sky texture is always present.
     // Note that F_SKY1 is the name used to

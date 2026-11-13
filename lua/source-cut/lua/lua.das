@@ -8,6 +8,7 @@ options jit_split_modules = 0
 require c_runtime/c_args
 require c_runtime/c_function
 require c_runtime/c_jit_build
+require c_runtime/c_macro
 require c_runtime/c_signal
 require c_runtime/c_switch
 require c_runtime/cstr
@@ -66,6 +67,65 @@ let private LUA_GCRESTART = 1
 let private LUA_GCGEN = 10
 let private LUA_GCSTOP = 0
 
+// lua.h:398: #define lua_tostring(L,i) lua_tolstring(L, (i), NULL)
+[c_macro]
+def private lua_tostring(var L; i) : uint8? => lua_tolstring(L, i, null)
+
+// lua.h:376: #define lua_pop(L,n) lua_settop(L, -(n)-1)
+[c_macro]
+def private lua_pop(var L; n) {
+    lua_settop(L, -n - 1)
+}
+
+// lauxlib.h:142: #define luaL_typename(L,i) lua_typename(L, lua_type(L,(i)))
+[c_macro]
+def private luaL_typename(var L; i) : uint8? => lua_typename(L, lua_type(L, i))
+
+// lua.h:401: #define lua_insert(L,idx) lua_rotate(L, (idx), 1)
+[c_macro]
+def private lua_insert(var L; idx) {
+    lua_rotate(L, idx, 1)
+}
+
+// lua.h:298: #define lua_pcall(L,n,r,f) lua_pcallk(L, (n), (r), (f), 0, NULL)
+[c_macro]
+def private lua_pcall(var L; n; r; f) => lua_pcallk(L, n, r, f, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+
+// lua.h:403: #define lua_remove(L,idx) (lua_rotate(L, (idx), -1), lua_pop(L, 1))
+[c_macro]
+def private lua_remove(var L; idx) {
+    lua_rotate(L, idx, -1)
+    lua_pop(L, 1)
+}
+
+// lauxlib.h:95: #define luaL_loadfile(L,f) luaL_loadfilex(L,f,NULL)
+[c_macro]
+def private luaL_loadfile(var L; var f) => luaL_loadfilex(L, f, null)
+
+// lauxlib.h:154: #define luaL_loadbuffer(L,s,sz,n) luaL_loadbufferx(L,s,sz,n,NULL)
+[c_macro]
+def private luaL_loadbuffer(var L; var s; sz; var n) => luaL_loadbufferx(L, s, sz, n, null)
+
+// lua.h:374: #define lua_tointeger(L,i) lua_tointegerx(L,(i),NULL)
+[c_macro]
+def private lua_tointeger(var L; i) => lua_tointegerx(L, i, null)
+
+// lauxlib.h:47: #define luaL_checkversion(L) luaL_checkversion_(L, LUA_VERSION_NUM, LUAL_NUMSIZES)
+[c_macro]
+def private luaL_checkversion(var L) {
+    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+}
+
+// lua.c:426: #define lua_stdin_is_tty() 1
+[c_macro]
+def private lua_stdin_is_tty() => 1
+
+// lua.h:382: #define lua_pushcfunction(L,f) lua_pushcclosure(L, (f), 0)
+[c_macro]
+def private lua_pushcfunction(var L; f) {
+    lua_pushcclosure(L, f, 0)
+}
+
 // Hook set by signal function to stop the interpreter.
 def private lstop(var L : lua_State?; var ar : lua_Debug?) {
     // unused arg.
@@ -79,7 +139,7 @@ def private lstop(var L : lua_State?; var ar : lua_Debug?) {
 // this function only sets a hook that, when called, will stop the
 // interpreter.
 def private laction(i : int) {
-    var flag : int = LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT
+    let flag : int = LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT
     // if another SIGINT happens, terminate process
     c_signal(i, default<function<(a0 : int) : void>>)
     lua_sethook(globalL, @@lstop, flag, 1)
@@ -119,13 +179,13 @@ def private l_message(var pname : uint8?; var msg : uint8?) {
 [c_function]
 def private report(var L : lua_State?; status : int) : int {
     if (status != LUA_OK) {
-        var msg : uint8? = lua_tolstring(L, -1, null)
+        var msg : uint8? = lua_tostring(L, -1)
         if (msg == null) {
             msg = cstr("(error message not a string)")
         }
         l_message(progname, msg)
         // remove message
-        lua_settop(L, -1 - 1)
+        lua_pop(L, 1)
     }
     return status
 }
@@ -133,7 +193,7 @@ def private report(var L : lua_State?; status : int) : int {
 // Message handler used to run all chunks
 [c_function]
 def private msghandler(var L : lua_State?) : int {
-    var msg : uint8? = lua_tolstring(L, 1, null)
+    var msg : uint8? = lua_tostring(L, 1)
     // is error object not a string?
     if (msg == null) {
         // does it have a metamethod
@@ -142,7 +202,7 @@ def private msghandler(var L : lua_State?) : int {
             // that is the message
             return 1
         } else {
-            msg = lua_pushfstring`va(L, cstr("(error object is a %s value)"), (lua_typename(L, lua_type(L, 1)),))
+            msg = lua_pushfstring`va(L, cstr("(error object is a %s value)"), (luaL_typename(L, 1),))
         }
     }
     // append a standard traceback
@@ -156,21 +216,20 @@ def private msghandler(var L : lua_State?) : int {
 def private docall(var L : lua_State?; narg : int; nres : int) : int {
     var status : int
     // function index
-    var base : int = lua_gettop(L) - narg
+    let base : int = lua_gettop(L) - narg
     // push message handler
     lua_pushcclosure(L, @@msghandler, 0)
     // put it under function and args
-    lua_rotate(L, base, 1)
+    lua_insert(L, base)
     // to be available to 'laction'
     globalL = L
     // set C-signal handler
     c_signal(2, @@laction)
-    status = lua_pcallk(L, narg, nres, base, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+    status = lua_pcall(L, narg, nres, base)
     // reset C-signal handler
     c_signal(2, default<function<(a0 : int) : void>>)
     // remove message handler from the stack
-    lua_rotate(L, base, -1)
-    lua_settop(L, -1 - 1)
+    lua_remove(L, base)
     return status
 }
 
@@ -211,12 +270,12 @@ def private dochunk(var L : lua_State?; var status : int) : int {
 }
 
 def private dofile(var L : lua_State?; var name : uint8?) : int {
-    return dochunk(L, luaL_loadfilex(L, name, null))
+    return dochunk(L, luaL_loadfile(L, name))
 }
 
 [c_function]
 def private dostring(var L : lua_State?; var s : uint8?; var name : uint8?) : int {
-    return dochunk(L, luaL_loadbufferx(L, s, crt::strlen(s), name, null))
+    return dochunk(L, luaL_loadbuffer(L, s, crt::strlen(s), name))
 }
 
 // Receives 'globname[=modname]' and runs 'globname = require(modname)'.
@@ -270,8 +329,7 @@ def private pushargs(var L : lua_State?) : int {
         i++
     }
     // remove table from the stack
-    lua_rotate(L, -i, -1)
-    lua_settop(L, -1 - 1)
+    lua_remove(L, -i)
     return n
 }
 
@@ -283,10 +341,10 @@ def private handle_script(var L : lua_State?; var argv : uint8 ??) : int {
         // stdin
         fname = null
     }
-    status = luaL_loadfilex(L, fname, null)
+    status = luaL_loadfile(L, fname)
     if (status == LUA_OK) {
         // push arguments to script
-        var n : int = pushargs(L)
+        let n : int = pushargs(L)
         status = docall(L, n, LUA_MULTRET)
     }
     return report(L, status)
@@ -406,7 +464,7 @@ def private runargs(var L : lua_State?; var argv : uint8 ??; n : int) : int {
     var i : int
     i = 1
     while (i < n) {
-        var option : int = int(argv[i][1])
+        let option : int = int(argv[i][1])
         // already checked
         c_switch(option) {
             case('e', 'l') {
@@ -465,8 +523,7 @@ def private get_prompt(var L : lua_State?; firstline : int) : uint8? {
         // apply 'tostring' over the value
         var p : uint8? = luaL_tolstring(L, -1, null)
         // remove original value
-        lua_rotate(L, -2, -1)
-        lua_settop(L, -1 - 1)
+        lua_remove(L, -2)
         return p
     }
 }
@@ -496,9 +553,9 @@ def private pushline(var L : lua_State?; firstline : int) : int {
     var prmt : uint8? = get_prompt(L, firstline)
     crt::fputs(prmt, crt::c_stdout())
     crt::fflush(crt::c_stdout())
-    var readstatus : int = int_of(crt::fgets(b, LUA_MAXINPUT, crt::c_stdin()) != null)
+    let readstatus : int = int_of(crt::fgets(b, LUA_MAXINPUT, crt::c_stdin()) != null)
     // remove prompt
-    lua_settop(L, -1 - 1)
+    lua_pop(L, 1)
     if (readstatus == 0) {
         // no input
         return 0
@@ -525,20 +582,19 @@ def private pushline(var L : lua_State?; firstline : int) : int {
 [c_function]
 def private addreturn(var L : lua_State?) : int {
     // original line
-    var line : uint8? = lua_tolstring(L, -1, null)
+    var line : uint8? = lua_tostring(L, -1)
     var retline : uint8? = lua_pushfstring`va(L, cstr("return %s;"), (line,))
-    var status : int = luaL_loadbufferx(L, retline, crt::strlen(retline), cstr("=stdin"), null)
+    let status : int = luaL_loadbufferx(L, retline, crt::strlen(retline), cstr("=stdin"), null)
     if (status == LUA_OK) {
         // remove modified line
-        lua_rotate(L, -2, -1)
-        lua_settop(L, -1 - 1)
+        lua_remove(L, -2)
         // non empty?
         if (line[0] != '\0') {
             // keep history
         }
     } else {
         // pop result from 'luaL_loadbuffer' and modified line
-        lua_settop(L, -2 - 1)
+        lua_pop(L, 2)
     }
     return status
 }
@@ -552,19 +608,18 @@ def private multiline(var L : lua_State?) : int {
         // get what it has
         var line : uint8? = lua_tolstring(L, 1, addr(len))
         // try it
-        var status : int = luaL_loadbufferx(L, line, len, cstr("=stdin"), null)
+        let status : int = luaL_loadbufferx(L, line, len, cstr("=stdin"), null)
         if (incomplete(L, status) == 0 || pushline(L, 0) == 0) {
             // keep history
             // should not or cannot try to add continuation line
             return status
         }
         // remove error message (from incomplete line)
-        lua_rotate(L, -2, -1)
-        lua_settop(L, -1 - 1)
+        lua_remove(L, -2)
         // add newline...
         lua_pushstring(L, cstr("\n"))
         // ...between the two lines
-        lua_rotate(L, -2, 1)
+        lua_insert(L, -2)
         // join them
         lua_concat(L, 3)
     }
@@ -589,21 +644,20 @@ def private loadline(var L : lua_State?) : int {
         status = multiline(L)
     }
     // remove line from the stack
-    lua_rotate(L, 1, -1)
-    lua_settop(L, -1 - 1)
+    lua_remove(L, 1)
     return status
 }
 
 // Prints (calling the Lua 'print' function) any values on the stack
 def private l_print(var L : lua_State?) {
-    var n : int = lua_gettop(L)
+    let n : int = lua_gettop(L)
     // any result to be printed?
     if (n > 0) {
         luaL_checkstack(L, LUA_MINSTACK, cstr("too many results to print"))
         lua_getglobal(L, cstr("print"))
-        lua_rotate(L, 1, 1)
-        if (lua_pcallk(L, n, 0, 0, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>) != LUA_OK) {
-            l_message(progname, lua_pushfstring`va(L, cstr("error calling 'print' (%s)"), (lua_tolstring(L, -1, null),)))
+        lua_insert(L, 1)
+        if (lua_pcall(L, n, 0, 0) != LUA_OK) {
+            l_message(progname, lua_pushfstring`va(L, cstr("error calling 'print' (%s)"), (lua_tostring(L, -1),)))
         }
     }
 }
@@ -641,14 +695,14 @@ def private doREPL(var L : lua_State?) {
 // Reads the options and handles them all.
 [c_function]
 def private pmain(var L : lua_State?) : int {
-    var argc : int = int(lua_tointegerx(L, 1, null))
+    let argc : int = int(lua_tointeger(L, 1))
     var argv : uint8 ?? = reinterpret<uint8 ??>(lua_touserdata(L, 2))
     var script : int
-    var args : int = collectargs(argv, addr(script))
+    let args : int = collectargs(argv, addr(script))
     // first argv not an option
-    var optlim : int = (script > 0) ? script : argc
+    let optlim : int = (script > 0) ? script : argc
     // check that interpreter has correct version
-    luaL_checkversion_(L, double(LUA_VERSION_NUM), LUAL_NUMSIZES)
+    luaL_checkversion(L)
     // bad arg?
     if (args == has_error) {
         // 'script' has index of bad arg.
@@ -700,7 +754,7 @@ def private pmain(var L : lua_State?) : int {
     } elif (script < 1 && (args & (has_e | has_v)) == 0) {
         // no active option?
         // running in interactive mode?
-        if (1 != 0) {
+        if (lua_stdin_is_tty() != 0) {
             print_version()
             // do read-eval-print loop
             doREPL(L)
@@ -727,13 +781,13 @@ def c_main(argc : int; var argv : uint8 ??) : int {
     // stop GC while building state
     lua_gc`va(L, LUA_GCSTOP, VaNone())
     // to call 'pmain' in protected mode
-    lua_pushcclosure(L, @@pmain, 0)
+    lua_pushcfunction(L, @@pmain)
     // 1st argument
     lua_pushinteger(L, int64(argc))
     // 2nd argument
     lua_pushlightuserdata(L, reinterpret<void?>(argv))
     // do the call
-    status = lua_pcallk(L, 2, 1, 0, 0l, default<function<(var a0 : lua_State?; a1 : int; a2 : int64) : int>>)
+    status = lua_pcall(L, 2, 1, 0)
     // get result
     result = lua_toboolean(L, -1)
     report(L, status)

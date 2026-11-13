@@ -8,6 +8,7 @@ require c_runtime/c_args
 require c_runtime/c_bounds
 require c_runtime/c_exit
 require c_runtime/c_function
+require c_runtime/c_macro
 require c_runtime/c_switch
 require c_runtime/c_union
 require c_runtime/cstr
@@ -1791,10 +1792,74 @@ let private PPU_FRAME_TICKS = PPU_LINE_TICKS * SCREEN_HEIGHT_WITH_VBLANK
 let private _IONBF = 2
 let private GB_FRAMES = 60
 
+// common.h:42: #define SUCCESS(x) ((x) == OK)
+[c_macro]
+def private SUCCESS(x) => x == Result.OK
+
+// emulator.c:1009: #define ROM_BANK_COUNT(e) s_rom_bank_count[(e)->cart_info->rom_size]
+[c_macro]
+def private ROM_BANK_COUNT(e) => binjgb_all__s_rom_bank_count[int(e.cart_info.rom_size)]
+
+// emulator.c:1010: #define ROM_BANK_MASK(e) (ROM_BANK_COUNT(e) - 1)
+[c_macro]
+def private ROM_BANK_MASK(e) => ROM_BANK_COUNT(e) - 1u
+
+// emulator.c:1017: #define EXT_RAM_BYTE_SIZE(e) s_ext_ram_byte_size[(e)->cart_info->ext_ram_size]
+[c_macro]
+def private EXT_RAM_BYTE_SIZE(e) => binjgb_all__s_ext_ram_byte_size[int(e.cart_info.ext_ram_size)]
+
+// emulator.c:1018: #define EXT_RAM_BYTE_SIZE_MASK(e) (EXT_RAM_BYTE_SIZE(e) - 1)
+[c_macro]
+def private EXT_RAM_BYTE_SIZE_MASK(e) => EXT_RAM_BYTE_SIZE(e) - 1u
+
+// common.h:62: #define MAKE_RGBA(r, g, b, a) (((u32)(u8)(a) << 24) | ((u32)(u8)(b) << 16) | ((u32)(u8)(g) << 8) | ((u32)(u8)(r)))
+[c_macro]
+def private MAKE_RGBA(r; g; b; a) => (uint(uint8(a)) << 24u) | (uint(b) << 16u) | (uint(g) << 8u) | uint(r)
+
+// common.h:30: #define MIN(x, y) ((x) < (y) ? (x) : (y))
+[c_macro]
+def private MIN(x : int; y : int) => x < y ? x : y
+
+// common.h:30: #define MIN(x, y) ((x) < (y) ? (x) : (y))
+[c_macro]
+def private MIN(x : uint; y : uint) => x < y ? x : y
+
+// common.h:30: #define MIN(x, y) ((x) < (y) ? (x) : (y))
+[c_macro]
+def private MIN(x : uint64; y : uint64) => x < y ? x : y
+
+// common.h:30: #define MIN(x, y) ((x) < (y) ? (x) : (y))
+[c_macro]
+def private MIN(x : int; y : int8) => x < int(y) ? x : int(y)
+
+// common.h:30: #define MIN(x, y) ((x) < (y) ? (x) : (y))
+[c_macro]
+def private MIN(x : uint64; y : uint) => x < uint64(y) ? x : uint64(y)
+
+// common.h:38: #define ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
+[c_macro]
+def private ALIGN_UP(x; align) => x + uint64(align) - 1ul & uint64(~(align - 1))
+
+// common.h:31: #define MAX(x, y) ((x) > (y) ? (x) : (y))
+[c_macro]
+def private MAX(x : int; y : int) => x > y ? x : y
+
+// common.h:31: #define MAX(x, y) ((x) > (y) ? (x) : (y))
+[c_macro]
+def private MAX(x : int; y : int8) => x > int(y) ? x : int(y)
+
+// common.h:39: #define ALIGN_DOWN(x, align) ((x) & ~((align) - 1))
+[c_macro]
+def private ALIGN_DOWN(x; align) => x & uint64(~(align - 1))
+
+// emulator.c:3778: #define CHANNELX_SAMPLE(channel, sample) (-(sample) & (channel)->envelope.volume)
+[c_macro]
+def private CHANNELX_SAMPLE(channel; sample) => -int(sample) & int(channel.envelope.volume)
+
 [c_function]
 def replace_extension(var filename : uint8?; var extension : uint8?) : uint8? {
     // +1 for \0.
-    var length : uint64 = crt::strlen(filename) + crt::strlen(extension) + 1ul
+    let length : uint64 = crt::strlen(filename) + crt::strlen(extension) + 1ul
     var result : uint8? = reinterpret<uint8?>(crt::malloc(length))
     var last_dot : uint8? = crt::strrchr(filename, '.')
     if (last_dot == null) {
@@ -1812,7 +1877,7 @@ def private binjgb_all__get_file_size(var f : FILE?; var out_size : int64?) : Re
         fprintf(crt::c_stderr(), cstr("fseek to end failed.\n"))
         goto label 1
     }
-    var size : int64 = crt::ftell(reinterpret<void?>(f))
+    let size : int64 = crt::ftell(reinterpret<void?>(f))
     if (!(size >= 0l)) {
         fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 29)
         fprintf(crt::c_stderr(), cstr("ftell failed."))
@@ -1848,7 +1913,7 @@ def file_read_aligned(var filename : uint8?; align : uint64; var out_file_data :
         }
         break
     }
-    var aligned_size : int64 = int64(uint64(size) + align - 1ul & ~(align - 1ul))
+    let aligned_size : int64 = int64(uint64(size) + align - 1ul & ~(align - 1ul))
     var data : uint8? = reinterpret<uint8?>(crt::calloc(1ul, uint64(aligned_size)))
     if (data == null) {
         fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/common.c"), 49)
@@ -1895,7 +1960,7 @@ def file_write(var filename : uint8?; var file_data : FileData?) : Result {
 
 [c_function]
 def file_data_resize(var file_data : FileData?; new_size : uint64) {
-    var old_size : uint64 = file_data.size
+    let old_size : uint64 = file_data.size
     file_data.data = reinterpret<uint8?>(crt::realloc(reinterpret<void?>(file_data.data), new_size))
     if (new_size > old_size) {
         crt::memset(reinterpret<void?>(file_data.data + old_size), 0, new_size - old_size)
@@ -2109,7 +2174,7 @@ def private binjgb_all__map_hdma_source_address(_c_addr : uint16) : MemoryTypeAd
 def private binjgb_all__set_cart_info(var e : Emulator?; index : uint8) {
     e.state.cart_info_index = index
     e.cart_info = addr(e.cart_infos[0]) + end_index(int(index), 256)
-    if (!(e.cart_info.data != null && binjgb_all__init_memory_map(e) == Result.OK)) {
+    if (!(e.cart_info.data != null && SUCCESS(binjgb_all__init_memory_map(e)))) {
         fprintf(crt::c_stderr(), cstr("Unable to switch cart (%d).\n"), int(index))
         c_exit(1)
     }
@@ -2166,7 +2231,7 @@ def private binjgb_all__get_cart_info(var file_data : FileData?; offset : uint64
             goto label 1
         }
     }
-    var rom_byte_size : uint = binjgb_all__s_rom_bank_count[int(cart_info.rom_size)] << uint(ROM_BANK_SHIFT)
+    let rom_byte_size : uint = binjgb_all__s_rom_bank_count[int(cart_info.rom_size)] << uint(ROM_BANK_SHIFT)
     *max_file_size = *max_file_size > offset + uint64(rom_byte_size) ? *max_file_size : offset + uint64(rom_byte_size)
     cart_info.size = *max_file_size
     return Result.OK
@@ -2176,16 +2241,16 @@ def private binjgb_all__get_cart_info(var file_data : FileData?; offset : uint64
 
 [c_function]
 def private binjgb_all__get_cart_infos(var e : Emulator?) : Result {
-    var file_size : uint64 = e.file_data.size
+    let file_size : uint64 = e.file_data.size
     var max_file_size : uint64 = file_size
     var i : uint
     i = 0u
     while (uint64(i) < MAX_CART_INFOS) {
-        var offset : uint64 = uint64(i << uint(CART_INFO_SHIFT))
+        let offset : uint64 = uint64(i << uint(CART_INFO_SHIFT))
         if (offset + 32ul * 1024ul > e.file_data.size) {
             break
         }
-        if (binjgb_all__get_cart_info(addr(e.file_data), offset, addr(e.cart_infos[0]) + end_index(i, 256), Bool.TRUE, addr(max_file_size)) == Result.OK) {
+        if (SUCCESS(binjgb_all__get_cart_info(addr(e.file_data), offset, addr(e.cart_infos[0]) + end_index(i, 256), Bool.TRUE, addr(max_file_size)))) {
             if (binjgb_all__s_cart_type_info[int(e.cart_infos[i].cart_type)].mbc_type == MbcType.MBC_TYPE_MMM01) {
                 // MMM01 has the cart header at the end.
                 goto label 1
@@ -2195,7 +2260,7 @@ def private binjgb_all__get_cart_infos(var e : Emulator?) : Result {
         i++
     }
     // Maybe the logo checksum failed; try again without it required.
-    if (e.cart_info_count == 0u && binjgb_all__get_cart_info(addr(e.file_data), 0ul, addr(e.cart_infos[0]), Bool.FALSE, addr(max_file_size)) == Result.OK) {
+    if (e.cart_info_count == 0u && SUCCESS(binjgb_all__get_cart_info(addr(e.file_data), 0ul, addr(e.cart_infos[0]), Bool.FALSE, addr(max_file_size)))) {
         e.cart_info_count++
     }
     if (!(e.cart_info_count != 0u)) {
@@ -2231,7 +2296,7 @@ def private binjgb_all__dummy_read(var e : Emulator?; _c_addr : uint16) : uint8 
 
 [c_function]
 def private binjgb_all__set_rom_bank(var e : Emulator?; index : int; bank : uint16) {
-    var new_base : uint = (uint(bank) & binjgb_all__s_rom_bank_count[int(e.cart_info.rom_size)] - 1u) << uint(ROM_BANK_SHIFT)
+    let new_base : uint = (uint(bank) & ROM_BANK_MASK(e)) << uint(ROM_BANK_SHIFT)
     var base : uint? = addr(e.state.memory_map_state.rom_base[0]) + end_index(index, 2)
     if (new_base != *base) {
     }
@@ -2240,7 +2305,7 @@ def private binjgb_all__set_rom_bank(var e : Emulator?; index : int; bank : uint
 
 [c_function]
 def private binjgb_all__set_ext_ram_bank(var e : Emulator?; bank : uint8) {
-    var new_base : uint = uint(int(bank) << EXT_RAM_BANK_SHIFT) & binjgb_all__s_ext_ram_byte_size[int(e.cart_info.ext_ram_size)] - 1u
+    let new_base : uint = uint(int(bank) << EXT_RAM_BANK_SHIFT) & EXT_RAM_BYTE_SIZE_MASK(e)
     var base : uint? = addr(e.state.memory_map_state.ext_ram_base)
     if (new_base != *base) {
     }
@@ -2288,7 +2353,7 @@ def private binjgb_all__mbc1_write_rom_shared(var e : Emulator?; bank_lo_mask : 
             break
         }
     }
-    var hi_bank : uint16 = uint16(int(mbc1.byte_4000_5fff) << bank_hi_shift)
+    let hi_bank : uint16 = uint16(int(mbc1.byte_4000_5fff) << bank_hi_shift)
     var rom1_bank : uint16 = uint16(mbc1.byte_2000_3fff)
     if (rom1_bank == 0) {
         rom1_bank = uint16(uint(rom1_bank) + 1)
@@ -2316,7 +2381,7 @@ def private binjgb_all__mbc1m_write_rom(var e : Emulator?; _c_addr : uint16; val
 def private binjgb_all__mbc2_write_rom(var e : Emulator?; _c_addr : uint16; value : uint8) {
     if (int(_c_addr) < 16384) {
         if ((int(_c_addr) & MBC2_ADDR_SELECT_BIT_MASK) != 0) {
-            var rom1_bank : uint16 = uint16(uint(int(value) & MBC2_ROM_BANK_SELECT_MASK) & binjgb_all__s_rom_bank_count[int(e.cart_info.rom_size)] - 1u)
+            var rom1_bank : uint16 = uint16(uint(int(value) & MBC2_ROM_BANK_SELECT_MASK) & ROM_BANK_MASK(e))
             if (rom1_bank == 0) {
                 rom1_bank = uint16(uint(rom1_bank) + 1)
             }
@@ -2353,7 +2418,7 @@ def private binjgb_all__mbc3_write_rom(var e : Emulator?; _c_addr : uint16; valu
         case(1) {
             {
                 // 2000-3fff
-                var rom1_bank : uint16 = uint16(uint(int(value) & MBC3_ROM_BANK_SELECT_MASK) & binjgb_all__s_rom_bank_count[int(e.cart_info.rom_size)] - 1u)
+                var rom1_bank : uint16 = uint16(uint(int(value) & MBC3_ROM_BANK_SELECT_MASK) & ROM_BANK_MASK(e))
                 if (rom1_bank == 0) {
                     rom1_bank = uint16(uint(rom1_bank) + 1)
                 }
@@ -2373,12 +2438,12 @@ def private binjgb_all__mbc3_write_rom(var e : Emulator?; _c_addr : uint16; valu
             {
                 // 6000-7fff
                 var mbc3 : Mbc3? = addr(e.state.memory_map_state._anon3.mbc3)
-                var was_latched : Bool = mbc3.latched
-                var latched : Bool = enum_from_int(type<Bool>, int_of(value == 1))
+                let was_latched : Bool = mbc3.latched
+                let latched : Bool = enum_from_int(type<Bool>, int_of(value == 1))
                 if (int(was_latched) == 0 && uint(latched) != 0 && int(mbc3.rtc_halt) == 0) {
                     // Update the clock by how much time has passed since it was last
                     // latched.
-                    var delta : uint64 = e.state.ticks - mbc3.latch_ticks
+                    let delta : uint64 = e.state.ticks - mbc3.latch_ticks
                     // RTC ticks every second, so don't update unless at least a second
                     // has passed.
                     if (delta >= uint64(CPU_TICKS_PER_SECOND)) {
@@ -2546,7 +2611,7 @@ def private binjgb_all__mbc3_write_ext_ram(var e : Emulator?; _c_addr : uint16; 
             {
                 mbc3.day = uint16((((int(value) >> 0) & (1 << 0 - 0 + 1) - 1) << 8) | (int(mbc3.day) & 255))
                 mbc3.day_carry = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
-                var old_rtc_halt : Bool = mbc3.rtc_halt
+                let old_rtc_halt : Bool = mbc3.rtc_halt
                 mbc3.rtc_halt = enum_from_int(type<Bool>, (int(value) >> 6) & (1 << 6 - 6 + 1) - 1)
                 if (mbc3.rtc_halt != old_rtc_halt) {
                     // Update the tick timer; if the clock is halted, then store the
@@ -2643,7 +2708,7 @@ def private binjgb_all__mmm01_write_rom(var e : Emulator?; _c_addr : uint16; val
             {
                 // 0000-1fff
                 // ROM size should be power-of-two.
-                var rom_offset : uint = uint(uint64(int(mmm01.byte_2000_3fff) << ROM_BANK_SHIFT) & (e.cart_info.size - 1ul))
+                let rom_offset : uint = uint(uint64(int(mmm01.byte_2000_3fff) << ROM_BANK_SHIFT) & (e.cart_info.size - 1ul))
                 binjgb_all__set_cart_info(e, uint8(rom_offset >> uint(CART_INFO_SHIFT)))
                 break
             }
@@ -2664,7 +2729,7 @@ def private binjgb_all__init_memory_map(var e : Emulator?) : Result {
         case(ExtRamType.EXT_RAM_TYPE_WITH_RAM) {
             memory_map.read_ext_ram = @@binjgb_all__gb_read_ext_ram
             memory_map.write_ext_ram = @@binjgb_all__gb_write_ext_ram
-            e.state.ext_ram.size = uint64(binjgb_all__s_ext_ram_byte_size[int(e.cart_info.ext_ram_size)])
+            e.state.ext_ram.size = uint64(EXT_RAM_BYTE_SIZE(e))
             break
         }
         case(ExtRamType.EXT_RAM_TYPE_NO_RAM, _) {
@@ -2681,7 +2746,7 @@ def private binjgb_all__init_memory_map(var e : Emulator?) : Result {
         }
         case(MbcType.MBC_TYPE_MBC1) {
             {
-                var is_mbc1m : Bool = enum_from_int(type<Bool>, int_of(e.cart_info_count > 1u))
+                let is_mbc1m : Bool = enum_from_int(type<Bool>, int_of(e.cart_info_count > 1u))
                 memory_map.write_rom = uint(is_mbc1m) != 0 ? @@binjgb_all__mbc1m_write_rom : @@binjgb_all__mbc1_write_rom
                 break
             }
@@ -2760,7 +2825,7 @@ def private binjgb_all__read_oam(var e : Emulator?; _c_addr : uint16) : uint8 {
     if (int(binjgb_all__is_using_oam(e, Bool.FALSE)) != 0) {
         return uint8(INVALID_READ_BYTE)
     }
-    var obj_index : uint8 = uint8(int(_c_addr) >> 2)
+    let obj_index : uint8 = uint8(int(_c_addr) >> 2)
     var obj : Obj? = addr(e.state.oam[0]) + end_index(int(obj_index), 40)
     c_switch(int(_c_addr) & 3) {
         case(0) {
@@ -2796,9 +2861,9 @@ def private binjgb_all__read_joyp_p10_p13(var e : Emulator?) : uint8 {
                 ((uint(e.state.joyp.buttons.A) & uint((1 << 0 - 0 + 1) - 1)) << 0u)))
     }
     var left : Bool = e.state.joyp.buttons.left
-    var right : Bool = e.state.joyp.buttons.right
+    let right : Bool = e.state.joyp.buttons.right
     var up : Bool = e.state.joyp.buttons.up
-    var down : Bool = e.state.joyp.buttons.down
+    let down : Bool = e.state.joyp.buttons.down
     if (int(e.config.allow_simulataneous_dpad_opposites) == 0) {
         if (uint(left) != 0 && uint(right) != 0) {
             left = Bool.FALSE
@@ -3075,8 +3140,8 @@ def private binjgb_all__read_u8_pair(var e : Emulator?; pair_in : MemoryTypeAddr
             {
                 // Take advantage of the fact that MEMORY_MAP_ROM9 is 0, and ROM1 is 1 when
                 // indexing into rom_base.
-                var rom_addr : uint = e.state.memory_map_state.rom_base[int(pair._c_type)] | uint(pair._c_addr)
-                var value : uint8 = e.cart_info.data[rom_addr]
+                let rom_addr : uint = e.state.memory_map_state.rom_base[int(pair._c_type)] | uint(pair._c_addr)
+                let value : uint8 = e.cart_info.data[rom_addr]
                 if (int(raw) == 0) {
                 }
                 return value
@@ -3102,7 +3167,7 @@ def private binjgb_all__read_u8_pair(var e : Emulator?; pair_in : MemoryTypeAddr
         }
         case(MemoryMapType.MEMORY_MAP_IO) {
             {
-                var value : uint8 = binjgb_all__read_io(e, pair._c_addr)
+                let value : uint8 = binjgb_all__read_io(e, pair._c_addr)
                 return value
             }
         }
@@ -3134,9 +3199,9 @@ def private binjgb_all__read_u8(var e : Emulator?; _c_addr : uint16) : uint8 {
         return uint8(INVALID_READ_BYTE)
     }
     if (int(_c_addr) < 32768) {
-        var bank : uint = uint(int(_c_addr) >> ROM_BANK_SHIFT)
-        var rom_addr : uint = e.state.memory_map_state.rom_base[bank] | uint(int(_c_addr) & ADDR_MASK_16K)
-        var value : uint8 = e.cart_info.data[rom_addr]
+        let bank : uint = uint(int(_c_addr) >> ROM_BANK_SHIFT)
+        let rom_addr : uint = e.state.memory_map_state.rom_base[bank] | uint(int(_c_addr) & ADDR_MASK_16K)
+        let value : uint8 = e.cart_info.data[rom_addr]
         return value
     } else {
         return binjgb_all__read_u8_pair(e, binjgb_all__map_address(_c_addr), Bool.FALSE)
@@ -3195,7 +3260,7 @@ def private binjgb_all__calculate_next_intr(var e : Emulator?) {
 }
 
 def private binjgb_all__is_div_falling_edge(var e : Emulator?; old_div_counter : uint16; div_counter : uint16) : Bool {
-    var falling_edge : uint16 = uint16((int(old_div_counter) ^ int(div_counter)) & ~int(div_counter))
+    let falling_edge : uint16 = uint16((int(old_div_counter) ^ int(div_counter)) & ~int(div_counter))
     return enum_from_int(type<Bool>, int(falling_edge) & int(binjgb_all__s_tima_mask[int(e.state.timer.clock_select)]))
 }
 
@@ -3204,7 +3269,7 @@ def private binjgb_all__timer_synchronize(var e : Emulator?) {
         var delta_ticks : uint64 = e.state.ticks - e.state.timer.sync_ticks
         e.state.timer.sync_ticks = e.state.ticks
         if (int(e.state.timer.on) != 0) {
-            var cpu_tick : uint64 = e.state.cpu_tick
+            let cpu_tick : uint64 = e.state.cpu_tick
             while (delta_ticks > 0ul) {
                 if (e.state.timer.tima_state == TimaState.TIMA_STATE_OVERFLOW) {
                     e.state.interrupt.if_ = uint8(int(e.state.interrupt.if_) | (int(e.state.interrupt.new_if) & IF_TIMER))
@@ -3213,7 +3278,7 @@ def private binjgb_all__timer_synchronize(var e : Emulator?) {
                 } elif (e.state.timer.tima_state == TimaState.TIMA_STATE_RESET) {
                     e.state.timer.tima_state = TimaState.TIMA_STATE_NORMAL
                 }
-                var old_div_counter : uint16 = e.state.timer.div_counter
+                let old_div_counter : uint16 = e.state.timer.div_counter
                 e.state.timer.div_counter = uint16(int(e.state.timer.div_counter) + CPU_TICK)
                 if (int(binjgb_all__is_div_falling_edge(e, old_div_counter, e.state.timer.div_counter)) != 0) {
                     binjgb_all__increment_tima(e)
@@ -3229,7 +3294,7 @@ def private binjgb_all__timer_synchronize(var e : Emulator?) {
 def private binjgb_all__calculate_next_timer_intr(var e : Emulator?) {
     if (int(e.state.timer.on) != 0) {
         var ticks : uint64 = e.state.timer.sync_ticks
-        var cpu_tick : uint64 = e.state.cpu_tick
+        let cpu_tick : uint64 = e.state.cpu_tick
         var div_counter : uint16 = e.state.timer.div_counter
         var tima : uint8 = e.state.timer.tima
         if (e.state.timer.tima_state == TimaState.TIMA_STATE_OVERFLOW) {
@@ -3238,7 +3303,7 @@ def private binjgb_all__calculate_next_timer_intr(var e : Emulator?) {
             ticks += cpu_tick
         }
         while (1 != 0) {
-            var old_div_counter : uint16 = div_counter
+            let old_div_counter : uint16 = div_counter
             div_counter = uint16(int(div_counter) + CPU_TICK)
             var _t0 = uint(binjgb_all__is_div_falling_edge(e, old_div_counter, div_counter)) != 0
             if (_t0) {
@@ -3258,7 +3323,7 @@ def private binjgb_all__calculate_next_timer_intr(var e : Emulator?) {
 }
 
 def private binjgb_all__do_timer_interrupt(var e : Emulator?) {
-    var cpu_tick : uint64 = e.state.cpu_tick
+    let cpu_tick : uint64 = e.state.cpu_tick
     e.state.timer.tima_state = TimaState.TIMA_STATE_OVERFLOW
     e.state.timer.div_counter = uint16(uint64(e.state.timer.div_counter) + (e.state.ticks + uint64(CPU_TICK) - e.state.timer.sync_ticks))
     e.state.timer.sync_ticks = e.state.ticks + cpu_tick
@@ -3327,7 +3392,7 @@ def private binjgb_all__check_ly_eq_lyc(var e : Emulator?; write : Bool) {
 
 def private binjgb_all__check_joyp_intr(var e : Emulator?) {
     binjgb_all__call_joyp_callback(e, Bool.TRUE)
-    var p10_p13 : uint8 = binjgb_all__read_joyp_p10_p13(e)
+    let p10_p13 : uint8 = binjgb_all__read_joyp_p10_p13(e)
     // joyp interrupt only triggers on p10-p13 going from high to low (i.e. not
     // pressed to pressed).
     if (((int(p10_p13) ^ int(e.state.joyp.last_p10_p13)) & ~int(p10_p13)) != 0) {
@@ -3364,7 +3429,7 @@ def private binjgb_all__unpack_cgb_color(var e : Emulator?; color : uint16) : ui
             g = unpack_cgb_color_curve[int(g)]
             b = unpack_cgb_color_curve[int(b)]
             g = uint8((int(g) * 3 + int(b)) / 4)
-            return (uint(255u8) << 24u) | (uint(b) << 16u) | (uint(g) << 8u) | uint(r)
+            return MAKE_RGBA(r, g, b, 255)
         }
         case(CgbColorCurve.CGB_COLOR_CURVE_GAMBATTE) {
             // Using gambatte's color curves, according to Gameboy Online, see
@@ -3397,7 +3462,7 @@ def private binjgb_all__set_sgb_palette(var e : Emulator?; pal : int; lo0 : uint
 
 [c_function]
 def private binjgb_all__unpack_sgb_palette_ram(var e : Emulator?; pal : int; idx_lo : uint8; idx_hi : uint8) {
-    var idx : uint16 = uint16((int(idx_hi) << 8) | int(idx_lo))
+    let idx : uint16 = uint16((int(idx_hi) << 8) | int(idx_lo))
     var data : uint8? = addr(e.state.sgb.pal_ram[0]) + 8 * (int(idx) & 511)
     binjgb_all__set_sgb_palette(e, pal, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7])
 }
@@ -3436,7 +3501,7 @@ def private binjgb_all__update_sgb_mask(var e : Emulator?) {
 
 [c_function]
 def private binjgb_all__set_sgb_attr(var e : Emulator?; byte : uint8) {
-    var file : uint8 = uint8(int(byte) & 63)
+    let file : uint8 = uint8(int(byte) & 63)
     if (int(file) < 45) {
         crt::memcpy(reinterpret<void?>(addr(e.state.sgb.attr_map[0])), reinterpret<void?>(addr(e.state.sgb.attr_ram[0]) + int(file) * 90),
                 uint64(typeinfo sizeof(type<uint8[90]>)))
@@ -3449,20 +3514,12 @@ def private binjgb_all__set_sgb_attr(var e : Emulator?; byte : uint8) {
 
 [c_function]
 def private binjgb_all__set_sgb_attr_block(var e : Emulator?; x0 : int; y0 : int; x1 : int; y1 : int; pal : uint8) {
-    {
-        var y : int = y0
-        while (y <= y1) {
-            {
-                var x : int = x0
-                while (x <= x1) {
-                    var index : int = y * 20 + x
-                    var byte : uint8? = addr(e.state.sgb.attr_map[0]) + end_index(index >> 2, 90)
-                    var mask : uint8 = uint8(~(192 >> (2 * (x & 3))))
-                    *byte = uint8((int(*byte) & int(mask)) | (int(pal) << (2 * (3 - (x & 3)))))
-                    x++
-                }
-            }
-            y++
+    for (y in range(y0, y1 + 1)) {
+        for (x in range(x0, x1 + 1)) {
+            let index : int = y * 20 + x
+            var byte : uint8? = addr(e.state.sgb.attr_map[0]) + end_index(index >> 2, 90)
+            let mask : uint8 = uint8(~(192 >> (2 * (x & 3))))
+            *byte = uint8((int(*byte) & int(mask)) | (int(pal) << (2 * (3 - (x & 3)))))
         }
     }
 }
@@ -3508,8 +3565,8 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
         }
         case(SgbState.SGB_STATE_READ_BIT) {
             if (e.state.joyp.joypad_select == JoypadSelect.JOYPAD_SGB_P15_LOW) {
-                var curbyte : int = (int(e.state.sgb.current_packet) << 4) | (int(e.state.sgb.bits_read) >> 3)
-                var curbit : uint8 = uint8(int(e.state.sgb.bits_read) & 7)
+                let curbyte : int = (int(e.state.sgb.current_packet) << 4) | (int(e.state.sgb.bits_read) >> 3)
+                let curbit : uint8 = uint8(int(e.state.sgb.bits_read) & 7)
                 e.state.sgb.data[curbyte] = uint8(int(e.state.sgb.data[curbyte]) | 1 << int(curbit))
                 e.state.sgb.bits_read = uint8(uint(e.state.sgb.bits_read) + 1)
                 e.state.sgb.state = SgbState.SGB_STATE_WAIT_BIT
@@ -3552,16 +3609,16 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
             // Assume we can just read the data directly from VRAM. Cheat by reading
             // the upper-left tile and assuming that the rest of the data is in
             // order.
-            var code : int = int(e.state.sgb.data[0]) >> 3
+            let code : int = int(e.state.sgb.data[0]) >> 3
             var xfer_src : uint8? = null
             if (code == 11 || code == 19 || code == 20 || code == 21) {
-                var map_base : uint16 = binjgb_all__map_select_to_address(e.state.ppu.lcdc.bg_tile_map_select)
-                var tile_index : uint16 = uint16(e.state.vram.data[int(map_base)])
+                let map_base : uint16 = binjgb_all__map_select_to_address(e.state.ppu.lcdc.bg_tile_map_select)
+                let tile_index : uint16 = uint16(e.state.vram.data[int(map_base)])
                 if (e.state.ppu.lcdc.bg_tile_data_select == TileDataSelect.TILE_DATA_8800_97FF) {
                     // Copy the data into the temporary buffer so it can be used
                     // contiguously.
-                    var start_offset : uint16 = uint16((256 + int(int8(tile_index))) * 16)
-                    var len : uint16 = uint16(6144 - int(start_offset))
+                    let start_offset : uint16 = uint16((256 + int(int8(tile_index))) * 16)
+                    let len : uint16 = uint16(6144 - int(start_offset))
                     crt::memcpy(reinterpret<void?>(addr(do_sgb_s_temp_xfer_buffer[0])), reinterpret<void?>(addr(e.state.vram.data[0]) + int(start_offset)),
                             uint64(len))
                     crt::memcpy(reinterpret<void?>(addr(do_sgb_s_temp_xfer_buffer[0]) + int(len)), reinterpret<void?>(addr(e.state.vram.data[0]) + 2048),
@@ -3586,18 +3643,18 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                 case(4) {
                     {
                         // ATTR_BLK
-                        var datasets : int = int(e.state.sgb.data[1]) < (int(e.state.sgb.packet_count) * 16 -
+                        let datasets : int = int(e.state.sgb.data[1]) < (int(e.state.sgb.packet_count) * 16 -
                                 2) / 6 ? int(e.state.sgb.data[1]) : (int(e.state.sgb.packet_count) * 16 - 2) / 6
                         for (i in range(datasets)) {
-                            var info : uint8 = e.state.sgb.data[2 + i * 6]
-                            var pal : uint8 = e.state.sgb.data[3 + i * 6]
-                            var palin : uint8 = uint8(int(pal) & 3)
-                            var palon : uint8 = uint8((int(pal) >> 2) & 3)
-                            var palout : uint8 = uint8((int(pal) >> 4) & 3)
-                            var l : uint8 = e.state.sgb.data[4 + i * 6]
-                            var t : uint8 = e.state.sgb.data[5 + i * 6]
-                            var r : uint8 = e.state.sgb.data[6 + i * 6]
-                            var b : uint8 = e.state.sgb.data[7 + i * 6]
+                            let info : uint8 = e.state.sgb.data[2 + i * 6]
+                            let pal : uint8 = e.state.sgb.data[3 + i * 6]
+                            let palin : uint8 = uint8(int(pal) & 3)
+                            let palon : uint8 = uint8((int(pal) >> 2) & 3)
+                            let palout : uint8 = uint8((int(pal) >> 4) & 3)
+                            let l : uint8 = e.state.sgb.data[4 + i * 6]
+                            let t : uint8 = e.state.sgb.data[5 + i * 6]
+                            let r : uint8 = e.state.sgb.data[6 + i * 6]
+                            let b : uint8 = e.state.sgb.data[7 + i * 6]
                             // colors inside region
                             if ((int(info) & 1) != 0) {
                                 binjgb_all__set_sgb_attr_block(e, int(l), int(t), int(r), int(b), palin)
@@ -3631,11 +3688,11 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                 case(5) {
                     {
                         // ATTR_LIN
-                        var datasets : int = int(e.state.sgb.data[1]) < int(e.state.sgb.packet_count) * 16 - 2 ? int(e.state.sgb.data[1]) : int(e.state.sgb.packet_count) * 16 - 2
+                        let datasets : int = int(e.state.sgb.data[1]) < int(e.state.sgb.packet_count) * 16 - 2 ? int(e.state.sgb.data[1]) : int(e.state.sgb.packet_count) * 16 - 2
                         for (i in range(datasets)) {
-                            var info : uint8 = e.state.sgb.data[2 + i]
-                            var line : uint8 = uint8(int(info) & 31)
-                            var pal : uint8 = uint8((int(info) >> 5) & 3)
+                            let info : uint8 = e.state.sgb.data[2 + i]
+                            let line : uint8 = uint8(int(info) & 31)
+                            let pal : uint8 = uint8((int(info) >> 5) & 3)
                             // horizontal
                             if ((int(info) & 128) != 0) {
                                 binjgb_all__set_sgb_attr_block(e, 0, int(line), 19, int(line), pal)
@@ -3650,11 +3707,11 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                 case(6) {
                     {
                         // ATTR_DIV
-                        var pal : uint8 = e.state.sgb.data[1]
-                        var pallo : uint8 = uint8(int(pal) & 3)
-                        var palon : uint8 = uint8((int(pal) >> 2) & 3)
-                        var palhi : uint8 = uint8((int(pal) >> 4) & 3)
-                        var line : uint8 = e.state.sgb.data[2]
+                        let pal : uint8 = e.state.sgb.data[1]
+                        let pallo : uint8 = uint8(int(pal) & 3)
+                        let palon : uint8 = uint8((int(pal) >> 2) & 3)
+                        let palhi : uint8 = uint8((int(pal) >> 4) & 3)
+                        let line : uint8 = e.state.sgb.data[2]
                         // above/below
                         if ((int(pal) & 64) != 0) {
                             // top
@@ -3687,7 +3744,7 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                         } else {
                             dy = 1u8
                         }
-                        var datasets : int = (((int(e.state.sgb.data[4]) << 8) | int(e.state.sgb.data[3])) < (int(e.state.sgb.packet_count) * 16 - 6) * 4 ?
+                        let datasets : int = (((int(e.state.sgb.data[4]) << 8) | int(e.state.sgb.data[3])) < (int(e.state.sgb.packet_count) * 16 - 6) * 4 ?
                                 ((int(e.state.sgb.data[4]) << 8) | int(e.state.sgb.data[3])) :
                                 (int(e.state.sgb.packet_count) * 16 - 6) * 4) < 360 ? (((int(e.state.sgb.data[4]) << 8) | int(e.state.sgb.data[3])) <
                                     (int(e.state.sgb.packet_count) * 16 - 6) * 4 ?
@@ -3695,10 +3752,10 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                         {
                             var i : int = 0
                             while (i < datasets) {
-                                var byte : uint8 = e.state.sgb.data[6 + (i >> 2)]
+                                let byte : uint8 = e.state.sgb.data[6 + (i >> 2)]
                                 {
                                     var j : int = 0
-                                    while (j < (datasets < 4 ? datasets : 4)) {
+                                    while (j < MIN(datasets, 4)) {
                                         binjgb_all__set_sgb_attr_block(e, int(x), int(y), int(x), int(y), uint8(int(byte) >> ((3 - j) * 2)))
                                         x = uint8(int(x) + int(dx))
                                         y = uint8(int(y) + int(dy))
@@ -3754,19 +3811,19 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                     for (pal in range(4)) {
                         e.state.sgb.border_pal[pal][0] = 0u
                         for (col in range(1, 16)) {
-                            var idx : int = 2048 + (pal * 16 + col) * 2
-                            var lo : uint8 = xfer_src[idx]
-                            var hi : uint8 = xfer_src[idx + 1]
+                            let idx : int = 2048 + (pal * 16 + col) * 2
+                            let lo : uint8 = xfer_src[idx]
+                            let hi : uint8 = xfer_src[idx + 1]
                             e.state.sgb.border_pal[pal][col] = binjgb_all__unpack_cgb_color8(e, lo, hi)
                         }
                     }
                     var dst : uint? = addr(e.sgb_frame_buffer[0])
                     for (col in range(28)) {
                         for (row in range(32)) {
-                            var idx : int = (col * 32 + row) * 2
-                            var tile : uint8 = xfer_src[idx]
-                            var info : uint8 = xfer_src[idx + 1]
-                            var pal : uint8 = uint8((int(info) >> 2) & 3)
+                            let idx : int = (col * 32 + row) * 2
+                            let tile : uint8 = xfer_src[idx]
+                            let info : uint8 = xfer_src[idx + 1]
+                            let pal : uint8 = uint8((int(info) >> 2) & 3)
                             var src : uint8? = addr(e.state.sgb.chr_ram[0]) + int(tile) * 32
                             var dsrc : int = 2
                             if ((int(info) & 128) != 0) {
@@ -3787,7 +3844,7 @@ def private binjgb_all__do_sgb(var e : Emulator?) {
                                         p3 = binjgb_all__reverse_bits_u8(p3)
                                     }
                                     for (x in range(8)) {
-                                        var palidx : int = ((int(p3) & 1) << 3) | ((int(p2) & 1) << 2) | ((int(p1) & 1) << 1) | (int(p0) & 1)
+                                        let palidx : int = ((int(p3) & 1) << 3) | ((int(p2) & 1) << 2) | ((int(p1) & 1) << 1) | (int(p0) & 1)
                                         dst[(col * 8 + y) * SGB_SCREEN_WIDTH + (row * 8 + x)] = e.state.sgb.border_pal[int(pal)][palidx]
                                         p0 = uint8(uint(p0) >> 1u)
                                         p1 = uint8(uint(p1) >> 1u)
@@ -3892,8 +3949,8 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
         case(7) {
             {
                 binjgb_all__timer_synchronize(e)
-                var old_timer_on : Bool = e.state.timer.on
-                var old_tima_mask : uint16 = binjgb_all__s_tima_mask[int(e.state.timer.clock_select)]
+                let old_timer_on : Bool = e.state.timer.on
+                let old_tima_mask : uint16 = binjgb_all__s_tima_mask[int(e.state.timer.clock_select)]
                 e.state.timer.clock_select = enum_from_int(type<TimerClock>, (int(value) >> 0) & (1 << 1 - 0 + 1) - 1)
                 e.state.timer.on = enum_from_int(type<Bool>, (int(value) >> 2) & (1 << 2 - 2 + 1) - 1)
                 // tima is incremented when a specific bit of div_counter transitions
@@ -3901,7 +3958,7 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
                 // case modifying which bit we're looking at.
                 var tima_tick : Bool = Bool.FALSE
                 if (int(old_timer_on) == 0) {
-                    var tima_mask : uint16 = binjgb_all__s_tima_mask[int(e.state.timer.clock_select)]
+                    let tima_mask : uint16 = binjgb_all__s_tima_mask[int(e.state.timer.clock_select)]
                     if (int(e.state.timer.on) != 0) {
                         tima_tick = enum_from_int(type<Bool>, int_of((int(e.state.timer.div_counter) & int(old_tima_mask)) != 0))
                     } else {
@@ -3926,7 +3983,7 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
             {
                 binjgb_all__ppu_synchronize(e)
                 binjgb_all__ppu_mode3_synchronize(e)
-                var was_enabled : Bool = e.state.ppu.lcdc.display
+                let was_enabled : Bool = e.state.ppu.lcdc.display
                 e.state.ppu.lcdc.display = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
                 e.state.ppu.lcdc.window_tile_map_select = enum_from_int(type<TileMapSelect>, (int(value) >> 6) & (1 << 6 - 6 + 1) - 1)
                 e.state.ppu.lcdc.window_display = enum_from_int(type<Bool>, (int(value) >> 5) & (1 << 5 - 5 + 1) - 1)
@@ -3943,7 +4000,7 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
                         binjgb_all__check_ly_eq_lyc(e, Bool.FALSE)
                         e.state.ppu.state = PPUState.PPU_STATE_LCD_ON_MODE2
                         e.state.ppu.state_ticks = uint(PPU_MODE2_TICKS)
-                        e.state.ppu.line_start_ticks = e.state.ticks - uint64(CPU_TICK) - uint64(CPU_TICK) + uint64(CPU_TICK) - 1ul & uint64(~(CPU_TICK - 1))
+                        e.state.ppu.line_start_ticks = ALIGN_UP(e.state.ticks - uint64(CPU_TICK) - uint64(CPU_TICK), CPU_TICK)
                         e.state.ppu.display_delay_frames = uint8(PPU_ENABLE_DISPLAY_DELAY_FRAMES)
                         e.state.ppu.stat.trigger_mode = PPUMode.PPU_MODE_MODE2
                     } else {
@@ -3963,14 +4020,14 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
         case(65) {
             {
                 binjgb_all__ppu_synchronize(e)
-                var new_vblank_irq : Bool = enum_from_int(type<Bool>, (int(value) >> 4) & (1 << 4 - 4 + 1) - 1)
-                var new_hblank_irq : Bool = enum_from_int(type<Bool>, (int(value) >> 3) & (1 << 3 - 3 + 1) - 1)
+                let new_vblank_irq : Bool = enum_from_int(type<Bool>, (int(value) >> 4) & (1 << 4 - 4 + 1) - 1)
+                let new_hblank_irq : Bool = enum_from_int(type<Bool>, (int(value) >> 3) & (1 << 3 - 3 + 1) - 1)
                 if (int(e.state.ppu.lcdc.display) != 0) {
                     var hblank : Bool = enum_from_int(type<Bool>, int_of(e.state.ppu.stat.trigger_mode == PPUMode.PPU_MODE_HBLANK &&
                             int(e.state.ppu.stat.hblank.irq) == 0))
                     var vblank : Bool = enum_from_int(type<Bool>, int_of(e.state.ppu.stat.trigger_mode == PPUMode.PPU_MODE_VBLANK &&
                             int(e.state.ppu.stat.vblank.irq) == 0))
-                    var y_compare : Bool = enum_from_int(type<Bool>, int_of(uint(e.state.ppu.stat.new_ly_eq_lyc) != 0 &&
+                    let y_compare : Bool = enum_from_int(type<Bool>, int_of(uint(e.state.ppu.stat.new_ly_eq_lyc) != 0 &&
                             int(e.state.ppu.stat.y_compare.irq) == 0))
                     if (int(e.state.is_cgb) != 0) {
                         // CGB only triggers on STAT write if the value being written
@@ -4027,7 +4084,7 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
         }
         case(71, 72, 73) {
             {
-                var _c_type : PaletteType = enum_from_int(type<PaletteType>, int(_c_addr) - int(IOReg.IO_BGP_ADDR))
+                let _c_type : PaletteType = enum_from_int(type<PaletteType>, int(_c_addr) - int(IOReg.IO_BGP_ADDR))
                 var pal : Palette? = addr(e.state.ppu.pal[0]) + end_index(int(_c_type), 3)
                 binjgb_all__ppu_mode3_synchronize(e)
                 pal.color[3] = enum_from_int(type<Color>, (int(value) >> 6) & (1 << 7 - 6 + 1) - 1)
@@ -4088,8 +4145,8 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
         }
         case(85) {
             if (int(e.state.is_cgb) != 0) {
-                var new_mode : HdmaTransferMode = enum_from_int(type<HdmaTransferMode>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
-                var new_blocks : uint8 = uint8((int(value) >> 0) & (1 << 6 - 0 + 1) - 1)
+                let new_mode : HdmaTransferMode = enum_from_int(type<HdmaTransferMode>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
+                let new_blocks : uint8 = uint8((int(value) >> 0) & (1 << 6 - 0 + 1) - 1)
                 if (e.state.hdma.mode == HdmaTransferMode.HDMA_TRANSFER_MODE_HDMA && (int(e.state.hdma.blocks) & 128) == 0) {
                     // HDMA Active
                     if (new_mode == HdmaTransferMode.HDMA_TRANSFER_MODE_GDMA) {
@@ -4130,10 +4187,10 @@ def private binjgb_all__write_io(var e : Emulator?; _c_addr : uint16; value : ui
                 binjgb_all__ppu_mode3_synchronize(e)
                 var cp : ColorPalettes? = int(_c_addr) == int(IOReg.IO_BCPD_ADDR) ? addr(e.state.ppu.bgcp) : addr(e.state.ppu.obcp)
                 cp.data[int(cp.index)] = value
-                var palette_index : uint8 = uint8((int(cp.index) >> 3) & 7)
-                var color_index : uint8 = uint8((int(cp.index) >> 1) & 3)
-                var color16 : uint16 = uint16((int(cp.data[int(cp.index) | 1]) << 8) | int(cp.data[int(cp.index) & ~1]))
-                var color : uint = binjgb_all__unpack_cgb_color(e, color16)
+                let palette_index : uint8 = uint8((int(cp.index) >> 3) & 7)
+                let color_index : uint8 = uint8((int(cp.index) >> 1) & 3)
+                let color16 : uint16 = uint16((int(cp.data[int(cp.index) | 1]) << 8) | int(cp.data[int(cp.index) & ~1]))
+                let color : uint = binjgb_all__unpack_cgb_color(e, color16)
                 cp.palettes[int(palette_index)].color[int(color_index)] = color
                 if (int(cp.auto_increment) != 0) {
                     cp.index = uint8((int(cp.index) + 1) & 63)
@@ -4173,7 +4230,7 @@ def private binjgb_all__write_nrx2_reg(var e : Emulator?; var channel : Channel?
     }
     if (int(channel.status) != 0) {
         if (channel.envelope.period == 0 && uint(channel.envelope.automatic) != 0) {
-            var new_volume : uint8 = uint8((int(channel.envelope.volume) + 1) & ENVELOPE_MAX_VOLUME)
+            let new_volume : uint8 = uint8((int(channel.envelope.volume) + 1) & ENVELOPE_MAX_VOLUME)
             channel.envelope.volume = new_volume
             // Super ugly hack to support decreasing volume in zombie mode.
             channel.envelope.zombie_step = uint8(int_of(value == 9))
@@ -4184,7 +4241,7 @@ def private binjgb_all__write_nrx2_reg(var e : Emulator?; var channel : Channel?
                 channel.envelope.zombie_step = uint8(uint(channel.envelope.zombie_step) + 1)
             } elif (channel.envelope.zombie_step == 2 && value == 24) {
                 channel.envelope.zombie_step = uint8(uint(channel.envelope.zombie_step) + 1)
-                var new_volume : uint8 = uint8((int(channel.envelope.volume) + ENVELOPE_MAX_VOLUME - 1) & ENVELOPE_MAX_VOLUME)
+                let new_volume : uint8 = uint8((int(channel.envelope.volume) + ENVELOPE_MAX_VOLUME - 1) & ENVELOPE_MAX_VOLUME)
                 channel.envelope.volume = new_volume
             } else {
                 channel.envelope.zombie_step = 0u8
@@ -4201,15 +4258,15 @@ def private binjgb_all__write_nrx3_reg(var e : Emulator?; var channel : Channel?
 
 // Returns TRUE if this channel was triggered.
 def private binjgb_all__write_nrx4_reg(var e : Emulator?; var channel : Channel?; _c_addr : uint16; value : uint8; max_length : uint16) : Bool {
-    var trigger : Bool = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
-    var was_length_enabled : Bool = channel.length_enabled
+    let trigger : Bool = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
+    let was_length_enabled : Bool = channel.length_enabled
     channel.length_enabled = enum_from_int(type<Bool>, (int(value) >> 6) & (1 << 6 - 6 + 1) - 1)
     channel.frequency = uint16(int(channel.frequency) & 255)
     channel.frequency = uint16(int(channel.frequency) | ((int(value) >> 0) & (1 << 2 - 0 + 1) - 1) << 8)
     // Extra length clocking occurs on NRX4 writes if the next APU frame isn't a
     // length counter frame. This only occurs on transition from disabled to
     // enabled.
-    var next_frame_is_length : Bool = enum_from_int(type<Bool>, int_of((int(e.state.apu.frame) & 1) == 1))
+    let next_frame_is_length : Bool = enum_from_int(type<Bool>, int_of((int(e.state.apu.frame) & 1) == 1))
     if (int(was_length_enabled) == 0 && uint(channel.length_enabled) != 0 && int(next_frame_is_length) == 0 && int(channel.length) > 0) {
         channel.length = uint16(uint(channel.length) - 1)
         if (int(trigger) == 0 && channel.length == 0) {
@@ -4241,7 +4298,7 @@ def private binjgb_all__trigger_nrx4_envelope(var e : Emulator?; var envelope : 
 }
 
 def private binjgb_all__calculate_sweep_frequency(var e : Emulator?) : uint16 {
-    var f : uint16 = e.state.apu.sweep.frequency
+    let f : uint16 = e.state.apu.sweep.frequency
     if (e.state.apu.sweep.direction == SweepDirection.SWEEP_DIRECTION_ADDITION) {
         return uint16(int(f) + (int(f) >> int(e.state.apu.sweep.shift)))
     } else {
@@ -4270,7 +4327,7 @@ def private binjgb_all__write_square_wave_period(var e : Emulator?; var channel 
 }
 
 def private binjgb_all__write_noise_period(var e : Emulator?) {
-    var divisor : uint8 = write_noise_period_s_divisors[int(e.state.apu.noise.divisor)]
+    let divisor : uint8 = write_noise_period_s_divisors[int(e.state.apu.noise.divisor)]
     e.state.apu.noise.period = uint(int(divisor) << int(e.state.apu.noise.clock_shift))
 }
 
@@ -4303,7 +4360,7 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
     c_switch(int(_c_addr)) {
         case(0) {
             {
-                var old_direction : SweepDirection = e.state.apu.sweep.direction
+                let old_direction : SweepDirection = e.state.apu.sweep.direction
                 e.state.apu.sweep.period = uint8((int(value) >> 4) & (1 << 6 - 4 + 1) - 1)
                 e.state.apu.sweep.direction = enum_from_int(type<SweepDirection>, (int(value) >> 3) & (1 << 3 - 3 + 1) - 1)
                 e.state.apu.sweep.shift = uint8((int(value) >> 0) & (1 << 2 - 0 + 1) - 1)
@@ -4330,7 +4387,7 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
         }
         case(4) {
             {
-                var trigger : Bool = binjgb_all__write_nrx4_reg(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL1)]), _c_addr, value,
+                let trigger : Bool = binjgb_all__write_nrx4_reg(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL1)]), _c_addr, value,
                         uint16(NRX1_MAX_LENGTH))
                 binjgb_all__write_square_wave_period(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL1)]),
                         addr(e.state.apu.channel[int(anon_96.APU_CHANNEL1)].square_wave))
@@ -4358,7 +4415,7 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
         }
         case(9) {
             {
-                var trigger : Bool = binjgb_all__write_nrx4_reg(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL2)]), _c_addr, value,
+                let trigger : Bool = binjgb_all__write_nrx4_reg(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL2)]), _c_addr, value,
                         uint16(NRX1_MAX_LENGTH))
                 binjgb_all__write_square_wave_period(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL2)]),
                         addr(e.state.apu.channel[int(anon_96.APU_CHANNEL2)].square_wave))
@@ -4393,7 +4450,7 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
         }
         case(14) {
             {
-                var trigger : Bool = binjgb_all__write_nrx4_reg(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL3)]), _c_addr, value,
+                let trigger : Bool = binjgb_all__write_nrx4_reg(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL3)]), _c_addr, value,
                         uint16(NR31_MAX_LENGTH))
                 binjgb_all__write_wave_period(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL3)]))
                 if (int(trigger) != 0) {
@@ -4401,8 +4458,8 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
                         // Triggering the wave channel while it is already playing will
                         // corrupt the wave RAM on DMG.
                         if (e.state.apu.wave.ticks == uint(WAVE_TRIGGER_CORRUPTION_OFFSET_TICKS)) {
-                            var position : uint8 = uint8((int(e.state.apu.wave.position) + 1) & 31)
-                            var byte : uint8 = e.state.apu.wave.ram[int(position) >> 1]
+                            let position : uint8 = uint8((int(e.state.apu.wave.position) + 1) & 31)
+                            let byte : uint8 = e.state.apu.wave.ram[int(position) >> 1]
                             c_switch(int(position) >> 3) {
                                 case(0) {
                                     e.state.apu.wave.ram[0] = byte
@@ -4440,7 +4497,7 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
         }
         case(19) {
             {
-                var trigger : Bool = binjgb_all__write_nrx4_reg(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL4)]), _c_addr, value,
+                let trigger : Bool = binjgb_all__write_nrx4_reg(e, addr(e.state.apu.channel[int(anon_96.APU_CHANNEL4)]), _c_addr, value,
                         uint16(NRX1_MAX_LENGTH))
                 if (int(trigger) != 0) {
                     binjgb_all__write_noise_period(e)
@@ -4472,8 +4529,8 @@ def private binjgb_all__write_apu(var e : Emulator?; _c_addr : uint16; value : u
         }
         case(22) {
             {
-                var was_enabled : Bool = e.state.apu.enabled
-                var is_enabled : Bool = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
+                let was_enabled : Bool = e.state.apu.enabled
+                let is_enabled : Bool = enum_from_int(type<Bool>, (int(value) >> 7) & (1 << 7 - 7 + 1) - 1)
                 if (uint(was_enabled) != 0 && int(is_enabled) == 0) {
                     var i : int
                     i = 0
@@ -4579,14 +4636,14 @@ def private binjgb_all__do_ppu_mode2(var e : Emulator?) {
         return
     }
     var line_obj_count : int = 0
-    var obj_height : uint8 = binjgb_all__s_obj_size_to_height[int(e.state.ppu.lcdc.obj_size)]
-    var y : uint8 = e.state.ppu.line_y
+    let obj_height : uint8 = binjgb_all__s_obj_size_to_height[int(e.state.ppu.lcdc.obj_size)]
+    let y : uint8 = e.state.ppu.line_y
     for (i in range(OBJ_COUNT)) {
         // Put the visible sprites into line_obj. Insert them so sprites with
         // smaller X-coordinates are earlier, but only on DMG. On CGB, they are
         // always ordered by obj index.
         var o : Obj? = addr(e.state.oam[0]) + end_index(i, 40)
-        var rel_y : uint8 = uint8(int(y) - int(o.y))
+        let rel_y : uint8 = uint8(int(y) - int(o.y))
         if (int(rel_y) < int(obj_height)) {
             var j : int = line_obj_count
             if (int(e.state.is_cgb) == 0) {
@@ -4609,29 +4666,24 @@ def private binjgb_all__do_ppu_mode2(var e : Emulator?) {
 def private binjgb_all__mode3_tick_count(var e : Emulator?) : uint {
     var buckets : int[22]
     crt::memset(reinterpret<void?>(addr(buckets)), 0, uint64(typeinfo sizeof(type<int[22]>)))
-    var scx_fine : uint8 = uint8(int(e.state.ppu.scx) & 7)
+    let scx_fine : uint8 = uint8(int(e.state.ppu.scx) & 7)
     var ticks : uint = uint(PPU_MODE3_MIN_TICKS + int(scx_fine))
     var has_zero : Bool = Bool.FALSE
     var i : int
-    i = 0
-    while (i < int(e.state.ppu.line_obj_count)) {
-        {
-            var o : Obj? = addr(e.state.ppu.line_obj[0]) + end_index(i, 10)
-            var x : uint8 = uint8(int(o.x) + OBJ_X_OFFSET)
-            if (int(x) >= SCREEN_WIDTH + OBJ_X_OFFSET) {
-                continue
-            }
-            if (int(has_zero) == 0 && x == 0) {
-                has_zero = Bool.TRUE
-                ticks += uint(scx_fine)
-            }
-            x = uint8(int(x) + int(scx_fine))
-            var bucket : int = int(x) >> 3
-            buckets[bucket] = buckets[bucket] > 5 - (int(x) & 7) ? buckets[bucket] : 5 - (int(x) & 7)
-            ticks += 6u
-        } finally {
-            i++
+    for (i1 in range(int(e.state.ppu.line_obj_count))) {
+        var o : Obj? = addr(e.state.ppu.line_obj[0]) + end_index(i1, 10)
+        var x : uint8 = uint8(int(o.x) + OBJ_X_OFFSET)
+        if (int(x) >= SCREEN_WIDTH + OBJ_X_OFFSET) {
+            continue
         }
+        if (int(has_zero) == 0 && x == 0) {
+            has_zero = Bool.TRUE
+            ticks += uint(scx_fine)
+        }
+        x = uint8(int(x) + int(scx_fine))
+        let bucket : int = int(x) >> 3
+        buckets[bucket] = buckets[bucket] > 5 - (int(x) & 7) ? buckets[bucket] : 5 - (int(x) & 7)
+        ticks += 6u
     }
     i = 0
     while (i < int(uint64(typeinfo sizeof(type<int[22]>)) / uint64(typeinfo sizeof(type<int>)))) {
@@ -4644,20 +4696,20 @@ def private binjgb_all__mode3_tick_count(var e : Emulator?) : uint {
 [c_function]
 def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
     var x : uint8 = e.state.ppu.render_x
-    var y : uint8 = e.state.ppu.line_y
+    let y : uint8 = e.state.ppu.line_y
     if (e.state.ppu.stat.mode != PPUMode.PPU_MODE_MODE3 || int(x) >= SCREEN_WIDTH) {
         return
     }
     var display_bg : Bool = enum_from_int(type<Bool>, int_of((uint(e.state.is_cgb) != 0 || uint(e.state.ppu.lcdc.bg_display) != 0) &&
             int(e.config.disable_bg) == 0))
-    var display_obj : Bool = enum_from_int(type<Bool>, int_of(uint(e.state.ppu.lcdc.obj_display) != 0 && int(e.config.disable_obj) == 0))
+    let display_obj : Bool = enum_from_int(type<Bool>, int_of(uint(e.state.ppu.lcdc.obj_display) != 0 && int(e.config.disable_obj) == 0))
     var rendering_window : Bool = e.state.ppu.rendering_window
     var window_counter : int = uint(rendering_window) != 0 ? 0 : 255
     if (int(rendering_window) == 0 && uint(e.state.ppu.lcdc.window_display) != 0 && int(e.config.disable_window) == 0 && int(e.state.ppu.wx) <= WINDOW_MAX_X &&
             int(y) >= int(e.state.ppu.wy)) {
         window_counter = 0 > int(e.state.ppu.wx) - (int(x) + WINDOW_X_OFFSET) ? 0 : int(e.state.ppu.wx) - (int(x) + WINDOW_X_OFFSET)
     }
-    var data_select : TileDataSelect = e.state.ppu.lcdc.bg_tile_data_select
+    let data_select : TileDataSelect = e.state.ppu.lcdc.bg_tile_data_select
     var mx : uint8 = uint8(int(e.state.ppu.scx) + int(x))
     var my : uint8 = uint8(int(e.state.ppu.scy) + int(y))
     var map_base : uint16 = uint16(int(binjgb_all__map_select_to_address(e.state.ppu.lcdc.bg_tile_map_select)) | ((int(my) >> 3) * TILE_MAP_WIDTH))
@@ -4691,7 +4743,7 @@ def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
                 map_addr = uint16(0)
             }
             if (int(display_bg) != 0) {
-                var new_map_addr : uint16 = uint16(int(map_base) | (int(mx) >> 3))
+                let new_map_addr : uint16 = uint16(int(map_base) | (int(mx) >> 3))
                 if (map_addr == new_map_addr) {
                     lo = uint8(uint(lo) << 1u)
                     hi = uint8(uint(hi) << 1u)
@@ -4703,7 +4755,7 @@ def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
                         tile_index = uint16(256 + int(int8(tile_index)))
                     }
                     if (int(e.state.is_cgb) != 0) {
-                        var attr : uint8 = e.state.vram.data[8192 + int(map_addr)]
+                        let attr : uint8 = e.state.vram.data[8192 + int(map_addr)]
                         pal = addr(e.state.ppu.bgcp.palettes[0]) + end_index(int(attr) & 7, 8)
                         if ((int(attr) & 8) != 0) {
                             tile_index = uint16(int(tile_index) + 512)
@@ -4712,7 +4764,7 @@ def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
                             my7 = uint8(7 - int(my7))
                         }
                         priority = enum_from_int(type<Bool>, int_of((int(attr) & 128) != 0))
-                        var tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + int(my7)) * TILE_ROW_BYTES)
+                        let tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + int(my7)) * TILE_ROW_BYTES)
                         lo = e.state.vram.data[int(tile_addr)]
                         hi = e.state.vram.data[int(tile_addr) + 1]
                         if ((int(attr) & 32) != 0) {
@@ -4721,22 +4773,22 @@ def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
                         }
                     } else {
                         if (int(e.state.is_sgb) != 0) {
-                            var idx : int = (int(y) >> 3) * (SCREEN_WIDTH >> 3) + (int(x) >> 3)
-                            var palidx : uint8 = uint8((int(e.state.sgb.attr_map[idx >> 2]) >> (2 * (3 - (idx & 3)))) & 3)
+                            let idx : int = (int(y) >> 3) * (SCREEN_WIDTH >> 3) + (int(x) >> 3)
+                            let palidx : uint8 = uint8((int(e.state.sgb.attr_map[idx >> 2]) >> (2 * (3 - (idx & 3)))) & 3)
                             pal = addr(e.sgb_pal[0]) + end_index(int(palidx), 4)
                         } else {
                             pal = addr(e.pal[int(PaletteType.PALETTE_TYPE_BGP)])
                         }
                         priority = Bool.FALSE
-                        var tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + int(my7)) * TILE_ROW_BYTES)
+                        let tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + int(my7)) * TILE_ROW_BYTES)
                         lo = e.state.vram.data[int(tile_addr)]
                         hi = e.state.vram.data[int(tile_addr) + 1]
                     }
-                    var shift : uint8 = uint8(int(mx) & 7)
+                    let shift : uint8 = uint8(int(mx) & 7)
                     lo = uint8(uint(lo) << uint(int(shift)))
                     hi = uint8(uint(hi) << uint(int(shift)))
                 }
-                var palette_index : uint8 = uint8(((int(hi) >> 6) & 2) | (int(lo) >> 7))
+                let palette_index : uint8 = uint8(((int(hi) >> 6) & 2) | (int(lo) >> 7))
                 pixel[i] = pal.color[int(palette_index)]
                 bg_is_zero[i] = enum_from_int(type<Bool>, int_of(palette_index == 0))
                 bg_priority[i] = priority
@@ -4759,7 +4811,7 @@ def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
             crt::memset(reinterpret<void?>(addr(bg_priority)), int(Bool.FALSE), uint64(typeinfo sizeof(type<Bool[4]>)))
         }
         if (int(display_obj) != 0) {
-            var obj_height : uint8 = binjgb_all__s_obj_size_to_height[int(e.state.ppu.lcdc.obj_size)]
+            let obj_height : uint8 = binjgb_all__s_obj_size_to_height[int(e.state.ppu.lcdc.obj_size)]
             var n : int
             n = int(e.state.ppu.line_obj_count) - 1
             while (n >= 0) {
@@ -4767,9 +4819,9 @@ def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
                     var o : Obj? = addr(e.state.ppu.line_obj[0]) + end_index(n, 10)
                     // Does [x, x + 4) intersect [o->x, o->x + 8)? Note that the sums must
                     // wrap at 256 (i.e. arithmetic is 8-bit).
-                    var ox_start : int8 = int8(int(o.x) - int(x))
+                    let ox_start : int8 = int8(int(o.x) - int(x))
                     // ox_end is inclusive.
-                    var ox_end : int8 = int8(int(ox_start) + 7)
+                    let ox_end : int8 = int8(int(ox_start) + 7)
                     var oy : uint8 = uint8(int(y) - int(o.y))
                     if ((int(uint8(ox_start)) >= 4 && int(uint8(ox_end)) >= 8) || int(oy) >= int(obj_height)) {
                         continue
@@ -4797,22 +4849,22 @@ def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
                     } else {
                         pal1 = addr(e.pal[0]) + end_index(int(o.palette) + 1, 3)
                     }
-                    var tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + (int(oy) & 7)) * TILE_ROW_BYTES)
+                    let tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + (int(oy) & 7)) * TILE_ROW_BYTES)
                     var lo1 : uint8 = e.state.vram.data[int(tile_addr)]
                     var hi1 : uint8 = e.state.vram.data[int(tile_addr) + 1]
                     if (int(o.xflip) == 0) {
                         lo1 = binjgb_all__reverse_bits_u8(lo1)
                         hi1 = binjgb_all__reverse_bits_u8(hi1)
                     }
-                    var tile_data_offset : int = 0 > -int(ox_start) ? 0 : -int(ox_start)
+                    let tile_data_offset : int = MAX(0, -int(ox_start))
                     lo1 = uint8(uint(lo1) >> uint(tile_data_offset))
                     hi1 = uint8(uint(hi1) >> uint(tile_data_offset))
-                    var start : int = 0 > int(ox_start) ? 0 : int(ox_start)
+                    let start : int = MAX(0, ox_start)
                     // end is inclusive.
-                    var end : int = 3 < int(ox_end) ? 3 : int(ox_end)
+                    let end : int = MIN(3, ox_end)
                     i = start
                     while (i <= end) {
-                        var palette_index : uint8 = uint8(((int(hi1) & 1) << 1) | (int(lo1) & 1))
+                        let palette_index : uint8 = uint8(((int(hi1) & 1) << 1) | (int(lo1) & 1))
                         if (palette_index != 0 && (int(bg_priority[i]) == 0 || uint(bg_is_zero[i]) != 0) &&
                                 (o.priority == ObjPriority.OBJ_PRIORITY_ABOVE_BG || uint(bg_is_zero[i]) != 0)) {
                             pixel[i] = pal1.color[int(palette_index)]
@@ -4834,7 +4886,7 @@ def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
 }
 
 def private binjgb_all__ppu_synchronize(var e : Emulator?) {
-    var aligned_ticks : uint64 = e.state.ticks & uint64(~(CPU_TICK - 1))
+    let aligned_ticks : uint64 = ALIGN_DOWN(e.state.ticks, CPU_TICK)
     if (aligned_ticks > e.state.ppu.sync_ticks) {
         var delta_ticks : uint64 = aligned_ticks - e.state.ppu.sync_ticks
         if (int(e.state.ppu.lcdc.display) != 0) {
@@ -4849,7 +4901,7 @@ def private binjgb_all__ppu_synchronize(var e : Emulator?) {
                     if (e.state.ppu.state_ticks != 0u) {
                         continue
                     }
-                    var ticks : uint64 = aligned_ticks - delta_ticks
+                    let ticks : uint64 = aligned_ticks - delta_ticks
                     c_switch(e.state.ppu.state) {
                         case(PPUState.PPU_STATE_HBLANK, PPUState.PPU_STATE_VBLANK_PLUS_4) {
                             e.state.ppu.line_y = uint8(uint(e.state.ppu.line_y) + 1)
@@ -4995,12 +5047,12 @@ def private binjgb_all__update_sweep(var e : Emulator?) {
     if (!(uint(e.state.apu.channel[int(anon_96.APU_CHANNEL1)].status) != 0 && uint(e.state.apu.sweep.enabled) != 0)) {
         return
     }
-    var period : uint8 = e.state.apu.sweep.period
+    let period : uint8 = e.state.apu.sweep.period
     e.state.apu.sweep.timer = uint8(uint(e.state.apu.sweep.timer) - 1)
     if (e.state.apu.sweep.timer == 0) {
         if (period != 0) {
             e.state.apu.sweep.timer = period
-            var new_frequency : uint16 = binjgb_all__calculate_sweep_frequency(e)
+            let new_frequency : uint16 = binjgb_all__calculate_sweep_frequency(e)
             if (int(new_frequency) > SOUND_MAX_FREQUENCY) {
                 e.state.apu.channel[int(anon_96.APU_CHANNEL1)].status = Bool.FALSE
             } else {
@@ -5046,8 +5098,8 @@ def private binjgb_all__update_envelopes(var e : Emulator?) {
             }
             if (_t0) {
                 envelope.timer = uint(envelope.period)
-                var delta : uint8 = uint8(envelope.direction == EnvelopeDirection.ENVELOPE_ATTENUATE ? -1 : 1)
-                var volume : uint8 = uint8(int(envelope.volume) + int(delta))
+                let delta : uint8 = uint8(envelope.direction == EnvelopeDirection.ENVELOPE_ATTENUATE ? -1 : 1)
+                let volume : uint8 = uint8(int(envelope.volume) + int(delta))
                 if (int(volume) < ENVELOPE_MAX_VOLUME) {
                     envelope.volume = volume
                 } else {
@@ -5066,7 +5118,7 @@ def private binjgb_all__update_square_wave(var channel : Channel?; var total_fra
     if (int(channel.status) != 0) {
         while (total_frames != 0) {
             var frames : uint = square.ticks / uint(APU_TICKS)
-            var sample : uint8 = uint8(-int(square.sample) & int(channel.envelope.volume))
+            let sample : uint8 = uint8(CHANNELX_SAMPLE(channel, square.sample))
             if (frames <= total_frames) {
                 square.ticks = square.period
                 square.position = uint8((int(square.position) + 1) % DUTY_CYCLE_COUNT)
@@ -5086,11 +5138,11 @@ def private binjgb_all__update_wave(var e : Emulator?; var apu_ticks : uint; var
         while (total_frames != 0) {
             var frames : uint = e.state.apu.wave.ticks / uint(APU_TICKS)
             // Modulate 4-bit sample by wave volume.
-            var sample : uint8 = uint8(int(e.state.apu.wave.sample_data) >> int(e.state.apu.wave.volume_shift))
+            let sample : uint8 = uint8(int(e.state.apu.wave.sample_data) >> int(e.state.apu.wave.volume_shift))
             if (frames <= total_frames) {
                 e.state.apu.wave.position = uint8((int(e.state.apu.wave.position) + 1) % WAVE_SAMPLE_COUNT)
                 e.state.apu.wave.sample_time = uint64(apu_ticks + e.state.apu.wave.ticks)
-                var byte : uint8 = e.state.apu.wave.ram[int(e.state.apu.wave.position) >> 1]
+                let byte : uint8 = e.state.apu.wave.ram[int(e.state.apu.wave.position) >> 1]
                 if ((int(e.state.apu.wave.position) & 1) == 0) {
                     // High nybble.
                     e.state.apu.wave.sample_data = uint8(int(byte) >> 4)
@@ -5115,10 +5167,10 @@ def private binjgb_all__update_noise(var e : Emulator?; var total_frames : uint)
     if (int(e.state.apu.channel[int(anon_96.APU_CHANNEL4)].status) != 0) {
         while (total_frames != 0) {
             var frames : uint = e.state.apu.noise.ticks / uint(APU_TICKS)
-            var sample : uint8 = uint8(-int(e.state.apu.noise.sample) & int(addr(e.state.apu.channel[int(anon_96.APU_CHANNEL4)]).envelope.volume))
+            let sample : uint8 = uint8(-int(e.state.apu.noise.sample) & int(addr(e.state.apu.channel[int(anon_96.APU_CHANNEL4)]).envelope.volume))
             if (int(e.state.apu.noise.clock_shift) <= NOISE_MAX_CLOCK_SHIFT) {
                 if (frames <= total_frames) {
-                    var bit : uint16 = uint16((int(e.state.apu.noise.lfsr) ^ (int(e.state.apu.noise.lfsr) >> 1)) & 1)
+                    let bit : uint16 = uint16((int(e.state.apu.noise.lfsr) ^ (int(e.state.apu.noise.lfsr) >> 1)) & 1)
                     if (e.state.apu.noise.lfsr_width == LfsrWidth.LFSR_WIDTH_7) {
                         e.state.apu.noise.lfsr = uint16(((int(e.state.apu.noise.lfsr) >> 1) & ~64) | (int(bit) << 6))
                     } else {
@@ -5197,7 +5249,7 @@ def private binjgb_all__write_audio_frame(var e : Emulator?; gb_frames : uint) {
 def private binjgb_all__apu_update_channels(var e : Emulator?; var total_frames : uint) {
     while (total_frames != 0) {
         var frames : uint = binjgb_all__get_gb_frames_until_next_resampled_frame(e)
-        frames = frames < total_frames ? frames : total_frames
+        frames = MIN(frames, total_frames)
         binjgb_all__update_square_wave(addr(e.state.apu.channel[int(anon_96.APU_CHANNEL1)]), frames)
         binjgb_all__update_square_wave(addr(e.state.apu.channel[int(anon_96.APU_CHANNEL2)]), frames)
         binjgb_all__update_wave(e, uint(e.state.apu.sync_ticks), frames)
@@ -5210,7 +5262,7 @@ def private binjgb_all__apu_update_channels(var e : Emulator?; var total_frames 
 
 def private binjgb_all__apu_update(var e : Emulator?; var total_ticks : uint) {
     while (total_ticks != 0) {
-        var next_seq_ticks : uint64 = uint64(FRAME_SEQUENCER_TICKS) - e.state.apu.sync_ticks % uint64(FRAME_SEQUENCER_TICKS)
+        let next_seq_ticks : uint64 = uint64(FRAME_SEQUENCER_TICKS) - e.state.apu.sync_ticks % uint64(FRAME_SEQUENCER_TICKS)
         if (next_seq_ticks == uint64(FRAME_SEQUENCER_TICKS)) {
             e.state.apu.frame = uint8((int(e.state.apu.frame) + 1) % FRAME_SEQUENCER_COUNT)
             c_switch(int(e.state.apu.frame)) {
@@ -5228,7 +5280,7 @@ def private binjgb_all__apu_update(var e : Emulator?; var total_ticks : uint) {
                 }
             }
         }
-        var ticks : uint64 = next_seq_ticks < uint64(total_ticks) ? next_seq_ticks : uint64(total_ticks)
+        let ticks : uint64 = MIN(next_seq_ticks, total_ticks)
         binjgb_all__apu_update_channels(e, uint(ticks / uint64(APU_TICKS)))
         total_ticks = uint(uint64(total_ticks) - ticks)
     }
@@ -5261,7 +5313,7 @@ def private binjgb_all__dma_synchronize(var e : Emulator?) {
         if (e.state.ticks > e.state.dma.sync_ticks) {
             var delta_ticks : uint64 = e.state.ticks - e.state.dma.sync_ticks
             e.state.dma.sync_ticks = e.state.ticks
-            var cpu_tick : uint64 = e.state.cpu_tick
+            let cpu_tick : uint64 = e.state.cpu_tick
             {
                 var _f = false
                 while (true) {
@@ -5280,8 +5332,8 @@ def private binjgb_all__dma_synchronize(var e : Emulator?) {
                         }
                         continue
                     }
-                    var addr_offset : uint8 = uint8((e.state.dma.tick_count - uint64(DMA_DELAY_TICKS)) >> 2ul)
-                    var value : uint8 = binjgb_all__read_u8_pair(e, binjgb_all__map_address(uint16(int(e.state.dma.source) + int(addr_offset))), Bool.FALSE)
+                    let addr_offset : uint8 = uint8((e.state.dma.tick_count - uint64(DMA_DELAY_TICKS)) >> 2ul)
+                    let value : uint8 = binjgb_all__read_u8_pair(e, binjgb_all__map_address(uint16(int(e.state.dma.source) + int(addr_offset))), Bool.FALSE)
                     binjgb_all__write_oam_no_mode_check(e, uint16(addr_offset), value)
                     e.state.dma.tick_count += uint64(CPU_TICK)
                     var _t0 : int
@@ -5351,7 +5403,7 @@ def private binjgb_all__serial_synchronize(var e : Emulator?) {
     if (e.state.ticks > e.state.serial.sync_ticks) {
         var delta_ticks : uint64 = e.state.ticks - e.state.serial.sync_ticks
         if (uint(e.state.serial.transferring) != 0 && e.state.serial.clock == SerialClock.SERIAL_CLOCK_INTERNAL) {
-            var cpu_tick : uint64 = e.state.cpu_tick
+            let cpu_tick : uint64 = e.state.cpu_tick
             while (delta_ticks > 0ul) {
                 e.state.serial.tick_count += cpu_tick
                 var _t0 : int
@@ -5400,8 +5452,8 @@ def private binjgb_all__read_u8_tick(var e : Emulator?; _c_addr : uint16) : uint
 }
 
 def private binjgb_all__read_u16_tick(var e : Emulator?; _c_addr : uint16) : uint16 {
-    var lo : uint8 = binjgb_all__read_u8_tick(e, _c_addr)
-    var hi : uint8 = binjgb_all__read_u8_tick(e, uint16(int(_c_addr) + 1))
+    let lo : uint8 = binjgb_all__read_u8_tick(e, _c_addr)
+    let hi : uint8 = binjgb_all__read_u8_tick(e, uint16(int(_c_addr) + 1))
     return uint16((int(hi) << 8) | int(lo))
 }
 
@@ -5430,7 +5482,7 @@ def private binjgb_all__set_af_reg(var e : Emulator?; af : uint16) {
 }
 
 def private binjgb_all__dispatch_interrupt(var e : Emulator?) {
-    var was_halt : Bool = enum_from_int(type<Bool>, int_of(uint(e.state.interrupt.state) >= uint(CpuState.CPU_STATE_HALT)))
+    let was_halt : Bool = enum_from_int(type<Bool>, int_of(uint(e.state.interrupt.state) >= uint(CpuState.CPU_STATE_HALT)))
     if (!(uint(e.state.interrupt.ime) != 0 || uint(was_halt) != 0)) {
         return
     }
@@ -5441,7 +5493,7 @@ def private binjgb_all__dispatch_interrupt(var e : Emulator?) {
     binjgb_all__write_u8_tick(e, e.state.reg.SP, uint8(int(e.state.reg.PC) >> 8))
     // Now check which interrupt to raise, after having written the MSB of PC.
     // This behavior is needed to pass the ie_push mooneye-gb test.
-    var interrupt : uint8 = uint8(int(e.state.interrupt.new_if) & int(e.state.interrupt.ie))
+    let interrupt : uint8 = uint8(int(e.state.interrupt.new_if) & int(e.state.interrupt.ie))
     var delay : Bool = Bool.FALSE
     var mask : uint8 = 0u8
     var vector : uint16 = uint16(0)
@@ -6910,7 +6962,7 @@ def private binjgb_all__execute_instruction(var e : Emulator?) {
         case(203) {
             {
                 new_pc = uint16(int(new_pc) + 1)
-                var cb : uint8 = binjgb_all__read_u8_tick(e, e.state.reg.PC)
+                let cb : uint8 = binjgb_all__read_u8_tick(e, e.state.reg.PC)
                 c_switch(int(cb)) {
                     case(0) {
                         u = e.state.reg._anon1._anon0.B
@@ -9138,10 +9190,10 @@ def emulator_run_until(var e : Emulator?; until_ticks : uint64) : uint {
     }
     binjgb_all__check_joyp_intr(e)
     e.state.event = 0u
-    var frames_left : uint64 = uint64(ab.frames - audio_buffer_get_frames(ab))
-    var max_audio_ticks : uint64 = e.state.apu.sync_ticks + uint64(uint((frames_left * uint64(CPU_TICKS_PER_SECOND) + uint64(ab.frequency) - 1ul) /
+    let frames_left : uint64 = uint64(ab.frames - audio_buffer_get_frames(ab))
+    let max_audio_ticks : uint64 = e.state.apu.sync_ticks + uint64(uint((frames_left * uint64(CPU_TICKS_PER_SECOND) + uint64(ab.frequency) - 1ul) /
             uint64(ab.frequency)))
-    var check_ticks : uint64 = until_ticks < max_audio_ticks ? until_ticks : max_audio_ticks
+    let check_ticks : uint64 = MIN(until_ticks, max_audio_ticks)
     while (e.state.event == 0u && e.state.ticks < check_ticks) {
         binjgb_all__emulator_step_internal(e)
     }
@@ -9162,11 +9214,8 @@ def emulator_step(var e : Emulator?) : uint {
 [c_function]
 def private binjgb_all__validate_header_checksum(var cart_info : CartInfo?) : Result {
     var checksum : uint8 = 0u8
-    var i : uint64 = 0ul
-    i = uint64(HEADER_CHECKSUM_RANGE_START)
-    while (i <= uint64(HEADER_CHECKSUM_RANGE_END)) {
+    for (i in urange64(uint64(HEADER_CHECKSUM_RANGE_START), uint64(HEADER_CHECKSUM_RANGE_END) + 1ul)) {
         checksum = uint8(int(checksum) - int(cart_info.data[i]) - 1)
-        i++
     }
     return checksum == cart_info.data[HEADER_CHECKSUM_ADDR] ? Result.OK : Result.ERROR
 }
@@ -9183,7 +9232,7 @@ def private binjgb_all__log_cart_info(var cart_info : CartInfo?) {
             uint8(0), uint8(0), uint8(0), uint8(0), uint8(0))
     var title_start : uint8? = reinterpret<uint8?>(cart_info.data) + TITLE_START_ADDR
     var title_end : uint8? = reinterpret<uint8?>(crt::memchr(reinterpret<void?>(title_start), '\0', uint64(TITLE_MAX_LENGTH)))
-    var title_length : int = int(title_end != null ? int64(title_end - title_start) : int64(TITLE_MAX_LENGTH))
+    let title_length : int = int(title_end != null ? int64(title_end - title_start) : int64(TITLE_MAX_LENGTH))
     crt::memcpy(reinterpret<void?>(addr(title[0])), reinterpret<void?>(title_start), uint64(title_length))
     // Change all non-ascii characters to ' '.
     for (i in range(title_length)) {
@@ -9205,7 +9254,7 @@ def private binjgb_all__log_cart_info(var cart_info : CartInfo?) {
 def init_audio_buffer(var e : Emulator?; frequency : uint; frames : uint) : Result {
     var audio_buffer : AudioBuffer? = addr(e.audio_buffer)
     audio_buffer.frames = frames
-    var buffer_size : uint64 = uint64((frames + uint(AUDIO_BUFFER_EXTRA_FRAMES)) * uint(SOUND_OUTPUT_COUNT))
+    let buffer_size : uint64 = uint64((frames + uint(AUDIO_BUFFER_EXTRA_FRAMES)) * uint(SOUND_OUTPUT_COUNT))
     audio_buffer.data = reinterpret<uint8?>(crt::malloc(buffer_size))
     if (!(audio_buffer.data != null)) {
         fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/emulator.c"), 4732)
@@ -9270,7 +9319,7 @@ def private binjgb_all__randomize_buffer(var seed : uint?; var buffer : uint8?; 
 [c_function]
 def init_emulator(var e : Emulator?; var init : EmulatorInit?) : Result {
     while (true) {
-        if (!(binjgb_all__get_cart_infos(e) == Result.OK)) {
+        if (!SUCCESS(binjgb_all__get_cart_infos(e))) {
             goto label 1
         }
         break
@@ -9433,7 +9482,7 @@ def private binjgb_all__set_rom_file_data(var e : Emulator?; var file_data : Fil
 }
 
 def emulator_was_ext_ram_updated(var e : Emulator?) : Bool {
-    var result : Bool = e.state.ext_ram_updated
+    let result : Bool = e.state.ext_ram_updated
     e.state.ext_ram_updated = Bool.FALSE
     return result
 }
@@ -9535,13 +9584,13 @@ def emulator_read_ext_ram_from_file(var e : Emulator?; var filename : uint8?) : 
     var file_data : FileData
     crt::memset(reinterpret<void?>(addr(file_data)), 0, uint64(typeinfo sizeof(type<FileData>)))
     while (true) {
-        if (!(file_read(filename, addr(file_data)) == Result.OK)) {
+        if (!SUCCESS(file_read(filename, addr(file_data)))) {
             goto label 1
         }
         break
     }
     while (true) {
-        if (!(emulator_read_ext_ram(e, addr(file_data)) == Result.OK)) {
+        if (!SUCCESS(emulator_read_ext_ram(e, addr(file_data)))) {
             goto label 1
         }
         break
@@ -9562,13 +9611,13 @@ def emulator_write_ext_ram_to_file(var e : Emulator?; var filename : uint8?) : R
     file_data.size = e.state.ext_ram.size
     file_data.data = reinterpret<uint8?>(crt::malloc(file_data.size))
     while (true) {
-        if (!(emulator_write_ext_ram(e, addr(file_data)) == Result.OK)) {
+        if (!SUCCESS(emulator_write_ext_ram(e, addr(file_data)))) {
             goto label 1
         }
         break
     }
     while (true) {
-        if (!(file_write(filename, addr(file_data)) == Result.OK)) {
+        if (!SUCCESS(file_write(filename, addr(file_data)))) {
             goto label 1
         }
         break
@@ -9585,13 +9634,13 @@ def emulator_read_state_from_file(var e : Emulator?; var filename : uint8?) : Re
     var file_data : FileData
     crt::memset(reinterpret<void?>(addr(file_data)), 0, uint64(typeinfo sizeof(type<FileData>)))
     while (true) {
-        if (!(file_read(filename, addr(file_data)) == Result.OK)) {
+        if (!SUCCESS(file_read(filename, addr(file_data)))) {
             goto label 1
         }
         break
     }
     while (true) {
-        if (!(emulator_read_state(e, addr(file_data)) == Result.OK)) {
+        if (!SUCCESS(emulator_read_state(e, addr(file_data)))) {
             goto label 1
         }
         break
@@ -9608,13 +9657,13 @@ def emulator_write_state_to_file(var e : Emulator?; var filename : uint8?) : Res
     var file_data : FileData
     emulator_init_state_file_data(addr(file_data))
     while (true) {
-        if (!(emulator_write_state(e, addr(file_data)) == Result.OK)) {
+        if (!SUCCESS(emulator_write_state(e, addr(file_data)))) {
             goto label 1
         }
         break
     }
     while (true) {
-        if (!(file_write(filename, addr(file_data)) == Result.OK)) {
+        if (!SUCCESS(file_write(filename, addr(file_data)))) {
             goto label 1
         }
         break
@@ -9629,19 +9678,19 @@ def emulator_write_state_to_file(var e : Emulator?; var filename : uint8?) : Res
 def emulator_new(var init : EmulatorInit?) : Emulator? {
     var e : Emulator? = reinterpret<Emulator?>(crt::calloc(1ul, uint64(typeinfo sizeof(type<Emulator>))))
     while (true) {
-        if (!(binjgb_all__set_rom_file_data(e, addr(init.rom)) == Result.OK)) {
+        if (!SUCCESS(binjgb_all__set_rom_file_data(e, addr(init.rom)))) {
             goto label 1
         }
         break
     }
     while (true) {
-        if (!(init_emulator(e, init) == Result.OK)) {
+        if (!SUCCESS(init_emulator(e, init))) {
             goto label 1
         }
         break
     }
     while (true) {
-        if (!(init_audio_buffer(e, uint(init.audio_frequency), uint(init.audio_frames)) == Result.OK)) {
+        if (!SUCCESS(init_audio_buffer(e, uint(init.audio_frequency), uint(init.audio_frames)))) {
             goto label 1
         }
         break
@@ -9663,7 +9712,7 @@ def emulator_delete(var e : Emulator?) {
 
 [c_function]
 def emulator_ticks_to_time(ticks : uint64; var day : uint?; var hr : uint?; var min : uint?; var sec : uint?; var ms : uint?) {
-    var secs : uint64 = ticks / uint64(CPU_TICKS_PER_SECOND)
+    let secs : uint64 = ticks / uint64(CPU_TICKS_PER_SECOND)
     *ms = uint((secs / 1000ul) % 1000ul)
     *sec = uint(secs % 60ul)
     *min = uint((secs / 60ul) % 60ul)
@@ -9673,7 +9722,7 @@ def emulator_ticks_to_time(ticks : uint64; var day : uint?; var hr : uint?; var 
 
 [c_function]
 def emulator_set_builtin_palette(var e : Emulator?; index : uint) {
-    var count : uint64 = uint64(typeinfo sizeof(type<PaletteRGBA[84][3]>)) / uint64(typeinfo sizeof(type<PaletteRGBA[3]>))
+    let count : uint64 = uint64(typeinfo sizeof(type<PaletteRGBA[84][3]>)) / uint64(typeinfo sizeof(type<PaletteRGBA[3]>))
     if (uint64(index) >= count) {
         return
     }
@@ -9844,8 +9893,8 @@ def joypad_find_state(var buffer : JoypadBuffer?; ticks : uint64) : JoypadStateI
     var result : JoypadStateIter
     var first_chunk : JoypadChunk? = buffer.sentinel.next
     var last_chunk : JoypadChunk? = buffer.sentinel.prev
-    var first_ticks : uint64 = first_chunk.data[0].ticks
-    var last_ticks : uint64 = last_chunk.data[last_chunk.size - 1ul].ticks
+    let first_ticks : uint64 = first_chunk.data[0].ticks
+    let last_ticks : uint64 = last_chunk.data[last_chunk.size - 1ul].ticks
     if (ticks <= first_ticks) {
         // At or past the beginning.
         result.chunk = first_chunk
@@ -9898,7 +9947,7 @@ def joypad_find_state(var buffer : JoypadBuffer?; ticks : uint64) : JoypadStateI
 [c_function]
 def joypad_truncate_to(var buffer : JoypadBuffer?; var iter_in : JoypadStateIter) {
     var iter = iter_in
-    var index : uint64 = uint64(int64(iter.state - iter.chunk.data))
+    let index : uint64 = uint64(int64(iter.state - iter.chunk.data))
     iter.chunk.size = index + 1ul
     var chunk : JoypadChunk? = iter.chunk.next
     var sentinel : JoypadChunk? = addr(buffer.sentinel)
@@ -9916,7 +9965,7 @@ def joypad_truncate_to(var buffer : JoypadBuffer?; var iter_in : JoypadStateIter
 [c_function]
 def joypad_get_next_state(var iter_in : JoypadStateIter) : JoypadStateIter {
     var iter = iter_in
-    var index : uint64 = uint64(int64(iter.state - iter.chunk.data))
+    let index : uint64 = uint64(int64(iter.state - iter.chunk.data))
     if (index + 1ul < iter.chunk.size) {
         iter.state++
         return iter
@@ -9951,7 +10000,7 @@ def joypad_get_stats(var buffer : JoypadBuffer?) : JoypadStats {
     var sentinel : JoypadChunk? = addr(buffer.sentinel)
     var cur : JoypadChunk? = sentinel.next
     while (intptr(cur) != intptr(sentinel)) {
-        var overhead : uint64 = uint64(typeinfo sizeof(type<JoypadChunk>))
+        let overhead : uint64 = uint64(typeinfo sizeof(type<JoypadChunk>))
         stats.used_bytes += cur.size * uint64(typeinfo sizeof(type<JoypadState>)) + overhead
         stats.capacity_bytes += cur.capacity * uint64(typeinfo sizeof(type<JoypadState>)) + overhead
         cur = cur.next
@@ -9981,7 +10030,7 @@ def joypad_write(var buffer : JoypadBuffer?; var file_data : FileData?) : Result
     var chunk : JoypadChunk? = buffer.sentinel.next
     var p : uint8? = file_data.data
     while (intptr(chunk) != intptr(addr(buffer.sentinel))) {
-        var chunk_size : uint64 = chunk.size * uint64(typeinfo sizeof(type<JoypadState>))
+        let chunk_size : uint64 = chunk.size * uint64(typeinfo sizeof(type<JoypadState>))
         crt::memcpy(reinterpret<void?>(p), reinterpret<void?>(chunk.data), chunk_size)
         p += chunk_size
         chunk = chunk.next
@@ -9996,13 +10045,13 @@ def joypad_read(var file_data : FileData?; var out_buffer : JoypadBuffer ??) : R
         fprintf(crt::c_stderr(), cstr("Expected joypad file size to be multiple of %zu\n"), uint64(typeinfo sizeof(type<JoypadState>)))
         goto label 1
     }
-    var size : uint64 = file_data.size / uint64(typeinfo sizeof(type<JoypadState>))
+    let size : uint64 = file_data.size / uint64(typeinfo sizeof(type<JoypadState>))
     var i : uint64
     var last_ticks : uint64 = 0ul
     i = 0ul
     while (i < size) {
         var state : JoypadState? = reinterpret<JoypadState?>(file_data.data) + i
-        var ticks : uint64 = state.ticks
+        let ticks : uint64 = state.ticks
         if (!(ticks >= last_ticks)) {
             fprintf(crt::c_stderr(), cstr("%s:%d: "), cstr("/root/c2das/tests/manual/binjgb/upstream/binjgb/src/joypad.c"), 240)
             fprintf(crt::c_stderr(), cstr("Expected ticks to be sorted, got %lu then %lu\n"), last_ticks, ticks)
@@ -10039,7 +10088,7 @@ def joypad_read(var file_data : FileData?; var out_buffer : JoypadBuffer ??) : R
 def private binjgb_all__joypad_playback_callback(var joyp : JoypadButtons?; var user_data : void?) {
     var changed : Bool = Bool.FALSE
     var playback : JoypadPlayback? = reinterpret<JoypadPlayback?>(user_data)
-    var ticks : uint64 = emulator_get_ticks(playback.e)
+    let ticks : uint64 = emulator_get_ticks(playback.e)
     if (ticks < playback.current.state.ticks) {
         playback.current = joypad_find_state(playback.buffer, ticks)
         playback.next = joypad_get_next_state(playback.current)
@@ -10088,7 +10137,7 @@ def gb_load_rom(argc : int; var argv : uint8 ??; var out : FileData?) : int {
     if (argc < 2) {
         return 0
     }
-    if (!(file_read_aligned(argv[argc - 1], 32ul * 1024ul, out) == Result.OK)) {
+    if (!SUCCESS(file_read_aligned(argv[argc - 1], 32ul * 1024ul, out))) {
         return 0
     }
     return 1
@@ -10121,7 +10170,7 @@ def gb_run_frame(var emulator : Emulator?; frame_index : int) : int {
     var until_ticks : uint64 = emulator_get_ticks(emulator) + uint64(PPU_FRAME_TICKS)
     binjgb_all__gb_script_buttons(frame_index, addr(binjgb_all__gb_live_buttons))
     while (true) {
-        var event : uint = emulator_run_until(emulator, until_ticks)
+        let event : uint = emulator_run_until(emulator, until_ticks)
         if ((event & uint(anon_240.EMULATOR_EVENT_NEW_FRAME)) != 0) {
             return 1
         }
@@ -10140,11 +10189,11 @@ def gb_frame_hash(var emulator : Emulator?) : int {
     var pixels : uint? = addr((*emulator_get_frame_buffer(emulator))[0])
     var hash : uint = 2166136261u
     for (i in range(SCREEN_WIDTH * SCREEN_HEIGHT)) {
-        var rgba : uint = pixels[i]
-        var r : uint = ((rgba >> 0u) & 255u) >> 3u
-        var g : uint = ((rgba >> 8u) & 255u) >> 3u
-        var b : uint = ((rgba >> 16u) & 255u) >> 3u
-        var packed : uint = (r << 10u) | (g << 5u) | b
+        let rgba : uint = pixels[i]
+        let r : uint = ((rgba >> 0u) & 255u) >> 3u
+        let g : uint = ((rgba >> 8u) & 255u) >> 3u
+        let b : uint = ((rgba >> 16u) & 255u) >> 3u
+        let packed : uint = (r << 10u) | (g << 5u) | b
         hash ^= packed & 255u
         hash *= 16777619u
         hash ^= packed >> 8u
