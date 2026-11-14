@@ -1,0 +1,45 @@
+{
+	"checks" : "safe",
+	"defines" : [
+		"DOOM_IMPLEMENT_PRINT",
+		"DOOM_IMPLEMENT_MALLOC",
+		"DOOM_IMPLEMENT_FILE_IO",
+		"DOOM_IMPLEMENT_EXIT",
+		"DOOM_IMPLEMENT_GETENV",
+		"DOOM_TIC_CHECKSUM"
+	],
+	"first_member" : "addr",
+	"fn_macros" : "fold",
+	"forms_off" : [],
+	"inline_helpers" : false,
+	"jit_whole_program" : false,
+	"layout" : "source",
+	"loops" : "range",
+	"marshal" : [
+		"mapvertex_t",
+		"mapsidedef_t",
+		"maplinedef_t",
+		"mapsector_t",
+		"mapsubsector_t",
+		"mapseg_t",
+		"mapnode_t",
+		"patch_t",
+		"post_t",
+		"mappatch_t",
+		"maptexture_t"
+	],
+	"over_indexed" : [
+		"patch_t.columnofs",
+		"maptexture_t.patches",
+		"texture_t.patches"
+	],
+	"padded" : [
+		"visplane_t.top",
+		"visplane_t.bottom"
+	],
+	"param_writes" : "in-place",
+	"past_end" : "call",
+	"solid_context" : true,
+	"strict_aliasing" : false,
+	"switch_dispatch" : "chain"
+}
