@@ -16,9 +16,9 @@ numbers of that generation.
 
 Each cell is the geometric mean, over the program's workloads (its startup row aside), of the lane's work time over the native build's, a work time being the seconds the workload's run measured inside its process; a mean `(by subtraction)` takes a capture made before that clock, its work times the workload's median less the same lane's startup median. A lane covering only some workloads names how many. A program's README holds its tables, its startup times, its machine and its raw captures.
 
-| Program              | Captured             | Machine                         | Workloads | interpreter |  JIT |           exe | JIT, goto dispatch | interpreter, source-cut layout | JIT, source-cut layout | interpreter, single module | JIT, single module |
-| :------------------- | :------------------- | :------------------------------ | --------: | ----------: | ---: | ------------: | -----------------: | -----------------------------: | ---------------------: | -------------------------: | -----------------: |
-| [lua](lua/README.md) | 2026-11-11 03:42 UTC | x86_64, PC (AMD Ryzen 7 7435HS) |         5 |      112.86 | 1.46 | 1.49 (4 of 5) |               1.21 |                         112.32 |                   1.42 |                     113.09 |               1.64 |
+| Program              | Captured             | Machine                         | Workloads | interpreter |  JIT |           exe |  AOT | AOT, fast | interpreter, fast | JIT, fast |     exe, fast |
+| :------------------- | :------------------- | :------------------------------ | --------: | ----------: | ---: | ------------: | ---: | --------: | ----------------: | --------: | ------------: |
+| [lua](lua/README.md) | 2026-11-14 09:58 UTC | x86_64, PC (AMD Ryzen 7 7435HS) |         5 |      110.92 | 1.54 | 1.54 (4 of 5) | 1.36 |      1.30 |            111.41 |      1.49 | 1.57 (4 of 5) |
 
 Raw captures beside this README, each copied whole from c2das-re when its tree holds it: `compare/results_linux.json`, `metrics/criteria_linux.json`, `perf/results_linux.json`, `perf/results_method_linux.json`, `perf/dasprofile_linux.json`.
 
@@ -561,7 +561,7 @@ Doom: pending (P6).
 
 ### Real projects
 
-Each project of the Rust repository's `tests/manual` on its own fixture, checked against the `expected.stdout` of its canonical case in the Rust repository's `tests/canonical/cases.json`; the native build (the pinned clang with the README's flags) must print it too. Captured: binjgb (Rust `b1d012eb5d26`, 2026-11-09 16:37 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap); doomgeneric (Rust `b1d012eb5d26`, 2026-11-09 16:48 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap); h264bsd-mp4 (Rust `b1d012eb5d26`, 2026-11-09 16:41 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap); plmpeg-stream (Rust `b1d012eb5d26`, 2026-11-09 16:46 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap); quakegeneric (Rust `b1d012eb5d26`, 2026-11-09 17:02 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap); wasm3 (Rust `b1d012eb5d26`, 2026-11-09 16:58 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap).
+Each project of the Rust repository's `tests/manual` on its own fixture, checked against the `expected.stdout` of its canonical case in the Rust repository's `tests/canonical/cases.json`; the native build (the pinned clang with the README's flags) must print it too. Captured: binjgb (Rust `b1d012eb5d26`, 2026-11-14 08:51 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap); doomgeneric (Rust `b1d012eb5d26`, 2026-11-09 16:48 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap); h264bsd-mp4 (Rust `b1d012eb5d26`, 2026-11-14 08:53 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap); plmpeg-stream (Rust `b1d012eb5d26`, 2026-11-14 08:54 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap); quakegeneric (Rust `b1d012eb5d26`, 2026-11-09 17:02 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap); wasm3 (Rust `b1d012eb5d26`, 2026-11-09 16:58 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap).
 
 | Project       | Side | Native | interpreter |     JIT |     exe |     AOT |
 | :------------ | :--- | :----- | ----------: | ------: | ------: | ------: |
@@ -594,14 +594,14 @@ The bench entry's timed loop (`decode_us`), a lane's median over the native buil
 
 | Project       | Side | Native compiler      | Native s | interpreter |      JIT |      exe |      AOT |
 | :------------ | :--- | :------------------- | -------: | ----------: | -------: | -------: | -------: |
-| binjgb        | Ours | clang version 22.1.8 | 0.061238 |       73.00 |     1.20 |     1.24 |     1.30 |
-| binjgb        | Rust | clang version 22.1.8 | 0.061238 |       71.52 |     1.04 |     1.05 |     1.07 |
+| binjgb        | Ours | clang version 22.1.8 | 0.061654 |       73.40 |     1.15 |     1.19 |     1.15 |
+| binjgb        | Rust | clang version 22.1.8 | 0.061654 |       71.12 |     1.03 |     1.03 |     1.07 |
 | doomgeneric   | Ours | clang version 22.1.8 | 0.117230 |     refused |  refused |  refused |  refused |
 | doomgeneric   | Rust | clang version 22.1.8 | 0.117230 |       33.26 |     1.07 |     1.08 |  timeout |
-| h264bsd-mp4   | Ours | clang version 22.1.8 | 0.079643 |       67.37 |     1.16 |     1.14 |     1.13 |
-| h264bsd-mp4   | Rust | clang version 22.1.8 | 0.079643 |       49.65 |     1.03 |     1.04 |     1.14 |
-| plmpeg-stream | Ours | clang version 22.1.8 | 0.041427 |       34.42 |     1.06 |     1.07 |     1.06 |
-| plmpeg-stream | Rust | clang version 22.1.8 | 0.041427 |       29.54 |     0.95 |     1.00 |     1.05 |
+| h264bsd-mp4   | Ours | clang version 22.1.8 | 0.078734 |       59.64 |     1.05 |     1.05 |     1.13 |
+| h264bsd-mp4   | Rust | clang version 22.1.8 | 0.078734 |       51.44 |     1.05 |     1.06 |     1.15 |
+| plmpeg-stream | Ours | clang version 22.1.8 | 0.040595 |       29.35 |     0.98 |     1.02 |     1.08 |
+| plmpeg-stream | Rust | clang version 22.1.8 | 0.040595 |       29.97 |     0.96 |     1.03 |     1.08 |
 | quakegeneric  | Ours | clang version 22.1.8 | no bench |    no bench | no bench | no bench | no bench |
 | quakegeneric  | Rust | clang version 22.1.8 | no bench |    no bench | no bench | no bench | no bench |
 | wasm3         | Ours | clang version 22.1.8 | 0.001818 |     refused |  refused |  refused |  refused |
@@ -611,13 +611,13 @@ The code of each side's module (the Rust runtime is its `c2da_rt_` and `c2da_std
 
 | Project       | Side | Code    | Files | Lines | Runtime lines | c_function | goto | label | literal_named | pointer_arith | pointer_index | reinterpret | unsafe_block | unsafe_expr | while_rangeable |
 | :------------ | :--- | :------ | ----: | ----: | ------------: | ---------: | ---: | ----: | ------------: | ------------: | ------------: | ----------: | -----------: | ----------: | --------------: |
-| binjgb        | Ours | ok      |     1 |  8170 |             0 |        110 |   38 |    19 |          1744 |            54 |            43 |         295 |            0 |         119 |              14 |
+| binjgb        | Ours | ok      |     1 |  9890 |             0 |        109 |   38 |    19 |          1362 |            54 |            43 |          86 |            0 |           0 |              11 |
 | binjgb        | Rust | ok      |     1 | 11481 |           956 |          0 |  670 |   867 |          2393 |            33 |           939 |        3705 |            8 |        5049 |              12 |
 | doomgeneric   | Ours | refused |     - |     - |             - |          - |    - |     - |             - |             - |             - |           - |            - |           - |               - |
 | doomgeneric   | Rust | ok      |     1 | 37045 |          1579 |          0 |  435 |   612 |         43595 |           523 |          3454 |        9882 |          260 |       15426 |             169 |
-| h264bsd-mp4   | Ours | ok      |     1 | 21478 |             0 |        306 |    5 |     3 |          6618 |          1970 |          2079 |         358 |            0 |           0 |              63 |
+| h264bsd-mp4   | Ours | ok      |     1 | 22184 |             0 |        307 |    5 |     3 |          6377 |          1970 |          2080 |         348 |            0 |           0 |              40 |
 | h264bsd-mp4   | Rust | ok      |     1 | 24316 |           822 |          0 |  362 |   309 |          7178 |          1738 |          2701 |        4495 |         1208 |        8557 |              73 |
-| plmpeg-stream | Ours | ok      |     1 |  3600 |             0 |         64 |    0 |     0 |          2062 |            11 |           387 |          66 |            0 |           6 |               5 |
+| plmpeg-stream | Ours | ok      |     1 |  4925 |             0 |         62 |    0 |     0 |          2056 |            11 |           387 |          52 |            0 |           6 |               4 |
 | plmpeg-stream | Rust | ok      |     1 |  4988 |           822 |          0 |    0 |     0 |          1891 |            10 |           587 |         474 |            0 |        1259 |              11 |
 | quakegeneric  | Ours | refused |     - |     - |             - |          - |    - |     - |             - |             - |             - |           - |            - |           - |               - |
 | quakegeneric  | Rust | compile |     - |     - |             - |          - |    - |     - |             - |             - |             - |           - |            - |           - |               - |
@@ -670,21 +670,23 @@ Ours:
 [c_function]
 def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
     var x : uint8 = e.state.ppu.render_x
-    var y : uint8 = e.state.ppu.line_y
+    let y : uint8 = e.state.ppu.line_y
     if (e.state.ppu.stat.mode != PPUMode.PPU_MODE_MODE3 || int(x) >= SCREEN_WIDTH) {
         return
     }
-    var display_bg : Bool = enum_from_int(type<Bool>, (uint(int(e.state.is_cgb)) != 0 || uint(int(e.state.ppu.lcdc.bg_display)) != 0) && !(int(e.config.disable_bg) != 0) ? 1 : 0)
-    var display_obj : Bool = enum_from_int(type<Bool>, uint(int(e.state.ppu.lcdc.obj_display)) != 0 && !(int(e.config.disable_obj) != 0) ? 1 : 0)
+    var display_bg : Bool = enum_from_int(type<Bool>, int_of((uint(e.state.is_cgb) != 0 || uint(e.state.ppu.lcdc.bg_display) != 0) &&
+            int(e.config.disable_bg) == 0))
+    let display_obj : Bool = enum_from_int(type<Bool>, int_of(uint(e.state.ppu.lcdc.obj_display) != 0 && int(e.config.disable_obj) == 0))
     var rendering_window : Bool = e.state.ppu.rendering_window
-    var window_counter : int = uint(int(rendering_window)) != 0 ? 0 : 255
-    if (!(int(rendering_window) != 0) && uint(int(e.state.ppu.lcdc.window_display)) != 0 && !(int(e.config.disable_window) != 0) && int(e.state.ppu.wx) <= WINDOW_MAX_X && int(y) >= int(e.state.ppu.wy)) {
-        window_counter = 0 > int(e.state.ppu.wx) - (int(x) + 7) ? 0 : int(e.state.ppu.wx) - (int(x) + 7)
+    var window_counter : int = uint(rendering_window) != 0 ? 0 : 255
+    if (int(rendering_window) == 0 && uint(e.state.ppu.lcdc.window_display) != 0 && int(e.config.disable_window) == 0 && int(e.state.ppu.wx) <= WINDOW_MAX_X &&
+            int(y) >= int(e.state.ppu.wy)) {
+        window_counter = 0 > int(e.state.ppu.wx) - (int(x) + WINDOW_X_OFFSET) ? 0 : int(e.state.ppu.wx) - (int(x) + WINDOW_X_OFFSET)
     }
-    var data_select : TileDataSelect = e.state.ppu.lcdc.bg_tile_data_select
+    let data_select : TileDataSelect = e.state.ppu.lcdc.bg_tile_data_select
     var mx : uint8 = uint8(int(e.state.ppu.scx) + int(x))
     var my : uint8 = uint8(int(e.state.ppu.scy) + int(y))
-    var map_base : uint16 = uint16(int(binjgb_all__map_select_to_address(e.state.ppu.lcdc.bg_tile_map_select)) | (int(my) >> 3) * TILE_MAP_WIDTH)
+    var map_base : uint16 = uint16(int(binjgb_all__map_select_to_address(e.state.ppu.lcdc.bg_tile_map_select)) | ((int(my) >> 3) * TILE_MAP_WIDTH))
     var pixel : uint?
     if (e.state.sgb.mask != SgbMask.SGB_MASK_CANCEL) {
         pixel = addr(ppu_mode3_synchronize_s_dummy_frame_buffer_line[0])
@@ -694,172 +696,165 @@ def private binjgb_all__ppu_mode3_synchronize(var e : Emulator?) {
     // Cache map_addr info.
     var map_addr : uint16 = uint16(0)
     var pal : PaletteRGBA? = null
-    var lo : uint8 = uint8(0)
-    var hi : uint8 = uint8(0)
+    var lo : uint8 = 0u8
+    var hi : uint8 = 0u8
     var priority : Bool = Bool.FALSE
     var i : int
-    {
-        while (e.state.ppu.mode3_render_ticks < e.state.ticks && int(x) < SCREEN_WIDTH) {
-            var bg_is_zero : Bool[4] = fixed_array(Bool.TRUE, Bool.TRUE, Bool.TRUE, Bool.TRUE)
-            var bg_priority : Bool[4] = fixed_array(Bool.FALSE, Bool.FALSE, Bool.FALSE, Bool.FALSE)
-            {
-                i = 0
-                while (i < 4) {
-                    let _t0 = window_counter
-                    window_counter--
-                    if (!!(_t0 == 0)) {
-                        display_bg = Bool.TRUE
-                        rendering_window = display_bg
-                        e.state.ppu.rendering_window = rendering_window
-                        mx = uint8(int(x) + i + WINDOW_X_OFFSET - int(e.state.ppu.wx))
-                        my = e.state.ppu.win_y
-                        map_base = uint16(int(binjgb_all__map_select_to_address(e.state.ppu.lcdc.window_tile_map_select)) | (int(my) >> 3) * TILE_MAP_WIDTH)
-                        map_addr = uint16(0)
+    while (e.state.ppu.mode3_render_ticks < e.state.ticks && int(x) < SCREEN_WIDTH) {
+        var bg_is_zero : Bool[4] = fixed_array(Bool.TRUE, Bool.TRUE, Bool.TRUE, Bool.TRUE)
+        var bg_priority : Bool[4] = fixed_array(Bool.FALSE, Bool.FALSE, Bool.FALSE, Bool.FALSE)
+        i = 0
+        while (i < 4) {
+            let _t0 = window_counter
+            window_counter--
+            if (_t0 == 0) {
+                display_bg = Bool.TRUE
+                rendering_window = display_bg
+                e.state.ppu.rendering_window = rendering_window
+                mx = uint8(int(x) + i + WINDOW_X_OFFSET - int(e.state.ppu.wx))
+                my = e.state.ppu.win_y
+                map_base = uint16(int(binjgb_all__map_select_to_address(e.state.ppu.lcdc.window_tile_map_select)) | ((int(my) >> 3) * TILE_MAP_WIDTH))
+                map_addr = uint16(0)
+            }
+            if (int(display_bg) != 0) {
+                let new_map_addr : uint16 = uint16(int(map_base) | (int(mx) >> 3))
+                if (map_addr == new_map_addr) {
+                    lo = uint8(uint(lo) << 1u)
+                    hi = uint8(uint(hi) << 1u)
+                } else {
+                    map_addr = new_map_addr
+                    var tile_index : uint16 = uint16(e.state.vram.data[int(map_addr)])
+                    var my7 : uint8 = uint8(int(my) & 7)
+                    if (data_select == TileDataSelect.TILE_DATA_8800_97FF) {
+                        tile_index = uint16(256 + int(int8(tile_index)))
                     }
-                    if (int(display_bg) != 0) {
-                        var new_map_addr : uint16 = uint16(int(map_base) | int(mx) >> 3)
-                        if (int(map_addr) == int(new_map_addr)) {
-                            lo = uint8(uint(lo) << 1u)
-                            hi = uint8(uint(hi) << 1u)
-                        } else {
-                            map_addr = new_map_addr
-                            var tile_index : uint16 = uint16(e.state.vram.data[int(map_addr)])
-                            var my7 : uint8 = uint8(int(my) & 7)
-                            if (data_select == TileDataSelect.TILE_DATA_8800_97FF) {
-                                tile_index = uint16(256 + int(int8(tile_index)))
-                            }
-                            if (int(e.state.is_cgb) != 0) {
-                                var attr : uint8 = e.state.vram.data[8192 + int(map_addr)]
-                                pal = addr(e.state.ppu.bgcp.palettes[0]) + end_index(int(attr) & 7, 8)
-                                if ((int(attr) & 8) != 0) {
-                                    tile_index = uint16(int(tile_index) + 512)
-                                }
-                                if ((int(attr) & 64) != 0) {
-                                    my7 = uint8(7 - int(my7))
-                                }
-                                priority = enum_from_int(type<Bool>, (int(attr) & 128) != 0 ? 1 : 0)
-                                var tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + int(my7)) * TILE_ROW_BYTES)
-                                lo = e.state.vram.data[int(tile_addr)]
-                                hi = e.state.vram.data[int(tile_addr) + 1]
-                                if ((int(attr) & 32) != 0) {
-                                    lo = binjgb_all__reverse_bits_u8(lo)
-                                    hi = binjgb_all__reverse_bits_u8(hi)
-                                }
-                            } else {
-                                if (int(e.state.is_sgb) != 0) {
-                                    var idx : int = (int(y) >> 3) * (SCREEN_WIDTH >> 3) + (int(x) >> 3)
-                                    var palidx : uint8 = uint8(int(e.state.sgb.attr_map[idx >> 2]) >> 2 * (3 - (idx & 3)) & 3)
-                                    pal = addr(e.sgb_pal[0]) + end_index(int(palidx), 4)
-                                } else {
-                                    pal = addr(e.pal[int(PaletteType.PALETTE_TYPE_BGP)])
-                                }
-                                priority = Bool.FALSE
-                                var tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + int(my7)) * TILE_ROW_BYTES)
-                                lo = e.state.vram.data[int(tile_addr)]
-                                hi = e.state.vram.data[int(tile_addr) + 1]
-                            }
-                            var shift : uint8 = uint8(int(mx) & 7)
-                            lo = uint8(uint(lo) << uint(int(shift)))
-                            hi = uint8(uint(hi) << uint(int(shift)))
+                    if (int(e.state.is_cgb) != 0) {
+                        let attr : uint8 = e.state.vram.data[8192 + int(map_addr)]
+                        pal = addr(e.state.ppu.bgcp.palettes[0]) + end_index(int(attr) & 7, 8)
+                        if ((int(attr) & 8) != 0) {
+                            tile_index = uint16(int(tile_index) + 512)
                         }
-                        var palette_index : uint8 = uint8(int(hi) >> 6 & 2 | int(lo) >> 7)
-                        deref(pixel + i) = pal.color[int(palette_index)]
-                        bg_is_zero[i] = enum_from_int(type<Bool>, int(palette_index) == 0 ? 1 : 0)
-                        bg_priority[i] = priority
+                        if ((int(attr) & 64) != 0) {
+                            my7 = uint8(7 - int(my7))
+                        }
+                        priority = enum_from_int(type<Bool>, int_of((int(attr) & 128) != 0))
+                        let tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + int(my7)) * TILE_ROW_BYTES)
+                        lo = e.state.vram.data[int(tile_addr)]
+                        hi = e.state.vram.data[int(tile_addr) + 1]
+                        if ((int(attr) & 32) != 0) {
+                            lo = binjgb_all__reverse_bits_u8(lo)
+                            hi = binjgb_all__reverse_bits_u8(hi)
+                        }
                     } else {
-                        if (int(e.state.is_cgb) != 0) {
-                            deref(pixel + i) = e.state.ppu.bgcp.palettes[0].color[0]
-                        } elif (int(e.state.is_sgb) != 0) {
-                            deref(pixel + i) = e.sgb_pal[0].color[0]
+                        if (int(e.state.is_sgb) != 0) {
+                            let idx : int = (int(y) >> 3) * (SCREEN_WIDTH >> 3) + (int(x) >> 3)
+                            let palidx : uint8 = uint8((int(e.state.sgb.attr_map[idx >> 2]) >> (2 * (3 - (idx & 3)))) & 3)
+                            pal = addr(e.sgb_pal[0]) + end_index(int(palidx), 4)
                         } else {
-                            deref(pixel + i) = e.color_to_rgba[0].color[0]
+                            pal = addr(e.pal[int(PaletteType.PALETTE_TYPE_BGP)])
                         }
+                        priority = Bool.FALSE
+                        let tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + int(my7)) * TILE_ROW_BYTES)
+                        lo = e.state.vram.data[int(tile_addr)]
+                        hi = e.state.vram.data[int(tile_addr) + 1]
                     }
-                    i++
-                    mx = uint8(uint(mx) + 1)
+                    let shift : uint8 = uint8(int(mx) & 7)
+                    lo = uint8(uint(lo) << uint(int(shift)))
+                    hi = uint8(uint(hi) << uint(int(shift)))
+                }
+                let palette_index : uint8 = uint8(((int(hi) >> 6) & 2) | (int(lo) >> 7))
+                pixel[i] = pal.color[int(palette_index)]
+                bg_is_zero[i] = enum_from_int(type<Bool>, int_of(palette_index == 0))
+                bg_priority[i] = priority
+            } else {
+                if (int(e.state.is_cgb) != 0) {
+                    pixel[i] = e.state.ppu.bgcp.palettes[0].color[0]
+                } elif (int(e.state.is_sgb) != 0) {
+                    pixel[i] = e.sgb_pal[0].color[0]
+                } else {
+                    pixel[i] = e.color_to_rgba[0].color[0]
                 }
             }
-            // LCDC bit 0 works differently on cgb; when it's cleared OBJ will always
-            // have priority over bg and window.
-            if (uint(int(e.state.is_cgb)) != 0 && !(int(e.state.ppu.lcdc.bg_display) != 0)) {
-                crt::memset(reinterpret<void?>(addr(bg_is_zero)), int(Bool.TRUE), uint64(typeinfo sizeof(type<Bool[4]>)))
-                crt::memset(reinterpret<void?>(addr(bg_priority)), int(Bool.FALSE), uint64(typeinfo sizeof(type<Bool[4]>)))
-            }
-            if (int(display_obj) != 0) {
-                var obj_height : uint8 = binjgb_all__s_obj_size_to_height[int(e.state.ppu.lcdc.obj_size)]
-                var n : int
-                {
-                    n = int(e.state.ppu.line_obj_count) - 1
-                    while (n >= 0) {
-                        {
-                            var o : Obj? = addr(e.state.ppu.line_obj[0]) + end_index(n, 10)
-                            // Does [x, x + 4) intersect [o->x, o->x + 8)? Note that the sums must
-                            // wrap at 256 (i.e. arithmetic is 8-bit).
-                            var ox_start : int8 = int8(int(o.x) - int(x))
-                            // ox_end is inclusive.
-                            var ox_end : int8 = int8(int(ox_start) + 7)
-                            var oy : uint8 = uint8(int(y) - int(o.y))
-                            if (int(uint8(ox_start)) >= 4 && int(uint8(ox_end)) >= 8 || int(oy) >= int(obj_height)) {
-                                continue
-                            }
-                            if (int(o.yflip) != 0) {
-                                oy = uint8(int(obj_height) - 1 - int(oy))
-                            }
-                            var tile_index : uint16 = uint16(o.tile)
-                            if (int(obj_height) == 16) {
-                                if (int(oy) < 8) {
-                                    // Top tile of 8x16 sprite.
-                                    tile_index = uint16(int(tile_index) & 254)
-                                } else {
-                                    // Bottom tile of 8x16 sprite.
-                                    tile_index = uint16(int(tile_index) | 1)
-                                    oy = uint8(int(oy) - 8)
-                                }
-                            }
-                            var pal1 : PaletteRGBA? = null
-                            if (int(e.state.is_cgb) != 0) {
-                                pal1 = addr(e.state.ppu.obcp.palettes[0]) + end_index(int(o.cgb_palette) & 7, 8)
-                                if (o.bank != 0) {
-                                    tile_index = uint16(int(tile_index) + 512)
-                                }
-                            } else {
-                                pal1 = addr(e.pal[0]) + end_index(int(o.palette) + 1, 3)
-                            }
-                            var tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + (int(oy) & 7)) * TILE_ROW_BYTES)
-                            var lo1 : uint8 = e.state.vram.data[int(tile_addr)]
-                            var hi1 : uint8 = e.state.vram.data[int(tile_addr) + 1]
-                            if (!(int(o.xflip) != 0)) {
-                                lo1 = binjgb_all__reverse_bits_u8(lo1)
-                                hi1 = binjgb_all__reverse_bits_u8(hi1)
-                            }
-                            var tile_data_offset : int = 0 > -int(ox_start) ? 0 : -int(ox_start)
-                            lo1 = uint8(uint(lo1) >> uint(tile_data_offset))
-                            hi1 = uint8(uint(hi1) >> uint(tile_data_offset))
-                            var start : int = 0 > int(ox_start) ? 0 : int(ox_start)
-                            // end is inclusive.
-                            var end : int = 3 < int(ox_end) ? 3 : int(ox_end)
-                            {
-                                i = start
-                                while (i <= end) {
-                                    var palette_index : uint8 = uint8((int(hi1) & 1) << 1 | int(lo1) & 1)
-                                    if (int(palette_index) != 0 && (!(int(bg_priority[i]) != 0) || uint(int(bg_is_zero[i])) != 0) && (o.priority == ObjPriority.OBJ_PRIORITY_ABOVE_BG || uint(int(bg_is_zero[i])) != 0)) {
-                                        deref(pixel + i) = pal1.color[int(palette_index)]
-                                    }
-                                    i++
-                                    lo1 = uint8(uint(lo1) >> 1u)
-                                    hi1 = uint8(uint(hi1) >> 1u)
-                                }
-                            }
-                        } finally {
-                            n--
-                        }
-                    }
-                }
-            }
-            e.state.ppu.mode3_render_ticks += uint64(CPU_TICK)
-            pixel = pixel + 4
-            x = uint8(int(x) + 4)
+            i++
+            mx = uint8(uint(mx) + 1)
         }
+        // LCDC bit 0 works differently on cgb; when it's cleared OBJ will always
+        // have priority over bg and window.
+        if (uint(e.state.is_cgb) != 0 && int(e.state.ppu.lcdc.bg_display) == 0) {
+            crt::memset(reinterpret<void?>(addr(bg_is_zero)), int(Bool.TRUE), uint64(typeinfo sizeof(type<Bool[4]>)))
+            crt::memset(reinterpret<void?>(addr(bg_priority)), int(Bool.FALSE), uint64(typeinfo sizeof(type<Bool[4]>)))
+        }
+        if (int(display_obj) != 0) {
+            let obj_height : uint8 = binjgb_all__s_obj_size_to_height[int(e.state.ppu.lcdc.obj_size)]
+            var n : int
+            n = int(e.state.ppu.line_obj_count) - 1
+            while (n >= 0) {
+                {
+                    var o : Obj? = addr(e.state.ppu.line_obj[0]) + end_index(n, 10)
+                    // Does [x, x + 4) intersect [o->x, o->x + 8)? Note that the sums must
+                    // wrap at 256 (i.e. arithmetic is 8-bit).
+                    let ox_start : int8 = int8(int(o.x) - int(x))
+                    // ox_end is inclusive.
+                    let ox_end : int8 = int8(int(ox_start) + 7)
+                    var oy : uint8 = uint8(int(y) - int(o.y))
+                    if ((int(uint8(ox_start)) >= 4 && int(uint8(ox_end)) >= 8) || int(oy) >= int(obj_height)) {
+                        continue
+                    }
+                    if (int(o.yflip) != 0) {
+                        oy = uint8(int(obj_height) - 1 - int(oy))
+                    }
+                    var tile_index : uint16 = uint16(o.tile)
+                    if (obj_height == 16) {
+                        if (int(oy) < 8) {
+                            // Top tile of 8x16 sprite.
+                            tile_index = uint16(int(tile_index) & 254)
+                        } else {
+                            // Bottom tile of 8x16 sprite.
+                            tile_index = uint16(int(tile_index) | 1)
+                            oy = uint8(int(oy) - 8)
+                        }
+                    }
+                    var pal1 : PaletteRGBA? = null
+                    if (int(e.state.is_cgb) != 0) {
+                        pal1 = addr(e.state.ppu.obcp.palettes[0]) + end_index(int(o.cgb_palette) & 7, 8)
+                        if (o.bank != 0) {
+                            tile_index = uint16(int(tile_index) + 512)
+                        }
+                    } else {
+                        pal1 = addr(e.pal[0]) + end_index(int(o.palette) + 1, 3)
+                    }
+                    let tile_addr : uint16 = uint16((int(tile_index) * TILE_HEIGHT + (int(oy) & 7)) * TILE_ROW_BYTES)
+                    var lo1 : uint8 = e.state.vram.data[int(tile_addr)]
+                    var hi1 : uint8 = e.state.vram.data[int(tile_addr) + 1]
+                    if (int(o.xflip) == 0) {
+                        lo1 = binjgb_all__reverse_bits_u8(lo1)
+                        hi1 = binjgb_all__reverse_bits_u8(hi1)
+                    }
+                    let tile_data_offset : int = MAX(0, -int(ox_start))
+                    lo1 = uint8(uint(lo1) >> uint(tile_data_offset))
+                    hi1 = uint8(uint(hi1) >> uint(tile_data_offset))
+                    let start : int = MAX(0, ox_start)
+                    // end is inclusive.
+                    let end : int = MIN(3, ox_end)
+                    i = start
+                    while (i <= end) {
+                        let palette_index : uint8 = uint8(((int(hi1) & 1) << 1) | (int(lo1) & 1))
+                        if (palette_index != 0 && (int(bg_priority[i]) == 0 || uint(bg_is_zero[i]) != 0) &&
+                                (o.priority == ObjPriority.OBJ_PRIORITY_ABOVE_BG || uint(bg_is_zero[i]) != 0)) {
+                            pixel[i] = pal1.color[int(palette_index)]
+                        }
+                        i++
+                        lo1 = uint8(uint(lo1) >> 1u)
+                        hi1 = uint8(uint(hi1) >> 1u)
+                    }
+                } finally {
+                    n--
+                }
+            }
+        }
+        e.state.ppu.mode3_render_ticks += uint64(CPU_TICK)
+        pixel += 4
+        x = uint8(int(x) + 4)
     }
     e.state.ppu.render_x = x
 }
@@ -1200,143 +1195,139 @@ def h264bsdProcessBlock(var data : int?; qp : uint; skip : uint; coeffMap : uint
     tmp1 = h264_file_all__levelScale[int(h264_file_all__qpMod6[qp])][0] << int(qpDiv)
     tmp2 = h264_file_all__levelScale[int(h264_file_all__qpMod6[qp])][1] << int(qpDiv)
     tmp3 = h264_file_all__levelScale[int(h264_file_all__qpMod6[qp])][2] << int(qpDiv)
-    if (!(skip != 0)) {
-        deref(data + 0) *= tmp1
+    if (skip == 0) {
+        data[0] *= tmp1
     }
     // at least one of the rows 1, 2 or 3 contain non-zero coeffs, mask takes
     // the scanning order into account
-    if ((coeffMap & uint(65436)) != 0) {
+    if ((coeffMap & 65436u) != 0) {
         // do the zig-zag scan and inverse quantization
-        d1 = deref(data + 1)
-        d2 = deref(data + 14)
-        d3 = deref(data + 15)
-        deref(data + 1) = d1 * tmp2
-        deref(data + 14) = d2 * tmp2
-        deref(data + 15) = d3 * tmp3
-        d1 = deref(data + 2)
-        d2 = deref(data + 5)
-        d3 = deref(data + 4)
-        deref(data + 4) = d1 * tmp2
-        deref(data + 2) = d2 * tmp1
-        deref(data + 5) = d3 * tmp3
-        d1 = deref(data + 8)
-        d2 = deref(data + 3)
-        d3 = deref(data + 6)
+        d1 = data[1]
+        d2 = data[14]
+        d3 = data[15]
+        data[1] = d1 * tmp2
+        data[14] = d2 * tmp2
+        data[15] = d3 * tmp3
+        d1 = data[2]
+        d2 = data[5]
+        d3 = data[4]
+        data[4] = d1 * tmp2
+        data[2] = d2 * tmp1
+        data[5] = d3 * tmp3
+        d1 = data[8]
+        d2 = data[3]
+        d3 = data[6]
         tmp0 = d1 * tmp2
-        deref(data + 8) = d2 * tmp1
-        deref(data + 3) = d3 * tmp2
-        d1 = deref(data + 7)
-        d2 = deref(data + 12)
-        d3 = deref(data + 9)
-        deref(data + 6) = d1 * tmp2
-        deref(data + 7) = d2 * tmp3
-        deref(data + 12) = d3 * tmp2
-        deref(data + 9) = tmp0
-        d1 = deref(data + 10)
-        d2 = deref(data + 11)
-        d3 = deref(data + 13)
-        deref(data + 13) = d1 * tmp3
-        deref(data + 10) = d2 * tmp1
-        deref(data + 11) = d3 * tmp2
+        data[8] = d2 * tmp1
+        data[3] = d3 * tmp2
+        d1 = data[7]
+        d2 = data[12]
+        d3 = data[9]
+        data[6] = d1 * tmp2
+        data[7] = d2 * tmp3
+        data[12] = d3 * tmp2
+        data[9] = tmp0
+        d1 = data[10]
+        d2 = data[11]
+        d3 = data[13]
+        data[13] = d1 * tmp3
+        data[10] = d2 * tmp1
+        data[11] = d3 * tmp2
         // horizontal transform
-        {
-            row = uint(4)
-            ptr = data
-            while (true) {
-                let _t0 = row
-                row--
-                if (!(_t0 != 0)) {
-                    break
-                }
-                tmp0 = deref(ptr + 0) + deref(ptr + 2)
-                tmp1 = deref(ptr + 0) - deref(ptr + 2)
-                tmp2 = (deref(ptr + 1) >> 1) - deref(ptr + 3)
-                tmp3 = deref(ptr + 1) + (deref(ptr + 3) >> 1)
-                deref(ptr + 0) = tmp0 + tmp3
-                deref(ptr + 1) = tmp1 + tmp2
-                deref(ptr + 2) = tmp1 - tmp2
-                deref(ptr + 3) = tmp0 - tmp3
-                ptr = ptr + 4
+        row = 4u
+        ptr = data
+        while (true) {
+            let _t0 = row
+            row--
+            if (_t0 == 0) {
+                break
             }
+            tmp0 = ptr[0] + ptr[2]
+            tmp1 = ptr[0] - ptr[2]
+            tmp2 = (ptr[1] >> 1) - ptr[3]
+            tmp3 = ptr[1] + (ptr[3] >> 1)
+            ptr[0] = tmp0 + tmp3
+            ptr[1] = tmp1 + tmp2
+            ptr[2] = tmp1 - tmp2
+            ptr[3] = tmp0 - tmp3
+            ptr += 4
         }
         // lint +e661 +e662
         // then vertical transform
-        {
-            col = uint(4)
-            while (true) {
-                let _t1 = col
-                col--
-                if (!(_t1 != 0)) {
-                    break
-                }
-                tmp0 = deref(data + 0) + deref(data + 8)
-                tmp1 = deref(data + 0) - deref(data + 8)
-                tmp2 = (deref(data + 4) >> 1) - deref(data + 12)
-                tmp3 = deref(data + 4) + (deref(data + 12) >> 1)
-                deref(data + 0) = tmp0 + tmp3 + 32 >> 6
-                deref(data + 4) = tmp1 + tmp2 + 32 >> 6
-                deref(data + 8) = tmp1 - tmp2 + 32 >> 6
-                deref(data + 12) = tmp0 - tmp3 + 32 >> 6
-                // check that each value is in the range [-512,511]
-                if (uint(deref(data + 0) + 512) > uint(1023) || uint(deref(data + 4) + 512) > uint(1023) || uint(deref(data + 8) + 512) > uint(1023) || uint(deref(data + 12) + 512) > uint(1023)) {
-                    return uint(HANTRO_NOK)
-                }
-                data = data + 1
+        col = 4u
+        while (true) {
+            let _t1 = col
+            col--
+            if (_t1 == 0) {
+                break
             }
+            tmp0 = data[0] + data[8]
+            tmp1 = data[0] - data[8]
+            tmp2 = (data[4] >> 1) - data[12]
+            tmp3 = data[4] + (data[12] >> 1)
+            data[0] = (tmp0 + tmp3 + 32) >> 6
+            data[4] = (tmp1 + tmp2 + 32) >> 6
+            data[8] = (tmp1 - tmp2 + 32) >> 6
+            data[12] = (tmp0 - tmp3 + 32) >> 6
+            // check that each value is in the range [-512,511]
+            if ((uint(data[0] + 512) > 1023u) || (uint(data[4] + 512) > 1023u) || (uint(data[8] + 512) > 1023u) || (uint(data[12] + 512) > 1023u)) {
+                return uint(HANTRO_NOK)
+            }
+            data++
         }
     } else {
         // rows 1, 2 and 3 are zero
         // only dc-coeff is non-zero, i.e. coeffs at original positions
         // 1, 5 and 6 are zero
-        if ((coeffMap & uint(98)) == uint(0)) {
-            tmp0 = deref(data + 0) + 32 >> 6
+        if ((coeffMap & 98u) == 0u) {
+            tmp0 = (data[0] + 32) >> 6
             // check that value is in the range [-512,511]
-            if (uint(tmp0 + 512) > uint(1023)) {
+            if (uint(tmp0 + 512) > 1023u) {
                 return uint(HANTRO_NOK)
             }
-            deref(data + 15) = tmp0
-            deref(data + 14) = deref(data + 15)
-            deref(data + 13) = deref(data + 14)
-            deref(data + 12) = deref(data + 13)
-            deref(data + 11) = deref(data + 12)
-            deref(data + 10) = deref(data + 11)
-            deref(data + 9) = deref(data + 10)
-            deref(data + 8) = deref(data + 9)
-            deref(data + 7) = deref(data + 8)
-            deref(data + 6) = deref(data + 7)
-            deref(data + 5) = deref(data + 6)
-            deref(data + 4) = deref(data + 5)
-            deref(data + 3) = deref(data + 4)
-            deref(data + 2) = deref(data + 3)
-            deref(data + 1) = deref(data + 2)
-            deref(data + 0) = deref(data + 1)
+            data[15] = tmp0
+            data[14] = data[15]
+            data[13] = data[14]
+            data[12] = data[13]
+            data[11] = data[12]
+            data[10] = data[11]
+            data[9] = data[10]
+            data[8] = data[9]
+            data[7] = data[8]
+            data[6] = data[7]
+            data[5] = data[6]
+            data[4] = data[5]
+            data[3] = data[4]
+            data[2] = data[3]
+            data[1] = data[2]
+            data[0] = data[1]
         } else {
             // at least one of the coeffs 1, 5 or 6 is non-zero
-            deref(data + 1) *= tmp2
-            deref(data + 2) = deref(data + 5) * tmp1
-            deref(data + 3) = deref(data + 6) * tmp2
-            tmp0 = deref(data + 0) + deref(data + 2)
-            tmp1 = deref(data + 0) - deref(data + 2)
-            tmp2 = (deref(data + 1) >> 1) - deref(data + 3)
-            tmp3 = deref(data + 1) + (deref(data + 3) >> 1)
-            deref(data + 0) = tmp0 + tmp3 + 32 >> 6
-            deref(data + 1) = tmp1 + tmp2 + 32 >> 6
-            deref(data + 2) = tmp1 - tmp2 + 32 >> 6
-            deref(data + 3) = tmp0 - tmp3 + 32 >> 6
-            deref(data + 12) = deref(data + 0)
-            deref(data + 8) = deref(data + 12)
-            deref(data + 4) = deref(data + 8)
-            deref(data + 13) = deref(data + 1)
-            deref(data + 9) = deref(data + 13)
-            deref(data + 5) = deref(data + 9)
-            deref(data + 14) = deref(data + 2)
-            deref(data + 10) = deref(data + 14)
-            deref(data + 6) = deref(data + 10)
-            deref(data + 15) = deref(data + 3)
-            deref(data + 11) = deref(data + 15)
-            deref(data + 7) = deref(data + 11)
+            data[1] *= tmp2
+            data[2] = data[5] * tmp1
+            data[3] = data[6] * tmp2
+            tmp0 = data[0] + data[2]
+            tmp1 = data[0] - data[2]
+            tmp2 = (data[1] >> 1) - data[3]
+            tmp3 = data[1] + (data[3] >> 1)
+            data[0] = (tmp0 + tmp3 + 32) >> 6
+            data[1] = (tmp1 + tmp2 + 32) >> 6
+            data[2] = (tmp1 - tmp2 + 32) >> 6
+            data[3] = (tmp0 - tmp3 + 32) >> 6
+            data[12] = data[0]
+            data[8] = data[12]
+            data[4] = data[8]
+            data[13] = data[1]
+            data[9] = data[13]
+            data[5] = data[9]
+            data[14] = data[2]
+            data[10] = data[14]
+            data[6] = data[10]
+            data[15] = data[3]
+            data[11] = data[15]
+            data[7] = data[11]
             // check that each value is in the range [-512,511]
-            if (uint(deref(data + 0) + 512) > uint(1023) || uint(deref(data + 1) + 512) > uint(1023) || uint(deref(data + 2) + 512) > uint(1023) || uint(deref(data + 3) + 512) > uint(1023)) {
+            if ((uint(data[0] + 512) > 1023u) || (uint(data[1] + 512) > 1023u) || (uint(data[2] + 512) > 1023u) || (uint(data[3] + 512) > 1023u)) {
                 return uint(HANTRO_NOK)
             }
         }
@@ -1507,78 +1498,74 @@ def private h264_file_all__FilterVerLumaEdge(var data : uint8?; bS : uint; var t
     var q2 : int
     var tmpFlag : uint
     var clp : uint8? = addr(h264bsdClip[0]) + 512
-    var alpha : uint = thresholds.alpha
-    var beta : uint = thresholds.beta
+    let alpha : uint = thresholds.alpha
+    let beta : uint = thresholds.beta
     var val : int
     // Code
-    if (bS < uint(4)) {
-        tc = int(deref(thresholds.tc0 + (bS - uint(1))))
+    if (bS < 4u) {
+        tc = int(thresholds.tc0[bS - 1u])
         tmp = tc
-        {
-            i = uint(4)
-            while (i != 0) {
-                p1 = int(deref(data + -2))
-                p0 = int(deref(data + -1))
-                q0 = int(deref(data + 0))
-                q1 = int(deref(data + 1))
-                if (uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha && uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta && uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta) {
-                    p2 = int(deref(data + -3))
-                    q2 = int(deref(data + 2))
-                    if (uint(p2 - p0 < 0 ? -(p2 - p0) : p2 - p0) < beta) {
-                        val = p2 + (p0 + q0 + 1 >> 1) - (p1 << 1) >> 1
-                        deref(data + -2) = uint8(p1 + (val < -tc ? -tc : (val > tc ? tc : val)))
-                        tmp++
-                    }
-                    if (uint(q2 - q0 < 0 ? -(q2 - q0) : q2 - q0) < beta) {
-                        val = q2 + (p0 + q0 + 1 >> 1) - (q1 << 1) >> 1
-                        deref(data + 1) = uint8(q1 + (val < -tc ? -tc : (val > tc ? tc : val)))
-                        tmp++
-                    }
-                    val = (q0 - p0 << 2) + (p1 - q1) + 4 >> 3
-                    delta = val < -tmp ? -tmp : (val > tmp ? tmp : val)
-                    p0 = int(deref(clp + (p0 + delta)))
-                    q0 = int(deref(clp + (q0 - delta)))
-                    tmp = tc
-                    deref(data + -1) = uint8(p0)
-                    deref(data + 0) = uint8(q0)
+        i = 4u
+        while (i != 0) {
+            p1 = int(data[-2])
+            p0 = int(data[-1])
+            q0 = int(data[0])
+            q1 = int(data[1])
+            if ((uint(ABS(p0 - q0)) < alpha) && (uint(ABS(p1 - p0)) < beta) && (uint(ABS(q1 - q0)) < beta)) {
+                p2 = int(data[-3])
+                q2 = int(data[2])
+                if (uint(ABS(p2 - p0)) < beta) {
+                    val = (p2 + ((p0 + q0 + 1) >> 1) - (p1 << 1)) >> 1
+                    data[-2] = uint8(p1 + CLIP3(-tc, tc, val))
+                    tmp++
                 }
-                i--
-                data = data + imageWidth
+                if (uint(ABS(q2 - q0)) < beta) {
+                    val = (q2 + ((p0 + q0 + 1) >> 1) - (q1 << 1)) >> 1
+                    data[1] = uint8(q1 + CLIP3(-tc, tc, val))
+                    tmp++
+                }
+                val = (((q0 - p0) << 2) + (p1 - q1) + 4) >> 3
+                delta = CLIP3(-tmp, tmp, val)
+                p0 = int(clp[p0 + delta])
+                q0 = int(clp[q0 - delta])
+                tmp = tc
+                data[-1] = uint8(p0)
+                data[0] = uint8(q0)
             }
+            i--
+            data += imageWidth
         }
     } else {
         // hashA += data[-2] + data[-1] + data[0] + data[1];
-        {
-            i = uint(4)
-            while (i != 0) {
-                p1 = int(deref(data + -2))
-                p0 = int(deref(data + -1))
-                q0 = int(deref(data + 0))
-                q1 = int(deref(data + 1))
-                if (uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < alpha && uint(p1 - p0 < 0 ? -(p1 - p0) : p1 - p0) < beta && uint(q1 - q0 < 0 ? -(q1 - q0) : q1 - q0) < beta) {
-                    tmpFlag = uint(uint(p0 - q0 < 0 ? -(p0 - q0) : p0 - q0) < (alpha >> 2u) + uint(2) ? HANTRO_TRUE : HANTRO_FALSE)
-                    p2 = int(deref(data + -3))
-                    q2 = int(deref(data + 2))
-                    if (tmpFlag != 0 && uint(p2 - p0 < 0 ? -(p2 - p0) : p2 - p0) < beta) {
-                        tmp = p1 + p0 + q0
-                        deref(data + -1) = uint8(p2 + 2 * tmp + q1 + 4 >> 3)
-                        deref(data + -2) = uint8(p2 + tmp + 2 >> 2)
-                        deref(data + -3) = uint8(2 * int(deref(data + -4)) + 3 * p2 + tmp + 4 >> 3)
-                    } else {
-                        deref(data + -1) = uint8(2 * p1 + p0 + q1 + 2 >> 2)
-                    }
-                    if (tmpFlag != 0 && uint(q2 - q0 < 0 ? -(q2 - q0) : q2 - q0) < beta) {
-                        tmp = p0 + q0 + q1
-                        deref(data + 0) = uint8(p1 + 2 * tmp + q2 + 4 >> 3)
-                        deref(data + 1) = uint8(tmp + q2 + 2 >> 2)
-                        deref(data + 2) = uint8(2 * int(deref(data + 3)) + 3 * q2 + tmp + 4 >> 3)
-                    } else {
-                        deref(data + 0) = uint8(2 * q1 + q0 + p1 + 2 >> 2)
-                    }
+        i = 4u
+        while (i != 0) {
+            p1 = int(data[-2])
+            p0 = int(data[-1])
+            q0 = int(data[0])
+            q1 = int(data[1])
+            if ((uint(ABS(p0 - q0)) < alpha) && (uint(ABS(p1 - p0)) < beta) && (uint(ABS(q1 - q0)) < beta)) {
+                tmpFlag = uint((uint(ABS(p0 - q0)) < ((alpha >> 2u) + 2u)) ? HANTRO_TRUE : HANTRO_FALSE)
+                p2 = int(data[-3])
+                q2 = int(data[2])
+                if (tmpFlag != 0 && uint(ABS(p2 - p0)) < beta) {
+                    tmp = p1 + p0 + q0
+                    data[-1] = uint8((p2 + 2 * tmp + q1 + 4) >> 3)
+                    data[-2] = uint8((p2 + tmp + 2) >> 2)
+                    data[-3] = uint8((2 * int(data[-4]) + 3 * p2 + tmp + 4) >> 3)
+                } else {
+                    data[-1] = uint8((2 * p1 + p0 + q1 + 2) >> 2)
                 }
-                i--
-                data = data + imageWidth
+                if (tmpFlag != 0 && uint(ABS(q2 - q0)) < beta) {
+                    tmp = p0 + q0 + q1
+                    data[0] = uint8((p1 + 2 * tmp + q2 + 4) >> 3)
+                    data[1] = uint8((tmp + q2 + 2) >> 2)
+                    data[2] = uint8((2 * int(data[3]) + 3 * q2 + tmp + 4) >> 3)
+                } else {
+                    data[0] = uint8((2 * q1 + q0 + p1 + 2) >> 2)
+                }
             }
+            i--
+            data += imageWidth
         }
     }
 }
@@ -1707,63 +1694,63 @@ def plm_video_idct(var _c_block : int?) {
     var y7 : int
     // Transform columns
     for (i in range(8)) {
-        b1 = deref(_c_block + (4 * 8 + i))
-        b3 = deref(_c_block + (2 * 8 + i)) + deref(_c_block + (6 * 8 + i))
-        b4 = deref(_c_block + (5 * 8 + i)) - deref(_c_block + (3 * 8 + i))
-        tmp1 = deref(_c_block + (1 * 8 + i)) + deref(_c_block + (7 * 8 + i))
-        tmp2 = deref(_c_block + (3 * 8 + i)) + deref(_c_block + (5 * 8 + i))
-        b6 = deref(_c_block + (1 * 8 + i)) - deref(_c_block + (7 * 8 + i))
+        b1 = _c_block[4 * 8 + i]
+        b3 = _c_block[2 * 8 + i] + _c_block[6 * 8 + i]
+        b4 = _c_block[5 * 8 + i] - _c_block[3 * 8 + i]
+        tmp1 = _c_block[1 * 8 + i] + _c_block[7 * 8 + i]
+        tmp2 = _c_block[3 * 8 + i] + _c_block[5 * 8 + i]
+        b6 = _c_block[1 * 8 + i] - _c_block[7 * 8 + i]
         b7 = tmp1 + tmp2
-        m0 = deref(_c_block + (0 * 8 + i))
-        x4 = (b6 * 473 - b4 * 196 + 128 >> 8) - b7
-        x0 = x4 - ((tmp1 - tmp2) * 362 + 128 >> 8)
+        m0 = _c_block[0 * 8 + i]
+        x4 = ((b6 * 473 - b4 * 196 + 128) >> 8) - b7
+        x0 = x4 - (((tmp1 - tmp2) * 362 + 128) >> 8)
         x1 = m0 - b1
-        x2 = ((deref(_c_block + (2 * 8 + i)) - deref(_c_block + (6 * 8 + i))) * 362 + 128 >> 8) - b3
+        x2 = (((_c_block[2 * 8 + i] - _c_block[6 * 8 + i]) * 362 + 128) >> 8) - b3
         x3 = m0 + b1
         y3 = x1 + x2
         y4 = x3 + b3
         y5 = x1 - x2
         y6 = x3 - b3
-        y7 = -x0 - (b4 * 473 + b6 * 196 + 128 >> 8)
-        deref(_c_block + (0 * 8 + i)) = b7 + y4
-        deref(_c_block + (1 * 8 + i)) = x4 + y3
-        deref(_c_block + (2 * 8 + i)) = y5 - x0
-        deref(_c_block + (3 * 8 + i)) = y6 - y7
-        deref(_c_block + (4 * 8 + i)) = y6 + y7
-        deref(_c_block + (5 * 8 + i)) = x0 + y5
-        deref(_c_block + (6 * 8 + i)) = y3 - x4
-        deref(_c_block + (7 * 8 + i)) = y4 - b7
+        y7 = -x0 - ((b4 * 473 + b6 * 196 + 128) >> 8)
+        _c_block[0 * 8 + i] = b7 + y4
+        _c_block[1 * 8 + i] = x4 + y3
+        _c_block[2 * 8 + i] = y5 - x0
+        _c_block[3 * 8 + i] = y6 - y7
+        _c_block[4 * 8 + i] = y6 + y7
+        _c_block[5 * 8 + i] = x0 + y5
+        _c_block[6 * 8 + i] = y3 - x4
+        _c_block[7 * 8 + i] = y4 - b7
     }
     // Transform rows
     {
         var i : int = 0
         while (i < 64) {
-            b1 = deref(_c_block + (4 + i))
-            b3 = deref(_c_block + (2 + i)) + deref(_c_block + (6 + i))
-            b4 = deref(_c_block + (5 + i)) - deref(_c_block + (3 + i))
-            tmp1 = deref(_c_block + (1 + i)) + deref(_c_block + (7 + i))
-            tmp2 = deref(_c_block + (3 + i)) + deref(_c_block + (5 + i))
-            b6 = deref(_c_block + (1 + i)) - deref(_c_block + (7 + i))
+            b1 = _c_block[4 + i]
+            b3 = _c_block[2 + i] + _c_block[6 + i]
+            b4 = _c_block[5 + i] - _c_block[3 + i]
+            tmp1 = _c_block[1 + i] + _c_block[7 + i]
+            tmp2 = _c_block[3 + i] + _c_block[5 + i]
+            b6 = _c_block[1 + i] - _c_block[7 + i]
             b7 = tmp1 + tmp2
-            m0 = deref(_c_block + (0 + i))
-            x4 = (b6 * 473 - b4 * 196 + 128 >> 8) - b7
-            x0 = x4 - ((tmp1 - tmp2) * 362 + 128 >> 8)
+            m0 = _c_block[0 + i]
+            x4 = ((b6 * 473 - b4 * 196 + 128) >> 8) - b7
+            x0 = x4 - (((tmp1 - tmp2) * 362 + 128) >> 8)
             x1 = m0 - b1
-            x2 = ((deref(_c_block + (2 + i)) - deref(_c_block + (6 + i))) * 362 + 128 >> 8) - b3
+            x2 = (((_c_block[2 + i] - _c_block[6 + i]) * 362 + 128) >> 8) - b3
             x3 = m0 + b1
             y3 = x1 + x2
             y4 = x3 + b3
             y5 = x1 - x2
             y6 = x3 - b3
-            y7 = -x0 - (b4 * 473 + b6 * 196 + 128 >> 8)
-            deref(_c_block + (0 + i)) = b7 + y4 + 128 >> 8
-            deref(_c_block + (1 + i)) = x4 + y3 + 128 >> 8
-            deref(_c_block + (2 + i)) = y5 - x0 + 128 >> 8
-            deref(_c_block + (3 + i)) = y6 - y7 + 128 >> 8
-            deref(_c_block + (4 + i)) = y6 + y7 + 128 >> 8
-            deref(_c_block + (5 + i)) = x0 + y5 + 128 >> 8
-            deref(_c_block + (6 + i)) = y3 - x4 + 128 >> 8
-            deref(_c_block + (7 + i)) = y4 - b7 + 128 >> 8
+            y7 = -x0 - ((b4 * 473 + b6 * 196 + 128) >> 8)
+            _c_block[0 + i] = (b7 + y4 + 128) >> 8
+            _c_block[1 + i] = (x4 + y3 + 128) >> 8
+            _c_block[2 + i] = (y5 - x0 + 128) >> 8
+            _c_block[3 + i] = (y6 - y7 + 128) >> 8
+            _c_block[4 + i] = (y6 + y7 + 128) >> 8
+            _c_block[5 + i] = (x0 + y5 + 128) >> 8
+            _c_block[6 + i] = (y3 - x4 + 128) >> 8
+            _c_block[7 + i] = (y4 - b7 + 128) >> 8
             i += 8
         }
     }
@@ -1870,16 +1857,16 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
         var predictor : int
         var dct_size : int
         // DC prediction
-        var plane_index : int = _c_block > 3 ? _c_block - 3 : 0
+        let plane_index : int = _c_block > 3 ? _c_block - 3 : 0
         predictor = self.dc_predictor[plane_index]
         dct_size = int(plm_buffer_read_vlc(self.buffer, plmpeg_file_all__PLM_VIDEO_DCT_SIZE[plane_index]))
         // Read DC coeff
         if (dct_size > 0) {
-            var differential : int = plm_buffer_read(self.buffer, dct_size)
-            if ((differential & 1 << dct_size - 1) != 0) {
+            let differential : int = plm_buffer_read(self.buffer, dct_size)
+            if ((differential & (1 << (dct_size - 1))) != 0) {
                 self.block_data[0] = predictor + differential
             } else {
-                self.block_data[0] = predictor + (-(1 << dct_size) | differential + 1)
+                self.block_data[0] = predictor + (-(1 << dct_size) | (differential + 1))
             }
         } else {
             self.block_data[0] = predictor
@@ -1897,12 +1884,12 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
     var level : int = 0
     while (TRUE != 0) {
         var run : int = 0
-        var coeff : uint16 = plm_buffer_read_vlc_uint(self.buffer, addr(plmpeg_file_all__PLM_VIDEO_DCT_COEFF[0]))
-        if (int(coeff) == 1 && n > 0 && plm_buffer_read(self.buffer, 1) == 0) {
+        let coeff : uint16 = plm_buffer_read_vlc_uint(self.buffer, addr(plmpeg_file_all__PLM_VIDEO_DCT_COEFF[0]))
+        if ((coeff == 1) && (n > 0) && (plm_buffer_read(self.buffer, 1) == 0)) {
             // end_of_block
             break
         }
-        if (int(coeff) == 65535) {
+        if (coeff == 65535) {
             // escape
             run = plm_buffer_read(self.buffer, 6)
             level = plm_buffer_read(self.buffer, 8)
@@ -1925,14 +1912,14 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
             // invalid
             return
         }
-        var de_zig_zagged : int = int(plmpeg_file_all__PLM_VIDEO_ZIG_ZAG[n])
+        let de_zig_zagged : int = int(plmpeg_file_all__PLM_VIDEO_ZIG_ZAG[n])
         n++
         // Dequantize, oddify, clip
         level = int(uint(level) << 1u)
-        if (!(self.macroblock_intra != 0)) {
+        if (self.macroblock_intra == 0) {
             level += level < 0 ? -1 : 1
         }
-        level = level * self.quantizer_scale * int(deref(quant_matrix + de_zig_zagged)) >> 4
+        level = (level * self.quantizer_scale * int(quant_matrix[de_zig_zagged])) >> 4
         if ((level & 1) == 0) {
             level -= level > 0 ? 1 : -1
         }
@@ -1951,7 +1938,7 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
     if (_c_block < 4) {
         d = self.frame_current.y.data
         dw = self.luma_width
-        di = self.mb_row * self.luma_width + self.mb_col << 4
+        di = (self.mb_row * self.luma_width + self.mb_col) << 4
         if ((_c_block & 1) != 0) {
             di += 8
         }
@@ -1959,22 +1946,22 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
             di += self.luma_width << 3
         }
     } else {
-        d = _c_block == 4 ? self.frame_current.cb.data : self.frame_current.cr.data
+        d = (_c_block == 4) ? self.frame_current.cb.data : self.frame_current.cr.data
         dw = self.chroma_width
-        di = (self.mb_row * self.luma_width << 2) + (self.mb_col << 3)
+        di = ((self.mb_row * self.luma_width) << 2) + (self.mb_col << 3)
     }
     var s : int? = addr(self.block_data[0])
     var si : int = 0
     if (self.macroblock_intra != 0) {
         // Overwrite (no prediction)
         if (n == 1) {
-            var clamped : int = int(plmpeg_file_all__plm_clamp(deref(s + 0) + 128 >> 8))
+            let clamped : int = int(plmpeg_file_all__plm_clamp((s[0] + 128) >> 8))
             {
-                var dest_scan : int = dw - 8
-                var source_scan : int = 8 - 8
+                let dest_scan : int = dw - 8
+                let source_scan : int = 8 - 8
                 for (y in range(8)) {
                     for (x in range(8)) {
-                        deref(d + di) = uint8(clamped)
+                        d[di] = uint8(clamped)
                         si++
                         di++
                     }
@@ -1982,15 +1969,15 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
                     di += dest_scan
                 }
             }
-            deref(s + 0) = 0
+            s[0] = 0
         } else {
             plm_video_idct(s)
             {
-                var dest_scan : int = dw - 8
-                var source_scan : int = 8 - 8
+                let dest_scan : int = dw - 8
+                let source_scan : int = 8 - 8
                 for (y in range(8)) {
                     for (x in range(8)) {
-                        deref(d + di) = plmpeg_file_all__plm_clamp(deref(s + si))
+                        d[di] = plmpeg_file_all__plm_clamp(s[si])
                         si++
                         di++
                     }
@@ -2003,13 +1990,13 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
     } else {
         // Add data to the predicted macroblock
         if (n == 1) {
-            var value : int = deref(s + 0) + 128 >> 8
+            let value : int = (s[0] + 128) >> 8
             {
-                var dest_scan : int = dw - 8
-                var source_scan : int = 8 - 8
+                let dest_scan : int = dw - 8
+                let source_scan : int = 8 - 8
                 for (y in range(8)) {
                     for (x in range(8)) {
-                        deref(d + di) = plmpeg_file_all__plm_clamp(int(deref(d + di)) + value)
+                        d[di] = plmpeg_file_all__plm_clamp(int(d[di]) + value)
                         si++
                         di++
                     }
@@ -2017,15 +2004,15 @@ def plm_video_decode_block(var self : plm_video_t?; _c_block : int) {
                     di += dest_scan
                 }
             }
-            deref(s + 0) = 0
+            s[0] = 0
         } else {
             plm_video_idct(s)
             {
-                var dest_scan : int = dw - 8
-                var source_scan : int = 8 - 8
+                let dest_scan : int = dw - 8
+                let source_scan : int = 8 - 8
                 for (y in range(8)) {
                     for (x in range(8)) {
-                        deref(d + di) = plmpeg_file_all__plm_clamp(int(deref(d + di)) + deref(s + si))
+                        d[di] = plmpeg_file_all__plm_clamp(int(d[di]) + s[si])
                         si++
                         di++
                     }

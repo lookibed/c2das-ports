@@ -1,0 +1,1075 @@
+{
+	"command" : "scripts/publish_ports.sh --program lua --no-convert --perf --samples 3 --lanes interp,jit,exe,aot,interp-fast,jit-fast,exe-fast,aot-fast --timeout 1800",
+	"program" : "lua",
+	"workloads" : [
+		{
+			"name" : "startup",
+			"args" : "-e \"print(1)\"",
+			"startup" : true
+		},
+		{
+			"name" : "fib",
+			"args" : "bench/timed.lua bench/fib.lua",
+			"startup" : false
+		},
+		{
+			"name" : "binary_trees",
+			"args" : "bench/timed.lua bench/binary_trees.lua",
+			"startup" : false
+		},
+		{
+			"name" : "nbody",
+			"args" : "bench/timed.lua bench/nbody.lua",
+			"startup" : false
+		},
+		{
+			"name" : "spectral_norm",
+			"args" : "bench/timed.lua bench/spectral_norm.lua",
+			"startup" : false
+		},
+		{
+			"name" : "test suite",
+			"args" : "-e \"_port=true\" bench/timed.lua all.lua",
+			"startup" : false
+		}
+	],
+	"lanes" : [
+		{
+			"name" : "native",
+			"command" : "/root/libclang/bin/clang -O3 -w -funsigned-char -o lua_native lapi.c lcode.c lctype.c ldebug.c ldo.c ldump.c lfunc.c lgc.c llex.c lmem.c lobject.c lopcodes.c lparser.c lstate.c lstring.c ltable.c ltm.c lundump.c lvm.c lzio.c lauxlib.c lbaselib.c lcorolib.c ldblib.c liolib.c lmathlib.c loadlib.c loslib.c lstrlib.c ltablib.c lutf8lib.c linit.c lua.c -lm",
+			"error" : ""
+		},
+		{
+			"name" : "interp",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime readable/lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit readable/lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "exe",
+			"command" : "daslang -exe readable/lua/lua.das, the binary run",
+			"error" : ""
+		},
+		{
+			"name" : "aot",
+			"command" : "the -ctx context of readable/lua/lua.das and its host compiled by clang++ -O3 (c2das-re converter/tiers.das), the binary run with `--`",
+			"error" : ""
+		},
+		{
+			"name" : "interp-fast",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime fast/lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "jit-fast",
+			"command" : "daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit fast/lua/lua.das --",
+			"error" : ""
+		},
+		{
+			"name" : "exe-fast",
+			"command" : "daslang -exe fast/lua/lua.das, the binary run",
+			"error" : ""
+		},
+		{
+			"name" : "aot-fast",
+			"command" : "the -ctx context of fast/lua/lua.das and its host compiled by clang++ -O3 (c2das-re converter/tiers.das), the binary run with `--`",
+			"error" : ""
+		}
+	],
+	"machine" : {
+		"arch" : "x86_64",
+		"cpu" : "AMD Ryzen 7 7435HS",
+		"box" : "PC",
+		"clang" : "clang version 22.1.8 (https://github.com/llvm/llvm-project ca7933e47d3a3451d81e72ac174dcb5aa28b59d1)",
+		"clang_path" : "/root/libclang/bin/clang",
+		"daslang" : "0.6.5"
+	},
+	"cells" : [
+		{
+			"work_time" : 0,
+			"spread" : 0.11573133131472343,
+			"work_samples" : [],
+			"time" : 0.0072327,
+			"error" : "",
+			"samples" : [
+				0.0085182,
+				0.0068441,
+				0.0072327
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.03820836354014451,
+			"work_samples" : [],
+			"time" : 2.474102598,
+			"error" : "",
+			"samples" : [
+				2.461448676,
+				2.650511499,
+				2.474102598
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.03537100437213982,
+			"work_samples" : [],
+			"time" : 3.054135652,
+			"error" : "",
+			"samples" : [
+				3.054135652,
+				3.198917896,
+				2.982862205
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.0174200065035363,
+			"work_samples" : [],
+			"time" : 0.036903,
+			"error" : "",
+			"samples" : [
+				0.036821799,
+				0.036903,
+				0.0381075
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.024995394215134237,
+			"work_samples" : [],
+			"time" : 0.0249686,
+			"error" : "",
+			"samples" : [
+				0.024155,
+				0.0254032,
+				0.0249686
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "aot"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.04566573191186758,
+			"work_samples" : [],
+			"time" : 1.919237004,
+			"error" : "",
+			"samples" : [
+				1.91918377,
+				2.094470495,
+				1.919237004
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "interp-fast"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.008557219127170517,
+			"work_samples" : [],
+			"time" : 2.423811894,
+			"error" : "",
+			"samples" : [
+				2.426988183,
+				2.423811894,
+				2.385506004
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "jit-fast"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.007400440075665834,
+			"work_samples" : [],
+			"time" : 0.0382207,
+			"error" : "",
+			"samples" : [
+				0.0382576,
+				0.0376919,
+				0.0382207
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "exe-fast"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0.009742515775571095,
+			"work_samples" : [],
+			"time" : 0.0245316,
+			"error" : "",
+			"samples" : [
+				0.024911199,
+				0.0244332,
+				0.0245316
+			],
+			"workload" : "startup",
+			"work_time_spread" : 0,
+			"lane" : "aot-fast"
+		},
+		{
+			"work_time" : 0.255455,
+			"spread" : 0.007310504141942215,
+			"work_samples" : [
+				0.256781,
+				0.255455,
+				0.252737
+			],
+			"time" : 0.262355299,
+			"error" : "",
+			"samples" : [
+				0.2640162,
+				0.262355299,
+				0.260180301
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.007915288406960114,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 53.541635,
+			"spread" : 0.005744920280549838,
+			"work_samples" : [
+				53.838142,
+				53.318745,
+				53.541635
+			],
+			"time" : 55.911646605,
+			"error" : "",
+			"samples" : [
+				56.372752124,
+				55.730336219,
+				55.911646605
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.004850402868720743,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 0.503785,
+			"spread" : 0.006936203272989576,
+			"work_samples" : [
+				0.501176,
+				0.50735,
+				0.503785
+			],
+			"time" : 3.306875476,
+			"error" : "",
+			"samples" : [
+				3.306875476,
+				3.34313369,
+				3.297259369
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.006127613962305361,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0.475501,
+			"spread" : 0.0021016481269930877,
+			"work_samples" : [
+				0.475501,
+				0.477755,
+				0.474876
+			],
+			"time" : 0.513791051,
+			"error" : "",
+			"samples" : [
+				0.512613811,
+				0.514773427,
+				0.513791051
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.0030273332758500664,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0.423772,
+			"spread" : 0.024690429539298682,
+			"work_samples" : [
+				0.423772,
+				0.420652,
+				0.442284
+			],
+			"time" : 0.448826011,
+			"error" : "",
+			"samples" : [
+				0.448826011,
+				0.445139623,
+				0.467303037
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.02552315867966735,
+			"lane" : "aot"
+		},
+		{
+			"work_time" : 54.760448,
+			"spread" : 0.005174520975482253,
+			"work_samples" : [
+				55.055321,
+				54.468771,
+				54.760448
+			],
+			"time" : 56.607489058,
+			"error" : "",
+			"samples" : [
+				56.925699061,
+				56.339865782,
+				56.607489058
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.005355598989986373,
+			"lane" : "interp-fast"
+		},
+		{
+			"work_time" : 0.494051,
+			"spread" : 0.011204170567481813,
+			"work_samples" : [
+				0.486321,
+				0.498359,
+				0.494051
+			],
+			"time" : 2.826832188,
+			"error" : "",
+			"samples" : [
+				2.800705279,
+				2.826832188,
+				2.864049899
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.012182952772082227,
+			"lane" : "jit-fast"
+		},
+		{
+			"work_time" : 0.477002,
+			"spread" : 0.005468601739899834,
+			"work_samples" : [
+				0.477002,
+				0.471534,
+				0.477063
+			],
+			"time" : 0.514546521,
+			"error" : "",
+			"samples" : [
+				0.515084198,
+				0.509456498,
+				0.514546521
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.005795573184179528,
+			"lane" : "exe-fast"
+		},
+		{
+			"work_time" : 0.391055,
+			"spread" : 0.0039030646444227143,
+			"work_samples" : [
+				0.390805,
+				0.391055,
+				0.392348
+			],
+			"time" : 0.417763898,
+			"error" : "",
+			"samples" : [
+				0.415714298,
+				0.417763898,
+				0.418975417
+			],
+			"workload" : "fib",
+			"work_time_spread" : 0.0019728682666120636,
+			"lane" : "aot-fast"
+		},
+		{
+			"work_time" : 0.32295,
+			"spread" : 0.01387668291469251,
+			"work_samples" : [
+				0.329915,
+				0.32295,
+				0.320718
+			],
+			"time" : 0.33311329,
+			"error" : "",
+			"samples" : [
+				0.339909114,
+				0.33311329,
+				0.330664099
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.014239046291995681,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 28.862677,
+			"spread" : 0.010617106339247409,
+			"work_samples" : [
+				29.102822,
+				28.501118,
+				28.862677
+			],
+			"time" : 31.259564508,
+			"error" : "",
+			"samples" : [
+				31.516463309,
+				30.852691068,
+				31.259564508
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.010423565353969037,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 0.500939,
+			"spread" : 0.005833004769947496,
+			"work_samples" : [
+				0.504641,
+				0.500939,
+				0.490757
+			],
+			"time" : 3.309041868,
+			"error" : "",
+			"samples" : [
+				3.309041868,
+				3.329140613,
+				3.290537299
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.013857974723469332,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0.434844,
+			"spread" : 0.024283123513267883,
+			"work_samples" : [
+				0.434844,
+				0.449844,
+				0.427398
+			],
+			"time" : 0.47849491,
+			"error" : "",
+			"samples" : [
+				0.47849491,
+				0.493974501,
+				0.470735799
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.02580925573309051,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0.43919,
+			"spread" : 0.0034082928420966726,
+			"work_samples" : [
+				0.43919,
+				0.436831,
+				0.44066
+			],
+			"time" : 0.46898831,
+			"error" : "",
+			"samples" : [
+				0.46898831,
+				0.466949701,
+				0.4701466
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.004359161183087014,
+			"lane" : "aot"
+		},
+		{
+			"work_time" : 29.00458,
+			"spread" : 0.013863768455089777,
+			"work_samples" : [
+				29.72158,
+				29.00458,
+				28.818254
+			],
+			"time" : 30.907759776,
+			"error" : "",
+			"samples" : [
+				31.609708648,
+				30.907759776,
+				30.752712598
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.015572126884788538,
+			"lane" : "interp-fast"
+		},
+		{
+			"work_time" : 0.474483,
+			"spread" : 0.006687966181907354,
+			"work_samples" : [
+				0.498871,
+				0.474483,
+				0.473092
+			],
+			"time" : 2.774630283,
+			"error" : "",
+			"samples" : [
+				2.749946151,
+				2.787059418,
+				2.774630283
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.02716535681994929,
+			"lane" : "jit-fast"
+		},
+		{
+			"work_time" : 0.427736,
+			"spread" : 0.013573642668750465,
+			"work_samples" : [
+				0.427736,
+				0.424308,
+				0.436508
+			],
+			"time" : 0.470964586,
+			"error" : "",
+			"samples" : [
+				0.470964586,
+				0.467611887,
+				0.480397297
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.01426113303533019,
+			"lane" : "exe-fast"
+		},
+		{
+			"work_time" : 0.41696,
+			"spread" : 0.00531476195903994,
+			"work_samples" : [
+				0.41862,
+				0.415026,
+				0.41696
+			],
+			"time" : 0.447282497,
+			"error" : "",
+			"samples" : [
+				0.449190587,
+				0.444436187,
+				0.447282497
+			],
+			"workload" : "binary_trees",
+			"work_time_spread" : 0.004309765924788932,
+			"lane" : "aot-fast"
+		},
+		{
+			"work_time" : 0.345053,
+			"spread" : 0.003612215436801674,
+			"work_samples" : [
+				0.345154,
+				0.345053,
+				0.342378
+			],
+			"time" : 0.351930698,
+			"error" : "",
+			"samples" : [
+				0.351930698,
+				0.352455001,
+				0.349912502
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.004022570445699647,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 55.072836,
+			"spread" : 0.0008754914894039882,
+			"work_samples" : [
+				54.994839,
+				55.095924,
+				55.072836
+			],
+			"time" : 57.413833382,
+			"error" : "",
+			"samples" : [
+				57.343908553,
+				57.413833382,
+				57.444439198
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.0009177391917859255,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 0.443303,
+			"spread" : 0.00983522201394913,
+			"work_samples" : [
+				0.454518,
+				0.440777,
+				0.443303
+			],
+			"time" : 3.229636754,
+			"error" : "",
+			"samples" : [
+				3.278240591,
+				3.229636754,
+				3.214712202
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.015498428839867994,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0.446758,
+			"spread" : 0.0144587473959183,
+			"work_samples" : [
+				0.436777,
+				0.446758,
+				0.450502
+			],
+			"time" : 0.484782693,
+			"error" : "",
+			"samples" : [
+				0.474446899,
+				0.484782693,
+				0.4884656
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.015360665058040356,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0.40796,
+			"spread" : 0.017873775251560142,
+			"work_samples" : [
+				0.40796,
+				0.42191,
+				0.407117
+			],
+			"time" : 0.433002899,
+			"error" : "",
+			"samples" : [
+				0.433002899,
+				0.447495994,
+				0.432017201
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.018130453966075107,
+			"lane" : "aot"
+		},
+		{
+			"work_time" : 55.235157,
+			"spread" : 0.025992369314660757,
+			"work_samples" : [
+				55.637762,
+				55.235157,
+				52.788714
+			],
+			"time" : 57.056212731,
+			"error" : "",
+			"samples" : [
+				57.571382668,
+				57.056212731,
+				54.605330362
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.025790168388586308,
+			"lane" : "interp-fast"
+		},
+		{
+			"work_time" : 0.429836,
+			"spread" : 0.01683164262556851,
+			"work_samples" : [
+				0.429836,
+				0.436099,
+				0.429467
+			],
+			"time" : 2.770843823,
+			"error" : "",
+			"samples" : [
+				2.770843823,
+				2.795624611,
+				2.702348905
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.00771457020817245,
+			"lane" : "jit-fast"
+		},
+		{
+			"work_time" : 0.469394,
+			"spread" : 0.012389785003412243,
+			"work_samples" : [
+				0.478635,
+				0.467301,
+				0.469394
+			],
+			"time" : 0.507349401,
+			"error" : "",
+			"samples" : [
+				0.518177502,
+				0.505605602,
+				0.507349401
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.01207301328947532,
+			"lane" : "exe-fast"
+		},
+		{
+			"work_time" : 0.391117,
+			"spread" : 0.009095393346013636,
+			"work_samples" : [
+				0.386707,
+				0.394407,
+				0.391117
+			],
+			"time" : 0.415705001,
+			"error" : "",
+			"samples" : [
+				0.411744601,
+				0.419306602,
+				0.415705001
+			],
+			"workload" : "nbody",
+			"work_time_spread" : 0.009843601786677625,
+			"lane" : "aot-fast"
+		},
+		{
+			"work_time" : 0.351518,
+			"spread" : 0.005845246003707893,
+			"work_samples" : [
+				0.349026,
+				0.353027,
+				0.351518
+			],
+			"time" : 0.359771,
+			"error" : "",
+			"samples" : [
+				0.3563045,
+				0.3605104,
+				0.359771
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.005691031469227717,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 70.963396,
+			"spread" : 0.006150170570496379,
+			"work_samples" : [
+				71.58184,
+				70.684565,
+				70.963396
+			],
+			"time" : 73.385075475,
+			"error" : "",
+			"samples" : [
+				73.965070033,
+				73.06240857,
+				73.385075475
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.0063220973810215715,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 0.621231,
+			"spread" : 0.007560467847428309,
+			"work_samples" : [
+				0.621231,
+				0.627795,
+				0.612902
+			],
+			"time" : 3.412853215,
+			"error" : "",
+			"samples" : [
+				3.423457203,
+				3.412853215,
+				3.371851669
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.011986684502222237,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0.614244,
+			"spread" : 0.0024072289695902414,
+			"work_samples" : [
+				0.614827,
+				0.614244,
+				0.611479
+			],
+			"time" : 0.6523696,
+			"error" : "",
+			"samples" : [
+				0.6523696,
+				0.652674103,
+				0.649533297
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.0027253013460449083,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 0.562879,
+			"spread" : 0.0029508411631115655,
+			"work_samples" : [
+				0.562879,
+				0.564345,
+				0.561231
+			],
+			"time" : 0.587985901,
+			"error" : "",
+			"samples" : [
+				0.587985901,
+				0.589488203,
+				0.586018097
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.0027661362388718977,
+			"lane" : "aot"
+		},
+		{
+			"work_time" : 70.479061,
+			"spread" : 0.002566055809995806,
+			"work_samples" : [
+				70.209252,
+				70.561445,
+				70.479061
+			],
+			"time" : 72.33457171,
+			"error" : "",
+			"samples" : [
+				72.045747819,
+				72.416976915,
+				72.33457171
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.0024985647864973664,
+			"lane" : "interp-fast"
+		},
+		{
+			"work_time" : 0.600056,
+			"spread" : 0.004141347209248401,
+			"work_samples" : [
+				0.601432,
+				0.596515,
+				0.600056
+			],
+			"time" : 2.871082621,
+			"error" : "",
+			"samples" : [
+				2.869019201,
+				2.892799501,
+				2.871082621
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.00409711760235707,
+			"lane" : "jit-fast"
+		},
+		{
+			"work_time" : 0.632186,
+			"spread" : 0.00145465245337332,
+			"work_samples" : [
+				0.631788,
+				0.632186,
+				0.633925
+			],
+			"time" : 0.6707805,
+			"error" : "",
+			"samples" : [
+				0.6695904,
+				0.6707805,
+				0.671541905
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.0016901671343559843,
+			"lane" : "exe-fast"
+		},
+		{
+			"work_time" : 0.530498,
+			"spread" : 0.006969870211097581,
+			"work_samples" : [
+				0.525064,
+				0.532392,
+				0.530498
+			],
+			"time" : 0.556602904,
+			"error" : "",
+			"samples" : [
+				0.5499466,
+				0.5577055,
+				0.556602904
+			],
+			"workload" : "spectral_norm",
+			"work_time_spread" : 0.006906717838710043,
+			"lane" : "aot-fast"
+		},
+		{
+			"work_time" : 5.176565,
+			"spread" : 0.023306327680658927,
+			"work_samples" : [
+				5.366242,
+				5.141316,
+				5.176565
+			],
+			"time" : 5.199663506,
+			"error" : "",
+			"samples" : [
+				5.405493099,
+				5.163122976,
+				5.199663506
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.021725410576318462,
+			"lane" : "native"
+		},
+		{
+			"work_time" : 144.026342,
+			"spread" : 0.016837565277465237,
+			"work_samples" : [
+				148.450104,
+				144.026342,
+				143.589738
+			],
+			"time" : 146.442409331,
+			"error" : "",
+			"samples" : [
+				150.901503286,
+				146.442409331,
+				145.970036033
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.01687318421237137,
+			"lane" : "interp"
+		},
+		{
+			"work_time" : 6.376382,
+			"spread" : 0.013937388894288243,
+			"work_samples" : [
+				6.376382,
+				6.440136,
+				6.223424
+			],
+			"time" : 9.182850925,
+			"error" : "",
+			"samples" : [
+				9.182850925,
+				9.280466506,
+				9.024496577
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.016993335719221358,
+			"lane" : "jit"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0,
+			"work_samples" : [],
+			"time" : 0,
+			"error" : "exited 255 where the native build exits 0: dynamic module `Module_CRT` failed to load: dasCRuntime/dasModuleCRuntime.shared_module (dasCRuntime/dasModuleCRun...",
+			"samples" : [
+				0.033146319
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0,
+			"lane" : "exe"
+		},
+		{
+			"work_time" : 5.605734,
+			"spread" : 0.022923160444408515,
+			"work_samples" : [
+				5.605734,
+				5.844729,
+				5.585986
+			],
+			"time" : 5.6472906,
+			"error" : "",
+			"samples" : [
+				5.6472906,
+				5.887247924,
+				5.628340427
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.02307842291482257,
+			"lane" : "aot"
+		},
+		{
+			"work_time" : 143.8073,
+			"spread" : 0.020875381008091443,
+			"work_samples" : [
+				142.860235,
+				143.8073,
+				148.856052
+			],
+			"time" : 145.71385422,
+			"error" : "",
+			"samples" : [
+				144.704609674,
+				145.71385422,
+				150.788274124
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.02084670597389707,
+			"lane" : "interp-fast"
+		},
+		{
+			"work_time" : 6.371094,
+			"spread" : 0.015171275828814086,
+			"work_samples" : [
+				6.383521,
+				6.159976,
+				6.371094
+			],
+			"time" : 8.720279098,
+			"error" : "",
+			"samples" : [
+				8.724663391,
+				8.460067872,
+				8.720279098
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.017543690298714762,
+			"lane" : "jit-fast"
+		},
+		{
+			"work_time" : 0,
+			"spread" : 0,
+			"work_samples" : [],
+			"time" : 0,
+			"error" : "exited 255 where the native build exits 0: dynamic module `Module_CRT` failed to load: dasCRuntime/dasModuleCRuntime.shared_module (dasCRuntime/dasModuleCRun...",
+			"samples" : [
+				0.0321293
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0,
+			"lane" : "exe-fast"
+		},
+		{
+			"work_time" : 5.706612,
+			"spread" : 0.020313171903300144,
+			"work_samples" : [
+				5.750513,
+				5.706612,
+				5.518894
+			],
+			"time" : 5.749539218,
+			"error" : "",
+			"samples" : [
+				5.793236339,
+				5.749539218,
+				5.559653582
+			],
+			"workload" : "test suite",
+			"work_time_spread" : 0.020293915198720307,
+			"lane" : "aot-fast"
+		}
+	],
+	"commit" : "7862dde4d19ddac1040a9778c301432fe522ab28",
+	"samples" : 3,
+	"timeout" : 1800,
+	"timestamp" : "2026-11-14 09:58 UTC"
+}
