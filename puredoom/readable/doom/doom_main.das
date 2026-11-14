@@ -74,7 +74,7 @@ def private play(argc : int; var argv : uint8 ??; tic_cap : int) {
         exit_code = 2
     } recover {
         if (c_jmp_target != addr(leave_main)) {
-            panic("longjmp")
+            c_jmp_rethrow()
         }
         c_jmp_target = null
     }
