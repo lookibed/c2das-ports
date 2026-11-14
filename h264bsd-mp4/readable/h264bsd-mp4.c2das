@@ -1,0 +1,24 @@
+{
+	"defines" : [],
+	"include_files" : [],
+	"first_member" : "addr",
+	"solid_context" : true,
+	"inline_helpers" : false,
+	"program_root" : "<c2das>/tests/manual/h264bsd-mp4",
+	"forms_off" : [],
+	"include_dirs" : [
+		"<c2das>/tests/manual/h264bsd-mp4/include",
+		"<c2das>/tests/manual/h264bsd-mp4/upstream/h264bsd/src",
+		"<c2das>/tests/manual/h264bsd-mp4/upstream/minimp4",
+		"<c2das>/tests/manual/h264bsd-mp4/src"
+	],
+	"checks" : "safe",
+	"layout" : "source",
+	"param_writes" : "in-place",
+	"switch_dispatch" : "chain",
+	"jit_whole_program" : false,
+	"loops" : "range",
+	"past_end" : "call",
+	"fn_macros" : "fold",
+	"strict_aliasing" : false
+}
