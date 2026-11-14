@@ -1,0 +1,25 @@
+{
+	"defines" : [
+		"NDEBUG"
+	],
+	"include_files" : [],
+	"first_member" : "addr",
+	"solid_context" : true,
+	"inline_helpers" : false,
+	"program_root" : "<c2das>/tests/manual/binjgb",
+	"forms_off" : [],
+	"include_dirs" : [
+		"<c2das>/tests/manual/binjgb/include",
+		"<c2das>/tests/manual/binjgb/upstream/binjgb/src",
+		"<c2das>/tests/manual/binjgb/src"
+	],
+	"checks" : "off",
+	"layout" : "source",
+	"param_writes" : "in-place",
+	"switch_dispatch" : "chain",
+	"jit_whole_program" : false,
+	"loops" : "range",
+	"past_end" : "call",
+	"fn_macros" : "fold",
+	"strict_aliasing" : false
+}
