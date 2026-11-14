@@ -1,0 +1,23 @@
+{
+	"defines" : [],
+	"include_files" : [],
+	"first_member" : "addr",
+	"solid_context" : true,
+	"inline_helpers" : false,
+	"program_root" : "<c2das>/tests/manual/doomgeneric",
+	"forms_off" : [],
+	"include_dirs" : [
+		"<c2das>/tests/manual/doomgeneric/include",
+		"<c2das>/tests/manual/doomgeneric/upstream/doomgeneric/doomgeneric",
+		"<c2das>/tests/manual/doomgeneric/src"
+	],
+	"checks" : "safe",
+	"layout" : "source",
+	"param_writes" : "in-place",
+	"switch_dispatch" : "chain",
+	"jit_whole_program" : false,
+	"loops" : "range",
+	"past_end" : "call",
+	"fn_macros" : "fold",
+	"strict_aliasing" : false
+}
