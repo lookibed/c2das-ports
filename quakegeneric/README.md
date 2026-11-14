@@ -26,196 +26,47 @@ Each variant converts the same program under its own knobs (c2das-re's `ports/va
 | `jit_whole_program`   |     `false` |    `false` |
 | `strict_aliasing`     |     `false` |    `false` |
 | `forms_off`           |        `[]` |       `[]` |
-| Criteria total, %     |    69.7 (1) |    not yet |
+| Criteria total, %     |    84.3 (1) |    not yet |
 | x native, interpreter |     not yet |    not yet |
 | x native, JIT         |     not yet |    not yet |
 | x native, exe         |     not yet |    not yet |
 | x native, AOT         |     not yet |    not yet |
-| das lines             |       14129 |      14174 |
+| das lines             |       36801 |      37164 |
 
-- `fast/`: not yet tuned: readable + checks off
+- `readable/`: no speed cells: compare's quakegeneric row has no bench unit; interp, JIT, exe and AOT pass on the native output (compare/run.das --project quakegeneric, cb35b34)
+- `fast/`: not yet tuned: readable + checks off; no speed cells: compare's quakegeneric row has no bench unit; interp, JIT, exe and AOT pass on the native output (compare/run.das --project quakegeneric, cb35b34)
 - (1) not from a search of the variant: the row `project/quakegeneric` of c2das-re's `metrics/criteria_linux.json`, the converter's default flags
 
 ## Conversion
 
 ### `readable/`
 
-The program does not convert whole yet: emitter: upstream/quakegeneric/source/host_cmd.c:63:10: a pointer to a variadic function is not lowered yet
-
-What does convert: each C file of the program converted alone, 7 of 70 (`readable/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
-
-| C file                                      | Result                                                                                                                                                                                  |
-| :------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| upstream/quakegeneric/source/cd_null.c      | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/chase.c        | refused: emitter: upstream/quakegeneric/source/chase.c:38:2: external function `Cvar_RegisterVariable` has no c_runtime mapping                                                         |
-| upstream/quakegeneric/source/cl_demo.c      | refused: emitter: upstream/quakegeneric/source/cl_demo.c:127:4: external function `Sys_Error` has no c_runtime mapping                                                                  |
-| upstream/quakegeneric/source/cl_input.c     | refused: emitter: upstream/quakegeneric/source/cl_input.c:63:2: external function `Cmd_Argv` has no c_runtime mapping                                                                   |
-| upstream/quakegeneric/source/cl_main.c      | refused: emitter: upstream/quakegeneric/source/cl_main.c:67:3: external function `Host_ClearMemory` has no c_runtime mapping                                                            |
-| upstream/quakegeneric/source/cl_parse.c     | refused: emitter: upstream/quakegeneric/source/cl_parse.c:84:4: external function `Host_Error` has no c_runtime mapping                                                                 |
-| upstream/quakegeneric/source/cl_tent.c      | refused: emitter: upstream/quakegeneric/source/cl_tent.c:43:2: external function `S_PrecacheSound` has no c_runtime mapping                                                             |
-| upstream/quakegeneric/source/cmd.c          | refused: emitter: upstream/quakegeneric/source/cmd.c:75:2: external function `SZ_Alloc` has no c_runtime mapping                                                                        |
-| upstream/quakegeneric/source/common.c       | refused: emitter: upstream/quakegeneric/source/common.c:735:2: external function `Hunk_AllocName` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/console.c      | refused: emitter: upstream/quakegeneric/source/console.c:520:14: `chat_buffer` is an array of unknown length (`extern int a[];`) that no unit of the program defines                    |
-| upstream/quakegeneric/source/crc.c          | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/cvar.c         | refused: emitter: upstream/quakegeneric/source/cvar.c:37:3: external function `Q_strcmp` has no c_runtime mapping                                                                       |
-| upstream/quakegeneric/source/d_edge.c       | refused: emitter: upstream/quakegeneric/source/d_edge.c:135:2: external function `TransformVector` has no c_runtime mapping                                                             |
-| upstream/quakegeneric/source/d_fill.c       | refused: compile check: error[30808]: Don't know what 'vid' is                                                                                                                          |
-| upstream/quakegeneric/source/d_init.c       | refused: emitter: upstream/quakegeneric/source/d_init.c:53:2: external function `Cvar_RegisterVariable` has no c_runtime mapping                                                        |
-| upstream/quakegeneric/source/d_modech.c     | refused: compile check: error[30838]: can't locate variable 'r_dowarp'                                                                                                                  |
-| upstream/quakegeneric/source/d_part.c       | refused: compile check: error[30838]: can't locate variable 'r_origin'                                                                                                                  |
-| upstream/quakegeneric/source/d_polyse.c     | refused: emitter: upstream/quakegeneric/source/d_polyse.c:506:3: external function `FloorDivMod` has no c_runtime mapping                                                               |
-| upstream/quakegeneric/source/d_scan.c       | refused: compile check: error[30808]: Don't know what 'r_refdef' is                                                                                                                     |
-| upstream/quakegeneric/source/d_sky.c        | refused: emitter: upstream/quakegeneric/source/d_sky.c:52:2: external function `VectorNormalize` has no c_runtime mapping                                                               |
-| upstream/quakegeneric/source/d_sprite.c     | refused: emitter: upstream/quakegeneric/source/d_sprite.c:343:2: external function `TransformVector` has no c_runtime mapping                                                           |
-| upstream/quakegeneric/source/d_surf.c       | refused: emitter: upstream/quakegeneric/source/d_surf.c:39:2: external function `COM_CheckParm` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/d_vars.c       | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/d_zpoint.c     | refused: compile check: error[30838]: can't locate variable 'd_pzbuffer' (+1 more on this line)                                                                                         |
-| upstream/quakegeneric/source/draw.c         | refused: emitter: upstream/quakegeneric/source/draw.c:56:2: external function `W_GetLumpName` has no c_runtime mapping                                                                  |
-| upstream/quakegeneric/source/host_cmd.c     | refused: emitter: upstream/quakegeneric/source/host_cmd.c:41:3: external function `M_Menu_Quit_f` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/host.c         | refused: emitter: upstream/quakegeneric/source/host.c:94:2: external function `Con_DPrintf` has no c_runtime mapping                                                                    |
-| upstream/quakegeneric/source/in_null.c      | refused: emitter: upstream/quakegeneric/source/in_null.c:61:2: external function `Cvar_RegisterVariable` has no c_runtime mapping                                                       |
-| upstream/quakegeneric/source/keys.c         | refused: emitter: upstream/quakegeneric/source/keys.c:165:3: external function `Cbuf_AddText` has no c_runtime mapping                                                                  |
-| upstream/quakegeneric/source/mathlib.c      | refused: emitter: upstream/quakegeneric/source/mathlib.c:166:2: external function `Sys_Error` has no c_runtime mapping                                                                  |
-| upstream/quakegeneric/source/menu.c         | refused: emitter: upstream/quakegeneric/source/menu.c:110:2: external function `Draw_Character` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/model.c        | refused: emitter: upstream/quakegeneric/source/model.c:68:2: external function `Cache_Check` has no c_runtime mapping                                                                   |
-| upstream/quakegeneric/source/net_loop.c     | refused: emitter: upstream/quakegeneric/source/net_loop.c:53:2: external function `Q_strcmp` has no c_runtime mapping                                                                   |
-| upstream/quakegeneric/source/net_main.c     | refused: emitter: upstream/quakegeneric/source/net_main.c:97:2: external function `Sys_FloatTime` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/net_none.c     | refused: emitter: upstream/quakegeneric/source/net.h:204:21: the value of external function `Loop_Init` (a pointer to a function this file does not define) is not lowered yet          |
-| upstream/quakegeneric/source/net_vcr.c      | refused: emitter: upstream/quakegeneric/source/net_vcr.c:52:2: external function `Sys_FileRead` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/nonintel.c     | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/pr_cmds.c      | refused: emitter: upstream/quakegeneric/source/pr_cmds.c:1523:11: the value of external function `SV_MoveToGoal` (a pointer to a function this file does not define) is not lowered yet |
-| upstream/quakegeneric/source/pr_edict.c     | refused: emitter: upstream/quakegeneric/source/pr_edict.c:105:3: external function `Sys_Error` has no c_runtime mapping                                                                 |
-| upstream/quakegeneric/source/pr_exec.c      | refused: emitter: upstream/quakegeneric/source/pr_exec.c:156:3: external function `Con_Printf` has no c_runtime mapping                                                                 |
-| upstream/quakegeneric/source/r_aclip.c      | refused: emitter: upstream/quakegeneric/source/r_aclip.c:82:2: external function `R_AliasProjectFinalVert` has no c_runtime mapping                                                     |
-| upstream/quakegeneric/source/r_alias.c      | refused: emitter: upstream/quakegeneric/source/r_alias.c:105:2: external function `Mod_Extradata` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/r_bsp.c        | refused: emitter: upstream/quakegeneric/source/r_bsp.c:121:2: external function `R_ConcatRotations` has no c_runtime mapping                                                            |
-| upstream/quakegeneric/source/r_draw.c       | refused: emitter: upstream/quakegeneric/source/r_draw.c:101:3: external function `TransformVector` has no c_runtime mapping                                                             |
-| upstream/quakegeneric/source/r_edge.c       | refused: emitter: upstream/quakegeneric/source/r_edge.c:101:5: external function `R_RenderPoly` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/r_efrag.c      | refused: emitter: upstream/quakegeneric/source/r_efrag.c:116:4: external function `Con_Printf` has no c_runtime mapping                                                                 |
-| upstream/quakegeneric/source/r_light.c      | refused: compile check: error[30808]: Don't know what 'cl' is                                                                                                                           |
-| upstream/quakegeneric/source/r_main.c       | refused: emitter: upstream/quakegeneric/source/r_main.c:155:2: external function `Hunk_AllocName` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/r_misc.c       | refused: emitter: upstream/quakegeneric/source/r_misc.c:38:3: external function `D_FlushCaches` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/r_part.c       | refused: emitter: upstream/quakegeneric/source/r_part.c:50:2: external function `COM_CheckParm` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/r_sky.c        | refused: emitter: upstream/quakegeneric/source/r_sky.c:188:2: external function `GreatestCommonDivisor` has no c_runtime mapping                                                        |
-| upstream/quakegeneric/source/r_sprite.c     | refused: emitter: upstream/quakegeneric/source/r_sprite.c:44:2: external function `VectorScale` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/r_surf.c       | refused: emitter: upstream/quakegeneric/source/r_surf.c:217:4: external function `Sys_Error` has no c_runtime mapping                                                                   |
-| upstream/quakegeneric/source/r_vars.c       | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/sbar.c         | refused: emitter: upstream/quakegeneric/source/sbar.c:117:3: external function `Draw_PicFromWad` has no c_runtime mapping                                                               |
-| upstream/quakegeneric/source/screen.c       | refused: emitter: upstream/quakegeneric/source/screen.c:122:2: external function `Draw_TileClear` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/snd_null.c     | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/sv_main.c      | refused: emitter: upstream/quakegeneric/source/sv_main.c:50:2: external function `Cvar_RegisterVariable` has no c_runtime mapping                                                       |
-| upstream/quakegeneric/source/sv_move.c      | refused: emitter: upstream/quakegeneric/source/sv_move.c:56:4: external function `SV_PointContents` has no c_runtime mapping                                                            |
-| upstream/quakegeneric/source/sv_phys.c      | refused: emitter: upstream/quakegeneric/source/sv_phys.c:73:3: external function `SV_TestEntityPosition` has no c_runtime mapping                                                       |
-| upstream/quakegeneric/source/sv_user.c      | refused: emitter: upstream/quakegeneric/source/sv_user.c:79:3: external function `SV_Move` has no c_runtime mapping                                                                     |
-| upstream/quakegeneric/source/sys_null.c     | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/vid_null.c     | refused: emitter: upstream/quakegeneric/source/vid_null.c:40:2: external function `QG_SetPalette` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/view.c         | refused: emitter: upstream/quakegeneric/source/view.c:87:2: external function `AngleVectors` has no c_runtime mapping                                                                   |
-| upstream/quakegeneric/source/wad.c          | refused: emitter: upstream/quakegeneric/source/wad.c:75:2: external function `COM_LoadHunkFile` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/world.c        | refused: emitter: upstream/quakegeneric/source/world.c:140:4: external function `Sys_Error` has no c_runtime mapping                                                                    |
-| upstream/quakegeneric/source/zone.c         | refused: emitter: upstream/quakegeneric/source/zone.c:104:3: external function `Sys_Error` has no c_runtime mapping                                                                     |
-| upstream/quakegeneric/source/quakegeneric.c | refused: emitter: upstream/quakegeneric/source/quakegeneric.c:25:2: external function `Host_Frame` has no c_runtime mapping                                                             |
-| src/qg_platform.c                           | refused: compile check: error[30838]: can't locate variable 'scr_con_current'                                                                                                           |
-| src/quake_entry.c                           | refused: emitter: src/quake_entry.c:35:16: `qg_frame_hash` is an array of unknown length (`extern int a[];`) that no unit of the program defines                                        |
+The program converts whole: `readable/quake_entry/` holds it (`readable/quake_entry/quake_entry.das` holds `main`).
 
 ### `fast/`
 
-The program does not convert whole yet: emitter: upstream/quakegeneric/source/host_cmd.c:63:10: a pointer to a variadic function is not lowered yet
-
-What does convert: each C file of the program converted alone, 7 of 70 (`fast/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
-
-| C file                                      | Result                                                                                                                                                                                  |
-| :------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| upstream/quakegeneric/source/cd_null.c      | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/chase.c        | refused: emitter: upstream/quakegeneric/source/chase.c:38:2: external function `Cvar_RegisterVariable` has no c_runtime mapping                                                         |
-| upstream/quakegeneric/source/cl_demo.c      | refused: emitter: upstream/quakegeneric/source/cl_demo.c:127:4: external function `Sys_Error` has no c_runtime mapping                                                                  |
-| upstream/quakegeneric/source/cl_input.c     | refused: emitter: upstream/quakegeneric/source/cl_input.c:63:2: external function `Cmd_Argv` has no c_runtime mapping                                                                   |
-| upstream/quakegeneric/source/cl_main.c      | refused: emitter: upstream/quakegeneric/source/cl_main.c:67:3: external function `Host_ClearMemory` has no c_runtime mapping                                                            |
-| upstream/quakegeneric/source/cl_parse.c     | refused: emitter: upstream/quakegeneric/source/cl_parse.c:84:4: external function `Host_Error` has no c_runtime mapping                                                                 |
-| upstream/quakegeneric/source/cl_tent.c      | refused: emitter: upstream/quakegeneric/source/cl_tent.c:43:2: external function `S_PrecacheSound` has no c_runtime mapping                                                             |
-| upstream/quakegeneric/source/cmd.c          | refused: emitter: upstream/quakegeneric/source/cmd.c:75:2: external function `SZ_Alloc` has no c_runtime mapping                                                                        |
-| upstream/quakegeneric/source/common.c       | refused: emitter: upstream/quakegeneric/source/common.c:735:2: external function `Hunk_AllocName` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/console.c      | refused: emitter: upstream/quakegeneric/source/console.c:520:14: `chat_buffer` is an array of unknown length (`extern int a[];`) that no unit of the program defines                    |
-| upstream/quakegeneric/source/crc.c          | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/cvar.c         | refused: emitter: upstream/quakegeneric/source/cvar.c:37:3: external function `Q_strcmp` has no c_runtime mapping                                                                       |
-| upstream/quakegeneric/source/d_edge.c       | refused: emitter: upstream/quakegeneric/source/d_edge.c:135:2: external function `TransformVector` has no c_runtime mapping                                                             |
-| upstream/quakegeneric/source/d_fill.c       | refused: compile check: error[30808]: Don't know what 'vid' is                                                                                                                          |
-| upstream/quakegeneric/source/d_init.c       | refused: emitter: upstream/quakegeneric/source/d_init.c:53:2: external function `Cvar_RegisterVariable` has no c_runtime mapping                                                        |
-| upstream/quakegeneric/source/d_modech.c     | refused: compile check: error[30838]: can't locate variable 'r_dowarp'                                                                                                                  |
-| upstream/quakegeneric/source/d_part.c       | refused: compile check: error[30838]: can't locate variable 'r_origin'                                                                                                                  |
-| upstream/quakegeneric/source/d_polyse.c     | refused: emitter: upstream/quakegeneric/source/d_polyse.c:506:3: external function `FloorDivMod` has no c_runtime mapping                                                               |
-| upstream/quakegeneric/source/d_scan.c       | refused: compile check: error[30808]: Don't know what 'r_refdef' is                                                                                                                     |
-| upstream/quakegeneric/source/d_sky.c        | refused: emitter: upstream/quakegeneric/source/d_sky.c:52:2: external function `VectorNormalize` has no c_runtime mapping                                                               |
-| upstream/quakegeneric/source/d_sprite.c     | refused: emitter: upstream/quakegeneric/source/d_sprite.c:343:2: external function `TransformVector` has no c_runtime mapping                                                           |
-| upstream/quakegeneric/source/d_surf.c       | refused: emitter: upstream/quakegeneric/source/d_surf.c:39:2: external function `COM_CheckParm` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/d_vars.c       | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/d_zpoint.c     | refused: compile check: error[30838]: can't locate variable 'd_pzbuffer' (+1 more on this line)                                                                                         |
-| upstream/quakegeneric/source/draw.c         | refused: emitter: upstream/quakegeneric/source/draw.c:56:2: external function `W_GetLumpName` has no c_runtime mapping                                                                  |
-| upstream/quakegeneric/source/host_cmd.c     | refused: emitter: upstream/quakegeneric/source/host_cmd.c:41:3: external function `M_Menu_Quit_f` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/host.c         | refused: emitter: upstream/quakegeneric/source/host.c:94:2: external function `Con_DPrintf` has no c_runtime mapping                                                                    |
-| upstream/quakegeneric/source/in_null.c      | refused: emitter: upstream/quakegeneric/source/in_null.c:61:2: external function `Cvar_RegisterVariable` has no c_runtime mapping                                                       |
-| upstream/quakegeneric/source/keys.c         | refused: emitter: upstream/quakegeneric/source/keys.c:165:3: external function `Cbuf_AddText` has no c_runtime mapping                                                                  |
-| upstream/quakegeneric/source/mathlib.c      | refused: emitter: upstream/quakegeneric/source/mathlib.c:166:2: external function `Sys_Error` has no c_runtime mapping                                                                  |
-| upstream/quakegeneric/source/menu.c         | refused: emitter: upstream/quakegeneric/source/menu.c:110:2: external function `Draw_Character` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/model.c        | refused: emitter: upstream/quakegeneric/source/model.c:68:2: external function `Cache_Check` has no c_runtime mapping                                                                   |
-| upstream/quakegeneric/source/net_loop.c     | refused: emitter: upstream/quakegeneric/source/net_loop.c:53:2: external function `Q_strcmp` has no c_runtime mapping                                                                   |
-| upstream/quakegeneric/source/net_main.c     | refused: emitter: upstream/quakegeneric/source/net_main.c:97:2: external function `Sys_FloatTime` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/net_none.c     | refused: emitter: upstream/quakegeneric/source/net.h:204:21: the value of external function `Loop_Init` (a pointer to a function this file does not define) is not lowered yet          |
-| upstream/quakegeneric/source/net_vcr.c      | refused: emitter: upstream/quakegeneric/source/net_vcr.c:52:2: external function `Sys_FileRead` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/nonintel.c     | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/pr_cmds.c      | refused: emitter: upstream/quakegeneric/source/pr_cmds.c:1523:11: the value of external function `SV_MoveToGoal` (a pointer to a function this file does not define) is not lowered yet |
-| upstream/quakegeneric/source/pr_edict.c     | refused: emitter: upstream/quakegeneric/source/pr_edict.c:105:3: external function `Sys_Error` has no c_runtime mapping                                                                 |
-| upstream/quakegeneric/source/pr_exec.c      | refused: emitter: upstream/quakegeneric/source/pr_exec.c:156:3: external function `Con_Printf` has no c_runtime mapping                                                                 |
-| upstream/quakegeneric/source/r_aclip.c      | refused: emitter: upstream/quakegeneric/source/r_aclip.c:82:2: external function `R_AliasProjectFinalVert` has no c_runtime mapping                                                     |
-| upstream/quakegeneric/source/r_alias.c      | refused: emitter: upstream/quakegeneric/source/r_alias.c:105:2: external function `Mod_Extradata` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/r_bsp.c        | refused: emitter: upstream/quakegeneric/source/r_bsp.c:121:2: external function `R_ConcatRotations` has no c_runtime mapping                                                            |
-| upstream/quakegeneric/source/r_draw.c       | refused: emitter: upstream/quakegeneric/source/r_draw.c:101:3: external function `TransformVector` has no c_runtime mapping                                                             |
-| upstream/quakegeneric/source/r_edge.c       | refused: emitter: upstream/quakegeneric/source/r_edge.c:101:5: external function `R_RenderPoly` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/r_efrag.c      | refused: emitter: upstream/quakegeneric/source/r_efrag.c:116:4: external function `Con_Printf` has no c_runtime mapping                                                                 |
-| upstream/quakegeneric/source/r_light.c      | refused: compile check: error[30808]: Don't know what 'cl' is                                                                                                                           |
-| upstream/quakegeneric/source/r_main.c       | refused: emitter: upstream/quakegeneric/source/r_main.c:155:2: external function `Hunk_AllocName` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/r_misc.c       | refused: emitter: upstream/quakegeneric/source/r_misc.c:38:3: external function `D_FlushCaches` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/r_part.c       | refused: emitter: upstream/quakegeneric/source/r_part.c:50:2: external function `COM_CheckParm` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/r_sky.c        | refused: emitter: upstream/quakegeneric/source/r_sky.c:188:2: external function `GreatestCommonDivisor` has no c_runtime mapping                                                        |
-| upstream/quakegeneric/source/r_sprite.c     | refused: emitter: upstream/quakegeneric/source/r_sprite.c:44:2: external function `VectorScale` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/r_surf.c       | refused: emitter: upstream/quakegeneric/source/r_surf.c:217:4: external function `Sys_Error` has no c_runtime mapping                                                                   |
-| upstream/quakegeneric/source/r_vars.c       | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/sbar.c         | refused: emitter: upstream/quakegeneric/source/sbar.c:117:3: external function `Draw_PicFromWad` has no c_runtime mapping                                                               |
-| upstream/quakegeneric/source/screen.c       | refused: emitter: upstream/quakegeneric/source/screen.c:122:2: external function `Draw_TileClear` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/snd_null.c     | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/sv_main.c      | refused: emitter: upstream/quakegeneric/source/sv_main.c:50:2: external function `Cvar_RegisterVariable` has no c_runtime mapping                                                       |
-| upstream/quakegeneric/source/sv_move.c      | refused: emitter: upstream/quakegeneric/source/sv_move.c:56:4: external function `SV_PointContents` has no c_runtime mapping                                                            |
-| upstream/quakegeneric/source/sv_phys.c      | refused: emitter: upstream/quakegeneric/source/sv_phys.c:73:3: external function `SV_TestEntityPosition` has no c_runtime mapping                                                       |
-| upstream/quakegeneric/source/sv_user.c      | refused: emitter: upstream/quakegeneric/source/sv_user.c:79:3: external function `SV_Move` has no c_runtime mapping                                                                     |
-| upstream/quakegeneric/source/sys_null.c     | converted                                                                                                                                                                               |
-| upstream/quakegeneric/source/vid_null.c     | refused: emitter: upstream/quakegeneric/source/vid_null.c:40:2: external function `QG_SetPalette` has no c_runtime mapping                                                              |
-| upstream/quakegeneric/source/view.c         | refused: emitter: upstream/quakegeneric/source/view.c:87:2: external function `AngleVectors` has no c_runtime mapping                                                                   |
-| upstream/quakegeneric/source/wad.c          | refused: emitter: upstream/quakegeneric/source/wad.c:75:2: external function `COM_LoadHunkFile` has no c_runtime mapping                                                                |
-| upstream/quakegeneric/source/world.c        | refused: emitter: upstream/quakegeneric/source/world.c:140:4: external function `Sys_Error` has no c_runtime mapping                                                                    |
-| upstream/quakegeneric/source/zone.c         | refused: emitter: upstream/quakegeneric/source/zone.c:104:3: external function `Sys_Error` has no c_runtime mapping                                                                     |
-| upstream/quakegeneric/source/quakegeneric.c | refused: emitter: upstream/quakegeneric/source/quakegeneric.c:25:2: external function `Host_Frame` has no c_runtime mapping                                                             |
-| src/qg_platform.c                           | refused: compile check: error[30838]: can't locate variable 'scr_con_current'                                                                                                           |
-| src/quake_entry.c                           | refused: emitter: src/quake_entry.c:35:16: `qg_frame_hash` is an array of unknown length (`extern int a[];`) that no unit of the program defines                                        |
+The program converts whole: `fast/quake_entry/` holds it (`fast/quake_entry/quake_entry.das` holds `main`).
 
 ## Files
 
-- `readable/files/` - each C file that converts alone, as its module.
+- `readable/quake_entry/` - the program converted from `src/quake_entry.c` and the other units of its canonical case, a module per C file (c2das-re's source layout; `readable/quake_entry/program.layout.txt` lists the modules).
 - `readable/quakegeneric.c2das` - the sidecar the readable variant's conversion ran under, its paths in the Rust checkout written under `<c2das>`, that checkout; `readable/variant.json` - its knobs with the reason and the numbers behind each.
-- `fast/files/` - each C file that converts alone, as its module.
+- `fast/quake_entry/` - the program converted from `src/quake_entry.c` and the other units of its canonical case, a module per C file (c2das-re's source layout; `fast/quake_entry/program.layout.txt` lists the modules).
 - `fast/quakegeneric.c2das` - the sidecar the fast variant's conversion ran under, its paths in the Rust checkout written under `<c2das>`, that checkout; `fast/variant.json` - its knobs with the reason and the numbers behind each.
 - `LICENSE` - the license of the upstream code under `tests/manual/quakegeneric/upstream/`; the conversion is a derived work.
 
 ## Source
 
 - The C sources: `tests/manual/quakegeneric/` of lookibed/c2das at `b1d012eb5d268f9f743168caa962a9218cf275f7`; its `UPSTREAM.md` names each upstream and its revision.
-- Generated by c2das-re `v0.5.0-778-gd047ca3` (`d047ca3eb19c368ad9908a7073b9a65ebdbfe707`, committed 2026-11-14)
+- Generated by c2das-re `v0.5.0-790-g21705bf` (`21705bfed696bc64ad67d14f062cdc65736bf631`, committed 2026-11-14)
 
 ## Running
 
 The modules require c2das-re's `crt` and `c_runtime` modules: a c2das-re checkout at the commit above, with the daScript its `VERSIONS.md` pins built and `scripts/build_crt.sh` run. The program reads its fixture `fixtures` from the Rust repository's project folder; no fixture is copied here (game data and fixtures stay with their own licenses there). With `<c2das-re>` and `<c2das>` the two checkouts:
 
 ```
-# readable/: not runnable yet: the program does not convert whole
-# fast/: not runnable yet: the program does not convert whole
+daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime readable/quake_entry/quake_entry.das -- <c2das>/tests/manual/quakegeneric/fixtures
+daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit fast/quake_entry/quake_entry.das -- <c2das>/tests/manual/quakegeneric/fixtures
 # the native build the tables compare with, in <c2das>/tests/manual/quakegeneric:
 clang -std=c11 -Iupstream/quakegeneric/source -Isrc -include engine_config.h -O2 upstream/quakegeneric/source/cd_null.c upstream/quakegeneric/source/chase.c upstream/quakegeneric/source/cl_demo.c upstream/quakegeneric/source/cl_input.c upstream/quakegeneric/source/cl_main.c upstream/quakegeneric/source/cl_parse.c upstream/quakegeneric/source/cl_tent.c upstream/quakegeneric/source/cmd.c upstream/quakegeneric/source/common.c upstream/quakegeneric/source/console.c upstream/quakegeneric/source/crc.c upstream/quakegeneric/source/cvar.c upstream/quakegeneric/source/d_edge.c upstream/quakegeneric/source/d_fill.c upstream/quakegeneric/source/d_init.c upstream/quakegeneric/source/d_modech.c upstream/quakegeneric/source/d_part.c upstream/quakegeneric/source/d_polyse.c upstream/quakegeneric/source/d_scan.c upstream/quakegeneric/source/d_sky.c upstream/quakegeneric/source/d_sprite.c upstream/quakegeneric/source/d_surf.c upstream/quakegeneric/source/d_vars.c upstream/quakegeneric/source/d_zpoint.c upstream/quakegeneric/source/draw.c upstream/quakegeneric/source/host_cmd.c upstream/quakegeneric/source/host.c upstream/quakegeneric/source/in_null.c upstream/quakegeneric/source/keys.c upstream/quakegeneric/source/mathlib.c upstream/quakegeneric/source/menu.c upstream/quakegeneric/source/model.c upstream/quakegeneric/source/net_loop.c upstream/quakegeneric/source/net_main.c upstream/quakegeneric/source/net_none.c upstream/quakegeneric/source/net_vcr.c upstream/quakegeneric/source/nonintel.c upstream/quakegeneric/source/pr_cmds.c upstream/quakegeneric/source/pr_edict.c upstream/quakegeneric/source/pr_exec.c upstream/quakegeneric/source/r_aclip.c upstream/quakegeneric/source/r_alias.c upstream/quakegeneric/source/r_bsp.c upstream/quakegeneric/source/r_draw.c upstream/quakegeneric/source/r_edge.c upstream/quakegeneric/source/r_efrag.c upstream/quakegeneric/source/r_light.c upstream/quakegeneric/source/r_main.c upstream/quakegeneric/source/r_misc.c upstream/quakegeneric/source/r_part.c upstream/quakegeneric/source/r_sky.c upstream/quakegeneric/source/r_sprite.c upstream/quakegeneric/source/r_surf.c upstream/quakegeneric/source/r_vars.c upstream/quakegeneric/source/sbar.c upstream/quakegeneric/source/screen.c upstream/quakegeneric/source/snd_null.c upstream/quakegeneric/source/sv_main.c upstream/quakegeneric/source/sv_move.c upstream/quakegeneric/source/sv_phys.c upstream/quakegeneric/source/sv_user.c upstream/quakegeneric/source/sys_null.c upstream/quakegeneric/source/vid_null.c upstream/quakegeneric/source/view.c upstream/quakegeneric/source/wad.c upstream/quakegeneric/source/world.c upstream/quakegeneric/source/zone.c upstream/quakegeneric/source/quakegeneric.c src/qg_platform.c src/quake_entry.c -lm -o quakegeneric
 ```
@@ -224,23 +75,18 @@ Its output must equal `expected.stdout` of the canonical case `quakegeneric-demo
 
 ## Performance
 
-Measured 2026-11-09 17:02 UTC (capture committed at c2das-re `b68a9b95df7a`), output changed since: the converter changed after that date; no new timing yet.
+Measured 2026-11-14 17:15 UTC (capture committed at c2das-re `21705bfed696`).
 
 From c2das-re's `compare/results_linux.json` (`compare/run.das --project quakegeneric`), our side against the Rust translator's:
 
-Each project of the Rust repository's `tests/manual` on its own fixture, checked against the `expected.stdout` of its canonical case in the Rust repository's `tests/canonical/cases.json`; the native build (the pinned clang with the README's flags) must print it too. Captured: quakegeneric (Rust `b1d012eb5d26`, 2026-11-09 17:02 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap).
+Each project of the Rust repository's `tests/manual` on its own fixture, checked against the `expected.stdout` of its canonical case in the Rust repository's `tests/canonical/cases.json`; the native build (the pinned clang with the README's flags) must print it too. Captured: quakegeneric (Rust `b1d012eb5d26`, 2026-11-14 17:15 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap).
 
-| Project      | Side | Native | interpreter |     JIT |     exe |     AOT |
-| :----------- | :--- | :----- | ----------: | ------: | ------: | ------: |
-| quakegeneric | Ours | pass   |     refused | refused | refused | refused |
-| quakegeneric | Rust | pass   |     compile | compile | compile | compile |
+| Project      | Side | Native | interpreter |  JIT |  exe |  AOT |
+| :----------- | :--- | :----- | ----------: | ---: | ---: | ---: |
+| quakegeneric | Ours | pass   |        pass | pass | pass | pass |
+| quakegeneric | Rust | pass   |        pass | pass | pass | pass |
 
-Why a lane does not pass:
-
-- quakegeneric, Ours, interpreter JIT exe AOT: refused: emitter: /root/c2das/tests/manual/quakegeneric/upstream/quakegeneric/source/host_cmd.c:63:10: a pointer to a variadic function is not lowered yet
-- quakegeneric, Rust, interpreter JIT exe AOT: compile: error[30299]: return inside a try/recover arm; set a variable in the arm and return after the pair
-
-The bench entry's timed loop (`decode_us`), a lane's median over the native build's (lower is faster), 3 samples a cell; a cell whose spread is above 20% is `suspect` with its spread, no ratio, as is a lane over a suspect native build:
+The bench entry's timed loop (`decode_us`), a lane's median over the native build's (lower is faster), 1 samples a cell; a cell whose spread is above 20% is `suspect` with its spread, no ratio, as is a lane over a suspect native build:
 
 | Project      | Side | Native compiler      | Native s | interpreter |      JIT |      exe |      AOT |
 | :----------- | :--- | :------------------- | -------: | ----------: | -------: | -------: | -------: |
@@ -249,14 +95,156 @@ The bench entry's timed loop (`decode_us`), a lane's median over the native buil
 
 The code of each side's module (the Rust runtime is its `c2da_rt_` and `c2da_std_` declarations):
 
-| Project      | Side | Code    | Files | Lines | Runtime lines | c_function | goto | label | literal_named | pointer_arith | pointer_index | reinterpret | unsafe_block | unsafe_expr | while_rangeable |
-| :----------- | :--- | :------ | ----: | ----: | ------------: | ---------: | ---: | ----: | ------------: | ------------: | ------------: | ----------: | -----------: | ----------: | --------------: |
-| quakegeneric | Ours | refused |     - |     - |             - |          - |    - |     - |             - |             - |             - |           - |            - |           - |               - |
-| quakegeneric | Rust | compile |     - |     - |             - |          - |    - |     - |             - |             - |             - |           - |            - |           - |               - |
+| Project      | Side | Code | Files | Lines | Runtime lines | c_function | goto | label | literal_named | pointer_arith | pointer_index | reinterpret | unsafe_block | unsafe_expr | while_rangeable |
+| :----------- | :--- | :--- | ----: | ----: | ------------: | ---------: | ---: | ----: | ------------: | ------------: | ------------: | ----------: | -----------: | ----------: | --------------: |
+| quakegeneric | Ours | ok   |   120 | 35444 |             0 |        702 |   44 |    24 |          4037 |           820 |          1700 |         721 |            0 |          59 |             114 |
+| quakegeneric | Rust | ok   |    72 | 59613 |          1781 |          0 |  461 |   578 |          2275 |           745 |          5761 |        9952 |          219 |       20287 |             203 |
 
 #### `quakegeneric`: `D_DrawSpans8`
 
-Ours: not found in this side's module.
+Ours:
+
+```das
+[c_function]
+def D_DrawSpans8(var pspan : espan_s?) {
+    var count : int
+    var spancount : int
+    var pbase : uint8?
+    var pdest : uint8?
+    var s : int
+    var t : int
+    var snext : int
+    var tnext : int
+    var sstep : int
+    var tstep : int
+    var sdivz : float
+    var tdivz : float
+    var zi : float
+    var z : float
+    var du : float
+    var dv : float
+    var spancountminus1 : float
+    var sdivz8stepu : float
+    var tdivz8stepu : float
+    var zi8stepu : float
+    // keep compiler happy
+    sstep = 0
+    // ditto
+    tstep = 0
+    pbase = cacheblock
+    sdivz8stepu = d_sdivzstepu * 8.0f
+    tdivz8stepu = d_tdivzstepu * 8.0f
+    zi8stepu = d_zistepu * 8.0f
+    while (true) {
+        pdest = d_viewbuffer + (screenwidth * pspan.v) + pspan.u
+        count = pspan.count
+        // calculate the initial s/z, t/z, 1/z, s, and t and clamp
+        du = float(pspan.u)
+        dv = float(pspan.v)
+        sdivz = d_sdivzorigin + dv * d_sdivzstepv + du * d_sdivzstepu
+        tdivz = d_tdivzorigin + dv * d_tdivzstepv + du * d_tdivzstepu
+        zi = d_ziorigin + dv * d_zistepv + du * d_zistepu
+        // prescale to 16.16 fixed-point
+        z = 65536.0f / zi
+        s = int(sdivz * z) + sadjust
+        if (s > bbextents) {
+            s = bbextents
+        } elif (s < 0) {
+            s = 0
+        }
+        t = int(tdivz * z) + tadjust
+        if (t > bbextentt) {
+            t = bbextentt
+        } elif (t < 0) {
+            t = 0
+        }
+        c_do_while(count > 0) {
+            // calculate s and t at the far end of the span
+            if (count >= 8) {
+                spancount = 8
+            } else {
+                spancount = count
+            }
+            count -= spancount
+            if (count != 0) {
+                // calculate s/z, t/z, zi->fixed s and t at far end of span,
+                // calculate s and t steps across span by shifting
+                sdivz += sdivz8stepu
+                tdivz += tdivz8stepu
+                zi += zi8stepu
+                // prescale to 16.16 fixed-point
+                z = 65536.0f / zi
+                snext = int(sdivz * z) + sadjust
+                if (snext > bbextents) {
+                    snext = bbextents
+                } elif (snext < 8) {
+                    // prevent round-off error on <0 steps from
+                    snext = 8
+                }
+                // from causing overstepping & running off the
+                // edge of the texture
+                tnext = int(tdivz * z) + tadjust
+                if (tnext > bbextentt) {
+                    tnext = bbextentt
+                } elif (tnext < 8) {
+                    // guard against round-off error on <0 steps
+                    tnext = 8
+                }
+                sstep = (snext - s) >> 3
+                tstep = (tnext - t) >> 3
+            } else {
+                // calculate s/z, t/z, zi->fixed s and t at last pixel in span (so
+                // can't step off polygon), clamp, calculate s and t steps across
+                // span by division, biasing steps low so we don't run off the
+                // texture
+                spancountminus1 = float(spancount - 1)
+                sdivz += d_sdivzstepu * spancountminus1
+                tdivz += d_tdivzstepu * spancountminus1
+                zi += d_zistepu * spancountminus1
+                // prescale to 16.16 fixed-point
+                z = 65536.0f / zi
+                snext = int(sdivz * z) + sadjust
+                if (snext > bbextents) {
+                    snext = bbextents
+                } elif (snext < 8) {
+                    // prevent round-off error on <0 steps from
+                    snext = 8
+                }
+                // from causing overstepping & running off the
+                // edge of the texture
+                tnext = int(tdivz * z) + tadjust
+                if (tnext > bbextentt) {
+                    tnext = bbextentt
+                } elif (tnext < 8) {
+                    // guard against round-off error on <0 steps
+                    tnext = 8
+                }
+                if (spancount > 1) {
+                    sstep = (snext - s) / (spancount - 1)
+                    tstep = (tnext - t) / (spancount - 1)
+                }
+            }
+            while (true) {
+                var _t0 = pdest
+                pdest++
+                *_t0 = (pbase + (s >> 16))[(t >> 16) * cachewidth]
+                s += sstep
+                t += tstep
+                spancount--
+                if (!(spancount > 0)) {
+                    break
+                }
+            }
+            s = snext
+            t = tnext
+        }
+        pspan = pspan.pnext
+        if (!(pspan != null)) {
+            break
+        }
+    }
+}
+```
 
 Rust:
 
@@ -388,7 +376,64 @@ def D_DrawSpans8(var pspan : espan_s?) {
 
 #### `quakegeneric`: `D_DrawZSpans`
 
-Ours: not found in this side's module.
+Ours:
+
+```das
+[c_function]
+def D_DrawZSpans(var pspan : espan_s?) {
+    var count : int
+    var doublecount : int
+    var izistep : int
+    var izi : int
+    var pdest : int16?
+    var ltemp : uint
+    var zi : double
+    var du : float
+    var dv : float
+    // FIXME: check for clamping/range problems
+    // we count on FP exceptions being turned off to avoid range problems
+    izistep = int(d_zistepu * 32768.0f * 65536.0f)
+    while (true) {
+        pdest = d_pzbuffer + (d_zwidth * uint(pspan.v)) + pspan.u
+        count = pspan.count
+        // calculate the initial 1/z
+        du = float(pspan.u)
+        dv = float(pspan.v)
+        zi = double(d_ziorigin + dv * d_zistepv + du * d_zistepu)
+        // we count on FP exceptions being turned off to avoid range problems
+        izi = int(zi * 32768.0lf * 65536.0lf)
+        if ((int64(intptr(pdest)) & 2l) != 0) {
+            var _t0 = pdest
+            pdest++
+            *_t0 = int16(izi >> 16)
+            izi += izistep
+            count--
+        }
+        doublecount = count >> 1
+        if (doublecount > 0) {
+            while (true) {
+                ltemp = uint(izi >> 16)
+                izi += izistep
+                ltemp |= uint(izi) & 4294901760u
+                izi += izistep
+                *reinterpret<int?>(pdest) = int(ltemp)
+                pdest += 2
+                doublecount--
+                if (!(doublecount > 0)) {
+                    break
+                }
+            }
+        }
+        if ((count & 1) != 0) {
+            *pdest = int16(izi >> 16)
+        }
+        pspan = pspan.pnext
+        if (!(pspan != null)) {
+            break
+        }
+    }
+}
+```
 
 Rust:
 
@@ -446,31 +491,31 @@ def D_DrawZSpans(var pspan_0 : espan_s?) {
 
 ## Readability criteria
 
-From c2das-re's `metrics/criteria_linux.json` (`scripts/run_criteria.sh`), its row `project/quakegeneric`, recorded at c2das-re `7cabbc4dc828`, output changed since: the converter changed after that commit; not re-measured yet. Measured on the 7 of 70 C files that convert alone, since the program does not convert whole; the other files are in no count, so these criteria describe only the converted files, converted as this directory's conversion is. The compliance in percent per criterion, 100 being what a human port would have (c2das-re's `metrics/ARCHITECTURE_CRITERIA.md` defines each); it counts lines and reads no clock.
+From c2das-re's `metrics/criteria_linux.json` (`scripts/run_criteria.sh`), its row `project/quakegeneric`, recorded at c2das-re `d46c547e4c70`. Measured on the whole program, its 70 C files, converted as this directory's conversion is. The compliance in percent per criterion, 100 being what a human port would have (c2das-re's `metrics/ARCHITECTURE_CRITERIA.md` defines each); it counts lines and reads no clock.
 
 | Criterion          | project/quakegeneric |
 | :----------------- | -------------------: |
-| comments           |                  8.2 |
-| constant_names     |                 57.1 |
-| char_literals      |                  n/a |
-| macro_blowup       |                100.0 |
-| repeated_blocks    |                  2.4 |
-| switch_flags       |                  n/a |
-| temporaries        |                100.0 |
-| addr_deref         |                100.0 |
-| reinterpret_casts  |                 84.0 |
+| comments           |                 71.0 |
+| constant_names     |                 75.1 |
+| char_literals      |                 99.3 |
+| macro_blowup       |                 95.7 |
+| repeated_blocks    |                 98.8 |
+| switch_flags       |                 96.4 |
+| temporaries        |                 95.8 |
+| addr_deref         |                 99.6 |
+| reinterpret_casts  |                 75.3 |
 | late_binding       |                100.0 |
 | qualified_calls    |                100.0 |
-| require_lines      |                 73.3 |
-| setjmp             |                  n/a |
-| layout_checks      |                  0.0 |
-| stray_braces       |                100.0 |
-| label_stubs        |                100.0 |
-| string_literals    |                  0.0 |
+| require_lines      |                100.0 |
+| setjmp             |                  0.0 |
+| layout_checks      |                100.0 |
+| stray_braces       |                 94.5 |
+| label_stubs        |                 98.6 |
+| string_literals    |                  0.7 |
 | lost_parens        |                100.0 |
-| literal_arithmetic |                100.0 |
-| bool_roundtrip     |                100.0 |
-| c_renames          |                100.0 |
-| long_lines         |                  0.0 |
-| **total**          |             **69.7** |
+| literal_arithmetic |                 93.9 |
+| bool_roundtrip     |                 97.7 |
+| c_renames          |                 71.5 |
+| long_lines         |                 89.8 |
+| **total**          |             **84.3** |
 The readability counters of the converted modules (`goto`, `label`, `reinterpret`, `unsafe`, `literal_named`, raw `while`) are the code table of the Performance section, from the head-to-head; a program that converts only file by file has none there, since its modules do not compile alone.

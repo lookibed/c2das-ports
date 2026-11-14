@@ -28,6 +28,10 @@
 	"layout" : "source",
 	"param_writes" : "in-place",
 	"switch_dispatch" : "chain",
+	"flat_indexed" : [
+		"texinfo_t.vecs",
+		"mtexinfo_t.vecs"
+	],
 	"jit_whole_program" : false,
 	"loops" : "range",
 	"past_end" : "call",
