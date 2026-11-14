@@ -11,6 +11,9 @@
 		"<c2das>/tests/manual/wasm3/upstream/wasm3/source",
 		"<c2das>/tests/manual/wasm3/src"
 	],
+	"over_indexed" : [
+		"M3CodePage.code"
+	],
 	"checks" : "off",
 	"layout" : "source",
 	"param_writes" : "in-place",

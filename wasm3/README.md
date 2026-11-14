@@ -31,7 +31,7 @@ Each variant converts the same program under its own knobs (c2das-re's `ports/va
 | x native, JIT         |     not yet |    not yet |
 | x native, exe         |     not yet |    not yet |
 | x native, AOT         |     not yet |    not yet |
-| das lines             |           6 |          7 |
+| das lines             |         745 |        763 |
 
 - `fast/`: not yet tuned: readable + checks off
 - (1) not from a search of the variant: the row `project/wasm3` of c2das-re's `metrics/criteria_linux.json`, the converter's default flags
@@ -40,45 +40,45 @@ Each variant converts the same program under its own knobs (c2das-re's `ports/va
 
 ### `readable/`
 
-The program does not convert whole yet: dumper: upstream/wasm3/source/m3_parse.c:305:22: `m3type_t argTypes[numArgs + 1]`: a variable-length array is not lowered (out of scope in v1)
+The program does not convert whole yet: compile check: error[30341]: too many matching functions or generics m3_Free
 
-What does convert: each C file of the program converted alone, 1 of 12 (`readable/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
+What does convert: each C file of the program converted alone, 2 of 12 (`readable/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
 
-| C file                              | Result                                                                                                                                                                   |
-| :---------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| upstream/wasm3/source/m3_bind.c     | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| upstream/wasm3/source/m3_code.c     | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| upstream/wasm3/source/m3_compile.c  | refused: dumper: upstream/wasm3/source/m3_exec.h:681:1: anonymous records from one macro expansion are not dumped yet                                                    |
-| upstream/wasm3/source/m3_core.c     | refused: dumper: libclang: include/time.h:10:8: error: redefinition of 'timespec'                                                                                        |
-| upstream/wasm3/source/m3_env.c      | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| upstream/wasm3/source/m3_exec.c     | converted                                                                                                                                                                |
-| upstream/wasm3/source/m3_function.c | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| upstream/wasm3/source/m3_info.c     | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| upstream/wasm3/source/m3_module.c   | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| upstream/wasm3/source/m3_parse.c    | refused: dumper: upstream/wasm3/source/m3_parse.c:305:22: `m3type_t argTypes[numArgs + 1]`: a variable-length array is not lowered (out of scope in v1)                  |
-| upstream/wasm3/source/m3_validate.c | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| src/host.c                          | refused: emitter: src/host.c:52:5: external function `m3_GetArgType` has no c_runtime mapping                                                                            |
+| C file                              | Result                                                                                                                   |
+| :---------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| upstream/wasm3/source/m3_bind.c     | refused: emitter: upstream/wasm3/source/m3_bind.c:53:1: external function `AllocFuncType` has no c_runtime mapping       |
+| upstream/wasm3/source/m3_code.c     | refused: emitter: upstream/wasm3/source/m3_code.c:36:5: external function `m3_Malloc_Impl` has no c_runtime mapping      |
+| upstream/wasm3/source/m3_compile.c  | refused: dumper: upstream/wasm3/source/m3_exec.h:681:1: anonymous records from one macro expansion are not dumped yet    |
+| upstream/wasm3/source/m3_core.c     | refused: dumper: libclang: include/time.h:10:8: error: redefinition of 'timespec'                                        |
+| upstream/wasm3/source/m3_env.c      | refused: emitter: upstream/wasm3/source/m3_host.h:104:12: external function `m3_Malloc_Impl` has no c_runtime mapping    |
+| upstream/wasm3/source/m3_exec.c     | converted                                                                                                                |
+| upstream/wasm3/source/m3_function.c | refused: emitter: upstream/wasm3/source/m3_function.c:14:5: external function `m3_Malloc_Impl` has no c_runtime mapping  |
+| upstream/wasm3/source/m3_info.c     | converted                                                                                                                |
+| upstream/wasm3/source/m3_module.c   | refused: emitter: upstream/wasm3/source/m3_module.c:16:9: external function `Function_Release` has no c_runtime mapping  |
+| upstream/wasm3/source/m3_parse.c    | refused: emitter: upstream/wasm3/source/m3_parse.c:78:1: external function `ReadLEB_i7` has no c_runtime mapping         |
+| upstream/wasm3/source/m3_validate.c | refused: emitter: upstream/wasm3/source/m3_validate.c:249:14: external function `ReadLebSigned` has no c_runtime mapping |
+| src/host.c                          | refused: emitter: src/host.c:52:5: external function `m3_GetArgType` has no c_runtime mapping                            |
 
 ### `fast/`
 
-The program does not convert whole yet: dumper: upstream/wasm3/source/m3_parse.c:305:22: `m3type_t argTypes[numArgs + 1]`: a variable-length array is not lowered (out of scope in v1)
+The program does not convert whole yet: compile check: error[30341]: too many matching functions or generics m3_Free
 
-What does convert: each C file of the program converted alone, 1 of 12 (`fast/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
+What does convert: each C file of the program converted alone, 2 of 12 (`fast/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
 
-| C file                              | Result                                                                                                                                                                   |
-| :---------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| upstream/wasm3/source/m3_bind.c     | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| upstream/wasm3/source/m3_code.c     | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| upstream/wasm3/source/m3_compile.c  | refused: dumper: upstream/wasm3/source/m3_exec.h:681:1: anonymous records from one macro expansion are not dumped yet                                                    |
-| upstream/wasm3/source/m3_core.c     | refused: dumper: libclang: include/time.h:10:8: error: redefinition of 'timespec'                                                                                        |
-| upstream/wasm3/source/m3_env.c      | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| upstream/wasm3/source/m3_exec.c     | converted                                                                                                                                                                |
-| upstream/wasm3/source/m3_function.c | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| upstream/wasm3/source/m3_info.c     | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| upstream/wasm3/source/m3_module.c   | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| upstream/wasm3/source/m3_parse.c    | refused: dumper: upstream/wasm3/source/m3_parse.c:305:22: `m3type_t argTypes[numArgs + 1]`: a variable-length array is not lowered (out of scope in v1)                  |
-| upstream/wasm3/source/m3_validate.c | refused: emitter: upstream/wasm3/source/m3_function.h:17:16: flexible array member `M3FuncType.types`, which pads the record or raises its alignment, is not lowered yet |
-| src/host.c                          | refused: emitter: src/host.c:52:5: external function `m3_GetArgType` has no c_runtime mapping                                                                            |
+| C file                              | Result                                                                                                                   |
+| :---------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| upstream/wasm3/source/m3_bind.c     | refused: emitter: upstream/wasm3/source/m3_bind.c:53:1: external function `AllocFuncType` has no c_runtime mapping       |
+| upstream/wasm3/source/m3_code.c     | refused: emitter: upstream/wasm3/source/m3_code.c:36:5: external function `m3_Malloc_Impl` has no c_runtime mapping      |
+| upstream/wasm3/source/m3_compile.c  | refused: dumper: upstream/wasm3/source/m3_exec.h:681:1: anonymous records from one macro expansion are not dumped yet    |
+| upstream/wasm3/source/m3_core.c     | refused: dumper: libclang: include/time.h:10:8: error: redefinition of 'timespec'                                        |
+| upstream/wasm3/source/m3_env.c      | refused: emitter: upstream/wasm3/source/m3_host.h:104:12: external function `m3_Malloc_Impl` has no c_runtime mapping    |
+| upstream/wasm3/source/m3_exec.c     | converted                                                                                                                |
+| upstream/wasm3/source/m3_function.c | refused: emitter: upstream/wasm3/source/m3_function.c:14:5: external function `m3_Malloc_Impl` has no c_runtime mapping  |
+| upstream/wasm3/source/m3_info.c     | converted                                                                                                                |
+| upstream/wasm3/source/m3_module.c   | refused: emitter: upstream/wasm3/source/m3_module.c:16:9: external function `Function_Release` has no c_runtime mapping  |
+| upstream/wasm3/source/m3_parse.c    | refused: emitter: upstream/wasm3/source/m3_parse.c:78:1: external function `ReadLEB_i7` has no c_runtime mapping         |
+| upstream/wasm3/source/m3_validate.c | refused: emitter: upstream/wasm3/source/m3_validate.c:249:14: external function `ReadLebSigned` has no c_runtime mapping |
+| src/host.c                          | refused: emitter: src/host.c:52:5: external function `m3_GetArgType` has no c_runtime mapping                            |
 
 ## Files
 
@@ -91,7 +91,7 @@ What does convert: each C file of the program converted alone, 1 of 12 (`fast/fi
 ## Source
 
 - The C sources: `tests/manual/wasm3/` of lookibed/c2das at `b1d012eb5d268f9f743168caa962a9218cf275f7`; its `UPSTREAM.md` names each upstream and its revision.
-- Generated by c2das-re `v0.5.0-759-g7cabbc4` (`7cabbc4dc82829c34a5f8a8bd9f59d63d527805f`, committed 2026-11-14)
+- Generated by c2das-re `v0.5.0-778-gd047ca3` (`d047ca3eb19c368ad9908a7073b9a65ebdbfe707`, committed 2026-11-14)
 
 ## Running
 
@@ -108,7 +108,7 @@ Its output must equal `expected.stdout` of the canonical case `wasm3-fib32-std` 
 
 ## Performance
 
-Measured 2026-11-09 16:58 UTC (capture committed at c2das-re `bba9010df546`), output changed since: the converter changed after that date; no new timing yet.
+Measured 2026-11-09 16:58 UTC (capture committed at c2das-re `b68a9b95df7a`), output changed since: the converter changed after that date; no new timing yet.
 
 From c2das-re's `compare/results_linux.json` (`compare/run.das --project wasm3`), our side against the Rust translator's:
 
@@ -208,7 +208,7 @@ def call_fib(var fib : IM3Function; var n_6 : int; var out_1 : int64?) : M3Resul
 
 ## Readability criteria
 
-From c2das-re's `metrics/criteria_linux.json` (`scripts/run_criteria.sh`), its row `project/wasm3`, recorded at c2das-re `7cabbc4dc828`. Measured on the 1 of 12 C files that convert alone, since the program does not convert whole; the other files are in no count, so these criteria describe only the converted files, converted as this directory's conversion is. The compliance in percent per criterion, 100 being what a human port would have (c2das-re's `metrics/ARCHITECTURE_CRITERIA.md` defines each); it counts lines and reads no clock.
+From c2das-re's `metrics/criteria_linux.json` (`scripts/run_criteria.sh`), its row `project/wasm3`, recorded at c2das-re `7cabbc4dc828`, output changed since: the converter changed after that commit; not re-measured yet. Measured on the 1 of 12 C files that convert alone, since the program does not convert whole; the other files are in no count, so these criteria describe only the converted files, converted as this directory's conversion is. The compliance in percent per criterion, 100 being what a human port would have (c2das-re's `metrics/ARCHITECTURE_CRITERIA.md` defines each); it counts lines and reads no clock.
 
 | Criterion          | project/wasm3 |
 | :----------------- | ------------: |
