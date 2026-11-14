@@ -12,6 +12,18 @@
 		"<c2das>/tests/manual/quakegeneric/upstream/quakegeneric/source",
 		"<c2das>/tests/manual/quakegeneric/src"
 	],
+	"over_indexed" : [
+		"dmiptexlump_t.dataofs",
+		"surfcache_t.data",
+		"mspriteframe_t.pixels",
+		"mspritegroup_t.frames",
+		"msprite_t.frames",
+		"maliasgroup_t.frames",
+		"maliasskingroup_t.skindescs",
+		"aliashdr_t.frames",
+		"sfxcache_t.data",
+		"qpic_t.data"
+	],
 	"checks" : "off",
 	"layout" : "source",
 	"param_writes" : "in-place",
