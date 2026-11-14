@@ -2463,7 +2463,7 @@ def strlen1(var src : uint8?) : uint64 {
 }
 
 [c_function, unsafe_deref, hint(unsafe_range_check)]
-def strdup(var src : uint8?) : uint8? {
+def strdup1(var src : uint8?) : uint8? {
     let length : uint64 = strlen1(src)
     var copy : uint8? = reinterpret<uint8?>(malloc1(length + uint64(1u)))
     if (copy == null) {
@@ -16129,7 +16129,7 @@ def MP4E_set_text_comment(var mux : MP4E_mux_tag?; var comment : uint8?) : int {
     if (mux.text_comment != null) {
         free1(reinterpret<void?>(mux.text_comment))
     }
-    mux.text_comment = strdup(comment)
+    mux.text_comment = strdup1(comment)
     if (mux.text_comment == null) {
         return MP4E_STATUS_NO_MEMORY
     }
