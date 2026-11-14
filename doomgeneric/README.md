@@ -26,220 +26,49 @@ Each variant converts the same program under its own knobs (c2das-re's `ports/va
 | `jit_whole_program`   |     `false` |    `false` |
 | `strict_aliasing`     |     `false` |    `false` |
 | `forms_off`           |        `[]` |       `[]` |
-| Criteria total, %     |    88.5 (1) |    not yet |
-| x native, interpreter |     not yet |    not yet |
-| x native, JIT         |     not yet |    not yet |
-| x native, exe         |     not yet |    not yet |
-| x native, AOT         |     not yet |    not yet |
-| das lines             |        4638 |       4680 |
+| Criteria total, %     |    78.3 (1) |    not yet |
+| x native, interpreter |       43.31 |      42.29 |
+| x native, JIT         |        1.07 |       1.03 |
+| x native, exe         |        1.07 |       1.03 |
+| x native, AOT         |        3.69 |       3.64 |
+| das lines             |       37864 |      38191 |
 
-- `fast/`: not yet tuned: readable + checks off
+- `readable/` speed: its search, the bench's decode time over native's (compare/run.das --project doomgeneric --bench-only), at c2das-re `cb35b34` (2026-11-14) on PC, `heavy --exclusive --label TIMING-aot-final --max 8G -- /root/notes/parallel/aotfinal_capture/cap.sh 3`, an exclusive run on a quiet machine.
+- `readable/`: AOT 3.7x native, likely the lookibed/daScript#48 class (global reads through a hash lookup) but not A/B-proven for this program, so unmarked
+- `fast/` speed: its search, the bench's decode time over native's (compare/run.das --project doomgeneric --bench-only), at c2das-re `cb35b34` (2026-11-14) on PC, `heavy --exclusive --label TIMING-aot-final --max 8G -- /root/notes/parallel/aotfinal_capture/cap.sh 3`, an exclusive run on a quiet machine.
+- `fast/`: not yet tuned: readable + checks off; AOT 3.7x native, likely the lookibed/daScript#48 class (global reads through a hash lookup) but not A/B-proven for this program, so unmarked
 - (1) not from a search of the variant: the row `project/doomgeneric` of c2das-re's `metrics/criteria_linux.json`, the converter's default flags
 
 ## Conversion
 
 ### `readable/`
 
-The program does not convert whole yet: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar
-
-What does convert: each C file of the program converted alone, 16 of 82 (`readable/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
-
-| C file                                         | Result                                                                                                                                                                                            |
-| :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| upstream/doomgeneric/doomgeneric/dummy.c       | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/am_map.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/doomdef.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/doomstat.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/dstrings.c    | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/d_event.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/d_items.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/d_iwad.c      | refused: emitter: upstream/doomgeneric/doomgeneric/d_iwad.c:415:5: external function `M_FileExists` has no c_runtime mapping                                                                      |
-| upstream/doomgeneric/doomgeneric/d_loop.c      | refused: emitter: upstream/doomgeneric/doomgeneric/d_loop.c:123:5: external function `I_GetTimeMS` has no c_runtime mapping                                                                       |
-| upstream/doomgeneric/doomgeneric/d_main.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/d_mode.c      | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/d_net.c       | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/f_finale.c    | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/f_wipe.c      | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/g_game.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/hu_lib.c      | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/hu_stuff.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/info.c        | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/i_cdmus.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/i_endoom.c    | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/i_joystick.c  | refused: emitter: upstream/doomgeneric/doomgeneric/i_joystick.c:343:5: external function `M_BindVariable` has no c_runtime mapping                                                                |
-| upstream/doomgeneric/doomgeneric/i_scale.c     | refused: emitter: upstream/doomgeneric/doomgeneric/i_scale.c:340:5: external function `Z_Malloc` has no c_runtime mapping                                                                         |
-| upstream/doomgeneric/doomgeneric/i_sound.c     | refused: emitter: upstream/doomgeneric/doomgeneric/i_sound.c:154:5: external function `M_CheckParm` has no c_runtime mapping                                                                      |
-| upstream/doomgeneric/doomgeneric/i_system.c    | refused: emitter: upstream/doomgeneric/doomgeneric/i_system.c:145:5: external function `M_CheckParmWithArgs` has no c_runtime mapping                                                             |
-| upstream/doomgeneric/doomgeneric/i_timer.c     | refused: emitter: upstream/doomgeneric/doomgeneric/i_timer.c:40:2: external function `DG_GetTicksMs` has no c_runtime mapping                                                                     |
-| upstream/doomgeneric/doomgeneric/memio.c       | refused: emitter: upstream/doomgeneric/doomgeneric/memio.c:46:2: external function `Z_Malloc` has no c_runtime mapping                                                                            |
-| upstream/doomgeneric/doomgeneric/m_argv.c      | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/m_bbox.c      | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/m_cheat.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/m_config.c    | refused: emitter: upstream/doomgeneric/doomgeneric/m_config.c:1895:5: external function `M_CheckParmWithArgs` has no c_runtime mapping                                                            |
-| upstream/doomgeneric/doomgeneric/m_controls.c  | refused: emitter: upstream/doomgeneric/doomgeneric/m_controls.c:206:5: external function `M_BindVariable` has no c_runtime mapping                                                                |
-| upstream/doomgeneric/doomgeneric/m_fixed.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/m_menu.c      | refused: emitter: upstream/doomgeneric/doomgeneric/dstrings.h:37:14: `doom1_endmsg` is an array of unknown length (`extern int a[];`) that no unit of the program defines                         |
-| upstream/doomgeneric/doomgeneric/m_misc.c      | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/m_random.c    | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/p_ceilng.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_doors.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_enemy.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_floor.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_inter.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_lights.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_map.c       | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_maputl.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_mobj.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_plats.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_pspr.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_saveg.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_setup.c     | refused: emitter: upstream/doomgeneric/doomgeneric/info.h:1157:14: `sprnames` is an array of unknown length (`extern int a[];`) that no unit of the program defines                               |
-| upstream/doomgeneric/doomgeneric/p_sight.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_spec.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_switch.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_telept.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_tick.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_user.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_bsp.c       | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_data.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_draw.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_main.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_plane.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_segs.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_sky.c       | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_things.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/sha1.c        | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/sounds.c      | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/statdump.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/st_lib.c      | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/st_stuff.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/s_sound.c     | refused: emitter: upstream/doomgeneric/doomgeneric/sounds.h:26:18: `S_sfx` is an array of unknown length (`extern int a[];`) that no unit of the program defines                                  |
-| upstream/doomgeneric/doomgeneric/tables.c      | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/v_video.c     | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/wi_stuff.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/w_checksum.c  | refused: emitter: upstream/doomgeneric/doomgeneric/w_checksum.c:61:5: external function `M_StringCopy` has no c_runtime mapping                                                                   |
-| upstream/doomgeneric/doomgeneric/w_file.c      | refused: emitter: upstream/doomgeneric/doomgeneric/w_file.c:63:5: external function `M_CheckParm` has no c_runtime mapping                                                                        |
-| upstream/doomgeneric/doomgeneric/w_main.c      | refused: emitter: upstream/doomgeneric/doomgeneric/w_main.c:177:5: external function `M_CheckParmWithArgs` has no c_runtime mapping                                                               |
-| upstream/doomgeneric/doomgeneric/w_wad.c       | refused: emitter: upstream/doomgeneric/doomgeneric/w_wad.c:39:9: record `wadinfo_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/z_zone.c      | refused: emitter: upstream/doomgeneric/doomgeneric/z_zone.c:102:5: external function `I_ZoneBase` has no c_runtime mapping                                                                        |
-| upstream/doomgeneric/doomgeneric/w_file_stdc.c | refused: emitter: upstream/doomgeneric/doomgeneric/w_file_stdc.c:47:5: external function `Z_Malloc` has no c_runtime mapping                                                                      |
-| upstream/doomgeneric/doomgeneric/i_input.c     | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/i_video.c     | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/doomgeneric.c | refused: emitter: upstream/doomgeneric/doomgeneric/doomgeneric.c:19:2: external function `M_FindResponseFile` has no c_runtime mapping                                                            |
-| src/dg_platform.c                              | refused: dumper: libclang: src/dg_platform.c:41:26: error: use of undeclared identifier 'colors'                                                                                                  |
-| src/doom_entry.c                               | refused: emitter: src/doom_entry.c:28:16: `dg_frame_hash` is an array of unknown length (`extern int a[];`) that no unit of the program defines                                                   |
+The program converts whole: `readable/doom_all/` holds it (`readable/doom_all/doom_all.das` holds `main`).
 
 ### `fast/`
 
-The program does not convert whole yet: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar
-
-What does convert: each C file of the program converted alone, 16 of 82 (`fast/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
-
-| C file                                         | Result                                                                                                                                                                                            |
-| :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| upstream/doomgeneric/doomgeneric/dummy.c       | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/am_map.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/doomdef.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/doomstat.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/dstrings.c    | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/d_event.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/d_items.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/d_iwad.c      | refused: emitter: upstream/doomgeneric/doomgeneric/d_iwad.c:415:5: external function `M_FileExists` has no c_runtime mapping                                                                      |
-| upstream/doomgeneric/doomgeneric/d_loop.c      | refused: emitter: upstream/doomgeneric/doomgeneric/d_loop.c:123:5: external function `I_GetTimeMS` has no c_runtime mapping                                                                       |
-| upstream/doomgeneric/doomgeneric/d_main.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/d_mode.c      | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/d_net.c       | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/f_finale.c    | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/f_wipe.c      | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/g_game.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/hu_lib.c      | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/hu_stuff.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/info.c        | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/i_cdmus.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/i_endoom.c    | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/i_joystick.c  | refused: emitter: upstream/doomgeneric/doomgeneric/i_joystick.c:343:5: external function `M_BindVariable` has no c_runtime mapping                                                                |
-| upstream/doomgeneric/doomgeneric/i_scale.c     | refused: emitter: upstream/doomgeneric/doomgeneric/i_scale.c:340:5: external function `Z_Malloc` has no c_runtime mapping                                                                         |
-| upstream/doomgeneric/doomgeneric/i_sound.c     | refused: emitter: upstream/doomgeneric/doomgeneric/i_sound.c:154:5: external function `M_CheckParm` has no c_runtime mapping                                                                      |
-| upstream/doomgeneric/doomgeneric/i_system.c    | refused: emitter: upstream/doomgeneric/doomgeneric/i_system.c:145:5: external function `M_CheckParmWithArgs` has no c_runtime mapping                                                             |
-| upstream/doomgeneric/doomgeneric/i_timer.c     | refused: emitter: upstream/doomgeneric/doomgeneric/i_timer.c:40:2: external function `DG_GetTicksMs` has no c_runtime mapping                                                                     |
-| upstream/doomgeneric/doomgeneric/memio.c       | refused: emitter: upstream/doomgeneric/doomgeneric/memio.c:46:2: external function `Z_Malloc` has no c_runtime mapping                                                                            |
-| upstream/doomgeneric/doomgeneric/m_argv.c      | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/m_bbox.c      | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/m_cheat.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/m_config.c    | refused: emitter: upstream/doomgeneric/doomgeneric/m_config.c:1895:5: external function `M_CheckParmWithArgs` has no c_runtime mapping                                                            |
-| upstream/doomgeneric/doomgeneric/m_controls.c  | refused: emitter: upstream/doomgeneric/doomgeneric/m_controls.c:206:5: external function `M_BindVariable` has no c_runtime mapping                                                                |
-| upstream/doomgeneric/doomgeneric/m_fixed.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/m_menu.c      | refused: emitter: upstream/doomgeneric/doomgeneric/dstrings.h:37:14: `doom1_endmsg` is an array of unknown length (`extern int a[];`) that no unit of the program defines                         |
-| upstream/doomgeneric/doomgeneric/m_misc.c      | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/m_random.c    | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/p_ceilng.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_doors.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_enemy.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_floor.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_inter.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_lights.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_map.c       | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_maputl.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_mobj.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_plats.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_pspr.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_saveg.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_setup.c     | refused: emitter: upstream/doomgeneric/doomgeneric/info.h:1157:14: `sprnames` is an array of unknown length (`extern int a[];`) that no unit of the program defines                               |
-| upstream/doomgeneric/doomgeneric/p_sight.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_spec.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_switch.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_telept.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_tick.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/p_user.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_bsp.c       | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_data.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_draw.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_main.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_plane.c     | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_segs.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_sky.c       | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/r_things.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/sha1.c        | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/sounds.c      | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/statdump.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/st_lib.c      | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/st_stuff.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/s_sound.c     | refused: emitter: upstream/doomgeneric/doomgeneric/sounds.h:26:18: `S_sfx` is an array of unknown length (`extern int a[];`) that no unit of the program defines                                  |
-| upstream/doomgeneric/doomgeneric/tables.c      | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/v_video.c     | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/wi_stuff.c    | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
-| upstream/doomgeneric/doomgeneric/w_checksum.c  | refused: emitter: upstream/doomgeneric/doomgeneric/w_checksum.c:61:5: external function `M_StringCopy` has no c_runtime mapping                                                                   |
-| upstream/doomgeneric/doomgeneric/w_file.c      | refused: emitter: upstream/doomgeneric/doomgeneric/w_file.c:63:5: external function `M_CheckParm` has no c_runtime mapping                                                                        |
-| upstream/doomgeneric/doomgeneric/w_main.c      | refused: emitter: upstream/doomgeneric/doomgeneric/w_main.c:177:5: external function `M_CheckParmWithArgs` has no c_runtime mapping                                                               |
-| upstream/doomgeneric/doomgeneric/w_wad.c       | refused: emitter: upstream/doomgeneric/doomgeneric/w_wad.c:39:9: record `wadinfo_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/z_zone.c      | refused: emitter: upstream/doomgeneric/doomgeneric/z_zone.c:102:5: external function `I_ZoneBase` has no c_runtime mapping                                                                        |
-| upstream/doomgeneric/doomgeneric/w_file_stdc.c | refused: emitter: upstream/doomgeneric/doomgeneric/w_file_stdc.c:47:5: external function `Z_Malloc` has no c_runtime mapping                                                                      |
-| upstream/doomgeneric/doomgeneric/i_input.c     | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/i_video.c     | refused: emitter: upstream/doomgeneric/doomgeneric/v_patch.h:29:9: record `patch_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar      |
-| upstream/doomgeneric/doomgeneric/doomgeneric.c | refused: emitter: upstream/doomgeneric/doomgeneric/doomgeneric.c:19:2: external function `M_FindResponseFile` has no c_runtime mapping                                                            |
-| src/dg_platform.c                              | refused: dumper: libclang: src/dg_platform.c:41:26: error: use of undeclared identifier 'colors'                                                                                                  |
-| src/doom_entry.c                               | refused: emitter: src/doom_entry.c:28:16: `dg_frame_hash` is an array of unknown length (`extern int a[];`) that no unit of the program defines                                                   |
+The program converts whole: `fast/doom_all/` holds it (`fast/doom_all/doom_all.das` holds `main`).
 
 ## Files
 
-- `readable/files/` - each C file that converts alone, as its module.
+- `readable/doom_all/` - the program converted from `src/doom_all.c`.
 - `readable/doomgeneric.c2das` - the sidecar the readable variant's conversion ran under, its paths in the Rust checkout written under `<c2das>`, that checkout; `readable/variant.json` - its knobs with the reason and the numbers behind each.
-- `fast/files/` - each C file that converts alone, as its module.
+- `fast/doom_all/` - the program converted from `src/doom_all.c`.
 - `fast/doomgeneric.c2das` - the sidecar the fast variant's conversion ran under, its paths in the Rust checkout written under `<c2das>`, that checkout; `fast/variant.json` - its knobs with the reason and the numbers behind each.
 - `LICENSE` - the license of the upstream code under `tests/manual/doomgeneric/upstream/`; the conversion is a derived work.
 
 ## Source
 
 - The C sources: `tests/manual/doomgeneric/` of lookibed/c2das at `b1d012eb5d268f9f743168caa962a9218cf275f7`; its `UPSTREAM.md` names each upstream and its revision.
-- Generated by c2das-re `v0.5.0-778-gd047ca3` (`d047ca3eb19c368ad9908a7073b9a65ebdbfe707`, committed 2026-11-14)
+- Generated by c2das-re `v0.5.0-790-g21705bf` (`21705bfed696bc64ad67d14f062cdc65736bf631`, committed 2026-11-14)
 
 ## Running
 
 The modules require c2das-re's `crt` and `c_runtime` modules: a c2das-re checkout at the commit above, with the daScript its `VERSIONS.md` pins built and `scripts/build_crt.sh` run. The program reads its fixture `fixtures/doom1.wad` from the Rust repository's project folder; no fixture is copied here (game data and fixtures stay with their own licenses there). With `<c2das-re>` and `<c2das>` the two checkouts:
 
 ```
-# readable/: not runnable yet: the program does not convert whole
-# fast/: not runnable yet: the program does not convert whole
+daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime readable/doom_all/doom_all.das -- <c2das>/tests/manual/doomgeneric/fixtures/doom1.wad
+daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit fast/doom_all/doom_all.das -- <c2das>/tests/manual/doomgeneric/fixtures/doom1.wad
 # the native build the tables compare with, in <c2das>/tests/manual/doomgeneric:
 clang -std=c11 -Iinclude -Iupstream/doomgeneric/doomgeneric -Isrc -O2 src/doom_all.c -o doomgeneric
 ```
@@ -248,39 +77,70 @@ Its output must equal `expected.stdout` of the canonical case `doomgeneric-demo1
 
 ## Performance
 
-Measured 2026-11-09 16:48 UTC (capture committed at c2das-re `b68a9b95df7a`), output changed since: the converter changed after that date; no new timing yet.
+Measured 2026-11-14 17:34 UTC (capture committed at c2das-re `21705bfed696`).
 
 From c2das-re's `compare/results_linux.json` (`compare/run.das --project doomgeneric`), our side against the Rust translator's:
 
-Each project of the Rust repository's `tests/manual` on its own fixture, checked against the `expected.stdout` of its canonical case in the Rust repository's `tests/canonical/cases.json`; the native build (the pinned clang with the README's flags) must print it too. Captured: doomgeneric (Rust `b1d012eb5d26`, 2026-11-09 16:48 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap).
+Each project of the Rust repository's `tests/manual` on its own fixture, checked against the `expected.stdout` of its canonical case in the Rust repository's `tests/canonical/cases.json`; the native build (the pinned clang with the README's flags) must print it too. Captured: doomgeneric (Rust `b1d012eb5d26`, 2026-11-14 17:34 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap).
 
-| Project     | Side | Native | interpreter |     JIT |     exe |     AOT |
-| :---------- | :--- | :----- | ----------: | ------: | ------: | ------: |
-| doomgeneric | Ours | pass   |     refused | refused | refused | refused |
-| doomgeneric | Rust | pass   |        pass |    pass |    pass | timeout |
-
-Why a lane does not pass:
-
-- doomgeneric, Ours, interpreter JIT exe AOT: refused: emitter: /root/c2das/tests/manual/doomgeneric/upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a pa...
-- doomgeneric, Rust, AOT: timeout: the build or its run took longer than 300 s
+| Project     | Side | Native | interpreter |  JIT |  exe |  AOT |
+| :---------- | :--- | :----- | ----------: | ---: | ---: | ---: |
+| doomgeneric | Ours | pass   |        pass | pass | pass | pass |
+| doomgeneric | Rust | pass   |        pass | pass | pass | pass |
 
 The bench entry's timed loop (`decode_us`), a lane's median over the native build's (lower is faster), 3 samples a cell; a cell whose spread is above 20% is `suspect` with its spread, no ratio, as is a lane over a suspect native build:
 
-| Project     | Side | Native compiler      | Native s | interpreter |     JIT |     exe |     AOT |
-| :---------- | :--- | :------------------- | -------: | ----------: | ------: | ------: | ------: |
-| doomgeneric | Ours | clang version 22.1.8 | 0.117230 |     refused | refused | refused | refused |
-| doomgeneric | Rust | clang version 22.1.8 | 0.117230 |       33.26 |    1.07 |    1.08 | timeout |
+| Project     | Side | Native compiler      | Native s | interpreter |  JIT |  exe |  AOT |
+| :---------- | :--- | :------------------- | -------: | ----------: | ---: | ---: | ---: |
+| doomgeneric | Ours | clang version 22.1.8 | 0.117362 |       43.31 | 1.07 | 1.07 | 3.69 |
+| doomgeneric | Rust | clang version 22.1.8 | 0.117362 |       33.49 | 1.06 | 1.08 | 3.69 |
 
 The code of each side's module (the Rust runtime is its `c2da_rt_` and `c2da_std_` declarations):
 
-| Project     | Side | Code    | Files | Lines | Runtime lines | c_function | goto | label | literal_named | pointer_arith | pointer_index | reinterpret | unsafe_block | unsafe_expr | while_rangeable |
-| :---------- | :--- | :------ | ----: | ----: | ------------: | ---------: | ---: | ----: | ------------: | ------------: | ------------: | ----------: | -----------: | ----------: | --------------: |
-| doomgeneric | Ours | refused |     - |     - |             - |          - |    - |     - |             - |             - |             - |           - |            - |           - |               - |
-| doomgeneric | Rust | ok      |     1 | 37045 |          1579 |          0 |  435 |   612 |         43595 |           523 |          3454 |        9882 |          260 |       15426 |             169 |
+| Project     | Side | Code | Files | Lines | Runtime lines | c_function | goto | label | literal_named | pointer_arith | pointer_index | reinterpret | unsafe_block | unsafe_expr | while_rangeable |
+| :---------- | :--- | :--- | ----: | ----: | ------------: | ---------: | ---: | ----: | ------------: | ------------: | ------------: | ----------: | -----------: | ----------: | --------------: |
+| doomgeneric | Ours | ok   |     1 | 36658 |             0 |        685 |   24 |    13 |          6259 |           988 |           742 |        1435 |            0 |         506 |              81 |
+| doomgeneric | Rust | ok   |     1 | 37045 |          1579 |          0 |  435 |   612 |         43595 |           523 |          3454 |        9882 |          260 |       15426 |             169 |
 
 #### `doomgeneric`: `R_DrawColumn`
 
-Ours: not found in this side's module.
+Ours:
+
+```das
+[c_function]
+def R_DrawColumn {
+    var count : int
+    var dest : uint8?
+    var frac : int
+    var fracstep : int
+    count = dc_yh - dc_yl
+    // Zero length, column does not exceed a pixel.
+    if (count < 0) {
+        return
+    }
+    if (uint(dc_x) >= uint(SCREENWIDTH) || dc_yl < 0 || dc_yh >= SCREENHEIGHT) {
+        I_Error`va(cstr("R_DrawColumn: %i to %i at %i"), (dc_yl, dc_yh, dc_x))
+    }
+    // Framebuffer destination address.
+    // Use ylookup LUT to avoid multiply with ScreenWidth.
+    // Use columnofs LUT for subwindows?
+    dest = ylookup[dc_yl] + columnofs[dc_x]
+    // Determine scaling,
+    // which is the only mapping to be done.
+    fracstep = dc_iscale
+    frac = dc_texturemid + (dc_yl - centery) * fracstep
+    // Inner loop that does the actual texture mapping,
+    // e.g. a DDA-lile scaling.
+    // This is as fast as it gets.
+    for (_t0 in urange64(uint64(uint(count)) + 1ul)) {
+        // Re-map color indices from wall texture column
+        // using a lighting/special effects LUT.
+        *dest = dc_colormap[int(dc_source[(frac >> FRACBITS) & 127])]
+        dest += SCREENWIDTH
+        frac += fracstep
+    }
+}
+```
 
 Rust:
 
@@ -313,7 +173,45 @@ def R_DrawColumn() {
 
 #### `doomgeneric`: `R_DrawSpan`
 
-Ours: not found in this side's module.
+Ours:
+
+```das
+[c_function]
+def R_DrawSpan {
+    var position : uint
+    var step : uint
+    var dest : uint8?
+    var count : int
+    var spot : int
+    var xtemp : uint
+    var ytemp : uint
+    if (ds_x2 < ds_x1 || ds_x1 < 0 || ds_x2 >= SCREENWIDTH || uint(ds_y) > uint(SCREENHEIGHT)) {
+        I_Error`va(cstr("R_DrawSpan: %i to %i at %i"), (ds_x1, ds_x2, ds_y))
+    }
+    // dscount++;
+    // Pack position and step variables into a single 32-bit integer,
+    // with x in the top 16 bits and y in the bottom 16 bits. For
+    // each 16-bit part, the top 6 bits are the integer part and the
+    // bottom 10 bits are the fractional part of the pixel position.
+    position = (uint(ds_xfrac << 10) & 4294901760u) | uint((ds_yfrac >> 6) & 65535)
+    step = (uint(ds_xstep << 10) & 4294901760u) | uint((ds_ystep >> 6) & 65535)
+    dest = ylookup[ds_y] + columnofs[ds_x1]
+    // We do not check for zero spans here?
+    count = ds_x2 - ds_x1
+    for (_t0 in urange64(uint64(uint(count)) + 1ul)) {
+        // Calculate current texture index in u,v.
+        ytemp = (position >> 4u) & 4032u
+        xtemp = position >> 26u
+        spot = int(xtemp | ytemp)
+        // Lookup pixel from flat texture tile,
+        // re-index using light/colormap.
+        var _t1 = dest
+        dest++
+        *_t1 = ds_colormap[int(ds_source[spot])]
+        position += step
+    }
+}
+```
 
 Rust:
 
@@ -344,31 +242,31 @@ def R_DrawSpan() {
 
 ## Readability criteria
 
-From c2das-re's `metrics/criteria_linux.json` (`scripts/run_criteria.sh`), its row `project/doomgeneric`, recorded at c2das-re `7cabbc4dc828`, output changed since: the converter changed after that commit; not re-measured yet. Measured on the 15 of 82 C files that convert alone, since the program does not convert whole; the other files are in no count, so these criteria describe only the converted files, converted as this directory's conversion is. The compliance in percent per criterion, 100 being what a human port would have (c2das-re's `metrics/ARCHITECTURE_CRITERIA.md` defines each); it counts lines and reads no clock.
+From c2das-re's `metrics/criteria_linux.json` (`scripts/run_criteria.sh`), its row `project/doomgeneric`, recorded at c2das-re `d46c547e4c70`. Measured on the whole program, its 82 C files, converted as this directory's conversion is. The compliance in percent per criterion, 100 being what a human port would have (c2das-re's `metrics/ARCHITECTURE_CRITERIA.md` defines each); it counts lines and reads no clock.
 
 | Criterion          | project/doomgeneric |
 | :----------------- | ------------------: |
-| comments           |                12.7 |
-| constant_names     |                98.9 |
-| char_literals      |                 n/a |
-| macro_blowup       |                97.1 |
+| comments           |                34.2 |
+| constant_names     |                74.6 |
+| char_literals      |               100.0 |
+| macro_blowup       |                99.5 |
 | repeated_blocks    |               100.0 |
 | switch_flags       |               100.0 |
-| temporaries        |                94.1 |
+| temporaries        |                93.1 |
 | addr_deref         |               100.0 |
-| reinterpret_casts  |                91.2 |
+| reinterpret_casts  |                69.5 |
 | late_binding       |               100.0 |
 | qualified_calls    |               100.0 |
 | require_lines      |               100.0 |
 | setjmp             |                 n/a |
-| layout_checks      |                46.7 |
-| stray_braces       |                97.1 |
-| label_stubs        |               100.0 |
-| string_literals    |                54.0 |
-| lost_parens        |               100.0 |
-| literal_arithmetic |                94.1 |
-| bool_roundtrip     |                97.1 |
-| c_renames          |               100.0 |
-| long_lines         |                86.7 |
-| **total**          |            **88.5** |
+| layout_checks      |                 0.0 |
+| stray_braces       |                96.7 |
+| label_stubs        |                99.0 |
+| string_literals    |                 0.0 |
+| lost_parens        |                99.8 |
+| literal_arithmetic |                94.9 |
+| bool_roundtrip     |                94.3 |
+| c_renames          |                88.1 |
+| long_lines         |                 0.0 |
+| **total**          |            **78.3** |
 The readability counters of the converted modules (`goto`, `label`, `reinterpret`, `unsafe`, `literal_named`, raw `while`) are the code table of the Performance section, from the head-to-head; a program that converts only file by file has none there, since its modules do not compile alone.
