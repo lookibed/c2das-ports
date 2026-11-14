@@ -1,0 +1,27 @@
+{
+	"checks" : "safe",
+	"defines" : [
+		"LUA_USE_JUMPTABLE=0"
+	],
+	"first_member" : "addr",
+	"fn_macros" : "fold",
+	"forms_off" : [],
+	"inline_helpers" : false,
+	"jit_whole_program" : true,
+	"layout" : {
+		"mode" : "source",
+		"profile" : "lua.profile.json"
+	},
+	"loops" : "range",
+	"over_indexed" : [
+		"TString.contents",
+		"Udata.uv",
+		"CClosure.upvalue",
+		"LClosure.upvals"
+	],
+	"param_writes" : "in-place",
+	"past_end" : "call",
+	"solid_context" : true,
+	"strict_aliasing" : false,
+	"switch_dispatch" : "chain"
+}
