@@ -1,0 +1,7 @@
+# built on first use by check.sh, and daslang's module manifests
+runtime/dasCRuntime/_build/
+runtime/dasCRuntime/_build.log
+*.shared_module
+.das_module.manifest
+# fetch_wad.sh
+freedoom2.wad
