@@ -97,7 +97,7 @@ def luaD_rawrunprotected(var L : lua_State?; f : function<(var a0 : lua_State?; 
         invoke(f, L, ud)
     } recover {
         if (c_jmp_target != addr(addr(lj).b)) {
-            panic("longjmp")
+            c_jmp_rethrow()
         }
         c_jmp_target = null
     }

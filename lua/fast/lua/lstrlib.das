@@ -183,23 +183,19 @@ def private lua_tointeger(var L; i) => lua_tointegerx(L, i, null)
 
 // luaconf.h:597: #define l_sprintf(s,sz,f,i) snprintf(s,sz,f,i)
 [c_macro, c_function, unsafe_deref, hint(unsafe_range_check)]
-def private l_sprintf(var s : uint8?; sz : int; var f : uint8?; var i : int64) => snprintf(s, uint64(sz), f, i)
+def private l_sprintf(var s : uint8?; sz : int; var f : uint8?; i : int64) => snprintf(s, uint64(sz), f, i)
 
 // luaconf.h:597: #define l_sprintf(s,sz,f,i) snprintf(s,sz,f,i)
 [c_macro, c_function, unsafe_deref, hint(unsafe_range_check)]
-def private l_sprintf(var s : uint8?; sz : int; var f : uint8[32]&; var i : int) => snprintf(s, uint64(sz), addr(f[0]), i)
+def private l_sprintf(var s : uint8?; sz : int; var f : uint8[32]&; i : int) => snprintf(s, uint64(sz), addr(f[0]), i)
 
 // luaconf.h:597: #define l_sprintf(s,sz,f,i) snprintf(s,sz,f,i)
 [c_macro, c_function, unsafe_deref, hint(unsafe_range_check)]
-def private l_sprintf(var s : uint8?; sz : int; var f : uint8[32]&; var i : int64) => snprintf(s, uint64(sz), addr(f[0]), i)
+def private l_sprintf(var s : uint8?; sz : int; var f : uint8[32]&; i : int64) => snprintf(s, uint64(sz), addr(f[0]), i)
 
 // luaconf.h:597: #define l_sprintf(s,sz,f,i) snprintf(s,sz,f,i)
 [c_macro, c_function, unsafe_deref, hint(unsafe_range_check)]
-def private l_sprintf(var s : uint8?; sz : int; var f : uint8[32]&; var i : double) => snprintf(s, uint64(sz), addr(f[0]), i)
-
-// luaconf.h:597: #define l_sprintf(s,sz,f,i) snprintf(s,sz,f,i)
-[c_macro, c_function, unsafe_deref, hint(unsafe_range_check)]
-def private l_sprintf(var s : uint8?; sz : int; var f : uint8[32]&; var i : void?) => snprintf(s, uint64(sz), addr(f[0]), i)
+def private l_sprintf(var s : uint8?; sz : int; var f : uint8[32]&; i : double) => snprintf(s, uint64(sz), addr(f[0]), i)
 
 // lauxlib.h:139: #define luaL_checkstring(L,n) (luaL_checklstring(L, (n), NULL))
 [c_macro, unsafe_deref, hint(unsafe_range_check)]
@@ -1649,7 +1645,7 @@ def private str_format(var L : lua_State?) : int {
                                 // format it as a string
                                 form[crt::strlen(addr(form[0])) - 1ul] = uint8('s')
                             }
-                            nb = l_sprintf(buff, maxitem, form, p)
+                            nb = snprintf(buff, uint64(maxitem), addr(form[0]), p)
                             break
                         }
                     }
