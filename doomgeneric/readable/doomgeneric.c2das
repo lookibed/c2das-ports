@@ -11,13 +11,25 @@
 		"<c2das>/tests/manual/doomgeneric/upstream/doomgeneric/doomgeneric",
 		"<c2das>/tests/manual/doomgeneric/src"
 	],
+	"over_indexed" : [
+		"patch_t.columnofs",
+		"maptexture_t.patches",
+		"texture_t.patches"
+	],
 	"checks" : "safe",
 	"layout" : "source",
 	"param_writes" : "in-place",
 	"switch_dispatch" : "chain",
+	"marshal" : [
+		"pcx_t"
+	],
 	"jit_whole_program" : false,
 	"loops" : "range",
 	"past_end" : "call",
 	"fn_macros" : "fold",
+	"padded" : [
+		"visplane_t.top",
+		"visplane_t.bottom"
+	],
 	"strict_aliasing" : false
 }

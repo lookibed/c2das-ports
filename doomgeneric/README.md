@@ -31,7 +31,7 @@ Each variant converts the same program under its own knobs (c2das-re's `ports/va
 | x native, JIT         |     not yet |    not yet |
 | x native, exe         |     not yet |    not yet |
 | x native, AOT         |     not yet |    not yet |
-| das lines             |        4515 |       4553 |
+| das lines             |        4638 |       4680 |
 
 - `fast/`: not yet tuned: readable + checks off
 - (1) not from a search of the variant: the row `project/doomgeneric` of c2das-re's `metrics/criteria_linux.json`, the converter's default flags
@@ -42,7 +42,7 @@ Each variant converts the same program under its own knobs (c2das-re's `ports/va
 
 The program does not convert whole yet: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar
 
-What does convert: each C file of the program converted alone, 15 of 82 (`readable/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
+What does convert: each C file of the program converted alone, 16 of 82 (`readable/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
 
 | C file                                         | Result                                                                                                                                                                                            |
 | :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -53,7 +53,7 @@ What does convert: each C file of the program converted alone, 15 of 82 (`readab
 | upstream/doomgeneric/doomgeneric/dstrings.c    | converted                                                                                                                                                                                         |
 | upstream/doomgeneric/doomgeneric/d_event.c     | converted                                                                                                                                                                                         |
 | upstream/doomgeneric/doomgeneric/d_items.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/d_iwad.c      | refused: emitter: upstream/doomgeneric/doomgeneric/d_iwad.c:399:5: external function `strcasecmp` has no c_runtime mapping                                                                        |
+| upstream/doomgeneric/doomgeneric/d_iwad.c      | refused: emitter: upstream/doomgeneric/doomgeneric/d_iwad.c:415:5: external function `M_FileExists` has no c_runtime mapping                                                                      |
 | upstream/doomgeneric/doomgeneric/d_loop.c      | refused: emitter: upstream/doomgeneric/doomgeneric/d_loop.c:123:5: external function `I_GetTimeMS` has no c_runtime mapping                                                                       |
 | upstream/doomgeneric/doomgeneric/d_main.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
 | upstream/doomgeneric/doomgeneric/d_mode.c      | converted                                                                                                                                                                                         |
@@ -72,10 +72,10 @@ What does convert: each C file of the program converted alone, 15 of 82 (`readab
 | upstream/doomgeneric/doomgeneric/i_system.c    | refused: emitter: upstream/doomgeneric/doomgeneric/i_system.c:145:5: external function `M_CheckParmWithArgs` has no c_runtime mapping                                                             |
 | upstream/doomgeneric/doomgeneric/i_timer.c     | refused: emitter: upstream/doomgeneric/doomgeneric/i_timer.c:40:2: external function `DG_GetTicksMs` has no c_runtime mapping                                                                     |
 | upstream/doomgeneric/doomgeneric/memio.c       | refused: emitter: upstream/doomgeneric/doomgeneric/memio.c:46:2: external function `Z_Malloc` has no c_runtime mapping                                                                            |
-| upstream/doomgeneric/doomgeneric/m_argv.c      | refused: emitter: upstream/doomgeneric/doomgeneric/m_argv.c:49:2: external function `strcasecmp` has no c_runtime mapping                                                                         |
+| upstream/doomgeneric/doomgeneric/m_argv.c      | converted                                                                                                                                                                                         |
 | upstream/doomgeneric/doomgeneric/m_bbox.c      | converted                                                                                                                                                                                         |
 | upstream/doomgeneric/doomgeneric/m_cheat.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/m_config.c    | refused: emitter: upstream/doomgeneric/doomgeneric/m_config.c:1737:13: external function `strdup` has no c_runtime mapping                                                                        |
+| upstream/doomgeneric/doomgeneric/m_config.c    | refused: emitter: upstream/doomgeneric/doomgeneric/m_config.c:1895:5: external function `M_CheckParmWithArgs` has no c_runtime mapping                                                            |
 | upstream/doomgeneric/doomgeneric/m_controls.c  | refused: emitter: upstream/doomgeneric/doomgeneric/m_controls.c:206:5: external function `M_BindVariable` has no c_runtime mapping                                                                |
 | upstream/doomgeneric/doomgeneric/m_fixed.c     | converted                                                                                                                                                                                         |
 | upstream/doomgeneric/doomgeneric/m_menu.c      | refused: emitter: upstream/doomgeneric/doomgeneric/dstrings.h:37:14: `doom1_endmsg` is an array of unknown length (`extern int a[];`) that no unit of the program defines                         |
@@ -133,7 +133,7 @@ What does convert: each C file of the program converted alone, 15 of 82 (`readab
 
 The program does not convert whole yet: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar
 
-What does convert: each C file of the program converted alone, 15 of 82 (`fast/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
+What does convert: each C file of the program converted alone, 16 of 82 (`fast/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
 
 | C file                                         | Result                                                                                                                                                                                            |
 | :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -144,7 +144,7 @@ What does convert: each C file of the program converted alone, 15 of 82 (`fast/f
 | upstream/doomgeneric/doomgeneric/dstrings.c    | converted                                                                                                                                                                                         |
 | upstream/doomgeneric/doomgeneric/d_event.c     | converted                                                                                                                                                                                         |
 | upstream/doomgeneric/doomgeneric/d_items.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/d_iwad.c      | refused: emitter: upstream/doomgeneric/doomgeneric/d_iwad.c:399:5: external function `strcasecmp` has no c_runtime mapping                                                                        |
+| upstream/doomgeneric/doomgeneric/d_iwad.c      | refused: emitter: upstream/doomgeneric/doomgeneric/d_iwad.c:415:5: external function `M_FileExists` has no c_runtime mapping                                                                      |
 | upstream/doomgeneric/doomgeneric/d_loop.c      | refused: emitter: upstream/doomgeneric/doomgeneric/d_loop.c:123:5: external function `I_GetTimeMS` has no c_runtime mapping                                                                       |
 | upstream/doomgeneric/doomgeneric/d_main.c      | refused: emitter: upstream/doomgeneric/doomgeneric/doomdata.h:57:9: record `mapvertex_t` is not laid out naturally: a packed record is marshal-only, listed under `marshal` in the .c2das sidecar |
 | upstream/doomgeneric/doomgeneric/d_mode.c      | converted                                                                                                                                                                                         |
@@ -163,10 +163,10 @@ What does convert: each C file of the program converted alone, 15 of 82 (`fast/f
 | upstream/doomgeneric/doomgeneric/i_system.c    | refused: emitter: upstream/doomgeneric/doomgeneric/i_system.c:145:5: external function `M_CheckParmWithArgs` has no c_runtime mapping                                                             |
 | upstream/doomgeneric/doomgeneric/i_timer.c     | refused: emitter: upstream/doomgeneric/doomgeneric/i_timer.c:40:2: external function `DG_GetTicksMs` has no c_runtime mapping                                                                     |
 | upstream/doomgeneric/doomgeneric/memio.c       | refused: emitter: upstream/doomgeneric/doomgeneric/memio.c:46:2: external function `Z_Malloc` has no c_runtime mapping                                                                            |
-| upstream/doomgeneric/doomgeneric/m_argv.c      | refused: emitter: upstream/doomgeneric/doomgeneric/m_argv.c:49:2: external function `strcasecmp` has no c_runtime mapping                                                                         |
+| upstream/doomgeneric/doomgeneric/m_argv.c      | converted                                                                                                                                                                                         |
 | upstream/doomgeneric/doomgeneric/m_bbox.c      | converted                                                                                                                                                                                         |
 | upstream/doomgeneric/doomgeneric/m_cheat.c     | converted                                                                                                                                                                                         |
-| upstream/doomgeneric/doomgeneric/m_config.c    | refused: emitter: upstream/doomgeneric/doomgeneric/m_config.c:1737:13: external function `strdup` has no c_runtime mapping                                                                        |
+| upstream/doomgeneric/doomgeneric/m_config.c    | refused: emitter: upstream/doomgeneric/doomgeneric/m_config.c:1895:5: external function `M_CheckParmWithArgs` has no c_runtime mapping                                                            |
 | upstream/doomgeneric/doomgeneric/m_controls.c  | refused: emitter: upstream/doomgeneric/doomgeneric/m_controls.c:206:5: external function `M_BindVariable` has no c_runtime mapping                                                                |
 | upstream/doomgeneric/doomgeneric/m_fixed.c     | converted                                                                                                                                                                                         |
 | upstream/doomgeneric/doomgeneric/m_menu.c      | refused: emitter: upstream/doomgeneric/doomgeneric/dstrings.h:37:14: `doom1_endmsg` is an array of unknown length (`extern int a[];`) that no unit of the program defines                         |
@@ -231,7 +231,7 @@ What does convert: each C file of the program converted alone, 15 of 82 (`fast/f
 ## Source
 
 - The C sources: `tests/manual/doomgeneric/` of lookibed/c2das at `b1d012eb5d268f9f743168caa962a9218cf275f7`; its `UPSTREAM.md` names each upstream and its revision.
-- Generated by c2das-re `v0.5.0-759-g7cabbc4` (`7cabbc4dc82829c34a5f8a8bd9f59d63d527805f`, committed 2026-11-14)
+- Generated by c2das-re `v0.5.0-778-gd047ca3` (`d047ca3eb19c368ad9908a7073b9a65ebdbfe707`, committed 2026-11-14)
 
 ## Running
 
@@ -248,7 +248,7 @@ Its output must equal `expected.stdout` of the canonical case `doomgeneric-demo1
 
 ## Performance
 
-Measured 2026-11-09 16:48 UTC (capture committed at c2das-re `bba9010df546`), output changed since: the converter changed after that date; no new timing yet.
+Measured 2026-11-09 16:48 UTC (capture committed at c2das-re `b68a9b95df7a`), output changed since: the converter changed after that date; no new timing yet.
 
 From c2das-re's `compare/results_linux.json` (`compare/run.das --project doomgeneric`), our side against the Rust translator's:
 
@@ -344,7 +344,7 @@ def R_DrawSpan() {
 
 ## Readability criteria
 
-From c2das-re's `metrics/criteria_linux.json` (`scripts/run_criteria.sh`), its row `project/doomgeneric`, recorded at c2das-re `7cabbc4dc828`. Measured on the 15 of 82 C files that convert alone, since the program does not convert whole; the other files are in no count, so these criteria describe only the converted files, converted as this directory's conversion is. The compliance in percent per criterion, 100 being what a human port would have (c2das-re's `metrics/ARCHITECTURE_CRITERIA.md` defines each); it counts lines and reads no clock.
+From c2das-re's `metrics/criteria_linux.json` (`scripts/run_criteria.sh`), its row `project/doomgeneric`, recorded at c2das-re `7cabbc4dc828`, output changed since: the converter changed after that commit; not re-measured yet. Measured on the 15 of 82 C files that convert alone, since the program does not convert whole; the other files are in no count, so these criteria describe only the converted files, converted as this directory's conversion is. The compliance in percent per criterion, 100 being what a human port would have (c2das-re's `metrics/ARCHITECTURE_CRITERIA.md` defines each); it counts lines and reads no clock.
 
 | Criterion          | project/doomgeneric |
 | :----------------- | ------------------: |
