@@ -26,13 +26,15 @@ Each variant converts the same program under its own knobs (c2das-re's `ports/va
 | `jit_whole_program`   |     `false` |    `false` |
 | `strict_aliasing`     |     `false` |    `false` |
 | `forms_off`           |        `[]` |       `[]` |
-| Criteria total, %     |    75.0 (1) |    not yet |
-| x native, interpreter |     not yet |    not yet |
-| x native, JIT         |     not yet |    not yet |
-| x native, exe         |     not yet |    not yet |
-| x native, AOT         |     not yet |    not yet |
-| das lines             |         745 |        763 |
+| Criteria total, %     |    71.6 (1) |    not yet |
+| x native, interpreter |       56.88 |      52.19 |
+| x native, JIT         |        2.79 |       2.63 |
+| x native, exe         |        2.61 |       2.57 |
+| x native, AOT         |        1.59 |       1.62 |
+| das lines             |       20473 |      20627 |
 
+- `readable/` speed: its search, the bench's decode time over native's (compare/run.das --project wasm3 --bench-only), at c2das-re `cb35b34` (2026-11-14) on PC, `heavy --exclusive --label TIMING-aot-final --max 8G -- /root/notes/parallel/aotfinal_capture/cap.sh 3`, an exclusive run on a quiet machine.
+- `fast/` speed: its search, the bench's decode time over native's (compare/run.das --project wasm3 --bench-only), at c2das-re `cb35b34` (2026-11-14) on PC, `heavy --exclusive --label TIMING-aot-final --max 8G -- /root/notes/parallel/aotfinal_capture/cap.sh 3`, an exclusive run on a quiet machine.
 - `fast/`: not yet tuned: readable + checks off
 - (1) not from a search of the variant: the row `project/wasm3` of c2das-re's `metrics/criteria_linux.json`, the converter's default flags
 
@@ -40,66 +42,32 @@ Each variant converts the same program under its own knobs (c2das-re's `ports/va
 
 ### `readable/`
 
-The program does not convert whole yet: compile check: error[30341]: too many matching functions or generics m3_Free
-
-What does convert: each C file of the program converted alone, 2 of 12 (`readable/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
-
-| C file                              | Result                                                                                                                   |
-| :---------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
-| upstream/wasm3/source/m3_bind.c     | refused: emitter: upstream/wasm3/source/m3_bind.c:53:1: external function `AllocFuncType` has no c_runtime mapping       |
-| upstream/wasm3/source/m3_code.c     | refused: emitter: upstream/wasm3/source/m3_code.c:36:5: external function `m3_Malloc_Impl` has no c_runtime mapping      |
-| upstream/wasm3/source/m3_compile.c  | refused: dumper: upstream/wasm3/source/m3_exec.h:681:1: anonymous records from one macro expansion are not dumped yet    |
-| upstream/wasm3/source/m3_core.c     | refused: dumper: libclang: include/time.h:10:8: error: redefinition of 'timespec'                                        |
-| upstream/wasm3/source/m3_env.c      | refused: emitter: upstream/wasm3/source/m3_host.h:104:12: external function `m3_Malloc_Impl` has no c_runtime mapping    |
-| upstream/wasm3/source/m3_exec.c     | converted                                                                                                                |
-| upstream/wasm3/source/m3_function.c | refused: emitter: upstream/wasm3/source/m3_function.c:14:5: external function `m3_Malloc_Impl` has no c_runtime mapping  |
-| upstream/wasm3/source/m3_info.c     | converted                                                                                                                |
-| upstream/wasm3/source/m3_module.c   | refused: emitter: upstream/wasm3/source/m3_module.c:16:9: external function `Function_Release` has no c_runtime mapping  |
-| upstream/wasm3/source/m3_parse.c    | refused: emitter: upstream/wasm3/source/m3_parse.c:78:1: external function `ReadLEB_i7` has no c_runtime mapping         |
-| upstream/wasm3/source/m3_validate.c | refused: emitter: upstream/wasm3/source/m3_validate.c:249:14: external function `ReadLebSigned` has no c_runtime mapping |
-| src/host.c                          | refused: emitter: src/host.c:52:5: external function `m3_GetArgType` has no c_runtime mapping                            |
+The program converts whole: `readable/all_host/` holds it (`readable/all_host/all_host.das` holds `main`).
 
 ### `fast/`
 
-The program does not convert whole yet: compile check: error[30341]: too many matching functions or generics m3_Free
-
-What does convert: each C file of the program converted alone, 2 of 12 (`fast/files/`, a module per file at its path under the project folder; a file alone is no program, so these modules show the conversion and do not run):
-
-| C file                              | Result                                                                                                                   |
-| :---------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
-| upstream/wasm3/source/m3_bind.c     | refused: emitter: upstream/wasm3/source/m3_bind.c:53:1: external function `AllocFuncType` has no c_runtime mapping       |
-| upstream/wasm3/source/m3_code.c     | refused: emitter: upstream/wasm3/source/m3_code.c:36:5: external function `m3_Malloc_Impl` has no c_runtime mapping      |
-| upstream/wasm3/source/m3_compile.c  | refused: dumper: upstream/wasm3/source/m3_exec.h:681:1: anonymous records from one macro expansion are not dumped yet    |
-| upstream/wasm3/source/m3_core.c     | refused: dumper: libclang: include/time.h:10:8: error: redefinition of 'timespec'                                        |
-| upstream/wasm3/source/m3_env.c      | refused: emitter: upstream/wasm3/source/m3_host.h:104:12: external function `m3_Malloc_Impl` has no c_runtime mapping    |
-| upstream/wasm3/source/m3_exec.c     | converted                                                                                                                |
-| upstream/wasm3/source/m3_function.c | refused: emitter: upstream/wasm3/source/m3_function.c:14:5: external function `m3_Malloc_Impl` has no c_runtime mapping  |
-| upstream/wasm3/source/m3_info.c     | converted                                                                                                                |
-| upstream/wasm3/source/m3_module.c   | refused: emitter: upstream/wasm3/source/m3_module.c:16:9: external function `Function_Release` has no c_runtime mapping  |
-| upstream/wasm3/source/m3_parse.c    | refused: emitter: upstream/wasm3/source/m3_parse.c:78:1: external function `ReadLEB_i7` has no c_runtime mapping         |
-| upstream/wasm3/source/m3_validate.c | refused: emitter: upstream/wasm3/source/m3_validate.c:249:14: external function `ReadLebSigned` has no c_runtime mapping |
-| src/host.c                          | refused: emitter: src/host.c:52:5: external function `m3_GetArgType` has no c_runtime mapping                            |
+The program converts whole: `fast/all_host/` holds it (`fast/all_host/all_host.das` holds `main`).
 
 ## Files
 
-- `readable/files/` - each C file that converts alone, as its module.
+- `readable/all_host/` - the program converted from `src/all_host.c`.
 - `readable/wasm3.c2das` - the sidecar the readable variant's conversion ran under, its paths in the Rust checkout written under `<c2das>`, that checkout; `readable/variant.json` - its knobs with the reason and the numbers behind each.
-- `fast/files/` - each C file that converts alone, as its module.
+- `fast/all_host/` - the program converted from `src/all_host.c`.
 - `fast/wasm3.c2das` - the sidecar the fast variant's conversion ran under, its paths in the Rust checkout written under `<c2das>`, that checkout; `fast/variant.json` - its knobs with the reason and the numbers behind each.
 - `LICENSE` - the license of the upstream code under `tests/manual/wasm3/upstream/`; the conversion is a derived work.
 
 ## Source
 
 - The C sources: `tests/manual/wasm3/` of lookibed/c2das at `b1d012eb5d268f9f743168caa962a9218cf275f7`; its `UPSTREAM.md` names each upstream and its revision.
-- Generated by c2das-re `v0.5.0-778-gd047ca3` (`d047ca3eb19c368ad9908a7073b9a65ebdbfe707`, committed 2026-11-14)
+- Generated by c2das-re `v0.5.0-790-g21705bf` (`21705bfed696bc64ad67d14f062cdc65736bf631`, committed 2026-11-14)
 
 ## Running
 
 The modules require c2das-re's `crt` and `c_runtime` modules: a c2das-re checkout at the commit above, with the daScript its `VERSIONS.md` pins built and `scripts/build_crt.sh` run. The program reads its fixture `fixtures/fib32.wasm` from the Rust repository's project folder; no fixture is copied here (game data and fixtures stay with their own licenses there). With `<c2das-re>` and `<c2das>` the two checkouts:
 
 ```
-# readable/: not runnable yet: the program does not convert whole
-# fast/: not runnable yet: the program does not convert whole
+daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime readable/all_host/all_host.das -- <c2das>/tests/manual/wasm3/fixtures/fib32.wasm
+daslang -load_module <c2das-re>/dasCRuntime -load_module <c2das-re>/c_runtime -jit fast/all_host/all_host.das -- <c2das>/tests/manual/wasm3/fixtures/fib32.wasm
 # the native build the tables compare with, in <c2das>/tests/manual/wasm3:
 clang -std=c11 -Iinclude -Iupstream/wasm3/source -Isrc -O2 src/all_host.c -o wasm3
 ```
@@ -108,38 +76,59 @@ Its output must equal `expected.stdout` of the canonical case `wasm3-fib32-std` 
 
 ## Performance
 
-Measured 2026-11-09 16:58 UTC (capture committed at c2das-re `b68a9b95df7a`), output changed since: the converter changed after that date; no new timing yet.
+Measured 2026-11-14 17:33 UTC (capture committed at c2das-re `21705bfed696`).
 
 From c2das-re's `compare/results_linux.json` (`compare/run.das --project wasm3`), our side against the Rust translator's:
 
-Each project of the Rust repository's `tests/manual` on its own fixture, checked against the `expected.stdout` of its canonical case in the Rust repository's `tests/canonical/cases.json`; the native build (the pinned clang with the README's flags) must print it too. Captured: wasm3 (Rust `b1d012eb5d26`, 2026-11-09 16:58 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap).
+Each project of the Rust repository's `tests/manual` on its own fixture, checked against the `expected.stdout` of its canonical case in the Rust repository's `tests/canonical/cases.json`; the native build (the pinned clang with the README's flags) must print it too. Captured: wasm3 (Rust `b1d012eb5d26`, 2026-11-14 17:33 UTC, PC (AMD Ryzen 7 7435HS), 6 GiB address-space cap).
 
-| Project | Side | Native | interpreter |     JIT |     exe |     AOT |
-| :------ | :--- | :----- | ----------: | ------: | ------: | ------: |
-| wasm3   | Ours | pass   |     refused | refused | refused | refused |
-| wasm3   | Rust | pass   |        pass |    pass |    pass |    pass |
-
-Why a lane does not pass:
-
-- wasm3, Ours, interpreter JIT exe AOT: refused: dumper: /root/c2das/tests/manual/wasm3/upstream/wasm3/source/m3_parse.c:305:22: `m3type_t argTypes[numArgs + 1]`: a variable-length array is not low...
+| Project | Side | Native | interpreter |  JIT |  exe |  AOT |
+| :------ | :--- | :----- | ----------: | ---: | ---: | ---: |
+| wasm3   | Ours | pass   |        pass | pass | pass | pass |
+| wasm3   | Rust | pass   |        pass | pass | pass | pass |
 
 The bench entry's timed loop (`decode_us`), a lane's median over the native build's (lower is faster), 3 samples a cell; a cell whose spread is above 20% is `suspect` with its spread, no ratio, as is a lane over a suspect native build:
 
-| Project | Side | Native compiler      | Native s | interpreter |     JIT |     exe |     AOT |
-| :------ | :--- | :------------------- | -------: | ----------: | ------: | ------: | ------: |
-| wasm3   | Ours | clang version 22.1.8 | 0.001818 |     refused | refused | refused | refused |
-| wasm3   | Rust | clang version 22.1.8 | 0.001818 |       65.08 |    2.69 |    2.71 |    1.53 |
+| Project | Side | Native compiler      | Native s | interpreter |  JIT |  exe |  AOT |
+| :------ | :--- | :------------------- | -------: | ----------: | ---: | ---: | ---: |
+| wasm3   | Ours | clang version 22.1.8 | 0.001852 |       56.88 | 2.79 | 2.61 | 1.59 |
+| wasm3   | Rust | clang version 22.1.8 | 0.001852 |       64.39 | 2.63 | 2.59 | 1.49 |
 
 The code of each side's module (the Rust runtime is its `c2da_rt_` and `c2da_std_` declarations):
 
-| Project | Side | Code    | Files | Lines | Runtime lines | c_function | goto | label | literal_named | pointer_arith | pointer_index | reinterpret | unsafe_block | unsafe_expr | while_rangeable |
-| :------ | :--- | :------ | ----: | ----: | ------------: | ---------: | ---: | ----: | ------------: | ------------: | ------------: | ----------: | -----------: | ----------: | --------------: |
-| wasm3   | Ours | refused |     - |     - |             - |          - |    - |     - |             - |             - |             - |           - |            - |           - |               - |
-| wasm3   | Rust | ok      |     1 | 25827 |          1009 |          0 | 2393 |  2162 |          1827 |          2074 |           430 |        4055 |          814 |        6589 |              24 |
+| Project | Side | Code | Files | Lines | Runtime lines | c_function | goto | label | literal_named | pointer_arith | pointer_index | reinterpret | unsafe_block | unsafe_expr | while_rangeable |
+| :------ | :--- | :--- | ----: | ----: | ------------: | ---------: | ---: | ----: | ------------: | ------------: | ------------: | ----------: | -----------: | ----------: | --------------: |
+| wasm3   | Ours | ok   |     1 | 19592 |             0 |        669 |  692 |   131 |           300 |          1965 |           375 |        2299 |            0 |           0 |              13 |
+| wasm3   | Rust | ok   |     1 | 25827 |          1009 |          0 | 2393 |  2162 |          1827 |          2074 |           430 |        4055 |          814 |        6589 |              24 |
 
 #### `wasm3`: `op_Call`
 
-Ours: not found in this side's module.
+Ours:
+
+```das
+[c_function]
+def private all_host__op_Call(var _pc : void ??; var _sp : uint?; var _mem : M3MemoryHeader?; _r0 : int64) : void? {
+    {
+    }
+    var _t0 = _pc
+    _pc++
+    var callPC : void ?? = *reinterpret<void ???>(_t0)
+    var _t1 = _pc
+    _pc++
+    let stackOffset : int = *reinterpret<int?>(_t1)
+    var memory : M3Memory? = m3MemInfo(_mem)
+    var sp : uint? = _sp + stackOffset
+    var r : void? = all_host__Call(callPC, sp, _mem, int64(d_m3OpDefaultArgs))
+    _mem = memory.mallocated
+    if (r == null) {
+        return invoke(reinterpret<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>(*_pc), _pc + 1, _sp, _mem, _r0)
+    } else {
+        {
+        }
+        return r
+    }
+}
+```
 
 Rust:
 
@@ -173,7 +162,32 @@ def op_Call(var _pc_224 : pc_t; var _sp_224 : m3stack_t; var _mem_224 : M3Memory
 
 #### `wasm3`: `call_fib`
 
-Ours: not found in this side's module.
+Ours:
+
+```das
+[c_function]
+def private all_host__call_fib(var fib : M3Function?; n : int; var out : int64?) : uint8? {
+    var result : uint8? = m3Err_none
+    if (m3_GetArgType(fib, 0u) == M3ValueType.c_m3Type_i64) {
+        var value : uint64 = 0ul
+        result = m3_CallV`va(fib, (uint64(n),))
+        if (result != null) {
+            return result
+        }
+        result = m3_GetResultsV`va(fib, (addr(value),))
+        *out = int64(value)
+    } else {
+        var value : uint = 0u
+        result = m3_CallV`va(fib, (uint(n),))
+        if (result != null) {
+            return result
+        }
+        result = m3_GetResultsV`va(fib, (addr(value),))
+        *out = int64(value)
+    }
+    return result
+}
+```
 
 Rust:
 
@@ -208,31 +222,31 @@ def call_fib(var fib : IM3Function; var n_6 : int; var out_1 : int64?) : M3Resul
 
 ## Readability criteria
 
-From c2das-re's `metrics/criteria_linux.json` (`scripts/run_criteria.sh`), its row `project/wasm3`, recorded at c2das-re `7cabbc4dc828`, output changed since: the converter changed after that commit; not re-measured yet. Measured on the 1 of 12 C files that convert alone, since the program does not convert whole; the other files are in no count, so these criteria describe only the converted files, converted as this directory's conversion is. The compliance in percent per criterion, 100 being what a human port would have (c2das-re's `metrics/ARCHITECTURE_CRITERIA.md` defines each); it counts lines and reads no clock.
+From c2das-re's `metrics/criteria_linux.json` (`scripts/run_criteria.sh`), its row `project/wasm3`, recorded at c2das-re `d46c547e4c70`. Measured on the whole program, its 12 C files, converted as this directory's conversion is. The compliance in percent per criterion, 100 being what a human port would have (c2das-re's `metrics/ARCHITECTURE_CRITERIA.md` defines each); it counts lines and reads no clock.
 
 | Criterion          | project/wasm3 |
 | :----------------- | ------------: |
-| comments           |           0.0 |
-| constant_names     |           n/a |
-| char_literals      |           n/a |
-| macro_blowup       |           n/a |
-| repeated_blocks    |           n/a |
-| switch_flags       |           n/a |
-| temporaries        |           n/a |
-| addr_deref         |           n/a |
-| reinterpret_casts  |           n/a |
-| late_binding       |         100.0 |
-| qualified_calls    |           n/a |
-| require_lines      |           n/a |
+| comments           |          54.2 |
+| constant_names     |          84.4 |
+| char_literals      |          85.7 |
+| macro_blowup       |          76.8 |
+| repeated_blocks    |          70.1 |
+| switch_flags       |         100.0 |
+| temporaries        |          91.6 |
+| addr_deref         |         100.0 |
+| reinterpret_casts  |          64.7 |
+| late_binding       |           0.0 |
+| qualified_calls    |         100.0 |
+| require_lines      |         100.0 |
 | setjmp             |           n/a |
-| layout_checks      |         100.0 |
-| stray_braces       |           n/a |
-| label_stubs        |           n/a |
-| string_literals    |           n/a |
-| lost_parens        |           n/a |
-| literal_arithmetic |           n/a |
-| bool_roundtrip     |           n/a |
-| c_renames          |           n/a |
-| long_lines         |         100.0 |
-| **total**          |      **75.0** |
+| layout_checks      |           0.0 |
+| stray_braces       |          77.9 |
+| label_stubs        |          71.1 |
+| string_literals    |          56.1 |
+| lost_parens        |         100.0 |
+| literal_arithmetic |          98.9 |
+| bool_roundtrip     |          98.9 |
+| c_renames          |          72.1 |
+| long_lines         |           0.0 |
+| **total**          |      **71.6** |
 The readability counters of the converted modules (`goto`, `label`, `reinterpret`, `unsafe`, `literal_named`, raw `while`) are the code table of the Performance section, from the head-to-head; a program that converts only file by file has none there, since its modules do not compile alone.
