@@ -667,7 +667,7 @@ def Host_Init(var parms : quakeparms_t?) {
     Mod_Init()
     NET_Init()
     SV_Init()
-    Con_Printf`va(cstr("Exe: 21:12:18 Nov 14 2026\n"), VaNone())
+    Con_Printf`va(cstr("Exe: 23:00:34 Nov 16 2026\n"), VaNone())
     Con_Printf`va(cstr("%4.1f megabyte heap\n"), (double(parms.memsize) / (1024.0lf * 1024.0lf),))
     // needed even for dedicated servers
     R_InitTextures()
