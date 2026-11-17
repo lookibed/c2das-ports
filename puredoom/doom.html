@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="das-build" content="v0.5.0-842-g09c4e2662 2026-11-17 04:32 +0300">
+<meta name="das-build" content="v0.5.0-858-g8d87baa17 2026-11-17 14:27 +0300">
+<meta name="doom-build" content="daslang">
 <title>PureDOOM in daslang</title>
 <script src="../coi-serviceworker.js"></script>
 <style>
@@ -16,6 +17,10 @@
   .dim { color: var(--dim); font-size: 13px; }
   #stage { position: relative; width: min(100%, calc(80vh * 4 / 3)); aspect-ratio: 4 / 3; background: #000; margin: 12px auto; }
   #canvas { width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
+  #fps { position: absolute; left: 8px; top: 8px; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,.65); color: #9fe08a; font: 12px/1.4 ui-monospace, Consolas, monospace; pointer-events: none; }
+  #fps[hidden] { display: none; }
+  #builds a.active { font-weight: bold; color: var(--fg); text-decoration: none; }
+  #compare { margin-top: 6px; }
   #panel { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; text-align: center; background: var(--panel); }
   #panel[hidden] { display: none; }
   button { font: inherit; padding: 8px 18px; border-radius: 6px; border: 1px solid #444; background: #2a2723; color: var(--fg); cursor: pointer; }
@@ -30,18 +35,25 @@
 </head>
 <body>
 <main>
-  <h1>PureDOOM, translated from C to daslang, compiled to WebAssembly</h1>
-  <p class="dim">The C source of <a href="https://github.com/Daivuk/PureDOOM">PureDOOM</a> was converted to daslang by
+  <h1 id="title">PureDOOM, translated from C to daslang, compiled to WebAssembly</h1>
+  <p id="builds"><a id="link-daslang" href="doom.html">daslang (c2das-re) wasm64</a> · <a id="link-c" href="doom_c.html">C (emscripten) wasm64</a>
+    <span class="dim">: the same game, page and harness; the second is PureDOOM's original C, the baseline</span></p>
+  <p class="dim" id="about-c" hidden>This build is <a href="https://github.com/Daivuk/PureDOOM">PureDOOM</a>'s original C (with
+    <a href="https://github.com/lookibed/c2das-re/tree/main/doom/patches">c2das-re's patches</a>: the per-tic checksums and fixes) compiled by emscripten
+    at -O3 with the daslang build's wasm flags, under the C twin of its browser host: the baseline the daslang build is compared with.</p>
+  <p class="dim" id="about-daslang">The C source of <a href="https://github.com/Daivuk/PureDOOM">PureDOOM</a> was converted to daslang by
     <a href="https://github.com/lookibed/c2das-re">c2das-re</a> (<a href="https://github.com/lookibed/c2das-ports/tree/main/puredoom-readable">puredoom-readable</a>, the processed variant),
     then compiled ahead of time to wasm by daslang's LLVM backend. Nothing here is the original C. Game data: <a href="https://freedoom.github.io/">Freedoom</a> Phase 2 (BSD licence), the official 0.13.0 release, loaded at run time; never id Software's commercial WADs.</p>
   <div id="stage">
     <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    <div id="fps" hidden></div>
     <div id="panel">
       <div id="status">Checking the browser...</div>
       <div>
         <button id="play" class="primary" disabled>Play</button>
         <button id="timedemo" disabled>Timedemo demo1 (fps)</button>
       </div>
+      <label class="dim"><input type="checkbox" id="uncapped"> Uncapped rendering: Doom renders its view again between tics as fast as it can; the game still runs 35 tics a second, so motion keeps 35 steps a second (<code>?uncapped=1</code>)</label>
       <div class="dim" id="wadnote"></div>
       <div id="pick" hidden>
         <label class="dim">Or use your own copy (<code>freedoom2.wad</code> 0.13.0 or <code>freedoom-0.13.0.zip</code>):
@@ -50,6 +62,7 @@
     </div>
   </div>
   <div id="result"></div>
+  <div id="compare" class="dim"></div>
   <p class="dim">Keys: arrows move, <kbd>Ctrl</kbd> or left mouse fires, <kbd>Space</kbd> opens doors, <kbd>Shift</kbd> runs, <kbd>Alt</kbd> strafes,
     <kbd>Enter</kbd>/<kbd>Esc</kbd> menus, <kbd>Y</kbd> confirms, <kbd>1</kbd>-<kbd>7</kbd> weapons, <kbd>Tab</kbd> map. Click the picture first. No sound yet.</p>
   <pre id="log"></pre>
@@ -136,6 +149,7 @@
   var expected = null;             // { tics, digest } of REF_LOG, folded the way the host folds its own lines
 
   var $ = function (id) { return document.getElementById(id); };
+
   var logEl = $('log');
   function log(line) { logEl.textContent += line + '\n'; logEl.scrollTop = logEl.scrollHeight; }
   function status(text) { $('status').textContent = text; }
@@ -207,10 +221,63 @@
   }
   fetch(REF_LOG).then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
     .then(function (t) { expected = ticDigest(t); }, function () {});
+  // which of the two builds this page is: scripts/build_web.sh writes it into the doom-build meta
+  var BUILD = document.querySelector('meta[name="doom-build"]').content === 'c' ? 'c' : 'daslang';
+  var BUILD_NAME = { daslang: 'daslang (c2das-re) wasm64', c: 'C (emscripten) wasm64' };
+  (function () {
+    $('link-' + BUILD).className = 'active';
+    // the other build's link carries this page's query and the uncapped checkbox
+    ['link-daslang', 'link-c'].forEach(function (id) {
+      $(id).addEventListener('click', function (e) {
+        if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+        var q = new URLSearchParams(location.search);
+        if ($('uncapped').checked) q.set('uncapped', '1'); else q.delete('uncapped');
+        var qs = q.toString();
+        e.preventDefault();
+        location.href = this.getAttribute('href') + (qs ? '?' + qs : '');
+      });
+    });
+    if (BUILD === 'c') {
+      $('title').textContent = 'PureDOOM, the original C, compiled by emscripten to WebAssembly';
+      $('about-c').hidden = false;
+      $('about-daslang').hidden = true;
+      document.title = 'PureDOOM in C (baseline)';
+    }
+  })();
   fetch('build.json').then(function (r) { return r.json(); }).then(function (b) {
-    $('build').textContent = 'Built from c2das-re ' + b.c2das_re + ' (crt, web host), c2das-ports ' + b.ports +
-      ' (puredoom-readable/processed, converted by c2das-re ' + b.converted_by + '), daScript ' + b.daslang + ', emscripten ' + b.emscripten + '.';
+    $('build').textContent = BUILD === 'c'
+      ? 'Built from PureDOOM ' + b.puredoom + ' with c2das-re ' + b.c2das_re + "'s patches and host, emscripten " + b.emscripten + '.'
+      : 'Built from c2das-re ' + b.c2das_re + ' (crt, web host), c2das-ports ' + b.ports +
+        ' (puredoom-readable/processed, converted by c2das-re ' + b.converted_by + '), daScript ' + b.daslang + ', emscripten ' + b.emscripten + '.';
   }, function () {});
+
+  // the last timedemo of each build in this browser, and the line comparing them
+  function validRun(r) { return r && typeof r.fps === 'number' && typeof r.seconds === 'number' && typeof r.tics === 'number'; }
+  function loadRuns() {
+    var runs = {};
+    try { runs = JSON.parse(localStorage.getItem('doomTimedemo') || '{}') || {}; } catch (e) {}
+    ['daslang', 'c'].forEach(function (b) { if (!validRun(runs[b])) delete runs[b]; });
+    return runs;
+  }
+  function saveRun(r) {
+    var runs = loadRuns();
+    runs[BUILD] = { fps: r.fps, seconds: r.seconds, tics: r.tics, inSync: !!r.inSync, uncapped: !!r.uncapped, at: Date.now() };
+    try { localStorage.setItem('doomTimedemo', JSON.stringify(runs)); } catch (e) {}
+    showCompare(runs);
+  }
+  function showCompare(runs) {
+    var d = runs.daslang, c = runs.c, parts = [];
+    var label = function (r) { return r.fps.toFixed(0) + ' tics/s' + (r.uncapped ? ', uncapped' : '') + (r.inSync ? '' : ', NOT in sync'); };
+    if (d) parts.push(BUILD_NAME.daslang + ': ' + label(d));
+    if (c) parts.push(BUILD_NAME.c + ': ' + label(c));
+    // a ratio only of like runs: both in sync over the same tics, both capped or both uncapped
+    var alike = d && c && d.inSync && c.inSync && d.tics === c.tics && d.uncapped === c.uncapped;
+    if (alike) parts.push('daslang takes ' + (d.seconds / c.seconds).toFixed(2) + 'x the C time');
+    $('compare').textContent = parts.length ? 'Last timedemo of each build in this browser: ' + parts.join(' · ') +
+      (alike ? ' (indicative: one run each, in this browser on this machine).'
+        : d && c ? '. No ratio: the two runs differ in mode or sync; run both the same way.' : '. Run the other build\'s timedemo to compare.') : '';
+  }
+  showCompare(loadRuns());
 
   var wadBytes = null, started = false;
   // the deploy put the official release's freedoom2.wad next to this page (never in git); the
@@ -248,7 +315,19 @@
     else if (q.get('autostart') === 'play') start(false);
   }
 
+  // `host: stats <frames> <tics> <renders> <seconds>` once a second: the counter over the picture
+  function showStats(m) {
+    var secs = +m[4];
+    var el = $('fps');
+    var demo = Module.arguments.indexOf('-timedemo') >= 0;
+    el.textContent = BUILD_NAME[BUILD] + ' · ' + (m[1] / secs).toFixed(0) + ' fps shown · ' + (m[2] / secs).toFixed(0) + (demo ? ' tics per wall second' : ' tics/s') + ' · ' +
+      (m[3] / secs).toFixed(0) + ' frames rendered/s' + (Module.arguments.indexOf('-uncapped') >= 0 ? ' (uncapped)' : '');
+    el.hidden = false;
+  }
+
   function onLine(line) {
+    var st = /^host: stats (\d+) (\d+) (\d+) ([\d.]+)/.exec(line);
+    if (st) { showStats(st); return; }
     log(line);
     if (/^host: Doom exited/.test(line)) {
       status('Doom has exited. Reload the page to play again.');
@@ -259,8 +338,9 @@
     if (m) {
       var tics = +m[1], secs = +m[2];
       $('result').innerHTML = 'Timedemo demo1: <b>' + tics + ' tics in ' + secs.toFixed(3) + ' s = ' + (tics / secs).toFixed(0) +
-        ' fps</b> (game tics run and rendered per second of update time; the screen shows one of them per display frame).';
-      window.doomResult = { tics: tics, seconds: secs, fps: tics / secs };
+        ' tics/s</b> (game tics run per second of update time, each rendered once' +
+        (Module.arguments.indexOf('-uncapped') >= 0 ? ' and once more between tics' : '') + '; the screen shows one frame per display refresh).';
+      window.doomResult = { tics: tics, seconds: secs, fps: tics / secs, build: BUILD, uncapped: Module.arguments.indexOf('-uncapped') >= 0 };
     }
     m = /^host: (\d+) checksum lines, digest ([0-9a-f]+)/.exec(line);
     if (m) {
@@ -273,6 +353,7 @@
         : 'Checksums differ from the native build: ' + m[1] + ' lines, digest ' + m[2] + ', expected ' + expected.tics + ' / ' + expected.digest + '.';
       $('result').appendChild(span);
       if (window.doomResult) window.doomResult.inSync = same;
+      if (window.doomResult) saveRun(window.doomResult);
     }
   }
 
@@ -296,12 +377,14 @@
     if (started) return;
     started = true;
     Module.arguments = timedemo ? ['-timedemo', 'demo1'] : [];
-    log('start: ' + (timedemo ? 'timedemo demo1' : 'play'));
+    if ($('uncapped').checked) Module.arguments.push('-uncapped');
+    log('start: ' + (timedemo ? 'timedemo demo1' : 'play') + ($('uncapped').checked ? ', uncapped' : ''));
     $('panel').hidden = true;
     $('canvas').focus();
     $('canvas').addEventListener('pointerdown', function () { $('canvas').focus(); });
     dasWasmGate.loadProgram(function () { status('The program script did not load.'); $('panel').hidden = false; });
   }
+  $('uncapped').checked = new URLSearchParams(location.search).get('uncapped') === '1';
   $('play').addEventListener('click', function () { start(false); });
   $('timedemo').addEventListener('click', function () { start(true); });
 

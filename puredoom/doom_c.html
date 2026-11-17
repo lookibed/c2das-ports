@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="das-build" content="__DAS_BUILD_STAMP__">
+<meta name="doom-build" content="c">
+<title>PureDOOM in daslang</title>
+<script src="../coi-serviceworker.js"></script>
+<style>
+  :root { --bg: #0d0c0a; --fg: #d8d2c4; --dim: #8f887a; --accent: #c8452c; --panel: #1a1815; --ok: #6fae5a; --bad: #d0533c; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 22px; margin: 4px 0 4px; }
+  p { margin: 6px 0; }
+  a { color: #e39a6b; }
+  .dim { color: var(--dim); font-size: 13px; }
+  #stage { position: relative; width: min(100%, calc(80vh * 4 / 3)); aspect-ratio: 4 / 3; background: #000; margin: 12px auto; }
+  #canvas { width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
+  #fps { position: absolute; left: 8px; top: 8px; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,.65); color: #9fe08a; font: 12px/1.4 ui-monospace, Consolas, monospace; pointer-events: none; }
+  #fps[hidden] { display: none; }
+  #builds a.active { font-weight: bold; color: var(--fg); text-decoration: none; }
+  #compare { margin-top: 6px; }
+  #panel { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; text-align: center; background: var(--panel); }
+  #panel[hidden] { display: none; }
+  button { font: inherit; padding: 8px 18px; border-radius: 6px; border: 1px solid #444; background: #2a2723; color: var(--fg); cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  #status { min-height: 1.5em; }
+  #result { font-size: 17px; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); }
+  #log { background: #000; color: #a9a294; font: 12px/1.4 ui-monospace, Consolas, monospace; height: 140px; overflow: auto; padding: 6px 8px; white-space: pre-wrap; margin: 0; }
+  kbd { background: #2a2723; border: 1px solid #444; border-radius: 3px; padding: 0 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">PureDOOM, translated from C to daslang, compiled to WebAssembly</h1>
+  <p id="builds"><a id="link-daslang" href="doom.html">daslang (c2das-re) wasm64</a> · <a id="link-c" href="doom_c.html">C (emscripten) wasm64</a>
+    <span class="dim">: the same game, page and harness; the second is PureDOOM's original C, the baseline</span></p>
+  <p class="dim" id="about-c" hidden>This build is <a href="https://github.com/Daivuk/PureDOOM">PureDOOM</a>'s original C (with
+    <a href="https://github.com/lookibed/c2das-re/tree/main/doom/patches">c2das-re's patches</a>: the per-tic checksums and fixes) compiled by emscripten
+    at -O3 with the daslang build's wasm flags, under the C twin of its browser host: the baseline the daslang build is compared with.</p>
+  <p class="dim" id="about-daslang">The C source of <a href="https://github.com/Daivuk/PureDOOM">PureDOOM</a> was converted to daslang by
+    <a href="https://github.com/lookibed/c2das-re">c2das-re</a> (<a href="https://github.com/lookibed/c2das-ports/tree/main/puredoom-readable">puredoom-readable</a>, the processed variant),
+    then compiled ahead of time to wasm by daslang's LLVM backend. Nothing here is the original C. Game data: <a href="https://freedoom.github.io/">Freedoom</a> Phase 2 (BSD licence), the official 0.13.0 release, loaded at run time; never id Software's commercial WADs.</p>
+  <div id="stage">
+    <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    <div id="fps" hidden></div>
+    <div id="panel">
+      <div id="status">Checking the browser...</div>
+      <div>
+        <button id="play" class="primary" disabled>Play</button>
+        <button id="timedemo" disabled>Timedemo demo1 (fps)</button>
+      </div>
+      <label class="dim"><input type="checkbox" id="uncapped"> Uncapped rendering: Doom renders its view again between tics as fast as it can; the game still runs 35 tics a second, so motion keeps 35 steps a second (<code>?uncapped=1</code>)</label>
+      <div class="dim" id="wadnote"></div>
+      <div id="pick" hidden>
+        <label class="dim">Or use your own copy (<code>freedoom2.wad</code> 0.13.0 or <code>freedoom-0.13.0.zip</code>):
+          <input type="file" id="wadfile" accept=".wad,.zip"></label>
+      </div>
+    </div>
+  </div>
+  <div id="result"></div>
+  <div id="compare" class="dim"></div>
+  <p class="dim">Keys: arrows move, <kbd>Ctrl</kbd> or left mouse fires, <kbd>Space</kbd> opens doors, <kbd>Shift</kbd> runs, <kbd>Alt</kbd> strafes,
+    <kbd>Enter</kbd>/<kbd>Esc</kbd> menus, <kbd>Y</kbd> confirms, <kbd>1</kbd>-<kbd>7</kbd> weapons, <kbd>Tab</kbd> map. Click the picture first. No sound yet.</p>
+  <pre id="log"></pre>
+  <p class="dim" id="build"></p>
+</main>
+<template id="loader"><script async type="text/javascript" src="doom_c.js"></script></template>
+<script>
+// The browser gate every daslang wasm page runs before it loads its program. `daspkg release
+// wasm` inlines this file where a shell carries its wasm-gate marker comment; a page outside a release
+// loads it as a script.
+(function () {
+  var HEADER = [0, 97, 115, 109, 1, 0, 0, 0];
+  var TYPE_SECTION_RETURNING_EXNREF = [1, 5, 1, 0x60, 0, 1, 0x69];
+  var TYPE_SECTION_TAKING_V128 = [1, 5, 1, 0x60, 1, 0x7b, 0];
+  function accepts(typeSection) {
+    try { return WebAssembly.validate(new Uint8Array(HEADER.concat(typeSection))); } catch (e) { return false; }
+  }
+  var ua = navigator.userAgent;
+  var MINIMUM_BROWSERS = 'Safari 18.4, Firefox 131 and Chrome 137 or newer run it';
+  var gate = {
+    hasExnref: accepts(TYPE_SECTION_RETURNING_EXNREF),
+    hasSimd: accepts(TYPE_SECTION_TAKING_V128),
+    is32bit: (/Windows NT/.test(ua) && !/Win64|x64/.test(ua)) || /Linux i686/.test(ua),
+    isIsolated: !!(self.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined'),
+    force: new URLSearchParams(location.search).get('force'),
+    /** '' when this engine can run the build, else 'wasm' or '32bit'. */
+    engineReason: function () {
+      if (!gate.hasExnref || !gate.hasSimd) return 'wasm';
+      if (gate.is32bit) return '32bit';
+      return '';
+    },
+    /** '' when the build can run on this page, else 'isolation', 'wasm' or '32bit'. */
+    reason: function () {
+      if (gate.force === 'run') return '';
+      if (gate.force === 'unsupported' || !gate.isIsolated) return 'isolation';
+      return gate.engineReason();
+    },
+    /** Plain text in every field, as explain() returns: the page escapes it. */
+    refusal: function (reason) {
+      if (reason === 'isolation') return {
+        status: 'needs SharedArrayBuffer',
+        title: 'SharedArrayBuffer is not available on this page.',
+        text: 'The build runs on Web Workers over it, and a browser grants it only to a cross-origin-isolated page - one the server sends the Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy headers for.'
+      };
+      if (reason === 'wasm') return {
+        status: 'needs a newer browser',
+        title: "This browser's WebAssembly lacks " + (gate.hasExnref ? 'SIMD' : 'exception references') + ', which the build uses.',
+        text: MINIMUM_BROWSERS + '; on an iPhone or iPad every browser is the system WebKit, so an iOS update brings it.'
+      };
+      if (reason === '32bit') return {
+        status: 'needs a 64-bit browser',
+        title: 'This browser is a 32-bit build.',
+        text: 'The program is tens of megabytes of WebAssembly, several times that once compiled, and a 32-bit browser has no room for it: the load ends in "out of memory". A 64-bit Firefox, Chrome or Edge on the same machine runs it.'
+      };
+      return null;
+    },
+    explain: function (what) {
+      what = String(what);
+      if (/out of memory/i.test(what)) return 'The browser ran out of memory compiling the program: a 32-bit browser has no room for it, and a 64-bit one may need other heavy tabs closed first.';
+      if (/CompileError/i.test(what)) return "This browser's WebAssembly does not accept the build; " + MINIMUM_BROWSERS + '.';
+      return '';
+    },
+    /** Appends a live copy of the script tag emcc put in the inert `loader` template (a cloned template script stays inert). */
+    loadProgram: function (onError) {
+      var inert = document.getElementById('loader').content.querySelector('script');
+      var live = document.createElement('script');
+      live.async = true;
+      if (onError) live.onerror = onError;
+      if (inert.getAttribute('src')) live.src = inert.getAttribute('src');
+      else live.textContent = inert.textContent;
+      document.body.appendChild(live);
+      return live;
+    }
+  };
+  window.dasWasmGate = gate;
+})();
+</script>
+<script>
+  var WAD_SHA256 = 'a8772e088847032510d97ba2312406a6998f21cbab44d4ff10696faa9c0ecd4b';
+  var ZIP_SHA256 = '3f9b264f3e3ce503b4fb7f6bdcb1f419d93c7b546f4df3e874dd878db9688f59';
+  var OFFICIAL_ZIP = 'https://github.com/freedoom/freedoom/releases/download/v0.13.0/freedoom-0.13.0.zip';
+  var SAME_ORIGIN_WAD = 'freedoom2.wad';   // put there by the Pages deploy from the official release, never committed
+  var REF_LOG = 'demo1_ref.log';   // the native build's demo1 log (puredoom-readable/ref), its tic= lines
+  var expected = null;             // { tics, digest } of REF_LOG, folded the way the host folds its own lines
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  var logEl = $('log');
+  function log(line) { logEl.textContent += line + '\n'; logEl.scrollTop = logEl.scrollHeight; }
+  function status(text) { $('status').textContent = text; }
+
+  // keys Doom reads whose browser default would scroll, move focus or open a menu; F5, F11 and F12 keep theirs
+  var SCROLL_KEYS = { ArrowUp:1, ArrowDown:1, ArrowLeft:1, ArrowRight:1, ' ':1, Tab:1, Alt:1, F1:1, F2:1, F3:1, F4:1, F6:1, F7:1, F8:1, F9:1, F10:1 };
+  window.addEventListener('keydown', function (e) {
+    if (!started) return;
+    if (SCROLL_KEYS[e.key] || e.ctrlKey && /^[a-z]$/i.test(e.key)) e.preventDefault();
+  }, { passive: false, capture: true });
+
+  async function sha256hex(bytes) {
+    var d = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+    return Array.from(d, function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+  }
+
+  // freedoom2.wad out of the release zip: the central directory names it, deflate-raw inflates it
+  async function wadFromZip(zip) {
+    var v = new DataView(zip.buffer, zip.byteOffset, zip.byteLength);
+    var eocd = -1;
+    for (var i = zip.length - 22; i >= Math.max(0, zip.length - 65557); i--) {
+      if (v.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error('not a zip');
+    var count = v.getUint16(eocd + 10, true), p = v.getUint32(eocd + 16, true);
+    for (var n = 0; n < count; n++) {
+      var method = v.getUint16(p + 10, true), csize = v.getUint32(p + 20, true);
+      var nlen = v.getUint16(p + 28, true), xlen = v.getUint16(p + 30, true), clen = v.getUint16(p + 32, true);
+      var local = v.getUint32(p + 42, true);
+      var name = new TextDecoder().decode(zip.subarray(p + 46, p + 46 + nlen));
+      p += 46 + nlen + xlen + clen;
+      if (!/(^|\/)freedoom2\.wad$/.test(name)) continue;
+      var start = local + 30 + v.getUint16(local + 26, true) + v.getUint16(local + 28, true);
+      var data = zip.subarray(start, start + csize);
+      if (method === 0) return data;
+      if (method !== 8) throw new Error('zip method ' + method);
+      var out = new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw')));
+      return new Uint8Array(await out.arrayBuffer());
+    }
+    throw new Error('no freedoom2.wad in the zip');
+  }
+
+  // a WAD or the release zip, checked against fetch_wad.sh's sha256
+  async function acceptBytes(bytes, from) {
+    var h = await sha256hex(bytes);
+    if (h === ZIP_SHA256) { bytes = await wadFromZip(bytes); h = await sha256hex(bytes); }
+    if (h !== WAD_SHA256) throw new Error(from + ': sha256 ' + h.slice(0, 16) + '... is not freedoom2.wad 0.13.0');
+    log('wad: freedoom2.wad from ' + from + ', sha256 ' + h + ' (matches fetch_wad.sh)');
+    return bytes;
+  }
+
+  async function fetchBytes(url) {
+    var r = await fetch(url);
+    if (!r.ok) throw new Error(url + ': HTTP ' + r.status);
+    return new Uint8Array(await r.arrayBuffer());
+  }
+
+  // FNV-1a 32 over every tic= line with its newline: main_web.das's host_print folds the same bytes
+  function ticDigest(text) {
+    var h = 2166136261, n = 0;
+    text.split('\n').forEach(function (line) {
+      line = line.replace(/\r$/, '');
+      if (line.indexOf('tic=') !== 0) return;
+      line += '\n';
+      for (var i = 0; i < line.length; i++) { h ^= line.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+      n++;
+    });
+    return { tics: String(n), digest: h.toString(16).padStart(8, '0') };
+  }
+  fetch(REF_LOG).then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
+    .then(function (t) { expected = ticDigest(t); }, function () {});
+  // which of the two builds this page is: scripts/build_web.sh writes it into the doom-build meta
+  var BUILD = document.querySelector('meta[name="doom-build"]').content === 'c' ? 'c' : 'daslang';
+  var BUILD_NAME = { daslang: 'daslang (c2das-re) wasm64', c: 'C (emscripten) wasm64' };
+  (function () {
+    $('link-' + BUILD).className = 'active';
+    // the other build's link carries this page's query and the uncapped checkbox
+    ['link-daslang', 'link-c'].forEach(function (id) {
+      $(id).addEventListener('click', function (e) {
+        if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+        var q = new URLSearchParams(location.search);
+        if ($('uncapped').checked) q.set('uncapped', '1'); else q.delete('uncapped');
+        var qs = q.toString();
+        e.preventDefault();
+        location.href = this.getAttribute('href') + (qs ? '?' + qs : '');
+      });
+    });
+    if (BUILD === 'c') {
+      $('title').textContent = 'PureDOOM, the original C, compiled by emscripten to WebAssembly';
+      $('about-c').hidden = false;
+      $('about-daslang').hidden = true;
+      document.title = 'PureDOOM in C (baseline)';
+    }
+  })();
+  fetch('build.json').then(function (r) { return r.json(); }).then(function (b) {
+    $('build').textContent = BUILD === 'c'
+      ? 'Built from PureDOOM ' + b.puredoom + ' with c2das-re ' + b.c2das_re + "'s patches and host, emscripten " + b.emscripten + '.'
+      : 'Built from c2das-re ' + b.c2das_re + ' (crt, web host), c2das-ports ' + b.ports +
+        ' (puredoom-readable/processed, converted by c2das-re ' + b.converted_by + '), daScript ' + b.daslang + ', emscripten ' + b.emscripten + '.';
+  }, function () {});
+
+  // the last timedemo of each build in this browser, and the line comparing them
+  function validRun(r) { return r && typeof r.fps === 'number' && typeof r.seconds === 'number' && typeof r.tics === 'number'; }
+  function loadRuns() {
+    var runs = {};
+    try { runs = JSON.parse(localStorage.getItem('doomTimedemo') || '{}') || {}; } catch (e) {}
+    ['daslang', 'c'].forEach(function (b) { if (!validRun(runs[b])) delete runs[b]; });
+    return runs;
+  }
+  function saveRun(r) {
+    var runs = loadRuns();
+    runs[BUILD] = { fps: r.fps, seconds: r.seconds, tics: r.tics, inSync: !!r.inSync, uncapped: !!r.uncapped, at: Date.now() };
+    try { localStorage.setItem('doomTimedemo', JSON.stringify(runs)); } catch (e) {}
+    showCompare(runs);
+  }
+  function showCompare(runs) {
+    var d = runs.daslang, c = runs.c, parts = [];
+    var label = function (r) { return r.fps.toFixed(0) + ' tics/s' + (r.uncapped ? ', uncapped' : '') + (r.inSync ? '' : ', NOT in sync'); };
+    if (d) parts.push(BUILD_NAME.daslang + ': ' + label(d));
+    if (c) parts.push(BUILD_NAME.c + ': ' + label(c));
+    // a ratio only of like runs: both in sync over the same tics, both capped or both uncapped
+    var alike = d && c && d.inSync && c.inSync && d.tics === c.tics && d.uncapped === c.uncapped;
+    if (alike) parts.push('daslang takes ' + (d.seconds / c.seconds).toFixed(2) + 'x the C time');
+    $('compare').textContent = parts.length ? 'Last timedemo of each build in this browser: ' + parts.join(' · ') +
+      (alike ? ' (indicative: one run each, in this browser on this machine).'
+        : d && c ? '. No ratio: the two runs differ in mode or sync; run both the same way.' : '. Run the other build\'s timedemo to compare.') : '';
+  }
+  showCompare(loadRuns());
+
+  var wadBytes = null, started = false;
+  // the deploy put the official release's freedoom2.wad next to this page (never in git); the
+  // release host itself sends no CORS headers, so a page cannot fetch it from there
+  async function findWad() {
+    status('Loading freedoom2.wad...');
+    try {
+      wadBytes = await acceptBytes(await fetchBytes(SAME_ORIGIN_WAD), 'the official Freedoom 0.13.0 release (fetched by this site\'s deploy)');
+      $('wadnote').textContent = 'freedoom2.wad from the official Freedoom 0.13.0 release, sha256 ' + WAD_SHA256 + ' (verified in your browser).';
+      ready();
+    } catch (e) {
+      log('wad: ' + e.message);
+      status('freedoom2.wad is not available on this site.');
+      $('wadnote').innerHTML = 'Get it from <a href="' + OFFICIAL_ZIP + '">the Freedoom 0.13.0 release</a>, then pick it below.';
+    }
+    $('pick').hidden = false;
+  }
+
+  $('wadfile').addEventListener('change', async function () {
+    var f = this.files[0];
+    if (!f) return;
+    try {
+      wadBytes = await acceptBytes(new Uint8Array(await f.arrayBuffer()), 'your file ' + f.name);
+      $('wadnote').textContent = 'freedoom2.wad 0.13.0 from your file, sha256 verified.';
+      ready();
+    } catch (e) { status(e.message); }
+  });
+
+  function ready() {
+    status('Ready.');
+    $('play').disabled = false;
+    $('timedemo').disabled = false;
+    var q = new URLSearchParams(location.search);
+    if (q.get('autostart') === 'timedemo') start(true);
+    else if (q.get('autostart') === 'play') start(false);
+  }
+
+  // `host: stats <frames> <tics> <renders> <seconds>` once a second: the counter over the picture
+  function showStats(m) {
+    var secs = +m[4];
+    var el = $('fps');
+    var demo = Module.arguments.indexOf('-timedemo') >= 0;
+    el.textContent = BUILD_NAME[BUILD] + ' · ' + (m[1] / secs).toFixed(0) + ' fps shown · ' + (m[2] / secs).toFixed(0) + (demo ? ' tics per wall second' : ' tics/s') + ' · ' +
+      (m[3] / secs).toFixed(0) + ' frames rendered/s' + (Module.arguments.indexOf('-uncapped') >= 0 ? ' (uncapped)' : '');
+    el.hidden = false;
+  }
+
+  function onLine(line) {
+    var st = /^host: stats (\d+) (\d+) (\d+) ([\d.]+)/.exec(line);
+    if (st) { showStats(st); return; }
+    log(line);
+    if (/^host: Doom exited/.test(line)) {
+      status('Doom has exited. Reload the page to play again.');
+      $('play').disabled = $('timedemo').disabled = true;
+      $('panel').hidden = false;
+    }
+    var m = /^host: timed (\d+) gametics in ([\d.]+) s/.exec(line);
+    if (m) {
+      var tics = +m[1], secs = +m[2];
+      $('result').innerHTML = 'Timedemo demo1: <b>' + tics + ' tics in ' + secs.toFixed(3) + ' s = ' + (tics / secs).toFixed(0) +
+        ' tics/s</b> (game tics run per second of update time, each rendered once' +
+        (Module.arguments.indexOf('-uncapped') >= 0 ? ' and once more between tics' : '') + '; the screen shows one frame per display refresh).';
+      window.doomResult = { tics: tics, seconds: secs, fps: tics / secs, build: BUILD, uncapped: Module.arguments.indexOf('-uncapped') >= 0 };
+    }
+    m = /^host: (\d+) checksum lines, digest ([0-9a-f]+)/.exec(line);
+    if (m) {
+      if (!expected) { $('result').appendChild(document.createTextNode(' Checksum digest ' + m[2] + ' over ' + m[1] + ' tics (no reference log here to compare).')); return; }
+      var same = m[1] === expected.tics && m[2] === expected.digest;
+      var span = document.createElement('div');
+      span.className = same ? 'ok' : 'bad';
+      span.textContent = same
+        ? 'In sync with the native build: all ' + m[1] + ' per-tic game-state and frame checksums match (digest ' + m[2] + ').'
+        : 'Checksums differ from the native build: ' + m[1] + ' lines, digest ' + m[2] + ', expected ' + expected.tics + ' / ' + expected.digest + '.';
+      $('result').appendChild(span);
+      if (window.doomResult) window.doomResult.inSync = same;
+      if (window.doomResult) saveRun(window.doomResult);
+    }
+  }
+
+  var Module = {
+    canvas: $('canvas'),
+    arguments: [],
+    print: onLine,
+    printErr: function (line) { log(line); },
+    preRun: [function () {
+      Module.ENV.DOOMWADDIR = '/';
+      Module.FS.writeFile('/doom2.wad', wadBytes);
+    }],
+    onAbort: function (what) {
+      var x = window.dasWasmGate && dasWasmGate.explain(what);
+      status('The program stopped: ' + what + (x ? '. ' + x : ''));
+      $('panel').hidden = false;
+    },
+  };
+
+  function start(timedemo) {
+    if (started) return;
+    started = true;
+    Module.arguments = timedemo ? ['-timedemo', 'demo1'] : [];
+    if ($('uncapped').checked) Module.arguments.push('-uncapped');
+    log('start: ' + (timedemo ? 'timedemo demo1' : 'play') + ($('uncapped').checked ? ', uncapped' : ''));
+    $('panel').hidden = true;
+    $('canvas').focus();
+    $('canvas').addEventListener('pointerdown', function () { $('canvas').focus(); });
+    dasWasmGate.loadProgram(function () { status('The program script did not load.'); $('panel').hidden = false; });
+  }
+  $('uncapped').checked = new URLSearchParams(location.search).get('uncapped') === '1';
+  $('play').addEventListener('click', function () { start(false); });
+  $('timedemo').addEventListener('click', function () { start(true); });
+
+  var reason = dasWasmGate.reason();
+  function refuseWith(r) {
+    var refusal = dasWasmGate.refusal(r);
+    status(refusal.title + ' ' + refusal.text);
+  }
+  if (window.crossOriginIsolated) sessionStorage.removeItem('coiReloaded');
+  if (reason === 'isolation' && window.isSecureContext && 'serviceWorker' in navigator && !sessionStorage.getItem('coiReloaded')) {
+    // coi-serviceworker.js reloads the page once it controls it; if that never happens, say why
+    status('Enabling cross-origin isolation for the threaded wasm (the page reloads once)...');
+    setTimeout(function () { refuseWith(reason); }, 8000);
+  } else if (reason) {
+    var refusal = dasWasmGate.refusal(reason);
+    status(refusal.title + ' ' + refusal.text);
+  } else {
+    findWad();
+  }
+</script>
+</body>
+</html>
