@@ -127,7 +127,7 @@ def private lua_isnoneornil(var L; n) => lua_type(L, n) <= 0
 
 // lauxlib.c:518: #define buffonstack(B) ((B)->b != (B)->init.b)
 [c_macro, c_function, unsafe_deref, hint(unsafe_range_check)]
-def private buffonstack(B) => intptr(B.b) != intptr(addr(B.init.b[0]))
+def private buffonstack(B) => B.b != addr(B.init.b[0])
 
 // lua.h:401: #define lua_insert(L,idx) lua_rotate(L, (idx), 1)
 [c_macro, unsafe_deref, hint(unsafe_range_check)]

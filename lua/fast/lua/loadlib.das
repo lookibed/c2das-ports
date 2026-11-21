@@ -169,7 +169,7 @@ def private setpath(var L : lua_State?; var fieldname : uint8?; var envname : ui
             var b : luaL_Buffer
             luaL_buffinit(L, addr(b))
             // is there a prefix before ';;'?
-            if (intptr(path) < intptr(dftmark)) {
+            if (reinterpret<uint64>(path) < reinterpret<uint64>(dftmark)) {
                 // add it
                 luaL_addlstring(addr(b), path, uint64(int64(dftmark - path)))
                 let _t0 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), 1ul) != null
@@ -180,7 +180,7 @@ def private setpath(var L : lua_State?; var fieldname : uint8?; var envname : ui
             // add default
             luaL_addstring(addr(b), dft)
             // is there a suffix after ';;'?
-            if (intptr(dftmark) < intptr(path + len + -(2))) {
+            if (reinterpret<uint64>(dftmark) < reinterpret<uint64>(path + len + -(2))) {
                 let _t2 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), 1ul) != null
                 let _t3 = addr(b).n
                 addr(b).n++
@@ -321,7 +321,7 @@ def private readable(var filename : uint8?) : int {
 def private getnextfilename(var path : uint8 ??; var end : uint8?) : uint8? {
     var sep : uint8?
     var name : uint8? = *path
-    if (intptr(name) == intptr(end)) {
+    if (name == end) {
         // no more names
         return null
     } elif (*name == '\0') {

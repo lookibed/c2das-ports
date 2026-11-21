@@ -167,7 +167,7 @@ def private luaB_yield(var L : lua_State?) : int {
 
 [c_function]
 def private auxstatus(var L : lua_State?; var co : lua_State?) : int {
-    if (intptr(L) == intptr(co)) {
+    if (L == co) {
         return COS_RUN
     } else {
         c_switch(lua_status(co)) {

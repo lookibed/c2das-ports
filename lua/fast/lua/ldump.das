@@ -163,7 +163,7 @@ def private dumpDebug(var D : DumpState?; var f : Proto?) {
 
 [unsafe_deref, hint(unsafe_range_check)]
 def private dumpFunction(var D : DumpState?; var f : Proto?; var psource : TString?) {
-    if (D.strip != 0 || intptr(f.source) == intptr(psource)) {
+    if (D.strip != 0 || f.source == psource) {
         // no debug info or same source as its parent
         dumpString(D, null)
     } else {

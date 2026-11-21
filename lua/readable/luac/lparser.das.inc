@@ -634,7 +634,7 @@ def private enterblock(var fs : FuncState?; var bl : BlockCnt?; isloop : uint8) 
 [c_function]
 def private undefgoto(var ls : LexState?; var gt : Labeldesc?) {
     var msg : uint8?
-    if (intptr(gt.name) == intptr(luaS_newlstr(ls.L, cstr("break"), uint64(typeinfo sizeof(type<uint8[6]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul))) {
+    if (gt.name == luaS_newlstr(ls.L, cstr("break"), uint64(typeinfo sizeof(type<uint8[6]>)) / uint64(typeinfo sizeof(type<uint8>)) - 1ul)) {
         msg = cstr("break outside loop at line %d")
         msg = luaO_pushfstring`va(ls.L, msg, (gt.line,))
     } else {

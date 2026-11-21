@@ -139,7 +139,7 @@ def private equalkey(var k1 : TValue?; var n2 : Node?; deadok : int) : int {
             return int_of(fltvalue(k1) == n2.u.key_val.n)
         }
         case(2) {
-            return int_of(intptr(pvalue(k1)) == intptr(n2.u.key_val.p))
+            return int_of(pvalue(k1) == n2.u.key_val.p)
         }
         case(22) {
             return int_of(fvalue(k1) == n2.u.key_val.f)
@@ -148,7 +148,7 @@ def private equalkey(var k1 : TValue?; var n2 : Node?; deadok : int) : int {
             return luaS_eqlngstr(tsvalue(k1), keystrval(n2))
         }
         case(_) {
-            return int_of(intptr(gcvalue(k1)) == intptr(n2.u.key_val.gc))
+            return int_of(gcvalue(k1) == n2.u.key_val.gc)
         }
     }
 }
@@ -618,7 +618,7 @@ def luaH_free(var L : lua_State?; var t : Table?) {
 [c_function]
 def private getfreepos(var t : Table?) : Node? {
     if (!isdummy(t)) {
-        while (intptr(t.lastfree) > intptr(t.node)) {
+        while (reinterpret<uint64>(t.lastfree) > reinterpret<uint64>(t.node)) {
             t.lastfree--
             if (keyisnil(t.lastfree)) {
                 return t.lastfree
@@ -673,10 +673,10 @@ def private luaH_newkey(var L : lua_State?; var t : Table?; var key : TValue?; v
         }
         othern = mainpositionfromnode(t, mp)
         // is colliding node out of its main position?
-        if (intptr(othern) != intptr(mp)) {
+        if (othern != mp) {
             // yes; move colliding node into free position
             // find previous
-            while (intptr(othern + gnext(othern)) != intptr(mp)) {
+            while (othern + gnext(othern) != mp) {
                 othern += gnext(othern)
             }
             // rechain to point to 'f'

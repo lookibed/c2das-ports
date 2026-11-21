@@ -124,7 +124,7 @@ def private luaL_checkversion(var L) {
 // guarantees about its stack space; any push in L1 must be
 // checked.
 def private checkstack(var L : lua_State?; var L1 : lua_State?; n : int) {
-    if (intptr(L) != intptr(L1) && lua_checkstack(L1, n) == 0) {
+    if (L != L1 && lua_checkstack(L1, n) == 0) {
         luaL_error`va(L, cstr("stack overflow"), VaNone())
     }
 }
@@ -214,7 +214,7 @@ def private settabsb(var L : lua_State?; var k : uint8?; v : int) {
 // 'lua_getinfo' on top of the result table so that it can call
 // 'lua_setfield'.
 def private treatstackoption(var L : lua_State?; var L1 : lua_State?; var fname : uint8?) {
-    if (intptr(L) == intptr(L1)) {
+    if (L == L1) {
         // exchange object and table
         lua_rotate(L, -2, 1)
     } else {
@@ -591,7 +591,7 @@ def private db_traceback(var L : lua_State?) : int {
         // return it untouched
         lua_pushvalue(L, arg + 1)
     } else {
-        let level : int = int(luaL_optinteger(L, arg + 2, int64((intptr(L) == intptr(L1)) ? 1 : 0)))
+        let level : int = int(luaL_optinteger(L, arg + 2, int64((L == L1) ? 1 : 0)))
         luaL_traceback(L, L1, msg, level)
     }
     return 1

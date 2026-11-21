@@ -517,7 +517,7 @@ def private classend(var ms : MatchState?; var p : uint8?) : uint8? {
     p++
     c_switch(int(*_t0)) {
         case('%') {
-            if (intptr(p) == intptr(ms.p_end)) {
+            if (p == ms.p_end) {
                 luaL_error`va(ms.L, cstr("malformed pattern (ends with '%%')"), VaNone())
             }
             return p + 1
@@ -528,12 +528,12 @@ def private classend(var ms : MatchState?; var p : uint8?) : uint8? {
             }
             // look for a ']'
             c_do_while(*p != ']') {
-                if (intptr(p) == intptr(ms.p_end)) {
+                if (p == ms.p_end) {
                     luaL_error`va(ms.L, cstr("malformed pattern (missing ']')"), VaNone())
                 }
                 var _t1 = p
                 p++
-                if (int(*_t1) == L_ESC && intptr(p) < intptr(ms.p_end)) {
+                if (int(*_t1) == L_ESC && reinterpret<uint64>(p) < reinterpret<uint64>(ms.p_end)) {
                     // skip escapes (e.g. '%]')
                     p++
                 }
@@ -612,7 +612,7 @@ def private matchbracketclass(c : int; var p : uint8?; var ec : uint8?) : int {
     }
     while (true) {
         p++
-        if (!(intptr(p) < intptr(ec))) {
+        if (!(reinterpret<uint64>(p) < reinterpret<uint64>(ec))) {
             break
         }
         if (int(*p) == L_ESC) {
@@ -620,7 +620,7 @@ def private matchbracketclass(c : int; var p : uint8?; var ec : uint8?) : int {
             if (match_class(c, int(*p)) != 0) {
                 return sig
             }
-        } elif ((p[1] == '-') && (intptr(p + 2) < intptr(ec))) {
+        } elif ((p[1] == '-') && (reinterpret<uint64>(p + 2) < reinterpret<uint64>(ec))) {
             p += 2
             if (int(*(p - 2)) <= c && c <= int(*p)) {
                 return sig
@@ -634,7 +634,7 @@ def private matchbracketclass(c : int; var p : uint8?; var ec : uint8?) : int {
 
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def private singlematch(var ms : MatchState?; var s : uint8?; var p : uint8?; var ep : uint8?) : int {
-    if (intptr(s) >= intptr(ms.src_end)) {
+    if (reinterpret<uint64>(s) >= reinterpret<uint64>(ms.src_end)) {
         return 0
     } else {
         let c : int = int(*s)
@@ -658,7 +658,7 @@ def private singlematch(var ms : MatchState?; var s : uint8?; var p : uint8?; va
 
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def private matchbalance(var ms : MatchState?; var s : uint8?; var p : uint8?) : uint8? {
-    if (intptr(p) >= intptr(ms.p_end - 1)) {
+    if (reinterpret<uint64>(p) >= reinterpret<uint64>(ms.p_end - 1)) {
         luaL_error`va(ms.L, cstr("malformed pattern (missing arguments to '%%b')"), VaNone())
     }
     if (*s != *p) {
@@ -669,7 +669,7 @@ def private matchbalance(var ms : MatchState?; var s : uint8?; var p : uint8?) :
         var cont : int = 1
         while (true) {
             s++
-            if (!(intptr(s) < intptr(ms.src_end))) {
+            if (!(reinterpret<uint64>(s) < reinterpret<uint64>(ms.src_end))) {
                 break
             }
             if (int(*s) == e) {
@@ -777,7 +777,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
     label 1:  // init
     // using goto to optimize tail recursion
     // end of pattern?
-    if (intptr(p) != intptr(ms.p_end)) {
+    if (p != ms.p_end) {
         var _cond = int(*p)
         var _goto = 0
         while (true) {
@@ -800,14 +800,14 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
             }
             if (_cond == '$') {
                 // is the '$' the last char in pattern?
-                if (intptr(p + 1) != intptr(ms.p_end)) {
+                if ((p + 1) != ms.p_end) {
                     // no; go to default
                     _goto = 1
                     _cond = 35
                     goto label 3
                 }
                 // check end of string
-                s = (intptr(s) == intptr(ms.src_end)) ? s : null
+                s = (s == ms.src_end) ? s : null
                 break
             }
             if (_cond == '%') {
@@ -835,7 +835,7 @@ def private _c_match(var ms : MatchState?; var s : uint8?; var p : uint8?) : uin
                             }
                             // points to what is next
                             ep = classend(ms, p)
-                            previous = uint8((intptr(s) == intptr(ms.src_init)) ? '\0' : int(*(s - 1)))
+                            previous = uint8((s == ms.src_init) ? '\0' : int(*(s - 1)))
                             if (matchbracketclass(int(previous), p, ep - 1) == 0 && matchbracketclass(int(*s), p, ep - 1) != 0) {
                                 // return match(ms, s, ep);
                                 p = ep
@@ -1102,7 +1102,7 @@ def private str_find_aux(var L : lua_State?; find : int) : int {
             }
             var _t0 = s1
             s1++
-            if (!(intptr(_t0) < intptr(ms.src_end) && anchor == 0)) {
+            if (!(reinterpret<uint64>(_t0) < reinterpret<uint64>(ms.src_end) && anchor == 0)) {
                 break
             }
         }
@@ -1128,11 +1128,11 @@ def private gmatch_aux(var L : lua_State?) : int {
     var src : uint8?
     gm.ms.L = L
     src = gm.src
-    while (intptr(src) <= intptr(gm.ms.src_end)) {
+    while (reinterpret<uint64>(src) <= reinterpret<uint64>(gm.ms.src_end)) {
         var e : uint8?
         reprepstate(addr(gm.ms))
         e = _c_match(addr(gm.ms), src, gm.p)
-        if (e != null && intptr(e) != intptr(gm.lastmatch)) {
+        if (e != null && e != gm.lastmatch) {
             gm.lastmatch = e
             gm.src = gm.lastmatch
             return push_captures(addr(gm.ms), src, e)
@@ -1297,12 +1297,12 @@ def private str_gsub(var L : lua_State?) : int {
         reprepstate(addr(ms))
         // match?
         e = _c_match(addr(ms), src, p)
-        if (e != null && intptr(e) != intptr(lastmatch)) {
+        if (e != null && e != lastmatch) {
             n++
             changed = add_value(addr(ms), addr(b), src, e, tr) | changed
             lastmatch = e
             src = lastmatch
-        } elif (intptr(src) < intptr(ms.src_end)) {
+        } elif (reinterpret<uint64>(src) < reinterpret<uint64>(ms.src_end)) {
             // otherwise, skip one character
             let _t1 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), 1ul) != null
             let _t2 = addr(b).n
@@ -1534,7 +1534,7 @@ def private str_format(var L : lua_State?) : int {
     var flags : uint8?
     var b : luaL_Buffer
     luaL_buffinit(L, addr(b))
-    while (intptr(strfrmt) < intptr(strfrmt_end)) {
+    while (reinterpret<uint64>(strfrmt) < reinterpret<uint64>(strfrmt_end)) {
         if (int(*strfrmt) != L_ESC) {
             let _t0 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), 1ul) != null
             let _t1 = addr(b).n

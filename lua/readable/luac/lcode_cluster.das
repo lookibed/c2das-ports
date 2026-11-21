@@ -492,7 +492,7 @@ def private set2black(var x) {
 
 // lfunc.h:32: #define upisopen(up) ((up)->v.p != &(up)->u.value)
 [c_macro, c_function]
-def private upisopen(up) => intptr(up.v.p) != intptr(addr(up.u.value))
+def private upisopen(up) => up.v.p != addr(up.u.value)
 
 // lgc.h:120: #define changeage(o,f,t) check_exp(getage(o) == (f), (o)->marked ^= ((f)^(t)))
 [c_macro]
@@ -760,7 +760,7 @@ def private addstr(var a : auto&; var b; l) {
 
 // lparser.c:43: #define eqstr(a,b) ((a) == (b))
 [c_macro]
-def private eqstr(a; b) => intptr(a) == intptr(b)
+def private eqstr(a; b) => a == b
 
 // lcode.h:58: #define luaK_setmultret(fs,e) luaK_setreturns(fs, e, LUA_MULTRET)
 [c_macro]
@@ -842,7 +842,7 @@ def private limitasasize(t) => t.alimit
 
 // lstring.h:41: #define eqshrstr(a,b) check_exp((a)->tt == LUA_VSHRSTR, (a) == (b))
 [c_macro]
-def private eqshrstr(a; b) => intptr(a) == intptr(b)
+def private eqshrstr(a; b) => a == b
 
 // llimits.h:66: #define ispow2(x) (((x) & ((x) - 1)) == 0)
 [c_macro]

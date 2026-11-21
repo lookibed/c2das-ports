@@ -4,7 +4,7 @@
 def luaS_eqlngstr(var a : TString?; var b : TString?) : int {
     let len : uint64 = a.u.lnglen
     // same instance or...
-    return int_of((intptr(a) == intptr(b)) ||
+    return int_of((a == b) ||
             ((len == b.u.lnglen) && (crt::memcmp(reinterpret<void?>(addr(a.contents[0])), reinterpret<void?>(addr(b.contents[0])), len) == 0)))
 }
 
@@ -153,7 +153,7 @@ def luaS_remove(var L : lua_State?; var ts : TString?) {
     var tb : stringtable? = addr(G(L).strt)
     var p : TString ?? = addr(tb.hash[lmod(ts.hash, tb.size)])
     // find previous element
-    while (intptr(*p) != intptr(ts)) {
+    while (*p != ts) {
         p = addr((*p).u.hnext)
     }
     // remove element from its list

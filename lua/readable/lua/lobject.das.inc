@@ -290,7 +290,7 @@ def private l_str2dloc(var s : uint8?; var result : double?; mode : int) : uint8
     // try to convert
     *result = (mode == 'x') ? lua_strx2number(s, addr(endptr)) : lua_str2number(s, addr(endptr))
     // nothing recognized?
-    if (intptr(endptr) == intptr(reinterpret<uint8?>(s))) {
+    if (endptr == reinterpret<uint8?>(s)) {
         return null
     }
     // skip trailing spaces

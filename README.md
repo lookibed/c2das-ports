@@ -83,33 +83,29 @@ Captured: c_testsuite (Rust `ce4647af2826`, 2026-11-01 02:54 UTC, unlabelled box
 
 Captured 2026-11-09 16:02 UTC on linux x86_64, PC (AMD Ryzen 7 7435HS); clang version 22.1.8 (https://github.com/llvm/llvm-project ca7933e47d3a3451d81e72ac174dcb5aa28b59d1); daslang 0.6.5; Rust `b1d012eb5d26`; 5 samples a cell. A cell is a lane's time over the native build's (lower is faster); the geomean row covers the kernels where native and both sides stand, their count in parentheses. A cell whose spread is above 20% is `suspect` with its spread, no ratio, and out of the geomean, as is a cell over a suspect native one.
 
-| Kernel                   | native (s) | ours interpreter | Rust interpreter |  ours JIT |  Rust JIT |  ours exe |  Rust exe |   ours AOT |  Rust AOT |
-| :----------------------- | ---------: | ---------------: | ---------------: | --------: | --------: | --------: | --------: | ---------: | --------: |
-| bit_pack                 |   0.000083 |           135.23 |           351.91 |      1.24 |      exit |      1.18 |      exit |       1.06 |      exit |
-| blit                     |   0.000358 |            45.40 |            28.99 |      0.17 |      0.48 |      0.80 |      0.49 |       0.83 |      0.73 |
-| compound_lit             |   0.000182 |            89.66 |            83.83 |      1.01 |      0.98 |      1.02 |      1.04 |       1.02 |      2.08 |
-| dasprofile/fib_loop      |   0.001453 |            21.39 |            66.03 |      1.00 |      1.00 |      1.00 |      1.02 |       1.00 |      1.00 |
-| dasprofile/fib_recursive |   0.003259 |             7.48 |            10.91 |      0.99 |   timeout |      0.90 |   timeout |       1.00 |      0.90 |
-| dasprofile/primes        |   0.014648 |             4.41 |             4.40 |      1.00 |      1.00 |      1.00 |      1.00 |       0.54 |      0.54 |
-| do_while_effect          |   0.001941 |            14.31 |            15.80 |      1.01 |      1.00 |      1.00 |      1.00 |       1.00 |      1.00 |
-| fib_loop                 |   0.001454 |            21.96 |            67.28 |      1.00 |      1.00 |      1.00 |      1.02 |       1.00 |      1.00 |
-| fib_recursive            |   0.003054 |             8.25 |            11.55 |      1.06 |   timeout |      0.96 |   timeout |       0.97 |      0.97 |
-| first_member             |   0.000571 |           102.32 |            81.26 |      1.16 |      1.17 |      1.16 |      1.43 |       1.12 |      1.03 |
-| fixed_mandel             |   0.000270 |            48.33 |            51.51 |      0.80 |      0.88 |      0.82 |      0.74 |       0.94 |      0.96 |
-| matmul                   |   0.000220 |            41.02 |            41.11 |      0.58 |      0.55 |      0.58 |      0.96 | 1.60 (#48) |      1.58 |
-| primes                   |   0.014617 |             4.42 |             2.41 |      1.00 |      1.00 |      1.00 |      1.00 |       0.54 |      0.54 |
-| qsort_cmp                |   0.000089 |             9.77 |          refused |      2.38 |   refused |      2.60 |   refused |       2.47 |   refused |
-| setjmp_general           |   0.000114 |            32.48 |          refused |     15.09 |   refused |     15.17 |   refused |      15.25 |   refused |
-| sieve                    |   0.001803 |            20.33 |            20.33 |      1.09 |      1.15 |      1.08 |      1.16 | 7.98 (#48) |      7.93 |
-| str_copy                 |   0.000294 |            57.96 |            53.48 |      1.15 |      1.15 |      0.99 |      1.02 | 3.55 (#48) |      3.62 |
-| switch_goto              |   0.000697 |            61.41 |            44.90 |      0.62 |      0.52 |      0.60 |      0.62 |       0.97 |      1.16 |
-| switch_local             |   0.000515 |            49.74 |            57.08 |      1.00 |      1.00 |      1.17 |      1.00 | 1.46 (#48) |      1.58 |
-| va_forward               |   0.000200 |           214.22 |           196.98 |     20.98 |    115.02 |     16.39 |    112.14 |       exit |      exit |
-| geomean (kernels)        |            |       30.99 (18) |       35.39 (18) | 1.03 (15) | 1.23 (15) | 1.12 (15) | 1.29 (15) |  1.19 (16) | 1.24 (16) |
-
-Ours:
-
-- (#48) daslang's AOT generator reads every module global through a hash lookup (`das_global<T, mnh>`), though the AOT context fixes each global's offset when it is generated; the same program's AOT reading each global at its fixed offset runs sieve 1.63, str_copy 1.40, switch_local 1.00, matmul 1.01 x native: [lookibed/daScript#48](https://github.com/lookibed/daScript/issues/48).
+| Kernel                   | native (s) | ours interpreter | Rust interpreter |  ours JIT |  Rust JIT |  ours exe |  Rust exe |  ours AOT |  Rust AOT |
+| :----------------------- | ---------: | ---------------: | ---------------: | --------: | --------: | --------: | --------: | --------: | --------: |
+| bit_pack                 |   0.000083 |           135.23 |           351.91 |      1.24 |      exit |      1.18 |      exit |      1.06 |      exit |
+| blit                     |   0.000358 |            45.40 |            28.99 |      0.17 |      0.48 |      0.80 |      0.49 |      0.83 |      0.73 |
+| compound_lit             |   0.000182 |            89.66 |            83.83 |      1.01 |      0.98 |      1.02 |      1.04 |      1.02 |      2.08 |
+| dasprofile/fib_loop      |   0.001453 |            21.39 |            66.03 |      1.00 |      1.00 |      1.00 |      1.02 |      1.00 |      1.00 |
+| dasprofile/fib_recursive |   0.003259 |             7.48 |            10.91 |      0.99 |   timeout |      0.90 |   timeout |      1.00 |      0.90 |
+| dasprofile/primes        |   0.014648 |             4.41 |             4.40 |      1.00 |      1.00 |      1.00 |      1.00 |      0.54 |      0.54 |
+| do_while_effect          |   0.001941 |            14.31 |            15.80 |      1.01 |      1.00 |      1.00 |      1.00 |      1.00 |      1.00 |
+| fib_loop                 |   0.001454 |            21.96 |            67.28 |      1.00 |      1.00 |      1.00 |      1.02 |      1.00 |      1.00 |
+| fib_recursive            |   0.003054 |             8.25 |            11.55 |      1.06 |   timeout |      0.96 |   timeout |      0.97 |      0.97 |
+| first_member             |   0.000571 |           102.32 |            81.26 |      1.16 |      1.17 |      1.16 |      1.43 |      1.12 |      1.03 |
+| fixed_mandel             |   0.000270 |            48.33 |            51.51 |      0.80 |      0.88 |      0.82 |      0.74 |      0.94 |      0.96 |
+| matmul                   |   0.000220 |            41.02 |            41.11 |      0.58 |      0.55 |      0.58 |      0.96 |      1.60 |      1.58 |
+| primes                   |   0.014617 |             4.42 |             2.41 |      1.00 |      1.00 |      1.00 |      1.00 |      0.54 |      0.54 |
+| qsort_cmp                |   0.000089 |             9.77 |          refused |      2.38 |   refused |      2.60 |   refused |      2.47 |   refused |
+| setjmp_general           |   0.000114 |            32.48 |          refused |     15.09 |   refused |     15.17 |   refused |     15.25 |   refused |
+| sieve                    |   0.001803 |            20.33 |            20.33 |      1.09 |      1.15 |      1.08 |      1.16 |      7.98 |      7.93 |
+| str_copy                 |   0.000294 |            57.96 |            53.48 |      1.15 |      1.15 |      0.99 |      1.02 |      3.55 |      3.62 |
+| switch_goto              |   0.000697 |            61.41 |            44.90 |      0.62 |      0.52 |      0.60 |      0.62 |      0.97 |      1.16 |
+| switch_local             |   0.000515 |            49.74 |            57.08 |      1.00 |      1.00 |      1.17 |      1.00 |      1.46 |      1.58 |
+| va_forward               |   0.000200 |           214.22 |           196.98 |     20.98 |    115.02 |     16.39 |    112.14 |      exit |      exit |
+| geomean (kernels)        |            |       30.99 (18) |       35.39 (18) | 1.03 (15) | 1.23 (15) | 1.12 (15) | 1.29 (15) | 1.19 (16) | 1.24 (16) |
 
 Error cells:
 

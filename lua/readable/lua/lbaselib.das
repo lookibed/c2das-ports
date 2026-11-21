@@ -231,7 +231,7 @@ def private luaB_tonumber(var L : lua_State?) : int {
         luaL_checktype(L, 1, LUA_TSTRING)
         s = lua_tolstring(L, 1, addr(l))
         let _t0 = 2l <= base && base <= 36l || luaL_argerror(L, 2, cstr("base out of range")) != 0
-        if (intptr(b_str2int(s, int(base), addr(n))) == intptr(s + l)) {
+        if (b_str2int(s, int(base), addr(n)) == s + l) {
             lua_pushinteger(L, n)
             return 1
         }

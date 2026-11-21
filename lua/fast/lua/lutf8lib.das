@@ -196,7 +196,7 @@ def private codepoint(var L : lua_State?) : int {
     // string end
     se = s + pose
     s += posi - 1l
-    while (intptr(s) < intptr(se)) {
+    while (reinterpret<uint64>(s) < reinterpret<uint64>(se)) {
         var code : uint
         s = utf8_decode(s, addr(code), int_of(lax == 0))
         if (s == null) {

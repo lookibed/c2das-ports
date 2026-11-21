@@ -679,19 +679,19 @@ def luaV_equalobj(var L : lua_State?; var t1 : TValue?; var t2 : TValue?) : int 
             return int_of(t1.value_.n == t2.value_.n)
         }
         case(2) {
-            return int_of(intptr(pvalue(t1)) == intptr(pvalue(t2)))
+            return int_of(pvalue(t1) == pvalue(t2))
         }
         case(22) {
             return int_of(fvalue(t1) == fvalue(t2))
         }
         case(4) {
-            return int_of(intptr(addr(reinterpret<GCUnion?>(t1.value_.gc).ts)) == intptr(addr(reinterpret<GCUnion?>(t2.value_.gc).ts)))
+            return int_of(addr(reinterpret<GCUnion?>(t1.value_.gc).ts) == addr(reinterpret<GCUnion?>(t2.value_.gc).ts))
         }
         case(20) {
             return luaS_eqlngstr(tsvalue(t1), tsvalue(t2))
         }
         case(7) {
-            if (intptr(gco2u(t1.value_.gc)) == intptr(gco2u(t2.value_.gc))) {
+            if (gco2u(t1.value_.gc) == gco2u(t2.value_.gc)) {
                 return 1
             } elif (L == null) {
                 return 0
@@ -708,7 +708,7 @@ def luaV_equalobj(var L : lua_State?; var t1 : TValue?; var t2 : TValue?) : int 
             break
         }
         case(5) {
-            if (intptr(gco2t(t1.value_.gc)) == intptr(gco2t(t2.value_.gc))) {
+            if (gco2t(t1.value_.gc) == gco2t(t2.value_.gc)) {
                 return 1
             } elif (L == null) {
                 return 0
@@ -725,7 +725,7 @@ def luaV_equalobj(var L : lua_State?; var t1 : TValue?; var t2 : TValue?) : int 
             break
         }
         case(_) {
-            return int_of(intptr(gcvalue(t1)) == intptr(gcvalue(t2)))
+            return int_of(gcvalue(t1) == gcvalue(t2))
         }
     }
     // no TM?
@@ -3373,7 +3373,7 @@ def luaV_execute(var L : lua_State?; var ci : CallInfo?) {
                     if ((i & (1u << uint(POS_k))) != 0) {
                         // save number of returns
                         ci.u2.nres = n
-                        if (intptr(L.top.p) < intptr(ci.top.p)) {
+                        if (reinterpret<uint64>(L.top.p) < reinterpret<uint64>(ci.top.p)) {
                             L.top.p = ci.top.p
                         }
                         luaF_close(L, base, CLOSEKTOP, 1)

@@ -359,7 +359,7 @@ def private traverseweakvalue(var g : global_State?; var h : Table?) {
     var hasclears : int = int_of(h.alimit > 0u)
     // traverse hash part
     n = gnode(h, 0)
-    while (intptr(n) < intptr(limit)) {
+    while (reinterpret<uint64>(n) < reinterpret<uint64>(limit)) {
         // entry is empty?
         if (isempty(gval(n))) {
             // clear its key
@@ -467,7 +467,7 @@ def private traversestrongtable(var g : global_State?; var h : Table?) {
     }
     // traverse hash part
     n = gnode(h, 0)
-    while (intptr(n) < intptr(limit)) {
+    while (reinterpret<uint64>(n) < reinterpret<uint64>(limit)) {
         // entry is empty?
         if (isempty(gval(n))) {
             // clear its key
@@ -661,7 +661,7 @@ def private traversethread(var g : global_State?; var th : lua_State?) : int {
         return 1
     }
     // mark live elements in the stack
-    while (intptr(o) < intptr(th.top.p)) {
+    while (reinterpret<uint64>(o) < reinterpret<uint64>(th.top.p)) {
         let _t0 = g.mainthread
         if ((int(s2v(o).tt_) & BIT_ISCOLLECTABLE) != 0 && iswhite(s2v(o).value_.gc) != 0) {
             reallymarkobject(g, s2v(o).value_.gc)
@@ -683,13 +683,13 @@ def private traversethread(var g : global_State?; var th : lua_State?) : int {
             luaD_shrinkstack(th)
         }
         o = th.top.p
-        while (intptr(o) < intptr(th.stack_last.p + EXTRA_STACK)) {
+        while (reinterpret<uint64>(o) < reinterpret<uint64>(th.stack_last.p + EXTRA_STACK)) {
             // clear dead stack slice
             s2v(o).tt_ = uint8(LUA_TNIL | (0 << 4))
             o++
         }
         // 'remarkupvals' may have removed thread from 'twups' list
-        if (!(intptr(th.twups) != intptr(th)) && th.openupval != null) {
+        if (!(th.twups != th) && th.openupval != null) {
             // link it back to the list
             th.twups = g.twups
             g.twups = th
@@ -785,7 +785,7 @@ def private clearbykeys(var g : global_State?; var l : GCObject?) {
         var limit : Node? = gnodelast(h)
         var n : Node?
         n = gnode(h, 0)
-        while (intptr(n) < intptr(limit)) {
+        while (reinterpret<uint64>(n) < reinterpret<uint64>(limit)) {
             // unmarked key?
             if (iscleared(g, gckeyN(n)) != 0) {
                 // remove entry
@@ -806,7 +806,7 @@ def private clearbykeys(var g : global_State?; var l : GCObject?) {
 // to element 'f'
 [c_function]
 def private clearbyvalues(var g : global_State?; var l : GCObject?; var f : GCObject?) {
-    while (intptr(l) != intptr(f)) {
+    while (l != f) {
         var h : Table? = gco2t(l)
         var n : Node?
         var limit : Node? = gnodelast(h)
@@ -820,7 +820,7 @@ def private clearbyvalues(var g : global_State?; var l : GCObject?; var f : GCOb
             }
         }
         n = gnode(h, 0)
-        while (intptr(n) < intptr(limit)) {
+        while (reinterpret<uint64>(n) < reinterpret<uint64>(limit)) {
             // unmarked value?
             if (iscleared(g, iscollectable(gval(n)) != 0 ? addr(n.i_val).value_.gc : null) != 0) {
                 // remove entry
@@ -948,7 +948,7 @@ def private sweeplist(var L : lua_State?; var p : GCObject ??; countin : int; va
 // sweep a list until a live object (or end of list)
 def private sweeptolive(var L : lua_State?; var p : GCObject ??) : GCObject ?? {
     var old : GCObject ?? = p
-    c_do_while(intptr(p) == intptr(old)) {
+    c_do_while(p == old) {
         p = sweeplist(L, p, 1, null)
     }
     return p
@@ -1094,7 +1094,7 @@ def private separatetobefnz(var g : global_State?; all : int) {
     // traverse all finalizable objects
     while (true) {
         curr = *p
-        if (!(intptr(curr) != intptr(g.finobjold1))) {
+        if (!(curr != g.finobjold1)) {
             break
         }
         // not being collected?
@@ -1103,7 +1103,7 @@ def private separatetobefnz(var g : global_State?; all : int) {
             p = addr(curr.next)
         } else {
             // removing 'finobjsur'?
-            if (intptr(curr) == intptr(g.finobjsur)) {
+            if (curr == g.finobjsur) {
                 // correct it
                 g.finobjsur = curr.next
             }
@@ -1120,7 +1120,7 @@ def private separatetobefnz(var g : global_State?; all : int) {
 // If pointer 'p' points to 'o', move it to the next element.
 [c_function]
 def private checkpointer(var p : GCObject ??; var o : GCObject?) {
-    if (intptr(o) == intptr(*p)) {
+    if (o == *p) {
         *p = o.next
     }
 }
@@ -1153,7 +1153,7 @@ def luaC_checkfinalizer(var L : lua_State?; var o : GCObject?; var mt : Table?) 
             // "sweep" object 'o'
             makewhite(g, o)
             // should not remove 'sweepgc' object
-            if (intptr(g.sweepgc) == intptr(addr(o.next))) {
+            if (g.sweepgc == addr(o.next)) {
                 // change 'sweepgc'
                 g.sweepgc = sweeptolive(L, g.sweepgc)
             }
@@ -1163,7 +1163,7 @@ def luaC_checkfinalizer(var L : lua_State?; var o : GCObject?; var mt : Table?) 
         // search for pointer pointing to 'o'
         // empty
         p = addr(g.allgc)
-        while (intptr(*p) != intptr(o)) {
+        while (*p != o) {
             p = addr((*p).next)
         }
         // remove 'o' from 'allgc' list
@@ -1224,7 +1224,7 @@ def private sweep2old(var L : lua_State?; var p : GCObject ??) {
                 var th : lua_State? = gco2th(curr)
                 // insert into 'grayagain' list
                 linkgclist_(obj2gco(th), addr(th.gclist), addr(g.grayagain))
-            } elif (int(curr.tt) == LUA_VUPVAL && intptr(gco2upv(curr).v.p) != intptr(addr(gco2upv(curr).u.value))) {
+            } elif (int(curr.tt) == LUA_VUPVAL && gco2upv(curr).v.p != addr(gco2upv(curr).u.value)) {
                 // open upvalues are always gray
                 set2gray(curr)
             } else {
@@ -1259,7 +1259,7 @@ def private sweepgen(var L : lua_State?; var g : global_State?; var p : GCObject
     var curr : GCObject?
     while (true) {
         curr = *p
-        if (!(intptr(curr) != intptr(limit))) {
+        if (!(curr != limit)) {
             break
         }
         // is 'curr' dead?
@@ -1374,7 +1374,7 @@ def private correctgraylists(var g : global_State?) {
 def private markold(var g : global_State?; var from : GCObject?; var to : GCObject?) {
     var p : GCObject?
     p = from
-    while (intptr(p) != intptr(to)) {
+    while (p != to) {
         if (getage(p) == G_OLD1) {
             // now they are old
             changeage(p, G_OLD1, G_OLD)
@@ -1644,7 +1644,7 @@ def private entersweep(var L : lua_State?) {
 // Delete all objects in list 'p' until (but not including) object
 // 'limit'.
 def private deletelist(var L : lua_State?; var p : GCObject?; var limit : GCObject?) {
-    while (intptr(p) != intptr(limit)) {
+    while (p != limit) {
         var next : GCObject? = p.next
         freeobj(L, p)
         p = next

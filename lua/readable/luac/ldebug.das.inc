@@ -129,12 +129,12 @@ def lua_getstack(var L : lua_State?; var level : int; var ar : lua_Debug?) : int
         return 0
     }
     ci = L.ci
-    while (level > 0 && intptr(ci) != intptr(addr(L.base_ci))) {
+    while (level > 0 && ci != addr(L.base_ci)) {
         level--
         ci = ci.previous
     }
     // level found?
-    if (level == 0 && intptr(ci) != intptr(addr(L.base_ci))) {
+    if (level == 0 && ci != addr(L.base_ci)) {
         status = 1
         ar.i_ci = ci
     } else {
@@ -183,7 +183,7 @@ def luaG_findlocal(var L : lua_State?; var ci : CallInfo?; n : int; var pos : St
     }
     // no 'standard' name?
     if (name == null) {
-        var limit : StackValue? = (intptr(ci) == intptr(L.ci)) ? L.top.p : ci.next.func.p
+        var limit : StackValue? = (ci == L.ci) ? L.top.p : ci.next.func.p
         // is 'n' inside 'ci' stack?
         if (int64(limit - base) >= int64(n) && n > 0) {
             // generic name for any valid slot
@@ -607,7 +607,7 @@ def private isEnv(var p : Proto?; var pc : int; i : uint; isup : int) : uint8? {
     } else {
         // 't' is a register
         var what : uint8? = basicgetobjname(p, addr(pc), t, addr(name))
-        if (intptr(what) != intptr(addr(strlocal[0])) && intptr(what) != intptr(addr(strupval[0]))) {
+        if (what != addr(strlocal[0]) && what != addr(strupval[0])) {
             // cannot be the variable _ENV
             name = null
         }
@@ -771,8 +771,8 @@ def private instack(var ci : CallInfo?; var o : TValue?) : int {
     var pos : int
     var base : StackValue? = ci.func.p + 1
     pos = 0
-    while (intptr(base + pos) < intptr(ci.top.p)) {
-        if (intptr(o) == intptr(reinterpret<TValue?>(s2v(base + pos)))) {
+    while (reinterpret<uint64>(base + pos) < reinterpret<uint64>(ci.top.p)) {
+        if (o == reinterpret<TValue?>(s2v(base + pos))) {
             return pos
         }
         pos++
@@ -790,7 +790,7 @@ def private getupvalname(var ci : CallInfo?; var o : TValue?; var name : uint8 ?
     var i : int
     i = 0
     while (i < int(c.nupvalues)) {
-        if (intptr(addr(c.upvals[0])[i].v.p) == intptr(reinterpret<TValue?>(o))) {
+        if (addr(c.upvals[0])[i].v.p == reinterpret<TValue?>(o)) {
             *name = upvalname(c.p, i)
             return addr(strupval[0])
         }
@@ -1014,7 +1014,7 @@ def luaG_tracecall(var L : lua_State?) : int {
     // ensure hooks will be checked
     c_volatile_store(ci.u.l.trap, 1)
     // first instruction (not resuming)?
-    if (intptr(ci.u.l.savedpc) == intptr(reinterpret<uint?>(p.code))) {
+    if (ci.u.l.savedpc == reinterpret<uint?>(p.code)) {
         if (p.is_vararg != 0) {
             // hooks will start at VARARGPREP instruction
             return 0

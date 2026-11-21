@@ -260,7 +260,7 @@ def private stackinuse(var L : lua_State?) : int {
     var lim : StackValue? = L.top.p
     ci = L.ci
     while (ci != null) {
-        if (intptr(lim) < intptr(ci.top.p)) {
+        if (reinterpret<uint64>(lim) < reinterpret<uint64>(ci.top.p)) {
             lim = ci.top.p
         }
         ci = ci.previous
@@ -331,7 +331,7 @@ def luaD_hook(var L : lua_State?; event : int; line : int; ftransfer : int; ntra
             ci.u2.transferinfo.ftransfer = uint16(ftransfer)
             ci.u2.transferinfo.ntransfer = uint16(ntransfer)
         }
-        if (isLua(ci) && intptr(L.top.p) < intptr(ci.top.p)) {
+        if (isLua(ci) && reinterpret<uint64>(L.top.p) < reinterpret<uint64>(ci.top.p)) {
             // protect entire activation register
             L.top.p = ci.top.p
         }
@@ -340,7 +340,7 @@ def luaD_hook(var L : lua_State?; event : int; line : int; ftransfer : int; ntra
             luaD_growstack(L, LUA_MINSTACK, 1)
         } else {
         }
-        if (intptr(ci.top.p) < intptr(L.top.p + LUA_MINSTACK)) {
+        if (reinterpret<uint64>(ci.top.p) < reinterpret<uint64>(L.top.p + LUA_MINSTACK)) {
             ci.top.p = L.top.p + LUA_MINSTACK
         }
         // cannot call hooks inside a hook
@@ -428,7 +428,7 @@ def private tryfuncTM(var L : lua_State?; var func : StackValue?) : StackValue? 
     }
     // open space for metamethod
     p = L.top.p
-    while (intptr(p) > intptr(func)) {
+    while (reinterpret<uint64>(p) > reinterpret<uint64>(func)) {
         var io1 : TValue? = s2v(p)
         var io2 : TValue? = s2v(p - 1)
         io1.value_ = io2.value_
@@ -816,6 +816,7 @@ def private finishpcallk(var L : lua_State?; var ci : CallInfo?) : int {
 // the call to 'adjustresults', we do not know the number of results
 // of the function called by 'lua_callk'/'lua_pcallk', so we are
 // conservative and use LUA_MULTRET (always adjust).
+[c_function]
 def private finishCcall(var L : lua_State?; var ci : CallInfo?) {
     // actual number of results from C function
     var n : int
@@ -834,7 +835,7 @@ def private finishCcall(var L : lua_State?; var ci : CallInfo?) {
             status = finishpcallk(L, ci)
         }
         // finish 'lua_callk'
-        if (LUA_MULTRET <= LUA_MULTRET && intptr(L.ci.top.p) < intptr(L.top.p)) {
+        if (LUA_MULTRET <= LUA_MULTRET && reinterpret<uint64>(L.ci.top.p) < reinterpret<uint64>(L.top.p)) {
             L.ci.top.p = L.top.p
         }
         // call continuation
@@ -853,7 +854,7 @@ def private unroll(var L : lua_State?; var ud : void?) {
     // something in the stack
     while (true) {
         ci = L.ci
-        if (!(intptr(ci) != intptr(addr(L.base_ci)))) {
+        if (!(ci != addr(L.base_ci))) {
             break
         }
         // C function?
@@ -982,7 +983,7 @@ def lua_resume(var L : lua_State?; var from : lua_State?; var nargs : int; var n
     // may be starting a coroutine
     if (int(L.status) == LUA_OK) {
         // not in base level?
-        if (intptr(L.ci) != intptr(addr(L.base_ci))) {
+        if (L.ci != addr(L.base_ci)) {
             return resume_error(L, cstr("cannot resume non-suspended coroutine"), nargs)
         } elif (int64(L.top.p - (L.ci.func.p + 1)) == int64(nargs)) {
             // no function?
@@ -1022,7 +1023,7 @@ def lua_yieldk(var L : lua_State?; nresults : int; ctx : int64; k : function<(va
     var ci : CallInfo?
     ci = L.ci
     if (!yieldable(L)) {
-        if (intptr(L) != intptr(G(L).mainthread)) {
+        if (L != G(L).mainthread) {
             luaG_runerror`va(L, cstr("attempt to yield across a C-call boundary"), VaNone())
         } else {
             luaG_runerror`va(L, cstr("attempt to yield from outside a coroutine"), VaNone())

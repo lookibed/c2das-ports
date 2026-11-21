@@ -57,7 +57,7 @@ def private newupval(var L : lua_State?; var level : StackValue?; var prev : UpV
     }
     *prev = uv
     // thread not in list of threads with upvalues?
-    if (!(intptr(L.twups) != intptr(L))) {
+    if (!(L.twups != L)) {
         // link it to the list
         L.twups = G(L).twups
         G(L).twups = L
@@ -74,11 +74,11 @@ def luaF_findupval(var L : lua_State?; var level : StackValue?) : UpVal? {
     // search for it
     while (true) {
         p = *pp
-        if (!(p != null && intptr(reinterpret<StackValue?>(p.v.p)) >= intptr(level))) {
+        if (!(p != null && reinterpret<uint64>(p.v.p) >= reinterpret<uint64>(level))) {
             break
         }
         // corresponding upvalue?
-        if (intptr(reinterpret<StackValue?>(p.v.p)) == intptr(level)) {
+        if (reinterpret<StackValue?>(p.v.p) == level) {
             // return it
             return p
         }
@@ -202,7 +202,7 @@ def luaF_closeupval(var L : lua_State?; var level : StackValue?) {
         var _t0 = uv != null
         if (_t0) {
             upl = uplevel(uv)
-            _t0 = intptr(upl) >= intptr(level)
+            _t0 = reinterpret<uint64>(upl) >= reinterpret<uint64>(level)
         }
         if (!(_t0)) {
             break
@@ -235,7 +235,7 @@ def private poptbclist(var L : lua_State?) {
     var tbc : StackValue? = L.tbclist.p
     // first element cannot be dummy
     tbc -= int(tbc.tbclist.delta)
-    while (intptr(tbc) > intptr(L.stack.p) && tbc.tbclist.delta == 0) {
+    while (reinterpret<uint64>(tbc) > reinterpret<uint64>(L.stack.p) && tbc.tbclist.delta == 0) {
         // remove dummy nodes
         tbc -= MAXDELTA
     }
@@ -244,12 +244,13 @@ def private poptbclist(var L : lua_State?) {
 
 // Close all upvalues and to-be-closed variables up to the given stack
 // level. Return restored 'level'.
+[c_function]
 def luaF_close(var L : lua_State?; var level : StackValue?; status : int; yy : int) : StackValue? {
     let levelrel : int64 = savestack(L, level)
     // first, close the upvalues
     luaF_closeupval(L, level)
     // traverse tbc's down to that level
-    while (intptr(L.tbclist.p) >= intptr(level)) {
+    while (reinterpret<uint64>(L.tbclist.p) >= reinterpret<uint64>(level)) {
         // get variable index
         var tbc : StackValue? = L.tbclist.p
         // remove it from list

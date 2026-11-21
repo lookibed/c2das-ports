@@ -278,7 +278,7 @@ def private os_date(var L : lua_State?) : int {
         var b : luaL_Buffer
         cc[0] = uint8('%')
         luaL_buffinit(L, addr(b))
-        while (intptr(s) < intptr(se)) {
+        while (reinterpret<uint64>(s) < reinterpret<uint64>(se)) {
             // not a conversion specifier?
             if (*s != '%') {
                 let _t2 = addr(b).n < addr(b).size || luaL_prepbuffsize(addr(b), 1ul) != null

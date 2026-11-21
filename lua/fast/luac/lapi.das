@@ -82,7 +82,7 @@ def private api_incr_top(var L) {
 
 // lapi.c:46: #define isvalid(L, o) (!ttisnil(o) || o != &G(L)->nilvalue)
 [c_macro, c_function, unsafe_deref, hint(unsafe_range_check)]
-def private isvalid(var L; o) => !(novariant(o.tt_) == LUA_TNIL) || intptr(o) != intptr(reinterpret<TValue?>(addr(G(L).nilvalue)))
+def private isvalid(var L; o) => !(novariant(o.tt_) == LUA_TNIL) || o != reinterpret<TValue?>(addr(G(L).nilvalue))
 
 // ltm.h:69: #define ttypename(x) luaT_typenames_[(x) + 1]
 [c_macro, unsafe_deref, hint(unsafe_range_check)]
@@ -127,9 +127,9 @@ def private invalidateTMcache(var t) {
 }
 
 // lapi.h:26: #define adjustresults(L,nres) { if ((nres) <= LUA_MULTRET && L->ci->top.p < L->top.p) L->ci->top.p = L->top.p; }
-[c_macro, unsafe_deref, hint(unsafe_range_check)]
+[c_macro, c_function, unsafe_deref, hint(unsafe_range_check)]
 def private adjustresults(var L; nres) {
-    if (nres <= LUA_MULTRET && intptr(L.ci.top.p) < intptr(L.top.p)) {
+    if (nres <= LUA_MULTRET && reinterpret<uint64>(L.ci.top.p) < reinterpret<uint64>(L.top.p)) {
         L.ci.top.p = L.top.p
     }
 }
@@ -152,7 +152,7 @@ def private isdecGCmodegen(g) => int(g.gckind) == KGC_GEN || g.lastatomic != 0ul
 
 // lstring.h:41: #define eqshrstr(a,b) check_exp((a)->tt == LUA_VSHRSTR, (a) == (b))
 [c_macro, unsafe_deref, hint(unsafe_range_check)]
-def private eqshrstr(a; b) => intptr(a) == intptr(b)
+def private eqshrstr(a; b) => a == b
 
 // lmem.h:17: #define luaM_error(L) luaD_throw(L, LUA_ERRMEM)
 [c_macro, unsafe_deref, hint(unsafe_range_check)]
@@ -205,7 +205,7 @@ def private index2value(var L : lua_State?; var idx : int) : TValue? {
     var ci : CallInfo? = L.ci
     if (idx > 0) {
         var o : StackValue? = ci.func.p + idx
-        if (intptr(o) >= intptr(L.top.p)) {
+        if (reinterpret<uint64>(o) >= reinterpret<uint64>(L.top.p)) {
             return addr(G(L).nilvalue)
         } else {
             return s2v(o)
@@ -256,7 +256,7 @@ def lua_checkstack(var L : lua_State?; n : int) : int {
         // need to grow stack
         res = luaD_growstack(L, n, 0)
     }
-    if (res != 0 && intptr(ci.top.p) < intptr(L.top.p + n)) {
+    if (res != 0 && reinterpret<uint64>(ci.top.p) < reinterpret<uint64>(L.top.p + n)) {
         // adjust frame top
         ci.top.p = L.top.p + n
     }
@@ -265,7 +265,7 @@ def lua_checkstack(var L : lua_State?; n : int) : int {
 
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def lua_xmove(var from : lua_State?; var to : lua_State?; n : int) {
-    if (intptr(from) == intptr(to)) {
+    if (from == to) {
         return
     }
     from.top.p -= n
@@ -328,7 +328,7 @@ def lua_settop(var L : lua_State?; idx : int) {
         diff = int64(idx + 1)
     }
     newtop = L.top.p + diff
-    if (diff < 0l && intptr(L.tbclist.p) >= intptr(newtop)) {
+    if (diff < 0l && reinterpret<uint64>(L.tbclist.p) >= reinterpret<uint64>(newtop)) {
         newtop = luaF_close(L, newtop, CLOSEKTOP, 0)
     }
     // correct top only after closing any upvalue
@@ -349,7 +349,7 @@ def lua_closeslot(var L : lua_State?; idx : int) {
 // (We do not move additional fields that may exist.)
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def private reverse(var L : lua_State?; var from : StackValue?; var to : StackValue?) {
-    while (intptr(from) < intptr(to)) {
+    while (reinterpret<uint64>(from) < reinterpret<uint64>(to)) {
         var temp : TValue
         {
             var io1 : TValue? = addr(temp)
@@ -485,8 +485,8 @@ def lua_isuserdata(var L : lua_State?; idx : int) : int {
 def lua_rawequal(var L : lua_State?; index1 : int; index2 : int) : int {
     var o1 : TValue? = index2value(L, index1)
     var o2 : TValue? = index2value(L, index2)
-    return ((!ttisnil(o1) || intptr(o1) != intptr(reinterpret<TValue?>(addr(G(L).nilvalue)))) &&
-                (!ttisnil(o2) || intptr(o2) != intptr(reinterpret<TValue?>(addr(G(L).nilvalue))))) ? luaV_rawequalobj(o1,
+    return ((!ttisnil(o1) || o1 != reinterpret<TValue?>(addr(G(L).nilvalue))) &&
+                (!ttisnil(o2) || o2 != reinterpret<TValue?>(addr(G(L).nilvalue)))) ? luaV_rawequalobj(o1,
             o2) : 0
 }
 
@@ -518,8 +518,7 @@ def lua_compare(var L : lua_State?; index1 : int; index2 : int; op : int) : int 
     // may call tag method
     o1 = index2value(L, index1)
     o2 = index2value(L, index2)
-    if ((!ttisnil(o1) || intptr(o1) != intptr(reinterpret<TValue?>(addr(G(L).nilvalue)))) &&
-            (!ttisnil(o2) || intptr(o2) != intptr(reinterpret<TValue?>(addr(G(L).nilvalue))))) {
+    if ((!ttisnil(o1) || o1 != reinterpret<TValue?>(addr(G(L).nilvalue))) && (!ttisnil(o2) || o2 != reinterpret<TValue?>(addr(G(L).nilvalue)))) {
         c_switch(op) {
             case(0) {
                 i = luaV_equalobj(L, o1, o2)
@@ -846,7 +845,7 @@ def lua_pushthread(var L : lua_State?) : int {
         settt_(io, ctb(LUA_TTHREAD | (0 << 4)))
     }
     api_incr_top(L)
-    return int_of(intptr(G(L).mainthread) == intptr(L))
+    return int_of(G(L).mainthread == L)
 }
 
 [c_function, unsafe_deref, hint(unsafe_range_check)]
