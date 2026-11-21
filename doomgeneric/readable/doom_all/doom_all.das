@@ -10180,7 +10180,7 @@ def AM_drawPlayers {
     for (i in range(MAXPLAYERS)) {
         their_color++
         p = addr(players[0]) + end_index(i, 4)
-        if ((deathmatch != 0 && singledemo == 0) && intptr(p) != intptr(doom_all__plr)) {
+        if ((deathmatch != 0 && singledemo == 0) && p != doom_all__plr) {
             continue
         }
         if (playeringame[i] == 0) {
@@ -11255,7 +11255,7 @@ def private doom_all__GetGameName(var gamename : uint8?) : uint8? {
     while (i < uint64(typeinfo sizeof(type<uint8? [7]>)) / uint64(typeinfo sizeof(type<uint8?>))) {
         // Has the banner been replaced?
         deh_sub = doom_all__banners[i]
-        if (intptr(deh_sub) != intptr(doom_all__banners[i])) {
+        if (deh_sub != doom_all__banners[i]) {
             var gamename_size : uint64
             var version : int
             // Has been replaced.
@@ -11409,7 +11409,7 @@ def PrintDehackedBanners {
     while (i < uint64(typeinfo sizeof(type<uint8? [3]>)) / uint64(typeinfo sizeof(type<uint8?>))) {
         var deh_s : uint8?
         deh_s = doom_all__copyright_banners[i]
-        if (intptr(deh_s) != intptr(doom_all__copyright_banners[i])) {
+        if (deh_s != doom_all__copyright_banners[i]) {
             fprintf(crt::c_stderr(), cstr("%s"), deh_s)
             // Make sure the modified banner always ends in a newline character.
             // If it doesn't, add a newline. This fixes av.wad.
@@ -12367,7 +12367,7 @@ def F_CastTicker {
         castframes = 0
     } else {
         // just advance to next state in animation
-        if (intptr(caststate) == intptr(addr(states[int(statenum_t.S_PLAY_ATK1)]))) {
+        if (caststate == addr(states[int(statenum_t.S_PLAY_ATK1)])) {
             // Oh, gross hack!
             goto label 1
         }
@@ -12462,7 +12462,7 @@ def F_CastTicker {
             caststate = addr(states[0]) + end_index(mobjinfo[int(castorder[castnum]._c_type)].missilestate, 967)
         }
         castonmelee ^= 1
-        if (intptr(caststate) == intptr(addr(states[int(statenum_t.S_NULL)]))) {
+        if (caststate == addr(states[int(statenum_t.S_NULL)])) {
             if (castonmelee != 0) {
                 caststate = addr(states[0]) + end_index(mobjinfo[int(castorder[castnum]._c_type)].meleestate, 967)
             } else {
@@ -12473,7 +12473,7 @@ def F_CastTicker {
     if (castattacking == 0) {
         goto label 2
     }
-    if (!(castframes == 24 || intptr(caststate) == intptr(addr(states[0]) + end_index(mobjinfo[int(castorder[castnum]._c_type)].seestate, 967)))) {
+    if (!(castframes == 24 || caststate == addr(states[0]) + end_index(mobjinfo[int(castorder[castnum]._c_type)].seestate, 967))) {
         goto label 3
     }
     label 1:  // stopattack
@@ -12731,7 +12731,7 @@ def wipe_doColorXForm(width : int; height : int; ticks : int) : int {
     changed = 0u
     w = doom_all__wipe_scr
     e = doom_all__wipe_scr_end
-    while (intptr(w) != intptr(doom_all__wipe_scr + width * height)) {
+    while (w != doom_all__wipe_scr + width * height) {
         if (*w != *e) {
             if (int(*w) > int(*e)) {
                 newval = int(*w) - ticks
@@ -14251,7 +14251,7 @@ def G_WriteDemoTiccmd(var cmd : ticcmd_t?) {
     *_t5 = cmd.buttons
     // reset demo pointer back
     demo_p = demo_start
-    if (intptr(demo_p) > intptr(demoend - 16)) {
+    if (reinterpret<uint64>(demo_p) > reinterpret<uint64>(demoend - 16)) {
         if (vanilla_demo_limit != 0) {
             // no more space
             G_CheckDemoStatus()
@@ -18926,7 +18926,7 @@ def M_ExtractFileBase(var path : uint8?; var dest : uint8?) {
     var length : int
     src = path + crt::strlen(path) + -(1)
     // back up until a \ or the start
-    while (intptr(src) != intptr(path) && int(*(src - 1)) != DIR_SEPARATOR) {
+    while (src != path && int(*(src - 1)) != DIR_SEPARATOR) {
         src--
     }
     filename = src
@@ -19330,7 +19330,7 @@ def P_AddActiveCeiling(var c : ceiling_t?) {
 [c_function]
 def P_RemoveActiveCeiling(var c : ceiling_t?) {
     for (i in range(MAXCEILINGS)) {
-        if (intptr(activeceilings[i]) == intptr(c)) {
+        if (activeceilings[i] == c) {
             activeceilings[i].sector.specialdata = null
             P_RemoveThinker(addr(activeceilings[i].thinker))
             activeceilings[i] = null
@@ -19821,7 +19821,7 @@ def P_RecursiveSound(var sec : sector_t?; soundblocks : int) {
                 // closed door
                 continue
             }
-            if (intptr(sides[int(check.sidenum[0])].sector) == intptr(sec)) {
+            if (sides[int(check.sidenum[0])].sector == sec) {
                 other = sides[int(check.sidenum[1])].sector
             } else {
                 other = sides[int(check.sidenum[0])].sector
@@ -20167,14 +20167,14 @@ def A_KeenDie(var mo : mobj_s?) {
                 th = th.next
             }
             _f = true
-            if (!(intptr(th) != intptr(addr(thinkercap)))) {
+            if (!(th != addr(thinkercap))) {
                 break
             }
             if (th._c_function.acp1 != reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
                 continue
             }
             mo2 = reinterpret<mobj_s?>(th)
-            if (intptr(mo2) != intptr(mo) && mo2._c_type == mo._c_type && mo2.health > 0) {
+            if (mo2 != mo && mo2._c_type == mo._c_type && mo2.health > 0) {
                 // other Keen not dead
                 return
             }
@@ -20846,7 +20846,7 @@ def A_PainShootSkull(var actor : mobj_s?; angle : uint) {
     // count total number of skull currently on the level
     count = 0
     currentthinker = thinkercap.next
-    while (intptr(currentthinker) != intptr(addr(thinkercap))) {
+    while (currentthinker != addr(thinkercap)) {
         if ((currentthinker._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) &&
                 reinterpret<mobj_s?>(currentthinker)._c_type == mobjtype_t.MT_SKULL) {
             count++
@@ -21021,14 +21021,14 @@ def A_BossDeath(var mo : mobj_s?) {
                 th = th.next
             }
             _f = true
-            if (!(intptr(th) != intptr(addr(thinkercap)))) {
+            if (!(th != addr(thinkercap))) {
                 break
             }
             if (th._c_function.acp1 != reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
                 continue
             }
             mo2 = reinterpret<mobj_s?>(th)
-            if (intptr(mo2) != intptr(mo) && mo2._c_type == mo._c_type && mo2.health > 0) {
+            if (mo2 != mo && mo2._c_type == mo._c_type && mo2.health > 0) {
                 // other boss not dead
                 return
             }
@@ -21120,7 +21120,7 @@ def A_BrainAwake(var mo : mobj_s?) {
     braintargeton = 0
     thinker = thinkercap.next
     thinker = thinkercap.next
-    while (intptr(thinker) != intptr(addr(thinkercap))) {
+    while (thinker != addr(thinkercap)) {
         {
             if (thinker._c_function.acp1 != reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
                 // not a mobj
@@ -21797,7 +21797,7 @@ def P_GiveWeapon(var player : player_s?; weapon : weapontype_t; dropped : uint) 
             P_GiveAmmo(player, weaponinfo[int(weapon)].ammo, 2)
         }
         player.pendingweapon = weapon
-        if (intptr(player) == intptr(addr(players[0]) + end_index(consoleplayer, 4))) {
+        if (player == addr(players[0]) + end_index(consoleplayer, 4)) {
             S_StartSound(null, int(sfxenum_t.sfx_wpnup))
         }
         return 0u
@@ -22255,7 +22255,7 @@ def P_TouchSpecialThing(var special : mobj_s?; var toucher : mobj_s?) {
     }
     P_RemoveMobj(special)
     player.bonuscount += BONUSADD
-    if (intptr(player) == intptr(addr(players[0]) + end_index(consoleplayer, 4))) {
+    if (player == addr(players[0]) + end_index(consoleplayer, 4)) {
         S_StartSound(null, sound)
     }
 }
@@ -22292,7 +22292,7 @@ def P_KillMobj(var source : mobj_s?; var target : mobj_s?) {
         target.flags &= ~int(mobjflag_t.MF_SOLID)
         target.player.playerstate = playerstate_t.PST_DEAD
         P_DropWeapon(target.player)
-        if (intptr(target.player) == intptr(addr(players[0]) + end_index(consoleplayer, 4)) && automapactive != 0) {
+        if (target.player == addr(players[0]) + end_index(consoleplayer, 4) && automapactive != 0) {
             // don't die in auto map,
             // switch view prior to dying
             AM_Stop()
@@ -22424,7 +22424,7 @@ def P_DamageMobj(var target : mobj_s?; var inflictor : mobj_s?; var source : mob
             player.damagecount = 100
         }
         temp = damage < 100 ? damage : 100
-        if (intptr(player) == intptr(addr(players[0]) + end_index(consoleplayer, 4))) {
+        if (player == addr(players[0]) + end_index(consoleplayer, 4)) {
             I_Tactile(40, 10, 40 + temp * 2)
         }
     }
@@ -22441,13 +22441,12 @@ def P_DamageMobj(var target : mobj_s?; var inflictor : mobj_s?; var source : mob
     }
     // we're awake now...
     target.reactiontime = 0
-    if ((target.threshold == 0 || target._c_type == mobjtype_t.MT_VILE) && source != null && intptr(source) != intptr(target) &&
-            source._c_type != mobjtype_t.MT_VILE) {
+    if ((target.threshold == 0 || target._c_type == mobjtype_t.MT_VILE) && source != null && source != target && source._c_type != mobjtype_t.MT_VILE) {
         // if not intent on another player,
         // chase after this one
         target.target = source
         target.threshold = BASETHRESHOLD
-        if (intptr(target.state) == intptr(addr(states[0]) + end_index(target.info.spawnstate, 967)) && target.info.seestate != int(statenum_t.S_NULL)) {
+        if (target.state == addr(states[0]) + end_index(target.info.spawnstate, 967) && target.info.seestate != int(statenum_t.S_NULL)) {
             P_SetMobjState(target, enum_from_int(type<statenum_t>, target.info.seestate))
         }
     }
@@ -22692,7 +22691,7 @@ def PIT_StompThing(var thing : mobj_s?) : uint {
         return 1u
     }
     // don't clip against self
-    if (intptr(thing) == intptr(tmthing)) {
+    if (thing == tmthing) {
         return 1u
     }
     // monsters don't stomp things except on boss level
@@ -22833,7 +22832,7 @@ def PIT_CheckThing(var thing : mobj_s?) : uint {
         return 1u
     }
     // don't clip against self
-    if (intptr(thing) == intptr(tmthing)) {
+    if (thing == tmthing) {
         return 1u
     }
     // check for skulls slamming into things
@@ -22863,7 +22862,7 @@ def PIT_CheckThing(var thing : mobj_s?) : uint {
                 (tmthing.target._c_type == thing._c_type || (tmthing.target._c_type == mobjtype_t.MT_KNIGHT && thing._c_type == mobjtype_t.MT_BRUISER) ||
                     (tmthing.target._c_type == mobjtype_t.MT_BRUISER && thing._c_type == mobjtype_t.MT_KNIGHT))) {
             // Don't hit same species as originator.
-            if (intptr(thing) == intptr(tmthing.target)) {
+            if (thing == tmthing.target) {
                 return 1u
             }
             // sdh: Add deh_species_infighting here. We can override the
@@ -23289,7 +23288,7 @@ def PTR_AimTraverse(var _c_in : intercept_t?) : uint {
     }
     // shoot a thing
     th = _c_in.d.thing
-    if (intptr(th) == intptr(shootthing)) {
+    if (th == shootthing) {
         // can't shoot self
         return 1u
     }
@@ -23397,7 +23396,7 @@ def PTR_ShootTraverse(var _c_in : intercept_t?) : uint {
     }
     // shoot a thing
     th = _c_in.d.thing
-    if (intptr(th) == intptr(shootthing)) {
+    if (th == shootthing) {
         // can't shoot self
         return 1u
     }
@@ -24113,7 +24112,7 @@ def P_TraverseIntercepts(func : function<(var a0 : intercept_t?) : uint>; maxfra
         }
         dist = 2147483647
         scan = addr(intercepts[0])
-        while (intptr(scan) < intptr(intercept_p)) {
+        while (reinterpret<uint64>(scan) < reinterpret<uint64>(intercept_p)) {
             if (scan.frac < dist) {
                 dist = scan.frac
                 _c_in = scan
@@ -24811,7 +24810,7 @@ def P_SpawnMapThing(var mthing : mapthing_t?) {
     var z : int
     // count deathmatch start positions
     if (mthing._c_type == 11) {
-        if (intptr(deathmatch_p) < intptr(addr(deathmatchstarts[0]) + 10)) {
+        if (reinterpret<uint64>(deathmatch_p) < reinterpret<uint64>(addr(deathmatchstarts[0]) + 10)) {
             crt::memcpy(reinterpret<void?>(deathmatch_p), reinterpret<void?>(mthing), uint64(typeinfo sizeof(type<mapthing_t>)))
             deathmatch_p++
         }
@@ -25226,7 +25225,7 @@ def P_AddActivePlat(var plat : plat_t?) {
 [c_function]
 def P_RemoveActivePlat(var plat : plat_t?) {
     for (i in range(MAXPLATS)) {
-        if (intptr(plat) == intptr(activeplats[i])) {
+        if (plat == activeplats[i]) {
             activeplats[i].sector.specialdata = null
             P_RemoveThinker(addr(activeplats[i].thinker))
             activeplats[i] = null
@@ -25381,11 +25380,10 @@ def A_WeaponReady(var player : player_s?; var psp : pspdef_t?) {
     var newstate : statenum_t
     var angle : int
     // get out of attack state
-    if (intptr(player.mo.state) == intptr(addr(states[int(statenum_t.S_PLAY_ATK1)])) ||
-            intptr(player.mo.state) == intptr(addr(states[int(statenum_t.S_PLAY_ATK2)]))) {
+    if (player.mo.state == addr(states[int(statenum_t.S_PLAY_ATK1)]) || player.mo.state == addr(states[int(statenum_t.S_PLAY_ATK2)])) {
         P_SetMobjState(player.mo, statenum_t.S_PLAY)
     }
-    if (player.readyweapon == weapontype_t.wp_chainsaw && intptr(psp.state) == intptr(addr(states[int(statenum_t.S_SAW)]))) {
+    if (player.readyweapon == weapontype_t.wp_chainsaw && psp.state == addr(states[int(statenum_t.S_SAW)])) {
         S_StartSound(reinterpret<void?>(player.mo), int(sfxenum_t.sfx_sawidl))
     }
     // check for change
@@ -26794,7 +26792,7 @@ def P_ArchiveThinkers {
     var th : thinker_s?
     // save off the current thinkers
     th = thinkercap.next
-    while (intptr(th) != intptr(addr(thinkercap))) {
+    while (th != addr(thinkercap)) {
         {
             if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
                 doom_all__saveg_write8(uint8(thinkerclass_t.tc_mobj))
@@ -26820,7 +26818,7 @@ def P_UnArchiveThinkers {
     var mobj : mobj_s?
     // remove all the current thinkers
     currentthinker = thinkercap.next
-    while (intptr(currentthinker) != intptr(addr(thinkercap))) {
+    while (currentthinker != addr(thinkercap)) {
         next = currentthinker.next
         if (currentthinker._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
             P_RemoveMobj(reinterpret<mobj_s?>(currentthinker))
@@ -26873,12 +26871,12 @@ def P_ArchiveSpecials {
     var i : int
     // save off the current thinkers
     th = thinkercap.next
-    while (intptr(th) != intptr(addr(thinkercap))) {
+    while (th != addr(thinkercap)) {
         {
             if (th._c_function.acv == null) {
                 i = 0
                 while (i < MAXCEILINGS) {
-                    if (intptr(activeceilings[i]) == intptr(reinterpret<ceiling_t?>(th))) {
+                    if (activeceilings[i] == reinterpret<ceiling_t?>(th)) {
                         break
                     }
                     i++
@@ -27414,7 +27412,7 @@ def P_GroupLines {
     while (i < numlines) {
         doom_all__totallines++
         li.frontsector.linecount++
-        if (li.backsector != null && intptr(li.backsector) != intptr(li.frontsector)) {
+        if (li.backsector != null && li.backsector != li.frontsector) {
             li.backsector.linecount++
             doom_all__totallines++
         }
@@ -27439,7 +27437,7 @@ def P_GroupLines {
             sector.lines[sector.linecount] = li
             sector.linecount++
         }
-        if (li.backsector != null && intptr(li.frontsector) != intptr(li.backsector)) {
+        if (li.backsector != null && li.frontsector != li.backsector) {
             sector = li.backsector
             sector.lines[sector.linecount] = li
             sector.linecount++
@@ -27940,7 +27938,7 @@ def getNextSector(var line : line_s?; var sec : sector_t?) : sector_t? {
     if ((int(line.flags) & ML_TWOSIDED) == 0) {
         return null
     }
-    if (intptr(line.frontsector) == intptr(sec)) {
+    if (line.frontsector == sec) {
         return line.backsector
     }
     return line.frontsector
@@ -28674,7 +28672,7 @@ def P_UpdateSpecials {
     }
     // ANIMATE FLATS AND TEXTURES GLOBALLY
     anim = addr(anims[0])
-    while (intptr(anim) < intptr(lastanim)) {
+    while (reinterpret<uint64>(anim) < reinterpret<uint64>(lastanim)) {
         i = anim.basepic
         while (i < anim.basepic + anim.numpics) {
             pic = anim.basepic + ((leveltime / anim.speed + i) % anim.numpics)
@@ -28822,7 +28820,7 @@ def EV_DoDonut(var line : line_s?) : int {
                     break
                 }
                 s3 = s2.lines[i].backsector
-                if (intptr(s3) == intptr(s1)) {
+                if (s3 == s1) {
                     continue
                 }
                 if (s3 == null) {
@@ -29019,7 +29017,7 @@ def P_InitSwitchList {
 def P_StartButton(var line : line_s?; w : bwhere_e; texture : int; time : int) {
     // See if button is already pressed
     for (i in range(MAXBUTTONS)) {
-        if (buttonlist[i].btimer != 0 && intptr(buttonlist[i].line) == intptr(line)) {
+        if (buttonlist[i].btimer != 0 && buttonlist[i].line == line) {
             return
         }
     }
@@ -29532,7 +29530,7 @@ def EV_Teleport(var line : line_s?; side : int; var thing : mobj_s?) : int {
                         thinker = thinker.next
                     }
                     _f = true
-                    if (!(intptr(thinker) != intptr(addr(thinkercap)))) {
+                    if (!(thinker != addr(thinkercap))) {
                         break
                     }
                     // not a mobj
@@ -29625,7 +29623,7 @@ def P_AllocateThinker(var thinker : thinker_s?) {
 def P_RunThinkers {
     var currentthinker : thinker_s?
     currentthinker = thinkercap.next
-    while (intptr(currentthinker) != intptr(addr(thinkercap))) {
+    while (currentthinker != addr(thinkercap)) {
         if (currentthinker._c_function.acv == reinterpret<function<() : void>>(uint64(-1))) {
             // time to remove it
             currentthinker.next.prev = currentthinker.prev
@@ -29738,7 +29736,7 @@ def P_MovePlayer(var player : player_s?) {
     if (cmd.sidemove != 0 && onground != 0) {
         P_Thrust(player, player.mo.angle - uint(ANG90), int(cmd.sidemove) * 2048)
     }
-    if ((cmd.forwardmove != 0 || cmd.sidemove != 0) && intptr(player.mo.state) == intptr(addr(states[int(statenum_t.S_PLAY)]))) {
+    if ((cmd.forwardmove != 0 || cmd.sidemove != 0) && player.mo.state == addr(states[int(statenum_t.S_PLAY)])) {
         P_SetMobjState(player.mo, statenum_t.S_PLAY_RUN1)
     }
 }
@@ -29757,7 +29755,7 @@ def P_DeathThink(var player : player_s?) {
     player.deltaviewheight = 0
     onground = uint(int_of(player.mo.z <= player.mo.floorz))
     P_CalcHeight(player)
-    if (player.attacker != null && intptr(player.attacker) != intptr(player.mo)) {
+    if (player.attacker != null && player.attacker != player.mo) {
         angle = R_PointToAngle2(player.mo.x, player.mo.y, player.attacker.x, player.attacker.y)
         delta = angle - player.mo.angle
         if (delta < uint(ANG5) || delta > uint(-ANG5)) {
@@ -29924,7 +29922,7 @@ def R_ClipSolidWallSegment(first : int; last : int) {
             R_StoreWallRange(first, last)
             next = newend
             newend++
-            while (intptr(next) != intptr(start)) {
+            while (next != start) {
                 *next = *(next - 1)
                 next--
             }
@@ -29960,14 +29958,14 @@ def R_ClipSolidWallSegment(first : int; last : int) {
     label 1:  // crunch
     // Remove start+1 to next from the clip list,
     // because start now covers their area.
-    if (intptr(next) == intptr(start)) {
+    if (next == start) {
         // Post just extended past the bottom of one post.
         return
     }
     while (true) {
         var _t0 = next
         next++
-        if (!(intptr(_t0) != intptr(newend))) {
+        if (!(_t0 != newend)) {
             break
         }
         // Remove a post.
@@ -30801,7 +30799,7 @@ def R_PrecacheLevel {
     spritepresent = reinterpret<uint8?>(Z_Malloc(numsprites, int(anon_28.PU_STATIC), null))
     crt::memset(reinterpret<void?>(spritepresent), 0, uint64(numsprites))
     th = thinkercap.next
-    while (intptr(th) != intptr(addr(thinkercap))) {
+    while (th != addr(thinkercap)) {
         if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
             spritepresent[int(reinterpret<mobj_s?>(th).sprite)] = 1u8
         }
@@ -31887,13 +31885,13 @@ def R_FindPlane(var height : int; picnum : int; var lightlevel : int) : visplane
         lightlevel = 0
     }
     check = addr(visplanes[0])
-    while (intptr(check) < intptr(lastvisplane)) {
+    while (reinterpret<uint64>(check) < reinterpret<uint64>(lastvisplane)) {
         if (height == check.height && picnum == check.picnum && lightlevel == check.lightlevel) {
             break
         }
         check++
     }
-    if (intptr(check) < intptr(lastvisplane)) {
+    if (reinterpret<uint64>(check) < reinterpret<uint64>(lastvisplane)) {
         return check
     }
     if (int64(lastvisplane - addr(visplanes[0])) == int64(MAXVISPLANES)) {
@@ -31997,7 +31995,7 @@ def R_DrawPlanes {
         I_Error`va(cstr("R_DrawPlanes: opening overflow (%i)"), (int64(lastopening - addr(openings[0])),))
     }
     pl = addr(visplanes[0])
-    while (intptr(pl) < intptr(lastvisplane)) {
+    while (reinterpret<uint64>(pl) < reinterpret<uint64>(lastvisplane)) {
         {
             if (pl.minx > pl.maxx) {
                 continue
@@ -32266,7 +32264,7 @@ def R_StoreWallRange(start : int; stop : int) {
     var vtop : int
     var lightnum : int
     // don't overflow and crash
-    if (intptr(ds_p) == intptr(addr(drawsegs[0]) + 256)) {
+    if (ds_p == addr(drawsegs[0]) + 256) {
         return
     }
     if (start >= viewwidth || start > stop) {
@@ -32688,7 +32686,7 @@ def R_ClearSprites {
 
 [c_function]
 def R_NewVisSprite : vissprite_s? {
-    if (intptr(vissprite_p) == intptr(addr(vissprites[0]) + 128)) {
+    if (vissprite_p == addr(vissprites[0]) + 128) {
         return addr(overflowsprite)
     }
     vissprite_p++
@@ -33026,7 +33024,7 @@ def R_SortVisSprites {
         return
     }
     ds = addr(vissprites[0])
-    while (intptr(ds) < intptr(vissprite_p)) {
+    while (reinterpret<uint64>(ds) < reinterpret<uint64>(vissprite_p)) {
         ds.next = ds + 1
         ds.prev = ds - 1
         ds++
@@ -33042,7 +33040,7 @@ def R_SortVisSprites {
         bestscale = 2147483647
         best = unsorted.next
         ds = unsorted.next
-        while (intptr(ds) != intptr(addr(unsorted))) {
+        while (ds != addr(unsorted)) {
             if (ds.scale < bestscale) {
                 bestscale = ds.scale
                 best = ds
@@ -33077,7 +33075,7 @@ def R_DrawSprite(var spr : vissprite_s?) {
     // The first drawseg that has a greater scale
     // is the clip seg.
     ds = ds_p - 1
-    while (intptr(ds) >= intptr(addr(drawsegs[0]))) {
+    while (reinterpret<uint64>(ds) >= reinterpret<uint64>(addr(drawsegs[0]))) {
         {
             // determine if the drawseg obscures the sprite
             if (ds.x1 > spr.x2 || ds.x2 < spr.x1 || (ds.silhouette == 0 && ds.maskedtexturecol == null)) {
@@ -33167,17 +33165,17 @@ def R_DrawMasked {
     var spr : vissprite_s?
     var ds : drawseg_s?
     R_SortVisSprites()
-    if (intptr(vissprite_p) > intptr(addr(vissprites[0]))) {
+    if (reinterpret<uint64>(vissprite_p) > reinterpret<uint64>(addr(vissprites[0]))) {
         // draw all vissprites back to front
         spr = vsprsortedhead.next
-        while (intptr(spr) != intptr(addr(vsprsortedhead))) {
+        while (spr != addr(vsprsortedhead)) {
             R_DrawSprite(spr)
             spr = spr.next
         }
     }
     // render any remaining masked mid textures
     ds = ds_p - 1
-    while (intptr(ds) >= intptr(addr(drawsegs[0]))) {
+    while (reinterpret<uint64>(ds) >= reinterpret<uint64>(addr(drawsegs[0]))) {
         if (ds.maskedtexturecol != null) {
             R_RenderMaskedSegRange(ds, ds.x1, ds.x2)
         }
@@ -34292,7 +34290,7 @@ def ST_updateFaceWidget {
         }
     }
     if (ST_updateFaceWidget_priority < 8) {
-        if (doom_all__plyr.damagecount != 0 && doom_all__plyr.attacker != null && intptr(doom_all__plyr.attacker) != intptr(doom_all__plyr.mo)) {
+        if (doom_all__plyr.damagecount != 0 && doom_all__plyr.attacker != null && doom_all__plyr.attacker != doom_all__plyr.mo) {
             // being attacked
             ST_updateFaceWidget_priority = 7
             if (doom_all__plyr.health - doom_all__st_oldhealth > ST_MUCHPAIN) {
@@ -34767,7 +34765,7 @@ def private doom_all__S_StopChannel(cnum : int) {
         }
         // check to see if other channels are playing the sound
         for (i in range(snd_channels)) {
-            if (cnum != i && intptr(c.sfxinfo) == intptr(doom_all__channels[i].sfxinfo)) {
+            if (cnum != i && c.sfxinfo == doom_all__channels[i].sfxinfo) {
                 break
             }
         }
@@ -34821,7 +34819,7 @@ def S_StopSound(var origin : mobj_s?) {
     var cnum : int
     cnum = 0
     while (cnum < snd_channels) {
-        if (doom_all__channels[cnum].sfxinfo != null && intptr(doom_all__channels[cnum].origin) == intptr(origin)) {
+        if (doom_all__channels[cnum].sfxinfo != null && doom_all__channels[cnum].origin == origin) {
             doom_all__S_StopChannel(cnum)
             break
         }
@@ -34839,7 +34837,7 @@ def private doom_all__S_GetChannel(var origin : mobj_s?; var sfxinfo : sfxinfo_s
     while (cnum < snd_channels) {
         if (doom_all__channels[cnum].sfxinfo == null) {
             break
-        } elif (origin != null && intptr(doom_all__channels[cnum].origin) == intptr(origin)) {
+        } elif (origin != null && doom_all__channels[cnum].origin == origin) {
             doom_all__S_StopChannel(cnum)
             break
         }
@@ -34937,7 +34935,7 @@ def S_StartSound(var origin_p : void?; sfx_id : int) {
     }
     // Check to see if it is audible,
     // and if not, modify the params
-    if (origin != null && intptr(origin) != intptr(players[consoleplayer].mo)) {
+    if (origin != null && origin != players[consoleplayer].mo) {
         rc = doom_all__S_AdjustSoundParams(players[consoleplayer].mo, origin, addr(volume), addr(sep))
         if (origin.x == players[consoleplayer].mo.x && origin.y == players[consoleplayer].mo.y) {
             sep = NORM_SEP
@@ -35011,7 +35009,7 @@ def S_UpdateSounds(var listener : mobj_s?) {
                     }
                     // check non-local sounds for distance clipping
                     // or modify their params
-                    if (c.origin != null && intptr(listener) != intptr(c.origin)) {
+                    if (c.origin != null && listener != c.origin) {
                         audible = doom_all__S_AdjustSoundParams(listener, c.origin, addr(volume), addr(sep))
                         if (audible == 0) {
                             doom_all__S_StopChannel(cnum)
@@ -35064,7 +35062,7 @@ def S_ChangeMusic(var musicnum : int; looping : int) {
     } else {
         music = addr(S_music[0]) + end_index(musicnum, 68)
     }
-    if (intptr(doom_all__mus_playing) == intptr(music)) {
+    if (doom_all__mus_playing == music) {
         return
     }
     // shutdown old music
@@ -35117,7 +35115,7 @@ def SlopeDiv(num : uint; den : uint) : int {
 def V_MarkRect(x : int; y : int; width : int; height : int) {
     // If we are temporarily using an alternate screen, do not
     // affect the update box.
-    if (intptr(doom_all__dest_screen) == intptr(I_VideoBuffer)) {
+    if (doom_all__dest_screen == I_VideoBuffer) {
         M_AddToBox(addr(dirtybox[0]), x, y)
         M_AddToBox(addr(dirtybox[0]), x + width - 1, y + height - 1)
     }
@@ -36728,7 +36726,7 @@ def WI_Start(var wbstartstruct : wbstartstruct_t?) {
 def private doom_all__GetFileNumber(var handle : _wad_file_s?) : int {
     var result : int
     for (i in range(doom_all__num_open_wadfiles)) {
-        if (intptr(doom_all__open_wadfiles[i]) == intptr(handle)) {
+        if (doom_all__open_wadfiles[i] == handle) {
             return i
         }
     }
@@ -37196,7 +37194,7 @@ def Z_Free(var ptr : void?) {
         other.size += _c_block.size
         other.next = _c_block.next
         other.next.prev = other
-        if (intptr(_c_block) == intptr(mainzone.rover)) {
+        if (_c_block == mainzone.rover) {
             mainzone.rover = other
         }
         _c_block = other
@@ -37207,7 +37205,7 @@ def Z_Free(var ptr : void?) {
         _c_block.size += other.size
         _c_block.next = other.next
         _c_block.next.prev = _c_block
-        if (intptr(other) == intptr(mainzone.rover)) {
+        if (other == mainzone.rover) {
             mainzone.rover = _c_block
         }
     }
@@ -37237,7 +37235,7 @@ def Z_Malloc(var size : int; tag : int; var user : void?) : void? {
     rover = base
     start = base.prev
     c_do_while(base.tag != int(anon_28.PU_FREE) || base.size < size) {
-        if (intptr(rover) == intptr(start)) {
+        if (rover == start) {
             // scanned all the way around the list
             I_Error`va(cstr("Z_Malloc: failed on allocation of %i bytes"), (size,))
         }
@@ -37294,7 +37292,7 @@ def Z_FreeTags(lowtag : int; hightag : int) {
     var _c_block : memblock_s?
     var next : memblock_s?
     _c_block = mainzone.blocklist.next
-    while (intptr(_c_block) != intptr(addr(mainzone.blocklist))) {
+    while (_c_block != addr(mainzone.blocklist)) {
         {
             // get link before freeing
             next = _c_block.next
@@ -37323,14 +37321,14 @@ def Z_DumpHeap(lowtag : int; hightag : int) {
         if (_c_block.tag >= lowtag && _c_block.tag <= hightag) {
             fprintf(crt::c_stderr(), cstr("block:%p    size:%7i    user:%p    tag:%3i\n"), _c_block, _c_block.size, _c_block.user, _c_block.tag)
         }
-        if (intptr(_c_block.next) == intptr(addr(mainzone.blocklist))) {
+        if (_c_block.next == addr(mainzone.blocklist)) {
             // all blocks have been hit
             break
         }
-        if (intptr(reinterpret<uint8?>(_c_block) + _c_block.size) != intptr(reinterpret<uint8?>(_c_block.next))) {
+        if (reinterpret<uint8?>(_c_block) + _c_block.size != reinterpret<uint8?>(_c_block.next)) {
             fprintf(crt::c_stderr(), cstr("ERROR: block size does not touch the next block\n"))
         }
-        if (intptr(_c_block.next.prev) != intptr(_c_block)) {
+        if (_c_block.next.prev != _c_block) {
             fprintf(crt::c_stderr(), cstr("ERROR: next block doesn't have proper back link\n"))
         }
         if (_c_block.tag == int(anon_28.PU_FREE) && _c_block.next.tag == int(anon_28.PU_FREE)) {
@@ -37348,14 +37346,14 @@ def Z_FileDumpHeap(var f : _IO_FILE?) {
     _c_block = mainzone.blocklist.next
     while (true) {
         fprintf(reinterpret<void?>(f), cstr("block:%p    size:%7i    user:%p    tag:%3i\n"), _c_block, _c_block.size, _c_block.user, _c_block.tag)
-        if (intptr(_c_block.next) == intptr(addr(mainzone.blocklist))) {
+        if (_c_block.next == addr(mainzone.blocklist)) {
             // all blocks have been hit
             break
         }
-        if (intptr(reinterpret<uint8?>(_c_block) + _c_block.size) != intptr(reinterpret<uint8?>(_c_block.next))) {
+        if (reinterpret<uint8?>(_c_block) + _c_block.size != reinterpret<uint8?>(_c_block.next)) {
             fprintf(reinterpret<void?>(f), cstr("ERROR: block size does not touch the next block\n"))
         }
-        if (intptr(_c_block.next.prev) != intptr(_c_block)) {
+        if (_c_block.next.prev != _c_block) {
             fprintf(reinterpret<void?>(f), cstr("ERROR: next block doesn't have proper back link\n"))
         }
         if (_c_block.tag == int(anon_28.PU_FREE) && _c_block.next.tag == int(anon_28.PU_FREE)) {
@@ -37371,14 +37369,14 @@ def Z_CheckHeap {
     var _c_block : memblock_s?
     _c_block = mainzone.blocklist.next
     while (true) {
-        if (intptr(_c_block.next) == intptr(addr(mainzone.blocklist))) {
+        if (_c_block.next == addr(mainzone.blocklist)) {
             // all blocks have been hit
             break
         }
-        if (intptr(reinterpret<uint8?>(_c_block) + _c_block.size) != intptr(reinterpret<uint8?>(_c_block.next))) {
+        if (reinterpret<uint8?>(_c_block) + _c_block.size != reinterpret<uint8?>(_c_block.next)) {
             I_Error`va(cstr("Z_CheckHeap: block size does not touch the next block\n"), VaNone())
         }
-        if (intptr(_c_block.next.prev) != intptr(_c_block)) {
+        if (_c_block.next.prev != _c_block) {
             I_Error`va(cstr("Z_CheckHeap: next block doesn't have proper back link\n"), VaNone())
         }
         if (_c_block.tag == int(anon_28.PU_FREE) && _c_block.next.tag == int(anon_28.PU_FREE)) {
@@ -37420,7 +37418,7 @@ def Z_FreeMemory : int {
     var free : int
     free = 0
     _c_block = mainzone.blocklist.next
-    while (intptr(_c_block) != intptr(addr(mainzone.blocklist))) {
+    while (_c_block != addr(mainzone.blocklist)) {
         if (_c_block.tag == int(anon_28.PU_FREE) || _c_block.tag >= int(anon_28.PU_PURGELEVEL)) {
             free += _c_block.size
         }
