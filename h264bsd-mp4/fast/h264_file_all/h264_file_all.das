@@ -2413,10 +2413,10 @@ def memmove1(var dest : void?; var src : void?; count : uint64) : void? {
     var out : uint8? = reinterpret<uint8?>(dest)
     var _c_in : uint8? = reinterpret<uint8?>(src)
     var i : uint64 = 0ul
-    if (intptr(out) == intptr(reinterpret<uint8?>(_c_in)) || count == 0ul) {
+    if (out == reinterpret<uint8?>(_c_in) || count == 0ul) {
         return dest
     }
-    if (intptr(out) < intptr(reinterpret<uint8?>(_c_in))) {
+    if (reinterpret<uint64>(out) < reinterpret<uint64>(_c_in)) {
         for (i1 in urange64(count)) {
             out[i1] = _c_in[i1]
         }
@@ -3739,7 +3739,7 @@ def private h264_file_all__InnerBoundaryStrength(var mb1 : mbStorage?; ind1 : ui
     mv4 = int(mb1.mv[ind2].ver)
     if (tmp1 != 0 || tmp2 != 0) {
         return 2u
-    } elif ((uint(ABS(mv1 - mv2)) >= 4u) || (uint(ABS(mv3 - mv4)) >= 4u) || (intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb1.refAddr[ind2 >> 2u]))) {
+    } elif ((uint(ABS(mv1 - mv2)) >= 4u) || (uint(ABS(mv3 - mv4)) >= 4u) || (mb1.refAddr[ind1 >> 2u] != mb1.refAddr[ind2 >> 2u])) {
         return 1u
     } else {
         return 0u
@@ -3763,7 +3763,7 @@ def InnerBoundaryStrength2(var mb1 : mbStorage?; ind1 : uint; ind2 : uint) : uin
     tmp2 = int(mb1.mv[ind2].hor)
     tmp3 = int(mb1.mv[ind1].ver)
     tmp4 = int(mb1.mv[ind2].ver)
-    if ((uint(ABS(tmp1 - tmp2)) >= 4u) || (uint(ABS(tmp3 - tmp4)) >= 4u) || (intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb1.refAddr[ind2 >> 2u]))) {
+    if ((uint(ABS(tmp1 - tmp2)) >= 4u) || (uint(ABS(tmp3 - tmp4)) >= 4u) || (mb1.refAddr[ind1 >> 2u] != mb1.refAddr[ind2 >> 2u])) {
         return 1u
     } else {
         return 0u
@@ -3781,7 +3781,7 @@ def InnerBoundaryStrength2(var mb1 : mbStorage?; ind1 : uint; ind2 : uint) : uin
 def private h264_file_all__EdgeBoundaryStrength(var mb1 : mbStorage?; var mb2 : mbStorage?; ind1 : uint; ind2 : uint) : uint {
     if (mb1.totalCoeff[ind1] != 0 || mb2.totalCoeff[ind2] != 0) {
         return 2u
-    } elif ((intptr(mb1.refAddr[ind1 >> 2u]) != intptr(mb2.refAddr[ind2 >> 2u])) ||
+    } elif ((mb1.refAddr[ind1 >> 2u] != mb2.refAddr[ind2 >> 2u]) ||
             (uint(int(mb1.mv[ind1].hor) - int(mb2.mv[ind2].hor) < 0 ? -(int(mb1.mv[ind1].hor) - int(mb2.mv[ind2].hor)) :
                     int(mb1.mv[ind1].hor) - int(mb2.mv[ind2].hor)) >=
                 4u) ||
@@ -4751,7 +4751,7 @@ def h264bsdDecode(var pStorage : storage?; var byteStrm : uint8?; len : uint; pi
     // Code
     // if previous buffer was not finished and same pointer given -> skip NAL
     // unit extraction
-    if (pStorage.prevBufNotFinished != 0 && intptr(byteStrm) == intptr(pStorage.prevBufPointer)) {
+    if (pStorage.prevBufNotFinished != 0 && byteStrm == pStorage.prevBufPointer) {
         strm = pStorage.strm[0]
         strm.pStrmCurrPos = strm.pStrmBuffStart
         strm.bitPosInWord = 0u
@@ -5581,7 +5581,7 @@ def h264bsdReorderRefPicList(var dpb : dpbStorage_t?; var order : refPicListReor
         k = refIdx
         j = k
         while (j <= numRefIdxActive) {
-            if (intptr(dpb.list[j]) != intptr(addr(dpb.buffer[index]))) {
+            if (dpb.list[j] != addr(dpb.buffer[index])) {
                 let _t1 = k
                 k++
                 dpb.list[_t1] = dpb.list[j]
@@ -5758,7 +5758,7 @@ def h264bsdMarkDecRefPic(var dpb : dpbStorage_t?; var mark : decRefPicMarking_t?
     var markedAsLongTerm : uint
     var toBeDisplayed : uint
     // Code
-    if (intptr(image.data) != intptr(dpb.currentOut.data)) {
+    if (image.data != dpb.currentOut.data) {
         return uint(HANTRO_NOK)
     }
     dpb.lastContainsMmco5 = uint(HANTRO_FALSE)
@@ -6109,12 +6109,12 @@ def h264bsdCheckGapsInFrameNum(var dpb : dpbStorage_t?; frameNum : uint; isRefPi
             var i : uint
             i = 0u
             while (i < dpb.numOut) {
-                if (intptr(dpb.outBuf[i].data) == intptr(dpb.buffer[dpb.dpbSize].data)) {
+                if (dpb.outBuf[i].data == dpb.buffer[dpb.dpbSize].data) {
                     // find buffer position containing data pointer stored in
                     // tmp
                     i = 0u
                     while (i < dpb.dpbSize) {
-                        if (intptr(dpb.buffer[i].data) == intptr(tmp)) {
+                        if (dpb.buffer[i].data == tmp) {
                             dpb.buffer[i].data = dpb.buffer[dpb.dpbSize].data
                             dpb.buffer[dpb.dpbSize].data = tmp
                             break
@@ -15379,7 +15379,7 @@ def MP4E_add_track(var mux : MP4E_mux_tag?; var track_data : MP4E_track_t?) : in
 
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def private h264_file_all__next_dsi(var p : uint8?; var end : uint8?; var bytes : int?) : uint8? {
-    if (intptr(p) < intptr(end + 2)) {
+    if (reinterpret<uint64>(p) < reinterpret<uint64>(end + 2)) {
         *bytes = int(p[0]) * 256 + int(p[1])
         return p + 2
     } else {
@@ -19603,11 +19603,11 @@ def private h264_file_all__transcode_nalu(var h : h264_sps_id_patcher_t?; var sr
 def private h264_file_all__find_start_code(var h264_data : uint8?; h264_data_bytes : int; var zcount : int?) : uint8? {
     var eof : uint8? = h264_data + h264_data_bytes
     var p : uint8? = h264_data
-    c_do_while(intptr(p) < intptr(eof)) {
+    c_do_while(reinterpret<uint64>(p) < reinterpret<uint64>(eof)) {
         var zero_cnt : int = 1
         var found : uint8? = reinterpret<uint8?>(memchr1(reinterpret<void?>(p), 0, uint64(int64(eof - p))))
         p = found != null ? found : eof
-        while (intptr(p + zero_cnt) < intptr(eof) && p[zero_cnt] == 0) {
+        while (reinterpret<uint64>(p + zero_cnt) < reinterpret<uint64>(eof) && p[zero_cnt] == 0) {
             zero_cnt++
         }
         if (zero_cnt >= 2 && p[zero_cnt] == 1) {
@@ -19629,7 +19629,7 @@ def private h264_file_all__find_nal_unit(var h264_data : uint8?; h264_data_bytes
     var stop : uint8? = start
     if (start != null) {
         stop = h264_file_all__find_start_code(start, int(int64(eof - start)), addr(zcount))
-        while (intptr(stop) > intptr(start) && stop[-1] == 0) {
+        while (reinterpret<uint64>(stop) > reinterpret<uint64>(start) && stop[-1] == 0) {
             stop--
         }
     }
