@@ -9939,7 +9939,7 @@ def joypad_delete(var buffer : JoypadBuffer?) {
         return
     }
     var current : JoypadChunk? = buffer.sentinel.next
-    while (intptr(current) != intptr(addr(buffer.sentinel))) {
+    while (current != addr(buffer.sentinel)) {
         var next : JoypadChunk? = current.next
         crt::free(reinterpret<void?>(current.data))
         crt::free(reinterpret<void?>(current))
@@ -10065,7 +10065,7 @@ def joypad_truncate_to(var buffer : JoypadBuffer?; var iter_in : JoypadStateIter
     iter.chunk.size = index + 1ul
     var chunk : JoypadChunk? = iter.chunk.next
     var sentinel : JoypadChunk? = addr(buffer.sentinel)
-    while (intptr(chunk) != intptr(sentinel)) {
+    while (chunk != sentinel) {
         var temp : JoypadChunk? = chunk.next
         crt::free(reinterpret<void?>(chunk.data))
         crt::free(reinterpret<void?>(chunk))
@@ -10115,7 +10115,7 @@ def joypad_get_stats(var buffer : JoypadBuffer?) : JoypadStats {
     crt::memset(reinterpret<void?>(addr(stats)), 0, uint64(typeinfo sizeof(type<JoypadStats>)))
     var sentinel : JoypadChunk? = addr(buffer.sentinel)
     var cur : JoypadChunk? = sentinel.next
-    while (intptr(cur) != intptr(sentinel)) {
+    while (cur != sentinel) {
         let overhead : uint64 = uint64(typeinfo sizeof(type<JoypadChunk>))
         stats.used_bytes += cur.size * uint64(typeinfo sizeof(type<JoypadState>)) + overhead
         stats.capacity_bytes += cur.capacity * uint64(typeinfo sizeof(type<JoypadState>)) + overhead
@@ -10128,7 +10128,7 @@ def joypad_get_stats(var buffer : JoypadBuffer?) : JoypadStats {
 def private binjgb_all__joypad_file_size(var buffer : JoypadBuffer?) : uint64 {
     var size : uint64 = 0ul
     var chunk : JoypadChunk? = buffer.sentinel.next
-    while (intptr(chunk) != intptr(addr(buffer.sentinel))) {
+    while (chunk != addr(buffer.sentinel)) {
         size += chunk.size * uint64(typeinfo sizeof(type<JoypadState>))
         chunk = chunk.next
     }
@@ -10145,7 +10145,7 @@ def joypad_init_file_data(var buffer : JoypadBuffer?; var file_data : FileData?)
 def joypad_write(var buffer : JoypadBuffer?; var file_data : FileData?) : Result {
     var chunk : JoypadChunk? = buffer.sentinel.next
     var p : uint8? = file_data.data
-    while (intptr(chunk) != intptr(addr(buffer.sentinel))) {
+    while (chunk != addr(buffer.sentinel)) {
         let chunk_size : uint64 = chunk.size * uint64(typeinfo sizeof(type<JoypadState>))
         crt::memcpy(reinterpret<void?>(p), reinterpret<void?>(chunk.data), chunk_size)
         p += chunk_size
