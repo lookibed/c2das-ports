@@ -776,7 +776,7 @@ def R_PrecacheLevel {
     spritepresent = reinterpret<uint8?>(invoke(doom_malloc, numsprites))
     doom_memset(reinterpret<void?>(spritepresent), 0, numsprites)
     th = thinkercap.next
-    while (intptr(th) != intptr(addr(thinkercap))) {
+    while (th != addr(thinkercap)) {
         if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
             spritepresent[int(reinterpret<mobj_s?>(th).sprite)] = 1u8
         }

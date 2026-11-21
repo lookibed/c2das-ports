@@ -205,7 +205,7 @@ def P_AddActivePlat(var plat : plat_t?) {
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def P_RemoveActivePlat(var plat : plat_t?) {
     for (i in range(MAXPLATS)) {
-        if (intptr(plat) == intptr(activeplats[i])) {
+        if (plat == activeplats[i]) {
             activeplats[i].sector.specialdata = null
             P_RemoveThinker(addr(activeplats[i].thinker))
             activeplats[i] = null

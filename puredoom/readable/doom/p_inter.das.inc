@@ -101,7 +101,7 @@ def P_GiveWeapon(var player : player_s?; weapon : weapontype_t; dropped : doom_b
             P_GiveAmmo(player, weaponinfo[int(weapon)].ammo, 2)
         }
         player.pendingweapon = weapon
-        if (intptr(player) == intptr(addr(players[0]) + end_index(consoleplayer, 4))) {
+        if (player == addr(players[0]) + end_index(consoleplayer, 4)) {
             S_StartSound(null, int(sfxenum_t.sfx_wpnup))
         }
         return doom_boolean._c_false
@@ -555,7 +555,7 @@ def P_TouchSpecialThing(var special : mobj_s?; var toucher : mobj_s?) {
     }
     P_RemoveMobj(special)
     player.bonuscount += BONUSADD
-    if (intptr(player) == intptr(addr(players[0]) + end_index(consoleplayer, 4))) {
+    if (player == addr(players[0]) + end_index(consoleplayer, 4)) {
         S_StartSound(null, sound)
     }
 }
@@ -592,7 +592,7 @@ def P_KillMobj(var source : mobj_s?; var target : mobj_s?) {
         target.flags &= ~int(mobjflag_t.MF_SOLID)
         target.player.playerstate = playerstate_t.PST_DEAD
         P_DropWeapon(target.player)
-        if (intptr(target.player) == intptr(addr(players[0]) + end_index(consoleplayer, 4)) && uint(automapactive) != 0) {
+        if (target.player == addr(players[0]) + end_index(consoleplayer, 4) && uint(automapactive) != 0) {
             // don't die in auto map,
             // switch view prior to dying
             AM_Stop()
@@ -720,7 +720,7 @@ def P_DamageMobj(var target : mobj_s?; var inflictor : mobj_s?; var source : mob
             player.damagecount = 100
         }
         temp = damage < 100 ? damage : 100
-        if (intptr(player) == intptr(addr(players[0]) + end_index(consoleplayer, 4))) {
+        if (player == addr(players[0]) + end_index(consoleplayer, 4)) {
             I_Tactile(40, 10, 40 + temp * 2)
         }
     }
@@ -737,13 +737,12 @@ def P_DamageMobj(var target : mobj_s?; var inflictor : mobj_s?; var source : mob
     }
     // we're awake now...
     target.reactiontime = 0
-    if ((target.threshold == 0 || target._c_type == mobjtype_t.MT_VILE) && source != null && intptr(source) != intptr(target) &&
-            source._c_type != mobjtype_t.MT_VILE) {
+    if ((target.threshold == 0 || target._c_type == mobjtype_t.MT_VILE) && source != null && source != target && source._c_type != mobjtype_t.MT_VILE) {
         // if not intent on another player,
         // chase after this one
         target.target = source
         target.threshold = BASETHRESHOLD
-        if (intptr(target.state) == intptr(addr(states[0]) + end_index(target.info.spawnstate, 967)) && target.info.seestate != int(statenum_t.S_NULL)) {
+        if (target.state == addr(states[0]) + end_index(target.info.spawnstate, 967) && target.info.seestate != int(statenum_t.S_NULL)) {
             P_SetMobjState(target, enum_from_int(type<statenum_t>, target.info.seestate))
         }
     }

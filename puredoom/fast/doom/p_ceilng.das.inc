@@ -184,7 +184,7 @@ def P_AddActiveCeiling(var c : ceiling_t?) {
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def P_RemoveActiveCeiling(var c : ceiling_t?) {
     for (i in range(MAXCEILINGS)) {
-        if (intptr(activeceilings[i]) == intptr(c)) {
+        if (activeceilings[i] == c) {
             activeceilings[i].sector.specialdata = null
             P_RemoveThinker(addr(activeceilings[i].thinker))
             activeceilings[i] = null

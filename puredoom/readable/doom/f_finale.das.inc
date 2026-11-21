@@ -307,7 +307,7 @@ def F_CastTicker {
         castframes = 0
     } else {
         // just advance to next state in animation
-        if (intptr(caststate) == intptr(addr(states[int(statenum_t.S_PLAY_ATK1)]))) {
+        if (caststate == addr(states[int(statenum_t.S_PLAY_ATK1)])) {
             // Oh, gross hack!
             goto label 1
         }
@@ -402,7 +402,7 @@ def F_CastTicker {
             caststate = addr(states[0]) + end_index(mobjinfo[int(castorder[castnum]._c_type)].missilestate, 967)
         }
         castonmelee ^= 1
-        if (intptr(caststate) == intptr(addr(states[int(statenum_t.S_NULL)]))) {
+        if (caststate == addr(states[int(statenum_t.S_NULL)])) {
             if (castonmelee != 0) {
                 caststate = addr(states[0]) + end_index(mobjinfo[int(castorder[castnum]._c_type)].meleestate, 967)
             } else {
@@ -413,7 +413,7 @@ def F_CastTicker {
     if (int(castattacking) == 0) {
         goto label 2
     }
-    if (!(castframes == 24 || intptr(caststate) == intptr(addr(states[0]) + end_index(mobjinfo[int(castorder[castnum]._c_type)].seestate, 967)))) {
+    if (!(castframes == 24 || caststate == addr(states[0]) + end_index(mobjinfo[int(castorder[castnum]._c_type)].seestate, 967))) {
         goto label 3
     }
     label 1:  // stopattack

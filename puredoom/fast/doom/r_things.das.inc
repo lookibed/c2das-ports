@@ -234,7 +234,7 @@ def R_ClearSprites {
 
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def R_NewVisSprite : vissprite_s? {
-    if (intptr(vissprite_p) == intptr(addr(vissprites[0]) + 128)) {
+    if (vissprite_p == addr(vissprites[0]) + 128) {
         return addr(overflowsprite)
     }
     vissprite_p++
@@ -597,7 +597,7 @@ def R_SortVisSprites {
         return
     }
     ds = addr(vissprites[0])
-    while (intptr(ds) < intptr(vissprite_p)) {
+    while (reinterpret<uint64>(ds) < reinterpret<uint64>(vissprite_p)) {
         ds.next = ds + 1
         ds.prev = ds - 1
         ds++
@@ -613,7 +613,7 @@ def R_SortVisSprites {
     for (i in range(count)) {
         bestscale = DOOM_MAXINT
         ds = unsorted.next
-        while (intptr(ds) != intptr(addr(unsorted))) {
+        while (ds != addr(unsorted)) {
             if (ds.scale < bestscale) {
                 bestscale = ds.scale
                 best = ds
@@ -651,7 +651,7 @@ def R_DrawSprite(var spr : vissprite_s?) {
     // The first drawseg that has a greater scale
     // is the clip seg.
     ds = ds_p - 1
-    while (intptr(ds) >= intptr(addr(drawsegs[0]))) {
+    while (reinterpret<uint64>(ds) >= reinterpret<uint64>(addr(drawsegs[0]))) {
         {
             // determine if the drawseg obscures the sprite
             if (ds.x1 > spr.x2 || ds.x2 < spr.x1 || (ds.silhouette == 0 && ds.maskedtexturecol == null)) {
@@ -741,17 +741,17 @@ def R_DrawMasked {
     var spr : vissprite_s?
     var ds : drawseg_s?
     R_SortVisSprites()
-    if (intptr(vissprite_p) > intptr(addr(vissprites[0]))) {
+    if (reinterpret<uint64>(vissprite_p) > reinterpret<uint64>(addr(vissprites[0]))) {
         // draw all vissprites back to front
         spr = vsprsortedhead.next
-        while (intptr(spr) != intptr(addr(vsprsortedhead))) {
+        while (spr != addr(vsprsortedhead)) {
             R_DrawSprite(spr)
             spr = spr.next
         }
     }
     // render any remaining masked mid textures
     ds = ds_p - 1
-    while (intptr(ds) >= intptr(addr(drawsegs[0]))) {
+    while (reinterpret<uint64>(ds) >= reinterpret<uint64>(addr(drawsegs[0]))) {
         if (ds.maskedtexturecol != null) {
             R_RenderMaskedSegRange(ds, ds.x1, ds.x2)
         }

@@ -1253,7 +1253,7 @@ def G_WriteDemoTiccmd(var cmd : ticcmd_t?) {
     demo_p++
     *_t3 = cmd.buttons
     demo_p -= 4
-    if (intptr(demo_p) > intptr(demoend - 16)) {
+    if (reinterpret<uint64>(demo_p) > reinterpret<uint64>(demoend - 16)) {
         // no more space
         G_CheckDemoStatus()
         return

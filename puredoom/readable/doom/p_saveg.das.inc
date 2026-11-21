@@ -234,7 +234,7 @@ def P_ArchiveThinkers {
     var mobj : mobj_s?
     // save off the current thinkers
     th = thinkercap.next
-    while (intptr(th) != intptr(addr(thinkercap))) {
+    while (th != addr(thinkercap)) {
         {
             if (th._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
                 var _t0 = save_p
@@ -270,7 +270,7 @@ def P_UnArchiveThinkers {
     var mobj : mobj_s?
     // remove all the current thinkers
     currentthinker = thinkercap.next
-    while (intptr(currentthinker) != intptr(addr(thinkercap))) {
+    while (currentthinker != addr(thinkercap)) {
         next = currentthinker.next
         if (currentthinker._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
             P_RemoveMobj(reinterpret<mobj_s?>(currentthinker))
@@ -341,12 +341,12 @@ def P_ArchiveSpecials {
     var i : int
     // save off the current thinkers
     th = thinkercap.next
-    while (intptr(th) != intptr(addr(thinkercap))) {
+    while (th != addr(thinkercap)) {
         {
             if (th._c_function.acv == null) {
                 i = 0
                 while (i < MAXCEILINGS) {
-                    if (intptr(activeceilings[i]) == intptr(reinterpret<ceiling_t?>(th))) {
+                    if (activeceilings[i] == reinterpret<ceiling_t?>(th)) {
                         break
                     }
                     i++

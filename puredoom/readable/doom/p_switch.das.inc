@@ -83,7 +83,7 @@ def P_InitSwitchList {
 def P_StartButton(var line : line_s?; w : bwhere_e; texture : int; time : int) {
     // See if button is already pressed
     for (i in range(MAXBUTTONS)) {
-        if (buttonlist[i].btimer != 0 && intptr(buttonlist[i].line) == intptr(line)) {
+        if (buttonlist[i].btimer != 0 && buttonlist[i].line == line) {
             return
         }
     }

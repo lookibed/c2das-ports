@@ -503,7 +503,7 @@ def P_SpawnMapThing(var mthing : mapthing_t?) {
     var z : int
     // count deathmatch start positions
     if (mthing._c_type == 11) {
-        if (intptr(deathmatch_p) < intptr(addr(deathmatchstarts[0]) + 10)) {
+        if (reinterpret<uint64>(deathmatch_p) < reinterpret<uint64>(addr(deathmatchstarts[0]) + 10)) {
             doom_memcpy(reinterpret<void?>(deathmatch_p), reinterpret<void?>(mthing), typeinfo sizeof(type<mapthing_t>))
             deathmatch_p++
         }

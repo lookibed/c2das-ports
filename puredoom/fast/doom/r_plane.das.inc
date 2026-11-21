@@ -117,13 +117,13 @@ def R_FindPlane(var height : int; picnum : int; var lightlevel : int) : visplane
         lightlevel = 0
     }
     check = addr(visplanes[0])
-    while (intptr(check) < intptr(lastvisplane)) {
+    while (reinterpret<uint64>(check) < reinterpret<uint64>(lastvisplane)) {
         if (height == check.height && picnum == check.picnum && lightlevel == check.lightlevel) {
             break
         }
         check++
     }
-    if (intptr(check) < intptr(lastvisplane)) {
+    if (reinterpret<uint64>(check) < reinterpret<uint64>(lastvisplane)) {
         return check
     }
     if (int64(lastvisplane - addr(visplanes[0])) == int64(MAXVISPLANES)) {
@@ -242,7 +242,7 @@ def R_DrawPlanes {
         I_Error(addr(error_buf[0]))
     }
     pl = addr(visplanes[0])
-    while (intptr(pl) < intptr(lastvisplane)) {
+    while (reinterpret<uint64>(pl) < reinterpret<uint64>(lastvisplane)) {
         {
             if (pl.minx > pl.maxx) {
                 continue

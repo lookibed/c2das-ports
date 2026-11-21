@@ -445,7 +445,7 @@ def P_TraverseIntercepts(func : function<(var a0 : intercept_t?) : doom_boolean>
         }
         dist = DOOM_MAXINT
         scan = addr(intercepts[0])
-        while (intptr(scan) < intptr(intercept_p)) {
+        while (reinterpret<uint64>(scan) < reinterpret<uint64>(intercept_p)) {
             if (scan.frac < dist) {
                 dist = scan.frac
                 _c_in = scan

@@ -141,11 +141,10 @@ def A_WeaponReady(var player : player_s?; var psp : pspdef_t?) {
     var newstate : statenum_t
     var angle : int
     // get out of attack state
-    if (intptr(player.mo.state) == intptr(addr(states[int(statenum_t.S_PLAY_ATK1)])) ||
-            intptr(player.mo.state) == intptr(addr(states[int(statenum_t.S_PLAY_ATK2)]))) {
+    if (player.mo.state == addr(states[int(statenum_t.S_PLAY_ATK1)]) || player.mo.state == addr(states[int(statenum_t.S_PLAY_ATK2)])) {
         P_SetMobjState(player.mo, statenum_t.S_PLAY)
     }
-    if (player.readyweapon == weapontype_t.wp_chainsaw && intptr(psp.state) == intptr(addr(states[int(statenum_t.S_SAW)]))) {
+    if (player.readyweapon == weapontype_t.wp_chainsaw && psp.state == addr(states[int(statenum_t.S_SAW)])) {
         S_StartSound(reinterpret<void?>(player.mo), int(sfxenum_t.sfx_sawidl))
     }
     // check for change

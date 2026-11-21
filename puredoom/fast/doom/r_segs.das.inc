@@ -252,7 +252,7 @@ def R_StoreWallRange(start : int; stop : int) {
     var vtop : int
     var lightnum : int
     // don't overflow and crash
-    if (intptr(ds_p) == intptr(addr(drawsegs[0]) + 256)) {
+    if (ds_p == addr(drawsegs[0]) + 256) {
         return
     }
     if (start >= viewwidth || start > stop) {

@@ -35,7 +35,7 @@ def wipe_doColorXForm(width : int; height : int; ticks : int) : int {
     changed = doom_boolean._c_false
     w = wipe_scr
     e = wipe_scr_end
-    while (intptr(w) != intptr(wipe_scr + width * height)) {
+    while (w != wipe_scr + width * height) {
         if (*w != *e) {
             if (int(*w) > int(*e)) {
                 newval = int(*w) - ticks

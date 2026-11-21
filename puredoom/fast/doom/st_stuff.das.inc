@@ -306,7 +306,7 @@ def ST_updateFaceWidget {
         }
     }
     if (ST_updateFaceWidget_priority < 8) {
-        if (plyr.damagecount != 0 && plyr.attacker != null && intptr(plyr.attacker) != intptr(plyr.mo)) {
+        if (plyr.damagecount != 0 && plyr.attacker != null && plyr.attacker != plyr.mo) {
             // being attacked
             ST_updateFaceWidget_priority = 7
             if (plyr.health - st_oldhealth > ST_MUCHPAIN) {

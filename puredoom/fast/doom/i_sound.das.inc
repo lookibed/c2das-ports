@@ -577,7 +577,7 @@ def I_UpdateSound {
     // Mix sounds into the mixing buffer.
     // Loop over step*SAMPLECOUNT,
     // that is 512 values for two channels.
-    while (intptr(leftout) != intptr(leftend)) {
+    while (leftout != leftend) {
         // Reset left/right value.
         dl = 0
         dr = 0
@@ -602,7 +602,7 @@ def I_UpdateSound {
                 // Limit to LSB???
                 channelstepremainder[chan] &= uint(65536 - 1)
                 // Check whether we are done.
-                if (intptr(channels[chan]) >= intptr(channelsend[chan])) {
+                if (reinterpret<uint64>(channels[chan]) >= reinterpret<uint64>(channelsend[chan])) {
                     channels[chan] = null
                 }
             }

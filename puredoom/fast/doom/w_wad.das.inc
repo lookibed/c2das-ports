@@ -28,7 +28,7 @@ def ExtractFileBase(var path : uint8?; var dest : uint8?) {
     var length : int
     src = path + doom_strlen(path) + -(1)
     // back up until a \ or the start
-    while (intptr(src) != intptr(path) && *(src - 1) != '\\' && *(src - 1) != '/') {
+    while (src != path && *(src - 1) != '\\' && *(src - 1) != '/') {
         src--
     }
     // copy up to eight characters
@@ -272,7 +272,7 @@ def W_CheckNumForName(var name : uint8?) : int {
     while (true) {
         var _t0 = lump_p
         lump_p--
-        if (!(intptr(_t0) != intptr(lumpinfo))) {
+        if (!(_t0 != lumpinfo)) {
             break
         }
         if (*reinterpret<int?>(addr(lump_p.name[0])) == v1 && *reinterpret<int?>(addr(lump_p.name[4])) == v2) {

@@ -34,7 +34,7 @@ def EV_Teleport(var line : line_s?; side : int; var thing : mobj_s?) : int {
                         thinker = thinker.next
                     }
                     _f = true
-                    if (!(intptr(thinker) != intptr(addr(thinkercap)))) {
+                    if (!(thinker != addr(thinkercap))) {
                         break
                     }
                     // not a mobj

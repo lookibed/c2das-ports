@@ -43,7 +43,7 @@ def R_ClipSolidWallSegment(first : int; last : int) {
             R_StoreWallRange(first, last)
             next = newend
             newend++
-            while (intptr(next) != intptr(start)) {
+            while (next != start) {
                 *next = *(next - 1)
                 next--
             }
@@ -79,14 +79,14 @@ def R_ClipSolidWallSegment(first : int; last : int) {
     label 1:  // crunch
     // Remove start+1 to next from the clip list,
     // because start now covers their area.
-    if (intptr(next) == intptr(start)) {
+    if (next == start) {
         // Post just extended past the bottom of one post.
         return
     }
     while (true) {
         var _t0 = next
         next++
-        if (!(intptr(_t0) != intptr(newend))) {
+        if (!(_t0 != newend)) {
             break
         }
         // Remove a post.

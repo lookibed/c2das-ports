@@ -379,7 +379,7 @@ def P_GroupLines {
     while (i < numlines) {
         total++
         li.frontsector.linecount++
-        if (li.backsector != null && intptr(li.backsector) != intptr(li.frontsector)) {
+        if (li.backsector != null && li.backsector != li.frontsector) {
             li.backsector.linecount++
             total++
         }
@@ -396,7 +396,7 @@ def P_GroupLines {
         li = lines
         j = 0
         while (j < numlines) {
-            if (intptr(li.frontsector) == intptr(sector) || intptr(li.backsector) == intptr(sector)) {
+            if (li.frontsector == sector || li.backsector == sector) {
                 var _t0 = linebuffer
                 linebuffer++
                 *_t0 = li

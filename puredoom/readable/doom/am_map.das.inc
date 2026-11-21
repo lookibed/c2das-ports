@@ -927,7 +927,7 @@ def AM_drawPlayers {
     for (i in range(MAXPLAYERS)) {
         their_color++
         p = addr(players[0]) + end_index(i, 4)
-        if ((uint(deathmatch) != 0 && int(singledemo) == 0) && intptr(p) != intptr(am_map_plr)) {
+        if ((uint(deathmatch) != 0 && int(singledemo) == 0) && p != am_map_plr) {
             continue
         }
         if (int(playeringame[i]) == 0) {

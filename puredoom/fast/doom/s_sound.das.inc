@@ -127,7 +127,7 @@ def S_StartSoundAtVolume(var origin_p : void?; sfx_id : int; var volume : int) {
     }
     // Check to see if it is audible,
     // and if not, modify the params
-    if (origin != null && intptr(origin) != intptr(players[consoleplayer].mo)) {
+    if (origin != null && origin != players[consoleplayer].mo) {
         rc = S_AdjustSoundParams(players[consoleplayer].mo, origin, addr(volume), addr(sep), addr(pitch))
         if (origin.x == players[consoleplayer].mo.x && origin.y == players[consoleplayer].mo.y) {
             sep = NORM_SEP
@@ -198,7 +198,7 @@ def S_StopSound(var origin : void?) {
     var cnum : int
     cnum = 0
     while (cnum < numChannels) {
-        if (channels_s_sound[cnum].sfxinfo != null && intptr(channels_s_sound[cnum].origin) == intptr(origin)) {
+        if (channels_s_sound[cnum].sfxinfo != null && channels_s_sound[cnum].origin == origin) {
             S_StopChannel(cnum)
             break
         }
@@ -257,7 +257,7 @@ def S_UpdateSounds(var listener_p : void?) {
                     }
                     // check non-local sounds for distance clipping
                     // or modify their params
-                    if (c.origin != null && intptr(listener_p) != intptr(c.origin)) {
+                    if (c.origin != null && listener_p != c.origin) {
                         audible = S_AdjustSoundParams(listener, reinterpret<mobj_s?>(c.origin), addr(volume), addr(sep), addr(pitch))
                         if (audible == 0) {
                             S_StopChannel(cnum)
@@ -320,7 +320,7 @@ def S_ChangeMusic(musicnum : int; looping : int) {
     } else {
         music = addr(S_music[0]) + end_index(musicnum, 68)
     }
-    if (intptr(mus_playing_s_sound) == intptr(music)) {
+    if (mus_playing_s_sound == music) {
         return
     }
     // shutdown old music
@@ -371,7 +371,7 @@ def S_StopChannel(cnum : int) {
         // check to see
         // if other channels are playing the sound
         for (i in range(numChannels)) {
-            if (cnum != i && intptr(c.sfxinfo) == intptr(channels_s_sound[i].sfxinfo)) {
+            if (cnum != i && c.sfxinfo == channels_s_sound[i].sfxinfo) {
                 break
             }
         }
@@ -437,7 +437,7 @@ def S_getChannel(var origin : void?; var sfxinfo : sfxinfo_struct?) : int {
     while (cnum < numChannels) {
         if (channels_s_sound[cnum].sfxinfo == null) {
             break
-        } elif (origin != null && intptr(channels_s_sound[cnum].origin) == intptr(origin)) {
+        } elif (origin != null && channels_s_sound[cnum].origin == origin) {
             S_StopChannel(cnum)
             break
         }

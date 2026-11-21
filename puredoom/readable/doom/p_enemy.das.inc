@@ -56,7 +56,7 @@ def P_RecursiveSound(var sec : sector_t?; soundblocks : int) {
                 // closed door
                 continue
             }
-            if (intptr(sides[int(check.sidenum[0])].sector) == intptr(sec)) {
+            if (sides[int(check.sidenum[0])].sector == sec) {
                 other = sides[int(check.sidenum[1])].sector
             } else {
                 other = sides[int(check.sidenum[0])].sector
@@ -406,14 +406,14 @@ def A_KeenDie(var mo : mobj_s?) {
                 th = th.next
             }
             _f = true
-            if (!(intptr(th) != intptr(addr(thinkercap)))) {
+            if (!(th != addr(thinkercap))) {
                 break
             }
             if (th._c_function.acp1 != reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
                 continue
             }
             mo2 = reinterpret<mobj_s?>(th)
-            if (intptr(mo2) != intptr(mo) && mo2._c_type == mo._c_type && mo2.health > 0) {
+            if (mo2 != mo && mo2._c_type == mo._c_type && mo2.health > 0) {
                 // other Keen not dead
                 return
             }
@@ -1087,7 +1087,7 @@ def A_PainShootSkull(var actor : mobj_s?; angle : uint) {
     // count total number of skull currently on the level
     count = 0
     currentthinker = thinkercap.next
-    while (intptr(currentthinker) != intptr(addr(thinkercap))) {
+    while (currentthinker != addr(thinkercap)) {
         if ((currentthinker._c_function.acp1 == reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) &&
                 reinterpret<mobj_s?>(currentthinker)._c_type == mobjtype_t.MT_SKULL) {
             count++
@@ -1280,14 +1280,14 @@ def A_BossDeath(var mo : mobj_s?) {
                 th = th.next
             }
             _f = true
-            if (!(intptr(th) != intptr(addr(thinkercap)))) {
+            if (!(th != addr(thinkercap))) {
                 break
             }
             if (th._c_function.acp1 != reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
                 continue
             }
             mo2 = reinterpret<mobj_s?>(th)
-            if (intptr(mo2) != intptr(mo) && mo2._c_type == mo._c_type && mo2.health > 0) {
+            if (mo2 != mo && mo2._c_type == mo._c_type && mo2.health > 0) {
                 // other boss not dead
                 return
             }
@@ -1379,7 +1379,7 @@ def A_BrainAwake(var mo : mobj_s?) {
     braintargeton = 0
     thinker = thinkercap.next
     thinker = thinkercap.next
-    while (intptr(thinker) != intptr(addr(thinkercap))) {
+    while (thinker != addr(thinkercap)) {
         {
             if (thinker._c_function.acp1 != reinterpret<function<(var a0 : void?) : void>>(@@P_MobjThinker)) {
                 // not a mobj

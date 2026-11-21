@@ -116,7 +116,7 @@ def getNextSector(var line : line_s?; var sec : sector_t?) : sector_t? {
     if ((int(line.flags) & ML_TWOSIDED) == 0) {
         return null
     }
-    if (intptr(line.frontsector) == intptr(sec)) {
+    if (line.frontsector == sec) {
         return line.backsector
     }
     return line.frontsector
@@ -867,7 +867,7 @@ def P_UpdateSpecials {
     }
     // ANIMATE FLATS AND TEXTURES GLOBALLY
     anim = addr(anims[0])
-    while (intptr(anim) < intptr(lastanim)) {
+    while (reinterpret<uint64>(anim) < reinterpret<uint64>(lastanim)) {
         i = anim.basepic
         while (i < anim.basepic + anim.numpics) {
             pic = anim.basepic + ((leveltime / anim.speed + i) % anim.numpics)
@@ -952,7 +952,7 @@ def EV_DoDonut(var line : line_s?) : int {
                 if (!(i < s2.linecount)) {
                     break
                 }
-                if (((int(s2.lines[i].flags) & ML_TWOSIDED) == 0) || (intptr(s2.lines[i].backsector) == intptr(s1))) {
+                if (((int(s2.lines[i].flags) & ML_TWOSIDED) == 0) || (s2.lines[i].backsector == s1)) {
                     continue
                 }
                 s3 = s2.lines[i].backsector

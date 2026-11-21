@@ -77,7 +77,7 @@ def P_MovePlayer(var player : player_s?) {
     if (cmd.sidemove != 0 && uint(onground) != 0) {
         P_Thrust(player, player.mo.angle - uint(ANG90), int(cmd.sidemove) * 2048)
     }
-    if ((cmd.forwardmove != 0 || cmd.sidemove != 0) && intptr(player.mo.state) == intptr(addr(states[int(statenum_t.S_PLAY)]))) {
+    if ((cmd.forwardmove != 0 || cmd.sidemove != 0) && player.mo.state == addr(states[int(statenum_t.S_PLAY)])) {
         P_SetMobjState(player.mo, statenum_t.S_PLAY_RUN1)
     }
 }
@@ -99,7 +99,7 @@ def P_DeathThink(var player : player_s?) {
     player.deltaviewheight = 0
     onground = enum_from_int(type<doom_boolean>, int_of(player.mo.z <= player.mo.floorz))
     P_CalcHeight(player)
-    if (player.attacker != null && intptr(player.attacker) != intptr(player.mo)) {
+    if (player.attacker != null && player.attacker != player.mo) {
         angle = R_PointToAngle2(player.mo.x, player.mo.y, player.attacker.x, player.attacker.y)
         delta = angle - player.mo.angle
         if (delta < uint(ANG5) || delta > uint(-ANG5)) {

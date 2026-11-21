@@ -44,7 +44,7 @@ def PIT_StompThing(var thing : mobj_s?) : doom_boolean {
         return doom_boolean._c_true
     }
     // don't clip against self
-    if (intptr(thing) == intptr(tmthing)) {
+    if (thing == tmthing) {
         return doom_boolean._c_true
     }
     // monsters don't stomp things except on boss level
@@ -182,7 +182,7 @@ def PIT_CheckThing(var thing : mobj_s?) : doom_boolean {
         return doom_boolean._c_true
     }
     // don't clip against self
-    if (intptr(thing) == intptr(tmthing)) {
+    if (thing == tmthing) {
         return doom_boolean._c_true
     }
     // check for skulls slamming into things
@@ -212,7 +212,7 @@ def PIT_CheckThing(var thing : mobj_s?) : doom_boolean {
                 (tmthing.target._c_type == thing._c_type || (tmthing.target._c_type == mobjtype_t.MT_KNIGHT && thing._c_type == mobjtype_t.MT_BRUISER) ||
                     (tmthing.target._c_type == mobjtype_t.MT_BRUISER && thing._c_type == mobjtype_t.MT_KNIGHT))) {
             // Don't hit same species as originator.
-            if (intptr(thing) == intptr(tmthing.target)) {
+            if (thing == tmthing.target) {
                 return doom_boolean._c_true
             }
             if (thing._c_type != mobjtype_t.MT_PLAYER) {
@@ -638,7 +638,7 @@ def PTR_AimTraverse(var _c_in : intercept_t?) : doom_boolean {
     }
     // shoot a thing
     th = _c_in.d.thing
-    if (intptr(th) == intptr(shootthing)) {
+    if (th == shootthing) {
         // can't shoot self
         return doom_boolean._c_true
     }
@@ -733,7 +733,7 @@ def PTR_ShootTraverse(var _c_in : intercept_t?) : doom_boolean {
     }
     // shoot a thing
     th = _c_in.d.thing
-    if (intptr(th) == intptr(shootthing)) {
+    if (th == shootthing) {
         // can't shoot self
         return doom_boolean._c_true
     }

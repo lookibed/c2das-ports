@@ -55,7 +55,7 @@ def Z_Free(var ptr : void?) {
     if (_c_block.id != ZONEID) {
         I_Error(cstr("Error: Z_Free: freed a pointer without ZONEID"))
     }
-    if (intptr(_c_block.user) > intptr(reinterpret<void ??>(uint64(256)))) {
+    if (reinterpret<uint64>(_c_block.user) > reinterpret<uint64>(reinterpret<void ??>(uint64(256)))) {
         // smaller values are not pointers
         // Note: OS-dependend?
         // clear the user's mark
@@ -71,7 +71,7 @@ def Z_Free(var ptr : void?) {
         other.size += _c_block.size
         other.next = _c_block.next
         other.next.prev = other
-        if (intptr(_c_block) == intptr(mainzone.rover)) {
+        if (_c_block == mainzone.rover) {
             mainzone.rover = other
         }
         _c_block = other
@@ -82,7 +82,7 @@ def Z_Free(var ptr : void?) {
         _c_block.size += other.size
         _c_block.next = other.next
         _c_block.next.prev = _c_block
-        if (intptr(other) == intptr(mainzone.rover)) {
+        if (other == mainzone.rover) {
             mainzone.rover = _c_block
         }
     }
@@ -113,7 +113,7 @@ def Z_Malloc(var size : int; tag : int; var user : void?) : void? {
     rover = base
     start = base.prev
     c_do_while(base.user != null || base.size < size) {
-        if (intptr(rover) == intptr(start)) {
+        if (rover == start) {
             // scanned all the way around the list
             // I_Error("Error: Z_Malloc: failed on allocation of %i bytes", size);
             doom_strcpy(addr(error_buf[0]), cstr("Error: Z_Malloc: failed on allocation of "))
@@ -178,7 +178,7 @@ def Z_FreeTags(lowtag : int; hightag : int) {
     var _c_block : memblock_s?
     var next : memblock_s?
     _c_block = mainzone.blocklist.next
-    while (intptr(_c_block) != intptr(addr(mainzone.blocklist))) {
+    while (_c_block != addr(mainzone.blocklist)) {
         {
             // get link before freeing
             next = _c_block.next
@@ -228,14 +228,14 @@ def Z_DumpHeap(lowtag : int; hightag : int) {
             invoke(doom_print, doom_itoa(_c_block.tag, 10))
             invoke(doom_print, cstr("\n"))
         }
-        if (intptr(_c_block.next) == intptr(addr(mainzone.blocklist))) {
+        if (_c_block.next == addr(mainzone.blocklist)) {
             // all blocks have been hit
             break
         }
-        if (intptr(reinterpret<uint8?>(_c_block) + _c_block.size) != intptr(reinterpret<uint8?>(_c_block.next))) {
+        if (reinterpret<uint8?>(_c_block) + _c_block.size != reinterpret<uint8?>(_c_block.next)) {
             invoke(doom_print, cstr("ERROR: block size does not touch the next block\n"))
         }
-        if (intptr(_c_block.next.prev) != intptr(_c_block)) {
+        if (_c_block.next.prev != _c_block) {
             invoke(doom_print, cstr("ERROR: next block doesn't have proper back link\n"))
         }
         if (_c_block.user == null && _c_block.next.user == null) {
@@ -269,14 +269,14 @@ def Z_FileDumpHeap(var f : void?) {
         doom_fprint(f, cstr("    tag:"))
         doom_fprint(f, doom_itoa(_c_block.tag, 10))
         doom_fprint(f, cstr("\n"))
-        if (intptr(_c_block.next) == intptr(addr(mainzone.blocklist))) {
+        if (_c_block.next == addr(mainzone.blocklist)) {
             // all blocks have been hit
             break
         }
-        if (intptr(reinterpret<uint8?>(_c_block) + _c_block.size) != intptr(reinterpret<uint8?>(_c_block.next))) {
+        if (reinterpret<uint8?>(_c_block) + _c_block.size != reinterpret<uint8?>(_c_block.next)) {
             doom_fprint(f, cstr("ERROR: block size does not touch the next block\n"))
         }
-        if (intptr(_c_block.next.prev) != intptr(_c_block)) {
+        if (_c_block.next.prev != _c_block) {
             doom_fprint(f, cstr("ERROR: next block doesn't have proper back link\n"))
         }
         if (_c_block.user == null && _c_block.next.user == null) {
@@ -292,14 +292,14 @@ def Z_CheckHeap {
     var _c_block : memblock_s?
     _c_block = mainzone.blocklist.next
     while (true) {
-        if (intptr(_c_block.next) == intptr(addr(mainzone.blocklist))) {
+        if (_c_block.next == addr(mainzone.blocklist)) {
             // all blocks have been hit
             break
         }
-        if (intptr(reinterpret<uint8?>(_c_block) + _c_block.size) != intptr(reinterpret<uint8?>(_c_block.next))) {
+        if (reinterpret<uint8?>(_c_block) + _c_block.size != reinterpret<uint8?>(_c_block.next)) {
             I_Error(cstr("Error: Z_CheckHeap: block size does not touch the next block\n"))
         }
-        if (intptr(_c_block.next.prev) != intptr(_c_block)) {
+        if (_c_block.next.prev != _c_block) {
             I_Error(cstr("Error: Z_CheckHeap: next block doesn't have proper back link\n"))
         }
         if (_c_block.user == null && _c_block.next.user == null) {
@@ -330,7 +330,7 @@ def Z_FreeMemory : int {
     var free : int
     free = 0
     _c_block = mainzone.blocklist.next
-    while (intptr(_c_block) != intptr(addr(mainzone.blocklist))) {
+    while (_c_block != addr(mainzone.blocklist)) {
         if (_c_block.user == null || _c_block.tag >= PU_PURGELEVEL) {
             free += _c_block.size
         }

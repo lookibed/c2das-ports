@@ -33,7 +33,7 @@ def P_RemoveThinker(var thinker : thinker_s?) {
 def P_RunThinkers {
     var currentthinker : thinker_s?
     currentthinker = thinkercap.next
-    while (intptr(currentthinker) != intptr(addr(thinkercap))) {
+    while (currentthinker != addr(thinkercap)) {
         if (currentthinker._c_function.acv == reinterpret<function<() : void>>(uint64(-1))) {
             // time to remove it
             currentthinker.next.prev = currentthinker.prev
