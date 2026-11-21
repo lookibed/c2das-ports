@@ -4861,7 +4861,7 @@ def private all_host__op_CallRef(var _pc : void ??; var _sp : uint?; var _mem : 
     var sp : uint? = _sp + stackOffset
     var r : void? = reinterpret<void?>(m3Err_none)
     if (_c_function != null) {
-        if (intptr(_c_type) == intptr(_c_function.funcType)) {
+        if (_c_type == _c_function.funcType) {
             if (_c_function.compiled == null) {
                 r = reinterpret<void?>(CompileFunction(_c_function))
             }
@@ -4933,7 +4933,7 @@ def private all_host__op_CallIndirect(var _pc : void ??; var _sp : uint?; var _m
     if (tableIndex < uint64(_c_table.size)) {
         var _c_function : M3Function? = reinterpret<M3Function?>(_c_table.elements[tableIndex])
         if (_c_function != null) {
-            if (intptr(_c_type) == intptr(_c_function.funcType)) {
+            if (_c_type == _c_function.funcType) {
                 if (_c_function.compiled == null) {
                     r = reinterpret<void?>(CompileFunction(_c_function))
                 }
@@ -5009,7 +5009,7 @@ def private all_host__op_ReturnCallRef(var _pc : void ??; var _sp : uint?; var _
     let numArgSlots : uint = *reinterpret<uint?>(_t4)
     var r : void? = reinterpret<void?>(m3Err_none)
     if (_c_function != null) {
-        if (intptr(_c_type) == intptr(_c_function.funcType)) {
+        if (_c_type == _c_function.funcType) {
             if (_c_function.compiled == null) {
                 r = reinterpret<void?>(CompileFunction(_c_function))
             }
@@ -5063,7 +5063,7 @@ def private all_host__op_ReturnCallIndirect(var _pc : void ??; var _sp : uint?; 
     if (tableIndex < uint64(_c_table.size)) {
         var _c_function : M3Function? = reinterpret<M3Function?>(_c_table.elements[tableIndex])
         if (_c_function != null) {
-            if (intptr(_c_type) == intptr(_c_function.funcType)) {
+            if (_c_type == _c_function.funcType) {
                 if (_c_function.compiled == null) {
                     r = reinterpret<void?>(CompileFunction(_c_function))
                 }
@@ -5712,7 +5712,7 @@ def private all_host__op_Entry(var _pc : void ??; var _sp : uint?; var _mem : M3
     var _t0 = _pc
     _pc++
     var _c_function : M3Function? = *reinterpret<M3Function ??>(_t0)
-    if (intptr(reinterpret<void?>(_sp + int(_c_function.maxStackSlots))) < intptr(_mem.maxStack)) {
+    if (reinterpret<uint64>(_sp + int(_c_function.maxStackSlots)) < reinterpret<uint64>(_mem.maxStack)) {
         var stack : uint8? = reinterpret<uint8?>(_sp + int(_c_function.numRetAndArgSlots))
         crt::memset(reinterpret<void?>(stack), 0, uint64(_c_function.numLocalBytes))
         stack += _c_function.numLocalBytes
@@ -5737,7 +5737,7 @@ def private all_host__op_Loop(var _pc : void ??; var _sp : uint?; var _mem : M3M
     _r0 = 0l
     var r : void?
     var memory : M3Memory? = m3MemInfo(_mem)
-    c_do_while(intptr(r) == intptr(reinterpret<void?>(_pc))) {
+    c_do_while(r == reinterpret<void?>(_pc)) {
         r = invoke(reinterpret<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>(*_pc), _pc + 1, _sp, _mem, _r0)
         // linear memory pointer needs refreshed here because the block it's looping over
         // can potentially invoke the grow operation.
@@ -5778,11 +5778,11 @@ def private all_host__op_TryTable(var _pc : void ??; var _sp : uint?; var _mem :
     // control is leaving this frame for good, so this try is done either way
     let isInnermost : bool = runtime.tryDepth == depth
     runtime.tryDepth = depth - 1u
-    if (intptr(r) == intptr(reinterpret<void?>(m3Err_pendingException)) && isInnermost) {
+    if (r == reinterpret<void?>(m3Err_pendingException) && isInnermost) {
         var exception : M3Exception? = runtime.pendingException
         for (i in urange(numClauses)) {
             var tag : M3Tag? = reinterpret<M3Tag?>(clauses[2u * i])
-            if (tag == null || intptr(tag) == intptr(exception.tag)) {
+            if (tag == null || tag == exception.tag) {
                 var handler : void ?? = reinterpret<void ??>(clauses[2u * i + 1u])
                 // an unwind leaves nothing meaningful in the registers
                 _r0 = 0l
@@ -10666,7 +10666,7 @@ def private all_host__CountTryFramesToExit(var i_from : M3CompilationScope?; var
             if (int(scope.opcode) == int(anon_315.c_waOp_tryTable)) {
                 count++
             }
-            if (intptr(scope) == intptr(i_target)) {
+            if (scope == i_target) {
                 break
             }
             scope = scope.outer
@@ -11282,7 +11282,7 @@ def private all_host__Compile_Call(var o : M3Compilation?; i_opcode : uint16) : 
                 // that crosses modules is bracketed by a pair of op_SetMemory. A
                 // tail call never returns to run the second one, so those compile
                 // as a plain call followed by a return instead.
-                let crossModule : bool = intptr(target._c_module) != intptr(o._c_module)
+                let crossModule : bool = target._c_module != o._c_module
                 let useTailCall : bool = isReturnCall && (!(d_m3RecordBacktraces != 0 || d_m3EnableStrace >= 2) && M3_GUARANTEED_TAIL_CALL != 0) && !crossModule
                 var slotTop : uint16
                 var numArgSlots : uint16 = uint16(0)
@@ -12606,7 +12606,7 @@ def private all_host__CompileElseBlock(var o : M3Compilation?; var o_startPC : v
         all_host__EmitPointer(o, reinterpret<void?>(GetPagePC(savedPage)))
     }
     label 1:  // _catch
-    if (intptr(o.page) != intptr(savedPage)) {
+    if (o.page != savedPage) {
         all_host__ReleaseCompilationCodePage(o)
     }
     o.page = savedPage
@@ -13390,7 +13390,7 @@ def private all_host__MeterOpcode(var o : M3Compilation?; var i_opcode : uint16)
 def CompileBlockStatements(var o : M3Compilation?) : uint8? {
     var result : uint8? = m3Err_none
     var validEnd : bool = 0 != 0
-    while (intptr(o.wasm) < intptr(o.wasmEnd)) {
+    while (reinterpret<uint64>(o.wasm) < reinterpret<uint64>(o.wasmEnd)) {
         var opcode : uint16
         o.lastOpcodeStart = o.wasm
         result = Read_opcode(addr(opcode), addr(o.wasm), o.wasmEnd)
@@ -13673,7 +13673,7 @@ def private all_host__ReserveConstants(var o : M3Compilation?) : uint8? {
     // that looks like an const opcode.
     var numConstantSlots : uint16 = uint16(0)
     var wa : uint8? = o.wasm
-    while (intptr(wa) < intptr(o.wasmEnd)) {
+    while (reinterpret<uint64>(wa) < reinterpret<uint64>(o.wasmEnd)) {
         var _t0 = wa
         wa++
         let code : uint8 = *_t0
@@ -13734,7 +13734,7 @@ def CompileFunction(var io_function : M3Function?) : uint8? {
         // in which case that one carries the body - or a host function was
         // bound to it, or it is simply unsatisfied.
         var impl : M3Function? = all_host__Function_Implementation(io_function)
-        if (intptr(impl) != intptr(io_function)) {
+        if (impl != io_function) {
             if (impl.compiled == null) {
                 var r : uint8? = CompileFunction(impl)
                 if (r != null) {
@@ -14043,7 +14043,7 @@ def SizeOfType(i_type : uint8) : uint {
 def Read_u64(var o_value : uint64?; var io_bytes : uint8 ??; var i_end : uint8?) : uint8? {
     var ptr : uint8? = *io_bytes
     ptr += uint64(typeinfo sizeof(type<uint64>))
-    if (intptr(ptr) <= intptr(i_end)) {
+    if (reinterpret<uint64>(ptr) <= reinterpret<uint64>(i_end)) {
         crt::memcpy(reinterpret<void?>(o_value), reinterpret<void?>(*io_bytes), uint64(typeinfo sizeof(type<uint64>)))
         *io_bytes = ptr
         return m3Err_none
@@ -14056,7 +14056,7 @@ def Read_u64(var o_value : uint64?; var io_bytes : uint8 ??; var i_end : uint8?)
 def Read_u32(var o_value : uint?; var io_bytes : uint8 ??; var i_end : uint8?) : uint8? {
     var ptr : uint8? = *io_bytes
     ptr += uint64(typeinfo sizeof(type<uint>))
-    if (intptr(ptr) <= intptr(i_end)) {
+    if (reinterpret<uint64>(ptr) <= reinterpret<uint64>(i_end)) {
         crt::memcpy(reinterpret<void?>(o_value), reinterpret<void?>(*io_bytes), uint64(typeinfo sizeof(type<uint>)))
         *io_bytes = ptr
         return m3Err_none
@@ -14069,7 +14069,7 @@ def Read_u32(var o_value : uint?; var io_bytes : uint8 ??; var i_end : uint8?) :
 def Read_f64(var o_value : double?; var io_bytes : uint8 ??; var i_end : uint8?) : uint8? {
     var ptr : uint8? = *io_bytes
     ptr += uint64(typeinfo sizeof(type<double>))
-    if (intptr(ptr) <= intptr(i_end)) {
+    if (reinterpret<uint64>(ptr) <= reinterpret<uint64>(i_end)) {
         crt::memcpy(reinterpret<void?>(o_value), reinterpret<void?>(*io_bytes), uint64(typeinfo sizeof(type<double>)))
         *io_bytes = ptr
         return m3Err_none
@@ -14082,7 +14082,7 @@ def Read_f64(var o_value : double?; var io_bytes : uint8 ??; var i_end : uint8?)
 def Read_f32(var o_value : float?; var io_bytes : uint8 ??; var i_end : uint8?) : uint8? {
     var ptr : uint8? = *io_bytes
     ptr += uint64(typeinfo sizeof(type<float>))
-    if (intptr(ptr) <= intptr(i_end)) {
+    if (reinterpret<uint64>(ptr) <= reinterpret<uint64>(i_end)) {
         crt::memcpy(reinterpret<void?>(o_value), reinterpret<void?>(*io_bytes), uint64(typeinfo sizeof(type<float>)))
         *io_bytes = ptr
         return m3Err_none
@@ -14094,7 +14094,7 @@ def Read_f32(var o_value : float?; var io_bytes : uint8 ??; var i_end : uint8?) 
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def Read_u8(var o_value : uint8?; var io_bytes : uint8 ??; var i_end : uint8?) : uint8? {
     var ptr : uint8? = *io_bytes
-    if (intptr(ptr) < intptr(i_end)) {
+    if (reinterpret<uint64>(ptr) < reinterpret<uint64>(i_end)) {
         *o_value = *ptr
         *io_bytes = ptr + 1
         return m3Err_none
@@ -14106,7 +14106,7 @@ def Read_u8(var o_value : uint8?; var io_bytes : uint8 ??; var i_end : uint8?) :
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def Read_opcode(var o_value : uint16?; var io_bytes : uint8 ??; var i_end : uint8?) : uint8? {
     var ptr : uint8? = *io_bytes
-    if (intptr(ptr) < intptr(i_end)) {
+    if (reinterpret<uint64>(ptr) < reinterpret<uint64>(i_end)) {
         // 0xFC is returned as the bare prefix: its sub-opcode is a LEB128 u32, which
         // only the callers - Compile_ExtendedOpcode and the validator - can read.
         var _t0 = ptr
@@ -14126,7 +14126,7 @@ def ReadLebUnsigned(var o_value : uint64?; i_maxNumBits : uint; var io_bytes : u
     var value : uint64 = 0ul
     var shift : uint = 0u
     var ptr : uint8? = *io_bytes
-    while (intptr(ptr) < intptr(i_end)) {
+    while (reinterpret<uint64>(ptr) < reinterpret<uint64>(i_end)) {
         var _t0 = ptr
         ptr++
         let byte : uint64 = uint64(*_t0)
@@ -14159,7 +14159,7 @@ def ReadLebSigned(var o_value : int64?; i_maxNumBits : uint; var io_bytes : uint
     var value : int64 = 0l
     var shift : uint = 0u
     var ptr : uint8? = *io_bytes
-    while (intptr(ptr) < intptr(i_end)) {
+    while (reinterpret<uint64>(ptr) < reinterpret<uint64>(i_end)) {
         var _t0 = ptr
         ptr++
         let byte : uint64 = uint64(*_t0)
@@ -14262,7 +14262,7 @@ def ReadLEB_i64(var o_value : int64?; var io_bytes : uint8 ??; var i_end : uint8
 def private all_host__IsValidUtf8(var i_data : uint8?; i_length : uint) : bool {
     var ptr : uint8? = i_data
     var end : uint8? = i_data + i_length
-    while (intptr(ptr) < intptr(end)) {
+    while (reinterpret<uint64>(ptr) < reinterpret<uint64>(end)) {
         var _t0 = ptr
         ptr++
         let b0 : uint8 = *_t0
@@ -14275,7 +14275,7 @@ def private all_host__IsValidUtf8(var i_data : uint8?; i_length : uint) : bool {
                 // overlong
                 return 0 != 0
             }
-            if (intptr(ptr) >= intptr(end)) {
+            if (reinterpret<uint64>(ptr) >= reinterpret<uint64>(end)) {
                 return 0 != 0
             }
             var _t1 = ptr
@@ -14286,7 +14286,7 @@ def private all_host__IsValidUtf8(var i_data : uint8?; i_length : uint) : bool {
             }
         } elif ((int(b0) & 240) == 224) {
             // three-byte: 1110xxxx 10xxxxxx 10xxxxxx
-            if (intptr(ptr + 1) >= intptr(end)) {
+            if (reinterpret<uint64>(ptr + 1) >= reinterpret<uint64>(end)) {
                 return 0 != 0
             }
             var _t2 = ptr
@@ -14315,7 +14315,7 @@ def private all_host__IsValidUtf8(var i_data : uint8?; i_length : uint) : bool {
                 // above U+10FFFF
                 return 0 != 0
             }
-            if (intptr(ptr + 2) >= intptr(end)) {
+            if (reinterpret<uint64>(ptr + 2) >= reinterpret<uint64>(end)) {
                 return 0 != 0
             }
             var _t4 = ptr
@@ -14361,7 +14361,7 @@ def Read_utf8(var o_utf8 : uint8 ??; var io_bytes : uint8 ??; var i_end : uint8?
         if (utf8Length <= uint(d_m3MaxSaneUtf8Length)) {
             var ptr : uint8? = *io_bytes
             var end : uint8? = ptr + utf8Length
-            if (intptr(end) <= intptr(i_end)) {
+            if (reinterpret<uint64>(end) <= reinterpret<uint64>(i_end)) {
                 if (!all_host__IsValidUtf8(ptr, utf8Length)) {
                     *io_bytes = end
                     return m3Err_wasmMalformed
@@ -14636,7 +14636,7 @@ def _ReleaseBorrowedSlots(var i_module : M3Module?; var i_info : void?) : void? 
         var i : uint = 0u
         while (i < i_module.numMemories) {
             var memory : M3Memory? = i_module.memories[i]
-            if (memory != null && intptr(memory.owner) != intptr(i_module)) {
+            if (memory != null && memory.owner != i_module) {
                 i_module.memories[i] = null
             }
             i++
@@ -14646,7 +14646,7 @@ def _ReleaseBorrowedSlots(var i_module : M3Module?; var i_info : void?) : void? 
         var i : uint = 0u
         while (i < i_module.numTables) {
             var _c_table : M3Table? = i_module.tables[i]
-            if (_c_table != null && intptr(_c_table.owner) != intptr(i_module)) {
+            if (_c_table != null && _c_table.owner != i_module) {
                 i_module.tables[i] = null
             }
             i++
@@ -14873,7 +14873,7 @@ def private all_host__LinkImports(var io_runtime : M3Runtime?; var io_module : M
             }
             // func types are canonical within an environment, so this is the
             // structural equivalence the spec asks for
-            if (intptr(exported.funcType) != intptr(f.funcType)) {
+            if (exported.funcType != f.funcType) {
                 result = m3Err_incompatibleImportType
                 goto label 1
             }
@@ -14892,7 +14892,7 @@ def private all_host__LinkImports(var io_runtime : M3Runtime?; var io_module : M
                 break
             }
             var memory : M3Memory? = io_module.memories[i]
-            if (!memory.imported || intptr(memory.owner) != intptr(io_module)) {
+            if (!memory.imported || memory.owner != io_module) {
                 continue
             }
             var from : M3Module? = m3_FindModule(io_runtime, memory.import.moduleUtf8)
@@ -14947,7 +14947,7 @@ def private all_host__LinkImports(var io_runtime : M3Runtime?; var io_module : M
                 break
             }
             var _c_table : M3Table? = io_module.tables[i]
-            if (!_c_table.imported || intptr(_c_table.owner) != intptr(io_module)) {
+            if (!_c_table.imported || _c_table.owner != io_module) {
                 continue
             }
             var from : M3Module? = m3_FindModule(io_runtime, _c_table.import.moduleUtf8)
@@ -15069,7 +15069,7 @@ def InitMemory(var io_runtime : M3Runtime?; var i_module : M3Module?) : uint8? {
             var memory : M3Memory? = i_module.memories[i]
             // a slot that already points at another module's memory is that
             // module's to allocate
-            if (intptr(memory.owner) != intptr(i_module) || memory.mallocated != null) {
+            if (memory.owner != i_module || memory.mallocated != null) {
                 continue
             }
             let pageSize : uint = all_host__Memory_PageSize(memory)
@@ -15388,7 +15388,7 @@ def InitTableAndElements(var io_module : M3Module?) : uint8? {
             }
             _c_table = io_module.tables[i]
             // a slot pointing at another module's table is that module's to fill
-            if (intptr(_c_table.owner) != intptr(io_module)) {
+            if (_c_table.owner != io_module) {
                 continue
             }
             if (_c_table.size != 0) {
@@ -15532,7 +15532,7 @@ def FreeException(var io_runtime : M3Runtime?; var i_exception : M3Exception?) {
     if (i_exception.next != null) {
         i_exception.next.prev = i_exception.prev
     }
-    if (intptr(io_runtime.pendingException) == intptr(i_exception)) {
+    if (io_runtime.pendingException == i_exception) {
         io_runtime.pendingException = null
     }
     m3_Free_Impl(reinterpret<void?>(i_exception))
@@ -15570,7 +15570,7 @@ def private all_host__RunCodeChecked(var i_runtime : M3Runtime?; var i_function 
     var result : uint8? = reinterpret<uint8?>(all_host__RunCode(i_pc, reinterpret<uint?>(i_runtime.stack), _mem, int64(d_m3OpDefaultArgs)))
     i_runtime.tryDepth = savedTryDepth
     // an exception that reached the bottom of the call stack found no handler
-    if (intptr(result) == intptr(m3Err_pendingException)) {
+    if (result == m3Err_pendingException) {
         result = m3Err_trapUncaughtException
     }
     i_runtime.exceptionNesting--
@@ -16096,7 +16096,7 @@ def private all_host__ParseArgInteger(var i_arg : uint8?; i_numBits : uint; var 
     if (*crt::c_errno_location() == 34) {
         return cstr("argument out of range")
     }
-    if (intptr(end) == intptr(reinterpret<uint8?>(i_arg)) || *end != 0) {
+    if (end == reinterpret<uint8?>(i_arg) || *end != 0) {
         return cstr("argument is not a number")
     }
     *o_value = value
@@ -16189,7 +16189,7 @@ def m3_GetResults(var i_function : M3Function?; i_retc : uint; var o_retptrs : v
     if (i_retc != uint(ftype.numRets)) {
         return m3Err_argumentCountMismatch
     }
-    if (intptr(i_function) != intptr(runtime.lastCalled)) {
+    if (i_function != runtime.lastCalled) {
         return cstr("function not called")
     }
     var s : uint8? = reinterpret<uint8?>(runtime.stack)
@@ -16234,7 +16234,7 @@ def m3_GetResultsV(var i_function : M3Function?; va : va_args) : uint8? {
 def m3_GetResultsVL(var i_function : M3Function?; var o_rets : CVaCursor) : uint8? {
     var runtime : M3Runtime? = i_function._c_module.runtime
     var ftype : M3FuncType? = i_function.funcType
-    if (intptr(i_function) != intptr(runtime.lastCalled)) {
+    if (i_function != runtime.lastCalled) {
         return cstr("function not called")
     }
     var s : uint8? = reinterpret<uint8?>(runtime.stack)
@@ -16511,7 +16511,7 @@ def Function_Release(var i_function : M3Function?) {
         var i : int = 0
         while (i < int(i_function.numNames)) {
             // name can be an alias of fieldUtf8
-            if (intptr(i_function.names[i]) != intptr(i_function.import.fieldUtf8)) {
+            if (i_function.names[i] != i_function.import.fieldUtf8) {
                 {
                     m3_Free_Impl(reinterpret<void?>(i_function.names[i]))
                     i_function.names[i] = null
@@ -16654,7 +16654,7 @@ def m3_FreeModule(var i_module : M3Module?) {
                     var _c_table : M3Table? = i_module.tables[i]
                     // a slot may point at a table another module owns; that module
                     // frees it
-                    if (_c_table == null || intptr(_c_table.owner) != intptr(i_module)) {
+                    if (_c_table == null || _c_table.owner != i_module) {
                         continue
                     }
                     {
@@ -16731,7 +16731,7 @@ def m3_FreeModule(var i_module : M3Module?) {
                     var memory : M3Memory? = i_module.memories[i]
                     // a slot may point at a memory another module owns; that module
                     // frees it
-                    if (memory == null || intptr(memory.owner) != intptr(i_module)) {
+                    if (memory == null || memory.owner != i_module) {
                         continue
                     }
                     FreeMemoryBlock(memory)
@@ -17040,7 +17040,7 @@ def m3_GetModuleRuntime(var i_module : M3Module?) : M3Runtime? {
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def ParseValueType(var i_module : M3Module?; var o_type : uint8?; var io_bytes : uint8 ??; var i_end : uint8?) : uint8? {
     var result : uint8? = m3Err_none
-    if (intptr(*io_bytes) >= intptr(i_end)) {
+    if (reinterpret<uint64>(*io_bytes) >= reinterpret<uint64>(i_end)) {
         result = m3Err_wasmUnderrun
         goto label 1
     }
@@ -17161,7 +17161,7 @@ def ParseType_Table(var io_module : M3Module?; var i_bytes : uint8?; var i_end :
         }
     }
     // section size mismatch
-    if (intptr(i_bytes) != intptr(i_end)) {
+    if (i_bytes != i_end) {
         result = m3Err_wasmMalformed
         goto label 1
     }
@@ -17323,7 +17323,7 @@ def ParseSection_Type(var io_module : M3Module?; var i_bytes : uint8?; var i_end
             }
         }
         // section size mismatch
-        if (intptr(i_bytes) != intptr(i_end)) {
+        if (i_bytes != i_end) {
             result = m3Err_wasmMalformed
             goto label 1
         }
@@ -17375,7 +17375,7 @@ def ParseSection_Function(var io_module : M3Module?; var i_bytes : uint8?; var i
         }
     }
     // section size mismatch
-    if (intptr(i_bytes) != intptr(i_end)) {
+    if (i_bytes != i_end) {
         result = m3Err_wasmMalformed
         goto label 1
     }
@@ -17593,7 +17593,7 @@ def ParseSection_Tag(var io_module : M3Module?; var i_bytes : uint8?; var i_end 
         }
     }
     // section size mismatch
-    if (intptr(i_bytes) != intptr(i_end)) {
+    if (i_bytes != i_end) {
         result = m3Err_wasmMalformed
         goto label 1
     }
@@ -17636,7 +17636,7 @@ def ParseSection_Import(var io_module : M3Module?; var i_bytes : uint8?; var i_e
         if (result != null) {
             goto label 1
         }
-        let compact : uint8 = uint8((intptr(i_bytes) < intptr(i_end)) ? int(*i_bytes) : 0)
+        let compact : uint8 = uint8((reinterpret<uint64>(i_bytes) < reinterpret<uint64>(i_end)) ? int(*i_bytes) : 0)
         // An empty item name where an externtype should start marks a compact
         // run sharing this module name. Neither marker is a valid externtype,
         // so nothing that used to parse changes meaning.
@@ -17712,7 +17712,7 @@ def ParseSection_Import(var io_module : M3Module?; var i_bytes : uint8?; var i_e
         FreeImportInfo(addr(import))
     }
     // section size mismatch
-    if (intptr(i_bytes) != intptr(i_end)) {
+    if (i_bytes != i_end) {
         result = m3Err_wasmMalformed
         goto label 1
     }
@@ -17864,7 +17864,7 @@ def ParseSection_Export(var io_module : M3Module?; var i_bytes : uint8?; var i_e
         }
     }
     // section size mismatch
-    if (intptr(i_bytes) != intptr(i_end)) {
+    if (i_bytes != i_end) {
         result = m3Err_wasmMalformed
         goto label 1
     }
@@ -17900,7 +17900,7 @@ def ParseSection_Start(var io_module : M3Module?; var i_bytes : uint8?; var i_en
         result = cstr("start function index out of bounds")
     }
     // section size mismatch
-    if (intptr(i_bytes) != intptr(i_end)) {
+    if (i_bytes != i_end) {
         result = m3Err_wasmMalformed
         goto label 1
     }
@@ -18056,7 +18056,7 @@ def ParseSection_Element(var io_module : M3Module?; var i_bytes : uint8?; var i_
         }
     }
     // section size mismatch
-    if (intptr(pos) != intptr(i_end)) {
+    if (pos != i_end) {
         result = m3Err_wasmMalformed
         goto label 1
     }
@@ -18085,7 +18085,7 @@ def ParseSection_Code(var io_module : M3Module?; var i_bytes : uint8?; var i_end
         }
         if (size != 0) {
             i_bytes += size
-            if (intptr(i_bytes) <= intptr(i_end)) {
+            if (reinterpret<uint64>(i_bytes) <= reinterpret<uint64>(i_end)) {
                 // const u8 * ptr = i_bytes - size;
                 // u32 numLocalBlocks;
                 // _ (ReadLEB_u32 (& numLocalBlocks, & ptr, i_end)); m3log (parse, " code size: %-4d", size);
@@ -18113,7 +18113,7 @@ def ParseSection_Code(var io_module : M3Module?; var i_bytes : uint8?; var i_end
         }
     }
     label 1:  // _catch
-    if (result == null && intptr(i_bytes) != intptr(i_end)) {
+    if (result == null && i_bytes != i_end) {
         result = m3Err_wasmSectionUnderrun
     }
     return result
@@ -18180,13 +18180,13 @@ def ParseSection_Data(var io_module : M3Module?; var i_bytes : uint8?; var i_end
         }
         segment.data = i_bytes
         i_bytes += segment.size
-        if (intptr(i_bytes) > intptr(i_end)) {
+        if (reinterpret<uint64>(i_bytes) > reinterpret<uint64>(i_end)) {
             result = cstr("data segment underflow")
             goto label 1
         }
     }
     // section size mismatch
-    if (intptr(i_bytes) != intptr(i_end)) {
+    if (i_bytes != i_end) {
         result = m3Err_wasmMalformed
         goto label 1
     }
@@ -18203,7 +18203,7 @@ def ParseSection_DataCount(var io_module : M3Module?; var i_bytes : uint8?; var 
     }
     io_module.hasDataCount = 1 != 0
     // section size mismatch
-    if (intptr(i_bytes) != intptr(i_end)) {
+    if (i_bytes != i_end) {
         result = m3Err_wasmMalformed
         goto label 1
     }
@@ -18237,7 +18237,7 @@ def ParseSection_Memory(var io_module : M3Module?; var i_bytes : uint8?; var i_e
         }
     }
     // section size mismatch
-    if (intptr(i_bytes) != intptr(i_end)) {
+    if (i_bytes != i_end) {
         result = m3Err_wasmMalformed
         goto label 1
     }
@@ -18290,7 +18290,7 @@ def ParseSection_Global(var io_module : M3Module?; var i_bytes : uint8?; var i_e
         }
     }
     // section size mismatch
-    if (intptr(i_bytes) != intptr(i_end)) {
+    if (i_bytes != i_end) {
         result = m3Err_wasmMalformed
         goto label 1
     }
@@ -18302,7 +18302,7 @@ def ParseSection_Global(var io_module : M3Module?; var i_bytes : uint8?; var i_e
 def ParseSection_Name(var io_module : M3Module?; var i_bytes : uint8?; var i_end : uint8?) : uint8? {
     var result : uint8? = m3Err_none
     var name : uint8? = null
-    while (intptr(i_bytes) < intptr(i_end)) {
+    while (reinterpret<uint64>(i_bytes) < reinterpret<uint64>(i_end)) {
         var nameType : uint8
         var payloadLength : uint
         result = ReadLEB_u7(addr(nameType), addr(i_bytes), i_end)
@@ -18463,7 +18463,7 @@ def m3_ParseModule(var i_environment : M3Environment?; var o_module : M3Module ?
         // 0 is a placeholder
         // 0 is a placeholder
         var expectedSection : uint8 = 0u8
-        while (intptr(pos) < intptr(end)) {
+        while (reinterpret<uint64>(pos) < reinterpret<uint64>(end)) {
             var section : uint8
             result = ReadLEB_u7(addr(section), addr(pos), end)
             if (result != null) {
@@ -18489,7 +18489,7 @@ def m3_ParseModule(var i_environment : M3Environment?; var o_module : M3Module ?
             if (result != null) {
                 goto label 1
             }
-            if (intptr(pos + sectionLength) > intptr(end)) {
+            if (reinterpret<uint64>(pos + sectionLength) > reinterpret<uint64>(end)) {
                 result = m3Err_wasmMalformed
                 goto label 1
             }
@@ -18750,7 +18750,7 @@ def private all_host__v_push_labels(var v : ValCtx?; var tgt : ValCtrlFrame?) : 
 
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def private all_host__v_read_blocktype(var v : ValCtx?; var o_type : M3FuncType ??) : uint8? {
-    if (intptr(v.wasm) >= intptr(v.wasmEnd)) {
+    if (reinterpret<uint64>(v.wasm) >= reinterpret<uint64>(v.wasmEnd)) {
         return m3Err_wasmUnderrun
     }
     var _c_type : int64
@@ -18912,7 +18912,7 @@ def private all_host__v_catch_clause(var v : ValCtx?) : uint8? {
 def private all_host__v_validate_body(var v : ValCtx?) : uint8? {
     var r : uint8? = m3Err_none
     var a : uint8 = uint8(c_valBottom)
-    while (intptr(v.wasm) < intptr(v.wasmEnd)) {
+    while (reinterpret<uint64>(v.wasm) < reinterpret<uint64>(v.wasmEnd)) {
         var opcode : uint16
         r = Read_opcode(addr(opcode), addr(v.wasm), v.wasmEnd)
         if (r != null) {
@@ -19892,7 +19892,7 @@ def private all_host__v_validate_body(var v : ValCtx?) : uint8? {
             }
             case(67) {
                 // f32.const
-                if (intptr(v.wasm + 4) > intptr(v.wasmEnd)) {
+                if (reinterpret<uint64>(v.wasm + 4) > reinterpret<uint64>(v.wasmEnd)) {
                     return m3Err_wasmUnderrun
                 }
                 v.wasm += 4
@@ -19904,7 +19904,7 @@ def private all_host__v_validate_body(var v : ValCtx?) : uint8? {
             }
             case(68) {
                 // f64.const
-                if (intptr(v.wasm + 8) > intptr(v.wasmEnd)) {
+                if (reinterpret<uint64>(v.wasm + 8) > reinterpret<uint64>(v.wasmEnd)) {
                     return m3Err_wasmUnderrun
                 }
                 v.wasm += 8
@@ -20515,7 +20515,7 @@ def ValidateFunction(var i_function : M3Function?) : uint8? {
     if (v.ctrlTop != 0) {
         return m3Err_wasmMalformed
     }
-    if (intptr(v.wasm) != intptr(v.wasmEnd)) {
+    if (v.wasm != v.wasmEnd) {
         return m3Err_wasmSectionUnderrun
     }
     return m3Err_none
