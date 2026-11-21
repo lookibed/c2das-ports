@@ -116,12 +116,12 @@ def NET_NewQSocket : qsocket_s? {
 def NET_FreeQSocket(var sock : qsocket_s?) {
     var s : qsocket_s?
     // remove it from active list
-    if (intptr(sock) == intptr(net_activeSockets)) {
+    if (sock == net_activeSockets) {
         net_activeSockets = net_activeSockets.next
     } else {
         s = net_activeSockets
         while (s != null) {
-            if (intptr(s.next) == intptr(sock)) {
+            if (s.next == sock) {
                 s.next = sock.next
                 break
             }

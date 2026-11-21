@@ -284,7 +284,7 @@ def R_DrawSurfaceBlock8_mip0 {
             lightleft += lightleftstep
             prowdest += surfrowbytes
         }
-        if (intptr(psource) >= intptr(r_sourcemax)) {
+        if (reinterpret<uint64>(psource) >= reinterpret<uint64>(r_sourcemax)) {
             psource -= r_stepback
         }
     }
@@ -328,7 +328,7 @@ def R_DrawSurfaceBlock8_mip1 {
             lightleft += lightleftstep
             prowdest += surfrowbytes
         }
-        if (intptr(psource) >= intptr(r_sourcemax)) {
+        if (reinterpret<uint64>(psource) >= reinterpret<uint64>(r_sourcemax)) {
             psource -= r_stepback
         }
     }
@@ -372,7 +372,7 @@ def R_DrawSurfaceBlock8_mip2 {
             lightleft += lightleftstep
             prowdest += surfrowbytes
         }
-        if (intptr(psource) >= intptr(r_sourcemax)) {
+        if (reinterpret<uint64>(psource) >= reinterpret<uint64>(r_sourcemax)) {
             psource -= r_stepback
         }
     }
@@ -416,7 +416,7 @@ def R_DrawSurfaceBlock8_mip3 {
             lightleft += lightleftstep
             prowdest += surfrowbytes
         }
-        if (intptr(psource) >= intptr(r_sourcemax)) {
+        if (reinterpret<uint64>(psource) >= reinterpret<uint64>(r_sourcemax)) {
             psource -= r_stepback
         }
     }

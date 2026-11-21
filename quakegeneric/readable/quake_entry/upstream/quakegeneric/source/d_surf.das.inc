@@ -143,7 +143,7 @@ def D_SCAlloc(width : int; var size : int) : surfcache_s? {
     // should be set properly after return
     _c_new.owner = null
     if (int(d_roverwrapped) != 0) {
-        if (uint(wrapped_this_time) != 0 || (intptr(sc_rover) >= intptr(d_initial_rover))) {
+        if (uint(wrapped_this_time) != 0 || (reinterpret<uint64>(sc_rover) >= reinterpret<uint64>(d_initial_rover))) {
             r_cache_thrash = qboolean._c_true
         }
     } elif (int(wrapped_this_time) != 0) {
@@ -162,7 +162,7 @@ def D_SCDump {
     var test : surfcache_s?
     test = sc_base
     while (test != null) {
-        if (intptr(test) == intptr(sc_rover)) {
+        if (test == sc_rover) {
             Sys_Printf`va(cstr("ROVER:\n"), VaNone())
         }
         fprintf(crt::c_stderr(), cstr("%p : %i bytes     %i width\n"), test, test.size, test.width)
@@ -213,7 +213,7 @@ def D_CacheSurface(var surface : msurface_s?; miplevel : int) : surfcache_s? {
     r_drawsurf.lightadj[3] = d_lightstylevalue[int(surface.styles[3])]
     // see if the cache holds apropriate data
     cache = surface.cachespots[miplevel]
-    if (cache != null && cache.dlight == 0 && surface.dlightframe != r_framecount && intptr(cache.texture) == intptr(r_drawsurf.texture) &&
+    if (cache != null && cache.dlight == 0 && surface.dlightframe != r_framecount && cache.texture == r_drawsurf.texture &&
             cache.lightadj[0] == r_drawsurf.lightadj[0] && cache.lightadj[1] == r_drawsurf.lightadj[1] && cache.lightadj[2] == r_drawsurf.lightadj[2] &&
             cache.lightadj[3] == r_drawsurf.lightadj[3]) {
         return cache

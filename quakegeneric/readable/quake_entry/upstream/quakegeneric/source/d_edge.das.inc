@@ -127,7 +127,7 @@ def D_DrawSurfaces {
     // TODO: could preset a lot of this at mode set time
     if (r_drawflat.value != 0.0f) {
         s = addr(surfaces[1])
-        while (intptr(s) < intptr(surface_p)) {
+        while (reinterpret<uint64>(s) < reinterpret<uint64>(surface_p)) {
             {
                 if (s.spans == null) {
                     continue
@@ -143,7 +143,7 @@ def D_DrawSurfaces {
         }
     } else {
         s = addr(surfaces[1])
-        while (intptr(s) < intptr(surface_p)) {
+        while (reinterpret<uint64>(s) < reinterpret<uint64>(surface_p)) {
             {
                 if (s.spans == null) {
                     continue

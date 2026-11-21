@@ -659,7 +659,7 @@ def R_AliasDrawModel(var plighting : alight_t?) {
         D_PolysetUpdateTables()
     }
     acolormap = reinterpret<void?>(currententity.colormap)
-    if (intptr(currententity) != intptr(addr(cl.viewent))) {
+    if (currententity != addr(cl.viewent)) {
         ziscale = 32768.0f * 65536.0f
     } else {
         ziscale = float(double(32768.0f * 65536.0f) * 3.0lf)

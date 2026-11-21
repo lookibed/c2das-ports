@@ -261,7 +261,7 @@ def CL_ParseUpdate(var bits : int) {
         modnum = ent.baseline.modelindex
     }
     model = cl.model_precache[modnum]
-    if (intptr(model) != intptr(ent.model)) {
+    if (model != ent.model) {
         ent.model = model
         // automatic animation (torches, etc) can be either all together
         // or randomized

@@ -388,7 +388,7 @@ def SV_PushMove(var pusher : edict_s?; movetime : float) {
                 continue
             }
             // if the entity is standing on the pusher, it will definately be moved
-            if (!((int(check.v.flags) & FL_ONGROUND) != 0 && intptr(PROG_TO_EDICT(check.v.groundentity)) == intptr(pusher))) {
+            if (!((int(check.v.flags) & FL_ONGROUND) != 0 && PROG_TO_EDICT(check.v.groundentity) == pusher)) {
                 if (check.v.absmin[0] >= maxs[0] || check.v.absmin[1] >= maxs[1] || check.v.absmin[2] >= maxs[2] || check.v.absmax[0] <= mins[0] ||
                         check.v.absmax[1] <= mins[1] || check.v.absmax[2] <= mins[2]) {
                     continue

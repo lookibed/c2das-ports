@@ -23,7 +23,7 @@ def R_RemoveEfrags(var ent : entity_s?) {
             if (walk == null) {
                 break
             }
-            if (intptr(walk) == intptr(ef)) {
+            if (walk == ef) {
                 // remove this fragment
                 *prev = ef.leafnext
                 break
@@ -142,7 +142,7 @@ def R_AddEfrags(var ent : entity_s?) {
     if (ent.model == null) {
         return
     }
-    if (intptr(ent) == intptr(addr(cl_entities[0]))) {
+    if (ent == addr(cl_entities[0])) {
         // never add the world
         return
     }

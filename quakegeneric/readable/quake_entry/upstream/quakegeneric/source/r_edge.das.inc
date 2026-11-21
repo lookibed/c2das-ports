@@ -31,7 +31,7 @@ def R_DrawCulledPolys {
     currententity = addr(cl_entities[0])
     if (int(r_worldpolysbacktofront) != 0) {
         s = surface_p - 1
-        while (intptr(s) > intptr(addr(surfaces[1]))) {
+        while (reinterpret<uint64>(s) > reinterpret<uint64>(addr(surfaces[1]))) {
             {
                 if (s.spans == null) {
                     continue
@@ -46,7 +46,7 @@ def R_DrawCulledPolys {
         }
     } else {
         s = addr(surfaces[1])
-        while (intptr(s) < intptr(surface_p)) {
+        while (reinterpret<uint64>(s) < reinterpret<uint64>(surface_p)) {
             {
                 if (s.spans == null) {
                     continue
@@ -181,7 +181,7 @@ def R_StepActiveU(var pedge : edge_s?) {
         pedge = pedge.next
         goto label 1
         label 2:  // pushback
-        if (intptr(pedge) == intptr(addr(edge_aftertail))) {
+        if (pedge == addr(edge_aftertail)) {
             return
         }
         // push it back to keep it sorted
@@ -200,7 +200,7 @@ def R_StepActiveU(var pedge : edge_s?) {
         pedge.next.prev = pedge
         pwedge.next = pedge
         pedge = pnext_edge
-        if (intptr(pedge) == intptr(addr(edge_tail))) {
+        if (pedge == addr(edge_tail)) {
             return
         }
     }
@@ -229,7 +229,7 @@ def R_CleanupSpan {
         surf.spans = span
     }
     // reset spanstate for all surfaces in the surface stack
-    c_do_while(intptr(surf) != intptr(addr(surfaces[1]))) {
+    c_do_while(surf != addr(surfaces[1])) {
         surf.spanstate = 0
         surf = surf.next
     }
@@ -315,7 +315,7 @@ def R_TrailingEdge(var surf : surf_s?; var edge : edge_s?) {
         if (int(surf.insubmodel) != 0) {
             r_bmodelactive--
         }
-        if (intptr(surf) == intptr(surfaces[1].next)) {
+        if (surf == surfaces[1].next) {
             // emit a span (current top going away)
             iu = edge.u >> 20
             if (iu > surf.last_u) {
@@ -449,7 +449,7 @@ def R_GenerateSpans {
     surfaces[1].last_u = edge_head_u_shift20
     // generate spans
     edge = edge_head.next
-    while (intptr(edge) != intptr(addr(edge_tail))) {
+    while (edge != addr(edge_tail)) {
         {
             if (edge.surfs[0] != 0) {
                 // it has a left surface, so a surface is going away for this span
@@ -480,7 +480,7 @@ def R_GenerateSpansBackward {
     surfaces[1].last_u = edge_head_u_shift20
     // generate spans
     edge = edge_head.next
-    while (intptr(edge) != intptr(addr(edge_tail))) {
+    while (edge != addr(edge_tail)) {
         if (edge.surfs[0] != 0) {
             R_TrailingEdge(addr(surfaces[int(edge.surfs[0])]), edge)
         }
@@ -549,7 +549,7 @@ def R_ScanEdges {
         invoke(pdrawfunc)
         // flush the span list if we can't be sure we have enough spans left for
         // the next scan
-        if (intptr(span_p) >= intptr(max_span_p)) {
+        if (reinterpret<uint64>(span_p) >= reinterpret<uint64>(max_span_p)) {
             // don't let sound get messed up if going slow
             S_ExtraUpdate()
             if (int(r_drawculledpolys) != 0) {
@@ -559,7 +559,7 @@ def R_ScanEdges {
             }
             // clear the surface span pointers
             s = addr(surfaces[1])
-            while (intptr(s) < intptr(surface_p)) {
+            while (reinterpret<uint64>(s) < reinterpret<uint64>(surface_p)) {
                 s.spans = null
                 s++
             }
@@ -568,7 +568,7 @@ def R_ScanEdges {
         if (removeedges[iv] != null) {
             R_RemoveEdges(removeedges[iv])
         }
-        if (intptr(edge_head.next) != intptr(addr(edge_tail))) {
+        if (edge_head.next != addr(edge_tail)) {
             R_StepActiveU(edge_head.next)
         }
         iv++

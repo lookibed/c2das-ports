@@ -321,7 +321,7 @@ def SV_WriteEntitiesToClient(var clent : edict_s?; var msg : sizebuf_s?) {
             }
             // ignore if not touching a PV leaf
             // clent is ALLWAYS sent
-            if (intptr(ent) != intptr(clent)) {
+            if (ent != clent) {
                 // ignore ents without visible models
                 if (ent.v.modelindex == 0.0f || pr_strings[ent.v.model] == 0) {
                     continue

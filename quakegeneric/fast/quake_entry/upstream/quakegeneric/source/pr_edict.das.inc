@@ -726,7 +726,7 @@ def ED_ParseEdict(var data : uint8?; var ent : edict_s?) : uint8? {
     init = qboolean._c_false
     // clear it
     // hack
-    if (intptr(ent) != intptr(sv.edicts)) {
+    if (ent != sv.edicts) {
         crt::memset(reinterpret<void?>(addr(ent.v)), 0, uint64(progs.entityfields * 4))
     }
     // go through all the dictionary pairs

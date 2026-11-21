@@ -369,7 +369,7 @@ def R_MarkLeaves {
     var vis : uint8?
     var node : mnode_s?
     var i : int
-    if (intptr(r_oldviewleaf) == intptr(r_viewleaf)) {
+    if (r_oldviewleaf == r_viewleaf) {
         return
     }
     r_visframecount++
@@ -411,7 +411,7 @@ def R_DrawEntitiesOnList {
     while (i < cl_numvisedicts) {
         {
             currententity = cl_visedicts[i]
-            if (intptr(currententity) == intptr(addr(cl_entities[0]) + end_index(cl.viewentity, 600))) {
+            if (currententity == addr(cl_entities[0]) + end_index(cl.viewentity, 600)) {
                 // don't draw the player
                 continue
             }

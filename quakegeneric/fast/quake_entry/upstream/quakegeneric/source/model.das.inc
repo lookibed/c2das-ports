@@ -104,7 +104,7 @@ def Mod_DecompressVis(var _c_in : uint8?; var model : model_s?) : uint8? {
 
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def Mod_LeafPVS(var leaf : mleaf_s?; var model : model_s?) : uint8? {
-    if (intptr(leaf) == intptr(model.leafs)) {
+    if (leaf == model.leafs) {
         return addr(mod_novis[0])
     }
     return Mod_DecompressVis(leaf.compressed_vis, model)

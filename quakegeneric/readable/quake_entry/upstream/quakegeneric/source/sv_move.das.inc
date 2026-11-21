@@ -109,7 +109,7 @@ def SV_movestep(var ent : edict_s?; var move : float?; relink : qboolean) : qboo
             neworg[1] = ent.v.origin[1] + move[1]
             neworg[2] = ent.v.origin[2] + move[2]
             enemy = PROG_TO_EDICT(ent.v.enemy)
-            if (i == 0 && intptr(enemy) != intptr(sv.edicts)) {
+            if (i == 0 && enemy != sv.edicts) {
                 dz = ent.v.origin[2] - PROG_TO_EDICT(ent.v.enemy).v.origin[2]
                 if (dz > 40.0f) {
                     neworg[2] -= 8.0f
@@ -132,7 +132,7 @@ def SV_movestep(var ent : edict_s?; var move : float?; relink : qboolean) : qboo
                 }
                 return qboolean._c_true
             }
-            if (intptr(enemy) == intptr(sv.edicts)) {
+            if (enemy == sv.edicts) {
                 break
             }
         }
@@ -353,7 +353,7 @@ def SV_MoveToGoal {
         return
     }
     // if the next step hits the enemy, return immediately
-    if (intptr(PROG_TO_EDICT(ent.v.enemy)) != intptr(sv.edicts) && uint(SV_CloseEnough(ent, goal, dist)) != 0) {
+    if (PROG_TO_EDICT(ent.v.enemy) != sv.edicts && uint(SV_CloseEnough(ent, goal, dist)) != 0) {
         return
     }
     // bump around...

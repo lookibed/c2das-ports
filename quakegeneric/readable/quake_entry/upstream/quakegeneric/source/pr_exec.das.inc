@@ -333,7 +333,7 @@ def PR_ExecuteProgram(fnum : int) {
                 break
             }
             case(47) {
-                c._float = float(int_of(intptr(PROG_TO_EDICT(a.edict)) == intptr(sv.edicts)))
+                c._float = float(int_of(PROG_TO_EDICT(a.edict) == sv.edicts))
                 break
             }
             case(10) {
@@ -406,7 +406,7 @@ def PR_ExecuteProgram(fnum : int) {
             case(30) {
                 ed = PROG_TO_EDICT(a.edict)
                 // make sure it's in range
-                if (intptr(ed) == intptr(sv.edicts) && sv.state == server_state_t.ss_active) {
+                if (ed == sv.edicts && sv.state == server_state_t.ss_active) {
                     PR_RunError`va(cstr("assignment to world entity"), VaNone())
                 }
                 c._int = int(int64(reinterpret<uint8?>(reinterpret<int?>(addr(ed.v)) + b._int) - reinterpret<uint8?>(sv.edicts)))

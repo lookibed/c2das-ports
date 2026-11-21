@@ -1087,7 +1087,7 @@ def PF_aim {
             if (check.v.takedamage != float(DAMAGE_AIM)) {
                 continue
             }
-            if (intptr(check) == intptr(ent)) {
+            if (check == ent) {
                 continue
             }
             if (teamplay.value != 0.0f && ent.v.team > 0.0f && ent.v.team == check.v.team) {
@@ -1107,7 +1107,7 @@ def PF_aim {
                 continue
             }
             tr = SV_Move(addr(start[0]), addr(vec3_origin[0]), addr(vec3_origin[0]), addr(end[0]), int(qboolean._c_false), ent)
-            if (intptr(tr.ent) == intptr(check)) {
+            if (tr.ent == check) {
                 // can shoot at this one
                 bestdist = dist
                 bestent = check

@@ -195,11 +195,11 @@ def SV_TouchLinks(var ent : edict_s?; var node : areanode_s?) {
     var old_other : int
     // touch linked edicts
     l = node.trigger_edicts.next
-    while (intptr(l) != intptr(addr(node.trigger_edicts))) {
+    while (l != addr(node.trigger_edicts)) {
         {
             next = l.next
             touch = EDICT_FROM_AREA(l)
-            if (intptr(touch) == intptr(ent)) {
+            if (touch == ent) {
                 continue
             }
             if (touch.v.touch == 0 || touch.v.solid != float(SOLID_TRIGGER)) {
@@ -280,7 +280,7 @@ def SV_LinkEdict(var ent : edict_s?; touch_triggers : qboolean) {
         // unlink from old position
         SV_UnlinkEdict(ent)
     }
-    if (intptr(ent) == intptr(sv.edicts)) {
+    if (ent == sv.edicts) {
         // don't add the world
         return
     }
@@ -576,7 +576,7 @@ def SV_ClipToLinks(var node : areanode_s?; var clip : moveclip_t?) {
                 l = next
             }
             _f = true
-            if (!(intptr(l) != intptr(addr(node.solid_edicts)))) {
+            if (!(l != addr(node.solid_edicts))) {
                 break
             }
             next = l.next
@@ -584,7 +584,7 @@ def SV_ClipToLinks(var node : areanode_s?; var clip : moveclip_t?) {
             if (touch.v.solid == float(SOLID_NOT)) {
                 continue
             }
-            if (intptr(touch) == intptr(clip.passedict)) {
+            if (touch == clip.passedict) {
                 continue
             }
             if (touch.v.solid == float(SOLID_TRIGGER)) {
@@ -606,11 +606,11 @@ def SV_ClipToLinks(var node : areanode_s?; var clip : moveclip_t?) {
                 return
             }
             if (clip.passedict != null) {
-                if (intptr(PROG_TO_EDICT(touch.v.owner)) == intptr(clip.passedict)) {
+                if (PROG_TO_EDICT(touch.v.owner) == clip.passedict) {
                     // don't clip against own missiles
                     continue
                 }
-                if (intptr(PROG_TO_EDICT(clip.passedict.v.owner)) == intptr(touch)) {
+                if (PROG_TO_EDICT(clip.passedict.v.owner) == touch) {
                     // don't clip against owner
                     continue
                 }

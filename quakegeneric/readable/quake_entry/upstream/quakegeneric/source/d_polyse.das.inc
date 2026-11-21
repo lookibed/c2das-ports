@@ -652,7 +652,7 @@ def D_PolysetRecursiveTriangle(var lp1 : int?; var lp2 : int?; var lp3 : int?) {
 def D_PolysetUpdateTables {
     var i : int
     var s : uint8?
-    if (r_affinetridesc.skinwidth != skinwidth || intptr(r_affinetridesc.pskin) != intptr(reinterpret<void?>(skinstart))) {
+    if (r_affinetridesc.skinwidth != skinwidth || r_affinetridesc.pskin != reinterpret<void?>(skinstart)) {
         skinwidth = r_affinetridesc.skinwidth
         skinstart = reinterpret<uint8?>(r_affinetridesc.pskin)
         s = skinstart

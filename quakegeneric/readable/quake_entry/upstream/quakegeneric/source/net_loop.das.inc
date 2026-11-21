@@ -191,7 +191,7 @@ def Loop_Close(var sock : qsocket_s?) {
     sock.receiveMessageLength = 0
     sock.sendMessageLength = 0
     sock.canSend = qboolean._c_true
-    if (intptr(sock) == intptr(loop_client)) {
+    if (sock == loop_client) {
         loop_client = null
     } else {
         loop_server = null

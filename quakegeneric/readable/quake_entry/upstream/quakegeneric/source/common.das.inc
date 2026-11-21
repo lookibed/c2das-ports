@@ -771,7 +771,7 @@ def COM_DefaultExtension(var path : uint8?; var extension : uint8?) {
     // if path doesn't have a .EXT, append extension
     // (extension should include the .)
     src = path + crt::strlen(path) + -(1)
-    while (*src != '/' && intptr(src) != intptr(path)) {
+    while (*src != '/' && src != path) {
         if (*src == '.') {
             // it has an extension
             return

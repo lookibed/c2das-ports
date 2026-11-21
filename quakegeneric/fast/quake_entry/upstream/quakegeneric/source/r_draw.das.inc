@@ -303,12 +303,12 @@ def R_RenderFace(var fa : msurface_s?; clipflags : int) {
     var tedge : medge_t
     var pclip : clipplane_s?
     // skip out if no more surfs
-    if (intptr(surface_p) >= intptr(surf_max)) {
+    if (reinterpret<uint64>(surface_p) >= reinterpret<uint64>(surf_max)) {
         r_outofsurfaces++
         return
     }
     // ditto if not enough edges left, or switch to auxedges if possible
-    if (intptr(edge_p + fa.numedges + 4) >= intptr(edge_max)) {
+    if (reinterpret<uint64>(edge_p + fa.numedges + 4) >= reinterpret<uint64>(edge_max)) {
         r_outofedges += fa.numedges
         return
     }
@@ -348,7 +348,7 @@ def R_RenderFace(var fa : msurface_s?; clipflags : int) {
                         }
                     } else {
                         if (((uint64(intptr(edge_p)) - uint64(intptr(r_edges))) > uint64(r_pedge.cachededgeoffset)) &&
-                                (intptr(reinterpret<edge_s?>(uint64(uint64(intptr(r_edges)) + uint64(r_pedge.cachededgeoffset))).owner) == intptr(r_pedge))) {
+                                (reinterpret<edge_s?>(uint64(uint64(intptr(r_edges)) + uint64(r_pedge.cachededgeoffset))).owner == r_pedge)) {
                             R_EmitCachedEdge()
                             r_lastvertvalid = qboolean._c_false
                             continue
@@ -382,7 +382,7 @@ def R_RenderFace(var fa : msurface_s?; clipflags : int) {
                         // it's cached if the cached edge is valid and is owned
                         // by this medge_t
                         if (((uint64(intptr(edge_p)) - uint64(intptr(r_edges))) > uint64(r_pedge.cachededgeoffset)) &&
-                                (intptr(reinterpret<edge_s?>(uint64(uint64(intptr(r_edges)) + uint64(r_pedge.cachededgeoffset))).owner) == intptr(r_pedge))) {
+                                (reinterpret<edge_s?>(uint64(uint64(intptr(r_edges)) + uint64(r_pedge.cachededgeoffset))).owner == r_pedge)) {
                             R_EmitCachedEdge()
                             r_lastvertvalid = qboolean._c_false
                             continue
@@ -462,12 +462,12 @@ def R_RenderBmodelFace(var pedges : bedge_s?; var psurf : msurface_s?) {
     var tedge : medge_t
     var pclip : clipplane_s?
     // skip out if no more surfs
-    if (intptr(surface_p) >= intptr(surf_max)) {
+    if (reinterpret<uint64>(surface_p) >= reinterpret<uint64>(surf_max)) {
         r_outofsurfaces++
         return
     }
     // ditto if not enough edges left, or switch to auxedges if possible
-    if (intptr(edge_p + psurf.numedges + 4) >= intptr(edge_max)) {
+    if (reinterpret<uint64>(edge_p + psurf.numedges + 4) >= reinterpret<uint64>(edge_max)) {
         r_outofedges += psurf.numedges
         return
     }

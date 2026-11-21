@@ -80,7 +80,7 @@ def Z_Free(var ptr : void?) {
         other.size += _c_block.size
         other.next = _c_block.next
         other.next.prev = other
-        if (intptr(_c_block) == intptr(mainzone.rover)) {
+        if (_c_block == mainzone.rover) {
             mainzone.rover = other
         }
         _c_block = other
@@ -91,7 +91,7 @@ def Z_Free(var ptr : void?) {
         _c_block.size += other.size
         _c_block.next = other.next
         _c_block.next.prev = _c_block
-        if (intptr(other) == intptr(mainzone.rover)) {
+        if (other == mainzone.rover) {
             mainzone.rover = _c_block
         }
     }
@@ -135,7 +135,7 @@ def Z_TagMalloc(var size : int; tag : int) : void? {
     start = base.prev
     c_do_while(base.tag != 0 || base.size < size) {
         // scaned all the way around the list
-        if (intptr(rover) == intptr(start)) {
+        if (rover == start) {
             return null
         }
         if (rover.tag != 0) {
@@ -180,14 +180,14 @@ def Z_Print(var zone : memzone_t?) {
     _c_block = zone.blocklist.next
     while (true) {
         Con_Printf`va(cstr("block:%p    size:%7i    tag:%3i\n"), (_c_block, _c_block.size, _c_block.tag))
-        if (intptr(_c_block.next) == intptr(addr(zone.blocklist))) {
+        if (_c_block.next == addr(zone.blocklist)) {
             // all blocks have been hit
             break
         }
-        if (intptr(reinterpret<uint8?>(_c_block) + _c_block.size) != intptr(reinterpret<uint8?>(_c_block.next))) {
+        if (reinterpret<uint8?>(_c_block) + _c_block.size != reinterpret<uint8?>(_c_block.next)) {
             Con_Printf`va(cstr("ERROR: block size does not touch the next block\n"), VaNone())
         }
-        if (intptr(_c_block.next.prev) != intptr(_c_block)) {
+        if (_c_block.next.prev != _c_block) {
             Con_Printf`va(cstr("ERROR: next block doesn't have proper back link\n"), VaNone())
         }
         if (_c_block.tag == 0 && _c_block.next.tag == 0) {
@@ -205,14 +205,14 @@ def Z_CheckHeap {
     var _c_block : memblock_s?
     _c_block = mainzone.blocklist.next
     while (true) {
-        if (intptr(_c_block.next) == intptr(addr(mainzone.blocklist))) {
+        if (_c_block.next == addr(mainzone.blocklist)) {
             // all blocks have been hit
             break
         }
-        if (intptr(reinterpret<uint8?>(_c_block) + _c_block.size) != intptr(reinterpret<uint8?>(_c_block.next))) {
+        if (reinterpret<uint8?>(_c_block) + _c_block.size != reinterpret<uint8?>(_c_block.next)) {
             Sys_Error`va(cstr("Z_CheckHeap: block size does not touch the next block\n"), VaNone())
         }
-        if (intptr(_c_block.next.prev) != intptr(_c_block)) {
+        if (_c_block.next.prev != _c_block) {
             Sys_Error`va(cstr("Z_CheckHeap: next block doesn't have proper back link\n"), VaNone())
         }
         if (_c_block.tag == 0 && _c_block.next.tag == 0) {
@@ -230,7 +230,7 @@ def Z_CheckHeap {
 def Hunk_Check {
     var h : hunk_t?
     h = reinterpret<hunk_t?>(hunk_base)
-    while (intptr(reinterpret<uint8?>(h)) != intptr(hunk_base + hunk_low_used)) {
+    while (reinterpret<uint8?>(h) != hunk_base + hunk_low_used) {
         if (h.sentinal != HUNK_SENTINAL) {
             Sys_Error`va(cstr("Hunk_Check: trahsed sentinal"), VaNone())
         }
@@ -269,14 +269,14 @@ def Hunk_Print(all : qboolean) {
     Con_Printf`va(cstr("-------------------------\n"), VaNone())
     while (1 != 0) {
         // skip to the high hunk if done with low hunk
-        if (intptr(h) == intptr(endlow)) {
+        if (h == endlow) {
             Con_Printf`va(cstr("-------------------------\n"), VaNone())
             Con_Printf`va(cstr("          :%8i REMAINING\n"), (hunk_size - hunk_low_used - hunk_high_used,))
             Con_Printf`va(cstr("-------------------------\n"), VaNone())
             h = starthigh
         }
         // if totally done, break
-        if (intptr(h) == intptr(endhigh)) {
+        if (h == endhigh) {
             break
         }
         // run consistancy checks
@@ -296,7 +296,7 @@ def Hunk_Print(all : qboolean) {
             Con_Printf`va(cstr("%8p :%8i %8s\n"), (h, h.size, addr(name[0])))
         }
         // print the total
-        if (intptr(next) == intptr(endlow) || intptr(next) == intptr(endhigh) || crt::strncmp(addr(h.name[0]), addr(next.name[0]), 8ul) != 0) {
+        if (next == endlow || next == endhigh || crt::strncmp(addr(h.name[0]), addr(next.name[0]), 8ul) != 0) {
             if (int(all) == 0) {
                 Con_Printf`va(cstr("          :%8i %8s (TOTAL)\n"), (sum, addr(name[0])))
             }
@@ -449,11 +449,11 @@ def Cache_FreeLow(new_low_hunk : int) {
     var c : cache_system_s?
     while (1 != 0) {
         c = cache_head.next
-        if (intptr(c) == intptr(addr(cache_head))) {
+        if (c == addr(cache_head)) {
             // nothing in cache at all
             return
         }
-        if (intptr(reinterpret<uint8?>(c)) >= intptr(hunk_base + new_low_hunk)) {
+        if (reinterpret<uint64>(c) >= reinterpret<uint64>(hunk_base + new_low_hunk)) {
             // there is space to grow the hunk
             return
         }
@@ -473,15 +473,15 @@ def Cache_FreeHigh(new_high_hunk : int) {
     prev = null
     while (1 != 0) {
         c = cache_head.prev
-        if (intptr(c) == intptr(addr(cache_head))) {
+        if (c == addr(cache_head)) {
             // nothing in cache at all
             return
         }
-        if (intptr(reinterpret<uint8?>(c) + c.size) <= intptr(hunk_base + hunk_size + -(new_high_hunk))) {
+        if (reinterpret<uint64>(reinterpret<uint8?>(c) + c.size) <= reinterpret<uint64>(hunk_base + hunk_size + -(new_high_hunk))) {
             // there is space to grow the hunk
             return
         }
-        if (intptr(c) == intptr(prev)) {
+        if (c == prev) {
             // didn't move out of the way
             Cache_Free(c.user)
         } else {
@@ -523,7 +523,7 @@ def Cache_TryAlloc(size : int; nobottom : qboolean) : cache_system_s? {
     var cs : cache_system_s?
     var _c_new : cache_system_s?
     // is the cache completely empty?
-    if (int(nobottom) == 0 && intptr(cache_head.prev) == intptr(addr(cache_head))) {
+    if (int(nobottom) == 0 && cache_head.prev == addr(cache_head)) {
         if (hunk_size - hunk_high_used - hunk_low_used < size) {
             Sys_Error`va(cstr("Cache_TryAlloc: %i is greater then free hunk"), (size,))
         }
@@ -540,8 +540,8 @@ def Cache_TryAlloc(size : int; nobottom : qboolean) : cache_system_s? {
     // search from the bottom up for space
     _c_new = reinterpret<cache_system_s?>(hunk_base + hunk_low_used)
     cs = cache_head.next
-    c_do_while(intptr(cs) != intptr(addr(cache_head))) {
-        if (int(nobottom) == 0 || intptr(cs) != intptr(cache_head.next)) {
+    c_do_while(cs != addr(cache_head)) {
+        if (int(nobottom) == 0 || cs != cache_head.next) {
             if (int64(reinterpret<uint8?>(cs) - reinterpret<uint8?>(_c_new)) >= int64(size)) {
                 // found space
                 crt::memset(reinterpret<void?>(_c_new), 0, uint64(typeinfo sizeof(type<cache_system_s>)))
@@ -579,7 +579,7 @@ def Cache_TryAlloc(size : int; nobottom : qboolean) : cache_system_s? {
 // ============
 [c_function]
 def Cache_Flush {
-    while (intptr(cache_head.next) != intptr(addr(cache_head))) {
+    while (cache_head.next != addr(cache_head)) {
         // reclaim the space
         Cache_Free(cache_head.next.user)
     }
@@ -592,7 +592,7 @@ def Cache_Flush {
 def Cache_Print {
     var cd : cache_system_s?
     cd = cache_head.next
-    while (intptr(cd) != intptr(addr(cache_head))) {
+    while (cd != addr(cache_head)) {
         Con_Printf`va(cstr("%8i : %s\n"), (cd.size, addr(cd.name[0])))
         cd = cd.next
     }
@@ -681,7 +681,7 @@ def Cache_Alloc(var c : cache_user_s?; var size : int; var name : uint8?) : void
             break
         }
         // free the least recently used cahedat
-        if (intptr(cache_head.lru_prev) == intptr(addr(cache_head))) {
+        if (cache_head.lru_prev == addr(cache_head)) {
             Sys_Error`va(cstr("Cache_Alloc: out of memory"), VaNone())
         }
         // not enough memory at all

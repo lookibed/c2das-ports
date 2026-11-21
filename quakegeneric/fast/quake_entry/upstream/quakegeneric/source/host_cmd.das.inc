@@ -570,7 +570,7 @@ def Host_Name_f {
 [unsafe_deref, hint(unsafe_range_check)]
 def Host_Version_f {
     Con_Printf`va(cstr("Version %4.2f\n"), (VERSION,))
-    Con_Printf`va(cstr("Exe: 09:14:52 Nov 17 2026\n"), VaNone())
+    Con_Printf`va(cstr("Exe: 21:50:31 Nov 21 2026\n"), VaNone())
 }
 
 [c_function, unsafe_deref, hint(unsafe_range_check)]
@@ -982,7 +982,7 @@ def Host_Kick_f {
             who = addr(save.name[0])
         }
         // can't kick yourself!
-        if (intptr(host_client) == intptr(save)) {
+        if (host_client == save) {
             return
         }
         if (Cmd_Argc() > 2) {
