@@ -7,36 +7,34 @@ Lua 5.4.8 converted to daslang by [c2das-re](https://github.com/lookibed/c2das-r
 - `readable/` - for reading and changing the code: Boris, and the weak-model add-a-feature check.
 - `fast/` - for running.
 
-`fast/` is converted with `checks: off`: no null or bounds checks, so C bugs are not caught (a null access is a SIGSEGV; an out-of-bounds index reads neighbour memory; AOT keeps its range checks); use `readable/` to debug.
-
 Each variant converts the same program under its own knobs (c2das-re's `ports/variants/`, copied as its `variant.json` with the reason and the numbers behind each knob). x native is the das time over the native build's, above 1 when slower; the lines are the published tree's.
 
-|                       | `readable/` |    `fast/` |
-| :-------------------- | ----------: | ---------: |
-| `layout`              |    `source` |   `source` |
-| `fn_macros`           |      `fold` |     `fold` |
-| `inline_helpers`      |     `false` |    `false` |
-| `switch_dispatch`     |     `chain` |    `chain` |
-| `checks`              |      `safe` |      `off` |
-| `past_end`            |      `call` |     `call` |
-| `param_writes`        |  `in-place` | `in-place` |
-| `loops`               |     `range` |    `range` |
-| `first_member`        |      `addr` |     `addr` |
-| `solid_context`       |      `true` |     `true` |
-| `jit_whole_program`   |      `true` |     `true` |
-| `strict_aliasing`     |     `false` |    `false` |
-| `forms_off`           |        `[]` |       `[]` |
-| Criteria total, %     |    88.9 (1) |    not yet |
-| x native, interpreter |      110.92 |     111.41 |
-| x native, JIT         |        1.54 |       1.49 |
-| x native, exe         |        1.54 |       1.57 |
-| x native, AOT         |        1.36 |       1.30 |
-| das lines             |       30539 |      31012 |
-| `luaV_execute` lines  |        2569 |       2569 |
+|                       | `readable/` |      `fast/` |
+| :-------------------- | ----------: | -----------: |
+| `layout`              |    `source` | `source-cut` |
+| `fn_macros`           |      `fold` |       `fold` |
+| `inline_helpers`      |     `false` |      `false` |
+| `switch_dispatch`     |     `chain` |      `table` |
+| `checks`              |      `safe` |       `safe` |
+| `past_end`            |      `call` |       `call` |
+| `param_writes`        |  `in-place` |   `in-place` |
+| `loops`               |     `range` |      `range` |
+| `first_member`        |      `addr` |       `addr` |
+| `solid_context`       |      `true` |       `true` |
+| `jit_whole_program`   |      `true` |       `true` |
+| `strict_aliasing`     |     `false` |      `false` |
+| `forms_off`           |        `[]` |         `[]` |
+| Criteria total, %     |    88.9 (1) |      not yet |
+| x native, interpreter |      161.28 |        88.40 |
+| x native, JIT         |        1.59 |         1.26 |
+| x native, exe         |        1.59 |         1.34 |
+| x native, AOT         |        1.35 |         1.11 |
+| das lines             |       30539 |        31704 |
+| `luaV_execute` lines  |        2569 |            6 |
 
-- `readable/` speed: its search, the in-process work time over native's, geometric mean over fib, binary_trees, nbody, spectral_norm and the test suite; exe over the four benches alone, its test-suite cell not yet (the exe binary does not load the crt module from the suite folder) (capture_2026-11-14T095846Z.json), at c2das-re `accac6c` (2026-11-14) on PC, `heavy --exclusive --label TIMING-aot-lua -- /root/notes/parallel/aot3_capture/cap_lua.sh 3 (scripts/publish_ports.sh --program lua --no-convert --perf --samples 3)`, an exclusive run on a quiet machine.
-- `fast/` speed: its search, the in-process work time over native's, geometric mean over fib, binary_trees, nbody, spectral_norm and the test suite; exe over the four benches alone, its test-suite cell not yet (the exe binary does not load the crt module from the suite folder) (capture_2026-11-14T095846Z.json), at c2das-re `accac6c` (2026-11-14) on PC, `heavy --exclusive --label TIMING-aot-lua -- /root/notes/parallel/aot3_capture/cap_lua.sh 3 (scripts/publish_ports.sh --program lua --no-convert --perf --samples 3)`, an exclusive run on a quiet machine.
-- `fast/`: not yet tuned: readable + checks off
+- `readable/` speed: its search, the in-process work time over native's (clang -O3 -w -funsigned-char), geometric mean over fib, binary_trees, nbody and spectral_norm (bench/timed.lua, median of 9 runs on the JIT, 5 on exe and AOT, 3 on interp); the test suite is not in this search's ratio, at c2das-re `e96b680` (2026-11-22) on PC, `heavy --exclusive --label TIMING-add38-b5 --max 8G -- /root/notes/parallel/add38/cap5.sh (ab2.sh b5 9 on the JIT, ab2.sh b5 5 on interp (3 samples), exe and AOT)`, an exclusive run on a quiet machine.
+- `fast/` speed: its search, the in-process work time over native's (clang -O3 -w -funsigned-char), geometric mean over fib, binary_trees, nbody and spectral_norm (bench/timed.lua, median of 9 runs on the JIT, 5 on exe and AOT, 3 on interp); the test suite is not in this search's ratio, at c2das-re `e96b680` (2026-11-22) on PC, `heavy --exclusive --label TIMING-add38-b5 --max 8G -- /root/notes/parallel/add38/cap5.sh (ab2.sh b5 9 on the JIT, ab2.sh b5 5 on interp (3 samples), exe and AOT)`, an exclusive run on a quiet machine.
+- `fast/`: the set over readable on the same tier: interp 0.548, jit 0.792, exe 0.843, aot 0.824 (batch 5); a knob stays iff the set with it beats the set without it by more than the tier's band on at least one tier and the tiers where it is faster beyond the band outnumber those where it is slower beyond it (the lead's ruling of 2026-11-22, after batch 5's data), the band the largest per-workload spread (max-min over median) of the readable arm in the same batch, the rule for every program; jit_whole_program stays on (off measured 2.372 on the JIT); the test suite, the error checks and luac -o pass under interp and JIT
 - (1) not from a search of the variant: the row `lua/lua` of c2das-re's `metrics/criteria_linux.json`, the converter's default flags
 
 ## Files
@@ -44,8 +42,8 @@ Each variant converts the same program under its own knobs (c2das-re's `ports/va
 - `readable/lua/` - the interpreter `lua`: the core, the standard libraries and `lua.c`, the readable variant, a module per C file, every cycle of files one module of `.das.inc` fragments (c2das-re's source layout; its `program.layout.txt` lists the modules); `readable/lua/lua.das` holds `main`.
 - `readable/luac/` - the compiler `luac`: the core, the auxiliary library and `luac.c`, the readable variant, a module per C file, every cycle of files one module of `.das.inc` fragments (c2das-re's source layout; its `program.layout.txt` lists the modules); `readable/luac/luac.das` holds `main`.
 - `readable/lua.c2das` - the sidecar the readable variant was converted under, `readable/variant.json` - its knobs with the reason and the numbers behind each.
-- `fast/lua/` - the interpreter `lua`: the core, the standard libraries and `lua.c`, the fast variant, a module per C file, every cycle of files one module of `.das.inc` fragments (c2das-re's source layout; its `program.layout.txt` lists the modules); `fast/lua/lua.das` holds `main`.
-- `fast/luac/` - the compiler `luac`: the core, the auxiliary library and `luac.c`, the fast variant, a module per C file, every cycle of files one module of `.das.inc` fragments (c2das-re's source layout; its `program.layout.txt` lists the modules); `fast/luac/luac.das` holds `main`.
+- `fast/lua/` - the interpreter `lua`: the core, the standard libraries and `lua.c`, the fast variant, a module per C file, the cycles among files cut by late binding through `<stem>_link.das` (c2das-re's source-cut layout; its `program.layout.txt` lists the cut); `fast/lua/lua.das` holds `main`.
+- `fast/luac/` - the compiler `luac`: the core, the auxiliary library and `luac.c`, the fast variant, a module per C file, the cycles among files cut by late binding through `<stem>_link.das` (c2das-re's source-cut layout; its `program.layout.txt` lists the cut); `fast/luac/luac.das` holds `main`.
 - `fast/lua.c2das` - the sidecar the fast variant was converted under, `fast/variant.json` - its knobs with the reason and the numbers behind each.
 - `LICENSE` - Lua's license, from `src/lua.h` of the release; the conversion is a derived work.
 - `bench/` - the benchmark scripts the tables below run, and `timed.lua`, which runs each and reports its work seconds measured inside the process.
@@ -56,7 +54,7 @@ Each variant converts the same program under its own knobs (c2das-re's `ports/va
 - Upstream: Lua 5.4.8
   - https://www.lua.org/ftp/lua-5.4.8.tar.gz (sha256 `4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae`)
   - https://www.lua.org/tests/lua-5.4.8-tests.tar.gz (sha256 `9581d5a7c39ffbf29b8ccde2709083c380f7bbddbd968dcb15712d2f2e33f4e5`)
-- Generated by c2das-re `v0.5.0-893-gb638124` (`b6381241a53fe501dd3597f409ae1ea405d19fe9`, committed 2026-11-18)
+- Generated by c2das-re `v0.5.0-915-gfe08272` (`fe08272d991bac4d57460f41dd6f0ad7f33ccfe7`, committed 2026-11-22)
 
 ## Running
 
@@ -144,64 +142,94 @@ readable:
 [I] lua: luac (source): 23415 lines of das, [c_function] on 473 of 767 functions, macro sites folded 2505, expanded: capture 366, effects 9, faulting 220, incomplete 321, lvalue 65, never 1280, order 80, overload 198, shape 27, spelling 383, statements 60, ternary 107
 fast:
 [I] lua: lua/work/lua_native: 384840 bytes
-[I] lua: lua (source): 33 files, JSON 497812538 bytes
-[I] lua: lua (source): 5829 declarations bound to another file's definition, 0 statics renamed, 0 header functions kept once
-[I] lua: lua (source): 28 modules, 33 fragments
-[I] lua: lua (source): module c_types
-[I] lua: lua (source): module lapi
-[I] lua: lua (source): module lauxlib
-[I] lua: lua (source): module lauxlib_h
-[I] lua: lua (source): module lbaselib
-[I] lua: lua (source): module lcode_cluster: cluster of 15: lcode ldebug ldo lfunc lgc llex lmem lobject lparser lstate lstring ltable ltm lundump lvm
-[I] lua: lua (source): module lcode_h
-[I] lua: lua (source): module lcorolib
-[I] lua: lua (source): module lctype
-[I] lua: lua (source): module ldblib
-[I] lua: lua (source): module ldump
-[I] lua: lua (source): module linit
-[I] lua: lua (source): module liolib
-[I] lua: lua (source): module llex_h_cluster: cluster of 2: llex_h lparser_h
-[I] lua: lua (source): module lmathlib
-[I] lua: lua (source): module loadlib
-[I] lua: lua (source): module lobject_h_cluster: cluster of 3: lobject_h lstate_h lua_h
-[I] lua: lua (source): module lopcodes
-[I] lua: lua (source): module lopcodes_h
-[I] lua: lua (source): module loslib
-[I] lua: lua (source): module lstrlib
-[I] lua: lua (source): module ltablib
-[I] lua: lua (source): module ltm_h
-[I] lua: lua (source): module lua
-[I] lua: lua (source): module lutf8lib
-[I] lua: lua (source): module lvm_h
-[I] lua: lua (source): module lzio
-[I] lua: lua (source): module lzio_h
-[I] lua: lua (source): 31012 lines of das, [c_function] on 631 of 1080 functions, macro sites folded 2738, expanded: capture 352, effects 11, faulting 223, flow 5, incomplete 366, lvalue 115, never 1318, order 80, overload 192, shape 27, spelling 400, statements 63, ternary 107
+[I] lua: lua (source-cut): 33 files, JSON 497812538 bytes
+[I] lua: lua (source-cut): 5829 declarations bound to another file's definition, 0 statics renamed, 0 header functions kept once
+[I] lua: lua (source-cut): 43 modules, 22 fragments
+[I] lua: lua (source-cut): module c_types
+[I] lua: lua (source-cut): module lapi
+[I] lua: lua (source-cut): module lauxlib
+[I] lua: lua (source-cut): module lauxlib_h
+[I] lua: lua (source-cut): module lbaselib
+[I] lua: lua (source-cut): module lcode
+[I] lua: lua (source-cut): module lcode_h
+[I] lua: lua (source-cut): module lcorolib
+[I] lua: lua (source-cut): module lctype
+[I] lua: lua (source-cut): module ldblib
+[I] lua: lua (source-cut): module ldebug
+[I] lua: lua (source-cut): module ldo
+[I] lua: lua (source-cut): module ldump
+[I] lua: lua (source-cut): module lfunc
+[I] lua: lua (source-cut): module lgc
+[I] lua: lua (source-cut): module linit
+[I] lua: lua (source-cut): module liolib
+[I] lua: lua (source-cut): module llex
+[I] lua: lua (source-cut): module llex_h_cluster: cluster of 2: llex_h lparser_h
+[I] lua: lua (source-cut): module lmathlib
+[I] lua: lua (source-cut): module lmem
+[I] lua: lua (source-cut): module loadlib
+[I] lua: lua (source-cut): module lobject
+[I] lua: lua (source-cut): module lobject_h_cluster: cluster of 3: lobject_h lstate_h lua_h
+[I] lua: lua (source-cut): module lopcodes
+[I] lua: lua (source-cut): module lopcodes_h
+[I] lua: lua (source-cut): module loslib
+[I] lua: lua (source-cut): module lparser
+[I] lua: lua (source-cut): module lstate
+[I] lua: lua (source-cut): module lstring
+[I] lua: lua (source-cut): module lstrlib
+[I] lua: lua (source-cut): module ltable
+[I] lua: lua (source-cut): module ltablib
+[I] lua: lua (source-cut): module ltm
+[I] lua: lua (source-cut): module ltm_h
+[I] lua: lua (source-cut): module lua
+[I] lua: lua (source-cut): module lua_link
+[I] lua: lua (source-cut): module lundump
+[I] lua: lua (source-cut): module lutf8lib
+[I] lua: lua (source-cut): module lvm
+[I] lua: lua (source-cut): module lvm_h
+[I] lua: lua (source-cut): module lzio
+[I] lua: lua (source-cut): module lzio_h
+[I] lua: lua (source-cut): 31704 lines of das, [c_function] on 630 of 1080 functions, macro sites folded 2734, expanded: capture 352, effects 11, faulting 223, flow 5, incomplete 396, labels 25, lvalue 110, never 1324, order 80, overload 249, shape 27, spelling 416, statements 63, ternary 107
 [I] lua: native exited 0: 2
 [I] lua: native stderr:
 [I] lua: interp exited 0: 2
 [I] lua: interp stderr:
 [I] lua: lua/work/luac_native: 285160 bytes
-[I] lua: luac (source): 22 files, JSON 431343353 bytes
-[I] lua: luac (source): 4185 declarations bound to another file's definition, 0 statics renamed, 0 header functions kept once
-[I] lua: luac (source): 17 modules, 28 fragments
-[I] lua: luac (source): module c_types
-[I] lua: luac (source): module lapi
-[I] lua: luac (source): module lauxlib
-[I] lua: luac (source): module lauxlib_h
-[I] lua: luac (source): module lcode_cluster: cluster of 15: lcode ldebug ldo lfunc lgc llex lmem lobject lparser lstate lstring ltable ltm lundump lvm
-[I] lua: luac (source): module lcode_h
-[I] lua: luac (source): module lctype
-[I] lua: luac (source): module ldump
-[I] lua: luac (source): module llex_h_cluster: cluster of 2: llex_h lparser_h
-[I] lua: luac (source): module lobject_h_cluster: cluster of 3: lobject_h lstate_h lua_h
-[I] lua: luac (source): module lopcodes
-[I] lua: luac (source): module lopcodes_h
-[I] lua: luac (source): module ltm_h
-[I] lua: luac (source): module luac
-[I] lua: luac (source): module lvm_h
-[I] lua: luac (source): module lzio
-[I] lua: luac (source): module lzio_h
-[I] lua: luac (source): 23722 lines of das, [c_function] on 473 of 767 functions, macro sites folded 2505, expanded: capture 366, effects 9, faulting 220, incomplete 321, lvalue 65, never 1280, order 80, overload 198, shape 27, spelling 383, statements 60, ternary 107
+[I] lua: luac (source-cut): 22 files, JSON 431343353 bytes
+[I] lua: luac (source-cut): 4185 declarations bound to another file's definition, 0 statics renamed, 0 header functions kept once
+[I] lua: luac (source-cut): 32 modules, 17 fragments
+[I] lua: luac (source-cut): module c_types
+[I] lua: luac (source-cut): module lapi
+[I] lua: luac (source-cut): module lauxlib
+[I] lua: luac (source-cut): module lauxlib_h
+[I] lua: luac (source-cut): module lcode
+[I] lua: luac (source-cut): module lcode_h
+[I] lua: luac (source-cut): module lctype
+[I] lua: luac (source-cut): module ldebug
+[I] lua: luac (source-cut): module ldo
+[I] lua: luac (source-cut): module ldump
+[I] lua: luac (source-cut): module lfunc
+[I] lua: luac (source-cut): module lgc
+[I] lua: luac (source-cut): module llex
+[I] lua: luac (source-cut): module llex_h_cluster: cluster of 2: llex_h lparser_h
+[I] lua: luac (source-cut): module lmem
+[I] lua: luac (source-cut): module lobject
+[I] lua: luac (source-cut): module lobject_h_cluster: cluster of 3: lobject_h lstate_h lua_h
+[I] lua: luac (source-cut): module lopcodes
+[I] lua: luac (source-cut): module lopcodes_h
+[I] lua: luac (source-cut): module lparser
+[I] lua: luac (source-cut): module lstate
+[I] lua: luac (source-cut): module lstring
+[I] lua: luac (source-cut): module ltable
+[I] lua: luac (source-cut): module ltm
+[I] lua: luac (source-cut): module ltm_h
+[I] lua: luac (source-cut): module luac
+[I] lua: luac (source-cut): module luac_link
+[I] lua: luac (source-cut): module lundump
+[I] lua: luac (source-cut): module lvm
+[I] lua: luac (source-cut): module lvm_h
+[I] lua: luac (source-cut): module lzio
+[I] lua: luac (source-cut): module lzio_h
+[I] lua: luac (source-cut): 24505 lines of das, [c_function] on 472 of 767 functions, macro sites folded 2490, expanded: capture 362, effects 8, faulting 219, incomplete 351, labels 76, lvalue 60, never 1281, order 80, overload 254, shape 27, spelling 398, statements 60, ternary 107
 ```
 
 ## Performance

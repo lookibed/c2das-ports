@@ -1,5 +1,5 @@
 {
-	"checks" : "off",
+	"checks" : "safe",
 	"defines" : [
 		"LUA_USE_JUMPTABLE=0"
 	],
@@ -9,7 +9,7 @@
 	"inline_helpers" : false,
 	"jit_whole_program" : true,
 	"layout" : {
-		"mode" : "source",
+		"mode" : "source-cut",
 		"profile" : "lua.profile.json"
 	},
 	"loops" : "range",
@@ -23,5 +23,5 @@
 	"past_end" : "call",
 	"solid_context" : true,
 	"strict_aliasing" : false,
-	"switch_dispatch" : "chain"
+	"switch_dispatch" : "table"
 }
