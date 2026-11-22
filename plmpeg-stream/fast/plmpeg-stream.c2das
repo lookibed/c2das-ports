@@ -15,7 +15,7 @@
 		"<c2das>/tests/manual/plmpeg-stream/fixtures",
 		"<c2das>/tests/manual/plmpeg-stream/src"
 	],
-	"checks" : "off",
+	"checks" : "safe",
 	"layout" : "source",
 	"param_writes" : "in-place",
 	"switch_dispatch" : "chain",
