@@ -5,10 +5,12 @@ options indenting = 4
 options solid_context
 options stack = 8388608
 options strict_aliasing = false
+options jit_split_modules = 0
 require DOOM_cluster
 require c_runtime/c_args
 require c_runtime/c_exit
 require c_runtime/c_function
+require c_runtime/c_jit_build
 require c_runtime/cstr
 require c_runtime/printf
 require c_runtime/setjmp

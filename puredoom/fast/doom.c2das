@@ -12,7 +12,7 @@
 	"fn_macros" : "fold",
 	"forms_off" : [],
 	"inline_helpers" : false,
-	"jit_whole_program" : false,
+	"jit_whole_program" : true,
 	"layout" : "source",
 	"loops" : "range",
 	"marshal" : [
