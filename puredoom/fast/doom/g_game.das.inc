@@ -1417,7 +1417,7 @@ def G_CheckDemoStatus : doom_boolean {
         }
         if (reinterpret<memblock_s?>(demobuffer + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/g_game.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/g_game.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1689, 10))
             I_Error(addr(buf[0]))
         }

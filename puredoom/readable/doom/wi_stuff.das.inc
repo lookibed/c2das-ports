@@ -1098,7 +1098,7 @@ def WI_unloadData {
     var j : int
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(wiminus) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1659, 10))
         I_Error(addr(buf[0]))
     }
@@ -1106,7 +1106,7 @@ def WI_unloadData {
     for (i1 in range(10)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(num[i1]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1662, 10))
             I_Error(addr(buf[0]))
         }
@@ -1117,7 +1117,7 @@ def WI_unloadData {
         while (i < NUMCMAPS) {
             if (reinterpret<memblock_s?>(reinterpret<uint8?>(lnames[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
                 var buf : uint8[260]
-                doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+                doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
                 doom_concat(addr(buf[0]), doom_itoa(1667, 10))
                 I_Error(addr(buf[0]))
             }
@@ -1127,21 +1127,21 @@ def WI_unloadData {
     } else {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(yah[0]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1671, 10))
             I_Error(addr(buf[0]))
         }
         Z_ChangeTag2(reinterpret<void?>(yah[0]), PU_CACHE)
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(yah[1]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1672, 10))
             I_Error(addr(buf[0]))
         }
         Z_ChangeTag2(reinterpret<void?>(yah[1]), PU_CACHE)
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(splat) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1674, 10))
             I_Error(addr(buf[0]))
         }
@@ -1149,7 +1149,7 @@ def WI_unloadData {
         for (i1 in range(NUMMAPS)) {
             if (reinterpret<memblock_s?>(reinterpret<uint8?>(lnames[i1]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
                 var buf : uint8[260]
-                doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+                doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
                 doom_concat(addr(buf[0]), doom_itoa(1677, 10))
                 I_Error(addr(buf[0]))
             }
@@ -1164,7 +1164,7 @@ def WI_unloadData {
                         if (reinterpret<memblock_s?>(reinterpret<uint8?>(anims_wi_stuff[wbs.epsd][j].p[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id !=
                                 1919505) {
                             var buf : uint8[260]
-                            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+                            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
                             doom_concat(addr(buf[0]), doom_itoa(1685, 10))
                             I_Error(addr(buf[0]))
                         }
@@ -1179,105 +1179,105 @@ def WI_unloadData {
     Z_Free(reinterpret<void?>(lnames))
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(percent) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1692, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(percent), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(colon) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1693, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(colon), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(finished) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1694, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(finished), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(entering) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1695, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(entering), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(kills) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1696, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(kills), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(secret) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1697, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(secret), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(sp_secret) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1698, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(sp_secret), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(items) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1699, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(items), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(frags) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1700, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(frags), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(time_patch) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1701, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(time_patch), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(sucks) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1702, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(sucks), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(par) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1703, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(par), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(victims) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1705, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(victims), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(killers) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1706, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(killers), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(total) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1707, 10))
         I_Error(addr(buf[0]))
     }
@@ -1287,7 +1287,7 @@ def WI_unloadData {
     for (i1 in range(MAXPLAYERS)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(p[i1]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1712, 10))
             I_Error(addr(buf[0]))
         }
@@ -1296,7 +1296,7 @@ def WI_unloadData {
     for (i1 in range(MAXPLAYERS)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(bp[i1]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/wi_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-pd/doom/work/src/wi_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1715, 10))
             I_Error(addr(buf[0]))
         }

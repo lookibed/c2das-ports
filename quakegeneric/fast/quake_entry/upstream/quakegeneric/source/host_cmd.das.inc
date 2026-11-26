@@ -570,7 +570,7 @@ def Host_Name_f {
 [unsafe_deref, hint(unsafe_range_check)]
 def Host_Version_f {
     Con_Printf`va(cstr("Version %4.2f\n"), (VERSION,))
-    Con_Printf`va(cstr("Exe: 09:15:38 Nov 23 2026\n"), VaNone())
+    Con_Printf`va(cstr("Exe: 22:02:27 Nov 26 2026\n"), VaNone())
 }
 
 [c_function, unsafe_deref, hint(unsafe_range_check)]
