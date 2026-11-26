@@ -42,7 +42,7 @@ enum M3ValueType {
     c_m3Type_unknown = 9
 }
 
-enum anon_315 {
+enum anon_318 {
     c_waOp_block = 2
     c_waOp_loop
     c_waOp_if
@@ -108,7 +108,7 @@ enum M3ElementMode {
     c_m3Elem_declarative
 }
 
-enum anon_598 {
+enum anon_601 {
     c_cc_NULL
     c_cc_Compile_Unreachable
     c_cc_Compile_Nop
@@ -152,14 +152,14 @@ enum anon_598 {
     c_cc_Compile_TryTable
 }
 
-enum anon_603 {
+enum anon_606 {
     c_opHigh_refNull
     c_opHigh_refIsNull
     c_opHigh_refFunc
     c_opHigh_extended
 }
 
-enum anon_609 {
+enum anon_612 {
     c_gasLocal = 1
     c_gasNominal = 1
     c_gasArith = 45
@@ -355,7 +355,7 @@ struct M3DataSegment {
 }
 
 [c_union]
-struct anon_75 {
+struct anon_78 {
     i32Value : int
     i64Value : int64
     refValue : void?
@@ -364,7 +364,7 @@ struct anon_75 {
 struct M3Global {
     import : M3ImportInfo
     resolved : M3Global?
-    _anon2 : anon_75
+    _anon2 : anon_78
     name, initExpr : uint8?
     initExprSize : uint
     _c_type : uint8
@@ -450,13 +450,13 @@ struct M3FusedCmpOps {
 }
 
 [c_union]
-struct anon_533 {
+struct anon_536 {
     u : uint
     f : float
 }
 
 [c_union]
-struct anon_535 {
+struct anon_538 {
     u : uint64
     f : double
 }
@@ -686,8 +686,8 @@ def private c2das_layout_check {
     static_assert(typeinfo offsetof < size > (type<M3DataSegment>) == 24, "M3DataSegment.size: clang puts it at 24")
     static_assert(typeinfo offsetof < isPassive > (type<M3DataSegment>) == 28, "M3DataSegment.isPassive: clang puts it at 28")
     static_assert(typeinfo offsetof < dropped > (type<M3DataSegment>) == 29, "M3DataSegment.dropped: clang puts it at 29")
-    static_assert(typeinfo sizeof(type<anon_75>) == 8 && typeinfo alignof(type<anon_75>) == 8, "anon_75: clang lays it out as size 8, align 8")
-    static_assert(typeinfo offsetof < _storage > (type<anon_75>) == 0, "anon_75: every member sits at 0")
+    static_assert(typeinfo sizeof(type<anon_78>) == 8 && typeinfo alignof(type<anon_78>) == 8, "anon_78: clang lays it out as size 8, align 8")
+    static_assert(typeinfo offsetof < _storage > (type<anon_78>) == 0, "anon_78: every member sits at 0")
     static_assert(typeinfo sizeof(type<M3Global>) == 56 && typeinfo alignof(type<M3Global>) == 8, "M3Global: clang lays it out as size 56, align 8")
     static_assert(typeinfo offsetof < import > (type<M3Global>) == 0, "M3Global.import: clang puts it at 0")
     static_assert(typeinfo offsetof < resolved > (type<M3Global>) == 16, "M3Global.resolved: clang puts it at 16")
@@ -778,10 +778,10 @@ def private c2das_layout_check {
             "M3FusedCmpOps: clang lays it out as size 64, align 8")
     static_assert(typeinfo offsetof < branchIf > (type<M3FusedCmpOps>) == 0, "M3FusedCmpOps.branchIf: clang puts it at 0")
     static_assert(typeinfo offsetof < ifOp > (type<M3FusedCmpOps>) == 32, "M3FusedCmpOps.ifOp: clang puts it at 32")
-    static_assert(typeinfo sizeof(type<anon_533>) == 4 && typeinfo alignof(type<anon_533>) == 4, "anon_533: clang lays it out as size 4, align 4")
-    static_assert(typeinfo offsetof < _storage > (type<anon_533>) == 0, "anon_533: every member sits at 0")
-    static_assert(typeinfo sizeof(type<anon_535>) == 8 && typeinfo alignof(type<anon_535>) == 8, "anon_535: clang lays it out as size 8, align 8")
-    static_assert(typeinfo offsetof < _storage > (type<anon_535>) == 0, "anon_535: every member sits at 0")
+    static_assert(typeinfo sizeof(type<anon_536>) == 4 && typeinfo alignof(type<anon_536>) == 4, "anon_536: clang lays it out as size 4, align 4")
+    static_assert(typeinfo offsetof < _storage > (type<anon_536>) == 0, "anon_536: every member sits at 0")
+    static_assert(typeinfo sizeof(type<anon_538>) == 8 && typeinfo alignof(type<anon_538>) == 8, "anon_538: clang lays it out as size 8, align 8")
+    static_assert(typeinfo offsetof < _storage > (type<anon_538>) == 0, "anon_538: every member sits at 0")
     static_assert(typeinfo sizeof(type<M3HostFile>) == 32 && typeinfo alignof(type<M3HostFile>) == 8, "M3HostFile: clang lays it out as size 32, align 8")
     static_assert(typeinfo offsetof < data > (type<M3HostFile>) == 0, "M3HostFile.data: clang puts it at 0")
     static_assert(typeinfo offsetof < size > (type<M3HostFile>) == 8, "M3HostFile.size: clang puts it at 8")
@@ -897,68 +897,68 @@ var private all_host__c_waCompactTypes : uint8? [10] = fixed_array<uint8?>(cstr(
         cstr("R"), cstr("e"), cstr("?"))
 var c_operations : M3OpInfo[197]
 var c_operationsFC : M3OpInfo[18] = fixed_array(M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32),
-            compiler = uint8(anon_598.c_cc_Compile_Convert),
+            compiler = uint8(anon_601.c_cc_Compile_Convert),
             operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Convert),
             operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Convert),
             operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Convert),
             operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Convert),
             operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Convert),
             operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Convert),
             operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Convert),
             operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Memory_Init),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Memory_Init),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Data_Drop),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Data_Drop),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Memory_CopyFill),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Memory_CopyFill),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Memory_CopyFill),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Memory_CopyFill),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Table_Init),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Table_Init),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Elem_Drop),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Elem_Drop),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Table_Copy),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Table_Copy),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Table_GrowFill),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Table_GrowFill),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-        M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Table_Size),
+        M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Table_Size),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Table_GrowFill),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Table_GrowFill),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
@@ -1146,30 +1146,30 @@ var private all_host__c_intSelectOps : function<(var a0 : void ??; var a1 : uint
 var private all_host__c_ioSlotCount : uint16 = uint16(uint64(typeinfo sizeof(type<uint64>)) / uint64(typeinfo sizeof(type<uint>)))
 var private all_host__c_compilers : function<(var a0 : M3Compilation?; a1 : uint16) : uint8?>[41]
 var private all_host__c_operationsHigh : M3OpInfo[4] = fixed_array(M3OpInfo(stackOffset = int8(1), _c_type = uint8(-1),
-            compiler = uint8(anon_598.c_cc_Compile_Ref_Null),
+            compiler = uint8(anon_601.c_cc_Compile_Ref_Null),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Ref_IsNull),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Ref_IsNull),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-        M3OpInfo(stackOffset = int8(1), _c_type = uint8(-1), compiler = uint8(anon_598.c_cc_Compile_Ref_Func),
+        M3OpInfo(stackOffset = int8(1), _c_type = uint8(-1), compiler = uint8(anon_601.c_cc_Compile_Ref_Func),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_unknown), compiler = uint8(anon_598.c_cc_Compile_ExtendedOpcode),
+        M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_unknown), compiler = uint8(anon_601.c_cc_Compile_ExtendedOpcode),
             operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                 default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)))
-var private GetGasCost_c_arithmeticCosts : uint16[15] = fixed_array(uint16(anon_609.c_gasArith), uint16(anon_609.c_gasArith), uint16(anon_609.c_gasArith),
-        uint16(anon_609.c_gasDivide), uint16(anon_609.c_gasDivide), uint16(anon_609.c_gasDivide), uint16(anon_609.c_gasDivide), uint16(anon_609.c_gasArith),
-        uint16(anon_609.c_gasArith), uint16(anon_609.c_gasArith), uint16(anon_609.c_gasShift), uint16(anon_609.c_gasShift), uint16(anon_609.c_gasShift),
-        uint16(anon_609.c_gasBranch), uint16(anon_609.c_gasBranch))
+var private GetGasCost_c_arithmeticCosts : uint16[15] = fixed_array(uint16(anon_612.c_gasArith), uint16(anon_612.c_gasArith), uint16(anon_612.c_gasArith),
+        uint16(anon_612.c_gasDivide), uint16(anon_612.c_gasDivide), uint16(anon_612.c_gasDivide), uint16(anon_612.c_gasDivide), uint16(anon_612.c_gasArith),
+        uint16(anon_612.c_gasArith), uint16(anon_612.c_gasArith), uint16(anon_612.c_gasShift), uint16(anon_612.c_gasShift), uint16(anon_612.c_gasShift),
+        uint16(anon_612.c_gasBranch), uint16(anon_612.c_gasBranch))
 var private ParseModuleSection_s_parsers : function<(var a0 : M3Module?; var a1 : uint8?; var a2 : uint8?) : uint8?>[14] = fixed_array(@@ParseSection_Custom,
         @@ParseSection_Type, @@ParseSection_Import, @@ParseSection_Function, @@ParseType_Table, @@ParseSection_Memory, @@ParseSection_Global,
         @@ParseSection_Export, @@ParseSection_Start, @@ParseSection_Element, @@ParseSection_Code, @@ParseSection_Data, @@ParseSection_DataCount,
@@ -1180,605 +1180,605 @@ var private all_host__fib_inputs : int[7] = fixed_array(1, 2, 5, 10, 15, 20, 24)
 
 [init]
 def private c2das_init_globals {
-    c_operations = fixed_array(M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Unreachable),
+    c_operations = fixed_array(M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Unreachable),
                 operations = fixed_array(@@all_host__op_Unreachable,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Nop),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Nop),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_LoopOrBlock),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_LoopOrBlock),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_LoopOrBlock),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_LoopOrBlock),
                 operations = fixed_array(@@all_host__op_Loop,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_If),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_If),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Nop),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Nop),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
             M3OpInfo(stackOffset = int8(0)), M3OpInfo(stackOffset = int8(0)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Throw),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Throw),
                 operations = fixed_array(@@all_host__op_Throw,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
             M3OpInfo(stackOffset = int8(0)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_ThrowRef),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_ThrowRef),
                 operations = fixed_array(@@all_host__op_ThrowRef,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_End),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_End),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Branch),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Branch),
                 operations = fixed_array(@@all_host__op_Branch,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Branch),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Branch),
                 operations = fixed_array(@@all_host__op_BranchIf_r, @@all_host__op_BranchIf_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_BranchTable),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_BranchTable),
                 operations = fixed_array(@@all_host__op_BranchTable,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_598.c_cc_Compile_Return),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_601.c_cc_Compile_Return),
                 operations = fixed_array(@@all_host__op_Return,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_598.c_cc_Compile_Call),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_601.c_cc_Compile_Call),
                 operations = fixed_array(@@all_host__op_Call,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_598.c_cc_Compile_CallIndirect),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_601.c_cc_Compile_CallIndirect),
                 operations = fixed_array(@@all_host__op_CallIndirect,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_598.c_cc_Compile_Call),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_601.c_cc_Compile_Call),
                 operations = fixed_array(@@all_host__op_ReturnCall,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_598.c_cc_Compile_CallIndirect),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_601.c_cc_Compile_CallIndirect),
                 operations = fixed_array(@@all_host__op_ReturnCallIndirect,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
             M3OpInfo(stackOffset = int8(0)), M3OpInfo(stackOffset = int8(0)), M3OpInfo(stackOffset = int8(0)), M3OpInfo(stackOffset = int8(0)),
             M3OpInfo(stackOffset = int8(0)), M3OpInfo(stackOffset = int8(0)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Drop),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Drop),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(-1), compiler = uint8(anon_598.c_cc_Compile_Select),
+            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(-1), compiler = uint8(anon_601.c_cc_Compile_Select),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(-1), compiler = uint8(anon_598.c_cc_Compile_Select_Typed),
+            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(-1), compiler = uint8(anon_601.c_cc_Compile_Select_Typed),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
             M3OpInfo(stackOffset = int8(0)), M3OpInfo(stackOffset = int8(0)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_TryTable),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_TryTable),
                 operations = fixed_array(@@all_host__op_TryTable,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(1), _c_type = uint8(-1), compiler = uint8(anon_598.c_cc_Compile_GetLocal),
+            M3OpInfo(stackOffset = int8(1), _c_type = uint8(-1), compiler = uint8(anon_601.c_cc_Compile_GetLocal),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_SetLocal),
+            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_SetLocal),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_598.c_cc_Compile_SetLocal),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_601.c_cc_Compile_SetLocal),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_GetSetGlobal),
+            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_GetSetGlobal),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_GetSetGlobal),
+            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_GetSetGlobal),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_598.c_cc_Compile_Table_GetSet),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(-1), compiler = uint8(anon_601.c_cc_Compile_Table_GetSet),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Table_GetSet),
+            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Table_GetSet),
                 operations = fixed_array(default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
             M3OpInfo(stackOffset = int8(0)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i32_Load_i32_r, @@all_host__op_i32_Load_i32_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i64_Load_i64_r, @@all_host__op_i64_Load_i64_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i32_Load_i8_r, @@all_host__op_i32_Load_i8_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i32_Load_u8_r, @@all_host__op_i32_Load_u8_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i32_Load_i16_r, @@all_host__op_i32_Load_i16_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i32_Load_u16_r, @@all_host__op_i32_Load_u16_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i64_Load_i8_r, @@all_host__op_i64_Load_i8_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i64_Load_u8_r, @@all_host__op_i64_Load_u8_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i64_Load_i16_r, @@all_host__op_i64_Load_i16_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i64_Load_u16_r, @@all_host__op_i64_Load_u16_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i64_Load_i32_r, @@all_host__op_i64_Load_i32_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i64_Load_u32_r, @@all_host__op_i64_Load_u32_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i32_Store_i32_rs, @@all_host__op_i32_Store_i32_sr, @@all_host__op_i32_Store_i32_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i64_Store_i64_rs, @@all_host__op_i64_Store_i64_sr, @@all_host__op_i64_Store_i64_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i32_Store_u8_rs, @@all_host__op_i32_Store_u8_sr, @@all_host__op_i32_Store_u8_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i32_Store_i16_rs, @@all_host__op_i32_Store_i16_sr, @@all_host__op_i32_Store_i16_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i64_Store_u8_rs, @@all_host__op_i64_Store_u8_sr, @@all_host__op_i64_Store_u8_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i64_Store_i16_rs, @@all_host__op_i64_Store_i16_sr, @@all_host__op_i64_Store_i16_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_598.c_cc_Compile_Load_Store),
+            M3OpInfo(stackOffset = int8(-2), _c_type = uint8(M3ValueType.c_m3Type_none), compiler = uint8(anon_601.c_cc_Compile_Load_Store),
                 operations = fixed_array(@@all_host__op_i64_Store_i32_rs, @@all_host__op_i64_Store_i32_sr, @@all_host__op_i64_Store_i32_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Memory_Size),
+            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Memory_Size),
                 operations = fixed_array(@@all_host__op_MemSize,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Memory_Grow),
+            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Memory_Grow),
                 operations = fixed_array(@@all_host__op_MemGrow,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Const_i32),
+            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Const_i32),
                 operations = fixed_array(@@all_host__op_Const32,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Const_i64),
+            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Const_i64),
                 operations = fixed_array(@@all_host__op_Const64,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_Compile_Const_f32),
+            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_Compile_Const_f32),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_Compile_Const_f64),
+            M3OpInfo(stackOffset = int8(1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_Compile_Const_f64),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_EqualToZero_r, @@all_host__op_i32_EqualToZero_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_Equal_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_i32_Equal_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_NotEqual_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_i32_NotEqual_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_LessThan_rs, @@all_host__op_i32_LessThan_sr, @@all_host__op_i32_LessThan_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_LessThan_rs, @@all_host__op_u32_LessThan_sr, @@all_host__op_u32_LessThan_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_GreaterThan_rs, @@all_host__op_i32_GreaterThan_sr, @@all_host__op_i32_GreaterThan_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_GreaterThan_rs, @@all_host__op_u32_GreaterThan_sr, @@all_host__op_u32_GreaterThan_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_LessThanOrEqual_rs, @@all_host__op_i32_LessThanOrEqual_sr, @@all_host__op_i32_LessThanOrEqual_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_LessThanOrEqual_rs, @@all_host__op_u32_LessThanOrEqual_sr, @@all_host__op_u32_LessThanOrEqual_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_GreaterThanOrEqual_rs, @@all_host__op_i32_GreaterThanOrEqual_sr,
                     @@all_host__op_i32_GreaterThanOrEqual_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_GreaterThanOrEqual_rs, @@all_host__op_u32_GreaterThanOrEqual_sr,
                     @@all_host__op_u32_GreaterThanOrEqual_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_EqualToZero_r, @@all_host__op_i64_EqualToZero_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_Equal_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_i64_Equal_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_NotEqual_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_i64_NotEqual_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_LessThan_rs, @@all_host__op_i64_LessThan_sr, @@all_host__op_i64_LessThan_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_LessThan_rs, @@all_host__op_u64_LessThan_sr, @@all_host__op_u64_LessThan_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_GreaterThan_rs, @@all_host__op_i64_GreaterThan_sr, @@all_host__op_i64_GreaterThan_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_GreaterThan_rs, @@all_host__op_u64_GreaterThan_sr, @@all_host__op_u64_GreaterThan_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_LessThanOrEqual_rs, @@all_host__op_i64_LessThanOrEqual_sr, @@all_host__op_i64_LessThanOrEqual_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_LessThanOrEqual_rs, @@all_host__op_u64_LessThanOrEqual_sr, @@all_host__op_u64_LessThanOrEqual_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_GreaterThanOrEqual_rs, @@all_host__op_i64_GreaterThanOrEqual_sr,
                     @@all_host__op_i64_GreaterThanOrEqual_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_GreaterThanOrEqual_rs, @@all_host__op_u64_GreaterThanOrEqual_sr,
                     @@all_host__op_u64_GreaterThanOrEqual_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_Clz_r, @@all_host__op_u32_Clz_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_Ctz_r, @@all_host__op_u32_Ctz_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_Popcnt_r, @@all_host__op_u32_Popcnt_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_Add_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_i32_Add_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_Subtract_rs, @@all_host__op_i32_Subtract_sr, @@all_host__op_i32_Subtract_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_Multiply_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_i32_Multiply_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_Divide_rs, @@all_host__op_i32_Divide_sr, @@all_host__op_i32_Divide_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_Divide_rs, @@all_host__op_u32_Divide_sr, @@all_host__op_u32_Divide_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_Remainder_rs, @@all_host__op_i32_Remainder_sr, @@all_host__op_i32_Remainder_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_Remainder_rs, @@all_host__op_u32_Remainder_sr, @@all_host__op_u32_Remainder_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_And_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_u32_And_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_Or_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_u32_Or_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_Xor_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_u32_Xor_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_ShiftLeft_rs, @@all_host__op_u32_ShiftLeft_sr, @@all_host__op_u32_ShiftLeft_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_ShiftRight_rs, @@all_host__op_i32_ShiftRight_sr, @@all_host__op_i32_ShiftRight_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_ShiftRight_rs, @@all_host__op_u32_ShiftRight_sr, @@all_host__op_u32_ShiftRight_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_Rotl_rs, @@all_host__op_u32_Rotl_sr, @@all_host__op_u32_Rotl_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u32_Rotr_rs, @@all_host__op_u32_Rotr_sr, @@all_host__op_u32_Rotr_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_Clz_r, @@all_host__op_u64_Clz_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_Ctz_r, @@all_host__op_u64_Ctz_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_Popcnt_r, @@all_host__op_u64_Popcnt_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_Add_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_i64_Add_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_Subtract_rs, @@all_host__op_i64_Subtract_sr, @@all_host__op_i64_Subtract_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_Multiply_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_i64_Multiply_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_Divide_rs, @@all_host__op_i64_Divide_sr, @@all_host__op_i64_Divide_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_Divide_rs, @@all_host__op_u64_Divide_sr, @@all_host__op_u64_Divide_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_Remainder_rs, @@all_host__op_i64_Remainder_sr, @@all_host__op_i64_Remainder_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_Remainder_rs, @@all_host__op_u64_Remainder_sr, @@all_host__op_u64_Remainder_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_And_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_u64_And_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_Or_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_u64_Or_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_Xor_rs,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>, @@all_host__op_u64_Xor_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_ShiftLeft_rs, @@all_host__op_u64_ShiftLeft_sr, @@all_host__op_u64_ShiftLeft_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_ShiftRight_rs, @@all_host__op_i64_ShiftRight_sr, @@all_host__op_i64_ShiftRight_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_ShiftRight_rs, @@all_host__op_u64_ShiftRight_sr, @@all_host__op_u64_ShiftRight_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_Rotl_rs, @@all_host__op_u64_Rotl_sr, @@all_host__op_u64_Rotl_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_u64_Rotr_rs, @@all_host__op_u64_Rotr_sr, @@all_host__op_u64_Rotr_ss,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(-1), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_Wrap_i64_r, @@all_host__op_i32_Wrap_i64_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_Extend_i32_r, @@all_host__op_i64_Extend_i32_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_Extend_u32_r, @@all_host__op_i64_Extend_u32_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f32), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_598.c_cc_Compile_Convert),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_f64), compiler = uint8(anon_601.c_cc_Compile_Convert),
                 operations = fixed_array(@@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported, @@all_host__op_Unsupported)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_Extend8_s_r, @@all_host__op_i32_Extend8_s_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i32), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i32_Extend16_s_r, @@all_host__op_i32_Extend16_s_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_Extend8_s_r, @@all_host__op_i64_Extend8_s_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_Extend16_s_r, @@all_host__op_i64_Extend16_s_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)),
-            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_598.c_cc_NULL),
+            M3OpInfo(stackOffset = int8(0), _c_type = uint8(M3ValueType.c_m3Type_i64), compiler = uint8(anon_601.c_cc_NULL),
                 operations = fixed_array(@@all_host__op_i64_Extend32_s_r, @@all_host__op_i64_Extend32_s_s,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>,
                     default<function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?>>)))
@@ -1896,6 +1896,22 @@ def private d_FuncArgType(ftype; i) => reinterpret<uint8?>(reinterpret<uint8?>(f
 // m3_compile.h:90: #define d_FuncRetType(ftype,i) ((ftype)->types[(i)])
 [c_macro, c_function, unsafe_deref, hint(unsafe_range_check)]
 def private d_FuncRetType(ftype; i) => reinterpret<uint8?>(reinterpret<uint8?>(ftype) + 14)[i]
+
+[unsafe_deref, hint(unsafe_range_check)]
+def private all_host__m3_bswap16(x : uint16) : uint16 {
+    return uint16((uint(int(x) >> 8) & 255u) | ((uint(x) & 255u) << 8u))
+}
+
+[unsafe_deref, hint(unsafe_range_check)]
+def private all_host__m3_bswap32(x : uint) : uint {
+    return ((x & 4278190080u) >> 24u) | ((x & 16711680u) >> 8u) | ((x & 65280u) << 8u) | ((x & 255u) << 24u)
+}
+
+[unsafe_deref, hint(unsafe_range_check)]
+def private all_host__m3_bswap64(x : uint64) : uint64 {
+    return ((x & 18374686479671623680ul) >> 56ul) | ((x & 71776119061217280ul) >> 40ul) | ((x & 280375465082880ul) >> 24ul) | ((x & 1095216660480ul) >>
+            8ul) | ((x & 4278190080ul) << 8ul) | ((x & 16711680ul) << 24ul) | ((x & 65280ul) << 40ul) | ((x & 255ul) << 56ul)
+}
 
 [unsafe_deref, hint(unsafe_range_check)]
 def private all_host__BaseTypeOf(i_type : uint8) : uint8 {
@@ -10010,7 +10026,7 @@ def private all_host__FindReferencedLocalWithinCurrentBlock(var o : M3Compilatio
     var result : uint8? = m3Err_none
     var scope : M3CompilationScope? = addr(o._c_block)
     var startIndex : uint16 = scope.blockStackIndex
-    while (int(scope.opcode) == int(anon_315.c_waOp_block)) {
+    while (int(scope.opcode) == int(anon_318.c_waOp_block)) {
         scope = scope.outer
         if (scope == null) {
             break
@@ -10132,7 +10148,7 @@ def private all_host__ResolveBlockResults(var o : M3Compilation?; var i_targetBl
     var result : uint8? = m3Err_none
     if (d_m3LogWasmStack != 0) {
     }
-    let isLoop : bool = int(i_targetBlock.opcode) == int(anon_315.c_waOp_loop) && i_isBranch
+    let isLoop : bool = int(i_targetBlock.opcode) == int(anon_318.c_waOp_loop) && i_isBranch
     let numParams : uint16 = GetFuncTypeNumParams(i_targetBlock._c_type)
     let numResults : uint16 = GetFuncTypeNumResults(i_targetBlock._c_type)
     var slotRecords : uint16 = i_targetBlock.exitStackIndex
@@ -10274,7 +10290,7 @@ def private all_host__Compile_Const_i64(var o : M3Compilation?; i_opcode : uint1
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def private all_host__Compile_Const_f32(var o : M3Compilation?; i_opcode : uint16) : uint8? {
     var result : uint8?
-    var value : anon_533
+    var value : anon_536
     result = Read_f32(addr(value.f), addr(o.wasm), o.wasmEnd)
     if (result != null) {
         goto label 1
@@ -10290,7 +10306,7 @@ def private all_host__Compile_Const_f32(var o : M3Compilation?; i_opcode : uint1
 [c_function, unsafe_deref, hint(unsafe_range_check)]
 def private all_host__Compile_Const_f64(var o : M3Compilation?; i_opcode : uint16) : uint8? {
     var result : uint8?
-    var value : anon_535
+    var value : anon_538
     result = Read_f64(addr(value.f), addr(o.wasm), o.wasmEnd)
     if (result != null) {
         goto label 1
@@ -10314,7 +10330,7 @@ def private all_host__Compile_ExtendedOpcode(var o : M3Compilation?; var i_opcod
         }
         // m3opcode_t carries only the low byte, so a wider sub-opcode is unknown
         // here rather than something to truncate into range
-        if (opcode > uint(anon_315.c_waOp_lastExtended)) {
+        if (opcode > uint(anon_318.c_waOp_lastExtended)) {
             result = m3Err_unknownOpcode
             goto label 1
         }
@@ -10475,7 +10491,7 @@ def private all_host__Compile_SetLocal(var o : M3Compilation?; i_opcode : uint16
             // A folded op writes its result through to the register as well, so a tee
             // can keep it there. Pushing the slot instead would make the next use that
             // wants a register reload the slot this op just stored to.
-            if (int(i_opcode) == int(anon_315.c_waOp_teeLocal)) {
+            if (int(i_opcode) == int(anon_318.c_waOp_teeLocal)) {
                 result = all_host__PushRegister(o, _c_type)
                 if (result != null) {
                     goto label 1
@@ -10493,7 +10509,7 @@ def private all_host__Compile_SetLocal(var o : M3Compilation?; i_opcode : uint16
                     goto label 1
                 }
             }
-            if (int(i_opcode) != int(anon_315.c_waOp_teeLocal)) {
+            if (int(i_opcode) != int(anon_318.c_waOp_teeLocal)) {
                 result = all_host__Pop(o)
                 if (result != null) {
                     goto label 1
@@ -10617,7 +10633,7 @@ def private all_host__Compile_GetSetGlobal(var o : M3Compilation?; i_opcode : ui
             if (global.resolved != null) {
                 global = global.resolved
             }
-            result = int(i_opcode) == int(anon_315.c_waOp_getGlobal) ? all_host__Compile_GetGlobal(o, global) : all_host__Compile_SetGlobal(o, global)
+            result = int(i_opcode) == int(anon_318.c_waOp_getGlobal) ? all_host__Compile_GetGlobal(o, global) : all_host__Compile_SetGlobal(o, global)
             if (result != null) {
                 goto label 1
             }
@@ -10663,7 +10679,7 @@ def private all_host__CountTryFramesToExit(var i_from : M3CompilationScope?; var
     {
         var scope : M3CompilationScope? = i_from
         while (scope != null) {
-            if (int(scope.opcode) == int(anon_315.c_waOp_tryTable)) {
+            if (int(scope.opcode) == int(anon_318.c_waOp_tryTable)) {
                 count++
             }
             if (scope == i_target) {
@@ -10721,7 +10737,7 @@ def private all_host__EmitPopTryFramesForReturnCall(var o : M3Compilation?) : ui
     {
         var scope : M3CompilationScope? = addr(o._c_block)
         while (scope != null) {
-            if (int(scope.opcode) == int(anon_315.c_waOp_tryTable)) {
+            if (int(scope.opcode) == int(anon_318.c_waOp_tryTable)) {
                 count++
             }
             scope = scope.outer
@@ -10754,7 +10770,7 @@ def private all_host__Compile_Branch(var o : M3Compilation?; i_opcode : uint16) 
         goto label 1
     }
     // Spec: br_if condition must be i32
-    if (int(i_opcode) == int(anon_315.c_waOp_branchIf) && !all_host__IsStackPolymorphic(o)) {
+    if (int(i_opcode) == int(anon_318.c_waOp_branchIf) && !all_host__IsStackPolymorphic(o)) {
         let condType : uint8 = all_host__GetStackTopType(o)
         if (int(condType) != int(M3ValueType.c_m3Type_none) && int(condType) != int(M3ValueType.c_m3Type_i32)) {
             result = m3Err_typeMismatch
@@ -10768,8 +10784,8 @@ def private all_host__Compile_Branch(var o : M3Compilation?; i_opcode : uint16) 
     }
     numTryFrames = all_host__NumTryFramesToPop(addr(o._c_block), scope)
     // branch target is a loop (continue)
-    if (int(scope.opcode) == int(anon_315.c_waOp_loop)) {
-        if (int(i_opcode) == int(anon_315.c_waOp_branchIf)) {
+    if (int(scope.opcode) == int(anon_318.c_waOp_loop)) {
+        if (int(i_opcode) == int(anon_318.c_waOp_branchIf)) {
             // a handler pop belongs on the taken path only, so it forces the
             // jump-over form even where the target takes no parameters
             if (GetFuncTypeNumParams(scope._c_type) != 0 || numTryFrames != 0) {
@@ -10843,7 +10859,7 @@ def private all_host__Compile_Branch(var o : M3Compilation?; i_opcode : uint16) 
         var jumpTo : void ?? ? = null
         let isReturn : bool = scope.depth == 0
         let targetHasResults : bool = GetFuncTypeNumResults(scope._c_type) != 0
-        if (int(i_opcode) == int(anon_315.c_waOp_branchIf)) {
+        if (int(i_opcode) == int(anon_318.c_waOp_branchIf)) {
             if (targetHasResults || isReturn || numTryFrames != 0) {
                 var op : function<(var a0 : void ??; var a1 : uint?; var a2 : M3MemoryHeader?; a3 : int64) : void?> = all_host__IsStackTopInRegister(o) ? @@all_host__op_BranchIfPrologue_r : @@all_host__op_BranchIfPrologue_s
                 result = all_host__EmitOp(o, op)
@@ -10913,7 +10929,7 @@ def private all_host__Compile_Branch(var o : M3Compilation?; i_opcode : uint16) 
         if (jumpTo != null) {
             *jumpTo = all_host__GetPC(o)
         }
-        if (int(i_opcode) == int(anon_315.c_waOp_branch)) {
+        if (int(i_opcode) == int(anon_318.c_waOp_branch)) {
             result = all_host__SetStackPolymorphic(o)
             if (result != null) {
                 goto label 1
@@ -11015,7 +11031,7 @@ def private all_host__Compile_BranchTable(var o : M3Compilation?; i_opcode : uin
             // block's type, since nothing is emitted for that case either way.
             // Each such entry is patched on its own, so none is recorded in targetStubs:
             // there is no shared stub for a later entry naming this label to point at.
-            if (int(scope.opcode) != int(anon_315.c_waOp_loop) && scope.depth > 0 && numTryFrames == 0u &&
+            if (int(scope.opcode) != int(anon_318.c_waOp_loop) && scope.depth > 0 && numTryFrames == 0u &&
                     (all_host__IsStackPolymorphic(o) || GetFuncTypeNumResults(scope._c_type) == 0)) {
                 all_host__EmitPatchingBranchPointer(o, scope)
                 continue
@@ -11027,7 +11043,7 @@ def private all_host__Compile_BranchTable(var o : M3Compilation?; i_opcode : uin
             var startPC : void ?? = GetPagePC(continueOpPage)
             displacedPage = o.page
             o.page = continueOpPage
-            if (int(scope.opcode) == int(anon_315.c_waOp_loop)) {
+            if (int(scope.opcode) == int(anon_318.c_waOp_loop)) {
                 result = all_host__EmitPopTryFrames(o, numTryFrames)
                 if (result != null) {
                     goto label 1
@@ -11277,7 +11293,7 @@ def private all_host__Compile_Call(var o : M3Compilation?; i_opcode : uint16) : 
             // an import linked to another module's export runs that module's body
             var target : M3Function? = all_host__Function_Implementation(_c_function)
             if (target._c_module != null) {
-                let isReturnCall : bool = int(i_opcode) == int(anon_315.c_waOp_returnCall)
+                let isReturnCall : bool = int(i_opcode) == int(anon_318.c_waOp_returnCall)
                 // The callee's body runs against its own module's memory, so a call
                 // that crosses modules is bracketed by a pair of op_SetMemory. A
                 // tail call never returns to run the second one, so those compile
@@ -11395,7 +11411,7 @@ def private all_host__Compile_CallIndirect(var o : M3Compilation?; i_opcode : ui
             }
         }
         let tableIndexSlot : uint16 = all_host__GetStackTopSlotNumber(o)
-        let isReturnCall : bool = int(i_opcode) == int(anon_315.c_waOp_returnCallIndirect)
+        let isReturnCall : bool = int(i_opcode) == int(anon_318.c_waOp_returnCallIndirect)
         let useTailCall : bool = isReturnCall && (!(d_m3RecordBacktraces != 0 || d_m3EnableStrace >= 2) && M3_GUARANTEED_TAIL_CALL != 0)
         var execTop : uint16
         var numArgSlots : uint16 = uint16(0)
@@ -11555,7 +11571,7 @@ def private all_host__Compile_Memory_CopyFill(var o : M3Compilation?; i_opcode :
     // names only the one it writes.
     var sourceMemoryIdx : uint = 0u
     var targetMemoryIdx : uint = 0u
-    let isCopy : bool = int(i_opcode) == int(anon_315.c_waOp_memoryCopy)
+    let isCopy : bool = int(i_opcode) == int(anon_318.c_waOp_memoryCopy)
     // Each address is typed by the memory it belongs to. The length follows
     // the narrower of the two, so it is 64-bit only when both are - which for
     // memory.fill, naming one memory twice over, means whenever that one is.
@@ -11924,7 +11940,7 @@ def Compile_Table_GetSet(var o : M3Compilation?; i_opcode : uint16) : uint8? {
     if (result != null) {
         goto label 1
     }
-    if (int(i_opcode) == int(anon_315.c_waOp_tableGet)) {
+    if (int(i_opcode) == int(anon_318.c_waOp_tableGet)) {
         result = all_host__CheckOperandType(o, uint16(0), all_host__Table_AddrType(_c_table))
         if (result != null) {
             goto label 1
@@ -12083,7 +12099,7 @@ def Compile_Table_GrowFill(var o : M3Compilation?; i_opcode : uint16) : uint8? {
     if (result != null) {
         goto label 1
     }
-    if (int(i_opcode) == int(anon_315.c_waOp_tableGrow)) {
+    if (int(i_opcode) == int(anon_318.c_waOp_tableGrow)) {
         result = all_host__CheckOperandType(o, uint16(0), all_host__Table_AddrType(_c_table))
         if (result != null) {
             goto label 1
@@ -12200,7 +12216,7 @@ def private all_host__Compile_LoopOrBlock(var o : M3Compilation?; i_opcode : uin
     if (result != null) {
         goto label 1
     }
-    if (int(i_opcode) == int(anon_315.c_waOp_loop)) {
+    if (int(i_opcode) == int(anon_318.c_waOp_loop)) {
         let numParams : uint16 = GetFuncTypeNumParams(blockType)
         if (numParams != 0) {
             // instantiate constants
@@ -12321,7 +12337,7 @@ def private all_host__EmitCatchStubs(var o : M3Compilation?) : uint8? {
             if (result != null) {
                 goto label 1
             }
-            if (int(scope.opcode) == int(anon_315.c_waOp_loop)) {
+            if (int(scope.opcode) == int(anon_318.c_waOp_loop)) {
                 // isBranch:
                 result = all_host__ResolveBlockResults(o, scope, 1 != 0)
                 if (result != null) {
@@ -12457,7 +12473,7 @@ def private all_host__Compile_TryTable(var o : M3Compilation?; i_opcode : uint16
         }
         o.tryClauses = clauses
         o.numTryClauses = numClauses
-        result = CompileBlock(o, blockType, uint16(anon_315.c_waOp_tryTable))
+        result = CompileBlock(o, blockType, uint16(anon_318.c_waOp_tryTable))
         if (result != null) {
             goto label 1
         }
@@ -12595,7 +12611,7 @@ def private all_host__CompileElseBlock(var o : M3Compilation?; var o_startPC : v
         }
         *o_startPC = GetPagePC(elsePage)
         o.page = elsePage
-        result = CompileBlock(o, i_blockType, uint16(anon_315.c_waOp_else))
+        result = CompileBlock(o, i_blockType, uint16(anon_318.c_waOp_else))
         if (result != null) {
             goto label 1
         }
@@ -12671,7 +12687,7 @@ def private all_host__Compile_If(var o : M3Compilation?; i_opcode : uint16) : ui
         if (result != null) {
             goto label 1
         }
-        if (int(o.previousOpcode) == int(anon_315.c_waOp_else)) {
+        if (int(o.previousOpcode) == int(anon_318.c_waOp_else)) {
             o.stackIndex = stackIndex
             result = all_host__CompileElseBlock(o, pc, blockType)
             if (result != null) {
@@ -13187,7 +13203,7 @@ def private all_host__GetCompiler(var i_opInfo : M3OpInfo?) : function<(var a0 :
 // and no operations. Every implemented op has at least one of the two.
 [unsafe_deref, hint(unsafe_range_check)]
 def private all_host__IsImplementedOp(var i_info : M3OpInfo?) : bool {
-    return int(i_info.compiler) != int(anon_598.c_cc_NULL) || i_info.operations[0] != null
+    return int(i_info.compiler) != int(anon_601.c_cc_NULL) || i_info.operations[0] != null
 }
 
 // Maps one of the sparse opcodes above c_waOp_lastCore onto c_operationsHigh,
@@ -13196,16 +13212,16 @@ def private all_host__IsImplementedOp(var i_info : M3OpInfo?) : bool {
 def private all_host__GetHighOpIndex(opcode : uint16) : int {
     c_switch(int(opcode)) {
         case(208) {
-            return int(anon_603.c_opHigh_refNull)
+            return int(anon_606.c_opHigh_refNull)
         }
         case(209) {
-            return int(anon_603.c_opHigh_refIsNull)
+            return int(anon_606.c_opHigh_refIsNull)
         }
         case(210) {
-            return int(anon_603.c_opHigh_refFunc)
+            return int(anon_606.c_opHigh_refFunc)
         }
         case(252) {
-            return int(anon_603.c_opHigh_extended)
+            return int(anon_606.c_opHigh_extended)
         }
         case(_) {
             return -1
@@ -13220,7 +13236,7 @@ def GetOpInfo(var opcode : uint16) : M3OpInfo? {
         case(0) {
             // c_operations is indexed by opcode only up to c_waOp_lastCore; past that
             // it holds internal operations (DEBUG builds), unreachable by opcode.
-            if (int(opcode) <= int(anon_315.c_waOp_lastCore)) {
+            if (int(opcode) <= int(anon_318.c_waOp_lastCore)) {
                 info = addr(c_operations[0]) + end_index(int(opcode), 197)
             } else {
                 let high : int = all_host__GetHighOpIndex(opcode)
@@ -13232,7 +13248,7 @@ def GetOpInfo(var opcode : uint16) : M3OpInfo? {
         }
         case(252) {
             opcode = uint16(int(opcode) & 255)
-            if (int(opcode) <= int(anon_315.c_waOp_lastExtended)) {
+            if (int(opcode) <= int(anon_318.c_waOp_lastExtended)) {
                 info = addr(c_operationsFC[0]) + end_index(int(opcode), 18)
             }
             break
@@ -13249,30 +13265,30 @@ def private all_host__GetGasCost(i_opcode : uint16) : uint {
             // nop
             // a block that also installs handlers
             // a constant, by another name
-            return uint(anon_609.c_gasNominal)
+            return uint(anon_612.c_gasNominal)
         }
         case(11) {
             // the one control instruction the table prices at nothing
             return 0u
         }
         case(5, 12, 13, 15, 16, 18, 8, 10) {
-            return uint(anon_609.c_gasBranch)
+            return uint(anon_612.c_gasBranch)
         }
         case(14, 26, 27, 28) {
             // drop
             // select
-            return uint(anon_609.c_gasAccess)
+            return uint(anon_612.c_gasAccess)
         }
         case(17, 19, 20, 21, 64520, 64522, 64523, 64524, 64526, 64527, 64529, 64) {
             // memory.grow
-            return uint(anon_609.c_gasHeavy)
+            return uint(anon_612.c_gasHeavy)
         }
         case(64521, 64525, 64528, 63) {
             // memory.size
-            return uint(anon_609.c_gasMemSize)
+            return uint(anon_612.c_gasMemSize)
         }
         case(209, 212) {
-            return uint(anon_609.c_gasArith)
+            return uint(anon_612.c_gasArith)
         }
         case(_) {
             break
@@ -13292,23 +13308,23 @@ def private all_host__GetGasCost(i_opcode : uint16) : uint {
     }
     if (int(i_opcode) >= 32 && int(i_opcode) <= 62) {
         // locals, globals, table accesses, loads and stores
-        return uint(anon_609.c_gasAccess)
+        return uint(anon_612.c_gasAccess)
     }
     if (int(i_opcode) >= 65 && int(i_opcode) <= 68) {
         // i32/i64/f32/f64.const
-        return uint(anon_609.c_gasNominal)
+        return uint(anon_612.c_gasNominal)
     }
     if (int(i_opcode) >= 139 && int(i_opcode) <= 166) {
         // the float run, priced as integer arithmetic except where it divides
         // f32.sqrt, f32.div
         let divides : bool = i_opcode == 145 || i_opcode == 149 || i_opcode == 159 || i_opcode == 163
         // f64.sqrt, f64.div
-        return uint(divides ? int(anon_609.c_gasDivide) : int(anon_609.c_gasArith))
+        return uint(divides ? int(anon_612.c_gasDivide) : int(anon_612.c_gasArith))
     }
     // comparisons and clz/ctz/popcnt (0x45..0x69, 0x79..0x7b), the conversions
     // and sign extensions (0xa7..0xc4), the saturating truncations, and anything
     // else that reaches here: plain arithmetic
-    return uint(anon_609.c_gasArith)
+    return uint(anon_612.c_gasArith)
 }
 
 // The instructions ewasm's design segments a body at. A segment runs up to and
@@ -13358,10 +13374,10 @@ def private all_host__MeterOpcode(var o : M3Compilation?; var i_opcode : uint16)
         // the LEB128 u32 the compiler is about to take. Peek it without consuming.
         // Anything the tables do not cover leaves the prefix priced on its own,
         // which is moot - the compile fails on it a moment later.
-        if (int(i_opcode) == int(anon_315.c_waOp_extended)) {
+        if (int(i_opcode) == int(anon_318.c_waOp_extended)) {
             var peek : uint8? = o.wasm
             var sub : uint
-            if (ReadLEB_u32(addr(sub), addr(peek), o.wasmEnd) == null && sub <= uint(anon_315.c_waOp_lastExtended)) {
+            if (ReadLEB_u32(addr(sub), addr(peek), o.wasmEnd) == null && sub <= uint(anon_318.c_waOp_lastExtended)) {
                 i_opcode = uint16(uint(int(i_opcode) << 8) | sub)
             }
         }
@@ -13420,7 +13436,7 @@ def CompileBlockStatements(var o : M3Compilation?) : uint8? {
         if (result != null) {
             goto label 1
         }
-        if (int(opinfo.compiler) != int(anon_598.c_cc_NULL)) {
+        if (int(opinfo.compiler) != int(anon_601.c_cc_NULL)) {
             {
                 let _t0 = all_host__GetCompiler(opinfo)
                 result = invoke(_t0, o, opcode)
@@ -13435,14 +13451,14 @@ def CompileBlockStatements(var o : M3Compilation?) : uint8? {
             }
         }
         o.previousOpcode = opcode
-        if (int(opcode) == int(anon_315.c_waOp_else)) {
-            if (int(o._c_block.opcode) != int(anon_315.c_waOp_if)) {
+        if (int(opcode) == int(anon_318.c_waOp_else)) {
+            if (int(o._c_block.opcode) != int(anon_318.c_waOp_if)) {
                 result = m3Err_wasmMalformed
                 goto label 1
             }
             validEnd = 1 != 0
             break
-        } elif (int(opcode) == int(anon_315.c_waOp_end)) {
+        } elif (int(opcode) == int(anon_318.c_waOp_end)) {
             validEnd = 1 != 0
             break
         }
@@ -13513,7 +13529,7 @@ def CompileBlock(var o : M3Compilation?; var i_blockType : M3FuncType?; i_blockO
         // validate and dealloc params ----------------------------
         var stackIndex : uint16 = o.stackIndex
         let numParams : uint16 = GetFuncTypeNumParams(i_blockType)
-        if (int(i_blockOpcode) != int(anon_315.c_waOp_else)) {
+        if (int(i_blockOpcode) != int(anon_318.c_waOp_else)) {
             {
                 var i : uint16 = uint16(0)
                 while (int(i) < int(numParams)) {
@@ -13574,7 +13590,7 @@ def CompileBlock(var o : M3Compilation?; var i_blockType : M3FuncType?; i_blockO
         // --------------------------------------------------------
         // with the scope pushed and the params back on, a catch label of 0 names
         // this block - which is what the proposal says it should
-        if (int(i_blockOpcode) == int(anon_315.c_waOp_tryTable)) {
+        if (int(i_blockOpcode) == int(anon_318.c_waOp_tryTable)) {
             result = all_host__EmitCatchStubs(o)
             if (result != null) {
                 goto label 1
@@ -13600,7 +13616,7 @@ def CompileBlock(var o : M3Compilation?; var i_blockType : M3FuncType?; i_blockO
             // Falling out of the end of a try region retires its handler. This sits
             // ahead of PatchBranches so branches into the block's exit land past it:
             // a branch out of the try popped its own handler at the branch site.
-            if (int(i_blockOpcode) == int(anon_315.c_waOp_tryTable)) {
+            if (int(i_blockOpcode) == int(anon_318.c_waOp_tryTable)) {
                 result = all_host__EmitOp(o, @@all_host__op_PopHandlers)
                 if (result != null) {
                     goto label 1
@@ -13611,7 +13627,7 @@ def CompileBlock(var o : M3Compilation?; var i_blockType : M3FuncType?; i_blockO
             if (result != null) {
                 goto label 1
             }
-            if (!((int(i_blockOpcode) == int(anon_315.c_waOp_if) && numResults != 0) || int(o.previousOpcode) == int(anon_315.c_waOp_else))) {
+            if (!((int(i_blockOpcode) == int(anon_318.c_waOp_if) && numResults != 0) || int(o.previousOpcode) == int(anon_318.c_waOp_else))) {
                 o.stackIndex = o._c_block.exitStackIndex
                 result = all_host__PushBlockResults(o)
                 if (result != null) {
@@ -13678,9 +13694,9 @@ def private all_host__ReserveConstants(var o : M3Compilation?) : uint8? {
         wa++
         let code : uint8 = *_t0
         var addSlots : uint16 = uint16(0)
-        if (int(code) == int(anon_315.c_waOp_i32_const) || int(code) == int(anon_315.c_waOp_f32_const)) {
+        if (int(code) == int(anon_318.c_waOp_i32_const) || int(code) == int(anon_318.c_waOp_f32_const)) {
             addSlots = uint16(1)
-        } elif (int(code) == int(anon_315.c_waOp_i64_const) || int(code) == int(anon_315.c_waOp_f64_const)) {
+        } elif (int(code) == int(anon_318.c_waOp_i64_const) || int(code) == int(anon_318.c_waOp_f64_const)) {
             addSlots = all_host__GetTypeNumSlots(uint8(M3ValueType.c_m3Type_i64))
         }
         if (int(numConstantSlots) + int(addSlots) >= d_m3MaxConstantTableSize) {
@@ -13815,7 +13831,7 @@ def CompileFunction(var io_function : M3Function?) : uint8? {
         // the table charges for a function's locals as well as for its instructions.
         // op_Entry is what sets them up, so the charge rides on the body's first
         // segment, which is emitted right after it
-        o.gasCost = uint(int(o._c_function.numLocals) * int(anon_609.c_gasLocal))
+        o.gasCost = uint(int(o._c_function.numLocals) * int(anon_612.c_gasLocal))
         let maxSlot : uint16 = GetMaxUsedSlotPlusOne(o)
         o._c_function.numLocalBytes = uint(uint64(int(maxSlot) - int(o.slotFirstLocalIndex)) * uint64(typeinfo sizeof(type<uint>)))
         o.slotMaxConstIndex = maxSlot
@@ -13839,7 +13855,7 @@ def CompileFunction(var io_function : M3Function?) : uint8? {
         if (result != null) {
             goto label 1
         }
-        if (int(o.previousOpcode) != int(anon_315.c_waOp_end)) {
+        if (int(o.previousOpcode) != int(anon_318.c_waOp_end)) {
             result = m3Err_wasmMalformed
             goto label 1
         }
@@ -15283,7 +15299,7 @@ def private all_host__ResolveElements(var io_module : M3Module?; var i_segment :
                 if (result != null) {
                     goto label 1
                 }
-                if (int(opcode) == int(anon_315.c_waOp_refFunc)) {
+                if (int(opcode) == int(anon_318.c_waOp_refFunc)) {
                     result = ReadLEB_u32(addr(funcIndex), addr(pos), end)
                     if (result != null) {
                         goto label 1
@@ -15293,7 +15309,7 @@ def private all_host__ResolveElements(var io_module : M3Module?; var i_segment :
                         goto label 1
                     }
                     ref = reinterpret<void?>(all_host__Function_Implementation(addr(io_module.functions[funcIndex])))
-                } elif (int(opcode) == int(anon_315.c_waOp_refNull)) {
+                } elif (int(opcode) == int(anon_318.c_waOp_refNull)) {
                     var waType : int8
                     var nullType : uint8
                     result = ReadLEB_i7(addr(waType), addr(pos), end)
@@ -15308,7 +15324,7 @@ def private all_host__ResolveElements(var io_module : M3Module?; var i_segment :
                         result = m3Err_typeMismatch
                         goto label 1
                     }
-                } elif (int(opcode) == int(anon_315.c_waOp_getGlobal)) {
+                } elif (int(opcode) == int(anon_318.c_waOp_getGlobal)) {
                     // wasm 2.0 lets an element expression read an imported
                     // immutable global, which is how one module seeds another's
                     // table with a reference it exported.
@@ -15347,7 +15363,7 @@ def private all_host__ResolveElements(var io_module : M3Module?; var i_segment :
                 if (result != null) {
                     goto label 1
                 }
-                if (int(opcode) != int(anon_315.c_waOp_end)) {
+                if (int(opcode) != int(anon_318.c_waOp_end)) {
                     result = m3Err_wasmMalformed
                     goto label 1
                 }

@@ -1,5 +1,7 @@
 {
-	"defines" : [],
+	"defines" : [
+		"d_m3HasPosixHost=0"
+	],
 	"include_files" : [],
 	"first_member" : "addr",
 	"solid_context" : true,
