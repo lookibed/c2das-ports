@@ -402,7 +402,8 @@ def IdentifyVersion {
     doom_strcpy(doom2wad, doomwaddir)
     doom_concat(doom2wad, cstr("/doom2.wad"))
     // Retail.
-    doomuwad = reinterpret<uint8?>(invoke(doom_malloc, doom_strlen(doomwaddir) + 1 + 8 + 1))
+    // [c2das] "/doomu.wad" is ten characters, as "/doom2.wad" is: 1 + 9 + 1 with the NUL, not 1 + 8 + 1.
+    doomuwad = reinterpret<uint8?>(invoke(doom_malloc, doom_strlen(doomwaddir) + 1 + 9 + 1))
     // doom_sprintf(doomuwad, "%s/doomu.wad", doomwaddir);
     doom_strcpy(doomuwad, doomwaddir)
     doom_concat(doomuwad, cstr("/doomu.wad"))
