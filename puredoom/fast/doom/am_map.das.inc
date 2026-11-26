@@ -313,7 +313,7 @@ def AM_unloadPics {
     for (i in range(10)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(marknums[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/am_map.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-h3/doom/work/src/am_map.c:"))
             doom_concat(addr(buf[0]), doom_itoa(509, 10))
             I_Error(addr(buf[0]))
         }

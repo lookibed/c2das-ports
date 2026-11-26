@@ -325,7 +325,7 @@ def R_GenerateComposite(texnum : int) {
     // it is purgable from zone memory.
     if (reinterpret<memblock_s?>(_c_block + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/r_data.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-h3/doom/work/src/r_data.c:"))
         doom_concat(addr(buf[0]), doom_itoa(283, 10))
         I_Error(addr(buf[0]))
     }

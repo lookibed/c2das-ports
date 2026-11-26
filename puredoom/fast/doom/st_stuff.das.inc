@@ -640,14 +640,14 @@ def ST_unloadGraphics {
     for (i in range(10)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(tallnum[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/st_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-h3/doom/work/src/st_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1111, 10))
             I_Error(addr(buf[0]))
         }
         Z_ChangeTag2(reinterpret<void?>(tallnum[i]), PU_CACHE)
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(shortnum[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/st_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-h3/doom/work/src/st_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1112, 10))
             I_Error(addr(buf[0]))
         }
@@ -656,7 +656,7 @@ def ST_unloadGraphics {
     // unload tall percent
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(tallpercent) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/st_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-h3/doom/work/src/st_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1115, 10))
         I_Error(addr(buf[0]))
     }
@@ -664,7 +664,7 @@ def ST_unloadGraphics {
     // unload arms background
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(armsbg) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/st_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-h3/doom/work/src/st_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1118, 10))
         I_Error(addr(buf[0]))
     }
@@ -673,7 +673,7 @@ def ST_unloadGraphics {
     for (i in range(6)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(arms[i][0]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/st_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-h3/doom/work/src/st_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1122, 10))
             I_Error(addr(buf[0]))
         }
@@ -683,7 +683,7 @@ def ST_unloadGraphics {
     for (i in range(int(card_t.NUMCARDS))) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(keys[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/st_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-h3/doom/work/src/st_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1126, 10))
             I_Error(addr(buf[0]))
         }
@@ -691,14 +691,14 @@ def ST_unloadGraphics {
     }
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(sbar) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/st_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-h3/doom/work/src/st_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1128, 10))
         I_Error(addr(buf[0]))
     }
     Z_ChangeTag2(reinterpret<void?>(sbar), PU_CACHE)
     if (reinterpret<memblock_s?>(reinterpret<uint8?>(faceback) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
         var buf : uint8[260]
-        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/st_stuff.c:"))
+        doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-h3/doom/work/src/st_stuff.c:"))
         doom_concat(addr(buf[0]), doom_itoa(1129, 10))
         I_Error(addr(buf[0]))
     }
@@ -706,7 +706,7 @@ def ST_unloadGraphics {
     for (i in range(ST_NUMFACES)) {
         if (reinterpret<memblock_s?>(reinterpret<uint8?>(faces[i]) + -int64(uint64(typeinfo sizeof(type<memblock_s>)))).id != 1919505) {
             var buf : uint8[260]
-            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-1114/doom/work/src/st_stuff.c:"))
+            doom_strcpy(addr(buf[0]), cstr("Error: Z_CT at /root/wt-ports-h3/doom/work/src/st_stuff.c:"))
             doom_concat(addr(buf[0]), doom_itoa(1132, 10))
             I_Error(addr(buf[0]))
         }
